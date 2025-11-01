@@ -7,6 +7,7 @@ import '../../data/mock_data.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/product_card.dart';
+import '../../core/constants.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -175,15 +176,15 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
           
-          // Menus Grid
+          // Menus Grid - Grille homogène 2 colonnes, ratio 0.75
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
+                crossAxisCount: VisualConstants.gridCrossAxisCount,
+                childAspectRatio: VisualConstants.gridChildAspectRatio,
+                crossAxisSpacing: VisualConstants.gridSpacing,
+                mainAxisSpacing: VisualConstants.gridSpacing,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {

@@ -22,21 +22,25 @@ class ProductCard extends StatelessWidget {
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
       margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(VisualConstants.radiusLarge),
+      ),
       child: InkWell(
         onTap: () {
           context.push('/details', extra: product);
         },
-        borderRadius: BorderRadius.circular(VisualConstants.radiusLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Image du produit avec badge - Hauteur fixe pour éviter overflow
+            // Image du produit avec badge - Hauteur fixe pour cohérence
             SizedBox(
-              height: 120, // Hauteur fixe pour cohérence
+              height: 120, // Hauteur fixe pour éviter overflow et uniformité
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Image
+                  // Image avec gestion robuste des erreurs
                   ClipRRect(
                     borderRadius: BorderRadius.vertical(
                       top: Radius.circular(VisualConstants.radiusLarge),
@@ -46,44 +50,37 @@ class ProductCard extends StatelessWidget {
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
+                        // Placeholder pendant le chargement - taille fixe
                         return Container(
                           color: Colors.grey[200],
-                          child: const Center(
+                          child: Center(
                             child: SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                             ),
                           ),
                         );
                       },
                       errorBuilder: (context, error, stackTrace) {
+                        // Placeholder neutre en cas d'erreur - ne change pas le layout
                         return Container(
                           color: Colors.grey[200],
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.local_pizza,
-                                size: 40,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Image\nnon dispo',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ],
+                          child: Center(
+                            child: Icon(
+                              Icons.local_pizza,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
-                  // Badge pour les menus - Haut gauche, petit
+                  // Badge MENU - haut gauche, compact
                   if (product.isMenu)
                     Positioned(
                       top: 6,
@@ -128,46 +125,48 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            // Contenu texte - Padding réduit pour éviter overflow
+            // Contenu texte - Expanded avec padding fixe
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Nom du produit - 2 lignes max
+                    // Nom du produit - 2 lignes max, ellipsis
                     Text(
                       product.name,
                       style: Theme.of(context).textTheme.titleSmall!.copyWith(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                           ),
-                      maxLines: 2,
+                      maxLines: VisualConstants.maxLines,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
 
-                    // Description - 2 lignes max, gris, petite
-                    Text(
-                      product.description,
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Colors.grey[600],
-                            fontSize: 11,
-                          ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    // Description - 2 lignes max, gris, ellipsis
+                    Flexible(
+                      child: Text(
+                        product.description,
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                              color: Colors.grey[600],
+                              fontSize: 11,
+                            ),
+                        maxLines: VisualConstants.maxLines,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
 
                     const Spacer(),
 
-                    // Prix et bouton panier - Toujours visible en bas
+                    // Prix et bouton panier - Bloc bas fixe, toujours visible
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Prix - Flexible pour éviter overflow
+                        // Prix - Flexible pour éviter overflow horizontal
                         Flexible(
-                          flex: 3,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -191,6 +190,7 @@ class ProductCard extends StatelessWidget {
                                     fontSize: 13,
                                   ),
                               overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ),
@@ -204,9 +204,9 @@ class ProductCard extends StatelessWidget {
                           child: InkWell(
                             onTap: onAddToCart,
                             borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              child: const Icon(
+                            child: const Padding(
+                              padding: EdgeInsets.all(6),
+                              child: Icon(
                                 Icons.add_shopping_cart,
                                 size: 18,
                                 color: Colors.white,
