@@ -35,7 +35,7 @@ dependencies:
   # Firebase - Backend et base de données
   firebase_core: ^2.24.2
   cloud_firestore: ^4.13.6
-  firebase_auth: ^4.15.3
+  # firebase_auth: ^4.15.3  # Temporairement commenté - sera ajouté lors de la Phase 3
 
 dev_dependencies:
   flutter_test:
