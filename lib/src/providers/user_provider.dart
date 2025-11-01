@@ -5,6 +5,7 @@ import '../models/user_profile.dart';
 import '../models/order.dart'; 
 import 'cart_provider.dart';
 import '../services/order_service.dart';
+import '../services/firestore_order_service.dart';
 // Note: L'ancienne importation vers '../models/cart.dart' est retirée
 
 final userProvider =
@@ -45,8 +46,11 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
       orderHistory: updatedHistory,
     );
 
-    // Sauvegarder aussi dans le service global pour l'admin
+    // Sauvegarder dans le service local (backup)
     await OrderService().addOrder(newOrder);
+    
+    // Sauvegarder dans Firestore (principal)
+    await FirestoreOrderService().addOrder(newOrder);
 
     // Vider le panier après la commande (méthode de CartNotifier)
     _ref.read(cartProvider.notifier).clearCart();

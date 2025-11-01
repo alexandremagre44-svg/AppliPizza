@@ -31,6 +31,11 @@ dependencies:
   
   # Stockage local pour auth et CRUD
   shared_preferences: ^2.2.2
+  
+  # Firebase - Backend et base de données
+  firebase_core: ^2.24.2
+  cloud_firestore: ^4.13.6
+  firebase_auth: ^4.15.3
 
 dev_dependencies:
   flutter_test:
