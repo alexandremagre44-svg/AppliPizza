@@ -67,7 +67,8 @@ class PizzaDelizzaApp extends ConsumerWidget {
         ),
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.red,
-          accentColor: const Color(0xFFB00020),
+        ).copyWith(
+          secondary: const Color(0xFFB00020),
         ),
         // Utilise un style de bouton textuel clair pour les liens
         textButtonTheme: TextButtonThemeData(

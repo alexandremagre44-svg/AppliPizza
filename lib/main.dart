@@ -34,8 +34,8 @@ class MyApp extends StatelessWidget {
         seedColor: const Color(0xFFB00020), // Rouge principal
         primary: const Color(0xFFB00020),
         secondary: const Color(0xFFFFC107), // Jaune/Ambre
-        background: Colors.grey[50],
       ),
+      scaffoldBackgroundColor: Colors.grey[50],
       useMaterial3: true,
       // Thème des textes
       textTheme: const TextTheme(
