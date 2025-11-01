@@ -9,7 +9,8 @@ import 'src/screens/splash/splash_screen.dart';
 import 'src/screens/auth/login_screen.dart';
 import 'src/screens/home/home_screen.dart'; 
 import 'src/screens/menu/menu_screen.dart'; 
-import 'src/screens/cart/cart_screen.dart'; 
+import 'src/screens/cart/cart_screen.dart';
+import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
 import 'src/screens/product_detail/product_detail_screen.dart';
 import 'src/screens/admin/admin_dashboard_screen.dart';
@@ -96,6 +97,19 @@ class MyApp extends ConsumerWidget {
               path: AppRoutes.profile,
               builder: (context, state) => const ProfileScreen(),
             ),
+            // Routes Admin dans le shell pour bottom bar
+            GoRoute(
+              path: '/admin',
+              builder: (context, state) => const AdminDashboardScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.adminPizza,
+              builder: (context, state) => const AdminPizzaScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.adminMenu,
+              builder: (context, state) => const AdminMenuScreen(),
+            ),
           ],
         ),
         // Route Indépendante pour l'écran de Détail
@@ -106,18 +120,10 @@ class MyApp extends ConsumerWidget {
             return ProductDetailScreen(product: product);
           },
         ),
-        // Routes Admin
+        // Route Checkout
         GoRoute(
-          path: '/admin',
-          builder: (context, state) => const AdminDashboardScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.adminPizza,
-          builder: (context, state) => const AdminPizzaScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.adminMenu,
-          builder: (context, state) => const AdminMenuScreen(),
+          path: '/checkout',
+          builder: (context, state) => const CheckoutScreen(),
         ),
       ],
     );
