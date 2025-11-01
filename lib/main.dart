@@ -9,7 +9,8 @@ import 'src/screens/splash/splash_screen.dart';
 import 'src/screens/auth/login_screen.dart';
 import 'src/screens/home/home_screen.dart'; 
 import 'src/screens/menu/menu_screen.dart'; 
-import 'src/screens/cart/cart_screen.dart'; 
+import 'src/screens/cart/cart_screen.dart';
+import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
 import 'src/screens/product_detail/product_detail_screen.dart';
 import 'src/screens/admin/admin_dashboard_screen.dart';
@@ -118,6 +119,11 @@ class MyApp extends ConsumerWidget {
             final product = state.extra as Product;
             return ProductDetailScreen(product: product);
           },
+        ),
+        // Route Checkout
+        GoRoute(
+          path: '/checkout',
+          builder: (context, state) => const CheckoutScreen(),
         ),
       ],
     );

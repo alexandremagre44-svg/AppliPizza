@@ -284,7 +284,7 @@ class CartScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: total > 0 ? handleOrder : null,
+            onPressed: total > 0 ? () => context.push('/checkout') : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFB00020),
               foregroundColor: Colors.white,
@@ -292,7 +292,7 @@ class CartScreen extends ConsumerWidget {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Passer la commande', style: TextStyle(fontSize: 18)),
+            child: const Text('Continuer vers le paiement', style: TextStyle(fontSize: 18)),
           ),
         ],
       ),
