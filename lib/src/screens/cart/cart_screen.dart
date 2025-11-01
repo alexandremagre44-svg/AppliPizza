@@ -47,30 +47,43 @@ class CartScreen extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.shopping_cart_outlined,
-              size: 100, color: Colors.grey),
-          const SizedBox(height: 20),
-          Text(
-            'Votre panier est vide !',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Ajoutez-y de délicieuses pizzas pour commander.',
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 30),
-          ElevatedButton(
-            onPressed: () => context.go('/menu'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFB00020),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              shape: BoxShape.circle,
             ),
-            child: const Text('Voir le menu', style: TextStyle(fontSize: 16)),
+            child: Icon(
+              Icons.shopping_cart_outlined,
+              size: 60,
+              color: Colors.grey[400],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Votre panier est vide',
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Ajoutez de délicieuses pizzas pour commencer votre commande',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () => context.go('/menu'),
+            icon: const Icon(Icons.restaurant_menu),
+            label: const Text('Découvrir le menu'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            ),
           ),
         ],
       ),

@@ -1,11 +1,11 @@
-﻿// lib/src/screens/profile/profile_screen.dart
+// lib/src/screens/profile/profile_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../providers/user_provider.dart'; // Pour accéder à l'historique
-import '../../models/order.dart'; // Pour le type Order
-import '../../providers/cart_provider.dart'; // Pour le type CartItem
+import '../../providers/user_provider.dart';
+import '../../models/order.dart';
+import '../../providers/cart_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -20,78 +20,209 @@ class ProfileScreen extends ConsumerWidget {
         title: const Text('Mon Profil'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () {
-              // Simuler une déconnexion ou navigation vers l'écran de connexion
-              context.go('/'); 
+              // Future: Paramètres
             },
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildProfileHeader(context, userProfile.name, userProfile.email),
-            const SizedBox(height: 30),
-            _buildSectionTitle(context, 'Historique des Commandes'),
-            const SizedBox(height: 10),
+            // En-tête du profil avec design moderne
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                  ],
+                ),
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  // Avatar
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.person,
+                      size: 50,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Nom
+                  Text(
+                    userProfile.name,
+                    style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Email
+                  Text(
+                    userProfile.email,
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          color: Colors.white70,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Statistiques rapides
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.shopping_bag,
+                      title: 'Commandes',
+                      value: history.length.toString(),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.favorite,
+                      title: 'Favoris',
+                      value: userProfile.favoriteProducts.length.toString(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Section Historique
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Historique des commandes',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  if (history.isNotEmpty)
+                    TextButton(
+                      onPressed: () {
+                        // Future: Voir toutes les commandes
+                      },
+                      child: const Text('Tout voir'),
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
             _buildOrderHistory(context, history),
-            const SizedBox(height: 50),
+
+            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
-  
-  // ... (Fonctions d'aide pour le profil)
 
-  Widget _buildProfileHeader(BuildContext context, String name, String email) {
-    return Row(
-      children: [
-        const CircleAvatar(
-          radius: 40,
-          backgroundColor: Color(0xFFB00020),
-          child: Icon(Icons.person, size: 40, color: Colors.white),
-        ),
-        const SizedBox(width: 20),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              name,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            Text(
-              email,
-              style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleLarge,
+  Widget _buildStatCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            size: 32,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildOrderHistory(BuildContext context, List<Order> history) {
     if (history.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40.0),
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(40),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(
           child: Column(
             children: [
-              const Icon(Icons.shopping_bag_outlined, size: 60, color: Colors.grey),
-              const SizedBox(height: 10),
+              Icon(
+                Icons.shopping_bag_outlined,
+                size: 60,
+                color: Colors.grey[400],
+              ),
+              const SizedBox(height: 16),
               Text(
-                'Aucune commande passée pour l\'instant.',
-                style: Theme.of(context).textTheme.titleMedium,
+                'Aucune commande',
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Colors.grey[600],
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Vos commandes apparaîtront ici',
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      color: Colors.grey[500],
+                    ),
               ),
             ],
           ),
@@ -102,49 +233,140 @@ class ProfileScreen extends ConsumerWidget {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: history.length,
       itemBuilder: (context, index) {
         final order = history[index];
-        final formattedDate = '${order.date.day}/${order.date.month}/${order.date.year}';
-        
+        final formattedDate = '${order.date.day.toString().padLeft(2, '0')}/'
+            '${order.date.month.toString().padLeft(2, '0')}/'
+            '${order.date.year}';
+
         return Card(
-          margin: const EdgeInsets.only(bottom: 15),
+          margin: const EdgeInsets.only(bottom: 12),
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: ExpansionTile(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), // Pour l'expansion
-            title: Text('Commande #${history.length - index}'),
-            subtitle: Text('$formattedDate - ${order.status}'), // <<< UTILISE CORRECTEMENT order.status
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            childrenPadding: const EdgeInsets.all(16),
+            leading: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.receipt_long,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            title: Text(
+              'Commande #${(history.length - index).toString().padLeft(4, '0')}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(formattedDate),
+                const SizedBox(height: 4),
+                _buildStatusChip(context, order.status),
+              ],
+            ),
             trailing: Text(
               '${order.total.toStringAsFixed(2)} €',
               style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                color: const Color(0xFFB00020),
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             children: [
-              const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
-              ...order.items.map((item) => ListTile(
-                title: Text('${item.productName}'),
-                subtitle: Text('${item.quantity} x ${item.price.toStringAsFixed(2)}€'),
-                trailing: Text('${item.total.toStringAsFixed(2)}€'),
-              )).toList(),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Statut:', style: Theme.of(context).textTheme.bodyLarge),
-                    // order.status est maintenant défini
-                    Text(order.status, style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold)), 
-                  ],
-                ),
-              ),
+              const Divider(),
               const SizedBox(height: 8),
+              ...order.items.map((item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.productName,
+                                style: const TextStyle(fontWeight: FontWeight.w500),
+                              ),
+                              Text(
+                                '${item.quantity} x ${item.price.toStringAsFixed(2)}€',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '${item.total.toStringAsFixed(2)}€',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  )),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildStatusChip(BuildContext context, String status) {
+    Color statusColor;
+    IconData statusIcon;
+
+    switch (status.toLowerCase()) {
+      case 'livrée':
+        statusColor = Colors.green;
+        statusIcon = Icons.check_circle;
+        break;
+      case 'en préparation':
+        statusColor = Colors.orange;
+        statusIcon = Icons.restaurant;
+        break;
+      case 'en livraison':
+        statusColor = Colors.blue;
+        statusIcon = Icons.delivery_dining;
+        break;
+      default:
+        statusColor = Colors.grey;
+        statusIcon = Icons.info;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(statusIcon, size: 14, color: statusColor),
+          const SizedBox(width: 4),
+          Text(
+            status,
+            style: TextStyle(
+              color: statusColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
