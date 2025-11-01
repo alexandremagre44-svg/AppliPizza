@@ -142,7 +142,7 @@ class ProductCard extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                           ),
-                      maxLines: 2,
+                      maxLines: VisualConstants.maxLinesTitle,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
@@ -154,7 +154,7 @@ class ProductCard extends StatelessWidget {
                             color: Colors.grey[600],
                             fontSize: 11,
                           ),
-                      maxLines: 2,
+                      maxLines: VisualConstants.maxLinesDescription,
                       overflow: TextOverflow.ellipsis,
                     ),
 

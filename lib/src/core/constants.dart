@@ -42,6 +42,7 @@ class VisualConstants {
   static const double gridSpacing = 16.0;
   
   // Text
+  static const int maxLines = 2; // Défaut pour la plupart des textes
   static const int maxLinesTitle = 2;
   static const int maxLinesDescription = 2;
   
