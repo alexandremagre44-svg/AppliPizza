@@ -2,7 +2,7 @@
 // Service pour gérer les commandes avec Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/order.dart';
+import '../models/order.dart' as app_models;
 import '../providers/cart_provider.dart';
 
 class FirestoreOrderService {
@@ -14,7 +14,7 @@ class FirestoreOrderService {
   final String _collectionName = 'orders';
 
   /// Charger toutes les commandes
-  Future<List<Order>> loadAllOrders() async {
+  Future<List<app_models.Order>> loadAllOrders() async {
     try {
       final snapshot = await _firestore
           .collection(_collectionName)
@@ -32,7 +32,7 @@ class FirestoreOrderService {
   }
 
   /// Stream pour écouter les commandes en temps réel
-  Stream<List<Order>> ordersStream() {
+  Stream<List<app_models.Order>> ordersStream() {
     return _firestore
         .collection(_collectionName)
         .orderBy('date', descending: true)
@@ -46,7 +46,7 @@ class FirestoreOrderService {
   }
 
   /// Ajouter une nouvelle commande
-  Future<bool> addOrder(Order order) async {
+  Future<bool> addOrder(app_models.Order order) async {
     try {
       await _firestore
           .collection(_collectionName)
@@ -88,7 +88,7 @@ class FirestoreOrderService {
   }
 
   /// Filtrer les commandes par statut
-  Future<List<Order>> getOrdersByStatus(String status) async {
+  Future<List<app_models.Order>> getOrdersByStatus(String status) async {
     try {
       final snapshot = await _firestore
           .collection(_collectionName)
@@ -107,7 +107,7 @@ class FirestoreOrderService {
   }
 
   /// Filtrer les commandes par plage de dates
-  Future<List<Order>> getOrdersByDateRange(DateTime start, DateTime end) async {
+  Future<List<app_models.Order>> getOrdersByDateRange(DateTime start, DateTime end) async {
     try {
       final snapshot = await _firestore
           .collection(_collectionName)
@@ -172,7 +172,7 @@ class FirestoreOrderService {
   }
 
   /// Obtenir les commandes d'un utilisateur spécifique
-  Future<List<Order>> getUserOrders(String userId) async {
+  Future<List<app_models.Order>> getUserOrders(String userId) async {
     try {
       final snapshot = await _firestore
           .collection(_collectionName)
@@ -190,8 +190,8 @@ class FirestoreOrderService {
     }
   }
 
-  /// Conversion Order -> Firestore
-  Map<String, dynamic> _orderToFirestore(Order order) {
+  /// Conversion app_models.Order -> Firestore
+  Map<String, dynamic> _orderToFirestore(app_models.Order order) {
     return {
       'id': order.id,
       'total': order.total,
@@ -210,9 +210,9 @@ class FirestoreOrderService {
     };
   }
 
-  /// Conversion Firestore -> Order
-  Order _orderFromFirestore(Map<String, dynamic> data) {
-    return Order(
+  /// Conversion Firestore -> app_models.Order
+  app_models.Order _orderFromFirestore(Map<String, dynamic> data) {
+    return app_models.Order(
       id: data['id'] as String,
       total: (data['total'] as num).toDouble(),
       date: (data['date'] as Timestamp).toDate(),
