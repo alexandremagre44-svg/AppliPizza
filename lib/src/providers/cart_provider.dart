@@ -51,7 +51,7 @@ class CartState {
   }
 
   // Propriété calculée pour le nombre total d'articles (pour le badge)
-  int get totalQuantity {
+  int get totalItems {
     return items.fold(0, (sum, item) => sum + item.quantity);
   }
 }

@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
     final finalTheme = baseTheme.copyWith(
       cardTheme: baseTheme.cardTheme.copyWith( // Ceci garantit que l'objet est de type CardThemeData
         elevation: 4,
-        shape: RoundedRectangleBorder( 
+        shape: const RoundedRectangleBorder( 
             borderRadius: BorderRadius.all(Radius.circular(12)), 
         ),
       ),

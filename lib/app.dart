@@ -51,7 +51,7 @@ class PizzaDelizzaApp extends ConsumerWidget {
   const PizzaDelizzaApp({super.key});
 
   @override
-  Widget build(BuildContextcontext, WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
 
     return MaterialApp.router(
