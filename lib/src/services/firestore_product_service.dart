@@ -52,15 +52,21 @@ class FirestoreProductService {
   /// Charger les pizzas (Firestore d'abord, puis local en fallback)
   Future<List<Product>> loadPizzas() async {
     try {
+      print('🔥 FirestoreProductService: Chargement des pizzas depuis Firestore...');
+      
       // Essayer de charger depuis Firestore
       final cloudPizzas = await loadPizzasFromFirestore();
+      
+      print('📦 Nombre de pizzas trouvées dans Firestore: ${cloudPizzas.length}');
       
       // Sauvegarder localement pour cache
       await _localService.savePizzas(cloudPizzas);
       
+      print('✅ Pizzas chargées depuis Firestore et mises en cache localement');
       return cloudPizzas;
     } catch (e) {
-      print('Firestore unavailable, using local data: $e');
+      print('❌ ERREUR Firestore: $e');
+      print('📱 Fallback: chargement depuis le cache local');
       // Fallback: charger depuis le stockage local
       return await _localService.loadPizzas();
     }
@@ -69,8 +75,12 @@ class FirestoreProductService {
   /// Ajouter une pizza (Firestore + Local)
   Future<bool> addPizza(Product pizza) async {
     try {
+      print('🔥 FirestoreProductService: Tentative d\'ajout de pizza "${pizza.name}" à Firestore...');
+      
       // Créer le document dans Firestore
       final docRef = await _firestore.collection(_pizzasCollection).add(pizza.toJson());
+      
+      print('✅ Pizza ajoutée à Firestore avec ID: ${docRef.id}');
       
       // Mettre à jour l'ID avec celui de Firestore
       final pizzaWithId = pizza.copyWith(id: docRef.id);
@@ -78,9 +88,12 @@ class FirestoreProductService {
       // Sauvegarder localement
       await _localService.addPizza(pizzaWithId);
       
+      print('✅ Pizza sauvegardée localement');
+      
       return true;
     } catch (e) {
-      print('Error adding pizza to Firestore: $e');
+      print('❌ ERREUR lors de l\'ajout à Firestore: $e');
+      print('📱 Fallback: sauvegarde locale uniquement');
       // Fallback: sauvegarder uniquement en local
       return await _localService.addPizza(pizza);
     }
