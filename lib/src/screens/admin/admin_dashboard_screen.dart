@@ -26,6 +26,14 @@ class AdminDashboardScreen extends StatelessWidget {
           children: [
             _buildAdminCard(
               context,
+              icon: Icons.shopping_bag,
+              title: 'Commandes',
+              subtitle: 'Gérer les commandes',
+              color: Colors.red,
+              onTap: () => context.push(AppRoutes.adminOrders),
+            ),
+            _buildAdminCard(
+              context,
               icon: Icons.local_pizza,
               title: 'Pizzas',
               subtitle: 'Gérer les pizzas',
@@ -42,27 +50,43 @@ class AdminDashboardScreen extends StatelessWidget {
             ),
             _buildAdminCard(
               context,
+              icon: Icons.people,
+              title: 'Utilisateurs',
+              subtitle: 'Gérer les comptes',
+              color: Colors.purple,
+              onTap: () => context.push(AppRoutes.adminUsers),
+            ),
+            _buildAdminCard(
+              context,
               icon: Icons.access_time,
               title: 'Horaires',
-              subtitle: 'À venir',
+              subtitle: 'Gérer les horaires',
               color: Colors.green,
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Fonctionnalité à venir')),
-                );
-              },
+              onTap: () => context.push(AppRoutes.adminHours),
             ),
             _buildAdminCard(
               context,
               icon: Icons.settings,
               title: 'Paramètres',
-              subtitle: 'À venir',
+              subtitle: 'Configuration',
               color: Colors.grey,
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Fonctionnalité à venir')),
-                );
-              },
+              onTap: () => context.push(AppRoutes.adminSettings),
+            ),
+            _buildAdminCard(
+              context,
+              icon: Icons.discount,
+              title: 'Promotions',
+              subtitle: 'Codes promo',
+              color: Colors.pink,
+              onTap: () => context.push(AppRoutes.adminPromos),
+            ),
+            _buildAdminCard(
+              context,
+              icon: Icons.bar_chart,
+              title: 'Statistiques',
+              subtitle: 'Voir les stats',
+              color: Colors.teal,
+              onTap: () => context.push(AppRoutes.adminStats),
             ),
           ],
         ),
