@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
       cardTheme: baseTheme.cardTheme.copyWith( // Ceci garantit que l'objet est de type CardThemeData
         elevation: 4,
         shape: const RoundedRectangleBorder( 
-            borderRadius: BorderRadius.all(Radius.circular(12)), 
+            borderRadius: const BorderRadius.all(const Radius.circular(12)), 
         ),
       ),
     );
