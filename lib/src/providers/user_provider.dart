@@ -30,8 +30,8 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     // Le type lu par _ref.read(cartProvider) est CartState
     final cartState = _ref.read(cartProvider); 
     
-    // Utilisation de totalQuantity qui est la bonne propriété
-    if (cartState.totalQuantity == 0) return; 
+    // Utilisation de totalItems qui est la bonne propriété
+    if (cartState.totalItems == 0) return; 
 
     final newOrder = Order.fromCart(
       cartState.items,
