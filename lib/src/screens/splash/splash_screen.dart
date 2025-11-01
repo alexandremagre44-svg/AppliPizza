@@ -40,10 +40,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     
     _controller.forward();
     
-    // Navigate to home after animation
+    // Navigate to login after animation
     Future.delayed(const Duration(milliseconds: 2500), () {
       if (mounted) {
-        context.go('/home');
+        context.go('/login');
       }
     });
   }

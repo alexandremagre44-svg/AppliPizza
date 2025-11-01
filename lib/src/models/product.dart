@@ -52,6 +52,41 @@ class Product {
       drinkCount: drinkCount ?? this.drinkCount,
     );
   }
+
+  // Conversion vers JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'price': price,
+      'imageUrl': imageUrl,
+      'category': category,
+      'isMenu': isMenu,
+      'baseIngredients': baseIngredients,
+      'pizzaCount': pizzaCount,
+      'drinkCount': drinkCount,
+    };
+  }
+
+  // Création depuis JSON
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      price: (json['price'] as num).toDouble(),
+      imageUrl: json['imageUrl'] as String,
+      category: json['category'] as String,
+      isMenu: json['isMenu'] as bool? ?? false,
+      baseIngredients: (json['baseIngredients'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      pizzaCount: json['pizzaCount'] as int? ?? 1,
+      drinkCount: json['drinkCount'] as int? ?? 0,
+    );
+  }
 }
 
 // ===============================================
