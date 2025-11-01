@@ -78,7 +78,7 @@ class _AdminPromosScreenState extends State<AdminPromosScreen> {
                   ),
                   const SizedBox(height: 12),
                   ListTile(
-                    title: Text(expiryDate == null ? 'Pas d\'expiration' : 'Expire le: ${expiryDate.day}/${expiryDate.month}/${expiryDate.year}'),
+                    title: Text(expiryDate == null ? 'Pas d\'expiration' : 'Expire le: ${expiryDate!.day}/${expiryDate!.month}/${expiryDate!.year}'),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () async {
                       final date = await showDatePicker(
