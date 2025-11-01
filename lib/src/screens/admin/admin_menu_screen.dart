@@ -1,10 +1,11 @@
 // lib/src/screens/admin/admin_menu_screen.dart
+// MIGRÉ VERS FIRESTORE - Synchronisation Cloud + Local
 // Écran CRUD pour gérer les menus (Admin uniquement)
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/product.dart';
-import '../../services/product_crud_service.dart';
+import '../../services/firestore_product_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 
@@ -16,7 +17,7 @@ class AdminMenuScreen extends StatefulWidget {
 }
 
 class _AdminMenuScreenState extends State<AdminMenuScreen> {
-  final ProductCrudService _crudService = ProductCrudService();
+  final FirestoreProductService _firestoreService = FirestoreProductService();
   List<Product> _menus = [];
   bool _isLoading = true;
 
@@ -28,7 +29,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
 
   Future<void> _loadMenus() async {
     setState(() => _isLoading = true);
-    final menus = await _crudService.loadMenus();
+    final menus = await _firestoreService.loadMenus();
     setState(() {
       _menus = menus;
       _isLoading = false;
@@ -211,9 +212,9 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
 
                   bool success;
                   if (menu == null) {
-                    success = await _crudService.addMenu(newMenu);
+                    success = await _firestoreService.addMenu(newMenu);
                   } else {
-                    success = await _crudService.updateMenu(newMenu);
+                    success = await _firestoreService.updateMenu(newMenu);
                   }
 
                   if (success && context.mounted) {
@@ -254,7 +255,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     );
 
     if (confirm == true) {
-      final success = await _crudService.deleteMenu(menu.id);
+      final success = await _firestoreService.deleteMenu(menu.id);
       if (success) {
         _loadMenus();
       }

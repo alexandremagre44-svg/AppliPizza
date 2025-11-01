@@ -1,10 +1,11 @@
 // lib/src/screens/admin/admin_pizza_screen.dart
 // Écran CRUD pour gérer les pizzas (Admin uniquement)
+// MIGRÉ VERS FIRESTORE - Synchronisation Cloud + Local
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/product.dart';
-import '../../services/product_crud_service.dart';
+import '../../services/firestore_product_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 
@@ -16,7 +17,7 @@ class AdminPizzaScreen extends StatefulWidget {
 }
 
 class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
-  final ProductCrudService _crudService = ProductCrudService();
+  final FirestoreProductService _firestoreService = FirestoreProductService();
   List<Product> _pizzas = [];
   bool _isLoading = true;
 
@@ -28,7 +29,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
 
   Future<void> _loadPizzas() async {
     setState(() => _isLoading = true);
-    final pizzas = await _crudService.loadPizzas();
+    final pizzas = await _firestoreService.loadPizzas();
     setState(() {
       _pizzas = pizzas;
       _isLoading = false;
@@ -133,9 +134,9 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
 
                 bool success;
                 if (pizza == null) {
-                  success = await _crudService.addPizza(newPizza);
+                  success = await _firestoreService.addPizza(newPizza);
                 } else {
-                  success = await _crudService.updatePizza(newPizza);
+                  success = await _firestoreService.updatePizza(newPizza);
                 }
 
                 if (success && context.mounted) {
@@ -175,7 +176,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
     );
 
     if (confirm == true) {
-      final success = await _crudService.deletePizza(pizza.id);
+      final success = await _firestoreService.deletePizza(pizza.id);
       if (success) {
         _loadPizzas();
       }

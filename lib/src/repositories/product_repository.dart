@@ -3,6 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product.dart';
 import '../data/mock_data.dart'; // Importe les données mockées
+import '../services/firestore_product_service.dart';
 
 // Définition de l'interface (contrat) pour le Repository
 abstract class ProductRepository {
@@ -32,7 +33,33 @@ class MockProductRepository implements ProductRepository {
   }
 }
 
+// Implémentation Firestore (utilise Firebase Cloud + cache local)
+class FirestoreProductRepository implements ProductRepository {
+  final FirestoreProductService _firestoreService = FirestoreProductService();
+
+  @override
+  Future<List<Product>> fetchAllProducts() async {
+    // Charger les pizzas et menus depuis Firestore
+    final pizzas = await _firestoreService.loadPizzas();
+    final menus = await _firestoreService.loadMenus();
+    
+    // Combiner les deux listes
+    return [...pizzas, ...menus];
+  }
+
+  @override
+  Future<Product?> getProductById(String id) async {
+    final allProducts = await fetchAllProducts();
+    try {
+      return allProducts.firstWhere((p) => p.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+}
+
 // Le provider pour fournir l'instance du Repository
+// MODIFIÉ: Utilise maintenant FirestoreProductRepository au lieu de MockProductRepository
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
-  return MockProductRepository();
+  return FirestoreProductRepository(); // Migration vers Firestore!
 });
