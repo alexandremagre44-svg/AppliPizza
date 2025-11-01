@@ -1,4 +1,5 @@
 // lib/src/widgets/product_card.dart
+// Carte produit optimisée sans overflow - P1, P2, P3, P4
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -18,55 +19,63 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 3,
+      elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
+      margin: EdgeInsets.zero,
       child: InkWell(
         onTap: () {
           context.push('/details', extra: product);
         },
         borderRadius: BorderRadius.circular(VisualConstants.radiusLarge),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Image du produit avec badge
-            Expanded(
-              flex: 3,
+            // Image du produit avec badge - Hauteur fixe pour éviter overflow
+            SizedBox(
+              height: 120, // Hauteur fixe pour cohérence
               child: Stack(
+                fit: StackFit.expand,
                 children: [
                   // Image
                   ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(VisualConstants.radiusLarge)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(VisualConstants.radiusLarge),
+                    ),
                     child: Image.network(
                       product.imageUrl,
                       fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
                         return Container(
-                          alignment: Alignment.center,
                           color: Colors.grey[200],
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
                           ),
                         );
                       },
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: Colors.grey[200],
-                          alignment: Alignment.center,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.local_pizza, size: 50, color: Colors.grey[400]),
-                              const SizedBox(height: 8),
+                              Icon(
+                                Icons.local_pizza,
+                                size: 40,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 4),
                               Text(
-                                'Image non disponible',
-                                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                'Image\nnon dispo',
                                 textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 10,
+                                ),
                               ),
                             ],
                           ),
@@ -74,33 +83,40 @@ class ProductCard extends StatelessWidget {
                       },
                     ),
                   ),
-                  // Badge pour les menus - Positionné en haut à gauche
+                  // Badge pour les menus - Haut gauche, petit
                   if (product.isMenu)
                     Positioned(
-                      top: VisualConstants.paddingSmall,
-                      left: VisualConstants.paddingSmall,
+                      top: 6,
+                      left: 6,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(VisualConstants.radiusMedium),
+                          borderRadius: BorderRadius.circular(8),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 4,
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 3,
                             ),
                           ],
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.restaurant_menu, size: 12, color: Colors.white),
-                            SizedBox(width: 4),
+                            Icon(
+                              Icons.restaurant_menu,
+                              size: 10,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 3),
                             Text(
                               'MENU',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 10,
+                                fontSize: 9,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -108,94 +124,91 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                  // Gradient overlay at bottom for better text readability
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 40,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.1),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
 
-            // Détails et Prix
+            // Contenu texte - Padding réduit pour éviter overflow
             Expanded(
-              flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(VisualConstants.paddingMedium),
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Nom du produit avec overflow handling
+                    // Nom du produit - 2 lignes max
                     Text(
                       product.name,
                       style: Theme.of(context).textTheme.titleSmall!.copyWith(
                             fontWeight: FontWeight.bold,
+                            fontSize: 13,
                           ),
-                      maxLines: VisualConstants.maxLinesTitle,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 4),
 
-                    // Description avec overflow handling
+                    // Description - 2 lignes max, gris, petite
                     Text(
                       product.description,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      maxLines: VisualConstants.maxLinesDescription,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color: Colors.grey[600],
+                            fontSize: 11,
+                          ),
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
 
                     const Spacer(),
 
-                    // Prix et bouton
+                    // Prix et bouton panier - Toujours visible en bas
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Prix avec style amélioré
+                        // Prix - Flexible pour éviter overflow
                         Flexible(
+                          flex: 3,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(VisualConstants.radiusSmall),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               '${product.price.toStringAsFixed(2)} €',
-                              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall!
+                                  .copyWith(
                                     color: Theme.of(context).colorScheme.primary,
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 13,
                                   ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
 
-                        // Bouton Ajouter au Panier
+                        const SizedBox(width: 4),
+
+                        // Bouton Ajouter - Taille fixe
                         Material(
                           color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           child: InkWell(
                             onTap: onAddToCart,
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(8),
                             child: Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(6),
                               child: const Icon(
                                 Icons.add_shopping_cart,
-                                size: 20,
+                                size: 18,
                                 color: Colors.white,
                               ),
                             ),

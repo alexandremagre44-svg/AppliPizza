@@ -96,6 +96,19 @@ class MyApp extends ConsumerWidget {
               path: AppRoutes.profile,
               builder: (context, state) => const ProfileScreen(),
             ),
+            // Routes Admin dans le shell pour bottom bar
+            GoRoute(
+              path: '/admin',
+              builder: (context, state) => const AdminDashboardScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.adminPizza,
+              builder: (context, state) => const AdminPizzaScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.adminMenu,
+              builder: (context, state) => const AdminMenuScreen(),
+            ),
           ],
         ),
         // Route Indépendante pour l'écran de Détail
@@ -105,19 +118,6 @@ class MyApp extends ConsumerWidget {
             final product = state.extra as Product;
             return ProductDetailScreen(product: product);
           },
-        ),
-        // Routes Admin
-        GoRoute(
-          path: '/admin',
-          builder: (context, state) => const AdminDashboardScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.adminPizza,
-          builder: (context, state) => const AdminPizzaScreen(),
-        ),
-        GoRoute(
-          path: AppRoutes.adminMenu,
-          builder: (context, state) => const AdminMenuScreen(),
         ),
       ],
     );
