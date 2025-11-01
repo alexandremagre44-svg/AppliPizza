@@ -7,6 +7,7 @@ import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/favorites_provider.dart';
 import '../../widgets/product_card.dart';
+import '../../core/constants.dart';
 
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
@@ -63,7 +64,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
         children: [
           // Barre de recherche
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(VisualConstants.paddingMedium),
             color: Theme.of(context).scaffoldBackgroundColor,
             child: TextField(
               controller: _searchController,
@@ -84,7 +85,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(VisualConstants.radiusMedium),
                   borderSide: BorderSide.none,
                 ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -103,13 +104,13 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
             color: Theme.of(context).scaffoldBackgroundColor,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: VisualConstants.paddingMedium),
               itemCount: _categories.length,
               itemBuilder: (context, index) {
                 final category = _categories[index];
                 final isSelected = _selectedCategory == category;
                 return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
+                  padding: const EdgeInsets.only(right: VisualConstants.paddingSmall),
                   child: FilterChip(
                     label: Text(category),
                     selected: isSelected,
@@ -142,17 +143,17 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
             ),
           ),
 
-          // Résultats
+          // Résultats avec Grid optimisé
           Expanded(
             child: filteredProducts.isEmpty
                 ? _buildEmptyState()
                 : GridView.builder(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(VisualConstants.paddingMedium),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.65,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
+                      crossAxisCount: VisualConstants.gridCrossAxisCount,
+                      childAspectRatio: VisualConstants.gridChildAspectRatio,
+                      crossAxisSpacing: VisualConstants.gridSpacing,
+                      mainAxisSpacing: VisualConstants.gridSpacing,
                     ),
                     itemCount: filteredProducts.length,
                     itemBuilder: (context, index) {
