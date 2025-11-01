@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../models/order.dart';
 import '../../providers/cart_provider.dart';
+import '../../core/constants.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -13,6 +15,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userProfile = ref.watch(userProvider);
+    final authState = ref.watch(authProvider);
     final history = userProfile.orderHistory;
 
     return Scaffold(
@@ -20,9 +23,12 @@ class ProfileScreen extends ConsumerWidget {
         title: const Text('Mon Profil'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              // Future: Paramètres
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) {
+                context.go(AppRoutes.login);
+              }
             },
           ),
         ],
@@ -69,18 +75,43 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Nom
+                  // Nom et rôle
                   Text(
-                    userProfile.name,
+                    authState.userEmail ?? userProfile.name,
                     style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   const SizedBox(height: 4),
+                  // Badge rôle
+                  if (authState.isAdmin)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.amber,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.admin_panel_settings, size: 16, color: Colors.black87),
+                          SizedBox(width: 4),
+                          Text(
+                            'ADMIN',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 8),
                   // Email
                   Text(
-                    userProfile.email,
+                    authState.userEmail ?? userProfile.email,
                     style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                           color: Colors.white70,
                         ),
