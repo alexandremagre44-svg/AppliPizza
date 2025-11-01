@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_profile.dart';
 import '../models/order.dart'; 
 import 'cart_provider.dart';
+import '../services/order_service.dart';
 // Note: L'ancienne importation vers '../models/cart.dart' est retirée
 
 final userProvider =
@@ -26,7 +27,7 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     state = state.copyWith(favoriteProducts: favorites);
   }
 
-  void addOrder() {
+  Future<void> addOrder() async {
     // Le type lu par _ref.read(cartProvider) est CartState
     final cartState = _ref.read(cartProvider); 
     
@@ -43,6 +44,9 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     state = state.copyWith(
       orderHistory: updatedHistory,
     );
+
+    // Sauvegarder aussi dans le service global pour l'admin
+    await OrderService().addOrder(newOrder);
 
     // Vider le panier après la commande (méthode de CartNotifier)
     _ref.read(cartProvider.notifier).clearCart();

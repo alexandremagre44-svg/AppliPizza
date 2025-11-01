@@ -11,6 +11,12 @@ class AppRoutes {
   static const String productDetail = '/details';
   static const String adminMenu = '/admin/menu';
   static const String adminPizza = '/admin/pizza';
+  static const String adminOrders = '/admin/orders';
+  static const String adminUsers = '/admin/users';
+  static const String adminHours = '/admin/hours';
+  static const String adminSettings = '/admin/settings';
+  static const String adminPromos = '/admin/promos';
+  static const String adminStats = '/admin/stats';
 }
 
 /// Rôles utilisateurs
