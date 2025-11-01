@@ -51,7 +51,7 @@ class PizzaDelizzaApp extends ConsumerWidget {
   const PizzaDelizzaApp({super.key});
 
   @override
-  Widget build(BuildContextcontext, WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
 
     return MaterialApp.router(
@@ -67,7 +67,8 @@ class PizzaDelizzaApp extends ConsumerWidget {
         ),
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.red,
-          accentColor: const Color(0xFFB00020),
+        ).copyWith(
+          secondary: const Color(0xFFB00020),
         ),
         // Utilise un style de bouton textuel clair pour les liens
         textButtonTheme: TextButtonThemeData(

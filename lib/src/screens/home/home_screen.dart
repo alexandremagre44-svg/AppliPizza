@@ -1,4 +1,4 @@
-﻿// lib/src/screens/home/home_screen.dart
+// lib/src/screens/home/home_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,7 +14,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Filtrage des produits pour la page d'accueil
-    final popularPizzas = mockProducts.where((p) => p.category == 'Pizza').take(4).toList();
+    final popularPizzas = mockProducts.where((p) => p.category == 'Pizza').take(6).toList();
     final popularMenus = mockProducts.where((p) => p.isMenu == true).take(2).toList();
     final cartNotifier = ref.read(cartProvider.notifier);
     
@@ -23,30 +23,126 @@ class HomeScreen extends ConsumerWidget {
       cartNotifier.addItem(product);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${product.name} ajouté au panier !'),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text('${product.name} ajouté au panier !'),
+              ),
+            ],
+          ),
           backgroundColor: Theme.of(context).colorScheme.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(16),
         ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pizza Deli\'Zza', style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () => context.go('/cart'),
+      body: CustomScrollView(
+        slivers: [
+          // Modern App Bar with Search
+          SliverAppBar(
+            expandedHeight: 200.0,
+            floating: false,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              title: const Text(
+                'Pizza Deli\'Zza',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(0, 1),
+                      blurRadius: 3.0,
+                      color: Colors.black26,
+                    ),
+                  ],
+                ),
+              ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Background Image with Gradient
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Pizza Icon Pattern
+                  Positioned.fill(
+                    child: Opacity(
+                      opacity: 0.1,
+                      child: Icon(
+                        Icons.local_pizza,
+                        size: 200,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  context.go('/menu');
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.shopping_cart),
+                onPressed: () => context.go('/cart'),
+              ),
+              const SizedBox(width: 8),
+            ],
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section Pizzas Populaires
-            _buildSectionHeader(context, 'Pizzas Populaires'),
-            SizedBox(
-              height: 300, // Hauteur fixe pour le ListView horizontal
+          
+          // Welcome Section
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Bienvenue ! 👋',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Découvrez nos délicieuses pizzas italiennes',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Section Header: Pizzas Populaires
+          SliverToBoxAdapter(
+            child: _buildSectionHeader(
+              context,
+              'Pizzas Populaires 🍕',
+              onSeeAll: () => context.go('/menu'),
+            ),
+          ),
+          
+          // Horizontal Pizzas List
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 300,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -54,12 +150,11 @@ class HomeScreen extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final product = popularPizzas[index];
                   return Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
+                    padding: const EdgeInsets.only(right: 16.0),
                     child: SizedBox(
                       width: 200,
                       child: ProductCard(
                         product: product,
-                        // CORRECTION : onTap a été retiré. La navigation est gérée dans ProductCard.
                         onAddToCart: () => handleAddToCart(product),
                       ),
                     ),
@@ -67,52 +162,70 @@ class HomeScreen extends ConsumerWidget {
                 },
               ),
             ),
-            
-            // Section Menus & Formules
-            _buildSectionHeader(context, 'Nos Meilleurs Menus'),
-            GridView.builder(
-              physics: const NeverScrollableScrollPhysics(), // Important dans un SingleChildScrollView
-              shrinkWrap: true,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          ),
+          
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          
+          // Section Header: Menus
+          SliverToBoxAdapter(
+            child: _buildSectionHeader(
+              context,
+              'Nos Meilleurs Menus 🎉',
+              onSeeAll: () => context.go('/menu'),
+            ),
+          ),
+          
+          // Menus Grid
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.7, // Ratio légèrement ajusté pour les cartes
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+                childAspectRatio: 0.7,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
               ),
-              itemCount: popularMenus.length,
-              itemBuilder: (context, index) {
-                final product = popularMenus[index];
-                return ProductCard(
-                  product: product,
-                  // CORRECTION : onTap a été retiré.
-                  onAddToCart: () => handleAddToCart(product),
-                );
-              },
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final product = popularMenus[index];
+                  return ProductCard(
+                    product: product,
+                    onAddToCart: () => handleAddToCart(product),
+                  );
+                },
+                childCount: popularMenus.length,
+              ),
             ),
-
-            const SizedBox(height: 20),
-          ],
-        ),
+          ),
+          
+          // Bottom Padding
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        ],
       ),
     );
   }
   
   // Widget utilitaire pour l'en-tête de section
-  Widget _buildSectionHeader(BuildContext context, String title) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title, {
+    VoidCallback? onSeeAll,
+  }) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 10.0),
+      padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-          TextButton(
-            onPressed: () => context.go('/menu'), // Naviguer vers l'écran Menu
-            child: const Text('Voir tout >'),
-          ),
+          if (onSeeAll != null)
+            TextButton.icon(
+              onPressed: onSeeAll,
+              icon: const Text('Voir tout'),
+              label: const Icon(Icons.arrow_forward, size: 18),
+            ),
         ],
       ),
     );

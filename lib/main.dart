@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 // Importez vos écrans
+import 'src/screens/splash/splash_screen.dart';
 import 'src/screens/home/home_screen.dart'; 
 import 'src/screens/menu/menu_screen.dart'; 
 import 'src/screens/cart/cart_screen.dart'; 
@@ -13,7 +14,8 @@ import 'src/screens/product_detail/product_detail_screen.dart';
 
 // Importez le composant de barre de navigation (maintenant créé)
 import 'src/widgets/scaffold_with_nav_bar.dart'; 
-import 'src/models/product.dart'; 
+import 'src/models/product.dart';
+import 'src/theme/app_theme.dart'; 
 
 void main() {
   runApp(
@@ -28,35 +30,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Définir le thème de base
-    final baseTheme = ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFFB00020), // Rouge principal
-        primary: const Color(0xFFB00020),
-        secondary: const Color(0xFFFFC107), // Jaune/Ambre
-        background: Colors.grey[50],
-      ),
-      useMaterial3: true,
-      // Thème des textes
-      textTheme: const TextTheme(
-        titleLarge: TextStyle(fontWeight: FontWeight.bold),
-        titleMedium: TextStyle(fontWeight: FontWeight.w600),
-      ),
-    );
-
-    // 2. CORRECTION : Utiliser copyWith pour créer le CardThemeData à partir du thème de base.
-    final finalTheme = baseTheme.copyWith(
-      cardTheme: baseTheme.cardTheme.copyWith( // Ceci garantit que l'objet est de type CardThemeData
-        elevation: 4,
-        shape: RoundedRectangleBorder( 
-            borderRadius: BorderRadius.all(Radius.circular(12)), 
-        ),
-      ),
-    );
-
     return MaterialApp.router(
       title: 'Pizza Deli\'Zza',
-      theme: finalTheme, // Utilisation du thème corrigé
+      theme: AppTheme.lightTheme,
+      debugShowCheckedModeBanner: false,
       routerConfig: _router,
     );
   }
@@ -64,8 +41,13 @@ class MyApp extends StatelessWidget {
 
 // Configuration de la navigation GoRouter
 final _router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/',
   routes: [
+    // Splash Screen
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const SplashScreen(),
+    ),
     // 1. ShellRoute pour les écrans AVEC barre de navigation
     ShellRoute(
       builder: (context, state, child) {
