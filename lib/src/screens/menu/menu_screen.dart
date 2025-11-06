@@ -2,10 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/mock_data.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
-import '../../providers/favorites_provider.dart';
+import '../../providers/product_provider.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/product_detail_modal.dart';
 import 'menu_customization_modal.dart';
@@ -37,10 +36,10 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     super.dispose();
   }
 
-  List<Product> get _filteredProducts {
+  List<Product> _filterProducts(List<Product> allProducts) {
     var products = _selectedCategory == 'Tous'
-        ? mockProducts
-        : mockProducts.where((p) => p.category == _selectedCategory).toList();
+        ? allProducts
+        : allProducts.where((p) => p.category == _selectedCategory).toList();
 
     if (_searchQuery.isNotEmpty) {
       products = products.where((p) {
@@ -54,7 +53,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredProducts = _filteredProducts;
+    // Charger les produits depuis le provider (inclut mock + admin + Firestore)
+    final productsAsync = ref.watch(productListProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
 
     return Scaffold(
@@ -147,85 +147,106 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
           // Résultats avec Grid optimisé
           Expanded(
-            child: filteredProducts.isEmpty
-                ? _buildEmptyState()
-                : GridView.builder(
-                    padding: const EdgeInsets.all(VisualConstants.paddingMedium),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: VisualConstants.gridCrossAxisCount,
-                      childAspectRatio: VisualConstants.gridChildAspectRatio,
-                      crossAxisSpacing: VisualConstants.gridSpacing,
-                      mainAxisSpacing: VisualConstants.gridSpacing,
-                    ),
-                    itemCount: filteredProducts.length,
-                    itemBuilder: (context, index) {
-                      final product = filteredProducts[index];
-                      return ProductCard(
-                        product: product,
-                        onAddToCart: () {
-                          // Si c'est un menu, afficher la modal de customisation
-                          if (product.isMenu) {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) => MenuCustomizationModal(menu: product),
-                            );
-                          } 
-                          // Si c'est une pizza, afficher la modal de personnalisation
-                          else if (product.category == 'Pizza') {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) => ProductDetailModal(
-                                product: product,
-                                onAddToCart: (customDescription) {
-                                  cartNotifier.addItem(product, customDescription: customDescription);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Row(
-                                        children: [
-                                          const Icon(Icons.check_circle, color: Colors.white),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Text('${product.name} ajouté au panier !'),
+            child: productsAsync.when(
+              data: (allProducts) {
+                final filteredProducts = _filterProducts(allProducts);
+                return filteredProducts.isEmpty
+                    ? _buildEmptyState()
+                    : GridView.builder(
+                        padding: const EdgeInsets.all(VisualConstants.paddingMedium),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: VisualConstants.gridCrossAxisCount,
+                          childAspectRatio: VisualConstants.gridChildAspectRatio,
+                          crossAxisSpacing: VisualConstants.gridSpacing,
+                          mainAxisSpacing: VisualConstants.gridSpacing,
+                        ),
+                        itemCount: filteredProducts.length,
+                        itemBuilder: (context, index) {
+                          final product = filteredProducts[index];
+                          return ProductCard(
+                            product: product,
+                            onAddToCart: () {
+                              // Si c'est un menu, afficher la modal de customisation
+                              if (product.isMenu) {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => MenuCustomizationModal(menu: product),
+                                );
+                              } 
+                              // Si c'est une pizza, afficher la modal de personnalisation
+                              else if (product.category == 'Pizza') {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => ProductDetailModal(
+                                    product: product,
+                                    onAddToCart: (customDescription) {
+                                      cartNotifier.addItem(product, customDescription: customDescription);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Row(
+                                            children: [
+                                              const Icon(Icons.check_circle, color: Colors.white),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Text('${product.name} ajouté au panier !'),
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
-                                      backgroundColor: Theme.of(context).colorScheme.primary,
-                                      behavior: SnackBarBehavior.floating,
-                                      duration: const Duration(seconds: 2),
+                                          backgroundColor: Theme.of(context).colorScheme.primary,
+                                          behavior: SnackBarBehavior.floating,
+                                          duration: const Duration(seconds: 2),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              }
+                              // Pour les autres produits (boissons, desserts), ajout direct
+                              else {
+                                cartNotifier.addItem(product);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Row(
+                                      children: [
+                                        const Icon(Icons.check_circle, color: Colors.white),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text('${product.name} ajouté au panier !'),
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                },
-                              ),
-                            );
-                          }
-                          // Pour les autres produits (boissons, desserts), ajout direct
-                          else {
-                            cartNotifier.addItem(product);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Row(
-                                  children: [
-                                    const Icon(Icons.check_circle, color: Colors.white),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text('${product.name} ajouté au panier !'),
-                                    ),
-                                  ],
-                                ),
-                                backgroundColor: Theme.of(context).colorScheme.primary,
-                                behavior: SnackBarBehavior.floating,
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          }
+                                    backgroundColor: Theme.of(context).colorScheme.primary,
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
+                          );
                         },
                       );
-                    },
-                  ),
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
+                    const SizedBox(height: 16),
+                    Text('Erreur de chargement: $error'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => ref.refresh(productListProvider),
+                      child: const Text('Réessayer'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),

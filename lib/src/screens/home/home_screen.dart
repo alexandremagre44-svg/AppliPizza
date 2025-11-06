@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../data/mock_data.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/product_provider.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/product_detail_modal.dart';
 import '../menu/menu_customization_modal.dart';
@@ -16,9 +16,47 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Charger les produits depuis le provider (inclut mock + admin + Firestore)
+    final productsAsync = ref.watch(productListProvider);
+    
+    return productsAsync.when(
+      data: (products) => _buildContent(context, ref, products),
+      loading: () => Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            _buildAppBar(context),
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          ],
+        ),
+      ),
+      error: (error, stack) => Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            _buildAppBar(context),
+            SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
+                    const SizedBox(height: 16),
+                    Text('Erreur de chargement: $error'),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, WidgetRef ref, List<Product> products) {
     // Filtrage des produits pour la page d'accueil
-    final popularPizzas = mockProducts.where((p) => p.category == 'Pizza').take(6).toList();
-    final popularMenus = mockProducts.where((p) => p.isMenu == true).take(2).toList();
+    final popularPizzas = products.where((p) => p.category == 'Pizza').take(6).toList();
+    final popularMenus = products.where((p) => p.isMenu == true).take(2).toList();
     final cartNotifier = ref.read(cartProvider.notifier);
     
     // Fonction d'ajout au panier
@@ -94,68 +132,7 @@ class HomeScreen extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           // Modern App Bar with Search
-          SliverAppBar(
-            expandedHeight: 200.0,
-            floating: false,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: const Text(
-                'Pizza Deli\'Zza',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(0, 1),
-                      blurRadius: 3.0,
-                      color: Colors.black26,
-                    ),
-                  ],
-                ),
-              ),
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Background Image with Gradient
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Theme.of(context).colorScheme.primary,
-                          Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Pizza Icon Pattern
-                  Positioned.fill(
-                    child: Opacity(
-                      opacity: 0.1,
-                      child: Icon(
-                        Icons.local_pizza,
-                        size: 200,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  context.go('/menu');
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: () => context.go('/cart'),
-              ),
-              const SizedBox(width: 8),
-            ],
-          ),
+          _buildAppBar(context),
           
           // Welcome Section
           SliverToBoxAdapter(
@@ -250,6 +227,72 @@ class HomeScreen extends ConsumerWidget {
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
         ],
       ),
+    );
+  }
+  
+  // Widget pour construire l'AppBar
+  SliverAppBar _buildAppBar(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 200.0,
+      floating: false,
+      pinned: true,
+      flexibleSpace: FlexibleSpaceBar(
+        title: const Text(
+          'Pizza Deli\'Zza',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                offset: Offset(0, 1),
+                blurRadius: 3.0,
+                color: Colors.black26,
+              ),
+            ],
+          ),
+        ),
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background Image with Gradient
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                  ],
+                ),
+              ),
+            ),
+            // Pizza Icon Pattern
+            Positioned.fill(
+              child: Opacity(
+                opacity: 0.1,
+                child: Icon(
+                  Icons.local_pizza,
+                  size: 200,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {
+            context.go('/menu');
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.shopping_cart),
+          onPressed: () => context.go('/cart'),
+        ),
+        const SizedBox(width: 8),
+      ],
     );
   }
   

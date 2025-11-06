@@ -140,25 +140,25 @@ class ProductCard extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                           ),
-                      maxLines: VisualConstants.maxLines,
+                      maxLines: VisualConstants.maxLinesTitle,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
 
-                    // Description - 2 lignes max, gris, ellipsis
-                    Flexible(
+                    // Description - 1 ligne max pour éviter overflow
+                    Expanded(
                       child: Text(
                         product.description,
                         style: Theme.of(context).textTheme.bodySmall!.copyWith(
                               color: Colors.grey[600],
                               fontSize: 11,
                             ),
-                        maxLines: VisualConstants.maxLines,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
 
-                    const Spacer(),
+                    const SizedBox(height: 4),
 
                     // Prix et bouton panier - Bloc bas fixe, toujours visible
                     Row(
