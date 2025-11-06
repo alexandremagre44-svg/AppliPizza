@@ -7,6 +7,8 @@ import '../../data/mock_data.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/product_card.dart';
+import '../../widgets/product_detail_modal.dart';
+import '../menu/menu_customization_modal.dart';
 import '../../core/constants.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -21,26 +23,71 @@ class HomeScreen extends ConsumerWidget {
     
     // Fonction d'ajout au panier
     void handleAddToCart(Product product) {
-      cartNotifier.addItem(product);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text('${product.name} ajouté au panier !'),
-              ),
-            ],
+      // Si c'est un menu, afficher la modal de customisation
+      if (product.isMenu) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => MenuCustomizationModal(menu: product),
+        );
+      } 
+      // Si c'est une pizza, afficher la modal de personnalisation
+      else if (product.category == 'Pizza') {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => ProductDetailModal(
+            product: product,
+            onAddToCart: (customDescription) {
+              cartNotifier.addItem(product, customDescription: customDescription);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text('${product.name} ajouté au panier !'),
+                      ),
+                    ],
+                  ),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  margin: const EdgeInsets.all(16),
+                ),
+              );
+            },
           ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+        );
+      }
+      // Pour les autres produits, ajout direct
+      else {
+        cartNotifier.addItem(product);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text('${product.name} ajouté au panier !'),
+                ),
+              ],
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.all(16),
           ),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
+        );
+      }
     }
 
     return Scaffold(
