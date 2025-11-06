@@ -74,12 +74,15 @@ Une documentation complète est disponible dans les fichiers suivants:
 | **[ANALYSE_APPLICATION.md](ANALYSE_APPLICATION.md)** | 📊 Analyse complète de l'architecture, des composants et de l'état du projet |
 | **[CARTE_NAVIGATION.md](CARTE_NAVIGATION.md)** | 🗺️ Carte visuelle de navigation avec diagrammes et flows utilisateur |
 | **[GUIDE_DEMARRAGE.md](GUIDE_DEMARRAGE.md)** | 🚀 Guide pratique de démarrage et recommandations de développement |
+| **[CORRECTIONS.md](CORRECTIONS.md)** | 🔧 Résumé de toutes les corrections et améliorations apportées |
+| **[FIRESTORE_INTEGRATION.md](FIRESTORE_INTEGRATION.md)** | 🔥 Guide d'intégration Firebase/Firestore pour charger les produits cloud |
 
 ### 🎯 Que Lire en Premier ?
 
 1. **Pour comprendre rapidement l'app** → [GUIDE_DEMARRAGE.md](GUIDE_DEMARRAGE.md)
 2. **Pour voir l'architecture détaillée** → [ANALYSE_APPLICATION.md](ANALYSE_APPLICATION.md)
 3. **Pour comprendre la navigation** → [CARTE_NAVIGATION.md](CARTE_NAVIGATION.md)
+4. **Pour activer Firestore** → [FIRESTORE_INTEGRATION.md](FIRESTORE_INTEGRATION.md)
 
 ---
 
