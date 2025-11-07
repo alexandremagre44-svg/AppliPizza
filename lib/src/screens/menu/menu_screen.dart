@@ -152,32 +152,39 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 final filteredProducts = _filterProducts(allProducts);
                 return filteredProducts.isEmpty
                     ? _buildEmptyState()
-                    : GridView.builder(
-                        padding: const EdgeInsets.all(VisualConstants.paddingMedium),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: VisualConstants.gridCrossAxisCount,
-                          childAspectRatio: VisualConstants.gridChildAspectRatio,
-                          crossAxisSpacing: VisualConstants.gridSpacing,
-                          mainAxisSpacing: VisualConstants.gridSpacing,
-                        ),
-                        itemCount: filteredProducts.length,
-                        itemBuilder: (context, index) {
-                          final product = filteredProducts[index];
-                          return ProductCard(
-                            product: product,
-                            onAddToCart: () {
-                              // Si c'est un menu, afficher la modal de customisation
-                              if (product.isMenu) {
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (context) => MenuCustomizationModal(menu: product),
-                                );
-                              } 
-                              // Si c'est une pizza, afficher la modal de personnalisation
-                              else if (product.category == 'Pizza') {
-                                showModalBottomSheet(
+                    : RefreshIndicator(
+                        onRefresh: () async {
+                          // Rafraîchir les produits en invalidant le provider
+                          ref.invalidate(productListProvider);
+                          // Attendre que le nouveau chargement soit terminé
+                          await ref.read(productListProvider.future);
+                        },
+                        child: GridView.builder(
+                          padding: const EdgeInsets.all(VisualConstants.paddingMedium),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: VisualConstants.gridCrossAxisCount,
+                            childAspectRatio: VisualConstants.gridChildAspectRatio,
+                            crossAxisSpacing: VisualConstants.gridSpacing,
+                            mainAxisSpacing: VisualConstants.gridSpacing,
+                          ),
+                          itemCount: filteredProducts.length,
+                          itemBuilder: (context, index) {
+                            final product = filteredProducts[index];
+                            return ProductCard(
+                              product: product,
+                              onAddToCart: () {
+                                // Si c'est un menu, afficher la modal de customisation
+                                if (product.isMenu) {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (context) => MenuCustomizationModal(menu: product),
+                                  );
+                                } 
+                                // Si c'est une pizza, afficher la modal de personnalisation
+                                else if (product.category == 'Pizza') {
+                                  showModalBottomSheet(
                                   context: context,
                                   isScrollControlled: true,
                                   backgroundColor: Colors.transparent,
@@ -228,7 +235,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                             },
                           );
                         },
-                      );
+                      ),
+                    );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(

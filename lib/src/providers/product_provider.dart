@@ -1,27 +1,32 @@
 ﻿// lib/src/providers/product_provider.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:developer' as developer;
 import '../models/product.dart';
 import '../repositories/product_repository.dart'; 
 
 // 1. FutureProvider pour obtenir la liste complète des produits
-final productListProvider = FutureProvider<List<Product>>((ref) async {
+// Utilisez .autoDispose pour que le provider se rafraîchisse automatiquement
+final productListProvider = FutureProvider.autoDispose<List<Product>>((ref) async {
+  developer.log('🔄 ProductProvider: Chargement des produits...');
   // Le provider demande les données au Repository
   final repository = ref.watch(productRepositoryProvider);
-  return repository.fetchAllProducts();
+  final products = await repository.fetchAllProducts();
+  developer.log('✅ ProductProvider: ${products.length} produits chargés');
+  return products;
 });
 
 
 // 2. Provider pour obtenir un produit par son ID
 final productByIdProvider =
-    FutureProvider.family<Product?, String>((ref, id) async {
+    FutureProvider.autoDispose.family<Product?, String>((ref, id) async {
   final repository = ref.watch(productRepositoryProvider);
   return repository.getProductById(id);
 });
 
 
 // 3. Provider pour regrouper les produits par catégorie
-final productsByCategoryProvider = FutureProvider<Map<String, List<Product>>>((ref) async {
+final productsByCategoryProvider = FutureProvider.autoDispose<Map<String, List<Product>>>((ref) async {
   // Attend que la liste complète des produits soit chargée
   final productsAsync = ref.watch(productListProvider);
 

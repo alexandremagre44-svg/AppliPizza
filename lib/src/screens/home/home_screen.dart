@@ -43,6 +43,11 @@ class HomeScreen extends ConsumerWidget {
                     Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
                     const SizedBox(height: 16),
                     Text('Erreur de chargement: $error'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => ref.refresh(productListProvider),
+                      child: const Text('Réessayer'),
+                    ),
                   ],
                 ),
               ),
@@ -129,15 +134,22 @@ class HomeScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Modern App Bar with Search
-          _buildAppBar(context),
-          
-          // Welcome Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // Rafraîchir les produits en invalidant le provider
+          ref.invalidate(productListProvider);
+          // Attendre que le nouveau chargement soit terminé
+          await ref.read(productListProvider.future);
+        },
+        child: CustomScrollView(
+          slivers: [
+            // Modern App Bar with Search
+            _buildAppBar(context),
+            
+            // Welcome Section
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -226,6 +238,7 @@ class HomeScreen extends ConsumerWidget {
           // Bottom Padding
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
         ],
+        ),
       ),
     );
   }
