@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../providers/cart_provider.dart'; // CORRECTION: Importe CartItem et CartNotifier ici
+import '../../providers/cart_provider.dart';
+import '../../providers/product_provider.dart';
 import '../../models/product.dart';
-import '../../data/mock_data.dart'; // Pour les options de pizzas et boissons
 
 const _uuid = Uuid();
 
@@ -128,8 +128,71 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
 
   @override
   Widget build(BuildContext context) {
-    final pizzaOptions = mockProducts.where((p) => p.category == 'Pizza' && !p.isMenu).toList();
-    final drinkOptions = mockProducts.where((p) => p.category == 'Boissons').toList();
+    // Charger les produits depuis le provider (inclut mock + admin + Firestore)
+    final productsAsync = ref.watch(productListProvider);
+    
+    return productsAsync.when(
+      data: (allProducts) {
+        final pizzaOptions = allProducts
+            .where((p) => p.category == 'Pizza' && !p.isMenu)
+            .toList();
+        final drinkOptions = allProducts
+            .where((p) => p.category == 'Boissons')
+            .toList();
+        
+        return _buildContent(context, pizzaOptions, drinkOptions);
+      },
+      loading: () => _buildLoading(),
+      error: (error, stack) => _buildError(error),
+    );
+  }
+
+  Widget _buildLoading() {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.5,
+      builder: (_, controller) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildError(Object error) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.5,
+      builder: (_, controller) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
+                const SizedBox(height: 16),
+                Text('Erreur: $error'),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+    List<Product> pizzaOptions,
+    List<Product> drinkOptions,
+  ) {
 
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
