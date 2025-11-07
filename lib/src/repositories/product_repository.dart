@@ -1,6 +1,7 @@
 // lib/src/repositories/product_repository.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:developer' as developer;
 import '../models/product.dart';
 import '../data/mock_data.dart';
 import '../services/product_crud_service.dart';
@@ -24,13 +25,18 @@ class MockProductRepository implements ProductRepository {
 
   @override
   Future<List<Product>> fetchAllProducts() async {
+    developer.log('📦 Repository: Début du chargement des produits...');
+    
     // Charger les produits depuis toutes les sources
     final adminPizzas = await _crudService.loadPizzas();
     final adminMenus = await _crudService.loadMenus();
+    developer.log('📱 Repository: ${adminPizzas.length} pizzas depuis SharedPreferences');
     
     // Charger depuis Firestore
     final firestorePizzas = await _firestoreService.loadPizzas();
     final firestoreMenus = await _firestoreService.loadMenus();
+    developer.log('🔥 Repository: ${firestorePizzas.length} pizzas depuis Firestore');
+    developer.log('🔥 Repository: ${firestoreMenus.length} menus depuis Firestore');
     
     // Fusionner avec les données mockées
     // On évite les doublons en utilisant les IDs
@@ -40,24 +46,34 @@ class MockProductRepository implements ProductRepository {
     for (var product in mockProducts) {
       allProducts[product.id] = product;
     }
+    developer.log('💾 Repository: ${mockProducts.length} produits depuis mock_data');
     
     // Puis on ajoute/écrase avec les produits admin (SharedPreferences)
     for (var pizza in adminPizzas) {
       allProducts[pizza.id] = pizza;
+      developer.log('  ➕ Ajout pizza admin: ${pizza.name} (ID: ${pizza.id})');
     }
     
     for (var menu in adminMenus) {
       allProducts[menu.id] = menu;
+      developer.log('  ➕ Ajout menu admin: ${menu.name} (ID: ${menu.id})');
     }
     
     // Enfin, on ajoute/écrase avec les produits Firestore (priorité maximale)
     for (var pizza in firestorePizzas) {
+      final wasPresent = allProducts.containsKey(pizza.id);
       allProducts[pizza.id] = pizza;
+      developer.log('  ⭐ ${wasPresent ? "Écrasement" : "Ajout"} pizza Firestore: ${pizza.name} (ID: ${pizza.id})');
     }
     
     for (var menu in firestoreMenus) {
+      final wasPresent = allProducts.containsKey(menu.id);
       allProducts[menu.id] = menu;
+      developer.log('  ⭐ ${wasPresent ? "Écrasement" : "Ajout"} menu Firestore: ${menu.name} (ID: ${menu.id})');
     }
+    
+    developer.log('✅ Repository: Total de ${allProducts.length} produits fusionnés');
+    developer.log('📊 Repository: Catégories présentes: ${allProducts.values.map((p) => p.category).toSet().join(", ")}');
     
     return _simulateDelay(allProducts.values.toList());
   }
