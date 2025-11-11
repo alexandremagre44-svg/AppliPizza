@@ -58,7 +58,7 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
     final total = cart.total;
 
     // Déclencher l'animation si le panier change (nouveau produit ajouté)
-    ref.listen<Cart>(cartProvider, (previous, next) {
+    ref.listen<CartState>(cartProvider, (previous, next) {
       if (previous != null && next.items.length > previous.items.length) {
         _triggerPopAnimation();
       }

@@ -19,6 +19,10 @@ class AppTheme {
   
   // Couleurs d'accentuation (utilisées avec parcimonie)
   static const Color accentGold = Color(0xFFFFB300);        // Or/jaune pour badges premium
+  static const Color secondaryAmber = Color(0xFFFFC107);    // Ambre pour accents secondaires
+  static const Color backgroundCream = Color(0xFFFFF8E1);   // Crème pour arrière-plans doux
+  static const Color accentOrange = Color(0xFFFF9800);      // Orange pour accents
+  static const Color accentGreen = Color(0xFF4CAF50);       // Vert pour accents
   
   // Status Colors
   static const Color successGreen = Color(0xFF4CAF50);
