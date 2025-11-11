@@ -9,6 +9,7 @@ import '../../providers/product_provider.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/product_detail_modal.dart';
 import '../menu/menu_customization_modal.dart';
+import 'elegant_pizza_customization_modal.dart';
 import '../../core/constants.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -75,37 +76,13 @@ class HomeScreen extends ConsumerWidget {
           builder: (context) => MenuCustomizationModal(menu: product),
         );
       } 
-      // Si c'est une pizza, afficher la modal de personnalisation
+      // Si c'est une pizza, afficher la modal de personnalisation élégante
       else if (product.category == 'Pizza') {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
-          builder: (context) => ProductDetailModal(
-            product: product,
-            onAddToCart: (customDescription) {
-              cartNotifier.addItem(product, customDescription: customDescription);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.check_circle, color: Colors.white),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text('${product.name} ajouté au panier !'),
-                      ),
-                    ],
-                  ),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  margin: const EdgeInsets.all(16),
-                ),
-              );
-            },
-          ),
+          builder: (context) => ElegantPizzaCustomizationModal(pizza: product),
         );
       }
       // Pour les autres produits, ajout direct

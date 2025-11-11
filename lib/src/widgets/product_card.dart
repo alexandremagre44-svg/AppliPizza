@@ -27,9 +27,7 @@ class ProductCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(VisualConstants.radiusLarge),
       ),
       child: InkWell(
-        onTap: () {
-          context.push('/details', extra: product);
-        },
+        onTap: onAddToCart, // Changé: appeler directement onAddToCart pour ouvrir la modal de personnalisation
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
