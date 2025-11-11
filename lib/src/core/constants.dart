@@ -14,6 +14,7 @@ class AppRoutes {
   static const String adminDrinks = '/admin/drinks';
   static const String adminDesserts = '/admin/desserts';
   static const String adminPageBuilder = '/admin/page-builder';
+  static const String adminMailing = '/admin/mailing';
 }
 
 /// Rôles utilisateurs

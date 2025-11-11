@@ -1,0 +1,473 @@
+// lib/src/screens/admin/mailing/email_templates_tab.dart
+// Onglet pour gérer les modèles d'emails
+
+import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+import '../../../models/email_template.dart';
+import '../../../services/email_template_service.dart';
+import '../../../theme/app_theme.dart';
+import '../../../core/constants.dart';
+import 'email_template_preview_dialog.dart';
+
+class EmailTemplatesTab extends StatefulWidget {
+  const EmailTemplatesTab({super.key});
+
+  @override
+  State<EmailTemplatesTab> createState() => _EmailTemplatesTabState();
+}
+
+class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
+  final EmailTemplateService _templateService = EmailTemplateService();
+  List<EmailTemplate> _templates = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTemplates();
+  }
+
+  Future<void> _loadTemplates() async {
+    setState(() => _isLoading = true);
+    final templates = await _templateService.loadTemplates();
+    setState(() {
+      _templates = templates;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _showTemplateDialog({EmailTemplate? template}) async {
+    final formKey = GlobalKey<FormState>();
+    final nameController = TextEditingController(text: template?.name ?? '');
+    final subjectController =
+        TextEditingController(text: template?.subject ?? '');
+    final htmlController = TextEditingController(text: template?.htmlBody ?? '');
+    final ctaTextController =
+        TextEditingController(text: template?.ctaText ?? 'Commander maintenant');
+    final ctaUrlController =
+        TextEditingController(text: template?.ctaUrl ?? '');
+    final bannerUrlController =
+        TextEditingController(text: template?.bannerUrl ?? '');
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 700, maxHeight: 700),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white,
+                AppTheme.primaryRed.withOpacity(0.05),
+              ],
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppTheme.primaryRed, AppTheme.primaryRedDark],
+                  ),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.description,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        template == null
+                            ? 'Nouveau Modèle'
+                            : 'Modifier Modèle',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Form content
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Nom du template *',
+                            hintText: 'Ex: Promo Weekend',
+                            prefixIcon: Icon(Icons.label,
+                                color: AppTheme.primaryRed),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Nom requis';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: subjectController,
+                          decoration: InputDecoration(
+                            labelText: 'Sujet de l\'email *',
+                            hintText: 'Ex: -20% sur toutes les pizzas',
+                            prefixIcon: Icon(Icons.subject,
+                                color: AppTheme.primaryRed),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Sujet requis';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: ctaTextController,
+                          decoration: InputDecoration(
+                            labelText: 'Texte du bouton CTA',
+                            hintText: 'Ex: Commander maintenant',
+                            prefixIcon:
+                                Icon(Icons.touch_app, color: AppTheme.primaryRed),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: ctaUrlController,
+                          decoration: InputDecoration(
+                            labelText: 'URL du bouton CTA',
+                            hintText: 'https://delizza.fr/commander',
+                            prefixIcon:
+                                Icon(Icons.link, color: AppTheme.primaryRed),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: bannerUrlController,
+                          decoration: InputDecoration(
+                            labelText: 'URL de la bannière',
+                            hintText: 'https://...',
+                            prefixIcon:
+                                Icon(Icons.image, color: AppTheme.primaryRed),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: htmlController,
+                          decoration: InputDecoration(
+                            labelText: 'Code HTML *',
+                            hintText: 'Collez votre template HTML ici...',
+                            prefixIcon:
+                                Icon(Icons.code, color: AppTheme.primaryRed),
+                            helperText:
+                                'Variables disponibles: {{subject}}, {{content}}, {{ctaUrl}}, {{ctaText}}, {{bannerUrl}}, {{unsubUrl}}',
+                            helperMaxLines: 3,
+                          ),
+                          maxLines: 8,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Code HTML requis';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // Actions
+              Container(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Annuler'),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        if (formKey.currentState!.validate()) {
+                          final newTemplate = EmailTemplate(
+                            id: template?.id ?? const Uuid().v4(),
+                            name: nameController.text.trim(),
+                            subject: subjectController.text.trim(),
+                            htmlBody: htmlController.text.trim(),
+                            createdAt: template?.createdAt ?? DateTime.now(),
+                            updatedAt: DateTime.now(),
+                            ctaText: ctaTextController.text.trim(),
+                            ctaUrl: ctaUrlController.text.trim(),
+                            bannerUrl: bannerUrlController.text.trim(),
+                          );
+
+                          bool success;
+                          if (template == null) {
+                            success = await _templateService.addTemplate(newTemplate);
+                          } else {
+                            success =
+                                await _templateService.updateTemplate(newTemplate);
+                          }
+
+                          if (success && context.mounted) {
+                            Navigator.pop(context, true);
+                          }
+                        }
+                      },
+                      icon: const Icon(Icons.check),
+                      label: const Text('Sauvegarder'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (result == true) {
+      _loadTemplates();
+    }
+  }
+
+  Future<void> _deleteTemplate(EmailTemplate template) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmer la suppression'),
+        content: Text('Voulez-vous vraiment supprimer "${template.name}" ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.errorRed,
+            ),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final success = await _templateService.deleteTemplate(template.id);
+      if (success) {
+        _loadTemplates();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Template supprimé avec succès')),
+          );
+        }
+      }
+    }
+  }
+
+  void _previewTemplate(EmailTemplate template) {
+    showDialog(
+      context: context,
+      builder: (context) => EmailTemplatePreviewDialog(template: template),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_templates.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.description, size: 80, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'Aucun modèle d\'email',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Créez votre premier modèle',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => _showTemplateDialog(),
+              icon: const Icon(Icons.add),
+              label: const Text('Nouveau modèle'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${_templates.length} modèle(s)',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              ElevatedButton.icon(
+                onPressed: () => _showTemplateDialog(),
+                icon: const Icon(Icons.add),
+                label: const Text('Nouveau'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryRed,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(VisualConstants.paddingMedium),
+            itemCount: _templates.length,
+            itemBuilder: (context, index) {
+              final template = _templates[index];
+              return _buildTemplateCard(template);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTemplateCard(EmailTemplate template) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _showTemplateDialog(template: template),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppTheme.primaryRed, AppTheme.primaryRedDark],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.description,
+                        color: Colors.white, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          template.name,
+                          style:
+                              Theme.of(context).textTheme.titleLarge!.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          template.subject,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.visibility, color: AppTheme.primaryRed),
+                    onPressed: () => _previewTemplate(template),
+                    tooltip: 'Prévisualiser',
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.edit, color: AppTheme.accentOrange),
+                    onPressed: () => _showTemplateDialog(template: template),
+                    tooltip: 'Modifier',
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: AppTheme.errorRed),
+                    onPressed: () => _deleteTemplate(template),
+                    tooltip: 'Supprimer',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildInfoChip(
+                    'Créé le ${_formatDate(template.createdAt)}',
+                    Icons.calendar_today,
+                  ),
+                  if (template.updatedAt != null)
+                    _buildInfoChip(
+                      'Modifié le ${_formatDate(template.updatedAt!)}',
+                      Icons.edit_calendar,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(String label, IconData icon) {
+    return Chip(
+      avatar: Icon(icon, size: 16, color: AppTheme.textMedium),
+      label: Text(label, style: const TextStyle(fontSize: 12)),
+      backgroundColor: AppTheme.backgroundCream,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}

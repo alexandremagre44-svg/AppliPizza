@@ -1,0 +1,602 @@
+// lib/src/screens/admin/mailing/subscribers_tab.dart
+// Onglet pour gérer les abonnés
+
+import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+import '../../../models/subscriber.dart';
+import '../../../services/mailing_service.dart';
+import '../../../theme/app_theme.dart';
+import '../../../core/constants.dart';
+
+class SubscribersTab extends StatefulWidget {
+  const SubscribersTab({super.key});
+
+  @override
+  State<SubscribersTab> createState() => _SubscribersTabState();
+}
+
+class _SubscribersTabState extends State<SubscribersTab> {
+  final MailingService _mailingService = MailingService();
+  List<Subscriber> _subscribers = [];
+  List<Subscriber> _filteredSubscribers = [];
+  bool _isLoading = true;
+  String _filterStatus = 'all';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSubscribers();
+  }
+
+  Future<void> _loadSubscribers() async {
+    setState(() => _isLoading = true);
+    final subscribers = await _mailingService.loadSubscribers();
+    setState(() {
+      _subscribers = subscribers;
+      _applyFilter();
+      _isLoading = false;
+    });
+  }
+
+  void _applyFilter() {
+    if (_filterStatus == 'all') {
+      _filteredSubscribers = _subscribers;
+    } else {
+      _filteredSubscribers = _subscribers
+          .where((sub) => sub.status == _filterStatus)
+          .toList();
+    }
+  }
+
+  Future<void> _showSubscriberDialog({Subscriber? subscriber}) async {
+    final formKey = GlobalKey<FormState>();
+    final emailController =
+        TextEditingController(text: subscriber?.email ?? '');
+    List<String> selectedTags =
+        List<String>.from(subscriber?.tags ?? ['client']);
+    String status = subscriber?.status ?? 'active';
+    bool consent = subscriber?.consent ?? true;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.white, AppTheme.accentGreen.withOpacity(0.05)],
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppTheme.accentGreen, Colors.teal.shade700],
+                    ),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.person_add,
+                            color: Colors.white, size: 28),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          subscriber == null
+                              ? 'Nouvel Abonné'
+                              : 'Modifier Abonné',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Form content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextFormField(
+                            controller: emailController,
+                            decoration: InputDecoration(
+                              labelText: 'Email *',
+                              hintText: 'exemple@email.com',
+                              prefixIcon: Icon(Icons.email,
+                                  color: AppTheme.accentGreen),
+                            ),
+                            keyboardType: TextInputType.emailAddress,
+                            enabled: subscriber == null,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Email requis';
+                              }
+                              if (!value.contains('@')) {
+                                return 'Email invalide';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Statut',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<String>(
+                            value: status,
+                            decoration: InputDecoration(
+                              prefixIcon: Icon(Icons.check_circle,
+                                  color: AppTheme.accentGreen),
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                  value: 'active', child: Text('Actif')),
+                              DropdownMenuItem(
+                                  value: 'unsubscribed',
+                                  child: Text('Désinscrit')),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                setDialogState(() => status = value);
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Tags',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              'client',
+                              'vip',
+                              'nouveautes',
+                              'promotions'
+                            ].map((tag) {
+                              final isSelected = selectedTags.contains(tag);
+                              return FilterChip(
+                                label: Text(tag),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  setDialogState(() {
+                                    if (selected) {
+                                      selectedTags.add(tag);
+                                    } else {
+                                      selectedTags.remove(tag);
+                                    }
+                                  });
+                                },
+                                selectedColor:
+                                    AppTheme.accentGreen.withOpacity(0.3),
+                                checkmarkColor: AppTheme.accentGreen,
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 20),
+                          SwitchListTile(
+                            title: const Text('Consentement'),
+                            subtitle: const Text(
+                                'L\'abonné accepte de recevoir des emails'),
+                            value: consent,
+                            onChanged: (value) {
+                              setDialogState(() => consent = value);
+                            },
+                            activeColor: AppTheme.accentGreen,
+                            tileColor: Colors.grey.shade100,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Actions
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Annuler'),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          if (formKey.currentState!.validate()) {
+                            final newSubscriber = Subscriber(
+                              id: subscriber?.id ?? const Uuid().v4(),
+                              email: emailController.text.trim(),
+                              status: status,
+                              tags: selectedTags,
+                              consent: consent,
+                              dateInscription: subscriber?.dateInscription ??
+                                  DateTime.now(),
+                              unsubscribeToken:
+                                  subscriber?.unsubscribeToken ??
+                                      _mailingService.generateUnsubscribeToken(),
+                            );
+
+                            bool success;
+                            if (subscriber == null) {
+                              success = await _mailingService
+                                  .addSubscriber(newSubscriber);
+                            } else {
+                              success = await _mailingService
+                                  .updateSubscriber(newSubscriber);
+                            }
+
+                            if (success && context.mounted) {
+                              Navigator.pop(context, true);
+                            } else if (!success && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Cet email est déjà inscrit'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.check),
+                        label: const Text('Sauvegarder'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.accentGreen,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (result == true) {
+      _loadSubscribers();
+    }
+  }
+
+  Future<void> _deleteSubscriber(Subscriber subscriber) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmer la suppression'),
+        content: Text('Voulez-vous vraiment supprimer "${subscriber.email}" ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.errorRed),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final success = await _mailingService.deleteSubscriber(subscriber.id);
+      if (success) {
+        _loadSubscribers();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Abonné supprimé avec succès')),
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Column(
+      children: [
+        // Filter bar
+        Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${_filteredSubscribers.length} abonné(s)',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showSubscriberDialog(),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Nouveau'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.accentGreen,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Status filter chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    FilterChip(
+                      label: const Text('Tous'),
+                      selected: _filterStatus == 'all',
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() {
+                            _filterStatus = 'all';
+                            _applyFilter();
+                          });
+                        }
+                      },
+                      selectedColor: AppTheme.accentGreen.withOpacity(0.3),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('Actifs'),
+                      selected: _filterStatus == 'active',
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() {
+                            _filterStatus = 'active';
+                            _applyFilter();
+                          });
+                        }
+                      },
+                      selectedColor: Colors.green.withOpacity(0.3),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text('Désinscrits'),
+                      selected: _filterStatus == 'unsubscribed',
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() {
+                            _filterStatus = 'unsubscribed';
+                            _applyFilter();
+                          });
+                        }
+                      },
+                      selectedColor: Colors.red.withOpacity(0.3),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Subscribers list
+        Expanded(
+          child: _filteredSubscribers.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.people, size: 80, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Aucun abonné',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text('Ajoutez votre premier abonné'),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () => _showSubscriberDialog(),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Nouvel abonné'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.accentGreen,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding:
+                      const EdgeInsets.all(VisualConstants.paddingMedium),
+                  itemCount: _filteredSubscribers.length,
+                  itemBuilder: (context, index) {
+                    final subscriber = _filteredSubscribers[index];
+                    return _buildSubscriberCard(subscriber);
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubscriberCard(Subscriber subscriber) {
+    final isActive = subscriber.status == 'active';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _showSubscriberDialog(subscriber: subscriber),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isActive
+                            ? [AppTheme.accentGreen, Colors.teal.shade700]
+                            : [Colors.grey.shade400, Colors.grey.shade600],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      isActive ? Icons.person : Icons.person_off,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          subscriber.email,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Inscrit le ${_formatDate(subscriber.dateInscription)}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isActive ? Colors.green : Colors.red,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isActive ? Icons.check_circle : Icons.cancel,
+                          size: 16,
+                          color: isActive ? Colors.green : Colors.red,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isActive ? 'Actif' : 'Désinscrit',
+                          style: TextStyle(
+                            color: isActive ? Colors.green : Colors.red,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ...subscriber.tags.map((tag) => Chip(
+                        label: Text(tag),
+                        backgroundColor: AppTheme.backgroundCream,
+                        labelStyle: const TextStyle(fontSize: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                      )),
+                  if (!subscriber.consent)
+                    Chip(
+                      label: const Text('Sans consentement'),
+                      backgroundColor: Colors.red.shade50,
+                      labelStyle: TextStyle(
+                        fontSize: 12,
+                        color: Colors.red.shade900,
+                      ),
+                      avatar:
+                          Icon(Icons.warning, size: 16, color: Colors.red),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.edit, color: AppTheme.accentGreen),
+                    onPressed: () =>
+                        _showSubscriberDialog(subscriber: subscriber),
+                    tooltip: 'Modifier',
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: AppTheme.errorRed),
+                    onPressed: () => _deleteSubscriber(subscriber),
+                    tooltip: 'Supprimer',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}
