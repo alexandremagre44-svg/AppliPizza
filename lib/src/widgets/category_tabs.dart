@@ -6,8 +6,12 @@ import '../theme/app_theme.dart';
 
 /// Barre d'onglets pour filtrer par catégorie
 /// - Scroll horizontal
-/// - Onglet actif : fond rouge + texte blanc
+/// - Onglet actif : fond rouge + texte blanc avec ombre
 /// - Onglets inactifs : bordure rouge + texte rouge
+/// 
+/// ANIMATION: AnimatedContainer (200ms) - Transition fluide entre états actif/inactif
+/// Fichier: lib/src/widgets/category_tabs.dart
+/// But: Améliorer la lisibilité de l'onglet actif avec une ombre douce
 class CategoryTabs extends StatelessWidget {
   final List<String> categories;
   final String selectedCategory;

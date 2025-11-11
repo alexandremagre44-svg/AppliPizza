@@ -10,6 +10,10 @@ import '../theme/app_theme.dart';
 /// - Badge "Personnaliser" rouge en bas à droite en overlay pour pizzas/menus
 /// - Badge quantité si dans le panier
 /// - Effet shadow et animation scale subtile au tap
+/// 
+/// ANIMATION: ScaleTransition sur tap (150ms) - Feedback visuel subtil
+/// Fichier: lib/src/widgets/product_card.dart
+/// But: Améliorer l'expérience utilisateur en donnant un feedback visuel au tap
 class ProductCard extends StatefulWidget {
   final Product product;
   final VoidCallback onAddToCart;

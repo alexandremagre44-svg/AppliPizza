@@ -11,6 +11,12 @@ import '../theme/app_theme.dart';
 /// - Fond rouge avec coins supérieurs arrondis
 /// - Icône panier + texte "Voir le panier" + total dynamique
 /// - Animation "pop" lors de l'ajout d'un produit
+/// 
+/// ANIMATIONS:
+/// 1. SlideTransition (400ms) - Entrée depuis le bas au premier produit
+/// 2. ScaleTransition (300ms) - Pop sur l'icône panier à chaque ajout
+/// Fichier: lib/src/widgets/fixed_cart_bar.dart
+/// But: Donner un feedback visuel dynamique et attirer l'attention sur le panier
 class FixedCartBar extends ConsumerStatefulWidget {
   const FixedCartBar({super.key});
 

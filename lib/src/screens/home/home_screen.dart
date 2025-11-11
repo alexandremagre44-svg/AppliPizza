@@ -21,6 +21,13 @@ import '../../theme/app_theme.dart';
 /// - Bannière promo carousel
 /// - Liste produits en grille 2 colonnes
 /// - Barre panier fixe en bas
+/// 
+/// ANIMATIONS AJOUTÉES:
+/// 1. TweenAnimationBuilder - Apparition séquentielle des produits (FadeInUp avec 100ms d'intervalle)
+/// 2. SnackBar avec emoji 🍕 - Confirmation d'ajout au panier
+/// 3. Header réduit à 60px pour gagner de l'espace
+/// Fichier: lib/src/screens/home/home_screen.dart
+/// But: Créer une expérience utilisateur fluide et professionnelle
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
