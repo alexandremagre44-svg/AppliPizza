@@ -60,13 +60,28 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 
     return Scaffold(
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: currentIndex,
-        selectedItemColor: Theme.of(context).colorScheme.secondary,
-        unselectedItemColor: Colors.grey,
-        onTap: (int index) => _onItemTapped(context, index, isAdmin),
-        items: items,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: currentIndex,
+          selectedItemColor: Theme.of(context).colorScheme.primary,
+          unselectedItemColor: Colors.grey[400],
+          selectedFontSize: 13,
+          unselectedFontSize: 12,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
+          onTap: (int index) => _onItemTapped(context, index, isAdmin),
+          items: items,
+        ),
       ),
     );
   }
