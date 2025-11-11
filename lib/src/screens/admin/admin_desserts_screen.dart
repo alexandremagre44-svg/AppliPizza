@@ -41,7 +41,10 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
     final descController = TextEditingController(text: dessert?.description ?? '');
     final priceController = TextEditingController(text: dessert?.price.toString() ?? '');
     final imageController = TextEditingController(text: dessert?.imageUrl ?? '');
+    final orderController = TextEditingController(text: dessert?.order.toString() ?? '0');
     bool isFeatured = dessert?.isFeatured ?? false;
+    bool isActive = dessert?.isActive ?? true;
+    String displaySpot = dessert?.displaySpot ?? 'all';
 
     final result = await showDialog<bool>(
       context: context,
@@ -227,6 +230,40 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 16),
+                          // Ordre d'affichage
+                          TextFormField(
+                            controller: orderController,
+                            decoration: InputDecoration(
+                              labelText: 'Ordre d\'affichage',
+                              hintText: 'Ex: 1, 2, 3...',
+                              prefixIcon: Icon(Icons.sort, color: Colors.pink.shade600),
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.pink.shade200),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.pink.shade200),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.pink.shade600, width: 2),
+                              ),
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value != null && value.isNotEmpty) {
+                                final order = int.tryParse(value);
+                                if (order == null) {
+                                  return 'Ordre invalide';
+                                }
+                              }
+                              return null;
+                            },
+                          ),
                           const SizedBox(height: 20),
                           // Mise en avant toggle
                           Container(
@@ -273,6 +310,136 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
                               ],
                             ),
                           ),
+                          const SizedBox(height: 16),
+                          // Statut actif toggle
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.green.shade200),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.visibility, color: Colors.green.shade600, size: 24),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Produit actif',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 15,
+                                          color: Colors.green.shade900,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Visible par les clients',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Switch(
+                                  value: isActive,
+                                  onChanged: (value) {
+                                    setState(() => isActive = value);
+                                  },
+                                  activeColor: Colors.green.shade600,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Zone d'affichage
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.blue.shade200),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.location_on, color: Colors.blue.shade600, size: 24),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Zone d\'affichage',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 15,
+                                        color: Colors.blue.shade900,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    ChoiceChip(
+                                      label: const Text('Partout'),
+                                      selected: displaySpot == 'all',
+                                      onSelected: (selected) {
+                                        if (selected) setState(() => displaySpot = 'all');
+                                      },
+                                      selectedColor: Colors.blue.shade200,
+                                      labelStyle: TextStyle(
+                                        color: displaySpot == 'all' ? Colors.blue.shade900 : Colors.grey.shade700,
+                                        fontWeight: displaySpot == 'all' ? FontWeight.w700 : FontWeight.w500,
+                                      ),
+                                    ),
+                                    ChoiceChip(
+                                      label: const Text('Accueil'),
+                                      selected: displaySpot == 'home',
+                                      onSelected: (selected) {
+                                        if (selected) setState(() => displaySpot = 'home');
+                                      },
+                                      selectedColor: Colors.blue.shade200,
+                                      labelStyle: TextStyle(
+                                        color: displaySpot == 'home' ? Colors.blue.shade900 : Colors.grey.shade700,
+                                        fontWeight: displaySpot == 'home' ? FontWeight.w700 : FontWeight.w500,
+                                      ),
+                                    ),
+                                    ChoiceChip(
+                                      label: const Text('Promotions'),
+                                      selected: displaySpot == 'promotions',
+                                      onSelected: (selected) {
+                                        if (selected) setState(() => displaySpot = 'promotions');
+                                      },
+                                      selectedColor: Colors.blue.shade200,
+                                      labelStyle: TextStyle(
+                                        color: displaySpot == 'promotions' ? Colors.blue.shade900 : Colors.grey.shade700,
+                                        fontWeight: displaySpot == 'promotions' ? FontWeight.w700 : FontWeight.w500,
+                                      ),
+                                    ),
+                                    ChoiceChip(
+                                      label: const Text('Nouveautés'),
+                                      selected: displaySpot == 'new',
+                                      onSelected: (selected) {
+                                        if (selected) setState(() => displaySpot = 'new');
+                                      },
+                                      selectedColor: Colors.blue.shade200,
+                                      labelStyle: TextStyle(
+                                        color: displaySpot == 'new' ? Colors.blue.shade900 : Colors.grey.shade700,
+                                        fontWeight: displaySpot == 'new' ? FontWeight.w700 : FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -312,6 +479,9 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
                               category: 'Desserts',
                               isMenu: false,
                               isFeatured: isFeatured,
+                              isActive: isActive,
+                              displaySpot: displaySpot,
+                              order: int.tryParse(orderController.text) ?? 0,
                             );
 
                             bool success;

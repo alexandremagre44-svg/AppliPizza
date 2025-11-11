@@ -41,11 +41,14 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     final descController = TextEditingController(text: menu?.description ?? '');
     final priceController = TextEditingController(text: menu?.price.toString() ?? '');
     final imageController = TextEditingController(text: menu?.imageUrl ?? '');
+    final orderController = TextEditingController(text: menu?.order.toString() ?? '0');
     
     // P10: Composition menu
     int pizzaCount = menu?.pizzaCount ?? 1;
     int drinkCount = menu?.drinkCount ?? 1;
     bool isFeatured = menu?.isFeatured ?? false;
+    bool isActive = menu?.isActive ?? true;
+    String displaySpot = menu?.displaySpot ?? 'all';
 
     final result = await showDialog<bool>(
       context: context,
@@ -402,6 +405,40 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 16),
+                          // Ordre d'affichage
+                          TextFormField(
+                            controller: orderController,
+                            decoration: InputDecoration(
+                              labelText: 'Ordre d\'affichage',
+                              hintText: 'Ex: 1, 2, 3...',
+                              prefixIcon: Icon(Icons.sort, color: Colors.blue.shade600),
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.blue.shade200),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.blue.shade200),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
+                              ),
+                            ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value != null && value.isNotEmpty) {
+                                final order = int.tryParse(value);
+                                if (order == null) {
+                                  return 'Ordre invalide';
+                                }
+                              }
+                              return null;
+                            },
+                          ),
                           const SizedBox(height: 20),
                           // Mise en avant toggle
                           Container(
@@ -444,6 +481,136 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                     setState(() => isFeatured = value);
                                   },
                                   activeColor: Colors.amber.shade600,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Statut actif toggle
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.green.shade200),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.visibility, color: Colors.green.shade600, size: 24),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Produit actif',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 15,
+                                          color: Colors.green.shade900,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Visible par les clients',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Switch(
+                                  value: isActive,
+                                  onChanged: (value) {
+                                    setState(() => isActive = value);
+                                  },
+                                  activeColor: Colors.green.shade600,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Zone d'affichage
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.shade50.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.purple.shade200),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.location_on, color: Colors.purple.shade600, size: 24),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Zone d\'affichage',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 15,
+                                        color: Colors.purple.shade900,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    ChoiceChip(
+                                      label: const Text('Partout'),
+                                      selected: displaySpot == 'all',
+                                      onSelected: (selected) {
+                                        if (selected) setState(() => displaySpot = 'all');
+                                      },
+                                      selectedColor: Colors.purple.shade200,
+                                      labelStyle: TextStyle(
+                                        color: displaySpot == 'all' ? Colors.purple.shade900 : Colors.grey.shade700,
+                                        fontWeight: displaySpot == 'all' ? FontWeight.w700 : FontWeight.w500,
+                                      ),
+                                    ),
+                                    ChoiceChip(
+                                      label: const Text('Accueil'),
+                                      selected: displaySpot == 'home',
+                                      onSelected: (selected) {
+                                        if (selected) setState(() => displaySpot = 'home');
+                                      },
+                                      selectedColor: Colors.purple.shade200,
+                                      labelStyle: TextStyle(
+                                        color: displaySpot == 'home' ? Colors.purple.shade900 : Colors.grey.shade700,
+                                        fontWeight: displaySpot == 'home' ? FontWeight.w700 : FontWeight.w500,
+                                      ),
+                                    ),
+                                    ChoiceChip(
+                                      label: const Text('Promotions'),
+                                      selected: displaySpot == 'promotions',
+                                      onSelected: (selected) {
+                                        if (selected) setState(() => displaySpot = 'promotions');
+                                      },
+                                      selectedColor: Colors.purple.shade200,
+                                      labelStyle: TextStyle(
+                                        color: displaySpot == 'promotions' ? Colors.purple.shade900 : Colors.grey.shade700,
+                                        fontWeight: displaySpot == 'promotions' ? FontWeight.w700 : FontWeight.w500,
+                                      ),
+                                    ),
+                                    ChoiceChip(
+                                      label: const Text('Nouveautés'),
+                                      selected: displaySpot == 'new',
+                                      onSelected: (selected) {
+                                        if (selected) setState(() => displaySpot = 'new');
+                                      },
+                                      selectedColor: Colors.purple.shade200,
+                                      labelStyle: TextStyle(
+                                        color: displaySpot == 'new' ? Colors.purple.shade900 : Colors.grey.shade700,
+                                        fontWeight: displaySpot == 'new' ? FontWeight.w700 : FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -492,6 +659,9 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                               pizzaCount: pizzaCount,
                               drinkCount: drinkCount,
                               isFeatured: isFeatured,
+                              isActive: isActive,
+                              displaySpot: displaySpot,
+                              order: int.tryParse(orderController.text) ?? 0,
                             );
 
                             bool success;
