@@ -117,15 +117,11 @@ class AdminDashboardScreen extends StatelessWidget {
                 ),
                 _buildAdminCard(
                   context,
-                  icon: Icons.settings,
-                  title: 'Paramètres',
-                  subtitle: 'À venir',
-                  colors: [Colors.grey.shade400, Colors.blueGrey.shade600],
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Fonctionnalité à venir')),
-                    );
-                  },
+                  icon: Icons.email,
+                  title: 'Mailing',
+                  subtitle: 'Marketing & Newsletters',
+                  colors: [AppTheme.primaryRed, AppTheme.primaryRedDark],
+                  onTap: () => context.push(AppRoutes.adminMailing),
                 ),
               ]),
             ),
