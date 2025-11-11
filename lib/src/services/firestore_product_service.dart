@@ -9,12 +9,27 @@ import '../models/product.dart';
 
 // Interface abstraite pour permettre la compatibilité avec/sans Firebase
 abstract class FirestoreProductService {
+  // CRUD pour toutes les catégories de produits
   Future<List<Product>> loadPizzas();
   Future<List<Product>> loadMenus();
+  Future<List<Product>> loadDrinks();
+  Future<List<Product>> loadDesserts();
+  
+  // Fonction centralisée pour charger par catégorie
+  Future<List<Product>> loadProductsByCategory(String category);
+  
+  // Stream pour écoute en temps réel
+  Stream<List<Product>> watchProductsByCategory(String category);
+  
   Future<bool> savePizza(Product pizza);
   Future<bool> saveMenu(Product menu);
+  Future<bool> saveDrink(Product drink);
+  Future<bool> saveDessert(Product dessert);
+  
   Future<bool> deletePizza(String pizzaId);
   Future<bool> deleteMenu(String menuId);
+  Future<bool> deleteDrink(String drinkId);
+  Future<bool> deleteDessert(String dessertId);
 }
 
 // Implémentation mock pour quand Firebase n'est pas disponible
@@ -32,6 +47,30 @@ class MockFirestoreProductService implements FirestoreProductService {
   }
 
   @override
+  Future<List<Product>> loadDrinks() async {
+    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
+    return [];
+  }
+
+  @override
+  Future<List<Product>> loadDesserts() async {
+    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
+    return [];
+  }
+
+  @override
+  Future<List<Product>> loadProductsByCategory(String category) async {
+    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide pour $category');
+    return [];
+  }
+
+  @override
+  Stream<List<Product>> watchProductsByCategory(String category) {
+    developer.log('MockFirestoreProductService: Firebase non configuré, retourne stream vide pour $category');
+    return Stream.value([]);
+  }
+
+  @override
   Future<bool> savePizza(Product pizza) async {
     developer.log('MockFirestoreProductService: Firebase non configuré, sauvegarde ignorée');
     return false;
@@ -44,6 +83,18 @@ class MockFirestoreProductService implements FirestoreProductService {
   }
 
   @override
+  Future<bool> saveDrink(Product drink) async {
+    developer.log('MockFirestoreProductService: Firebase non configuré, sauvegarde ignorée');
+    return false;
+  }
+
+  @override
+  Future<bool> saveDessert(Product dessert) async {
+    developer.log('MockFirestoreProductService: Firebase non configuré, sauvegarde ignorée');
+    return false;
+  }
+
+  @override
   Future<bool> deletePizza(String pizzaId) async {
     developer.log('MockFirestoreProductService: Firebase non configuré, suppression ignorée');
     return false;
@@ -51,6 +102,18 @@ class MockFirestoreProductService implements FirestoreProductService {
 
   @override
   Future<bool> deleteMenu(String menuId) async {
+    developer.log('MockFirestoreProductService: Firebase non configuré, suppression ignorée');
+    return false;
+  }
+
+  @override
+  Future<bool> deleteDrink(String drinkId) async {
+    developer.log('MockFirestoreProductService: Firebase non configuré, suppression ignorée');
+    return false;
+  }
+
+  @override
+  Future<bool> deleteDessert(String dessertId) async {
     developer.log('MockFirestoreProductService: Firebase non configuré, suppression ignorée');
     return false;
   }
@@ -64,121 +127,199 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreProductServiceImpl implements FirestoreProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
+  // ===============================================
+  // FONCTION CENTRALISÉE: Mapper le nom de collection
+  // ===============================================
+  String _getCollectionName(String category) {
+    switch (category.toLowerCase()) {
+      case 'pizza':
+        return 'pizzas';
+      case 'menus':
+        return 'menus';
+      case 'boissons':
+        return 'drinks';
+      case 'desserts':
+        return 'desserts';
+      default:
+        return category.toLowerCase();
+    }
+  }
+
+  // ===============================================
+  // FONCTION CENTRALISÉE: Charger par catégorie
+  // ===============================================
   @override
-  Future<List<Product>> loadPizzas() async {
+  Future<List<Product>> loadProductsByCategory(String category) async {
     try {
-      developer.log('🔥 FirestoreProductService: Chargement des pizzas depuis Firestore...');
+      final collectionName = _getCollectionName(category);
+      developer.log('🔥 FirestoreProductService: Chargement de $category depuis Firestore ($collectionName)...');
       
       final snapshot = await _firestore
-          .collection('pizzas')
+          .collection(collectionName)
           .get();
       
-      final pizzas = snapshot.docs
-          .map((doc) {
-            final data = doc.data();
-            data['id'] = doc.id; // Assurer que l'ID est présent
-            return Product.fromJson(data);
-          })
-          .toList();
+      final products = snapshot.docs.map((doc) {
+        final data = doc.data();
+        // Assurer que l'ID est présent
+        data['id'] = doc.id;
+        
+        // Assurer que les champs requis ont des valeurs par défaut si manquants
+        data['baseIngredients'] = data['baseIngredients'] ?? [];
+        data['isActive'] = data['isActive'] ?? true;
+        data['isMenu'] = data['isMenu'] ?? false;
+        data['isFeatured'] = data['isFeatured'] ?? false;
+        data['displaySpot'] = data['displaySpot'] ?? 'all';
+        data['order'] = data['order'] ?? 0;
+        data['pizzaCount'] = data['pizzaCount'] ?? 1;
+        data['drinkCount'] = data['drinkCount'] ?? 0;
+        
+        return Product.fromJson(data);
+      }).toList();
       
-      developer.log('📦 Nombre de pizzas trouvées dans Firestore: ${pizzas.length}');
-      developer.log('✅ Pizzas chargées depuis Firestore et mises en cache localement');
+      developer.log('📦 Nombre de produits "$category" trouvés dans Firestore: ${products.length}');
       
-      return pizzas;
+      return products;
     } catch (e) {
-      developer.log('❌ Erreur lors du chargement des pizzas Firestore: $e');
+      developer.log('❌ Erreur lors du chargement de $category depuis Firestore: $e');
       return [];
     }
+  }
+
+  // ===============================================
+  // STREAM EN TEMPS RÉEL: Écouter les changements
+  // ===============================================
+  @override
+  Stream<List<Product>> watchProductsByCategory(String category) {
+    final collectionName = _getCollectionName(category);
+    developer.log('🔄 FirestoreProductService: Écoute en temps réel de $category ($collectionName)...');
+    
+    return _firestore
+        .collection(collectionName)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        
+        // Assurer valeurs par défaut
+        data['baseIngredients'] = data['baseIngredients'] ?? [];
+        data['isActive'] = data['isActive'] ?? true;
+        data['isMenu'] = data['isMenu'] ?? false;
+        data['isFeatured'] = data['isFeatured'] ?? false;
+        data['displaySpot'] = data['displaySpot'] ?? 'all';
+        data['order'] = data['order'] ?? 0;
+        data['pizzaCount'] = data['pizzaCount'] ?? 1;
+        data['drinkCount'] = data['drinkCount'] ?? 0;
+        
+        return Product.fromJson(data);
+      }).toList();
+    }).handleError((error) {
+      developer.log('❌ Erreur stream Firestore pour $category: $error');
+      return <Product>[];
+    });
+  }
+
+  // ===============================================
+  // MÉTHODES SPÉCIFIQUES PAR CATÉGORIE
+  // ===============================================
+  
+  @override
+  Future<List<Product>> loadPizzas() async {
+    return loadProductsByCategory('Pizza');
   }
 
   @override
   Future<List<Product>> loadMenus() async {
-    try {
-      developer.log('🔥 FirestoreProductService: Chargement des menus depuis Firestore...');
-      
-      final snapshot = await _firestore
-          .collection('menus')
-          .get();
-      
-      final menus = snapshot.docs
-          .map((doc) {
-            final data = doc.data();
-            data['id'] = doc.id;
-            return Product.fromJson(data);
-          })
-          .toList();
-      
-      developer.log('📦 Nombre de menus trouvés dans Firestore: ${menus.length}');
-      
-      return menus;
-    } catch (e) {
-      developer.log('❌ Erreur lors du chargement des menus Firestore: $e');
-      return [];
-    }
+    return loadProductsByCategory('Menus');
   }
 
   @override
-  Future<bool> savePizza(Product pizza) async {
+  Future<List<Product>> loadDrinks() async {
+    return loadProductsByCategory('Boissons');
+  }
+
+  @override
+  Future<List<Product>> loadDesserts() async {
+    return loadProductsByCategory('Desserts');
+  }
+
+  // ===============================================
+  // SAUVEGARDE: Fonction générique
+  // ===============================================
+  Future<bool> _saveProduct(Product product, String collectionName) async {
     try {
-      await _firestore
-          .collection('pizzas')
-          .doc(pizza.id)
-          .set(pizza.toJson());
+      // Préparer les données avec valeurs par défaut si nécessaire
+      final data = product.toJson();
       
-      developer.log('✅ Pizza sauvegardée dans Firestore: ${pizza.name}');
+      await _firestore
+          .collection(collectionName)
+          .doc(product.id)
+          .set(data, SetOptions(merge: true)); // merge pour ne pas écraser tout
+      
+      developer.log('✅ Produit "${product.name}" sauvegardé dans Firestore ($collectionName)');
       return true;
     } catch (e) {
-      developer.log('❌ Erreur lors de la sauvegarde de la pizza: $e');
+      developer.log('❌ Erreur lors de la sauvegarde du produit "${product.name}": $e');
       return false;
     }
   }
 
   @override
+  Future<bool> savePizza(Product pizza) async {
+    return _saveProduct(pizza, 'pizzas');
+  }
+
+  @override
   Future<bool> saveMenu(Product menu) async {
+    return _saveProduct(menu, 'menus');
+  }
+
+  @override
+  Future<bool> saveDrink(Product drink) async {
+    return _saveProduct(drink, 'drinks');
+  }
+
+  @override
+  Future<bool> saveDessert(Product dessert) async {
+    return _saveProduct(dessert, 'desserts');
+  }
+
+  // ===============================================
+  // SUPPRESSION: Fonction générique
+  // ===============================================
+  Future<bool> _deleteProduct(String productId, String collectionName) async {
     try {
       await _firestore
-          .collection('menus')
-          .doc(menu.id)
-          .set(menu.toJson());
+          .collection(collectionName)
+          .doc(productId)
+          .delete();
       
-      developer.log('✅ Menu sauvegardé dans Firestore: ${menu.name}');
+      developer.log('✅ Produit "$productId" supprimé de Firestore ($collectionName)');
       return true;
     } catch (e) {
-      developer.log('❌ Erreur lors de la sauvegarde du menu: $e');
+      developer.log('❌ Erreur lors de la suppression du produit "$productId": $e');
       return false;
     }
   }
 
   @override
   Future<bool> deletePizza(String pizzaId) async {
-    try {
-      await _firestore
-          .collection('pizzas')
-          .doc(pizzaId)
-          .delete();
-      
-      developer.log('✅ Pizza supprimée de Firestore: $pizzaId');
-      return true;
-    } catch (e) {
-      developer.log('❌ Erreur lors de la suppression de la pizza: $e');
-      return false;
-    }
+    return _deleteProduct(pizzaId, 'pizzas');
   }
 
   @override
   Future<bool> deleteMenu(String menuId) async {
-    try {
-      await _firestore
-          .collection('menus')
-          .doc(menuId)
-          .delete();
-      
-      developer.log('✅ Menu supprimé de Firestore: $menuId');
-      return true;
-    } catch (e) {
-      developer.log('❌ Erreur lors de la suppression du menu: $e');
-      return false;
-    }
+    return _deleteProduct(menuId, 'menus');
+  }
+
+  @override
+  Future<bool> deleteDrink(String drinkId) async {
+    return _deleteProduct(drinkId, 'drinks');
+  }
+
+  @override
+  Future<bool> deleteDessert(String dessertId) async {
+    return _deleteProduct(dessertId, 'desserts');
   }
 }
 */

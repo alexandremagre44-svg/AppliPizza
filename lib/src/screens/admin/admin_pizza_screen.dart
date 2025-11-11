@@ -7,6 +7,7 @@ import '../../models/product.dart';
 import '../../services/product_crud_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/ingredient_selector.dart';
 
 class AdminPizzaScreen extends StatefulWidget {
   const AdminPizzaScreen({super.key});
@@ -45,6 +46,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
     bool isFeatured = pizza?.isFeatured ?? false;
     bool isActive = pizza?.isActive ?? true;
     String displaySpot = pizza?.displaySpot ?? 'all';
+    List<String> selectedIngredients = List.from(pizza?.baseIngredients ?? []);
 
     final result = await showDialog<bool>(
       context: context,
@@ -440,6 +442,19 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                             ],
                           ),
                         ),
+                        const SizedBox(height: 20),
+                        // ===============================================
+                        // SECTION: Gestion des ingrédients
+                        // ===============================================
+                        IngredientSelector(
+                          selectedIngredients: selectedIngredients,
+                          onIngredientsChanged: (ingredients) {
+                            setState(() {
+                              selectedIngredients = ingredients;
+                            });
+                          },
+                          primaryColor: Colors.orange.shade600,
+                        ),
                       ],
                     ),
                   ),
@@ -478,6 +493,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                                 : imageController.text.trim(),
                             category: 'Pizza',
                             isMenu: false,
+                            baseIngredients: selectedIngredients, // ✨ Inclure les ingrédients sélectionnés
                             isFeatured: isFeatured,
                             isActive: isActive,
                             displaySpot: displaySpot,

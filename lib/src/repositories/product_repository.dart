@@ -27,19 +27,36 @@ class MockProductRepository implements ProductRepository {
   Future<List<Product>> fetchAllProducts() async {
     developer.log('📦 Repository: Début du chargement des produits...');
     
-    // Charger les produits depuis toutes les sources
+    // ===============================================
+    // ÉTAPE 1: Charger depuis SharedPreferences (Admin local)
+    // ===============================================
     final adminPizzas = await _crudService.loadPizzas();
     final adminMenus = await _crudService.loadMenus();
-    developer.log('📱 Repository: ${adminPizzas.length} pizzas depuis SharedPreferences');
+    final adminDrinks = await _crudService.loadDrinks();
+    final adminDesserts = await _crudService.loadDesserts();
     
-    // Charger depuis Firestore
+    developer.log('📱 Repository: ${adminPizzas.length} pizzas depuis SharedPreferences');
+    developer.log('📱 Repository: ${adminMenus.length} menus depuis SharedPreferences');
+    developer.log('📱 Repository: ${adminDrinks.length} boissons depuis SharedPreferences');
+    developer.log('📱 Repository: ${adminDesserts.length} desserts depuis SharedPreferences');
+    
+    // ===============================================
+    // ÉTAPE 2: Charger depuis Firestore (toutes catégories)
+    // ===============================================
     final firestorePizzas = await _firestoreService.loadPizzas();
     final firestoreMenus = await _firestoreService.loadMenus();
+    final firestoreDrinks = await _firestoreService.loadDrinks();
+    final firestoreDesserts = await _firestoreService.loadDesserts();
+    
     developer.log('🔥 Repository: ${firestorePizzas.length} pizzas depuis Firestore');
     developer.log('🔥 Repository: ${firestoreMenus.length} menus depuis Firestore');
+    developer.log('🔥 Repository: ${firestoreDrinks.length} boissons depuis Firestore');
+    developer.log('🔥 Repository: ${firestoreDesserts.length} desserts depuis Firestore');
     
-    // Fusionner avec les données mockées
-    // On évite les doublons en utilisant les IDs
+    // ===============================================
+    // ÉTAPE 3: Fusionner avec ordre de priorité
+    // Ordre: Mock Data → SharedPreferences → Firestore
+    // ===============================================
     final allProducts = <String, Product>{};
     
     // D'abord les mock data (base)
@@ -59,6 +76,16 @@ class MockProductRepository implements ProductRepository {
       developer.log('  ➕ Ajout menu admin: ${menu.name} (ID: ${menu.id})');
     }
     
+    for (var drink in adminDrinks) {
+      allProducts[drink.id] = drink;
+      developer.log('  ➕ Ajout boisson admin: ${drink.name} (ID: ${drink.id})');
+    }
+    
+    for (var dessert in adminDesserts) {
+      allProducts[dessert.id] = dessert;
+      developer.log('  ➕ Ajout dessert admin: ${dessert.name} (ID: ${dessert.id})');
+    }
+    
     // Enfin, on ajoute/écrase avec les produits Firestore (priorité maximale)
     for (var pizza in firestorePizzas) {
       final wasPresent = allProducts.containsKey(pizza.id);
@@ -70,6 +97,18 @@ class MockProductRepository implements ProductRepository {
       final wasPresent = allProducts.containsKey(menu.id);
       allProducts[menu.id] = menu;
       developer.log('  ⭐ ${wasPresent ? "Écrasement" : "Ajout"} menu Firestore: ${menu.name} (ID: ${menu.id})');
+    }
+    
+    for (var drink in firestoreDrinks) {
+      final wasPresent = allProducts.containsKey(drink.id);
+      allProducts[drink.id] = drink;
+      developer.log('  ⭐ ${wasPresent ? "Écrasement" : "Ajout"} boisson Firestore: ${drink.name} (ID: ${drink.id})');
+    }
+    
+    for (var dessert in firestoreDesserts) {
+      final wasPresent = allProducts.containsKey(dessert.id);
+      allProducts[dessert.id] = dessert;
+      developer.log('  ⭐ ${wasPresent ? "Écrasement" : "Ajout"} dessert Firestore: ${dessert.name} (ID: ${dessert.id})');
     }
     
     developer.log('✅ Repository: Total de ${allProducts.length} produits fusionnés');
