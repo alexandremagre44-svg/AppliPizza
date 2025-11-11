@@ -358,7 +358,6 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
           ),
         ),
       ),
-      ),
     );
 
     if (result == true) {

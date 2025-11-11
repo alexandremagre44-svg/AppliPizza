@@ -538,7 +538,6 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
           ),
         ),
       ),
-      ),
     );
 
     if (result == true) {
