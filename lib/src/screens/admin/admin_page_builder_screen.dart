@@ -205,7 +205,7 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
     );
   }
 
-  Widget _buildProductList(List<Product> products, String category, Color themeColor) {
+  Widget _buildProductList(List<Product> products, String category, MaterialColor themeColor) {
     if (products.isEmpty) {
       return Center(
         child: Column(
@@ -277,7 +277,7 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
     );
   }
 
-  Widget _buildProductCard(Product product, String category, Color themeColor) {
+  Widget _buildProductCard(Product product, String category, MaterialColor themeColor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(

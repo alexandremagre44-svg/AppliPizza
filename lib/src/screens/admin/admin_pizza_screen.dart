@@ -278,7 +278,6 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                   ),
                 ),
               ),
-              ),
               // Actions
               Container(
                 padding: const EdgeInsets.all(24),

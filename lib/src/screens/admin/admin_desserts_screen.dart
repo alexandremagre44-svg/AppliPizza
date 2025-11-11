@@ -84,7 +84,7 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
-                          Icons.local_dessert,
+                          Icons.cake,
                           color: Colors.white,
                           size: 28,
                         ),
@@ -117,7 +117,7 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
                             decoration: InputDecoration(
                               labelText: 'Nom *',
                               hintText: 'Ex: Tiramisu',
-                              prefixIcon: Icon(Icons.local_dessert, color: Colors.pink.shade600),
+                              prefixIcon: Icon(Icons.cake, color: Colors.pink.shade600),
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
@@ -559,7 +559,7 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
                       child: Opacity(
                         opacity: 0.15,
                         child: Icon(
-                          Icons.local_dessert,
+                          Icons.cake,
                           size: 180,
                           color: Colors.white,
                         ),
@@ -606,7 +606,7 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
                                 ],
                               ),
                               child: Icon(
-                                Icons.local_dessert,
+                                Icons.cake,
                                 size: 70,
                                 color: Colors.pink.shade600,
                               ),
@@ -720,7 +720,7 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
                         errorBuilder: (_, __, ___) => Container(
                           color: Colors.grey[100],
                           child: Icon(
-                            Icons.local_dessert,
+                            Icons.cake,
                             color: Colors.pink.shade600,
                             size: 40,
                           ),
