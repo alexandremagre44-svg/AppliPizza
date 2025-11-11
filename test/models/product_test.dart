@@ -123,5 +123,98 @@ void main() {
       expect(product.pizzaCount, 1);
       expect(product.drinkCount, 0);
     });
+
+    test('fromJson devrait utiliser les valeurs par défaut pour les nouveaux champs', () {
+      final json = {
+        'id': 'p1',
+        'name': 'Margherita',
+        'description': 'Tomate, Mozzarella',
+        'price': 12.50,
+        'imageUrl': 'https://test.com/image.jpg',
+        'category': 'Pizza',
+      };
+
+      final product = Product.fromJson(json);
+
+      expect(product.isActive, true); // Valeur par défaut
+      expect(product.displaySpot, 'all'); // Valeur par défaut
+      expect(product.order, 0); // Valeur par défaut
+      expect(product.isFeatured, false); // Valeur par défaut
+    });
+
+    test('toJson devrait inclure les nouveaux champs', () {
+      final product = Product(
+        id: 'p1',
+        name: 'Margherita',
+        description: 'Tomate, Mozzarella',
+        price: 12.50,
+        imageUrl: 'https://test.com/image.jpg',
+        category: 'Pizza',
+        isActive: false,
+        displaySpot: 'home',
+        order: 5,
+        isFeatured: true,
+      );
+
+      final json = product.toJson();
+
+      expect(json['isActive'], false);
+      expect(json['displaySpot'], 'home');
+      expect(json['order'], 5);
+      expect(json['isFeatured'], true);
+    });
+
+    test('copyWith devrait modifier les nouveaux champs', () {
+      final product = Product(
+        id: 'p1',
+        name: 'Margherita',
+        description: 'Tomate, Mozzarella',
+        price: 12.50,
+        imageUrl: 'https://test.com/image.jpg',
+        category: 'Pizza',
+      );
+
+      final updatedProduct = product.copyWith(
+        isActive: false,
+        displaySpot: 'promotions',
+        order: 10,
+        isFeatured: true,
+      );
+
+      expect(updatedProduct.id, 'p1');
+      expect(updatedProduct.name, 'Margherita');
+      expect(updatedProduct.isActive, false);
+      expect(updatedProduct.displaySpot, 'promotions');
+      expect(updatedProduct.order, 10);
+      expect(updatedProduct.isFeatured, true);
+    });
+
+    test('fromJson avec tous les nouveaux champs devrait fonctionner', () {
+      final json = {
+        'id': 'p1',
+        'name': 'Margherita',
+        'description': 'Tomate, Mozzarella',
+        'price': 12.50,
+        'imageUrl': 'https://test.com/image.jpg',
+        'category': 'Pizza',
+        'isMenu': false,
+        'baseIngredients': ['Tomate', 'Mozzarella'],
+        'pizzaCount': 1,
+        'drinkCount': 0,
+        'isActive': false,
+        'displaySpot': 'new',
+        'order': 3,
+        'isFeatured': true,
+      };
+
+      final product = Product.fromJson(json);
+
+      expect(product.id, 'p1');
+      expect(product.name, 'Margherita');
+      expect(product.isActive, false);
+      expect(product.displaySpot, 'new');
+      expect(product.order, 3);
+      expect(product.isFeatured, true);
+    });
   });
 }
