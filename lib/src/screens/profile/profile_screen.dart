@@ -37,7 +37,7 @@ class ProfileScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // En-tête du profil avec design moderne
+            // Enhanced Profile Header
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -46,44 +46,46 @@ class ProfileScreen extends ConsumerWidget {
                   end: Alignment.bottomRight,
                   colors: [
                     Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                    Theme.of(context).colorScheme.secondary,
                   ],
+                  stops: const [0.4, 1.0],
                 ),
               ),
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
               child: Column(
                 children: [
-                  // Avatar
+                  // Enhanced Avatar
                   Container(
-                    width: 100,
-                    height: 100,
+                    width: 120,
+                    height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
                         ),
                       ],
                     ),
                     child: Icon(
                       Icons.person,
-                      size: 50,
+                      size: 60,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   // Nom et rôle
                   Text(
                     authState.userEmail ?? userProfile.name,
                     style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 24,
                         ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   // Badge rôle
                   if (authState.isAdmin)
                     Container(

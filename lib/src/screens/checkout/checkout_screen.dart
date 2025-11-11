@@ -131,11 +131,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Finaliser la commande'),
+        title: Text(
+          'Finaliser la commande',
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(VisualConstants.paddingMedium),
@@ -145,45 +153,78 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             // Récapitulatif commande
             _buildOrderSummary(cartState, deliveryFee, total),
             
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             
-            // Sélection date
-            Text(
-              'Choisir une date',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
+            // Enhanced Section: Sélection date
+            _buildSectionHeader(context, 'Choisir une date', Icons.calendar_today),
+            const SizedBox(height: 16),
             _buildDateSelector(),
-            
-            const SizedBox(height: 24),
-            
-            // Sélection créneau
-            Text(
-              'Choisir un créneau',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
-            _buildTimeSlotSelector(),
             
             const SizedBox(height: 32),
             
-            // Bouton confirmation
+            // Enhanced Section: Sélection créneau
+            _buildSectionHeader(context, 'Choisir un créneau', Icons.access_time),
+            const SizedBox(height: 16),
+            _buildTimeSlotSelector(),
+            
+            const SizedBox(height: 40),
+            
+            // Enhanced Confirmation Button
             SizedBox(
               width: double.infinity,
+              height: 60,
               child: ElevatedButton(
                 onPressed: _confirmOrder,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: Text(
-                  'Confirmer la commande - ${total.toStringAsFixed(2)} €',
-                  style: const TextStyle(fontSize: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.check_circle_outline, size: 24),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Confirmer - ${total.toStringAsFixed(2)} €',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                Theme.of(context).colorScheme.secondary.withOpacity(0.15),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).colorScheme.primary,
+            size: 24,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+        ),
+      ],
     );
   }
 
