@@ -25,7 +25,7 @@ class ElegantPizzaCustomizationModal extends ConsumerStatefulWidget {
 
 class _ElegantPizzaCustomizationModalState
     extends ConsumerState<ElegantPizzaCustomizationModal>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
