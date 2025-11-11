@@ -1,5 +1,5 @@
-// lib/src/screens/admin/admin_menu_screen.dart
-// Écran CRUD pour gérer les menus (Admin uniquement)
+// lib/src/screens/admin/admin_desserts_screen.dart
+// Écran CRUD pour gérer les desserts (Admin uniquement)
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -8,44 +8,40 @@ import '../../services/product_crud_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 
-class AdminMenuScreen extends StatefulWidget {
-  const AdminMenuScreen({super.key});
+class AdminDessertsScreen extends StatefulWidget {
+  const AdminDessertsScreen({super.key});
 
   @override
-  State<AdminMenuScreen> createState() => _AdminMenuScreenState();
+  State<AdminDessertsScreen> createState() => _AdminDessertsScreenState();
 }
 
-class _AdminMenuScreenState extends State<AdminMenuScreen> {
+class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
   final ProductCrudService _crudService = ProductCrudService();
-  List<Product> _menus = [];
+  List<Product> _desserts = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadMenus();
+    _loadDesserts();
   }
 
-  Future<void> _loadMenus() async {
+  Future<void> _loadDesserts() async {
     setState(() => _isLoading = true);
-    final menus = await _crudService.loadMenus();
+    final desserts = await _crudService.loadDesserts();
     setState(() {
-      _menus = menus;
+      _desserts = desserts;
       _isLoading = false;
     });
   }
 
-  Future<void> _showMenuDialog({Product? menu}) async {
+  Future<void> _showDessertDialog({Product? dessert}) async {
     final formKey = GlobalKey<FormState>();
-    final nameController = TextEditingController(text: menu?.name ?? '');
-    final descController = TextEditingController(text: menu?.description ?? '');
-    final priceController = TextEditingController(text: menu?.price.toString() ?? '');
-    final imageController = TextEditingController(text: menu?.imageUrl ?? '');
-    
-    // P10: Composition menu
-    int pizzaCount = menu?.pizzaCount ?? 1;
-    int drinkCount = menu?.drinkCount ?? 1;
-    bool isFeatured = menu?.isFeatured ?? false;
+    final nameController = TextEditingController(text: dessert?.name ?? '');
+    final descController = TextEditingController(text: dessert?.description ?? '');
+    final priceController = TextEditingController(text: dessert?.price.toString() ?? '');
+    final imageController = TextEditingController(text: dessert?.imageUrl ?? '');
+    bool isFeatured = dessert?.isFeatured ?? false;
 
     final result = await showDialog<bool>(
       context: context,
@@ -63,7 +59,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                 end: Alignment.bottomRight,
                 colors: [
                   Colors.white,
-                  Colors.blue.shade50.withOpacity(0.3),
+                  Colors.pink.shade50.withOpacity(0.3),
                 ],
               ),
             ),
@@ -75,7 +71,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.blue.shade400, Colors.indigo.shade600],
+                      colors: [Colors.pink.shade400, Colors.blue.shade600],
                     ),
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                   ),
@@ -88,7 +84,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
-                          Icons.restaurant_menu,
+                          Icons.local_dessert,
                           color: Colors.white,
                           size: 28,
                         ),
@@ -96,7 +92,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(
-                          menu == null ? 'Nouveau Menu' : 'Modifier Menu',
+                          dessert == null ? 'Nouvelle Dessert' : 'Modifier Dessert',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 22,
@@ -120,21 +116,21 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                             controller: nameController,
                             decoration: InputDecoration(
                               labelText: 'Nom *',
-                              hintText: 'Ex: Menu Duo',
-                              prefixIcon: Icon(Icons.fastfood, color: Colors.blue.shade600),
+                              hintText: 'Ex: Tiramisu',
+                              prefixIcon: Icon(Icons.local_dessert, color: Colors.pink.shade600),
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade200),
+                                borderSide: BorderSide(color: Colors.pink.shade200),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade200),
+                                borderSide: BorderSide(color: Colors.pink.shade200),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
+                                borderSide: BorderSide(color: Colors.pink.shade600, width: 2),
                               ),
                             ),
                             validator: (value) {
@@ -149,21 +145,21 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                             controller: descController,
                             decoration: InputDecoration(
                               labelText: 'Description *',
-                              hintText: 'Ex: 2 pizzas + 2 boissons',
-                              prefixIcon: Icon(Icons.description, color: Colors.blue.shade600),
+                              hintText: 'Ex: Dessert au mascarpone',
+                              prefixIcon: Icon(Icons.description, color: Colors.pink.shade600),
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade200),
+                                borderSide: BorderSide(color: Colors.pink.shade200),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade200),
+                                borderSide: BorderSide(color: Colors.pink.shade200),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
+                                borderSide: BorderSide(color: Colors.pink.shade600, width: 2),
                               ),
                             ),
                             maxLines: 2,
@@ -174,197 +170,26 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 20),
-                          
-                          // P10: Composition du menu - Enhanced
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.blue.shade200),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Composition du menu',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 16,
-                                    color: Colors.blue.shade900,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                
-                                // Nombre de pizzas
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
-                                          ),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: const Icon(Icons.local_pizza, size: 20, color: Colors.white),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Text(
-                                        'Pizzas',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.shade100,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            IconButton(
-                                              icon: Icon(Icons.remove, color: Colors.orange.shade700),
-                                              onPressed: pizzaCount > 0
-                                                  ? () => setState(() => pizzaCount--)
-                                                  : null,
-                                            ),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
-                                                ),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: Text(
-                                                pizzaCount.toString(),
-                                                style: const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                            IconButton(
-                                              icon: Icon(Icons.add, color: Colors.orange.shade700),
-                                              onPressed: pizzaCount < 5
-                                                  ? () => setState(() => pizzaCount++)
-                                                  : null,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                
-                                const SizedBox(height: 12),
-                                
-                                // Nombre de boissons
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [Colors.blue.shade400, Colors.cyan.shade600],
-                                          ),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: const Icon(Icons.local_drink, size: 20, color: Colors.white),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Text(
-                                        'Boissons',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.shade100,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            IconButton(
-                                              icon: Icon(Icons.remove, color: Colors.blue.shade700),
-                                              onPressed: drinkCount > 0
-                                                  ? () => setState(() => drinkCount--)
-                                                  : null,
-                                            ),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [Colors.blue.shade400, Colors.cyan.shade600],
-                                                ),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: Text(
-                                                drinkCount.toString(),
-                                                style: const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                            IconButton(
-                                              icon: Icon(Icons.add, color: Colors.blue.shade700),
-                                              onPressed: drinkCount < 5
-                                                  ? () => setState(() => drinkCount++)
-                                                  : null,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          
                           const SizedBox(height: 16),
-                          
                           TextFormField(
                             controller: priceController,
                             decoration: InputDecoration(
                               labelText: 'Prix (€) *',
-                              hintText: 'Ex: 34.90',
-                              prefixIcon: Icon(Icons.euro, color: Colors.blue.shade600),
+                              hintText: 'Ex: 2.50',
+                              prefixIcon: Icon(Icons.euro, color: Colors.pink.shade600),
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade200),
+                                borderSide: BorderSide(color: Colors.pink.shade200),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade200),
+                                borderSide: BorderSide(color: Colors.pink.shade200),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
+                                borderSide: BorderSide(color: Colors.pink.shade600, width: 2),
                               ),
                             ),
                             keyboardType: TextInputType.number,
@@ -385,20 +210,20 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                             decoration: InputDecoration(
                               labelText: 'URL Image (optionnel)',
                               hintText: 'https://...',
-                              prefixIcon: Icon(Icons.image, color: Colors.blue.shade600),
+                              prefixIcon: Icon(Icons.image, color: Colors.pink.shade600),
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade200),
+                                borderSide: BorderSide(color: Colors.pink.shade200),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade200),
+                                borderSide: BorderSide(color: Colors.pink.shade200),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
+                                borderSide: BorderSide(color: Colors.pink.shade600, width: 2),
                               ),
                             ),
                           ),
@@ -407,9 +232,9 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.blue.shade50.withOpacity(0.5),
+                              color: Colors.pink.shade50.withOpacity(0.5),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.blue.shade200),
+                              border: Border.all(color: Colors.pink.shade200),
                             ),
                             child: Row(
                               children: [
@@ -424,7 +249,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                         style: TextStyle(
                                           fontWeight: FontWeight.w900,
                                           fontSize: 15,
-                                          color: Colors.blue.shade900,
+                                          color: Colors.pink.shade900,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
@@ -476,29 +301,24 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                       ElevatedButton(
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            // Mise à jour de la description selon la composition
-                            final compositionDesc = '${pizzaCount} pizza${pizzaCount > 1 ? 's' : ''} + ${drinkCount} boisson${drinkCount > 1 ? 's' : ''}';
-                            
-                            final newMenu = Product(
-                              id: menu?.id ?? const Uuid().v4(),
+                            final newDessert = Product(
+                              id: dessert?.id ?? const Uuid().v4(),
                               name: nameController.text.trim(),
                               description: descController.text.trim(),
                               price: double.parse(priceController.text),
                               imageUrl: imageController.text.trim().isEmpty
                                   ? 'https://via.placeholder.com/200'
                                   : imageController.text.trim(),
-                              category: 'Menus',
-                              isMenu: true,
-                              pizzaCount: pizzaCount,
-                              drinkCount: drinkCount,
+                              category: 'Desserts',
+                              isMenu: false,
                               isFeatured: isFeatured,
                             );
 
                             bool success;
-                            if (menu == null) {
-                              success = await _crudService.addMenu(newMenu);
+                            if (dessert == null) {
+                              success = await _crudService.addDessert(newDessert);
                             } else {
-                              success = await _crudService.updateMenu(newMenu);
+                              success = await _crudService.updateDessert(newDessert);
                             }
 
                             if (success && context.mounted) {
@@ -507,7 +327,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.indigo.shade600,
+                          backgroundColor: Colors.blue.shade600,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -541,11 +361,11 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     );
 
     if (result == true) {
-      _loadMenus();
+      _loadDesserts();
     }
   }
 
-  Future<void> _deleteMenu(Product menu) async {
+  Future<void> _deleteDessert(Product dessert) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
@@ -592,7 +412,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Voulez-vous vraiment supprimer "${menu.name}" ?',
+                'Voulez-vous vraiment supprimer "${dessert.name}" ?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -669,9 +489,9 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     );
 
     if (confirm == true) {
-      final success = await _crudService.deleteMenu(menu.id);
+      final success = await _crudService.deleteDessert(dessert.id);
       if (success) {
-        _loadMenus();
+        _loadDesserts();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -680,7 +500,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text('${menu.name} supprimé avec succès'),
+                    child: Text('${dessert.name} supprimée avec succès'),
                   ),
                 ],
               ),
@@ -708,7 +528,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
-                'Gestion des Menus',
+                'Gestion des Desserts',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   shadows: [
@@ -726,8 +546,8 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.blue.shade400,
-                      Colors.indigo.shade600,
+                      Colors.pink.shade400,
+                      Colors.blue.shade600,
                     ],
                   ),
                 ),
@@ -739,7 +559,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                       child: Opacity(
                         opacity: 0.15,
                         child: Icon(
-                          Icons.restaurant_menu,
+                          Icons.local_dessert,
                           size: 180,
                           color: Colors.white,
                         ),
@@ -760,7 +580,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
               ? const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
                 )
-              : _menus.isEmpty
+              : _desserts.isEmpty
                   ? SliverFillRemaining(
                       child: Center(
                         child: Column(
@@ -772,28 +592,28 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    Colors.blue.shade300.withOpacity(0.2),
-                                    Colors.indigo.shade400.withOpacity(0.1),
+                                    Colors.pink.shade300.withOpacity(0.2),
+                                    Colors.blue.shade400.withOpacity(0.1),
                                   ],
                                 ),
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.blue.withOpacity(0.1),
+                                    color: Colors.pink.withOpacity(0.1),
                                     blurRadius: 30,
                                     spreadRadius: 10,
                                   ),
                                 ],
                               ),
                               child: Icon(
-                                Icons.restaurant_menu,
+                                Icons.local_dessert,
                                 size: 70,
-                                color: Colors.blue.shade600,
+                                color: Colors.pink.shade600,
                               ),
                             ),
                             const SizedBox(height: 24),
                             Text(
-                              'Aucun menu',
+                              'Aucune dessert',
                               style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -802,7 +622,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 40),
                               child: Text(
-                                'Cliquez sur + pour créer votre premier menu',
+                                'Cliquez sur + pour ajouter votre première dessert',
                                 style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                                       color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                     ),
@@ -818,21 +638,21 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final menu = _menus[index];
-                            return _buildEnhancedMenuCard(context, menu);
+                            final dessert = _desserts[index];
+                            return _buildEnhancedDessertCard(context, dessert);
                           },
-                          childCount: _menus.length,
+                          childCount: _desserts.length,
                         ),
                       ),
                     ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showMenuDialog(),
-        backgroundColor: Colors.indigo.shade600,
+        onPressed: () => _showDessertDialog(),
+        backgroundColor: Colors.blue.shade600,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text(
-          'Nouveau Menu',
+          'Nouvelle Dessert',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w700,
@@ -843,7 +663,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     );
   }
 
-  Widget _buildEnhancedMenuCard(BuildContext context, Product menu) {
+  Widget _buildEnhancedDessertCard(BuildContext context, Product dessert) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -853,12 +673,12 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
           end: Alignment.bottomRight,
           colors: [
             Colors.white,
-            Colors.blue.shade50.withOpacity(0.3),
+            Colors.pink.shade50.withOpacity(0.3),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.15),
+            color: Colors.pink.withOpacity(0.15),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -868,7 +688,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: () => _showMenuDialog(menu: menu),
+          onTap: () => _showDessertDialog(dessert: dessert),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -880,11 +700,11 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     gradient: LinearGradient(
-                      colors: [Colors.blue.shade400, Colors.indigo.shade600],
+                      colors: [Colors.pink.shade400, Colors.blue.shade600],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue.withOpacity(0.3),
+                        color: Colors.pink.withOpacity(0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -895,13 +715,13 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(14),
                       child: Image.network(
-                        menu.imageUrl,
+                        dessert.imageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
                           color: Colors.grey[100],
                           child: Icon(
-                            Icons.restaurant_menu,
-                            color: Colors.blue.shade600,
+                            Icons.local_dessert,
+                            color: Colors.pink.shade600,
                             size: 40,
                           ),
                         ),
@@ -919,14 +739,14 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              menu.name,
+                              dessert.name,
                               style: Theme.of(context).textTheme.titleLarge!.copyWith(
                                     fontWeight: FontWeight.w900,
                                     fontSize: 18,
                                   ),
                             ),
                           ),
-                          if (menu.isFeatured)
+                          if (dessert.isFeatured)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
@@ -939,7 +759,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                   Icon(Icons.star, size: 14, color: Colors.amber.shade700),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'En avant',
+                                    'Mise en avant',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: Colors.amber.shade700,
@@ -953,7 +773,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        menu.description,
+                        dessert.description,
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                               color: Colors.grey[600],
                             ),
@@ -961,72 +781,22 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [Colors.blue.shade400, Colors.indigo.shade600],
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              '${menu.price.toStringAsFixed(2)} €',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 14,
-                              ),
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.pink.shade400, Colors.blue.shade600],
                           ),
-                          const SizedBox(width: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.local_pizza, size: 14, color: Colors.orange.shade700),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${menu.pizzaCount}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.orange.shade700,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${dessert.price.toStringAsFixed(2)} €',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.local_drink, size: 14, color: Colors.blue.shade700),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${menu.drinkCount}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.blue.shade700,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
@@ -1042,7 +812,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                       ),
                       child: IconButton(
                         icon: Icon(Icons.edit, color: Colors.blue.shade700),
-                        onPressed: () => _showMenuDialog(menu: menu),
+                        onPressed: () => _showDessertDialog(dessert: dessert),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -1053,7 +823,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                       ),
                       child: IconButton(
                         icon: Icon(Icons.delete, color: Colors.red.shade700),
-                        onPressed: () => _deleteMenu(menu),
+                        onPressed: () => _deleteDessert(dessert),
                       ),
                     ),
                   ],

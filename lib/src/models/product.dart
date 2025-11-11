@@ -12,6 +12,8 @@ class Product {
   // NOUVEAU: Propriétés spécifiques aux menus
   final int pizzaCount;
   final int drinkCount;
+  // NOUVEAU: Mise en avant du produit
+  final bool isFeatured;
 
   Product({
     required this.id,
@@ -24,6 +26,7 @@ class Product {
     this.baseIngredients = const [], 
     this.pizzaCount = 1, // Par défaut à 1
     this.drinkCount = 0, // Par défaut à 0
+    this.isFeatured = false, // Par défaut non mis en avant
   });
 
   // Méthode pour créer une copie d'un produit avec des modifications
@@ -38,6 +41,7 @@ class Product {
     List<String>? baseIngredients,
     int? pizzaCount,
     int? drinkCount,
+    bool? isFeatured,
   }) {
     return Product(
       id: id ?? this.id,
@@ -50,6 +54,7 @@ class Product {
       baseIngredients: baseIngredients ?? this.baseIngredients,
       pizzaCount: pizzaCount ?? this.pizzaCount,
       drinkCount: drinkCount ?? this.drinkCount,
+      isFeatured: isFeatured ?? this.isFeatured,
     );
   }
 
@@ -66,6 +71,7 @@ class Product {
       'baseIngredients': baseIngredients,
       'pizzaCount': pizzaCount,
       'drinkCount': drinkCount,
+      'isFeatured': isFeatured,
     };
   }
 
@@ -85,6 +91,7 @@ class Product {
           [],
       pizzaCount: json['pizzaCount'] as int? ?? 1,
       drinkCount: json['drinkCount'] as int? ?? 0,
+      isFeatured: json['isFeatured'] as bool? ?? false,
     );
   }
 }

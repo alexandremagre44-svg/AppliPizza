@@ -16,6 +16,9 @@ import 'src/screens/product_detail/product_detail_screen.dart';
 import 'src/screens/admin/admin_dashboard_screen.dart';
 import 'src/screens/admin/admin_pizza_screen.dart';
 import 'src/screens/admin/admin_menu_screen.dart';
+import 'src/screens/admin/admin_drinks_screen.dart';
+import 'src/screens/admin/admin_desserts_screen.dart';
+import 'src/screens/admin/admin_page_builder_screen.dart';
 
 // Importez le composant de barre de navigation
 import 'src/widgets/scaffold_with_nav_bar.dart'; 
@@ -109,6 +112,18 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: AppRoutes.adminMenu,
               builder: (context, state) => const AdminMenuScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.adminDrinks,
+              builder: (context, state) => const AdminDrinksScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.adminDesserts,
+              builder: (context, state) => const AdminDessertsScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.adminPageBuilder,
+              builder: (context, state) => const AdminPageBuilderScreen(),
             ),
           ],
         ),

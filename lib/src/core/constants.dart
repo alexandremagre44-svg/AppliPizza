@@ -11,6 +11,9 @@ class AppRoutes {
   static const String productDetail = '/details';
   static const String adminMenu = '/admin/menu';
   static const String adminPizza = '/admin/pizza';
+  static const String adminDrinks = '/admin/drinks';
+  static const String adminDesserts = '/admin/desserts';
+  static const String adminPageBuilder = '/admin/page-builder';
 }
 
 /// Rôles utilisateurs
@@ -26,6 +29,8 @@ class StorageKeys {
   static const String userRole = 'user_role';
   static const String pizzasList = 'pizzas_list';
   static const String menusList = 'menus_list';
+  static const String drinksList = 'drinks_list';
+  static const String dessertsList = 'desserts_list';
 }
 
 /// Constantes visuelles
