@@ -1,138 +1,172 @@
 // lib/src/theme/app_theme.dart
+// Pizza Deli'Zza Visual Identity - Refonte complète
 
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Brand Colors - Modern Pizza Restaurant Palette
-  static const Color primaryRed = Color(0xFFE63946);        // Vibrant red
-  static const Color primaryRedDark = Color(0xFFD62828);    // Deeper red
-  static const Color secondaryAmber = Color(0xFFF77F00);    // Warm orange
-  static const Color accentOrange = Color(0xFFFFB703);      // Golden yellow
-  static const Color accentGreen = Color(0xFF06A77D);       // Fresh green
+  // === Pizza Deli'Zza Brand Colors ===
+  // Palette principale inspirée du style Pizza Hut premium
+  static const Color primaryRed = Color(0xFFC62828);        // Rouge principal Pizza Deli'Zza
+  static const Color primaryRedLight = Color(0xFFEF5350);   // Rouge clair pour hover/accents
+  static const Color primaryRedDark = Color(0xFF8E0000);    // Rouge foncé pour ombres
   
-  // Neutral Colors - Warmer tones
-  static const Color backgroundLight = Color(0xFFFFFBF5);   // Warm white
-  static const Color backgroundCream = Color(0xFFFFF8E7);   // Cream
-  static const Color surfaceWhite = Color(0xFFFFFFFF);
-  static const Color textDark = Color(0xFF1D2D3D);          // Navy dark
-  static const Color textMedium = Color(0xFF5A6C7D);        // Muted blue-gray
-  static const Color textLight = Color(0xFF8B9DAF);         // Light gray-blue
+  // Couleurs neutres
+  static const Color surfaceWhite = Color(0xFFFFFFFF);      // Blanc pur
+  static const Color backgroundLight = Color(0xFFF5F5F5);   // Gris très clair
+  static const Color textDark = Color(0xFF222222);          // Noir doux
+  static const Color textMedium = Color(0xFF666666);        // Gris moyen
+  static const Color textLight = Color(0xFF999999);         // Gris clair
+  
+  // Couleurs d'accentuation (utilisées avec parcimonie)
+  static const Color accentGold = Color(0xFFFFB300);        // Or/jaune pour badges premium
   
   // Status Colors
-  static const Color successGreen = Color(0xFF06A77D);
-  static const Color errorRed = Color(0xFFDC2626);
-  static const Color warningOrange = Color(0xFFF59E0B);
-  static const Color infoBlue = Color(0xFF3B82F6);
+  static const Color successGreen = Color(0xFF4CAF50);
+  static const Color errorRed = Color(0xFFD32F2F);
+  static const Color warningOrange = Color(0xFFFF9800);
+  static const Color infoBlue = Color(0xFF2196F3);
 
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       
-      // Color Scheme
+      // === Color Scheme Pizza Deli'Zza ===
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryRed,
         primary: primaryRed,
-        secondary: secondaryAmber,
-        tertiary: accentOrange,
+        secondary: primaryRedLight,
+        tertiary: accentGold,
         surface: surfaceWhite,
+        background: backgroundLight,
         error: errorRed,
         brightness: Brightness.light,
       ),
       
       scaffoldBackgroundColor: backgroundLight,
       
-      // AppBar Theme
+      // === AppBar Theme - Fixed Red Header ===
+      // En-tête rouge fixe avec logo centré pour client
+      // En-tête rouge avec logo et bouton déconnexion pour admin
       appBarTheme: const AppBarTheme(
-        centerTitle: false,
+        centerTitle: true,
         elevation: 0,
-        scrolledUnderElevation: 2,
-        backgroundColor: surfaceWhite,
-        foregroundColor: textDark,
+        scrolledUnderElevation: 0,
+        backgroundColor: primaryRed,
+        foregroundColor: surfaceWhite,
         titleTextStyle: TextStyle(
-          fontSize: 22,
+          fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: textDark,
+          color: surfaceWhite,
           letterSpacing: 0.5,
+          fontFamily: 'Poppins',
         ),
         iconTheme: IconThemeData(
-          color: textDark,
+          color: surfaceWhite,
           size: 24,
         ),
       ),
       
-      // Card Theme - Enhanced with better shadows
+      // === Card Theme - Cartes produits arrondies ===
+      // Cartes avec ombres douces et coins arrondis
       cardTheme: CardThemeData(
-        elevation: 3,
-        shadowColor: Colors.black.withOpacity(0.08),
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.1),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
         ),
         clipBehavior: Clip.antiAlias,
         color: surfaceWhite,
       ),
       
-      // Elevated Button Theme - Modern with gradient effect
+      // === Button Themes - Boutons arrondis rouges ===
+      // Bouton principal rouge avec coins arrondis
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryRed,
-          foregroundColor: Colors.white,
-          elevation: 4,
-          shadowColor: primaryRed.withOpacity(0.4),
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          foregroundColor: surfaceWhite,
+          elevation: 2,
+          shadowColor: primaryRed.withOpacity(0.3),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
           textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.3,
+            fontFamily: 'Poppins',
           ),
         ),
       ),
       
-      // Text Button Theme
+      // Bouton secondaire transparent
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primaryRed,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.3,
+            fontFamily: 'Poppins',
           ),
         ),
       ),
       
-      // Bottom Navigation Bar Theme - Enhanced
+      // Bouton avec bordure rouge
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: primaryRed,
+          side: const BorderSide(color: primaryRed, width: 1.5),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.3,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ),
+      
+      // === Bottom Navigation Bar - Non utilisé pour le fixed cart bar ===
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: surfaceWhite,
         selectedItemColor: primaryRed,
         unselectedItemColor: textLight,
         selectedLabelStyle: TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          fontSize: 11,
+          fontFamily: 'Poppins',
         ),
         unselectedLabelStyle: TextStyle(
           fontWeight: FontWeight.w500,
           fontSize: 11,
+          fontFamily: 'Poppins',
         ),
-        elevation: 12,
+        elevation: 8,
         type: BottomNavigationBarType.fixed,
         showUnselectedLabels: true,
       ),
       
-      // Input Decoration Theme
+      // === Input Decoration Theme - Champs de formulaire ===
+      // Champs arrondis avec label au-dessus
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surfaceWhite,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -142,73 +176,132 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: errorRed),
         ),
+        labelStyle: const TextStyle(
+          color: textMedium,
+          fontSize: 14,
+          fontFamily: 'Poppins',
+        ),
+        floatingLabelStyle: const TextStyle(
+          color: primaryRed,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Poppins',
+        ),
       ),
       
-      // Snackbar Theme
+      // === Snackbar / Alertes - Fond rouge clair + texte blanc ===
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: textDark,
+        backgroundColor: primaryRed,
         contentTextStyle: const TextStyle(
-          color: Colors.white,
+          color: surfaceWhite,
           fontSize: 14,
+          fontWeight: FontWeight.w500,
+          fontFamily: 'Poppins',
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
         behavior: SnackBarBehavior.floating,
+        elevation: 3,
       ),
       
-      // Typography
+      // === Typography - Police Poppins (ou Nunito) ===
+      // Hiérarchie typographique claire avec Poppins
       textTheme: const TextTheme(
+        // Grands titres
         displayLarge: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: textDark,
-          letterSpacing: 0.5,
+          letterSpacing: -0.5,
+          fontFamily: 'Poppins',
+        ),
+        displayMedium: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: textDark,
+          letterSpacing: -0.3,
+          fontFamily: 'Poppins',
+        ),
+        // Titres de section
+        headlineLarge: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: textDark,
+          fontFamily: 'Poppins',
         ),
         headlineMedium: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: textDark,
+          fontFamily: 'Poppins',
         ),
         headlineSmall: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: textDark,
+          fontFamily: 'Poppins',
         ),
+        // Titres de cartes
         titleLarge: TextStyle(
-          fontSize: 18,
+          fontSize: 17,
           fontWeight: FontWeight.w600,
           color: textDark,
+          fontFamily: 'Poppins',
         ),
         titleMedium: TextStyle(
-          fontSize: 16,
+          fontSize: 15,
           fontWeight: FontWeight.w600,
           color: textDark,
+          fontFamily: 'Poppins',
         ),
         titleSmall: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: textDark,
+          fontFamily: 'Poppins',
         ),
+        // Corps de texte
         bodyLarge: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.normal,
           color: textDark,
           height: 1.5,
+          fontFamily: 'Poppins',
         ),
         bodyMedium: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.normal,
           color: textMedium,
           height: 1.5,
+          fontFamily: 'Poppins',
         ),
         bodySmall: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.normal,
           color: textLight,
           height: 1.4,
+          fontFamily: 'Poppins',
+        ),
+        // Labels
+        labelLarge: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: textDark,
+          letterSpacing: 0.3,
+          fontFamily: 'Poppins',
+        ),
+        labelMedium: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: textMedium,
+          letterSpacing: 0.3,
+          fontFamily: 'Poppins',
         ),
       ),
+      
+      // Famille de police par défaut
+      fontFamily: 'Poppins',
     );
   }
 }

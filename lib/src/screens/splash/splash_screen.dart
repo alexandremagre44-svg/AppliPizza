@@ -59,15 +59,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
+          // Gradient Pizza Deli'Zza
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFE63946),
-              Color(0xFFD62828),
-              Color(0xFFF77F00),
+              Color(0xFFC62828), // primaryRed
+              Color(0xFF8E0000), // primaryRedDark
             ],
-            stops: [0.0, 0.5, 1.0],
           ),
         ),
         child: Center(
@@ -96,22 +95,23 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: const Icon(
                       Icons.local_pizza,
                       size: 90,
-                      color: Color(0xFFE63946),
+                      color: Color(0xFFC62828),
                     ),
                   ),
                   const SizedBox(height: 40),
                   // App Name with shadow
-                  Text(
+                  const Text(
                     'Pizza Deli\'Zza',
                     style: TextStyle(
                       fontSize: 42,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
                       letterSpacing: 2.0,
+                      fontFamily: 'Poppins',
                       shadows: [
                         Shadow(
-                          color: Colors.black.withOpacity(0.3),
-                          offset: const Offset(0, 4),
+                          color: Colors.black38,
+                          offset: Offset(0, 4),
                           blurRadius: 8,
                         ),
                       ],
@@ -119,13 +119,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Authentic Italian Pizza',
+                    'À emporter uniquement',
                     style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white.withOpacity(0.9),
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.2,
+                      fontSize: 16,
+                      color: Colors.white.withOpacity(0.95),
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                      fontFamily: 'Poppins',
                     ),
                   ),
                   const SizedBox(height: 60),

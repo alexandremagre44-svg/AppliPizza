@@ -1,11 +1,15 @@
-﻿// lib/src/screens/cart/cart_screen.dart
+// lib/src/screens/cart/cart_screen.dart
+// CartScreen redesigné - Style Pizza Deli'Zza
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/cart_provider.dart'; 
-import '../../providers/user_provider.dart'; 
+import '../../providers/user_provider.dart';
+import '../../theme/app_theme.dart';
 
+/// Écran du panier - Redesign Pizza Deli'Zza
+/// Style cohérent avec le reste de l'application
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
 
@@ -17,6 +21,9 @@ class CartScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mon Panier'),
+        centerTitle: true,
+        backgroundColor: AppTheme.primaryRed,
+        foregroundColor: AppTheme.surfaceWhite,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/home'), 
@@ -50,54 +57,48 @@ class CartScreen extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 160,
-              height: 160,
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-                  ],
-                ),
+                color: AppTheme.backgroundLight,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    blurRadius: 20,
-                    spreadRadius: 5,
-                  ),
-                ],
               ),
-              child: Icon(
-                Icons.shopping_cart_outlined,
-                size: 80,
-                color: Theme.of(context).colorScheme.primary,
+              child: const Icon(
+                Icons.shopping_bag_outlined,
+                size: 70,
+                color: AppTheme.textLight,
               ),
             ),
             const SizedBox(height: 32),
-            Text(
+            const Text(
               'Votre panier est vide',
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textDark,
+                fontFamily: 'Poppins',
+              ),
             ),
             const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40),
               child: Text(
                 'Ajoutez de délicieuses pizzas pour commencer votre commande',
-                style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                    ),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.textMedium,
+                  fontFamily: 'Poppins',
+                  height: 1.5,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 40),
             SizedBox(
-              height: 56,
+              height: 50,
               child: ElevatedButton.icon(
-                onPressed: () => context.go('/menu'),
-                icon: const Icon(Icons.restaurant_menu, size: 24),
+                onPressed: () => context.go('/home'),
+                icon: const Icon(Icons.local_pizza, size: 22),
                 label: const Text(
                   'Découvrir le menu',
                   style: TextStyle(fontSize: 16),
@@ -110,19 +111,20 @@ class CartScreen extends ConsumerWidget {
     );
   }
   
-  // CORRECTION : Espacement réduit et utilisation de Flexible/Contraintes pour éviter l'overflow
+  /// Carte d'article du panier - Style Pizza Deli'Zza
   Widget _buildCartItemCard(
       BuildContext context, CartItem item, CartNotifier notifier) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8), 
+        padding: const EdgeInsets.all(12), 
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image (70x70)
+            // Image produit
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
@@ -131,31 +133,57 @@ class CartScreen extends ConsumerWidget {
                 height: 70,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
-                    return Container(width: 70, height: 70, color: Colors.grey[200], child: const Icon(Icons.broken_image, size: 30, color: Colors.grey));
+                  return Container(
+                    width: 70,
+                    height: 70,
+                    color: AppTheme.backgroundLight,
+                    child: const Icon(
+                      Icons.local_pizza,
+                      size: 30,
+                      color: AppTheme.textLight,
+                    ),
+                  );
                 },
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
 
-            // Détails du produit (Expanded pour corriger l'overflow)
+            // Détails du produit
             Expanded( 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     item.productName,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: AppTheme.textDark,
+                      fontFamily: 'Poppins',
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text('${item.price.toStringAsFixed(2)} € / unité', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${item.price.toStringAsFixed(2)} € / unité',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textMedium,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
                   
                   if (item.customDescription != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0),
                       child: Text(
                         item.customDescription!,
-                        style: const TextStyle(fontSize: 13, color: Colors.black87),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textMedium,
+                          fontFamily: 'Poppins',
+                        ),
                         maxLines: 2, 
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -167,24 +195,43 @@ class CartScreen extends ConsumerWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline, size: 24),
-                        color: Colors.grey,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 24, minHeight: 24), 
-                        onPressed: () => notifier.decrementQuantity(item.id),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppTheme.backgroundLight,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.remove, size: 18),
+                          color: AppTheme.primaryRed,
+                          padding: const EdgeInsets.all(4),
+                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32), 
+                          onPressed: () => notifier.decrementQuantity(item.id),
+                        ),
                       ),
-                      // CORRECTION APPLIQUÉE ICI : RETRAIT DU 'const' sur Padding
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Text('${item.quantity}', style: const TextStyle(fontSize: 16)),
+                        child: Text(
+                          '${item.quantity}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textDark,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.add_circle_outline, size: 24),
-                        color: Colors.grey,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-                        onPressed: () => notifier.incrementQuantity(item.id),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryRed,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.add, size: 18),
+                          color: AppTheme.surfaceWhite,
+                          padding: const EdgeInsets.all(4),
+                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                          onPressed: () => notifier.incrementQuantity(item.id),
+                        ),
                       ),
                     ],
                   ),
@@ -194,29 +241,29 @@ class CartScreen extends ConsumerWidget {
 
             const SizedBox(width: 8),
             
-            // Prix et Supprimer (Flexible pour éviter le débordement)
-            Flexible( 
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${item.total.toStringAsFixed(2)} €',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(color: const Color(0xFFB00020), fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.right,
+            // Prix et supprimer
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '${item.total.toStringAsFixed(2)} €',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryRed,
+                    fontFamily: 'Poppins',
                   ),
-                  const SizedBox(height: 4),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, size: 24),
-                    color: Colors.red,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 24, minHeight: 24), 
-                    onPressed: () => notifier.removeItem(item.id),
-                  ),
-                ],
-              ),
+                  textAlign: TextAlign.right,
+                ),
+                const SizedBox(height: 4),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, size: 22),
+                  color: AppTheme.errorRed,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32), 
+                  onPressed: () => notifier.removeItem(item.id),
+                ),
+              ],
             ),
           ],
         ),
@@ -224,28 +271,32 @@ class CartScreen extends ConsumerWidget {
     );
   }
   
+  /// Résumé du panier - À emporter uniquement (pas de frais de livraison)
   Widget _buildSummary(BuildContext context, WidgetRef ref, double total) {
-    // Dans ce projet, nous allons introduire des frais de livraison fixes pour l'exemple
-    const double deliveryFee = 5.00; 
-    final finalTotal = total + deliveryFee;
-
     void handleOrder() {
       ref.read(userProvider.notifier).addOrder();
-
       context.go('/profile'); 
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Commande passée avec succès !'),
-          backgroundColor: Color(0xFFB00020),
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: AppTheme.surfaceWhite),
+              SizedBox(width: 12),
+              Text('Commande à emporter confirmée !'),
+            ],
+          ),
+          backgroundColor: AppTheme.primaryRed,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
     
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surfaceWhite,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -255,66 +306,110 @@ class CartScreen extends ConsumerWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Sous-total',
-                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Info: À emporter uniquement
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.backgroundLight,
+                borderRadius: BorderRadius.circular(8),
               ),
-              Text(
-                '${total.toStringAsFixed(2)} €',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Frais de livraison',
-                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-              ),
-              Text(
-                '${deliveryFee.toStringAsFixed(2)} €',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const Divider(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Total à payer',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                '${finalTotal.toStringAsFixed(2)} €',
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: const Color(0xFFB00020),
-                      fontWeight: FontWeight.bold,
+              child: const Row(
+                children: [
+                  Icon(
+                    Icons.shopping_bag,
+                    size: 18,
+                    color: AppTheme.primaryRed,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Commande à emporter',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textDark,
+                      fontFamily: 'Poppins',
                     ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: total > 0 ? () => context.push('/checkout') : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFB00020),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 50),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Continuer vers le paiement', style: TextStyle(fontSize: 18)),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Sous-total',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: AppTheme.textMedium,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                Text(
+                  '${total.toStringAsFixed(2)} €',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textDark,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total à payer',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textDark,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                Text(
+                  '${total.toStringAsFixed(2)} €',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryRed,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: total > 0 ? () => context.push('/checkout') : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryRed,
+                  foregroundColor: AppTheme.surfaceWhite,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Valider ma commande',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

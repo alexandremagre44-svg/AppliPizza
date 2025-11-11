@@ -1,346 +1,218 @@
 // lib/src/widgets/product_card.dart
-// Carte produit optimisée sans overflow - P1, P2, P3, P4
+// Carte produit redesignée - Style Pizza Deli'Zza
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../models/product.dart';
-import '../core/constants.dart';
+import '../theme/app_theme.dart';
 
+/// Carte produit avec le nouveau design Pizza Deli'Zza
+/// - Cartes arrondies avec photo, nom, description courte, prix
+/// - Badge "Personnaliser" rouge en haut à droite pour pizzas/menus
+/// - Badge quantité si dans le panier
+/// - Effet shadow et hover subtil
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onAddToCart;
+  final int? cartQuantity; // Quantité dans le panier (optionnel)
 
   const ProductCard({
     super.key,
     required this.product,
     required this.onAddToCart,
+    this.cartQuantity,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
-      shadowColor: Colors.black.withOpacity(0.15),
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.1),
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
         onTap: onAddToCart,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                Colors.grey.shade50,
-              ],
-            ),
+          decoration: const BoxDecoration(
+            color: AppTheme.surfaceWhite,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              // Image du produit avec badge - Hauteur fixe pour cohérence
+              // Image du produit avec badges - Hauteur fixe
               SizedBox(
                 height: 120,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Image avec gestion robuste des erreurs
+                    // Image
                     ClipRRect(
                       borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(20),
+                        top: Radius.circular(16),
                       ),
                       child: Image.network(
                         product.imageUrl,
                         fit: BoxFit.cover,
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
-                          // Placeholder pendant le chargement
                           return Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [Colors.grey[200]!, Colors.grey[300]!],
-                              ),
-                            ),
-                            child: Center(
+                            color: AppTheme.backgroundLight,
+                            child: const Center(
                               child: SizedBox(
-                                width: 28,
-                                height: 28,
+                                width: 24,
+                                height: 24,
                                 child: CircularProgressIndicator(
-                                  strokeWidth: 3,
-                                  color: Theme.of(context).colorScheme.primary,
+                                  strokeWidth: 2.5,
+                                  color: AppTheme.primaryRed,
                                 ),
                               ),
                             ),
                           );
                         },
                         errorBuilder: (context, error, stackTrace) {
-                          // Placeholder en cas d'erreur
                           return Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [Colors.grey[200]!, Colors.grey[300]!],
-                              ),
-                            ),
-                            child: Center(
+                            color: AppTheme.backgroundLight,
+                            child: const Center(
                               child: Icon(
                                 Icons.local_pizza,
-                                size: 52,
-                                color: Colors.grey[400],
+                                size: 48,
+                                color: AppTheme.textLight,
                               ),
                             ),
                           );
                         },
                       ),
                     ),
-                    // Badge MENU - Enhanced design
-                    if (product.isMenu)
+                    // Badge "Personnaliser" pour pizzas/menus
+                    if (product.category == 'Pizza' || product.isMenu)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryRed,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            'Personnaliser',
+                            style: TextStyle(
+                              color: AppTheme.surfaceWhite,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Badge quantité si dans le panier
+                    if (cartQuantity != null && cartQuantity! > 0)
                       Positioned(
                         top: 8,
                         left: 8,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
+                            horizontal: 8,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Theme.of(context).colorScheme.secondary,
-                                Theme.of(context).colorScheme.secondary.withOpacity(0.8),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
+                            color: AppTheme.accentGold,
+                            borderRadius: BorderRadius.circular(8),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.25),
-                                blurRadius: 6,
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
                             ],
                           ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.restaurant_menu,
-                                size: 12,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                'MENU',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    // Badge VEDETTE - Featured product badge
-                    if (product.isFeatured && !product.isMenu)
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.amber.shade400,
-                                Colors.amber.shade600,
-                              ],
+                          child: Text(
+                            'x$cartQuantity',
+                            style: const TextStyle(
+                              color: AppTheme.textDark,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
                             ),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.amber.withOpacity(0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.star,
-                                size: 12,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                'VEDETTE',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    // Badge VEDETTE for menus - positioned differently
-                    if (product.isFeatured && product.isMenu)
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.amber.shade400,
-                                Colors.amber.shade600,
-                              ],
-                            ),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.amber.withOpacity(0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.star,
-                            size: 14,
-                            color: Colors.white,
                           ),
                         ),
                       ),
                   ],
                 ),
               ),
-
-              // Contenu texte - Enhanced design
+              // Contenu texte
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       // Nom du produit - 2 lignes max
                       Text(
                         product.name,
-                        style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 14,
-                              height: 1.2,
-                            ),
-                        maxLines: VisualConstants.maxLinesTitle,
+                        style: const TextStyle(
+                          color: AppTheme.textDark,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins',
+                          height: 1.2,
+                        ),
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-
-                      // Description
+                      // Description courte
                       Expanded(
                         child: Text(
                           product.description,
-                          style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                color: Colors.grey[600],
-                                fontSize: 11,
-                                height: 1.3,
-                              ),
-                          maxLines: 1,
+                          style: const TextStyle(
+                            color: AppTheme.textMedium,
+                            fontSize: 11,
+                            fontFamily: 'Poppins',
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-
                       const SizedBox(height: 8),
-
-                      // Prix et bouton panier - Enhanced design
+                      // Prix
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Prix avec style amélioré
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Theme.of(context).colorScheme.primary.withOpacity(0.15),
-                                    Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: Text(
-                                '${product.price.toStringAsFixed(2)} €',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleSmall!
-                                    .copyWith(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 14,
-                                    ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
+                          Text(
+                            '${product.price.toStringAsFixed(2)} €',
+                            style: const TextStyle(
+                              color: AppTheme.primaryRed,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins',
                             ),
                           ),
-
-                          const SizedBox(width: 6),
-
-                          // Bouton Ajouter - Enhanced
+                          // Icône panier
                           Container(
+                            padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Theme.of(context).colorScheme.secondary,
-                                  Theme.of(context).colorScheme.secondary.withOpacity(0.8),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
+                              color: AppTheme.primaryRed,
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Material(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
-                              child: InkWell(
-                                onTap: onAddToCart,
-                                borderRadius: BorderRadius.circular(12),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: Icon(
-                                    Icons.add_shopping_cart,
-                                    size: 20,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
+                            child: const Icon(
+                              Icons.add_shopping_cart,
+                              size: 18,
+                              color: AppTheme.surfaceWhite,
                             ),
                           ),
                         ],
