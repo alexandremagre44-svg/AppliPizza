@@ -9,6 +9,7 @@ import '../../providers/product_provider.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/product_detail_modal.dart';
 import '../menu/menu_customization_modal.dart';
+import 'pizza_customization_modal.dart';
 import '../../core/constants.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -81,31 +82,7 @@ class HomeScreen extends ConsumerWidget {
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
-          builder: (context) => ProductDetailModal(
-            product: product,
-            onAddToCart: (customDescription) {
-              cartNotifier.addItem(product, customDescription: customDescription);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(Icons.check_circle, color: Colors.white),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text('${product.name} ajouté au panier !'),
-                      ),
-                    ],
-                  ),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  margin: const EdgeInsets.all(16),
-                ),
-              );
-            },
-          ),
+          builder: (context) => PizzaCustomizationModal(pizza: product),
         );
       }
       // Pour les autres produits, ajout direct
