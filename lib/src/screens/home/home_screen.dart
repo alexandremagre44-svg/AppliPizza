@@ -470,9 +470,9 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   Icon(Icons.star, color: Colors.white, size: 14),
                   SizedBox(width: 4),
                   Text(
