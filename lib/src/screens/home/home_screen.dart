@@ -61,9 +61,23 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildContent(BuildContext context, WidgetRef ref, List<Product> products) {
     // Filtrage des produits pour la page d'accueil
-    final featuredProducts = products.where((p) => p.isFeatured).take(5).toList();
-    final popularPizzas = products.where((p) => p.category == 'Pizza').take(6).toList();
-    final popularMenus = products.where((p) => p.isMenu == true).take(2).toList();
+    // 1. Ne garder que les produits actifs
+    final activeProducts = products.where((p) => p.isActive).toList();
+    
+    // 2. Filtrer par zone d'affichage (displaySpot)
+    final homeProducts = activeProducts.where((p) => 
+      p.displaySpot == 'all' || p.displaySpot == 'home'
+    ).toList();
+    
+    // 3. Produits mis en avant
+    final featuredProducts = homeProducts.where((p) => p.isFeatured).take(5).toList();
+    
+    // 4. Pizzas populaires
+    final popularPizzas = homeProducts.where((p) => p.category == 'Pizza').take(6).toList();
+    
+    // 5. Menus populaires
+    final popularMenus = homeProducts.where((p) => p.isMenu == true).take(2).toList();
+    
     final cartNotifier = ref.read(cartProvider.notifier);
     
     // Fonction d'ajout au panier

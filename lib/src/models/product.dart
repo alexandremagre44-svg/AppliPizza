@@ -14,6 +14,10 @@ class Product {
   final int drinkCount;
   // NOUVEAU: Mise en avant du produit
   final bool isFeatured;
+  // NOUVEAU: Gestion de l'affichage et de l'état
+  final bool isActive; // Produit actif ou inactif
+  final String displaySpot; // Où afficher le produit: 'home', 'promotions', 'new', 'all'
+  final int order; // Ordre d'affichage (priorité numérique)
 
   Product({
     required this.id,
@@ -27,6 +31,9 @@ class Product {
     this.pizzaCount = 1, // Par défaut à 1
     this.drinkCount = 0, // Par défaut à 0
     this.isFeatured = false, // Par défaut non mis en avant
+    this.isActive = true, // Par défaut actif
+    this.displaySpot = 'all', // Par défaut affiché partout
+    this.order = 0, // Par défaut ordre 0
   });
 
   // Méthode pour créer une copie d'un produit avec des modifications
@@ -42,6 +49,9 @@ class Product {
     int? pizzaCount,
     int? drinkCount,
     bool? isFeatured,
+    bool? isActive,
+    String? displaySpot,
+    int? order,
   }) {
     return Product(
       id: id ?? this.id,
@@ -55,6 +65,9 @@ class Product {
       pizzaCount: pizzaCount ?? this.pizzaCount,
       drinkCount: drinkCount ?? this.drinkCount,
       isFeatured: isFeatured ?? this.isFeatured,
+      isActive: isActive ?? this.isActive,
+      displaySpot: displaySpot ?? this.displaySpot,
+      order: order ?? this.order,
     );
   }
 
@@ -72,10 +85,13 @@ class Product {
       'pizzaCount': pizzaCount,
       'drinkCount': drinkCount,
       'isFeatured': isFeatured,
+      'isActive': isActive,
+      'displaySpot': displaySpot,
+      'order': order,
     };
   }
 
-  // Création depuis JSON
+  // Création depuis JSON (avec compatibilité pour anciens produits)
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'] as String,
@@ -92,6 +108,10 @@ class Product {
       pizzaCount: json['pizzaCount'] as int? ?? 1,
       drinkCount: json['drinkCount'] as int? ?? 0,
       isFeatured: json['isFeatured'] as bool? ?? false,
+      // Nouveaux champs avec valeurs par défaut pour rétrocompatibilité
+      isActive: json['isActive'] as bool? ?? true,
+      displaySpot: json['displaySpot'] as String? ?? 'all',
+      order: json['order'] as int? ?? 0,
     );
   }
 }
