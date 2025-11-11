@@ -108,20 +108,107 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
   }
 
   Widget _buildSelectionTile(String title, Product? selected, VoidCallback onTap) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: ListTile(
-        leading: Icon(
-          selected != null ? Icons.check_circle : Icons.add_circle_outline,
-          color: selected != null ? Theme.of(context).colorScheme.primary : Colors.grey,
+    final isSelected = selected != null;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        gradient: isSelected
+            ? LinearGradient(
+                colors: [
+                  Colors.blue.shade50,
+                  Colors.indigo.shade50.withOpacity(0.3),
+                ],
+              )
+            : null,
+        color: isSelected ? null : Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
+          width: isSelected ? 2.5 : 1.5,
         ),
-        title: Text(title),
-        subtitle: Text(selected?.name ?? 'Cliquez pour sélectionner',
-            style: TextStyle(
-                color: selected != null ? Colors.black : Colors.red)),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: onTap,
+        boxShadow: [
+          if (isSelected)
+            BoxShadow(
+              color: Colors.blue.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 4),
+            )
+          else
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: isSelected
+                        ? LinearGradient(
+                            colors: [Colors.blue.shade400, Colors.indigo.shade600],
+                          )
+                        : null,
+                    color: isSelected ? null : Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      if (isSelected)
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                    ],
+                  ),
+                  child: Icon(
+                    isSelected ? Icons.check_circle : Icons.add_circle_outline,
+                    color: isSelected ? Colors.white : Colors.grey.shade600,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        selected?.name ?? 'Cliquez pour sélectionner',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected ? Colors.blue.shade700 : Colors.red.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 18,
+                  color: isSelected ? Colors.blue.shade600 : Colors.grey.shade400,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -206,22 +293,68 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
           ),
           child: Column(
             children: [
-              // Poignée de glissement et titre
+              // Poignée de glissement et titre avec gradient
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
                   children: [
                     Container(
-                      height: 4,
-                      width: 40,
+                      height: 5,
+                      width: 50,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        gradient: LinearGradient(
+                          colors: [Colors.blue.shade400, Colors.indigo.shade600],
+                        ),
                         borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Text('Personnalisation du ${widget.menu.name}', 
-                      style: Theme.of(context).textTheme.headlineSmall),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.blue.shade50,
+                            Colors.indigo.shade50.withOpacity(0.3),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.blue.shade200,
+                          width: 2,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.restaurant_menu,
+                            color: Colors.blue.shade700,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Text(
+                              'PERSONNALISATION DU ${widget.menu.name.toUpperCase()}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.blue.shade800,
+                                letterSpacing: 0.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -231,13 +364,61 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
                   controller: controller,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    const Divider(),
+                    const SizedBox(height: 8),
                     // --- Sélections de Pizzas ---
                     if (widget.menu.pizzaCount > 0)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                        child: Text('Sélectionnez vos Pizzas (${widget.menu.pizzaCount} requises)', 
-                            style: Theme.of(context).textTheme.titleLarge),
+                      Container(
+                        margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.orange.shade50,
+                              Colors.deepOrange.shade50.withOpacity(0.3),
+                            ],
+                          ),
+                          border: Border.all(
+                            color: Colors.orange.shade300,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.orange.withOpacity(0.4),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.local_pizza,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Sélectionnez vos Pizzas (${widget.menu.pizzaCount} requises)',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.orange.shade900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ...List.generate(widget.menu.pizzaCount, (index) {
                       return _buildSelectionTile(
@@ -254,10 +435,58 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
 
                     // --- Sélections de Boissons ---
                     if (widget.menu.drinkCount > 0)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-                        child: Text('Sélectionnez vos Boissons (${widget.menu.drinkCount} requises)', 
-                            style: Theme.of(context).textTheme.titleLarge),
+                      Container(
+                        margin: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.cyan.shade50,
+                              Colors.blue.shade50.withOpacity(0.3),
+                            ],
+                          ),
+                          border: Border.all(
+                            color: Colors.cyan.shade300,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Colors.cyan.shade400, Colors.blue.shade600],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.cyan.withOpacity(0.4),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.local_drink,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Sélectionnez vos Boissons (${widget.menu.drinkCount} requises)',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.blue.shade900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ...List.generate(widget.menu.drinkCount, (index) {
                       return _buildSelectionTile(
@@ -280,24 +509,88 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withOpacity(0.95),
+                      Colors.white,
+                    ],
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 20,
                       offset: const Offset(0, -5),
                     ),
                   ],
                 ),
-                child: ElevatedButton(
-                  onPressed: _isSelectionComplete ? _addToCart : null,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50),
-                    backgroundColor: _isSelectionComplete ? Theme.of(context).colorScheme.primary : Colors.grey,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: _isSelectionComplete
+                        ? LinearGradient(
+                            colors: [Colors.blue.shade400, Colors.indigo.shade600],
+                          )
+                        : null,
+                    color: _isSelectionComplete ? null : Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: _isSelectionComplete
+                        ? [
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.5),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ]
+                        : null,
                   ),
-                  child: Text(
-                    'Ajouter au Panier (${widget.menu.price.toStringAsFixed(2)} €)',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  child: ElevatedButton(
+                    onPressed: _isSelectionComplete ? _addToCart : null,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(58),
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.shopping_cart,
+                          size: 24,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'AJOUTER AU PANIER',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.25),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${widget.menu.price.toStringAsFixed(2)} €',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -324,31 +617,212 @@ class _SelectionOptionsModal extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white,
+            Colors.grey.shade50,
+          ],
+        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(title, style: Theme.of(context).textTheme.headlineSmall),
+          // Handle bar
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            height: 5,
+            width: 50,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue.shade400, Colors.indigo.shade600],
+              ),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue.withOpacity(0.4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
           ),
+          // Title
+          Container(
+            margin: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue.shade400, Colors.indigo.shade600],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.shopping_basket, color: Colors.white, size: 24),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Product list
           Expanded(
             child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: options.length,
               itemBuilder: (context, index) {
                 final option = options[index];
-                return ListTile(
-                  leading: option.imageUrl.isNotEmpty
-                      ? Image.network(option.imageUrl, width: 40, height: 40, fit: BoxFit.cover)
-                      : null,
-                  title: Text(option.name),
-                  subtitle: Text('${option.description.substring(0, option.description.length > 50 ? 50 : option.description.length)}${option.description.length > 50 ? '...' : ''}'),
-                  trailing: Text('${option.price.toStringAsFixed(2)} €'),
-                  onTap: () {
-                    // Retourne le produit sélectionné
-                    Navigator.of(context).pop(option); 
-                  },
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.white,
+                        Colors.blue.shade50.withOpacity(0.2),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.blue.shade200,
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => Navigator.of(context).pop(option),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Row(
+                          children: [
+                            if (option.imageUrl.isNotEmpty)
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.blue.shade300,
+                                    width: 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.blue.withOpacity(0.2),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.network(
+                                    option.imageUrl,
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 60,
+                                        height: 60,
+                                        color: Colors.grey.shade200,
+                                        child: Icon(Icons.image_not_supported, color: Colors.grey.shade400),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    option.name,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    option.description.length > 50
+                                        ? '${option.description.substring(0, 50)}...'
+                                        : option.description,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Colors.blue.shade400, Colors.indigo.shade600],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blue.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                '${option.price.toStringAsFixed(2)} €',
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 );
               },
             ),
