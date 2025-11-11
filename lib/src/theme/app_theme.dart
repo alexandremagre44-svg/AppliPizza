@@ -12,7 +12,7 @@ class AppTheme {
   
   // Couleurs neutres
   static const Color surfaceWhite = Color(0xFFFFFFFF);      // Blanc pur
-  static const Color backgroundLight = Color(0xFFF5F5F5);   // Gris très clair
+  static const Color backgroundLight = Color(0xFAFAFA);     // Gris très clair (#FAFAFA pour meilleur contraste)
   static const Color textDark = Color(0xFF222222);          // Noir doux
   static const Color textMedium = Color(0xFF666666);        // Gris moyen
   static const Color textLight = Color(0xFF999999);         // Gris clair

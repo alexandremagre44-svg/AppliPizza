@@ -130,14 +130,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           builder: (context) => ElegantPizzaCustomizationModal(pizza: product),
         );
       }
-      // Pour les autres produits, ajout direct
+      // Pour les autres produits, ajout direct avec animation et toast
       else {
         cartNotifier.addItem(product);
+        // Micro-animation: SnackBar stylé avec emoji pizza
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.check_circle, color: AppTheme.surfaceWhite),
+                const Text('🍕', style: TextStyle(fontSize: 20)),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text('${product.name} ajouté au panier !'),
@@ -147,6 +148,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             backgroundColor: AppTheme.primaryRed,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -204,35 +208,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 
                 const SliverToBoxAdapter(child: SizedBox(height: 20)),
                 
-                // En-tête de section avec bouton filtres
+                // En-tête de section centré et bold avec bouton filtres
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
+                        // Titre centré et bold
                         Text(
                           _getCategoryTitle(_selectedCategory),
+                          textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 20,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.textDark,
                             fontFamily: 'Poppins',
                           ),
                         ),
-                        OutlinedButton.icon(
-                          onPressed: () {
-                            _showFiltersModal(context);
-                          },
-                          icon: const Icon(
-                            Icons.tune,
-                            size: 18,
-                          ),
-                          label: const Text('Filtres'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                        const SizedBox(height: 12),
+                        // Bouton filtres centré en dessous
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              _showFiltersModal(context);
+                            },
+                            icon: const Icon(
+                              Icons.tune,
+                              size: 18,
+                            ),
+                            label: const Text('Filtres'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
                             ),
                           ),
                         ),
@@ -287,10 +297,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             orElse: () => null,
                           );
                           
-                          return ProductCard(
-                            product: product,
-                            onAddToCart: () => handleAddToCart(product),
-                            cartQuantity: cartItem?.quantity,
+                          // Micro-animation: Apparition séquentielle avec FadeInUp (100ms d'intervalle)
+                          return TweenAnimationBuilder<double>(
+                            duration: Duration(milliseconds: 300 + (index * 100)),
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            curve: Curves.easeOut,
+                            builder: (context, value, child) {
+                              return Opacity(
+                                opacity: value,
+                                child: Transform.translate(
+                                  offset: Offset(0, 20 * (1 - value)),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: ProductCard(
+                              product: product,
+                              onAddToCart: () => handleAddToCart(product),
+                              cartQuantity: cartItem?.quantity,
+                            ),
                           );
                         },
                         childCount: filteredProducts.length,
@@ -319,15 +344,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
   
   /// Construit l'AppBar fixe rouge avec logo centré
+  /// Hauteur réduite pour gagner de l'espace
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
+      toolbarHeight: 60, // Hauteur réduite
       title: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
             'Pizza Deli\'Zza',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18, // Taille réduite
               fontWeight: FontWeight.bold,
               color: AppTheme.surfaceWhite,
               fontFamily: 'Poppins',
@@ -336,9 +363,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Text(
             'À emporter uniquement',
             style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.surfaceWhite.withOpacity(0.9),
+              fontSize: 10, // Taille réduite et gris clair
+              fontWeight: FontWeight.w400,
+              color: AppTheme.surfaceWhite.withOpacity(0.7),
               fontFamily: 'Poppins',
             ),
           ),
@@ -382,11 +409,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
   
-  /// Affiche la modal de filtres
+  /// Affiche la modal de filtres avec animation d'entrée
   void _showFiltersModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      // Micro-animation: Entrée fluide de la modal
+      transitionAnimationController: AnimationController(
+        duration: const Duration(milliseconds: 300),
+        vsync: Navigator.of(context),
+      ),
       builder: (context) => Container(
         decoration: const BoxDecoration(
           color: AppTheme.surfaceWhite,

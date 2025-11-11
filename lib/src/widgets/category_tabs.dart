@@ -69,6 +69,16 @@ class CategoryTabs extends StatelessWidget {
               width: 1.5,
             ),
             borderRadius: BorderRadius.circular(20),
+            // Ombre légère pour détacher le pill rouge actif
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppTheme.primaryRed.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Center(
             child: Text(
