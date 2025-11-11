@@ -85,10 +85,22 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    updatedProduct.isFeatured
-                        ? '${product.name} mis en avant'
-                        : '${product.name} retiré de la mise en avant',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        updatedProduct.isFeatured
+                            ? '${product.name} mis en avant !'
+                            : '${product.name} retiré',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      if (updatedProduct.isFeatured)
+                        const Text(
+                          'Apparaîtra dans "Sélection du Chef" sur l\'accueil',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                    ],
                   ),
                 ),
               ],
@@ -100,6 +112,7 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -236,11 +249,14 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
         if (!a.isFeatured && b.isFeatured) return 1;
         return 0;
       });
+    
+    // Compter les produits mis en avant
+    final featuredCount = sortedProducts.where((p) => p.isFeatured).length;
 
     return ListView(
       padding: const EdgeInsets.all(VisualConstants.paddingMedium),
       children: [
-        // Info card
+        // Info card with counter
         Container(
           padding: const EdgeInsets.all(16),
           margin: const EdgeInsets.only(bottom: 16),
@@ -254,19 +270,50 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: themeColor.withOpacity(0.3)),
           ),
-          child: Row(
+          child: Column(
             children: [
-              Icon(Icons.info_outline, color: themeColor.shade700),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Activez l\'étoile pour mettre un produit en avant sur la page d\'accueil',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: themeColor.shade700,
+              Row(
+                children: [
+                  Icon(Icons.info_outline, color: themeColor.shade700),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Activez l\'étoile pour mettre un produit en avant sur la page d\'accueil',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: themeColor.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (featuredCount > 0) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.amber.shade400, Colors.orange.shade600],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.star, color: Colors.white, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$featuredCount produit${featuredCount > 1 ? 's' : ''} mis en avant',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
