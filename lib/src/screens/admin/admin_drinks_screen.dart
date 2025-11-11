@@ -916,7 +916,30 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                                   ),
                             ),
                           ),
-                          if (drink.isFeatured)
+                          if (!drink.isActive)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.visibility_off, size: 14, color: Colors.grey.shade700),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Inactif',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey.shade700,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          if (drink.isFeatured && drink.isActive)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
@@ -929,7 +952,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                                   Icon(Icons.star, size: 14, color: Colors.amber.shade700),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Mise en avant',
+                                    'En avant',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: Colors.amber.shade700,

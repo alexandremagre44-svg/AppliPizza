@@ -38,10 +38,15 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   }
 
   List<Product> _filterProducts(List<Product> allProducts) {
-    var products = _selectedCategory == 'Tous'
-        ? allProducts
-        : allProducts.where((p) => p.category == _selectedCategory).toList();
+    // 1. Filter only active products
+    var products = allProducts.where((p) => p.isActive).toList();
+    
+    // 2. Filter by category
+    if (_selectedCategory != 'Tous') {
+      products = products.where((p) => p.category == _selectedCategory).toList();
+    }
 
+    // 3. Filter by search query
     if (_searchQuery.isNotEmpty) {
       products = products.where((p) {
         return p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||

@@ -69,13 +69,23 @@ class HomeScreen extends ConsumerWidget {
       p.displaySpot == 'all' || p.displaySpot == 'home'
     ).toList();
     
-    // 3. Produits mis en avant
+    // 3. Produits en promotions
+    final promotionProducts = activeProducts.where((p) => 
+      p.displaySpot == 'promotions'
+    ).take(6).toList();
+    
+    // 4. Nouveautés
+    final newProducts = activeProducts.where((p) => 
+      p.displaySpot == 'new'
+    ).take(6).toList();
+    
+    // 5. Produits mis en avant
     final featuredProducts = homeProducts.where((p) => p.isFeatured).take(5).toList();
     
-    // 4. Pizzas populaires
+    // 6. Pizzas populaires
     final popularPizzas = homeProducts.where((p) => p.category == 'Pizza').take(6).toList();
     
-    // 5. Menus populaires
+    // 7. Menus populaires
     final popularMenus = homeProducts.where((p) => p.isMenu == true).take(2).toList();
     
     final cartNotifier = ref.read(cartProvider.notifier);
@@ -231,6 +241,82 @@ class HomeScreen extends ConsumerWidget {
                           context,
                           product,
                           () => handleAddToCart(product),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          ],
+          
+          // Section Promotions (only if there are promotion products)
+          if (promotionProducts.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: _buildSectionHeader(
+                context,
+                '🔥 Promotions',
+                onSeeAll: () => context.go('/menu'),
+              ),
+            ),
+            
+            // Promotion Products Carousel
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  itemCount: promotionProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = promotionProducts[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 16.0),
+                      child: SizedBox(
+                        width: 200,
+                        child: ProductCard(
+                          product: product,
+                          onAddToCart: () => handleAddToCart(product),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          ],
+          
+          // Section Nouveautés (only if there are new products)
+          if (newProducts.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: _buildSectionHeader(
+                context,
+                '✨ Nouveautés',
+                onSeeAll: () => context.go('/menu'),
+              ),
+            ),
+            
+            // New Products Carousel
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  itemCount: newProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = newProducts[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 16.0),
+                      child: SizedBox(
+                        width: 200,
+                        child: ProductCard(
+                          product: product,
+                          onAddToCart: () => handleAddToCart(product),
                         ),
                       ),
                     );
