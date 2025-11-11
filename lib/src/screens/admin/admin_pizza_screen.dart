@@ -357,6 +357,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
           ),
         ),
       ),
+      ),
     );
 
     if (result == true) {

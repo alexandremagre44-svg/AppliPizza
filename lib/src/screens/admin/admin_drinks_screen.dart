@@ -358,6 +358,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
           ),
         ),
       ),
+      ),
     );
 
     if (result == true) {
