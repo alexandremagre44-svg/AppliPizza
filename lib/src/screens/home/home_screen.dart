@@ -9,7 +9,7 @@ import '../../providers/product_provider.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/product_detail_modal.dart';
 import '../menu/menu_customization_modal.dart';
-import 'pizza_customization_modal.dart';
+import 'elegant_pizza_customization_modal.dart';
 import '../../core/constants.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -76,13 +76,13 @@ class HomeScreen extends ConsumerWidget {
           builder: (context) => MenuCustomizationModal(menu: product),
         );
       } 
-      // Si c'est une pizza, afficher la modal de personnalisation
+      // Si c'est une pizza, afficher la modal de personnalisation élégante
       else if (product.category == 'Pizza') {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
-          builder: (context) => PizzaCustomizationModal(pizza: product),
+          builder: (context) => ElegantPizzaCustomizationModal(pizza: product),
         );
       }
       // Pour les autres produits, ajout direct
