@@ -283,7 +283,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           final product = filteredProducts[index];
                           // Obtenir la quantité dans le panier pour ce produit
                           final cartItem = cart.items.cast<CartItem?>().firstWhere(
-                            (item) => item?.product.id == product.id,
+                            (item) => item?.productId == product.id,
                             orElse: () => null,
                           );
                           
