@@ -123,26 +123,70 @@ class HomeScreen extends ConsumerWidget {
             // Modern App Bar with Search
             _buildAppBar(context),
             
-            // Welcome Section
+            // Welcome Section - Enhanced with card design
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Bienvenue ! 👋',
-                    style: Theme.of(context).textTheme.headlineMedium,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                        Theme.of(context).colorScheme.secondary.withOpacity(0.08),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      width: 1,
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Découvrez nos délicieuses pizzas italiennes',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.waving_hand,
+                              color: Theme.of(context).colorScheme.secondary,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Bienvenue !',
+                                  style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Découvrez nos délicieuses pizzas italiennes',
+                                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                        color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
           
           // Section Header: Pizzas Populaires
           SliverToBoxAdapter(
@@ -220,22 +264,24 @@ class HomeScreen extends ConsumerWidget {
     );
   }
   
-  // Widget pour construire l'AppBar
+  // Widget pour construire l'AppBar avec design amélioré
   SliverAppBar _buildAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 200.0,
+      expandedHeight: 220.0,
       floating: false,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
-        title: const Text(
+        title: Text(
           'Pizza Deli\'Zza',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900,
+            fontSize: 22,
+            letterSpacing: 0.5,
             shadows: [
               Shadow(
-                offset: Offset(0, 1),
-                blurRadius: 3.0,
-                color: Colors.black26,
+                offset: const Offset(0, 2),
+                blurRadius: 8.0,
+                color: Colors.black.withOpacity(0.4),
               ),
             ],
           ),
@@ -243,27 +289,61 @@ class HomeScreen extends ConsumerWidget {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            // Background Image with Gradient
+            // Enhanced Gradient Background
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.secondary,
+                  ],
+                  stops: const [0.4, 1.0],
+                ),
+              ),
+            ),
+            // Decorative Pizza Icons Pattern
+            Positioned(
+              top: 20,
+              right: -30,
+              child: Transform.rotate(
+                angle: 0.3,
+                child: Opacity(
+                  opacity: 0.15,
+                  child: Icon(
+                    Icons.local_pizza,
+                    size: 150,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: -20,
+              left: -20,
+              child: Transform.rotate(
+                angle: -0.2,
+                child: Opacity(
+                  opacity: 0.1,
+                  child: Icon(
+                    Icons.local_pizza,
+                    size: 120,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            // Subtle overlay
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.1),
                   ],
-                ),
-              ),
-            ),
-            // Pizza Icon Pattern
-            Positioned.fill(
-              child: Opacity(
-                opacity: 0.1,
-                child: Icon(
-                  Icons.local_pizza,
-                  size: 200,
-                  color: Colors.white,
                 ),
               ),
             ),
@@ -271,41 +351,98 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {
-            context.go('/menu');
-          },
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.search, size: 24),
+            onPressed: () {
+              context.go('/menu');
+            },
+          ),
         ),
-        IconButton(
-          icon: const Icon(Icons.shopping_cart),
-          onPressed: () => context.go('/cart'),
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.shopping_cart, size: 24),
+            onPressed: () => context.go('/cart'),
+          ),
         ),
         const SizedBox(width: 8),
       ],
     );
   }
   
-  // Widget utilitaire pour l'en-tête de section
+  // Widget utilitaire pour l'en-tête de section - Enhanced
   Widget _buildSectionHeader(
     BuildContext context,
     String title, {
     VoidCallback? onSeeAll,
   }) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 16.0),
+      padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 22,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  height: 4,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).colorScheme.primary,
+                        Theme.of(context).colorScheme.secondary,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ],
+            ),
           ),
           if (onSeeAll != null)
-            TextButton.icon(
-              onPressed: onSeeAll,
-              icon: const Text('Voir tout'),
-              label: const Icon(Icons.arrow_forward, size: 18),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TextButton.icon(
+                onPressed: onSeeAll,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                label: Text(
+                  'Voir tout',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                icon: Icon(
+                  Icons.arrow_forward,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
         ],
       ),
