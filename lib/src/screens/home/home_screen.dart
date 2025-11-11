@@ -61,6 +61,7 @@ class HomeScreen extends ConsumerWidget {
 
   Widget _buildContent(BuildContext context, WidgetRef ref, List<Product> products) {
     // Filtrage des produits pour la page d'accueil
+    final featuredProducts = products.where((p) => p.isFeatured).take(5).toList();
     final popularPizzas = products.where((p) => p.category == 'Pizza').take(6).toList();
     final popularMenus = products.where((p) => p.isMenu == true).take(2).toList();
     final cartNotifier = ref.read(cartProvider.notifier);
@@ -187,6 +188,45 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
+          
+          // Section Featured Products (only if there are featured products)
+          if (featuredProducts.isNotEmpty) ...[
+            SliverToBoxAdapter(
+              child: _buildSectionHeader(
+                context,
+                '⭐ Sélection du Chef',
+                onSeeAll: () => context.go('/menu'),
+              ),
+            ),
+            
+            // Featured Products Carousel with Premium Design
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 320,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  itemCount: featuredProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = featuredProducts[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 16.0),
+                      child: SizedBox(
+                        width: 200,
+                        child: _buildFeaturedProductCard(
+                          context,
+                          product,
+                          () => handleAddToCart(product),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          ],
           
           // Section Header: Pizzas Populaires
           SliverToBoxAdapter(
@@ -377,6 +417,87 @@ class HomeScreen extends ConsumerWidget {
         ),
         const SizedBox(width: 8),
       ],
+    );
+  }
+  
+  // Widget pour les produits featured avec design premium
+  Widget _buildFeaturedProductCard(
+    BuildContext context,
+    Product product,
+    VoidCallback onAddToCart,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.amber.shade50,
+            Colors.orange.shade50,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.amber.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.amber.shade300,
+          width: 2,
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Featured Badge
+          Positioned(
+            top: 12,
+            right: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.amber.shade400, Colors.orange.shade600],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.amber.withOpacity(0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.star, color: Colors.white, size: 14),
+                  SizedBox(width: 4),
+                  Text(
+                    'Coup de ❤️',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Product Content using ProductCard
+          Padding(
+            padding: const EdgeInsets.all(4),
+            child: ProductCard(
+              product: product,
+              onAddToCart: onAddToCart,
+            ),
+          ),
+        ],
+      ),
     );
   }
   
