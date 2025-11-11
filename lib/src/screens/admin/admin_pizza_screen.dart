@@ -64,7 +64,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
               end: Alignment.bottomRight,
               colors: [
                 Colors.white,
-                Colors.orange.shade50.withOpacity(0.3),
+                AppTheme.primaryRed.shade50.withOpacity(0.3),
               ],
             ),
           ),
@@ -76,7 +76,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
+                    colors: [AppTheme.primaryRed.shade400, AppTheme.primaryRed.shade600],
                   ),
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 ),
@@ -122,20 +122,20 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                           decoration: InputDecoration(
                             labelText: 'Nom *',
                             hintText: 'Ex: Margherita',
-                            prefixIcon: Icon(Icons.fastfood, color: Colors.orange.shade600),
+                            prefixIcon: Icon(Icons.fastfood, color: AppTheme.primaryRed.shade600),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade200),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade200),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade200),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade200),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade600, width: 2),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade600, width: 2),
                             ),
                           ),
                           validator: (value) {
@@ -151,20 +151,20 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                           decoration: InputDecoration(
                             labelText: 'Description *',
                             hintText: 'Ex: Tomate, Mozzarella, Basilic',
-                            prefixIcon: Icon(Icons.description, color: Colors.orange.shade600),
+                            prefixIcon: Icon(Icons.description, color: AppTheme.primaryRed.shade600),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade200),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade200),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade200),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade200),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade600, width: 2),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade600, width: 2),
                             ),
                           ),
                           maxLines: 3,
@@ -181,20 +181,20 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                           decoration: InputDecoration(
                             labelText: 'Prix (€) *',
                             hintText: 'Ex: 12.50',
-                            prefixIcon: Icon(Icons.euro, color: Colors.orange.shade600),
+                            prefixIcon: Icon(Icons.euro, color: AppTheme.primaryRed.shade600),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade200),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade200),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade200),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade200),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade600, width: 2),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade600, width: 2),
                             ),
                           ),
                           keyboardType: TextInputType.number,
@@ -215,20 +215,20 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                           decoration: InputDecoration(
                             labelText: 'URL Image (optionnel)',
                             hintText: 'https://...',
-                            prefixIcon: Icon(Icons.image, color: Colors.orange.shade600),
+                            prefixIcon: Icon(Icons.image, color: AppTheme.primaryRed.shade600),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade200),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade200),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade200),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade200),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade600, width: 2),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade600, width: 2),
                             ),
                           ),
                         ),
@@ -239,20 +239,20 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                           decoration: InputDecoration(
                             labelText: 'Ordre d\'affichage',
                             hintText: 'Ex: 1, 2, 3...',
-                            prefixIcon: Icon(Icons.sort, color: Colors.orange.shade600),
+                            prefixIcon: Icon(Icons.sort, color: AppTheme.primaryRed.shade600),
                             filled: true,
                             fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade200),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade200),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade200),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade200),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.orange.shade600, width: 2),
+                              borderSide: BorderSide(color: AppTheme.primaryRed.shade600, width: 2),
                             ),
                           ),
                           keyboardType: TextInputType.number,
@@ -271,9 +271,9 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.orange.shade50.withOpacity(0.5),
+                            color: AppTheme.primaryRed.shade50.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.orange.shade200),
+                            border: Border.all(color: AppTheme.primaryRed.shade200),
                           ),
                           child: Row(
                             children: [
@@ -288,7 +288,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                                       style: TextStyle(
                                         fontWeight: FontWeight.w900,
                                         fontSize: 15,
-                                        color: Colors.orange.shade900,
+                                        color: AppTheme.primaryRed.shade900,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
@@ -453,7 +453,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                               selectedIngredients = ingredients;
                             });
                           },
-                          primaryColor: Colors.orange.shade600,
+                          primaryColor: AppTheme.primaryRed.shade600,
                         ),
                       ],
                     ),
@@ -501,7 +501,8 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                           );
 
                           bool success;
-                          if (pizza == null) {
+                          final isNew = pizza == null;
+                          if (isNew) {
                             success = await _crudService.addPizza(newPizza);
                           } else {
                             success = await _crudService.updatePizza(newPizza);
@@ -509,11 +510,39 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
 
                           if (success && context.mounted) {
                             Navigator.pop(context, true);
+                            // Micro-animation: SnackBar stylé avec succès
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Row(
+                                  children: [
+                                    const Text('✅', style: TextStyle(fontSize: 20)),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        isNew
+                                            ? '${newPizza.name} ajoutée avec succès'
+                                            : '${newPizza.name} modifiée avec succès',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: 'Poppins',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                backgroundColor: AppTheme.primaryRed,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
                           }
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepOrange.shade600,
+                        backgroundColor: AppTheme.primaryRed.shade600,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -679,22 +708,30 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
       if (success) {
         _loadPizzas();
         if (mounted) {
+          // Micro-animation: SnackBar stylé rouge clair avec icône ✅
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Colors.white),
+                  const Text('✅', style: TextStyle(fontSize: 20)),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text('${pizza.name} supprimée avec succès'),
+                    child: Text(
+                      '${pizza.name} supprimée avec succès',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
                   ),
                 ],
               ),
-              backgroundColor: Colors.green.shade600,
+              backgroundColor: AppTheme.primaryRed,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
@@ -732,8 +769,8 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.orange.shade400,
-                      Colors.deepOrange.shade600,
+                      AppTheme.primaryRed.shade400,
+                      AppTheme.primaryRed.shade600,
                     ],
                   ),
                 ),
@@ -778,14 +815,14 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    Colors.orange.shade300.withOpacity(0.2),
-                                    Colors.deepOrange.shade400.withOpacity(0.1),
+                                    AppTheme.primaryRed.shade300.withOpacity(0.2),
+                                    AppTheme.primaryRed.shade400.withOpacity(0.1),
                                   ],
                                 ),
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.orange.withOpacity(0.1),
+                                    color: AppTheme.primaryRed.withOpacity(0.1),
                                     blurRadius: 30,
                                     spreadRadius: 10,
                                   ),
@@ -794,7 +831,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                               child: Icon(
                                 Icons.local_pizza,
                                 size: 70,
-                                color: Colors.orange.shade600,
+                                color: AppTheme.primaryRed.shade600,
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -835,7 +872,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showPizzaDialog(),
-        backgroundColor: Colors.deepOrange.shade600,
+        backgroundColor: AppTheme.primaryRed.shade600,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text(
           'Nouvelle Pizza',
@@ -859,12 +896,12 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
           end: Alignment.bottomRight,
           colors: [
             Colors.white,
-            Colors.orange.shade50.withOpacity(0.3),
+            AppTheme.primaryRed.shade50.withOpacity(0.3),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withOpacity(0.15),
+            color: AppTheme.primaryRed.withOpacity(0.15),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -886,11 +923,11 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     gradient: LinearGradient(
-                      colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
+                      colors: [AppTheme.primaryRed.shade400, AppTheme.primaryRed.shade600],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.orange.withOpacity(0.3),
+                        color: AppTheme.primaryRed.withOpacity(0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -907,7 +944,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                           color: Colors.grey[100],
                           child: Icon(
                             Icons.local_pizza,
-                            color: Colors.orange.shade600,
+                            color: AppTheme.primaryRed.shade600,
                             size: 40,
                           ),
                         ),
@@ -994,7 +1031,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
+                            colors: [AppTheme.primaryRed.shade400, AppTheme.primaryRed.shade600],
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),

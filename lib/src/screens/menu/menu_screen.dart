@@ -92,13 +92,13 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
             ),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                color: const Color(0xFFFFFFFF), // Fond blanc pur
+                borderRadius: BorderRadius.circular(30), // Bords arrondis 30
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withOpacity(0.15), // Ombre douce
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -125,7 +125,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                       : null,
                   filled: false,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(30), // Match container radius
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
