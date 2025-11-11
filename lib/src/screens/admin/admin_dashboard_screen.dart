@@ -1,78 +1,102 @@
 // lib/src/screens/admin/admin_dashboard_screen.dart
-// Tableau de bord admin avec accès aux écrans CRUD
+// Tableau de bord admin - Redesign Pizza Deli'Zza
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 
+/// Dashboard admin avec design cohérent Pizza Deli'Zza
+/// - En-tête rouge avec logo et bouton déconnexion
+/// - Navigation vers les différentes sections de gestion
+/// - Cartes avec icônes et design harmonisé
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundLight,
+      appBar: AppBar(
+        title: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Pizza Deli\'Zza',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.surfaceWhite,
+                fontFamily: 'Poppins',
+              ),
+            ),
+            Text(
+              'Administration',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.surfaceWhite,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
+        backgroundColor: AppTheme.primaryRed,
+        elevation: 0,
+        actions: [
+          // Bouton déconnexion
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Déconnexion',
+            onPressed: () {
+              // TODO: Implémenter la déconnexion
+              context.go('/login');
+            },
+          ),
+        ],
+      ),
       body: CustomScrollView(
         slivers: [
-          // Enhanced Admin AppBar
-          SliverAppBar(
-            expandedHeight: 180,
-            floating: false,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                'Administration',
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.3),
-                      offset: const Offset(0, 2),
-                      blurRadius: 4,
+          // En-tête avec message de bienvenue
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Tableau de bord',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textDark,
+                      fontFamily: 'Poppins',
                     ),
-                  ],
-                ),
-              ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppTheme.primaryRed,
-                      AppTheme.secondaryAmber,
-                    ],
                   ),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: -30,
-                      top: 20,
-                      child: Opacity(
-                        opacity: 0.15,
-                        child: Icon(
-                          Icons.admin_panel_settings,
-                          size: 150,
-                          color: Colors.white,
-                        ),
-                      ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Gérez votre pizzeria Pizza Deli\'Zza',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppTheme.textMedium,
+                      fontFamily: 'Poppins',
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
           
-          // Grid of Admin Cards
+          // Grille de cartes admin
           SliverPadding(
-            padding: const EdgeInsets.all(VisualConstants.paddingMedium),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                crossAxisSpacing: VisualConstants.gridSpacing,
-                mainAxisSpacing: VisualConstants.gridSpacing,
-                childAspectRatio: 1.0,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1.1,
               ),
               delegate: SliverChildListDelegate([
                 _buildAdminCard(
@@ -80,7 +104,6 @@ class AdminDashboardScreen extends StatelessWidget {
                   icon: Icons.local_pizza,
                   title: 'Pizzas',
                   subtitle: 'Gérer les pizzas',
-                  colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
                   onTap: () => context.push(AppRoutes.adminPizza),
                 ),
                 _buildAdminCard(
@@ -88,7 +111,6 @@ class AdminDashboardScreen extends StatelessWidget {
                   icon: Icons.restaurant_menu,
                   title: 'Menus',
                   subtitle: 'Gérer les menus',
-                  colors: [Colors.blue.shade400, Colors.indigo.shade600],
                   onTap: () => context.push(AppRoutes.adminMenu),
                 ),
                 _buildAdminCard(
@@ -96,7 +118,6 @@ class AdminDashboardScreen extends StatelessWidget {
                   icon: Icons.local_drink,
                   title: 'Boissons',
                   subtitle: 'Gérer les boissons',
-                  colors: [Colors.cyan.shade400, Colors.blue.shade600],
                   onTap: () => context.push(AppRoutes.adminDrinks),
                 ),
                 _buildAdminCard(
@@ -104,7 +125,6 @@ class AdminDashboardScreen extends StatelessWidget {
                   icon: Icons.cake,
                   title: 'Desserts',
                   subtitle: 'Gérer les desserts',
-                  colors: [Colors.pink.shade400, Colors.purple.shade600],
                   onTap: () => context.push(AppRoutes.adminDesserts),
                 ),
                 _buildAdminCard(
@@ -112,7 +132,6 @@ class AdminDashboardScreen extends StatelessWidget {
                   icon: Icons.dashboard_customize,
                   title: 'Page Builder',
                   subtitle: 'Organiser l\'affichage',
-                  colors: [Colors.green.shade400, Colors.teal.shade600],
                   onTap: () => context.push(AppRoutes.adminPageBuilder),
                 ),
                 _buildAdminCard(
@@ -120,90 +139,85 @@ class AdminDashboardScreen extends StatelessWidget {
                   icon: Icons.email,
                   title: 'Mailing',
                   subtitle: 'Marketing & Newsletters',
-                  colors: [AppTheme.primaryRed, AppTheme.primaryRedDark],
                   onTap: () => context.push(AppRoutes.adminMailing),
                 ),
               ]),
             ),
+          ),
+          
+          // Espace en bas
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 24),
           ),
         ],
       ),
     );
   }
 
+  /// Carte admin avec design Pizza Deli'Zza
   Widget _buildAdminCard(
     BuildContext context, {
     required IconData icon,
     required String title,
     required String subtitle,
-    required List<Color> colors,
     required VoidCallback onTap,
   }) {
     return Card(
-      elevation: 6,
-      shadowColor: colors[0].withOpacity(0.3),
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.1),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colors[0].withOpacity(0.1),
-              colors[1].withOpacity(0.05),
-            ],
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceWhite,
+            borderRadius: BorderRadius.circular(16),
           ),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: colors,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors[0].withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Icon(icon, size: 36, color: Colors.white),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Icône avec fond rouge
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryRed.withOpacity(0.1),
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 18,
-                      ),
-                  textAlign: TextAlign.center,
+                child: Icon(
+                  icon,
+                  size: 30,
+                  color: AppTheme.primaryRed,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                  textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              // Titre
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textDark,
+                  fontFamily: 'Poppins',
                 ),
-              ],
-            ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              // Sous-titre
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.textMedium,
+                  fontFamily: 'Poppins',
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       ),
