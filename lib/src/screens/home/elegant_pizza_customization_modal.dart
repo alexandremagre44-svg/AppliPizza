@@ -1,4 +1,5 @@
 // lib/src/screens/home/elegant_pizza_customization_modal.dart
+// Ultra-professional pizza customization modal with modern design
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'dart:ui';
 import '../../models/product.dart';
 import '../../data/mock_data.dart';
 import '../../providers/cart_provider.dart';
+import '../../theme/app_theme.dart';
 
 const _uuid = Uuid();
 
@@ -201,39 +203,40 @@ class _ElegantPizzaCustomizationModalState
       child: SlideTransition(
         position: _slideAnimation,
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            height: MediaQuery.of(context).size.height * 0.9,
+            height: MediaQuery.of(context).size.height * 0.92,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
                   Colors.white,
-                  theme.primaryColor.withOpacity(0.02),
+                  Colors.orange.shade50.withOpacity(0.3),
                 ],
               ),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 20,
+                  color: AppTheme.primaryRed.withOpacity(0.2),
+                  blurRadius: 30,
                   spreadRadius: 5,
+                  offset: const Offset(0, -5),
                 ),
               ],
             ),
             child: Column(
               children: [
-                // Elegant handle bar with animation
-                _buildHandleBar(),
+                // Modern handle bar
+                _buildModernHandleBar(),
                 
-                // Hero header with image
-                _buildHeroHeader(theme),
+                // Premium header with gradient
+                _buildPremiumHeader(theme),
                 
-                // Animated tabs
-                _buildAnimatedTabBar(theme),
+                // Professional tabs
+                _buildProfessionalTabBar(theme),
                 
-                // Tab content with animations
+                // Tab content
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
@@ -244,8 +247,8 @@ class _ElegantPizzaCustomizationModalState
                   ),
                 ),
                 
-                // Floating footer with glassmorphism effect
-                _buildGlassmorphismFooter(theme),
+                // Premium footer with gradient
+                _buildPremiumFooter(theme),
               ],
             ),
           ),
@@ -254,27 +257,59 @@ class _ElegantPizzaCustomizationModalState
     );
   }
 
-  Widget _buildHandleBar() {
+  Widget _buildModernHandleBar() {
     return Container(
-      margin: const EdgeInsets.only(top: 16, bottom: 8),
+      margin: const EdgeInsets.only(top: 20, bottom: 12),
       child: Column(
         children: [
           Container(
-            width: 50,
-            height: 5,
+            width: 60,
+            height: 6,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              gradient: LinearGradient(
+                colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+              ),
               borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryRed.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Personnalisez votre pizza',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[600],
-              letterSpacing: 1.2,
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryRed.withOpacity(0.1),
+                  AppTheme.secondaryAmber.withOpacity(0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.restaurant_menu,
+                  size: 16,
+                  color: AppTheme.primaryRed,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'PERSONNALISEZ VOTRE PIZZA',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.primaryRed,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -282,7 +317,7 @@ class _ElegantPizzaCustomizationModalState
     );
   }
 
-  Widget _buildHeroHeader(ThemeData theme) {
+  Widget _buildPremiumHeader(ThemeData theme) {
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 800),
       tween: Tween(begin: 0.0, end: 1.0),
@@ -294,44 +329,69 @@ class _ElegantPizzaCustomizationModalState
         );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white,
+              Colors.orange.shade50.withOpacity(0.5),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryRed.withOpacity(0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
         child: Row(
           children: [
-            // Animated image with shadow
+            // Premium image with gradient border
             Hero(
               tag: 'pizza_${widget.pizza.id}',
               child: Container(
-                width: 100,
-                height: 100,
+                width: 110,
+                height: 110,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: theme.primaryColor.withOpacity(0.3),
+                      color: AppTheme.primaryRed.withOpacity(0.4),
                       blurRadius: 20,
                       spreadRadius: 2,
                       offset: const Offset(0, 8),
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Image.network(
-                    widget.pizza.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              theme.primaryColor.withOpacity(0.3),
-                              theme.primaryColor.withOpacity(0.1),
-                            ],
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: Image.network(
+                      widget.pizza.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppTheme.primaryRed.withOpacity(0.3),
+                                AppTheme.secondaryAmber.withOpacity(0.3),
+                              ],
+                            ),
                           ),
-                        ),
-                        child: const Icon(Icons.local_pizza, size: 50, color: Colors.white),
-                      );
-                    },
+                          child: const Icon(Icons.local_pizza, size: 50, color: Colors.white),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -339,27 +399,49 @@ class _ElegantPizzaCustomizationModalState
             
             const SizedBox(width: 20),
             
-            // Title and description with fade-in
+            // Title and description
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     widget.pizza.name,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.textDark,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     widget.pizza.description,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
-                      height: 1.4,
+                    style: TextStyle(
+                      color: AppTheme.textMedium,
+                      fontSize: 14,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Prix de base: ${widget.pizza.price.toStringAsFixed(2)}€',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -370,18 +452,23 @@ class _ElegantPizzaCustomizationModalState
     );
   }
 
-  Widget _buildAnimatedTabBar(ThemeData theme) {
+  Widget _buildProfessionalTabBar(ThemeData theme) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      padding: const EdgeInsets.all(4),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [
+            Colors.grey.shade100,
+            Colors.grey.shade50,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -389,42 +476,42 @@ class _ElegantPizzaCustomizationModalState
         controller: _tabController,
         indicator: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              theme.primaryColor,
-              theme.primaryColor.withOpacity(0.8),
-            ],
+            colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: theme.primaryColor.withOpacity(0.4),
-              blurRadius: 8,
+              color: AppTheme.primaryRed.withOpacity(0.4),
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey[700],
+        unselectedLabelColor: AppTheme.textMedium,
         labelStyle: const TextStyle(
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w900,
           fontSize: 15,
+          letterSpacing: 0.5,
         ),
         unselectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
           fontSize: 14,
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
         tabs: const [
           Tab(
-            icon: Icon(Icons.restaurant_menu, size: 22),
+            icon: Icon(Icons.restaurant_menu, size: 24),
             text: 'Ingrédients',
-            height: 56,
+            height: 60,
           ),
           Tab(
-            icon: Icon(Icons.tune, size: 22),
+            icon: Icon(Icons.settings_suggest, size: 24),
             text: 'Options',
-            height: 56,
+            height: 60,
           ),
         ],
       ),
@@ -536,46 +623,69 @@ class _ElegantPizzaCustomizationModalState
   }
 
   Widget _buildSectionHeader(String title, String subtitle, IconData icon) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).primaryColor.withOpacity(0.2),
-                Theme.of(context).primaryColor.withOpacity(0.1),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryRed.withOpacity(0.1),
+            AppTheme.secondaryAmber.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppTheme.primaryRed.withOpacity(0.2),
+          width: 2,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryRed.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
               ],
             ),
-            borderRadius: BorderRadius.circular(12),
+            child: Icon(icon, color: Colors.white, size: 24),
           ),
-          child: Icon(icon, color: Theme.of(context).primaryColor, size: 24),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 18,
+                    color: AppTheme.textDark,
+                    letterSpacing: 0.5,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 13,
-                  height: 1.3,
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: AppTheme.textMedium,
+                    fontSize: 13,
+                    height: 1.4,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -601,34 +711,39 @@ class _ElegantPizzaCustomizationModalState
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           decoration: BoxDecoration(
             gradient: isSelected
                 ? LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withOpacity(0.8),
-                    ],
+                    colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   )
                 : LinearGradient(
-                    colors: [Colors.grey[100]!, Colors.grey[50]!],
+                    colors: [Colors.white, Colors.grey.shade50],
                   ),
             borderRadius: BorderRadius.circular(25),
             border: Border.all(
               color: isSelected
-                  ? Theme.of(context).primaryColor
+                  ? AppTheme.primaryRed
                   : Colors.grey[300]!,
-              width: 2,
+              width: 2.5,
             ),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Theme.of(context).primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
+                      color: AppTheme.primaryRed.withOpacity(0.4),
+                      blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ]
-                : [],
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -638,17 +753,18 @@ class _ElegantPizzaCustomizationModalState
                 child: Icon(
                   isSelected ? Icons.check_circle : Icons.cancel,
                   key: ValueKey(isSelected),
-                  size: 18,
-                  color: isSelected ? Colors.white : Colors.grey[600],
+                  size: 20,
+                  color: isSelected ? Colors.white : AppTheme.textMedium,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Text(
                 ingredient,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.grey[800],
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                  fontSize: 14,
+                  color: isSelected ? Colors.white : AppTheme.textDark,
+                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                  fontSize: 15,
+                  letterSpacing: 0.3,
                 ),
               ),
             ],
@@ -664,31 +780,33 @@ class _ElegantPizzaCustomizationModalState
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         gradient: isSelected
             ? LinearGradient(
                 colors: [
-                  Theme.of(context).primaryColor.withOpacity(0.15),
-                  Theme.of(context).primaryColor.withOpacity(0.05),
+                  AppTheme.primaryRed.withOpacity(0.15),
+                  AppTheme.secondaryAmber.withOpacity(0.05),
                 ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               )
             : const LinearGradient(
                 colors: [Colors.white, Colors.white],
               ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isSelected
-              ? Theme.of(context).primaryColor
+              ? AppTheme.primaryRed
               : Colors.grey[200]!,
-          width: 2,
+          width: 2.5,
         ),
         boxShadow: [
           BoxShadow(
             color: isSelected
-                ? Theme.of(context).primaryColor.withOpacity(0.1)
-                : Colors.black.withOpacity(0.03),
-            blurRadius: isSelected ? 12 : 6,
+                ? AppTheme.primaryRed.withOpacity(0.2)
+                : Colors.black.withOpacity(0.04),
+            blurRadius: isSelected ? 15 : 6,
             offset: Offset(0, isSelected ? 6 : 2),
           ),
         ],
@@ -699,33 +817,32 @@ class _ElegantPizzaCustomizationModalState
             _supplementIngredients[ingredient.name] = !isSelected;
           });
         },
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           child: Row(
             children: [
-              // Animated icon
+              // Premium animated icon
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                width: 48,
-                height: 48,
+                width: 54,
+                height: 54,
                 decoration: BoxDecoration(
                   gradient: isSelected
                       ? LinearGradient(
-                          colors: [
-                            Theme.of(context).primaryColor,
-                            Theme.of(context).primaryColor.withOpacity(0.8),
-                          ],
+                          colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         )
                       : LinearGradient(
-                          colors: [Colors.grey[100]!, Colors.grey[50]!],
+                          colors: [Colors.grey.shade100, Colors.grey.shade50],
                         ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: Theme.of(context).primaryColor.withOpacity(0.3),
-                            blurRadius: 8,
+                            color: AppTheme.primaryRed.withOpacity(0.4),
+                            blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
                         ]
@@ -734,34 +851,35 @@ class _ElegantPizzaCustomizationModalState
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
                   child: Icon(
-                    isSelected ? Icons.check_circle : Icons.add_circle_outline,
+                    isSelected ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
                     key: ValueKey(isSelected),
-                    color: isSelected ? Colors.white : Colors.grey[600],
-                    size: 28,
+                    color: isSelected ? Colors.white : AppTheme.textMedium,
+                    size: 30,
                   ),
                 ),
               ),
               
-              const SizedBox(width: 16),
+              const SizedBox(width: 18),
               
               // Ingredient name
               Expanded(
                 child: Text(
                   ingredient.name,
                   style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                    fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
                     color: isSelected
-                        ? Theme.of(context).primaryColor
-                        : Colors.black87,
-                    fontSize: 16,
+                        ? AppTheme.primaryRed
+                        : AppTheme.textDark,
+                    fontSize: 17,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ),
               
-              // Price with animation
+              // Price badge with animation
               TweenAnimationBuilder<double>(
                 duration: const Duration(milliseconds: 300),
-                tween: Tween(begin: 1.0, end: isSelected ? 1.1 : 1.0),
+                tween: Tween(begin: 1.0, end: isSelected ? 1.05 : 1.0),
                 curve: Curves.easeOut,
                 builder: (context, scale, child) {
                   return Transform.scale(
@@ -770,19 +888,31 @@ class _ElegantPizzaCustomizationModalState
                   );
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? Theme.of(context).primaryColor
-                        : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
+                    gradient: isSelected
+                        ? LinearGradient(
+                            colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                          )
+                        : null,
+                    color: isSelected ? null : Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: AppTheme.primaryRed.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ]
+                        : [],
                   ),
                   child: Text(
                     '+${ingredient.extraCost.toStringAsFixed(2)}€',
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : Colors.grey[700],
-                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: isSelected ? Colors.white : AppTheme.textMedium,
+                      fontSize: 15,
                     ),
                   ),
                 ),
@@ -796,8 +926,8 @@ class _ElegantPizzaCustomizationModalState
 
   Widget _buildAnimatedSizeSelector() {
     final sizes = [
-      {'name': 'Moyenne', 'size': 32.0, 'extra': 0.0},
-      {'name': 'Grande', 'size': 42.0, 'extra': 3.0},
+      {'name': 'Moyenne', 'size': 36.0, 'extra': 0.0, 'desc': '30 cm'},
+      {'name': 'Grande', 'size': 48.0, 'extra': 3.0, 'desc': '40 cm'},
     ];
     
     return Row(
@@ -805,6 +935,7 @@ class _ElegantPizzaCustomizationModalState
         final name = sizeData['name'] as String;
         final iconSize = sizeData['size'] as double;
         final extraCost = sizeData['extra'] as double;
+        final desc = sizeData['desc'] as String;
         final isSelected = _selectedSize == name;
         
         return Expanded(
@@ -822,36 +953,33 @@ class _ElegantPizzaCustomizationModalState
               },
               child: InkWell(
                 onTap: () => setState(() => _selectedSize = name),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     gradient: isSelected
                         ? LinearGradient(
-                            colors: [
-                              Theme.of(context).primaryColor,
-                              Theme.of(context).primaryColor.withOpacity(0.8),
-                            ],
+                            colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           )
-                        : const LinearGradient(
-                            colors: [Colors.white, Colors.white],
+                        : LinearGradient(
+                            colors: [Colors.white, Colors.grey.shade50],
                           ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
-                          ? Theme.of(context).primaryColor
+                          ? AppTheme.primaryRed
                           : Colors.grey[300]!,
-                      width: 2,
+                      width: 2.5,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: Theme.of(context).primaryColor.withOpacity(0.3),
-                              blurRadius: 12,
+                              color: AppTheme.primaryRed.withOpacity(0.4),
+                              blurRadius: 15,
                               offset: const Offset(0, 6),
                             ),
                           ]
@@ -870,36 +998,48 @@ class _ElegantPizzaCustomizationModalState
                         child: Icon(
                           Icons.local_pizza,
                           size: iconSize,
-                          color: isSelected ? Colors.white : Colors.grey[600],
+                          color: isSelected ? Colors.white : AppTheme.textMedium,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
                       Text(
                         name,
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: isSelected ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18,
+                          color: isSelected ? Colors.white : AppTheme.textDark,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        desc,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isSelected
+                              ? Colors.white.withOpacity(0.9)
+                              : AppTheme.textMedium,
                         ),
                       ),
                       if (extraCost > 0) ...[
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 10),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? Colors.white.withOpacity(0.2)
-                                : Theme.of(context).primaryColor.withOpacity(0.1),
+                                ? Colors.white.withOpacity(0.25)
+                                : AppTheme.primaryRed.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '+${extraCost.toStringAsFixed(2)}€',
                             style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
                               color: isSelected
                                   ? Colors.white
-                                  : Theme.of(context).primaryColor,
+                                  : AppTheme.primaryRed,
                             ),
                           ),
                         ),
@@ -919,149 +1059,209 @@ class _ElegantPizzaCustomizationModalState
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.grey[200]!,
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: TextField(
         controller: _notesController,
-        maxLines: 4,
-        style: const TextStyle(fontSize: 15, height: 1.5),
+        maxLines: 5,
+        style: const TextStyle(
+          fontSize: 15,
+          height: 1.6,
+          fontWeight: FontWeight.w500,
+        ),
         decoration: InputDecoration(
-          hintText: 'Ex: Bien cuite, peu d\'ail, sans oignons...',
-          hintStyle: TextStyle(color: Colors.grey[400]),
+          hintText: 'Ex: Bien cuite, supplément d\'ail, peu d\'oignons...',
+          hintStyle: TextStyle(
+            color: AppTheme.textLight,
+            fontWeight: FontWeight.w500,
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             borderSide: BorderSide.none,
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             borderSide: BorderSide(
-              color: Theme.of(context).primaryColor,
-              width: 2,
+              color: AppTheme.primaryRed,
+              width: 2.5,
             ),
           ),
           filled: true,
-          fillColor: Colors.grey[50],
-          contentPadding: const EdgeInsets.all(16),
+          fillColor: Colors.grey.shade50,
+          contentPadding: const EdgeInsets.all(18),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Icon(
+              Icons.edit_note_rounded,
+              color: AppTheme.primaryRed,
+              size: 28,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildGlassmorphismFooter(ThemeData theme) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
-              ),
-            ],
+  Widget _buildPremiumFooter(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white.withOpacity(0.95),
+            Colors.white,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 25,
+            offset: const Offset(0, -5),
           ),
-          child: SafeArea(
-            child: Row(
-              children: [
-                // Prix total avec animation
-                Expanded(
-                  child: TweenAnimationBuilder<double>(
-                    duration: const Duration(milliseconds: 300),
-                    tween: Tween(begin: _totalPrice, end: _totalPrice),
-                    builder: (context, value, child) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Total',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
+        ],
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Prix récapitulatif
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryRed.withOpacity(0.05),
+                    AppTheme.secondaryAmber.withOpacity(0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppTheme.primaryRed.withOpacity(0.2),
+                  width: 2,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Prix total',
+                        style: TextStyle(
+                          color: AppTheme.textMedium,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 300),
+                        tween: Tween(begin: _totalPrice, end: _totalPrice),
+                        builder: (context, value, child) {
+                          return Text(
                             '${value.toStringAsFixed(2)}€',
                             style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: theme.primaryColor,
+                              fontSize: 36,
+                              fontWeight: FontWeight.w900,
+                              foreground: Paint()
+                                ..shader = LinearGradient(
+                                  colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                                ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
                             ),
-                          ),
-                        ],
-                      );
-                    },
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ),
-                
-                const SizedBox(width: 16),
-                
-                // Bouton Ajouter au panier avec animation
-                Expanded(
-                  flex: 2,
-                  child: Container(
+                  Container(
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          theme.primaryColor,
-                          theme.primaryColor.withOpacity(0.8),
-                        ],
+                        colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
                       ),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.primaryColor.withOpacity(0.4),
+                          color: AppTheme.primaryRed.withOpacity(0.3),
                           blurRadius: 12,
-                          offset: const Offset(0, 6),
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    child: ElevatedButton(
-                      onPressed: _addToCart,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        foregroundColor: Colors.white,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.shopping_cart_outlined, size: 22),
-                          SizedBox(width: 10),
-                          Text(
-                            'Ajouter au panier',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
+                    child: const Icon(
+                      Icons.euro,
+                      color: Colors.white,
+                      size: 32,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+            
+            const SizedBox(height: 16),
+            
+            // Bouton Ajouter au panier premium
+            Container(
+              width: double.infinity,
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryRed.withOpacity(0.5),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: _addToCart,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.shopping_cart_rounded, size: 26),
+                    SizedBox(width: 12),
+                    Text(
+                      'AJOUTER AU PANIER',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
