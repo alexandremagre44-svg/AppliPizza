@@ -19,7 +19,7 @@ Application Flutter complète de commande de pizzas en ligne avec interface clie
 - 🛒 **Panier intelligent** - Gestion complète avec quantités
 - ⏰ **Commande** - Sélection de date et créneaux horaires
 - 👤 **Profil** - Informations et historique des commandes
-- 👨‍💼 **Admin** - CRUD complet pour pizzas et menus
+- 👨‍💼 **Admin** - CRUD complet pour pizzas, menus, boissons et desserts + page builder
 - ⭐ **Favoris** - Sauvegarde de produits préférés
 
 ---
@@ -74,6 +74,7 @@ Une documentation complète est disponible dans les fichiers suivants:
 | **[ANALYSE_APPLICATION.md](ANALYSE_APPLICATION.md)** | 📊 Analyse complète de l'architecture, des composants et de l'état du projet |
 | **[CARTE_NAVIGATION.md](CARTE_NAVIGATION.md)** | 🗺️ Carte visuelle de navigation avec diagrammes et flows utilisateur |
 | **[GUIDE_DEMARRAGE.md](GUIDE_DEMARRAGE.md)** | 🚀 Guide pratique de démarrage et recommandations de développement |
+| **[ADMIN_FEATURES.md](ADMIN_FEATURES.md)** | 🛠️ Guide complet des fonctionnalités admin (CRUD, mise en avant, page builder) |
 | **[CORRECTIONS.md](CORRECTIONS.md)** | 🔧 Résumé de toutes les corrections et améliorations apportées |
 | **[FIRESTORE_INTEGRATION.md](FIRESTORE_INTEGRATION.md)** | 🔥 Guide d'intégration Firebase/Firestore pour charger les produits cloud |
 
@@ -140,7 +141,9 @@ lib/
 - ✅ Panier avec gestion complète
 - ✅ Processus de commande avec créneaux horaires
 - ✅ Profil utilisateur et historique
-- ✅ Interface admin (CRUD pizzas et menus)
+- ✅ Interface admin (CRUD pizzas, menus, boissons, desserts)
+- ✅ Système de mise en avant des produits (featured)
+- ✅ Page Builder pour organiser l'affichage
 - ✅ Navigation fluide avec bottom bar
 - ✅ Gestion des favoris
 

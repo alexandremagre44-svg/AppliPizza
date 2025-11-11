@@ -93,15 +93,27 @@ class AdminDashboardScreen extends StatelessWidget {
                 ),
                 _buildAdminCard(
                   context,
-                  icon: Icons.access_time,
-                  title: 'Horaires',
-                  subtitle: 'À venir',
+                  icon: Icons.local_drink,
+                  title: 'Boissons',
+                  subtitle: 'Gérer les boissons',
+                  colors: [Colors.cyan.shade400, Colors.blue.shade600],
+                  onTap: () => context.push(AppRoutes.adminDrinks),
+                ),
+                _buildAdminCard(
+                  context,
+                  icon: Icons.cake,
+                  title: 'Desserts',
+                  subtitle: 'Gérer les desserts',
+                  colors: [Colors.pink.shade400, Colors.purple.shade600],
+                  onTap: () => context.push(AppRoutes.adminDesserts),
+                ),
+                _buildAdminCard(
+                  context,
+                  icon: Icons.dashboard_customize,
+                  title: 'Page Builder',
+                  subtitle: 'Organiser l\'affichage',
                   colors: [Colors.green.shade400, Colors.teal.shade600],
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Fonctionnalité à venir')),
-                    );
-                  },
+                  onTap: () => context.push(AppRoutes.adminPageBuilder),
                 ),
                 _buildAdminCard(
                   context,

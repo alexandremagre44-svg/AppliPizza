@@ -41,10 +41,12 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
     final descController = TextEditingController(text: pizza?.description ?? '');
     final priceController = TextEditingController(text: pizza?.price.toString() ?? '');
     final imageController = TextEditingController(text: pizza?.imageUrl ?? '');
+    bool isFeatured = pizza?.isFeatured ?? false;
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => Dialog(
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
@@ -225,10 +227,57 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 20),
+                        // Mise en avant toggle
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.orange.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.star, color: Colors.amber.shade600, size: 24),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Mise en avant',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 15,
+                                        color: Colors.orange.shade900,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Afficher ce produit en priorité',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Switch(
+                                value: isFeatured,
+                                onChanged: (value) {
+                                  setState(() => isFeatured = value);
+                                },
+                                activeColor: Colors.amber.shade600,
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
+              ),
               ),
               // Actions
               Container(
@@ -263,6 +312,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                                 : imageController.text.trim(),
                             category: 'Pizza',
                             isMenu: false,
+                            isFeatured: isFeatured,
                           );
 
                           bool success;
@@ -685,12 +735,41 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        pizza.name,
-                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 18,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              pizza.name,
+                              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 18,
+                                  ),
                             ),
+                          ),
+                          if (pizza.isFeatured)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.star, size: 14, color: Colors.amber.shade700),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'En avant',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.amber.shade700,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 6),
                       Text(
