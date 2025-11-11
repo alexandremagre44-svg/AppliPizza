@@ -21,8 +21,14 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final isAdmin = ref.watch(authProvider.select((auth) => auth.isAdmin));
     final currentIndex = _calculateSelectedIndex(context, isAdmin);
 
-    // Liste des items selon le rôle
+    // Liste des items selon le rôle - Admin en premier si admin
     final items = <BottomNavigationBarItem>[
+      if (isAdmin)
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.admin_panel_settings_outlined),
+          activeIcon: Icon(Icons.admin_panel_settings),
+          label: 'Admin',
+        ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.home_outlined),
         activeIcon: Icon(Icons.home),
@@ -50,12 +56,6 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         activeIcon: Icon(Icons.person),
         label: 'Profil',
       ),
-      if (isAdmin)
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.admin_panel_settings_outlined),
-          activeIcon: Icon(Icons.admin_panel_settings),
-          label: 'Admin',
-        ),
     ];
 
     return Scaffold(
@@ -89,44 +89,80 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   // Logique pour trouver l'index de la page courante
   static int _calculateSelectedIndex(BuildContext context, bool isAdmin) {
     final String location = GoRouterState.of(context).uri.toString();
-    if (location.startsWith('/home')) {
+    
+    // Si admin, le layout est différent (Admin en premier)
+    if (isAdmin) {
+      if (location.startsWith('/admin')) {
+        return 0; // Admin en position 0
+      }
+      if (location.startsWith('/home')) {
+        return 1; // Accueil en position 1
+      }
+      if (location.startsWith('/menu')) {
+        return 2; // Menu en position 2
+      }
+      if (location.startsWith('/cart')) {
+        return 3; // Panier en position 3
+      }
+      if (location.startsWith('/profile')) {
+        return 4; // Profil en position 4
+      }
+      return 1; // Default à Accueil
+    } else {
+      // Layout normal pour utilisateurs non-admin
+      if (location.startsWith('/home')) {
+        return 0;
+      }
+      if (location.startsWith('/menu')) {
+        return 1;
+      }
+      if (location.startsWith('/cart')) {
+        return 2;
+      }
+      if (location.startsWith('/profile')) {
+        return 3;
+      }
       return 0;
     }
-    if (location.startsWith('/menu')) {
-      return 1;
-    }
-    if (location.startsWith('/cart')) {
-      return 2;
-    }
-    if (location.startsWith('/profile')) {
-      return 3;
-    }
-    if (location.startsWith('/admin') && isAdmin) {
-      return 4;
-    }
-    return 0;
   }
 
   // Logique pour naviguer au clic
   void _onItemTapped(BuildContext context, int index, bool isAdmin) {
-    switch (index) {
-      case 0:
-        context.go('/home');
-        break;
-      case 1:
-        context.go('/menu');
-        break;
-      case 2:
-        context.go('/cart');
-        break;
-      case 3:
-        context.go('/profile');
-        break;
-      case 4:
-        if (isAdmin) {
+    if (isAdmin) {
+      // Layout admin : Admin, Accueil, Menu, Panier, Profil
+      switch (index) {
+        case 0:
           context.go('/admin');
-        }
-        break;
+          break;
+        case 1:
+          context.go('/home');
+          break;
+        case 2:
+          context.go('/menu');
+          break;
+        case 3:
+          context.go('/cart');
+          break;
+        case 4:
+          context.go('/profile');
+          break;
+      }
+    } else {
+      // Layout normal : Accueil, Menu, Panier, Profil
+      switch (index) {
+        case 0:
+          context.go('/home');
+          break;
+        case 1:
+          context.go('/menu');
+          break;
+        case 2:
+          context.go('/cart');
+          break;
+        case 3:
+          context.go('/profile');
+          break;
+      }
     }
   }
 }
