@@ -8,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../models/order.dart';
 import '../../providers/cart_provider.dart';
 import '../../core/constants.dart';
+import '../../theme/app_theme.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});

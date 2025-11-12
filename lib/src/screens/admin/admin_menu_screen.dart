@@ -213,7 +213,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
-                                            colors: [AppTheme.primaryRed.shade400, AppTheme.primaryRed.shade600],
+                                            colors: [AppColors.primaryRedSwatch.shade400, AppColors.primaryRedSwatch.shade600],
                                           ),
                                           borderRadius: BorderRadius.circular(8),
                                         ),
@@ -236,7 +236,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                         child: Row(
                                           children: [
                                             IconButton(
-                                              icon: Icon(Icons.remove, color: AppTheme.primaryRed.shade700),
+                                              icon: Icon(Icons.remove, color: AppColors.primaryRedSwatch.shade700),
                                               onPressed: pizzaCount > 0
                                                   ? () => setState(() => pizzaCount--)
                                                   : null,
@@ -245,7 +245,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                               decoration: BoxDecoration(
                                                 gradient: LinearGradient(
-                                                  colors: [AppTheme.primaryRed.shade400, AppTheme.primaryRed.shade600],
+                                                  colors: [AppColors.primaryRedSwatch.shade400, AppColors.primaryRedSwatch.shade600],
                                                 ),
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
@@ -259,7 +259,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                               ),
                                             ),
                                             IconButton(
-                                              icon: Icon(Icons.add, color: AppTheme.primaryRed.shade700),
+                                              icon: Icon(Icons.add, color: AppColors.primaryRedSwatch.shade700),
                                               onPressed: pizzaCount < 5
                                                   ? () => setState(() => pizzaCount++)
                                                   : null,
@@ -1154,19 +1154,19 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryRed.shade50,
+                              color: AppColors.primaryRedSwatch.shade50,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.local_pizza, size: 14, color: AppTheme.primaryRed.shade700),
+                                Icon(Icons.local_pizza, size: 14, color: AppColors.primaryRedSwatch.shade700),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${menu.pizzaCount}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: AppTheme.primaryRed.shade700,
+                                    color: AppColors.primaryRedSwatch.shade700,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),

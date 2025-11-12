@@ -10,6 +10,7 @@ import '../../widgets/product_detail_modal.dart';
 import 'menu_customization_modal.dart';
 import '../home/elegant_pizza_customization_modal.dart';
 import '../../core/constants.dart';
+import '../../theme/app_theme.dart';
 
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
