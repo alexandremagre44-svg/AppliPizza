@@ -8,11 +8,12 @@ import '../providers/cart_provider.dart';
 class OrderStatus {
   static const String pending = 'En attente';
   static const String preparing = 'En préparation';
+  static const String baking = 'En cuisson'; // Added for kitchen workflow
   static const String ready = 'Prête';
   static const String delivered = 'Livrée';
   static const String cancelled = 'Annulée';
   
-  static List<String> get all => [pending, preparing, ready, delivered, cancelled];
+  static List<String> get all => [pending, preparing, baking, ready, delivered, cancelled];
 }
 
 /// Historique de changement de statut

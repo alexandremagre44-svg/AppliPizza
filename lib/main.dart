@@ -21,6 +21,7 @@ import 'src/screens/admin/admin_desserts_screen.dart';
 import 'src/screens/admin/admin_page_builder_screen.dart';
 import 'src/screens/admin/admin_mailing_screen.dart';
 import 'src/screens/admin/admin_orders_screen.dart';
+import 'src/kitchen/kitchen_page.dart';
 
 // Importez le composant de barre de navigation
 import 'src/widgets/scaffold_with_nav_bar.dart'; 
@@ -149,6 +150,11 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: '/checkout',
           builder: (context, state) => const CheckoutScreen(),
+        ),
+        // Route Kitchen Mode
+        GoRoute(
+          path: AppRoutes.kitchen,
+          builder: (context, state) => const KitchenPage(),
         ),
       ],
     );
