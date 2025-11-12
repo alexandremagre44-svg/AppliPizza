@@ -57,3 +57,59 @@ final productsByCategoryProvider = FutureProvider.autoDispose<Map<String, List<P
   }
   return groupedProducts;
 });
+
+// 4. OPTIMIZATION: Provider pour filtrer les produits par catégorie et critères
+// Ce provider ne recalcule les produits filtrés que lorsque les dépendances changent
+final filteredProductsProvider = Provider.family.autoDispose<List<Product>, FilterCriteria>((ref, criteria) {
+  final productsAsync = ref.watch(productListProvider);
+  
+  return productsAsync.when(
+    data: (allProducts) {
+      var filtered = allProducts.where((p) => p.isActive).toList();
+      
+      // Filter by category if specified
+      if (criteria.category != null) {
+        filtered = filtered.where((p) => p.category == criteria.category).toList();
+      }
+      
+      // Filter by displaySpot if specified
+      if (criteria.displaySpot != null) {
+        filtered = filtered.where((p) => p.displaySpot == criteria.displaySpot).toList();
+      }
+      
+      // Filter by isFeatured if specified
+      if (criteria.isFeatured != null) {
+        filtered = filtered.where((p) => p.isFeatured == criteria.isFeatured).toList();
+      }
+      
+      return filtered;
+    },
+    loading: () => [],
+    error: (_, __) => [],
+  );
+});
+
+/// Criteria for filtering products
+class FilterCriteria {
+  final ProductCategory? category;
+  final DisplaySpot? displaySpot;
+  final bool? isFeatured;
+  
+  const FilterCriteria({
+    this.category,
+    this.displaySpot,
+    this.isFeatured,
+  });
+  
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FilterCriteria &&
+          runtimeType == other.runtimeType &&
+          category == other.category &&
+          displaySpot == other.displaySpot &&
+          isFeatured == other.isFeatured;
+  
+  @override
+  int get hashCode => Object.hash(category, displaySpot, isFeatured);
+}
