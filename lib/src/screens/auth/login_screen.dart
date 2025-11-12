@@ -93,17 +93,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primaryRed,
-              AppTheme.primaryRedDark,
-              AppTheme.secondaryAmber,
-            ],
-            stops: const [0.0, 0.6, 1.0],
-          ),
+        decoration: const BoxDecoration(
+          // Fond rouge uni (pas de gradient) selon la charte officielle
+          color: AppColors.primaryRed,
         ),
         child: SafeArea(
           child: Center(
@@ -274,16 +266,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AppTheme.backgroundCream,
+                              color: AppColors.backgroundLight,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppTheme.secondaryAmber.withOpacity(0.3)),
+                              border: Border.all(color: AppColors.textLight.withOpacity(0.3)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.info_outline, size: 20, color: AppTheme.secondaryAmber),
+                                    const Icon(Icons.info_outline, size: 20, color: AppColors.primaryRed),
                                     const SizedBox(width: 8),
                                     Text(
                                       'Comptes de test',
