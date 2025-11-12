@@ -71,24 +71,26 @@ Avant de lancer l'application, vous devez :
 
 1. Créer un projet Firebase
 2. Activer Authentication (Email/Password) et Firestore
-3. Créer les utilisateurs de test avec leurs rôles
-4. Déployer les règles de sécurité Firestore
+3. Déployer les règles de sécurité Firestore
+4. (Optionnel) Créer des utilisateurs de test - ou utilisez l'écran d'inscription dans l'app
 
-**Consultez le guide complet : [FIREBASE_SETUP.md](FIREBASE_SETUP.md)**
+**Guides complets :** 
+- [FIREBASE_SETUP.md](FIREBASE_SETUP.md) - Configuration Firebase
+- [ADMIN_SIGNUP_GUIDE.md](ADMIN_SIGNUP_GUIDE.md) - Création de comptes admin
 
-### Premiers Tests
+### 🆕 Création de votre premier compte
 
-**Compte Client:**
-```
-Email: client@delizza.com
-Password: client123
-```
+**Nouveau : L'application inclut maintenant un écran d'inscription !**
 
-**Compte Admin:**
-```
-Email: admin@delizza.com
-Password: admin123
-```
+1. Lancez l'application
+2. Sur l'écran de connexion, cliquez sur **"Pas de compte ? Créer un compte"**
+3. Remplissez le formulaire d'inscription
+4. Pour créer un administrateur, cochez **"Créer un compte administrateur"**
+5. Connectez-vous avec vos nouveaux identifiants
+
+**📖 Guide détaillé : [ADMIN_SIGNUP_GUIDE.md](ADMIN_SIGNUP_GUIDE.md)**
+
+**Note:** Les anciens identifiants de test doivent maintenant être créés via l'écran d'inscription ou manuellement dans Firebase Console.
 
 ---
 
@@ -104,6 +106,7 @@ Une documentation complète est disponible dans les fichiers suivants:
 | **[CARTE_NAVIGATION.md](CARTE_NAVIGATION.md)** | 🗺️ Carte visuelle de navigation avec diagrammes et flows utilisateur |
 | **[GUIDE_DEMARRAGE.md](GUIDE_DEMARRAGE.md)** | 🚀 Guide pratique de démarrage et recommandations de développement |
 | **[ADMIN_FEATURES.md](ADMIN_FEATURES.md)** | 🛠️ Guide complet des fonctionnalités admin (CRUD, mise en avant, page builder) |
+| **[ADMIN_SIGNUP_GUIDE.md](ADMIN_SIGNUP_GUIDE.md)** | 📝 Guide de création de comptes administrateurs via l'interface |
 | **[CORRECTIONS.md](CORRECTIONS.md)** | 🔧 Résumé de toutes les corrections et améliorations apportées |
 | **[FIRESTORE_INTEGRATION.md](FIRESTORE_INTEGRATION.md)** | 🔥 Guide d'intégration Firebase/Firestore pour charger les produits cloud |
 
