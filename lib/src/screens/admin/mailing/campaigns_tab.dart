@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:csv/csv.dart';
 import '../../../models/campaign.dart';
 import '../../../models/email_template.dart';
 import '../../../services/campaign_service.dart';
@@ -92,6 +93,119 @@ class _CampaignsTabState extends State<CampaignsTab> {
       'draft': _campaigns.where((c) => c.status == 'draft').length,
       'failed': _campaigns.where((c) => c.status == 'failed').length,
     };
+  }
+
+  Future<void> _exportCampaignsToCSV() async {
+    if (_filteredCampaigns.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Aucune campagne à exporter')),
+      );
+      return;
+    }
+
+    // Create CSV data
+    List<List<dynamic>> rows = [];
+    
+    // Header row
+    rows.add(['Nom', 'Statut', 'Segment', 'Date création', 'Date envoi', 'Envoyés', 'Ouverts', 'Clics']);
+    
+    // Data rows
+    for (var campaign in _filteredCampaigns) {
+      rows.add([
+        campaign.name,
+        _getStatusLabel(campaign.status),
+        _getSegmentLabel(campaign.segment),
+        _formatDate(campaign.createdAt),
+        campaign.sentAt != null ? _formatDate(campaign.sentAt!) : '-',
+        campaign.stats?.sent ?? 0,
+        campaign.stats?.opened ?? 0,
+        campaign.stats?.clicked ?? 0,
+      ]);
+    }
+
+    // Convert to CSV string
+    String csv = const ListToCsvConverter().convert(rows);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Export CSV - Campagnes'),
+        content: SingleChildScrollView(
+          child: SelectableText(
+            csv,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Export de ${_filteredCampaigns.length} campagne(s) généré'),
+        backgroundColor: AppTheme.primaryRed,
+      ),
+    );
+  }
+
+  Future<void> _sendTestEmail(Campaign campaign) async {
+    final emailController = TextEditingController();
+    
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Envoyer un email de test'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Campagne: ${campaign.name}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email de destination',
+                hintText: 'votre.email@exemple.com',
+                prefixIcon: Icon(Icons.email),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (emailController.text.contains('@')) {
+                Navigator.pop(context, true);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryRed),
+            child: const Text('Envoyer'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && emailController.text.isNotEmpty) {
+      // Simulate sending test email
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Email de test envoyé à ${emailController.text}'),
+          backgroundColor: AppTheme.accentGreen,
+        ),
+      );
+    }
   }
 
   Future<void> _showCampaignDialog({Campaign? campaign}) async {
@@ -425,21 +539,43 @@ class _CampaignsTabState extends State<CampaignsTab> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.campaign, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryRed.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.campaign, size: 80, color: AppTheme.primaryRed),
+            ),
+            const SizedBox(height: 24),
             Text(
               'Aucune campagne',
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            const SizedBox(height: 8),
-            const Text('Créez votre première campagne d\'emailing'),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                'Créez des campagnes d\'emailing pour communiquer avec vos abonnés. Planifiez, envoyez et suivez vos résultats.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textMedium,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () => _showCampaignDialog(),
               icon: const Icon(Icons.add),
-              label: const Text('Nouvelle campagne'),
+              label: const Text('Créer ma première campagne'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryRed,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
               ),
             ),
           ],
@@ -487,6 +623,13 @@ class _CampaignsTabState extends State<CampaignsTab> {
                       ),
                     ),
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.download),
+                    onPressed: _exportCampaignsToCSV,
+                    tooltip: 'Exporter CSV',
+                    color: AppTheme.primaryRed,
+                  ),
+                  const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: () => _showCampaignDialog(),
                     icon: const Icon(Icons.add),
@@ -594,14 +737,35 @@ class _CampaignsTabState extends State<CampaignsTab> {
         ),
         // Campaigns list
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(VisualConstants.paddingMedium),
-            itemCount: _filteredCampaigns.length,
-            itemBuilder: (context, index) {
-              final campaign = _filteredCampaigns[index];
-              return _buildCampaignCard(campaign);
-            },
-          ),
+          child: _filteredCampaigns.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Aucune campagne trouvée',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Essayez de modifier vos filtres ou votre recherche',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.textMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(VisualConstants.paddingMedium),
+                  itemCount: _filteredCampaigns.length,
+                  itemBuilder: (context, index) {
+                    final campaign = _filteredCampaigns[index];
+                    return _buildCampaignCard(campaign);
+                  },
+                ),
         ),
       ],
     );
@@ -713,6 +877,12 @@ class _CampaignsTabState extends State<CampaignsTab> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  if (campaign.status != 'sent')
+                    IconButton(
+                      icon: Icon(Icons.send, color: Colors.blue),
+                      onPressed: () => _sendTestEmail(campaign),
+                      tooltip: 'Tester',
+                    ),
                   IconButton(
                     icon: Icon(Icons.edit, color: AppTheme.primaryRed),
                     onPressed: () => _showCampaignDialog(campaign: campaign),

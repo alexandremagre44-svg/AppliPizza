@@ -31,6 +31,100 @@ class _AdminMailingScreenState extends State<AdminMailingScreen>
     super.dispose();
   }
 
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: const [
+            Icon(Icons.help_outline, color: AppTheme.primaryRed),
+            SizedBox(width: 8),
+            Text('Guide d\'utilisation'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildHelpSection(
+                'Modèles d\'emails',
+                'Créez et gérez vos templates HTML pour vos campagnes. '
+                'Utilisez les variables {{variable}} pour personnaliser vos emails.',
+              ),
+              const SizedBox(height: 16),
+              _buildHelpSection(
+                'Campagnes',
+                'Planifiez et envoyez vos campagnes d\'emailing. '
+                'Sélectionnez un modèle, choisissez votre audience et définissez la date d\'envoi.',
+              ),
+              const SizedBox(height: 16),
+              _buildHelpSection(
+                'Abonnés',
+                'Gérez votre liste d\'abonnés avec segmentation par tags. '
+                'Vous pouvez exporter la liste en CSV et effectuer des actions groupées.',
+              ),
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 8),
+              Text(
+                'Conseils:',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              _buildTip('Utilisez la recherche pour trouver rapidement'),
+              _buildTip('Dupliquez vos modèles pour gagner du temps'),
+              _buildTip('Testez vos campagnes avant l\'envoi massif'),
+              _buildTip('Exportez vos données pour les analyser'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelpSection(String title, String content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+            color: AppTheme.primaryRed,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          content,
+          style: const TextStyle(fontSize: 13),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTip(String tip) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(fontSize: 13)),
+          Expanded(
+            child: Text(tip, style: const TextStyle(fontSize: 13)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,6 +175,13 @@ class _AdminMailingScreenState extends State<AdminMailingScreen>
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Navigator.of(context).pop(),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.help_outline, color: Colors.white),
+                onPressed: () => _showHelpDialog(),
+                tooltip: 'Aide',
+              ),
+            ],
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(48),
               child: Container(

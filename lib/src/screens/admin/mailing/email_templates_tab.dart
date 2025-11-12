@@ -369,22 +369,44 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.description, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'Aucun modèle d\'email',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Créez votre premier modèle',
-              style: Theme.of(context).textTheme.bodyMedium,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryRed.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.description, size: 80, color: AppTheme.primaryRed),
             ),
             const SizedBox(height: 24),
+            Text(
+              'Aucun modèle d\'email',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                'Les modèles vous permettent de créer des emails personnalisés réutilisables pour vos campagnes',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textMedium,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () => _showTemplateDialog(),
               icon: const Icon(Icons.add),
-              label: const Text('Nouveau modèle'),
+              label: const Text('Créer mon premier modèle'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryRed,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+              ),
             ),
           ],
         ),
@@ -499,14 +521,35 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
         ),
         // Templates list
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(VisualConstants.paddingMedium),
-            itemCount: _filteredTemplates.length,
-            itemBuilder: (context, index) {
-              final template = _filteredTemplates[index];
-              return _buildTemplateCard(template);
-            },
-          ),
+          child: _filteredTemplates.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Aucun modèle trouvé',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Essayez de modifier vos critères de recherche',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.textMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(VisualConstants.paddingMedium),
+                  itemCount: _filteredTemplates.length,
+                  itemBuilder: (context, index) {
+                    final template = _filteredTemplates[index];
+                    return _buildTemplateCard(template);
+                  },
+                ),
         ),
       ],
     );

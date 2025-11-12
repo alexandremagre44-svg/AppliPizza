@@ -3,6 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:csv/csv.dart';
+import 'dart:convert';
 import '../../../models/subscriber.dart';
 import '../../../services/mailing_service.dart';
 import '../../../theme/app_theme.dart';
@@ -92,11 +94,57 @@ class _SubscribersTabState extends State<SubscribersTab> {
   }
 
   Future<void> _exportToCSV() async {
-    // This would export subscribers to CSV
-    // For now, just show a message
+    if (_filteredSubscribers.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Aucun abonné à exporter')),
+      );
+      return;
+    }
+
+    // Create CSV data
+    List<List<dynamic>> rows = [];
+    
+    // Header row
+    rows.add(['Email', 'Statut', 'Tags', 'Consentement', 'Date d\'inscription']);
+    
+    // Data rows
+    for (var subscriber in _filteredSubscribers) {
+      rows.add([
+        subscriber.email,
+        subscriber.status,
+        subscriber.tags.join(', '),
+        subscriber.consent ? 'Oui' : 'Non',
+        _formatDate(subscriber.dateInscription),
+      ]);
+    }
+
+    // Convert to CSV string
+    String csv = const ListToCsvConverter().convert(rows);
+    
+    // In a real app, you would save this file or share it
+    // For now, show the data in a dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Export CSV'),
+        content: SingleChildScrollView(
+          child: SelectableText(
+            csv,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
+    );
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Export de ${_filteredSubscribers.length} abonné(s) en cours...'),
+        content: Text('Export de ${_filteredSubscribers.length} abonné(s) généré'),
         backgroundColor: AppTheme.accentGreen,
       ),
     );
@@ -648,23 +696,52 @@ class _SubscribersTabState extends State<SubscribersTab> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.people, size: 80, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aucun abonné',
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      const Text('Ajoutez votre premier abonné'),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () => _showSubscriberDialog(),
-                        icon: const Icon(Icons.add),
-                        label: const Text('Nouvel abonné'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.accentGreen,
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: AppTheme.accentGreen.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _subscribers.isEmpty ? Icons.people : Icons.search_off,
+                          size: 80,
+                          color: AppTheme.accentGreen,
                         ),
                       ),
+                      const SizedBox(height: 24),
+                      Text(
+                        _subscribers.isEmpty ? 'Aucun abonné' : 'Aucun abonné trouvé',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Text(
+                          _subscribers.isEmpty
+                              ? 'Construisez votre liste d\'abonnés pour communiquer avec vos clients'
+                              : 'Essayez de modifier vos filtres ou votre recherche',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.textMedium,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      if (_subscribers.isEmpty)
+                        ElevatedButton.icon(
+                          onPressed: () => _showSubscriberDialog(),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Ajouter mon premier abonné'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.accentGreen,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 )
