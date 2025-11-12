@@ -154,51 +154,62 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
                 ),
               ),
               
-              // Left tap zone for previous status (full 50% width)
-              if (widget.onPreviousStatus != null)
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: constraints.maxWidth / 2,
-                  child: GestureDetector(
-                    onTap: () {
-                      // Haptic feedback
-                      HapticFeedback.lightImpact();
-                      widget.onPreviousStatus!();
-                    },
-                    child: Container(
-                      color: Colors.transparent,
-                    ),
-                  ),
-                ),
-              
-              // Right tap zone for next status (full 50% width)
-              if (widget.onNextStatus != null)
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: constraints.maxWidth / 2,
-                  child: GestureDetector(
-                    onTap: () {
-                      // Haptic feedback
-                      HapticFeedback.lightImpact();
-                      widget.onNextStatus!();
-                    },
-                    child: Container(
-                      color: Colors.transparent,
-                    ),
-                  ),
-                ),
-              
-              // Center double-tap detector for opening details (on top of tap zones)
+              // Combined gesture detector for all interactions
               Positioned.fill(
-                child: GestureDetector(
-                  onDoubleTap: widget.onTap,
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
+                child: Row(
+                  children: [
+                    // Left zone: tap for previous status (50% width)
+                    if (widget.onPreviousStatus != null)
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            widget.onPreviousStatus!();
+                          },
+                          onDoubleTap: widget.onTap,
+                          child: Container(
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onDoubleTap: widget.onTap,
+                          child: Container(
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      ),
+                    
+                    // Right zone: tap for next status (50% width)
+                    if (widget.onNextStatus != null)
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            widget.onNextStatus!();
+                          },
+                          onDoubleTap: widget.onTap,
+                          child: Container(
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onDoubleTap: widget.onTap,
+                          child: Container(
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
           
