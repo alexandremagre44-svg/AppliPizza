@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/order.dart';
-import '../services/order_service.dart';
 import '../core/constants.dart';
 import '../providers/auth_provider.dart';
+import '../providers/order_provider.dart';
 import 'kitchen_constants.dart';
 import 'widgets/kitchen_order_card.dart';
 import 'widgets/kitchen_order_detail.dart';
@@ -24,11 +24,9 @@ class KitchenPage extends ConsumerStatefulWidget {
 }
 
 class _KitchenPageState extends ConsumerState<KitchenPage> {
-  final OrderService _orderService = OrderService();
   final KitchenNotificationService _notificationService = KitchenNotificationService();
   final KitchenPrintService _printService = KitchenPrintService();
   
-  StreamSubscription? _ordersSubscription;
   Timer? _clockTimer;
   List<Order> _displayedOrders = [];
   DateTime _now = DateTime.now();
@@ -39,9 +37,6 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
     
     // Check if user has kitchen role
     _checkKitchenAccess();
-    
-    // Listen to order stream
-    _ordersSubscription = _orderService.ordersStream.listen(_onOrdersUpdated);
     
     // Start clock timer for elapsed time updates
     _clockTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
@@ -58,14 +53,10 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
         setState(() {});
       }
     };
-    
-    // Initial load
-    _orderService.refresh();
   }
 
   @override
   void dispose() {
-    _ordersSubscription?.cancel();
     _clockTimer?.cancel();
     _notificationService.stopAlerts();
     super.dispose();
@@ -89,7 +80,7 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
     }
   }
 
-  void _onOrdersUpdated(List<Order> orders) {
+  void _updateDisplayedOrders(List<Order> orders) {
     if (!mounted) return;
     
     setState(() {
@@ -213,11 +204,12 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
   }
 
   Future<void> _changeOrderStatus(Order order, String newStatus) async {
-    await _orderService.updateOrderStatus(order.id, newStatus);
+    final orderService = ref.read(firebaseOrderServiceProvider);
+    await orderService.updateOrderStatus(order.id, newStatus);
     
     // Mark as viewed if not already
     if (!order.isViewed) {
-      await _orderService.markOrderAsViewed(order.id);
+      await orderService.markAsSeenByKitchen(order.id);
       _notificationService.markOrderAsSeen(order.id);
     }
   }
@@ -239,7 +231,8 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
   Future<void> _showOrderDetail(Order order) async {
     // Mark as viewed
     if (!order.isViewed) {
-      await _orderService.markOrderAsViewed(order.id);
+      final orderService = ref.read(firebaseOrderServiceProvider);
+      await orderService.markAsSeenByKitchen(order.id);
       _notificationService.markOrderAsSeen(order.id);
     }
     
@@ -295,6 +288,16 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
   @override
   Widget build(BuildContext context) {
     final unseenCount = _notificationService.unseenOrderCount;
+    
+    // Watch the orders stream from Firebase
+    final ordersAsync = ref.watch(ordersStreamProvider);
+    
+    // Update displayed orders when data changes
+    ordersAsync.whenData((orders) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _updateDisplayedOrders(orders);
+      });
+    });
     
     return Scaffold(
       backgroundColor: KitchenConstants.kitchenBackground,

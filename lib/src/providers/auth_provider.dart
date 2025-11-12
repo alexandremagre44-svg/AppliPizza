@@ -1,12 +1,18 @@
 // lib/src/providers/auth_provider.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/firebase_auth_service.dart';
 import '../core/constants.dart';
+
+/// Provider pour le service d'authentification Firebase
+final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
+  return FirebaseAuthService();
+});
 
 /// Provider pour l'état d'authentification
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier();
+  return AuthNotifier(ref.watch(firebaseAuthServiceProvider));
 });
 
 /// État d'authentification
@@ -47,20 +53,29 @@ class AuthState {
 
 /// Notifier pour gérer l'authentification
 class AuthNotifier extends StateNotifier<AuthState> {
-  final AuthService _authService = AuthService();
+  final FirebaseAuthService _authService;
 
-  AuthNotifier() : super(AuthState()) {
+  AuthNotifier(this._authService) : super(AuthState()) {
     _initialize();
   }
 
   /// Initialiser l'état d'authentification
   Future<void> _initialize() async {
-    await _authService.initialize();
-    state = AuthState(
-      isLoggedIn: _authService.isLoggedIn,
-      userEmail: _authService.userEmail,
-      userRole: _authService.userRole,
-    );
+    // Écouter les changements d'état Firebase Auth
+    _authService.authStateChanges.listen((user) async {
+      if (user == null) {
+        state = AuthState();
+      } else {
+        // Récupérer le rôle de l'utilisateur
+        final role = await _authService.getUserRole(user.uid);
+        state = AuthState(
+          isLoggedIn: true,
+          userEmail: user.email,
+          userRole: role,
+          isLoading: false,
+        );
+      }
+    });
   }
 
   /// Connexion
@@ -68,20 +83,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     
     try {
-      final success = await _authService.login(email, password);
+      final result = await _authService.signIn(email, password);
       
-      if (success) {
-        state = AuthState(
-          isLoggedIn: true,
-          userEmail: _authService.userEmail,
-          userRole: _authService.userRole,
-          isLoading: false,
-        );
+      if (result['success']) {
+        // L'état sera mis à jour automatiquement par le stream authStateChanges
         return true;
       } else {
         state = state.copyWith(
           isLoading: false,
-          error: 'Email ou mot de passe incorrect',
+          error: result['error'] as String,
         );
         return false;
       }
@@ -96,20 +106,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// Déconnexion
   Future<void> logout() async {
-    await _authService.logout();
-    state = AuthState();
+    await _authService.signOut();
+    // L'état sera mis à jour automatiquement par le stream authStateChanges
   }
 
   /// Vérifier le statut d'authentification
   Future<bool> checkAuthStatus() async {
-    final isLoggedIn = await _authService.checkAuthStatus();
-    if (isLoggedIn) {
+    final user = _authService.currentUser;
+    if (user != null) {
+      final role = await _authService.getUserRole(user.uid);
       state = AuthState(
         isLoggedIn: true,
-        userEmail: _authService.userEmail,
-        userRole: _authService.userRole,
+        userEmail: user.email,
+        userRole: role,
       );
+      return true;
     }
-    return isLoggedIn;
+    return false;
   }
 }

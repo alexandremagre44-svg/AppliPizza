@@ -1,25 +1,38 @@
 # 🍕 Pizza Deli'Zza
 
-Application Flutter complète de commande de pizzas en ligne avec interface client et administration.
+Application Flutter complète de commande de pizzas en ligne avec interface client et administration, propulsée par Firebase.
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.0+-blue.svg)
 ![Dart](https://img.shields.io/badge/Dart-3.0+-blue.svg)
-![Status](https://img.shields.io/badge/Status-MVP%20Ready-green.svg)
+![Firebase](https://img.shields.io/badge/Firebase-Enabled-orange.svg)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-green.svg)
+
+---
+
+## 🔥 **IMPORTANT : Migration Firebase**
+
+L'application utilise maintenant **Firebase** pour l'authentification et la gestion des commandes en temps réel. 
+
+**⚠️ Les anciennes données locales (SharedPreferences) ne sont plus utilisées.**
+
+👉 **Consultez [FIREBASE_SETUP.md](FIREBASE_SETUP.md) pour la configuration complète de Firebase.**
 
 ---
 
 ## 📱 Présentation
 
-**Pizza Deli'Zza** est une application mobile de commande de pizzas qui permet aux utilisateurs de parcourir un catalogue, personnaliser leurs pizzas, gérer leur panier et passer des commandes avec sélection de créneaux horaires. L'application inclut également une interface d'administration complète pour gérer les produits.
+**Pizza Deli'Zza** est une application mobile de commande de pizzas qui permet aux utilisateurs de parcourir un catalogue, personnaliser leurs pizzas, gérer leur panier et passer des commandes avec sélection de créneaux horaires. L'application inclut également une interface d'administration complète pour gérer les produits et un mode cuisine pour suivre les commandes en temps réel.
 
 ### ✨ Fonctionnalités Principales
 
-- 🔐 **Authentification** - Connexion client et admin
+- 🔐 **Authentification Firebase** - Connexion sécurisée avec rôles (client, admin, kitchen)
 - 📋 **Catalogue** - Pizzas, menus, boissons, desserts
 - 🛒 **Panier intelligent** - Gestion complète avec quantités
 - ⏰ **Commande** - Sélection de date et créneaux horaires
+- 🔄 **Temps réel** - Synchronisation instantanée des commandes via Firestore
 - 👤 **Profil** - Informations et historique des commandes
 - 👨‍💼 **Admin** - CRUD complet pour pizzas, menus, boissons et desserts + page builder
+- 👨‍🍳 **Mode Cuisine** - Suivi en temps réel des commandes avec notifications
 - ⭐ **Favoris** - Sauvegarde de produits préférés
 
 ---
@@ -32,6 +45,7 @@ Application Flutter complète de commande de pizzas en ligne avec interface clie
 - Dart 3.0+
 - Android Studio / VS Code
 - Git
+- **Firebase Project** (voir [FIREBASE_SETUP.md](FIREBASE_SETUP.md))
 
 ### Installation
 
@@ -40,12 +54,27 @@ Application Flutter complète de commande de pizzas en ligne avec interface clie
 git clone https://github.com/alexandremagre44-svg/AppliPizza.git
 cd AppliPizza
 
+# Configurer Firebase (IMPORTANT !)
+# Suivez les instructions dans FIREBASE_SETUP.md
+flutterfire configure
+
 # Installer les dépendances
 flutter pub get
 
 # Lancer l'application
 flutter run
 ```
+
+### Configuration Firebase (Obligatoire)
+
+Avant de lancer l'application, vous devez :
+
+1. Créer un projet Firebase
+2. Activer Authentication (Email/Password) et Firestore
+3. Créer les utilisateurs de test avec leurs rôles
+4. Déployer les règles de sécurité Firestore
+
+**Consultez le guide complet : [FIREBASE_SETUP.md](FIREBASE_SETUP.md)**
 
 ### Premiers Tests
 

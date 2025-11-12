@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Fonction helper pour vérifier si l'utilisateur est authentifié
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Fonction helper pour récupérer le rôle de l'utilisateur
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    // Fonction helper pour vérifier si l'utilisateur est admin
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+    
+    // Fonction helper pour vérifier si l'utilisateur est kitchen
+    function isKitchen() {
+      return isAuthenticated() && getUserRole() == 'kitchen';
+    }
+    
+    // Fonction helper pour vérifier si l'utilisateur est admin ou kitchen
+    function isAdminOrKitchen() {
+      return isAdmin() || isKitchen();
+    }
+    
+    // Règles pour la collection users
+    match /users/{userId} {
+      // Lecture: l'utilisateur peut lire son propre profil, admin peut tout lire
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      
+      // Création: seulement lors de l'inscription (géré par le service)
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Mise à jour: l'utilisateur peut mettre à jour son profil (sauf le rôle), admin peut tout
+      allow update: if isAuthenticated() && (
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])) ||
+        isAdmin()
+      );
+      
+      // Suppression: seulement admin
+      allow delete: if isAdmin();
+    }
+    
+    // Règles pour la collection orders
+    match /orders/{orderId} {
+      // Lecture:
+      // - Client peut lire ses propres commandes
+      // - Admin et Kitchen peuvent lire toutes les commandes
+      allow read: if isAuthenticated() && (
+        resource.data.uid == request.auth.uid ||
+        isAdminOrKitchen()
+      );
+      
+      // Création:
+      // - N'importe quel utilisateur authentifié peut créer une commande
+      // - Le uid doit correspondre à l'utilisateur connecté
+      // - Les champs critiques doivent être présents et valides
+      allow create: if isAuthenticated() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.status == 'En attente' &&
+        request.resource.data.total_cents is int &&
+        request.resource.data.total_cents > 0 &&
+        request.resource.data.items is list &&
+        request.resource.data.items.size() > 0;
+      
+      // Mise à jour:
+      // - Client ne peut pas modifier sa commande une fois créée
+      // - Admin et Kitchen peuvent mettre à jour le statut et les champs de vue
+      // - Les champs uid, total, total_cents, items, createdAt ne peuvent jamais être modifiés
+      allow update: if isAuthenticated() && isAdminOrKitchen() &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['uid', 'total_cents', 'items', 'createdAt']) &&
+        (
+          // Mise à jour du statut
+          request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'statusChangedAt', 'statusHistory']) ||
+          // Marquer comme vu
+          request.resource.data.diff(resource.data).affectedKeys().hasAny(['isViewed', 'viewedAt', 'seenByKitchen'])
+        );
+      
+      // Suppression: seulement admin
+      allow delete: if isAdmin();
+    }
+    
+    // Règles par défaut: refuser tout accès aux autres collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
