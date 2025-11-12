@@ -121,8 +121,8 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
             ],
           ),
           child: Material(
-          color: Colors.transparent,
-          child: InkWell(
+            color: Colors.transparent,
+            child: InkWell(
             onTap: () => context.push('/cart'),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
@@ -214,6 +214,7 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
               ),
             ),
           ),
+        ),
         ),
       ),
     );
