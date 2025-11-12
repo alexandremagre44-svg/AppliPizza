@@ -3,8 +3,13 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/order.dart';
+import '../models/order.dart' as app_order;
 import '../providers/cart_provider.dart';
+
+// Use app_order.Order to refer to our custom Order class
+typedef Order = app_order.Order;
+typedef OrderStatus = app_order.OrderStatus;
+typedef OrderStatusHistory = app_order.OrderStatusHistory;
 
 class FirebaseOrderService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
