@@ -228,9 +228,9 @@ class AdminDashboardScreen extends StatelessWidget {
               color: AppTheme.surfaceWhite,
               borderRadius: BorderRadius.circular(16),
             ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
               // Icône avec fond rouge
               Container(
                 width: 60,
@@ -269,6 +269,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ],
+          ),
           ),
         ),
       ),

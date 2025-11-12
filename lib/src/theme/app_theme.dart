@@ -6,7 +6,21 @@ import 'package:flutter/material.dart';
 class AppTheme {
   // === Pizza Deli'Zza Brand Colors ===
   // Palette principale inspirée du style Pizza Hut premium
-  static const Color primaryRed = Color(0xFFC62828);        // Rouge principal Pizza Deli'Zza
+  static const MaterialColor primaryRed = MaterialColor(
+    0xFFC62828, // Base color (shade 500)
+    <int, Color>{
+      50: Color(0xFFFFEBEE),
+      100: Color(0xFFFFCDD2),
+      200: Color(0xFFEF9A9A),
+      300: Color(0xFFE57373),
+      400: Color(0xFFEF5350),
+      500: Color(0xFFC62828),
+      600: Color(0xFFE53935),
+      700: Color(0xFFD32F2F),
+      800: Color(0xFFC62828),
+      900: Color(0xFFB71C1C),
+    },
+  );
   static const Color primaryRedLight = Color(0xFFEF5350);   // Rouge clair pour hover/accents
   static const Color primaryRedDark = Color(0xFF8E0000);    // Rouge foncé pour ombres
   

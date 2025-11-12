@@ -106,23 +106,23 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.primaryRed,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 12,
-              offset: const Offset(0, -4),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryRed,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
             ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 12,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
             onTap: () => context.push('/cart'),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
@@ -214,6 +214,7 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
               ),
             ),
           ),
+        ),
         ),
       ),
     );

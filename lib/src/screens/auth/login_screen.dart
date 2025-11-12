@@ -116,9 +116,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   child: Form(
                     key: _formKey,
                     child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                     // Logo with enhanced styling
                     Container(
                       width: 140,
@@ -305,6 +305,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       ),
                     ),
                     ],
+                  ),
                   ),
                 ),
               ),
