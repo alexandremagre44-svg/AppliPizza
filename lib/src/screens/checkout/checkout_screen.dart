@@ -72,8 +72,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       return;
     }
 
-    // Créer la commande
-    ref.read(userProvider.notifier).addOrder();
+    // Créer la commande avec les informations de retrait
+    ref.read(userProvider.notifier).addOrder(
+      pickupDate: '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+      pickupTimeSlot: _selectedTimeSlot,
+      customerName: 'Client', // TODO: Récupérer depuis le profil utilisateur
+    );
     
     // Afficher confirmation
     showDialog(

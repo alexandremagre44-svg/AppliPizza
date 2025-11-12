@@ -168,6 +168,13 @@ class AdminDashboardScreen extends StatelessWidget {
                   subtitle: 'Marketing & Newsletters',
                   onTap: () => context.push(AppRoutes.adminMailing),
                 ),
+                _buildAdminCard(
+                  context,
+                  icon: Icons.shopping_bag,
+                  title: 'Commandes',
+                  subtitle: 'Gérer les commandes',
+                  onTap: () => context.push(AppRoutes.adminOrders),
+                ),
               ]),
             ),
           ),

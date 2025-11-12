@@ -31,6 +31,15 @@ dependencies:
   
   # Stockage local pour auth et CRUD
   shared_preferences: ^2.2.2
+  
+  # Son pour les notifications de commandes
+  audioplayers: ^5.2.1
+  
+  # Export CSV
+  csv: ^5.1.1
+  
+  # Formatage de dates
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
