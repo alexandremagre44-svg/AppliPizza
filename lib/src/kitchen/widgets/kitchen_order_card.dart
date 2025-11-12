@@ -92,177 +92,181 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          // Subtle gradient overlay for better text readability
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0x00000000), // Transparent
-                    Color(0x1A000000), // Black at 10% opacity
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-          // Left tap zone for previous status
-          if (widget.onPreviousStatus != null)
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: GestureDetector(
-                onTap: () async {
-                  // Haptic feedback
-                  HapticFeedback.lightImpact();
-                  widget.onPreviousStatus!();
-                },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Stack(
+            children: [
+              // Subtle gradient overlay for better text readability
+              Positioned.fill(
                 child: Container(
-                  color: Colors.transparent,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x00000000), // Transparent
+                        Color(0x1A000000), // Black at 10% opacity
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          
-          // Right tap zone for next status
-          if (widget.onNextStatus != null)
-            Positioned(
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: GestureDetector(
-                onTap: () async {
-                  // Haptic feedback
-                  HapticFeedback.lightImpact();
-                  widget.onNextStatus!();
-                },
-                child: Container(
-                  color: Colors.transparent,
+              
+              // Left tap zone for previous status (50% of card width)
+              if (widget.onPreviousStatus != null)
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: constraints.maxWidth * 0.5,
+                  child: GestureDetector(
+                    onTap: () async {
+                      // Haptic feedback
+                      HapticFeedback.lightImpact();
+                      widget.onPreviousStatus!();
+                    },
+                    child: Container(
+                      color: Colors.transparent,
+                    ),
+                  ),
+                ),
+              
+              // Right tap zone for next status (50% of card width)
+              if (widget.onNextStatus != null)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: constraints.maxWidth * 0.5,
+                  child: GestureDetector(
+                    onTap: () async {
+                      // Haptic feedback
+                      HapticFeedback.lightImpact();
+                      widget.onNextStatus!();
+                    },
+                    child: Container(
+                      color: Colors.transparent,
+                    ),
+                  ),
+                ),
+              
+              // Double-tap detector for opening details
+              Positioned.fill(
+                child: GestureDetector(
+                  onDoubleTap: widget.onTap,
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
                 ),
               ),
-            ),
           
-          // Double-tap detector for opening details
-          Positioned.fill(
-            child: GestureDetector(
-              onDoubleTap: widget.onTap,
-              child: Container(
-                color: Colors.transparent,
-              ),
-            ),
-          ),
-          
-          // Main content
-          Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header: Order number and status badge
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Main content
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '#$orderNumber',
-                      style: const TextStyle(
-                        color: KitchenColors.textPrimary,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    KitchenStatusBadge(
-                      status: widget.order.status,
-                      animate: !widget.order.isViewed,
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 8),
-                
-                // Line 2: Creation time + elapsed time badge
-                ValueListenableBuilder<int>(
-                  valueListenable: _elapsedMinutes,
-                  builder: (context, minutes, child) {
-                    final badgeColor = KitchenColors.getElapsedTimeColor(minutes);
-                    return Row(
+                    // Header: Order number and status badge
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          Icons.access_time,
-                          color: KitchenColors.iconPrimary,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
                         Text(
-                          createdTime,
+                          '#$orderNumber',
                           style: const TextStyle(
-                            color: KitchenColors.textSecondary,
-                            fontSize: 14,
+                            color: KitchenColors.textPrimary,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: badgeColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'Depuis ${minutes}min',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        KitchenStatusBadge(
+                          status: widget.order.status,
+                          animate: !widget.order.isViewed,
                         ),
                       ],
-                    );
-                  },
-                ),
-                
-                // Line 3: Pickup time range
-                if (pickupTimeRange != null) ...[
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.schedule,
-                        color: KitchenColors.iconPrimary,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Retrait: $pickupTimeRange',
-                        style: const TextStyle(
-                          color: KitchenColors.textSecondary,
-                          fontSize: 14,
-                        ),
+                    ),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Line 2: Creation time + elapsed time badge
+                    ValueListenableBuilder<int>(
+                      valueListenable: _elapsedMinutes,
+                      builder: (context, minutes, child) {
+                        final badgeColor = KitchenColors.getElapsedTimeColor(minutes);
+                        return Row(
+                          children: [
+                            const Icon(
+                              Icons.access_time,
+                              color: KitchenColors.iconPrimary,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              createdTime,
+                              style: const TextStyle(
+                                color: KitchenColors.textSecondary,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: badgeColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Depuis ${minutes}min',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    
+                    // Line 3: Pickup time range
+                    if (pickupTimeRange != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.schedule,
+                            color: KitchenColors.iconPrimary,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Retrait: $pickupTimeRange',
+                            style: const TextStyle(
+                              color: KitchenColors.textSecondary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ],
-                
-                const SizedBox(height: 12),
-                
-                // Items block (max 4 lines visible)
-                Expanded(
-                  child: _buildItemsList(),
+                    
+                    const SizedBox(height: 12),
+                    
+                    // Items block (max 4 lines visible)
+                    Expanded(
+                      child: _buildItemsList(),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
