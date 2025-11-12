@@ -374,7 +374,10 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
               color: KitchenConstants.kitchenText,
             ),
             tooltip: 'Actualiser',
-            onPressed: () => _orderService.refresh(),
+            onPressed: () {
+              // Invalidate the provider to force re-subscription to the stream
+              ref.invalidate(ordersStreamProvider);
+            },
           ),
           
           // Exit button
