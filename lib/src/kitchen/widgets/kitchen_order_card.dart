@@ -63,14 +63,34 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
     final createdTime = timeFormat.format(widget.order.date);
     final statusColor = KitchenColors.getStatusBackgroundColor(widget.order.status);
     
-    // Calculate pickup time range
+    // Calculate pickup time range and urgency
     String? pickupTimeRange;
+    int? minutesUntilPickup;
+    bool isUrgent = false;
+    
     if (widget.order.pickupDate != null && widget.order.pickupTimeSlot != null) {
       // Parse the pickup time slot (format: "HH:mm")
       try {
         final parts = widget.order.pickupTimeSlot!.split(':');
+        final dateParts = widget.order.pickupDate!.split('/');
         final hour = int.parse(parts[0]);
         final minute = int.parse(parts[1]);
+        
+        // Create pickup DateTime
+        final pickupDateTime = DateTime(
+          int.parse(dateParts[2]), // year
+          int.parse(dateParts[1]), // month
+          int.parse(dateParts[0]), // day
+          hour,
+          minute,
+        );
+        
+        // Calculate minutes until pickup
+        minutesUntilPickup = pickupDateTime.difference(DateTime.now()).inMinutes;
+        
+        // Mark as urgent if pickup is within 20 minutes
+        isUrgent = minutesUntilPickup <= 20 && minutesUntilPickup >= -5;
+        
         final startTime = '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
         final endTime = '${(hour + 1).toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
         pickupTimeRange = '$startTime-$endTime';
@@ -83,14 +103,35 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
       decoration: BoxDecoration(
         color: statusColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: KitchenColors.cardShadow,
-            blurRadius: 12,
-            spreadRadius: 0,
-            offset: Offset(0, 6),
-          ),
-        ],
+        border: isUrgent 
+          ? Border.all(
+              color: Colors.amber,
+              width: 4,
+            )
+          : null,
+        boxShadow: isUrgent 
+          ? [
+              BoxShadow(
+                color: Colors.amber.withOpacity(0.5),
+                blurRadius: 20,
+                spreadRadius: 4,
+                offset: const Offset(0, 0),
+              ),
+              const BoxShadow(
+                color: KitchenColors.cardShadow,
+                blurRadius: 12,
+                spreadRadius: 0,
+                offset: Offset(0, 6),
+              ),
+            ]
+          : const [
+              BoxShadow(
+                color: KitchenColors.cardShadow,
+                blurRadius: 12,
+                spreadRadius: 0,
+                offset: Offset(0, 6),
+              ),
+            ],
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -113,53 +154,64 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
                 ),
               ),
               
-              // Double-tap detector for opening details (must be BEFORE single tap zones)
+              // Combined gesture detector for all interactions
               Positioned.fill(
-                child: GestureDetector(
-                  onDoubleTap: widget.onTap,
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
+                child: Row(
+                  children: [
+                    // Left zone: tap for previous status (50% width)
+                    if (widget.onPreviousStatus != null)
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            widget.onPreviousStatus!();
+                          },
+                          onDoubleTap: widget.onTap,
+                          child: Container(
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onDoubleTap: widget.onTap,
+                          child: Container(
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      ),
+                    
+                    // Right zone: tap for next status (50% width)
+                    if (widget.onNextStatus != null)
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            widget.onNextStatus!();
+                          },
+                          onDoubleTap: widget.onTap,
+                          child: Container(
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onDoubleTap: widget.onTap,
+                          child: Container(
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              
-              // Left tap zone for previous status (50% of card width)
-              if (widget.onPreviousStatus != null)
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: constraints.maxWidth * 0.5,
-                  child: GestureDetector(
-                    onTap: () async {
-                      // Haptic feedback
-                      HapticFeedback.lightImpact();
-                      widget.onPreviousStatus!();
-                    },
-                    child: Container(
-                      color: Colors.transparent,
-                    ),
-                  ),
-                ),
-              
-              // Right tap zone for next status (50% of card width)
-              if (widget.onNextStatus != null)
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: constraints.maxWidth * 0.5,
-                  child: GestureDetector(
-                    onTap: () async {
-                      // Haptic feedback
-                      HapticFeedback.lightImpact();
-                      widget.onNextStatus!();
-                    },
-                    child: Container(
-                      color: Colors.transparent,
-                    ),
-                  ),
-                ),
           
               // Main content
               Padding(
@@ -171,13 +223,51 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '#$orderNumber',
-                          style: const TextStyle(
-                            color: KitchenColors.textPrimary,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Text(
+                                '#$orderNumber',
+                                style: const TextStyle(
+                                  color: KitchenColors.textPrimary,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              if (isUrgent) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.warning_amber,
+                                        color: Colors.black87,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'URGENT',
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         KitchenStatusBadge(
