@@ -1,13 +1,39 @@
 // lib/src/theme/app_theme.dart
-// Pizza Deli'Zza Visual Identity - Refonte complète
+// Pizza Deli'Zza Visual Identity - Système de design centralisé
+// refactor: centralisation complète du design system → app_theme standard
 
 import 'package:flutter/material.dart';
 
-class AppTheme {
-  // === Pizza Deli'Zza Brand Colors ===
-  // Palette principale inspirée du style Pizza Hut premium
-  static const MaterialColor primaryRed = MaterialColor(
-    0xFFC62828, // Base color (shade 500)
+/// Classe centralisée pour toutes les couleurs de l'application
+class AppColors {
+  // === Couleurs de base Pizza Deli'Zza ===
+  static const Color primaryRed = Color(0xFFC62828);        // Rouge principal #C62828
+  static const Color primaryRedLight = Color(0xFFE53935);   // Rouge clair #E53935
+  static const Color primaryRedDark = Color(0xFF8E0000);    // Rouge foncé pour ombres
+  
+  // Couleurs neutres
+  static const Color surfaceWhite = Color(0xFFFFFFFF);      // Blanc pur
+  static const Color backgroundLight = Color(0xFAFAFA);     // Gris très clair #FAFAFA
+  static const Color textDark = Color(0xFF222222);          // Noir doux #222222
+  static const Color textMedium = Color(0xFF666666);        // Gris moyen
+  static const Color textLight = Color(0xFF999999);         // Gris clair
+  
+  // Couleurs d'accentuation
+  static const Color accentGold = Color(0xFFFFB300);        // Or/jaune pour badges premium
+  static const Color secondaryAmber = Color(0xFFFFC107);    // Ambre pour accents secondaires
+  static const Color backgroundCream = Color(0xFFFFF8E1);   // Crème pour arrière-plans doux
+  static const Color accentOrange = Color(0xFFFF9800);      // Orange pour accents
+  static const Color accentGreen = Color(0xFF4CAF50);       // Vert pour accents
+  
+  // Status Colors
+  static const Color successGreen = Color(0xFF4CAF50);
+  static const Color errorRed = Color(0xFFD32F2F);
+  static const Color warningOrange = Color(0xFFFF9800);
+  static const Color infoBlue = Color(0xFF2196F3);
+  
+  // MaterialColor pour le theme
+  static const MaterialColor primaryRedSwatch = MaterialColor(
+    0xFFC62828,
     <int, Color>{
       50: Color(0xFFFFEBEE),
       100: Color(0xFFFFCDD2),
@@ -21,28 +47,300 @@ class AppTheme {
       900: Color(0xFFB71C1C),
     },
   );
-  static const Color primaryRedLight = Color(0xFFEF5350);   // Rouge clair pour hover/accents
-  static const Color primaryRedDark = Color(0xFF8E0000);    // Rouge foncé pour ombres
+}
+
+/// Classe centralisée pour tous les styles de texte
+class AppTextStyles {
+  // Grands titres
+  static const TextStyle displayLarge = TextStyle(
+    fontSize: 32,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textDark,
+    letterSpacing: -0.5,
+    fontFamily: 'Poppins',
+  );
   
-  // Couleurs neutres
-  static const Color surfaceWhite = Color(0xFFFFFFFF);      // Blanc pur
-  static const Color backgroundLight = Color(0xFAFAFA);     // Gris très clair (#FAFAFA pour meilleur contraste)
-  static const Color textDark = Color(0xFF222222);          // Noir doux
-  static const Color textMedium = Color(0xFF666666);        // Gris moyen
-  static const Color textLight = Color(0xFF999999);         // Gris clair
+  static const TextStyle displayMedium = TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textDark,
+    letterSpacing: -0.3,
+    fontFamily: 'Poppins',
+  );
   
-  // Couleurs d'accentuation (utilisées avec parcimonie)
-  static const Color accentGold = Color(0xFFFFB300);        // Or/jaune pour badges premium
-  static const Color secondaryAmber = Color(0xFFFFC107);    // Ambre pour accents secondaires
-  static const Color backgroundCream = Color(0xFFFFF8E1);   // Crème pour arrière-plans doux
-  static const Color accentOrange = Color(0xFFFF9800);      // Orange pour accents
-  static const Color accentGreen = Color(0xFF4CAF50);       // Vert pour accents
+  // Titres de section
+  static const TextStyle headlineLarge = TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textDark,
+    fontFamily: 'Poppins',
+  );
   
-  // Status Colors
-  static const Color successGreen = Color(0xFF4CAF50);
-  static const Color errorRed = Color(0xFFD32F2F);
-  static const Color warningOrange = Color(0xFFFF9800);
-  static const Color infoBlue = Color(0xFF2196F3);
+  static const TextStyle headlineMedium = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textDark,
+    fontFamily: 'Poppins',
+  );
+  
+  static const TextStyle headlineSmall = TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textDark,
+    fontFamily: 'Poppins',
+  );
+  
+  // Titres de cartes
+  static const TextStyle titleLarge = TextStyle(
+    fontSize: 17,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textDark,
+    fontFamily: 'Poppins',
+  );
+  
+  static const TextStyle titleMedium = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textDark,
+    fontFamily: 'Poppins',
+  );
+  
+  static const TextStyle titleSmall = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textDark,
+    fontFamily: 'Poppins',
+  );
+  
+  // Corps de texte
+  static const TextStyle bodyLarge = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textDark,
+    height: 1.5,
+    fontFamily: 'Poppins',
+  );
+  
+  static const TextStyle bodyMedium = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textMedium,
+    height: 1.5,
+    fontFamily: 'Poppins',
+  );
+  
+  static const TextStyle bodySmall = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textLight,
+    height: 1.4,
+    fontFamily: 'Poppins',
+  );
+  
+  // Labels
+  static const TextStyle labelLarge = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textDark,
+    letterSpacing: 0.3,
+    fontFamily: 'Poppins',
+  );
+  
+  static const TextStyle labelMedium = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textMedium,
+    letterSpacing: 0.3,
+    fontFamily: 'Poppins',
+  );
+  
+  static const TextStyle labelSmall = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textLight,
+    letterSpacing: 0.3,
+    fontFamily: 'Poppins',
+  );
+  
+  // Boutons
+  static const TextStyle button = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.3,
+    fontFamily: 'Poppins',
+  );
+  
+  // Prix
+  static const TextStyle price = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: AppColors.primaryRed,
+    fontFamily: 'Poppins',
+  );
+  
+  static const TextStyle priceLarge = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: AppColors.primaryRed,
+    fontFamily: 'Poppins',
+  );
+}
+
+/// Classe centralisée pour tous les espacements (marges et paddings)
+class AppSpacing {
+  // Espacements standard
+  static const double xs = 4.0;
+  static const double sm = 8.0;
+  static const double md = 12.0;
+  static const double lg = 16.0;
+  static const double xl = 20.0;
+  static const double xxl = 24.0;
+  static const double xxxl = 32.0;
+  
+  // EdgeInsets prédéfinis
+  static const EdgeInsets paddingXS = EdgeInsets.all(xs);
+  static const EdgeInsets paddingSM = EdgeInsets.all(sm);
+  static const EdgeInsets paddingMD = EdgeInsets.all(md);
+  static const EdgeInsets paddingLG = EdgeInsets.all(lg);
+  static const EdgeInsets paddingXL = EdgeInsets.all(xl);
+  static const EdgeInsets paddingXXL = EdgeInsets.all(xxl);
+  static const EdgeInsets paddingXXXL = EdgeInsets.all(xxxl);
+  
+  // Padding horizontal
+  static const EdgeInsets paddingHorizontalSM = EdgeInsets.symmetric(horizontal: sm);
+  static const EdgeInsets paddingHorizontalMD = EdgeInsets.symmetric(horizontal: md);
+  static const EdgeInsets paddingHorizontalLG = EdgeInsets.symmetric(horizontal: lg);
+  static const EdgeInsets paddingHorizontalXL = EdgeInsets.symmetric(horizontal: xl);
+  static const EdgeInsets paddingHorizontalXXL = EdgeInsets.symmetric(horizontal: xxl);
+  
+  // Padding vertical
+  static const EdgeInsets paddingVerticalSM = EdgeInsets.symmetric(vertical: sm);
+  static const EdgeInsets paddingVerticalMD = EdgeInsets.symmetric(vertical: md);
+  static const EdgeInsets paddingVerticalLG = EdgeInsets.symmetric(vertical: lg);
+  static const EdgeInsets paddingVerticalXL = EdgeInsets.symmetric(vertical: xl);
+  
+  // Padding pour boutons
+  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: xxl, vertical: 14);
+  static const EdgeInsets buttonPaddingSmall = EdgeInsets.symmetric(horizontal: lg, vertical: 10);
+  
+  // Padding pour cartes
+  static const EdgeInsets cardPadding = EdgeInsets.all(lg);
+  static const EdgeInsets cardPaddingLarge = EdgeInsets.all(xxl);
+  
+  // Padding pour écrans
+  static const EdgeInsets screenPadding = EdgeInsets.all(lg);
+  static const EdgeInsets screenPaddingLarge = EdgeInsets.all(xxl);
+}
+
+/// Classe centralisée pour tous les radius (coins arrondis)
+class AppRadius {
+  // Radius standard
+  static const double xs = 4.0;
+  static const double sm = 8.0;
+  static const double md = 12.0;
+  static const double lg = 16.0;
+  static const double xl = 20.0;
+  static const double xxl = 24.0;
+  
+  // BorderRadius prédéfinis
+  static final BorderRadius radiusXS = BorderRadius.circular(xs);
+  static final BorderRadius radiusSM = BorderRadius.circular(sm);
+  static final BorderRadius radiusMD = BorderRadius.circular(md);
+  static final BorderRadius radiusLG = BorderRadius.circular(lg);
+  static final BorderRadius radiusXL = BorderRadius.circular(xl);
+  static final BorderRadius radiusXXL = BorderRadius.circular(xxl);
+  
+  // BorderRadius pour cartes (8px standard)
+  static final BorderRadius card = BorderRadius.circular(sm);
+  static final BorderRadius cardLarge = BorderRadius.circular(lg);
+  
+  // BorderRadius pour boutons (24px standard)
+  static final BorderRadius button = BorderRadius.circular(md);
+  static final BorderRadius buttonLarge = BorderRadius.circular(xxl);
+  
+  // BorderRadius pour inputs
+  static final BorderRadius input = BorderRadius.circular(md);
+  
+  // BorderRadius pour badges
+  static final BorderRadius badge = BorderRadius.circular(sm);
+}
+
+/// Classe centralisée pour toutes les ombres
+class AppShadows {
+  // Ombre douce (soft)
+  static List<BoxShadow> soft = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.08),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+    ),
+  ];
+  
+  // Ombre moyenne
+  static List<BoxShadow> medium = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.1),
+      blurRadius: 12,
+      offset: const Offset(0, 4),
+    ),
+  ];
+  
+  // Ombre profonde (deep)
+  static List<BoxShadow> deep = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.15),
+      blurRadius: 16,
+      offset: const Offset(0, 6),
+    ),
+  ];
+  
+  // Ombre avec couleur rouge (pour éléments primaires)
+  static List<BoxShadow> primary = [
+    BoxShadow(
+      color: AppColors.primaryRed.withOpacity(0.3),
+      blurRadius: 12,
+      offset: const Offset(0, 4),
+    ),
+  ];
+  
+  // Ombre pour cartes
+  static List<BoxShadow> card = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.1),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+    ),
+  ];
+  
+  // Ombre pour éléments flottants
+  static List<BoxShadow> floating = [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.15),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+    ),
+  ];
+}
+
+class AppTheme {
+  // Rétrocompatibilité: Aliases vers AppColors
+  static const Color primaryRed = AppColors.primaryRed;
+  static const Color primaryRedLight = AppColors.primaryRedLight;
+  static const Color primaryRedDark = AppColors.primaryRedDark;
+  static const Color surfaceWhite = AppColors.surfaceWhite;
+  static const Color backgroundLight = AppColors.backgroundLight;
+  static const Color textDark = AppColors.textDark;
+  static const Color textMedium = AppColors.textMedium;
+  static const Color textLight = AppColors.textLight;
+  static const Color accentGold = AppColors.accentGold;
+  static const Color secondaryAmber = AppColors.secondaryAmber;
+  static const Color backgroundCream = AppColors.backgroundCream;
+  static const Color accentOrange = AppColors.accentOrange;
+  static const Color accentGreen = AppColors.accentGreen;
+  static const Color successGreen = AppColors.successGreen;
+  static const Color errorRed = AppColors.errorRed;
+  static const Color warningOrange = AppColors.warningOrange;
+  static const Color infoBlue = AppColors.infoBlue;
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -50,123 +348,99 @@ class AppTheme {
       
       // === Color Scheme Pizza Deli'Zza ===
       colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryRed,
-        primary: primaryRed,
-        secondary: primaryRedLight,
-        tertiary: accentGold,
-        surface: surfaceWhite,
-        background: backgroundLight,
-        error: errorRed,
+        seedColor: AppColors.primaryRed,
+        primary: AppColors.primaryRed,
+        secondary: AppColors.primaryRedLight,
+        tertiary: AppColors.accentGold,
+        surface: AppColors.surfaceWhite,
+        background: AppColors.backgroundLight,
+        error: AppColors.errorRed,
         brightness: Brightness.light,
       ),
       
-      scaffoldBackgroundColor: backgroundLight,
+      scaffoldBackgroundColor: AppColors.backgroundLight,
       
       // === AppBar Theme - Fixed Red Header ===
       // En-tête rouge fixe avec logo centré pour client
       // En-tête rouge avec logo et bouton déconnexion pour admin
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: primaryRed,
-        foregroundColor: surfaceWhite,
-        titleTextStyle: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: surfaceWhite,
+        backgroundColor: AppColors.primaryRed,
+        foregroundColor: AppColors.surfaceWhite,
+        titleTextStyle: AppTextStyles.headlineMedium.copyWith(
+          color: AppColors.surfaceWhite,
           letterSpacing: 0.5,
-          fontFamily: 'Poppins',
         ),
-        iconTheme: IconThemeData(
-          color: surfaceWhite,
+        iconTheme: const IconThemeData(
+          color: AppColors.surfaceWhite,
           size: 24,
         ),
       ),
       
       // === Card Theme - Cartes produits arrondies ===
-      // Cartes avec ombres douces et coins arrondis
+      // Cartes avec ombres douces et coins arrondis (8px radius standard)
       cardTheme: CardThemeData(
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.1),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.card,
         ),
         clipBehavior: Clip.antiAlias,
-        color: surfaceWhite,
+        color: AppColors.surfaceWhite,
       ),
       
-      // === Button Themes - Boutons arrondis rouges ===
+      // === Button Themes - Boutons arrondis rouges (24px radius standard) ===
       // Bouton principal rouge avec coins arrondis
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryRed,
-          foregroundColor: surfaceWhite,
+          backgroundColor: AppColors.primaryRed,
+          foregroundColor: AppColors.surfaceWhite,
           elevation: 2,
-          shadowColor: primaryRed.withOpacity(0.3),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shadowColor: AppColors.primaryRed.withOpacity(0.3),
+          padding: AppSpacing.buttonPadding,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.button,
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.3,
-            fontFamily: 'Poppins',
-          ),
+          textStyle: AppTextStyles.button,
         ),
       ),
       
       // Bouton secondaire transparent
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primaryRed,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          foregroundColor: AppColors.primaryRed,
+          padding: AppSpacing.buttonPaddingSmall,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.button,
           ),
-          textStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.3,
-            fontFamily: 'Poppins',
-          ),
+          textStyle: AppTextStyles.titleSmall,
         ),
       ),
       
       // Bouton avec bordure rouge
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primaryRed,
-          side: const BorderSide(color: primaryRed, width: 1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          foregroundColor: AppColors.primaryRed,
+          side: const BorderSide(color: AppColors.primaryRed, width: 1.5),
+          padding: AppSpacing.buttonPadding,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.button,
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.3,
-            fontFamily: 'Poppins',
-          ),
+          textStyle: AppTextStyles.button,
         ),
       ),
       
       // === Bottom Navigation Bar - Non utilisé pour le fixed cart bar ===
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: surfaceWhite,
-        selectedItemColor: primaryRed,
-        unselectedItemColor: textLight,
-        selectedLabelStyle: TextStyle(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: AppColors.surfaceWhite,
+        selectedItemColor: AppColors.primaryRed,
+        unselectedItemColor: AppColors.textLight,
+        selectedLabelStyle: AppTextStyles.labelSmall.copyWith(
           fontWeight: FontWeight.w600,
-          fontSize: 11,
-          fontFamily: 'Poppins',
         ),
-        unselectedLabelStyle: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 11,
-          fontFamily: 'Poppins',
-        ),
+        unselectedLabelStyle: AppTextStyles.labelSmall,
         elevation: 8,
         type: BottomNavigationBarType.fixed,
         showUnselectedLabels: true,
@@ -176,146 +450,63 @@ class AppTheme {
       // Champs arrondis avec label au-dessus
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfaceWhite,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        fillColor: AppColors.surfaceWhite,
+        contentPadding: AppSpacing.paddingLG,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppRadius.input,
           borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppRadius.input,
           borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryRed, width: 2),
+          borderRadius: AppRadius.input,
+          borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: errorRed),
+          borderRadius: AppRadius.input,
+          borderSide: const BorderSide(color: AppColors.errorRed),
         ),
-        labelStyle: const TextStyle(
-          color: textMedium,
-          fontSize: 14,
-          fontFamily: 'Poppins',
+        labelStyle: AppTextStyles.titleSmall.copyWith(
+          color: AppColors.textMedium,
         ),
-        floatingLabelStyle: const TextStyle(
-          color: primaryRed,
-          fontSize: 14,
+        floatingLabelStyle: AppTextStyles.titleSmall.copyWith(
+          color: AppColors.primaryRed,
           fontWeight: FontWeight.w600,
-          fontFamily: 'Poppins',
         ),
       ),
       
       // === Snackbar / Alertes - Fond rouge clair + texte blanc ===
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: primaryRed,
-        contentTextStyle: const TextStyle(
-          color: surfaceWhite,
-          fontSize: 14,
+        backgroundColor: AppColors.primaryRed,
+        contentTextStyle: AppTextStyles.titleSmall.copyWith(
+          color: AppColors.surfaceWhite,
           fontWeight: FontWeight.w500,
-          fontFamily: 'Poppins',
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppRadius.button,
         ),
         behavior: SnackBarBehavior.floating,
         elevation: 3,
       ),
       
       // === Typography - Police Poppins (ou Nunito) ===
-      // Hiérarchie typographique claire avec Poppins
+      // Hiérarchie typographique claire avec Poppins via AppTextStyles
       textTheme: const TextTheme(
-        // Grands titres
-        displayLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: textDark,
-          letterSpacing: -0.5,
-          fontFamily: 'Poppins',
-        ),
-        displayMedium: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: textDark,
-          letterSpacing: -0.3,
-          fontFamily: 'Poppins',
-        ),
-        // Titres de section
-        headlineLarge: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: textDark,
-          fontFamily: 'Poppins',
-        ),
-        headlineMedium: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: textDark,
-          fontFamily: 'Poppins',
-        ),
-        headlineSmall: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: textDark,
-          fontFamily: 'Poppins',
-        ),
-        // Titres de cartes
-        titleLarge: TextStyle(
-          fontSize: 17,
-          fontWeight: FontWeight.w600,
-          color: textDark,
-          fontFamily: 'Poppins',
-        ),
-        titleMedium: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: textDark,
-          fontFamily: 'Poppins',
-        ),
-        titleSmall: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: textDark,
-          fontFamily: 'Poppins',
-        ),
-        // Corps de texte
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.normal,
-          color: textDark,
-          height: 1.5,
-          fontFamily: 'Poppins',
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-          color: textMedium,
-          height: 1.5,
-          fontFamily: 'Poppins',
-        ),
-        bodySmall: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.normal,
-          color: textLight,
-          height: 1.4,
-          fontFamily: 'Poppins',
-        ),
-        // Labels
-        labelLarge: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: textDark,
-          letterSpacing: 0.3,
-          fontFamily: 'Poppins',
-        ),
-        labelMedium: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: textMedium,
-          letterSpacing: 0.3,
-          fontFamily: 'Poppins',
-        ),
+        displayLarge: AppTextStyles.displayLarge,
+        displayMedium: AppTextStyles.displayMedium,
+        headlineLarge: AppTextStyles.headlineLarge,
+        headlineMedium: AppTextStyles.headlineMedium,
+        headlineSmall: AppTextStyles.headlineSmall,
+        titleLarge: AppTextStyles.titleLarge,
+        titleMedium: AppTextStyles.titleMedium,
+        titleSmall: AppTextStyles.titleSmall,
+        bodyLarge: AppTextStyles.bodyLarge,
+        bodyMedium: AppTextStyles.bodyMedium,
+        bodySmall: AppTextStyles.bodySmall,
+        labelLarge: AppTextStyles.labelLarge,
+        labelMedium: AppTextStyles.labelMedium,
       ),
       
       // Famille de police par défaut
