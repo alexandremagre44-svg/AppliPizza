@@ -113,6 +113,16 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
                 ),
               ),
               
+              // Double-tap detector for opening details (must be BEFORE single tap zones)
+              Positioned.fill(
+                child: GestureDetector(
+                  onDoubleTap: widget.onTap,
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
+                ),
+              ),
+              
               // Left tap zone for previous status (50% of card width)
               if (widget.onPreviousStatus != null)
                 Positioned(
@@ -150,16 +160,6 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
                     ),
                   ),
                 ),
-              
-              // Double-tap detector for opening details
-              Positioned.fill(
-                child: GestureDetector(
-                  onDoubleTap: widget.onTap,
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
-                ),
-              ),
           
               // Main content
               Padding(
@@ -331,21 +331,110 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
           ],
         ),
         if (item.customDescription != null && item.customDescription!.isNotEmpty) ...[
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Padding(
             padding: const EdgeInsets.only(left: 28),
+            child: _buildCustomizationDetails(item.customDescription!),
+          ),
+        ],
+      ],
+    );
+  }
+  
+  Widget _buildCustomizationDetails(String customDescription) {
+    // Parse the custom description to extract and color-code parts
+    final parts = customDescription.split(' • ');
+    final List<Widget> widgets = [];
+    
+    for (final part in parts) {
+      if (part.startsWith('Sans:')) {
+        // Removed ingredients - show in red
+        final ingredients = part.substring(5).trim();
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
             child: Text(
-              item.customDescription!,
+              '- $ingredients',
+              style: const TextStyle(
+                color: Colors.red,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        );
+      } else if (part.startsWith('Avec:')) {
+        // Added ingredients - show in green
+        final ingredients = part.substring(5).trim();
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Text(
+              '+ $ingredients',
+              style: const TextStyle(
+                color: Colors.green,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        );
+      } else if (part.startsWith('Taille:')) {
+        // Size - show normally
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Text(
+              part,
               style: const TextStyle(
                 color: KitchenColors.textSecondary,
                 fontSize: 13,
               ),
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
-        ],
-      ],
+        );
+      } else if (part.startsWith('Note:')) {
+        // Note - show in yellow
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Text(
+              part,
+              style: const TextStyle(
+                color: Colors.yellow,
+                fontSize: 13,
+                fontStyle: FontStyle.italic,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        );
+      }
+    }
+    
+    if (widgets.isEmpty) {
+      // Fallback if no recognized format
+      return Text(
+        customDescription,
+        style: const TextStyle(
+          color: KitchenColors.textSecondary,
+          fontSize: 13,
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: widgets,
     );
   }
   
