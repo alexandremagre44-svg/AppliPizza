@@ -112,7 +112,7 @@ class MockProductRepository implements ProductRepository {
     }
     
     developer.log('✅ Repository: Total de ${allProducts.length} produits fusionnés');
-    developer.log('📊 Repository: Catégories présentes: ${allProducts.values.map((p) => p.category).toSet().join(", ")}');
+    developer.log('📊 Repository: Catégories présentes: ${allProducts.values.map((p) => p.category.value).toSet().join(", ")}');
     
     // Trier les produits par ordre (priorité)
     final sortedProducts = allProducts.values.toList()

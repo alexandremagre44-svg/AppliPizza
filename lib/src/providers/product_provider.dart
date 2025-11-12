@@ -47,8 +47,8 @@ final productsByCategoryProvider = FutureProvider.autoDispose<Map<String, List<P
 
   final Map<String, List<Product>> groupedProducts = {};
   for (var product in products) {
-    // S'assurer que la catégorie n'est pas nulle ou vide
-    final category = product.category.isNotEmpty ? product.category : 'Autres';
+    // Use the enum value as the category key
+    final category = product.category.value;
 
     if (!groupedProducts.containsKey(category)) {
       groupedProducts[category] = [];

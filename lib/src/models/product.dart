@@ -1,12 +1,58 @@
 // lib/src/models/product.dart
 
+// ===============================================
+// ENUMS FOR TYPE SAFETY
+// ===============================================
+
+/// Product category enum for type safety
+enum ProductCategory {
+  pizza('Pizza'),
+  menus('Menus'),
+  boissons('Boissons'),
+  desserts('Desserts');
+
+  const ProductCategory(this.value);
+  final String value;
+
+  /// Convert from string to enum, with fallback to Pizza
+  static ProductCategory fromString(String value) {
+    return ProductCategory.values.firstWhere(
+      (e) => e.value.toLowerCase() == value.toLowerCase(),
+      orElse: () => ProductCategory.pizza,
+    );
+  }
+}
+
+/// Display spot enum for type safety
+enum DisplaySpot {
+  home('home'),
+  promotions('promotions'),
+  new_('new'),
+  all('all');
+
+  const DisplaySpot(this.value);
+  final String value;
+
+  /// Convert from string to enum, with fallback to all
+  static DisplaySpot fromString(String value) {
+    return DisplaySpot.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => DisplaySpot.all,
+    );
+  }
+}
+
+// ===============================================
+// PRODUCT MODEL
+// ===============================================
+
 class Product {
   final String id;
   final String name;
   final String description;
   final double price;
   final String imageUrl;
-  final String category;
+  final ProductCategory category;
   final bool isMenu;
   final List<String> baseIngredients; 
   // NOUVEAU: Propriétés spécifiques aux menus
@@ -16,7 +62,7 @@ class Product {
   final bool isFeatured;
   // NOUVEAU: Gestion de l'affichage et de l'état
   final bool isActive; // Produit actif ou inactif
-  final String displaySpot; // Où afficher le produit: 'home', 'promotions', 'new', 'all'
+  final DisplaySpot displaySpot; // Où afficher le produit: 'home', 'promotions', 'new', 'all'
   final int order; // Ordre d'affichage (priorité numérique)
 
   Product({
@@ -32,7 +78,7 @@ class Product {
     this.drinkCount = 0, // Par défaut à 0
     this.isFeatured = false, // Par défaut non mis en avant
     this.isActive = true, // Par défaut actif
-    this.displaySpot = 'all', // Par défaut affiché partout
+    this.displaySpot = DisplaySpot.all, // Par défaut affiché partout
     this.order = 0, // Par défaut ordre 0
   });
 
@@ -43,14 +89,14 @@ class Product {
     String? description,
     double? price,
     String? imageUrl,
-    String? category,
+    ProductCategory? category,
     bool? isMenu,
     List<String>? baseIngredients,
     int? pizzaCount,
     int? drinkCount,
     bool? isFeatured,
     bool? isActive,
-    String? displaySpot,
+    DisplaySpot? displaySpot,
     int? order,
   }) {
     return Product(
@@ -79,14 +125,14 @@ class Product {
       'description': description,
       'price': price,
       'imageUrl': imageUrl,
-      'category': category,
+      'category': category.value,
       'isMenu': isMenu,
       'baseIngredients': baseIngredients,
       'pizzaCount': pizzaCount,
       'drinkCount': drinkCount,
       'isFeatured': isFeatured,
       'isActive': isActive,
-      'displaySpot': displaySpot,
+      'displaySpot': displaySpot.value,
       'order': order,
     };
   }
@@ -99,7 +145,7 @@ class Product {
       description: json['description'] as String,
       price: (json['price'] as num).toDouble(),
       imageUrl: json['imageUrl'] as String,
-      category: json['category'] as String,
+      category: ProductCategory.fromString(json['category'] as String),
       isMenu: json['isMenu'] as bool? ?? false,
       baseIngredients: (json['baseIngredients'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -110,7 +156,7 @@ class Product {
       isFeatured: json['isFeatured'] as bool? ?? false,
       // Nouveaux champs avec valeurs par défaut pour rétrocompatibilité
       isActive: json['isActive'] as bool? ?? true,
-      displaySpot: json['displaySpot'] as String? ?? 'all',
+      displaySpot: DisplaySpot.fromString(json['displaySpot'] as String? ?? 'all'),
       order: json['order'] as int? ?? 0,
     );
   }
