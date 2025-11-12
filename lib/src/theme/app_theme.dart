@@ -19,6 +19,10 @@ class AppColors {
   static const Color textMedium = Color(0xFF666666);        // Gris moyen
   static const Color textLight = Color(0xFF999999);         // Gris clair
   
+  // Accent colors
+  static const Color accentGold = Color(0xFFFFD700);        // Gold accent
+  static const Color accentGreen = Color(0xFF4CAF50);       // Green accent
+  
   // Status Colors uniquement (pas d'accents orange/jaune)
   static const Color successGreen = Color(0xFF4CAF50);
   static const Color errorRed = Color(0xFFD32F2F);
@@ -326,6 +330,8 @@ class AppTheme {
   static const Color textDark = AppColors.textDark;
   static const Color textMedium = AppColors.textMedium;
   static const Color textLight = AppColors.textLight;
+  static const Color accentGold = AppColors.accentGold;
+  static const Color accentGreen = AppColors.accentGreen;
   static const Color successGreen = AppColors.successGreen;
   static const Color errorRed = AppColors.errorRed;
   static const Color warningOrange = AppColors.warningOrange;

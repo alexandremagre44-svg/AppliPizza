@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../models/product.dart';
+import '../../theme/app_theme.dart';
 
 const _uuid = Uuid();
 
