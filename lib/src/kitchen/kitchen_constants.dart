@@ -18,7 +18,7 @@ class KitchenConstants {
   static const double gridChildAspectRatio = 1.3;
   
   // Card dimensions for responsive layout
-  static const double targetCardHeight = 380.0; // Target height for desktop cards
+  static const double targetCardHeight = 280.0; // Target height for desktop cards (more horizontal)
   static const double gridSpacing = 16.0; // Gap between cards
   
   // Status colors for kitchen mode (high contrast on black background)

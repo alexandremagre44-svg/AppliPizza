@@ -384,25 +384,172 @@ class KitchenOrderDetail extends StatelessWidget {
               ),
             ],
           ),
-          if (item.customDescription != null) ...[
+          if (item.customDescription != null && item.customDescription!.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                item.customDescription!,
-                style: const TextStyle(
-                  color: Colors.blue,
-                  fontSize: 14,
-                ),
-              ),
-            ),
+            _buildCustomizationDetails(item.customDescription!),
           ],
         ],
       ),
+    );
+  }
+
+  Widget _buildCustomizationDetails(String customDescription) {
+    // Parse the custom description to extract and color-code parts
+    final parts = customDescription.split(' • ');
+    final List<Widget> widgets = [];
+    
+    for (final part in parts) {
+      if (part.startsWith('Sans:')) {
+        // Removed ingredients - show in red
+        final ingredients = part.substring(5).trim();
+        widgets.add(
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            margin: const EdgeInsets.only(bottom: 4),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.red.withOpacity(0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.remove_circle, color: Colors.red, size: 16),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    ingredients,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else if (part.startsWith('Avec:')) {
+        // Added ingredients - show in green
+        final ingredients = part.substring(5).trim();
+        widgets.add(
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            margin: const EdgeInsets.only(bottom: 4),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.green.withOpacity(0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.add_circle, color: Colors.green, size: 16),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    ingredients,
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else if (part.startsWith('Taille:')) {
+        // Size - show normally
+        widgets.add(
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            margin: const EdgeInsets.only(bottom: 4),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.blue.withOpacity(0.3)),
+            ),
+            child: Text(
+              part,
+              style: const TextStyle(
+                color: Colors.blue,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        );
+      } else if (part.startsWith('Note:')) {
+        // Note - show in yellow
+        widgets.add(
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            margin: const EdgeInsets.only(bottom: 4),
+            decoration: BoxDecoration(
+              color: Colors.yellow.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.yellow.withOpacity(0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.note, color: Colors.yellow, size: 16),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    part.substring(5).trim(),
+                    style: const TextStyle(
+                      color: Colors.yellow,
+                      fontSize: 14,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else if (part.isNotEmpty) {
+        // Other parts - show normally
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              part,
+              style: const TextStyle(
+                color: KitchenConstants.kitchenTextSecondary,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        );
+      }
+    }
+    
+    if (widgets.isEmpty) {
+      // Fallback if no recognized format
+      return Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.blue.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          customDescription,
+          style: const TextStyle(
+            color: Colors.blue,
+            fontSize: 14,
+          ),
+        ),
+      );
+    }
+    
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: widgets,
     );
   }
 

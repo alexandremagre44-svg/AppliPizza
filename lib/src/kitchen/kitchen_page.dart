@@ -187,9 +187,14 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
         // Ignore parsing errors
       }
       
-      // If both have pickup times, sort by pickup time
+      // If both have pickup times, sort by pickup time, then by creation time as tiebreaker
       if (pickupA != null && pickupB != null) {
-        return pickupA.compareTo(pickupB);
+        final pickupComparison = pickupA.compareTo(pickupB);
+        if (pickupComparison != 0) {
+          return pickupComparison;
+        }
+        // Same pickup time, use creation time as tiebreaker (first ordered comes first)
+        return a.date.compareTo(b.date);
       }
       
       // If only one has pickup time, prioritize it
