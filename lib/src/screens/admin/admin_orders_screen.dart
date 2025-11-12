@@ -536,6 +536,8 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
 }
 
 class _FilterDialog extends ConsumerWidget {
+  const _FilterDialog();
+  
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final viewState = ref.watch(ordersViewProvider);
