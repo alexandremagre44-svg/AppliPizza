@@ -192,7 +192,11 @@ class _SubscribersTabState extends State<SubscribersTab> {
         TextEditingController(text: subscriber?.email ?? '');
     List<String> selectedTags =
         List<String>.from(subscriber?.tags ?? ['client']);
+    // Ensure status is always valid
     String status = subscriber?.status ?? 'active';
+    if (status != 'active' && status != 'unsubscribed') {
+      status = 'active';
+    }
     bool consent = subscriber?.consent ?? true;
 
     final result = await showDialog<bool>(

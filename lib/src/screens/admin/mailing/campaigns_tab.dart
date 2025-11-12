@@ -211,7 +211,15 @@ class _CampaignsTabState extends State<CampaignsTab> {
   Future<void> _showCampaignDialog({Campaign? campaign}) async {
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: campaign?.name ?? '');
-    String selectedTemplateId = campaign?.templateId ?? (_templates.isNotEmpty ? _templates.first.id : '');
+    
+    // Validate that selectedTemplateId exists in the templates list
+    String selectedTemplateId = '';
+    if (campaign?.templateId != null && _templates.any((t) => t.id == campaign!.templateId)) {
+      selectedTemplateId = campaign!.templateId;
+    } else if (_templates.isNotEmpty) {
+      selectedTemplateId = _templates.first.id;
+    }
+    
     String selectedSegment = campaign?.segment ?? 'all';
     DateTime? scheduleDate = campaign?.scheduleAt;
     bool sendNow = campaign?.scheduleAt == null;
@@ -296,29 +304,50 @@ class _CampaignsTabState extends State<CampaignsTab> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          DropdownButtonFormField<String>(
-                            value: selectedTemplateId,
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.description, color: AppTheme.primaryRed),
-                            ),
-                            items: _templates.map((template) {
-                              return DropdownMenuItem(
-                                value: template.id,
-                                child: Text(template.name),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                setDialogState(() => selectedTemplateId = value);
-                              }
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Sélectionnez un modèle';
-                              }
-                              return null;
-                            },
-                          ),
+                          _templates.isEmpty
+                              ? Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.orange.shade200),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.warning, color: Colors.orange.shade700),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          'Aucun modèle disponible',
+                                          style: TextStyle(color: Colors.orange.shade900),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : DropdownButtonFormField<String>(
+                                  value: selectedTemplateId.isEmpty ? null : selectedTemplateId,
+                                  decoration: InputDecoration(
+                                    prefixIcon: Icon(Icons.description, color: AppTheme.primaryRed),
+                                  ),
+                                  items: _templates.map((template) {
+                                    return DropdownMenuItem(
+                                      value: template.id,
+                                      child: Text(template.name),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      setDialogState(() => selectedTemplateId = value);
+                                    }
+                                  },
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Sélectionnez un modèle';
+                                    }
+                                    return null;
+                                  },
+                                ),
                           const SizedBox(height: 20),
                           Text(
                             'Segment de destinataires',
