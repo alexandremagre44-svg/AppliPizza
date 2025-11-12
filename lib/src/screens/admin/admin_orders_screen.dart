@@ -53,7 +53,7 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder: (context) => _FilterDialog(),
+      builder: (context) => const _FilterDialog(),
     );
   }
   
@@ -191,6 +191,7 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
         label: const Text('Test Data (disabled)'),
         backgroundColor: AppColors.infoBlue,
       ),
+      */
       body: showSplitView
           ? Row(
               children: [
