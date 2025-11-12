@@ -15,6 +15,9 @@ abstract class FirestoreProductService {
   Future<List<Product>> loadDrinks();
   Future<List<Product>> loadDesserts();
   
+  // OPTIMIZATION: Load all products at once instead of separate calls per category
+  Future<List<Product>> loadAllProducts();
+  
   // Fonction centralisée pour charger par catégorie
   Future<List<Product>> loadProductsByCategory(String category);
   
@@ -54,6 +57,12 @@ class MockFirestoreProductService implements FirestoreProductService {
 
   @override
   Future<List<Product>> loadDesserts() async {
+    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
+    return [];
+  }
+
+  @override
+  Future<List<Product>> loadAllProducts() async {
     developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
     return [];
   }
@@ -241,6 +250,33 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
   @override
   Future<List<Product>> loadDesserts() async {
     return loadProductsByCategory('Desserts');
+  }
+
+  // ===============================================
+  // OPTIMIZATION: Load all products at once
+  // ===============================================
+  @override
+  Future<List<Product>> loadAllProducts() async {
+    developer.log('🔥 FirestoreProductService: Chargement de TOUS les produits depuis Firestore...');
+    
+    try {
+      // Load all categories in parallel for better performance
+      final results = await Future.wait([
+        loadProductsByCategory('Pizza'),
+        loadProductsByCategory('Menus'),
+        loadProductsByCategory('Boissons'),
+        loadProductsByCategory('Desserts'),
+      ]);
+      
+      // Flatten the list
+      final allProducts = results.expand((list) => list).toList();
+      developer.log('📦 Total produits chargés depuis Firestore: ${allProducts.length}');
+      
+      return allProducts;
+    } catch (e) {
+      developer.log('❌ Erreur lors du chargement de tous les produits: $e');
+      return [];
+    }
   }
 
   // ===============================================

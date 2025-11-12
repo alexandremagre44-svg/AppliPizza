@@ -41,6 +41,8 @@ class AuthState {
   final bool isLoggedIn;
   final String? userEmail;
   final String? userRole;
+  final String? displayName;
+  final Map<String, dynamic>? userProfile; // Full user profile from Firestore
   final bool isLoading;
   final String? error;
 
@@ -48,6 +50,8 @@ class AuthState {
     this.isLoggedIn = false,
     this.userEmail,
     this.userRole,
+    this.displayName,
+    this.userProfile,
     this.isLoading = false,
     this.error,
   });
@@ -59,6 +63,8 @@ class AuthState {
     bool? isLoggedIn,
     String? userEmail,
     String? userRole,
+    String? displayName,
+    Map<String, dynamic>? userProfile,
     bool? isLoading,
     String? error,
   }) {
@@ -66,6 +72,8 @@ class AuthState {
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,
       userEmail: userEmail ?? this.userEmail,
       userRole: userRole ?? this.userRole,
+      displayName: displayName ?? this.displayName,
+      userProfile: userProfile ?? this.userProfile,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
@@ -87,12 +95,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (user == null) {
         state = AuthState();
       } else {
-        // Récupérer le rôle de l'utilisateur
-        final role = await _authService.getUserRole(user.uid);
+        // Récupérer le profil complet de l'utilisateur depuis Firestore
+        final profile = await _authService.getUserProfile(user.uid);
+        final role = profile?['role'] ?? UserRole.client;
+        final displayName = profile?['displayName'] ?? user.displayName;
+        
         state = AuthState(
           isLoggedIn: true,
           userEmail: user.email,
           userRole: role,
+          displayName: displayName,
+          userProfile: profile,
           isLoading: false,
         );
       }
@@ -135,11 +148,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> checkAuthStatus() async {
     final user = _authService.currentUser;
     if (user != null) {
-      final role = await _authService.getUserRole(user.uid);
+      final profile = await _authService.getUserProfile(user.uid);
+      final role = profile?['role'] ?? UserRole.client;
+      final displayName = profile?['displayName'] ?? user.displayName;
+      
       state = AuthState(
         isLoggedIn: true,
         userEmail: user.email,
         userRole: role,
+        displayName: displayName,
+        userProfile: profile,
       );
       return true;
     }

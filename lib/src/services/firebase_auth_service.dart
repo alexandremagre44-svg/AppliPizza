@@ -179,6 +179,19 @@ class FirebaseAuthService {
     }
   }
 
+  /// Récupérer le profil complet de l'utilisateur
+  Future<Map<String, dynamic>?> getUserProfile(String uid) async {
+    try {
+      final userDoc = await _firestore.collection('users').doc(uid).get();
+      if (userDoc.exists) {
+        return userDoc.data();
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// Stream du rôle utilisateur
   Stream<String> watchUserRole(String uid) {
     return _firestore
