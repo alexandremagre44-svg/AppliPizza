@@ -111,7 +111,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
                             decoration: InputDecoration(
                               labelText: 'Nom de la campagne *',
                               hintText: 'Ex: Promo Weekend',
-                              prefixIcon: Icon(Icons.label, color: AppTheme.accentOrange),
+                              prefixIcon: Icon(Icons.label, color: AppTheme.primaryRed),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -131,7 +131,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
                           DropdownButtonFormField<String>(
                             value: selectedTemplateId,
                             decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.description, color: AppTheme.accentOrange),
+                              prefixIcon: Icon(Icons.description, color: AppTheme.primaryRed),
                             ),
                             items: _templates.map((template) {
                               return DropdownMenuItem(
@@ -162,7 +162,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
                           DropdownButtonFormField<String>(
                             value: selectedSegment,
                             decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.people, color: AppTheme.accentOrange),
+                              prefixIcon: Icon(Icons.people, color: AppTheme.primaryRed),
                             ),
                             items: const [
                               DropdownMenuItem(value: 'all', child: Text('Tous les abonnés actifs')),
@@ -190,12 +190,12 @@ class _CampaignsTabState extends State<CampaignsTab> {
                             onChanged: (value) {
                               setDialogState(() => sendNow = value);
                             },
-                            activeColor: AppTheme.accentOrange,
+                            activeColor: AppTheme.primaryRed,
                           ),
                           if (!sendNow) ...[
                             const SizedBox(height: 12),
                             ListTile(
-                              leading: Icon(Icons.calendar_today, color: AppTheme.accentOrange),
+                              leading: Icon(Icons.calendar_today, color: AppTheme.primaryRed),
                               title: Text(
                                 scheduleDate != null
                                     ? 'Envoi prévu le ${_formatDate(scheduleDate!)}'
@@ -290,7 +290,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
                         icon: const Icon(Icons.check),
                         label: Text(sendNow ? 'Créer et Envoyer' : 'Planifier'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.accentOrange,
+                          backgroundColor: AppTheme.primaryRed,
                         ),
                       ),
                     ],
@@ -384,7 +384,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
               icon: const Icon(Icons.add),
               label: const Text('Nouvelle campagne'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentOrange,
+                backgroundColor: AppTheme.primaryRed,
               ),
             ),
           ],
@@ -408,7 +408,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
                 icon: const Icon(Icons.add),
                 label: const Text('Nouvelle'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentOrange,
+                  backgroundColor: AppTheme.primaryRed,
                 ),
               ),
             ],
@@ -517,7 +517,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppTheme.backgroundCream,
+                    color: AppTheme.backgroundLight,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -535,7 +535,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.edit, color: AppTheme.accentOrange),
+                    icon: Icon(Icons.edit, color: AppTheme.primaryRed),
                     onPressed: () => _showCampaignDialog(campaign: campaign),
                     tooltip: 'Modifier',
                   ),
@@ -557,7 +557,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
     return Chip(
       avatar: Icon(icon, size: 16, color: AppTheme.textMedium),
       label: Text(label, style: const TextStyle(fontSize: 12)),
-      backgroundColor: AppTheme.backgroundCream,
+      backgroundColor: AppTheme.backgroundLight,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     );
   }
@@ -565,7 +565,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
   Widget _buildStatItem(String label, int value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, size: 24, color: AppTheme.accentOrange),
+        Icon(icon, size: 24, color: AppTheme.primaryRed),
         const SizedBox(height: 4),
         Text(
           value.toString(),

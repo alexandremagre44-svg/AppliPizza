@@ -413,7 +413,7 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
                     tooltip: 'Prévisualiser',
                   ),
                   IconButton(
-                    icon: Icon(Icons.edit, color: AppTheme.accentOrange),
+                    icon: Icon(Icons.edit, color: AppTheme.primaryRed),
                     onPressed: () => _showTemplateDialog(template: template),
                     tooltip: 'Modifier',
                   ),
@@ -451,7 +451,7 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
     return Chip(
       avatar: Icon(icon, size: 16, color: AppTheme.textMedium),
       label: Text(label, style: const TextStyle(fontSize: 12)),
-      backgroundColor: AppTheme.backgroundCream,
+      backgroundColor: AppTheme.backgroundLight,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     );
   }

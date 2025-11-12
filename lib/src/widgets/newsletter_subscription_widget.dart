@@ -197,14 +197,7 @@ class _NewsletterSubscriptionWidgetState
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            AppTheme.primaryRed.withOpacity(0.05),
-          ],
-        ),
+        color: AppColors.primaryRed,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -225,9 +218,7 @@ class _NewsletterSubscriptionWidgetState
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppTheme.primaryRed, AppTheme.primaryRedDark],
-                    ),
+                    color: AppColors.primaryRed,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -385,14 +376,7 @@ class _NewsletterSubscriptionWidgetState
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            AppTheme.successGreen.withOpacity(0.05),
-          ],
-        ),
+        color: AppColors.primaryRed,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.successGreen, width: 2),
         boxShadow: [
@@ -409,9 +393,7 @@ class _NewsletterSubscriptionWidgetState
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppTheme.successGreen, Colors.teal.shade700],
-              ),
+              color: AppColors.primaryRed,
               shape: BoxShape.circle,
             ),
             child: const Icon(

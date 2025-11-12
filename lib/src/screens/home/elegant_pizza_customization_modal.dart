@@ -207,14 +207,7 @@ class _ElegantPizzaCustomizationModalState
           child: Container(
             height: MediaQuery.of(context).size.height * 0.92,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white,
-                  Colors.orange.shade50.withOpacity(0.3),
-                ],
-              ),
+              color: Colors.white,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
               boxShadow: [
                 BoxShadow(
@@ -266,9 +259,7 @@ class _ElegantPizzaCustomizationModalState
             width: 60,
             height: 6,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
-              ),
+              color: AppColors.primaryRed,
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
@@ -283,12 +274,7 @@ class _ElegantPizzaCustomizationModalState
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppTheme.primaryRed.withOpacity(0.1),
-                  AppTheme.secondaryAmber.withOpacity(0.1),
-                ],
-              ),
+              color: AppColors.primaryRed,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -332,14 +318,7 @@ class _ElegantPizzaCustomizationModalState
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white,
-              Colors.orange.shade50.withOpacity(0.5),
-            ],
-          ),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -359,9 +338,7 @@ class _ElegantPizzaCustomizationModalState
                 height: 110,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  gradient: LinearGradient(
-                    colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
-                  ),
+                  color: AppColors.primaryRed,
                   boxShadow: [
                     BoxShadow(
                       color: AppTheme.primaryRed.withOpacity(0.4),
@@ -381,12 +358,7 @@ class _ElegantPizzaCustomizationModalState
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppTheme.primaryRed.withOpacity(0.3),
-                                AppTheme.secondaryAmber.withOpacity(0.3),
-                              ],
-                            ),
+                            color: AppColors.primaryRed,
                           ),
                           child: const Icon(Icons.local_pizza, size: 50, color: Colors.white),
                         );
@@ -429,9 +401,7 @@ class _ElegantPizzaCustomizationModalState
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
-                      ),
+                      color: AppColors.primaryRed,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -457,12 +427,7 @@ class _ElegantPizzaCustomizationModalState
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.grey.shade100,
-            Colors.grey.shade50,
-          ],
-        ),
+        color: AppColors.primaryRed,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -475,11 +440,7 @@ class _ElegantPizzaCustomizationModalState
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: AppColors.primaryRed,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -626,12 +587,7 @@ class _ElegantPizzaCustomizationModalState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.primaryRed.withOpacity(0.1),
-            AppTheme.secondaryAmber.withOpacity(0.05),
-          ],
-        ),
+        color: AppColors.primaryRed,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: AppTheme.primaryRed.withOpacity(0.2),
@@ -643,9 +599,7 @@ class _ElegantPizzaCustomizationModalState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
-              ),
+              color: AppColors.primaryRed,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
@@ -713,9 +667,9 @@ class _ElegantPizzaCustomizationModalState
           curve: Curves.easeInOut,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           decoration: BoxDecoration(
-            gradient: isSelected
+            color: isSelected ? AppColors.primaryRed : Colors.white,
                 ? LinearGradient(
-                    colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                    colors: [AppTheme.primaryRed, AppTheme.primaryRedLight],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   )
@@ -782,11 +736,11 @@ class _ElegantPizzaCustomizationModalState
       curve: Curves.easeInOut,
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        gradient: isSelected
+        color: isSelected ? AppColors.primaryRed : Colors.white,
             ? LinearGradient(
                 colors: [
                   AppTheme.primaryRed.withOpacity(0.15),
-                  AppTheme.secondaryAmber.withOpacity(0.05),
+                  AppTheme.primaryRedLight.withOpacity(0.05),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -828,9 +782,9 @@ class _ElegantPizzaCustomizationModalState
                 width: 54,
                 height: 54,
                 decoration: BoxDecoration(
-                  gradient: isSelected
+                  color: isSelected ? AppColors.primaryRed : Colors.white,
                       ? LinearGradient(
-                          colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                          colors: [AppTheme.primaryRed, AppTheme.primaryRedLight],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         )
@@ -890,9 +844,9 @@ class _ElegantPizzaCustomizationModalState
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    gradient: isSelected
+                    color: isSelected ? AppColors.primaryRed : Colors.white,
                         ? LinearGradient(
-                            colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                            colors: [AppTheme.primaryRed, AppTheme.primaryRedLight],
                           )
                         : null,
                     color: isSelected ? null : Colors.grey[100],
@@ -959,9 +913,9 @@ class _ElegantPizzaCustomizationModalState
                   curve: Curves.easeInOut,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: isSelected
+                    color: isSelected ? AppColors.primaryRed : Colors.white,
                         ? LinearGradient(
-                            colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                            colors: [AppTheme.primaryRed, AppTheme.primaryRedLight],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           )
@@ -1117,14 +1071,7 @@ class _ElegantPizzaCustomizationModalState
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.white.withOpacity(0.95),
-            Colors.white,
-          ],
-        ),
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -1142,12 +1089,7 @@ class _ElegantPizzaCustomizationModalState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppTheme.primaryRed.withOpacity(0.05),
-                    AppTheme.secondaryAmber.withOpacity(0.05),
-                  ],
-                ),
+                color: AppColors.primaryRed,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: AppTheme.primaryRed.withOpacity(0.2),
@@ -1180,7 +1122,7 @@ class _ElegantPizzaCustomizationModalState
                               fontWeight: FontWeight.w900,
                               foreground: Paint()
                                 ..shader = LinearGradient(
-                                  colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
+                                  colors: [AppTheme.primaryRed, AppTheme.primaryRedLight],
                                 ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
                             ),
                           );
@@ -1191,9 +1133,7 @@ class _ElegantPizzaCustomizationModalState
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
-                      ),
+                      color: AppColors.primaryRed,
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
@@ -1220,11 +1160,7 @@ class _ElegantPizzaCustomizationModalState
               width: double.infinity,
               height: 64,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppTheme.primaryRed, AppTheme.secondaryAmber],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: AppColors.primaryRed,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(

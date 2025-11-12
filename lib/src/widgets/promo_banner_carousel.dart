@@ -121,14 +121,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
             // Gradient overlay
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.7),
-                  ],
-                ),
+                color: AppColors.primaryRed,
               ),
             ),
             // Contenu texte

@@ -544,7 +544,7 @@ class _SubscribersTabState extends State<SubscribersTab> {
                 children: [
                   ...subscriber.tags.map((tag) => Chip(
                         label: Text(tag),
-                        backgroundColor: AppTheme.backgroundCream,
+                        backgroundColor: AppTheme.backgroundLight,
                         labelStyle: const TextStyle(fontSize: 12),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),

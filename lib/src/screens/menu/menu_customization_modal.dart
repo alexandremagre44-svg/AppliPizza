@@ -112,18 +112,10 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        gradient: isSelected
-            ? LinearGradient(
-                colors: [
-                  Colors.blue.shade50,
-                  Colors.indigo.shade50.withOpacity(0.3),
-                ],
-              )
-            : null,
-        color: isSelected ? null : Colors.white,
+        color: isSelected ? AppColors.primaryRedLight.withOpacity(0.1) : Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
+          color: isSelected ? AppColors.primaryRed : Colors.grey.shade300,
           width: isSelected ? 2.5 : 1.5,
         ),
         boxShadow: [
@@ -153,17 +145,12 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    gradient: isSelected
-                        ? LinearGradient(
-                            colors: [Colors.blue.shade400, Colors.indigo.shade600],
-                          )
-                        : null,
-                    color: isSelected ? null : Colors.grey.shade200,
+                    color: isSelected ? AppColors.primaryRed : Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       if (isSelected)
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.4),
+                          color: AppColors.primaryRed.withOpacity(0.4),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -302,9 +289,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
                       height: 5,
                       width: 50,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.blue.shade400, Colors.indigo.shade600],
-                        ),
+                        color: AppColors.primaryRed,
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
@@ -319,12 +304,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.blue.shade50,
-                            Colors.indigo.shade50.withOpacity(0.3),
-                          ],
-                        ),
+                        color: AppColors.primaryRed,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: Colors.blue.shade200,
@@ -371,12 +351,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
                         margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.orange.shade50,
-                              Colors.deepOrange.shade50.withOpacity(0.3),
-                            ],
-                          ),
+                          color: AppColors.primaryRed,
                           border: Border.all(
                             color: Colors.orange.shade300,
                             width: 2,
@@ -388,9 +363,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
-                                ),
+                                color: AppColors.primaryRed,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
@@ -439,12 +412,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
                         margin: const EdgeInsets.only(top: 16.0, bottom: 16.0),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.cyan.shade50,
-                              Colors.blue.shade50.withOpacity(0.3),
-                            ],
-                          ),
+                          color: AppColors.primaryRed,
                           border: Border.all(
                             color: Colors.cyan.shade300,
                             width: 2,
@@ -456,9 +424,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Colors.cyan.shade400, Colors.blue.shade600],
-                                ),
+                                color: AppColors.primaryRed,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
@@ -509,14 +475,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withOpacity(0.95),
-                      Colors.white,
-                    ],
-                  ),
+                  color: Colors.white,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.15),
@@ -527,17 +486,12 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: _isSelectionComplete
-                        ? LinearGradient(
-                            colors: [Colors.blue.shade400, Colors.indigo.shade600],
-                          )
-                        : null,
-                    color: _isSelectionComplete ? null : Colors.grey.shade400,
+                    color: _isSelectionComplete ? AppColors.primaryRed : Colors.grey.shade400,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: _isSelectionComplete
                         ? [
                             BoxShadow(
-                              color: Colors.blue.withOpacity(0.5),
+                              color: AppColors.primaryRed.withOpacity(0.5),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
                             ),
@@ -617,14 +571,7 @@ class _SelectionOptionsModal extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.white,
-            Colors.grey.shade50,
-          ],
-        ),
+        color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
@@ -642,9 +589,7 @@ class _SelectionOptionsModal extends StatelessWidget {
             height: 5,
             width: 50,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade400, Colors.indigo.shade600],
-              ),
+              color: AppColors.primaryRed,
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
@@ -660,9 +605,7 @@ class _SelectionOptionsModal extends StatelessWidget {
             margin: const EdgeInsets.all(16.0),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade400, Colors.indigo.shade600],
-              ),
+              color: AppColors.primaryRed,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -702,12 +645,7 @@ class _SelectionOptionsModal extends StatelessWidget {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.white,
-                        Colors.blue.shade50.withOpacity(0.2),
-                      ],
-                    ),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: Colors.blue.shade200,
@@ -797,9 +735,7 @@ class _SelectionOptionsModal extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Colors.blue.shade400, Colors.indigo.shade600],
-                                ),
+                                color: AppColors.primaryRed,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
