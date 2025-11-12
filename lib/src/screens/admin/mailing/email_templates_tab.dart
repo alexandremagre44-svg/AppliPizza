@@ -59,14 +59,7 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
           constraints: const BoxConstraints(maxWidth: 700, maxHeight: 700),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                AppTheme.primaryRed.withOpacity(0.05),
-              ],
-            ),
+            color: Colors.white,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -75,9 +68,7 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppTheme.primaryRed, AppTheme.primaryRedDark],
-                  ),
+                  color: AppColors.primaryRed,
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(24)),
                 ),
@@ -390,9 +381,7 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppTheme.primaryRed, AppTheme.primaryRedDark],
-                      ),
+                      color: AppColors.primaryRed,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.description,
@@ -424,7 +413,7 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
                     tooltip: 'Prévisualiser',
                   ),
                   IconButton(
-                    icon: Icon(Icons.edit, color: AppTheme.accentOrange),
+                    icon: Icon(Icons.edit, color: AppTheme.primaryRed),
                     onPressed: () => _showTemplateDialog(template: template),
                     tooltip: 'Modifier',
                   ),
@@ -462,7 +451,7 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
     return Chip(
       avatar: Icon(icon, size: 16, color: AppTheme.textMedium),
       label: Text(label, style: const TextStyle(fontSize: 12)),
-      backgroundColor: AppTheme.backgroundCream,
+      backgroundColor: AppTheme.backgroundLight,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     );
   }

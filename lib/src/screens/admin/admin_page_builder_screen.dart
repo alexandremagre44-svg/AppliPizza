@@ -146,14 +146,7 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
               ),
               background: Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.green.shade400,
-                      Colors.teal.shade600,
-                    ],
-                  ),
+                  color: AppColors.primaryRed,
                 ),
                 child: Stack(
                   children: [
@@ -262,12 +255,7 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
           padding: const EdgeInsets.all(16),
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                themeColor.withOpacity(0.1),
-                themeColor.withOpacity(0.05),
-              ],
-            ),
+            color: AppColors.primaryRed,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: themeColor.withOpacity(0.3)),
           ),
@@ -293,9 +281,7 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.amber.shade400, AppColors.primaryRedSwatch.shade600],
-                    ),
+                    color: AppColors.primaryRed,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -354,12 +340,7 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
                   height: 60,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    gradient: LinearGradient(
-                      colors: [
-                        themeColor.shade300,
-                        themeColor.shade600,
-                      ],
-                    ),
+                    color: AppColors.primaryRed,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(2),

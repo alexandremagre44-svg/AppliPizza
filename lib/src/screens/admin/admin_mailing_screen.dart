@@ -57,14 +57,7 @@ class _AdminMailingScreenState extends State<AdminMailingScreen>
               ),
               background: Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppTheme.primaryRed,
-                      AppTheme.primaryRedDark,
-                    ],
-                  ),
+                  color: AppColors.primaryRed,
                 ),
                 child: Stack(
                   children: [

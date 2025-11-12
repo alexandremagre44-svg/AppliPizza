@@ -61,14 +61,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
             constraints: const BoxConstraints(maxWidth: 500),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white,
-                  Colors.blue.shade50.withOpacity(0.3),
-                ],
-              ),
+              color: Colors.white,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -77,9 +70,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.blue.shade400, Colors.indigo.shade600],
-                    ),
+                    color: AppColors.primaryRed,
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                   ),
                   child: Row(
@@ -212,9 +203,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                       Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [AppColors.primaryRedSwatch.shade400, AppColors.primaryRedSwatch.shade600],
-                                          ),
+                                          color: AppColors.primaryRed,
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: const Icon(Icons.local_pizza, size: 20, color: Colors.white),
@@ -244,9 +233,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                               decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [AppColors.primaryRedSwatch.shade400, AppColors.primaryRedSwatch.shade600],
-                                                ),
+                                                color: AppColors.primaryRed,
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
                                               child: Text(
@@ -285,9 +272,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                       Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [Colors.blue.shade400, Colors.cyan.shade600],
-                                          ),
+                                          color: AppColors.primaryRed,
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: const Icon(Icons.local_drink, size: 20, color: Colors.white),
@@ -317,9 +302,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                               decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [Colors.blue.shade400, Colors.cyan.shade600],
-                                                ),
+                                                color: AppColors.primaryRed,
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
                                               child: Text(
@@ -726,14 +709,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                Colors.red.shade50.withOpacity(0.5),
-              ],
-            ),
+            color: Colors.white,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -741,9 +717,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.red.shade400, Colors.red.shade700],
-                  ),
+                  color: AppColors.primaryRed,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -892,14 +866,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
               ),
               background: Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.blue.shade400,
-                      Colors.indigo.shade600,
-                    ],
-                  ),
+                  color: AppColors.primaryRed,
                 ),
                 child: Stack(
                   children: [
@@ -940,12 +907,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                               width: 140,
                               height: 140,
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.blue.shade300.withOpacity(0.2),
-                                    Colors.indigo.shade400.withOpacity(0.1),
-                                  ],
-                                ),
+                                color: AppColors.primaryRed,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
@@ -1018,14 +980,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            Colors.blue.shade50.withOpacity(0.3),
-          ],
-        ),
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.blue.withOpacity(0.15),
@@ -1049,9 +1004,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                   height: 80,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      colors: [Colors.blue.shade400, Colors.indigo.shade600],
-                    ),
+                    color: AppColors.primaryRed,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.blue.withOpacity(0.3),
@@ -1136,9 +1089,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [Colors.blue.shade400, Colors.indigo.shade600],
-                              ),
+                              color: AppColors.primaryRed,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(

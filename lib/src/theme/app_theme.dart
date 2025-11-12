@@ -6,45 +6,39 @@ import 'package:flutter/material.dart';
 
 /// Classe centralisée pour toutes les couleurs de l'application
 class AppColors {
-  // === Couleurs de base Pizza Deli'Zza ===
-  static const Color primaryRed = Color(0xFFC62828);        // Rouge principal #C62828
-  static const Color primaryRedLight = Color(0xFFE53935);   // Rouge clair #E53935
+  // === CHARTE VISUELLE OFFICIELLE Pizza Deli'Zza ===
+  // Palette rouge/blanc moderne et minimaliste
+  static const Color primaryRed = Color(0xFFB00020);        // Rouge profond #B00020 (OFFICIEL)
+  static const Color primaryRedLight = Color(0xFFE53935);   // Rouge clair #E53935 (OFFICIEL)
   static const Color primaryRedDark = Color(0xFF8E0000);    // Rouge foncé pour ombres
   
   // Couleurs neutres
-  static const Color surfaceWhite = Color(0xFFFFFFFF);      // Blanc pur
-  static const Color backgroundLight = Color(0xFAFAFA);     // Gris très clair #FAFAFA
-  static const Color textDark = Color(0xFF222222);          // Noir doux #222222
+  static const Color surfaceWhite = Color(0xFFFFFFFF);      // Blanc pur #FFFFFF (OFFICIEL)
+  static const Color backgroundLight = Color(0xFFF5F5F5);   // Gris très clair #F5F5F5 (OFFICIEL)
+  static const Color textDark = Color(0xFF212121);          // Noir/gris foncé #212121 (OFFICIEL)
   static const Color textMedium = Color(0xFF666666);        // Gris moyen
   static const Color textLight = Color(0xFF999999);         // Gris clair
   
-  // Couleurs d'accentuation
-  static const Color accentGold = Color(0xFFFFB300);        // Or/jaune pour badges premium
-  static const Color secondaryAmber = Color(0xFFFFC107);    // Ambre pour accents secondaires
-  static const Color backgroundCream = Color(0xFFFFF8E1);   // Crème pour arrière-plans doux
-  static const Color accentOrange = Color(0xFFFF9800);      // Orange pour accents
-  static const Color accentGreen = Color(0xFF4CAF50);       // Vert pour accents
-  
-  // Status Colors
+  // Status Colors uniquement (pas d'accents orange/jaune)
   static const Color successGreen = Color(0xFF4CAF50);
   static const Color errorRed = Color(0xFFD32F2F);
-  static const Color warningOrange = Color(0xFFFF9800);
+  static const Color warningOrange = Color(0xFFFF9800);     // Réservé uniquement aux alertes
   static const Color infoBlue = Color(0xFF2196F3);
   
   // MaterialColor pour le theme
   static const MaterialColor primaryRedSwatch = MaterialColor(
-    0xFFC62828,
+    0xFFB00020,
     <int, Color>{
       50: Color(0xFFFFEBEE),
       100: Color(0xFFFFCDD2),
       200: Color(0xFFEF9A9A),
       300: Color(0xFFE57373),
       400: Color(0xFFEF5350),
-      500: Color(0xFFC62828),
+      500: Color(0xFFB00020),  // Couleur principale officielle
       600: Color(0xFFE53935),
       700: Color(0xFFD32F2F),
-      800: Color(0xFFC62828),
-      900: Color(0xFFB71C1C),
+      800: Color(0xFFB00020),
+      900: Color(0xFF8E0000),
     },
   );
 }
@@ -219,9 +213,9 @@ class AppSpacing {
   static const EdgeInsets paddingVerticalLG = EdgeInsets.symmetric(vertical: lg);
   static const EdgeInsets paddingVerticalXL = EdgeInsets.symmetric(vertical: xl);
   
-  // Padding pour boutons
-  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: xxl, vertical: 14);
-  static const EdgeInsets buttonPaddingSmall = EdgeInsets.symmetric(horizontal: lg, vertical: 10);
+  // Padding pour boutons (standardisé pour 44-48px de hauteur)
+  static const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: xxl, vertical: 15);  // ~48px total
+  static const EdgeInsets buttonPaddingSmall = EdgeInsets.symmetric(horizontal: lg, vertical: 12); // ~44px total
   
   // Padding pour cartes
   static const EdgeInsets cardPadding = EdgeInsets.all(lg);
@@ -332,11 +326,6 @@ class AppTheme {
   static const Color textDark = AppColors.textDark;
   static const Color textMedium = AppColors.textMedium;
   static const Color textLight = AppColors.textLight;
-  static const Color accentGold = AppColors.accentGold;
-  static const Color secondaryAmber = AppColors.secondaryAmber;
-  static const Color backgroundCream = AppColors.backgroundCream;
-  static const Color accentOrange = AppColors.accentOrange;
-  static const Color accentGreen = AppColors.accentGreen;
   static const Color successGreen = AppColors.successGreen;
   static const Color errorRed = AppColors.errorRed;
   static const Color warningOrange = AppColors.warningOrange;

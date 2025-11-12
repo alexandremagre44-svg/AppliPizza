@@ -59,26 +59,17 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
           constraints: const BoxConstraints(maxWidth: 500),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                AppColors.primaryRedSwatch.shade50.withOpacity(0.3),
-              ],
-            ),
+            color: Colors.white,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header with gradient
+              // Header with solid color
               Container(
                 padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppColors.primaryRedSwatch.shade400, AppColors.primaryRedSwatch.shade600],
-                  ),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryRed,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                 ),
                 child: Row(
                   children: [
@@ -591,24 +582,15 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                Colors.red.shade50.withOpacity(0.5),
-              ],
-            ),
+            color: Colors.white,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.red.shade400, Colors.red.shade700],
-                  ),
+                decoration: const BoxDecoration(
+                  color: AppColors.errorRed,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -764,15 +746,8 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                 ),
               ),
               background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primaryRedSwatch.shade400,
-                      AppColors.primaryRedSwatch.shade600,
-                    ],
-                  ),
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryRed,
                 ),
                 child: Stack(
                   children: [
@@ -813,12 +788,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                               width: 140,
                               height: 140,
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppColors.primaryRedSwatch.shade300.withOpacity(0.2),
-                                    AppColors.primaryRedSwatch.shade400.withOpacity(0.1),
-                                  ],
-                                ),
+                                color: AppColors.backgroundLight,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
@@ -828,10 +798,10 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                                   ),
                                 ],
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.local_pizza,
                                 size: 70,
-                                color: AppColors.primaryRedSwatch.shade600,
+                                color: AppColors.primaryRed,
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -891,14 +861,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            AppColors.primaryRedSwatch.shade50.withOpacity(0.3),
-          ],
-        ),
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: AppTheme.primaryRed.withOpacity(0.15),
@@ -916,15 +879,13 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Image with gradient border
+                // Image with red border
                 Container(
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      colors: [AppColors.primaryRedSwatch.shade400, AppColors.primaryRedSwatch.shade600],
-                    ),
+                    color: AppColors.primaryRed,
                     boxShadow: [
                       BoxShadow(
                         color: AppTheme.primaryRed.withOpacity(0.3),
@@ -996,19 +957,19 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.amber.shade100,
+                                color: AppColors.primaryRedLight.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.star, size: 14, color: Colors.amber.shade700),
+                                  const Icon(Icons.star, size: 14, color: AppColors.primaryRed),
                                   const SizedBox(width: 4),
-                                  Text(
+                                  const Text(
                                     'En avant',
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: Colors.amber.shade700,
+                                      color: AppColors.primaryRed,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -1030,9 +991,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [AppColors.primaryRedSwatch.shade400, AppColors.primaryRedSwatch.shade600],
-                          ),
+                          color: AppColors.primaryRed,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(

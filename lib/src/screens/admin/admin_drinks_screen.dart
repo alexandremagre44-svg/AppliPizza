@@ -57,14 +57,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
             constraints: const BoxConstraints(maxWidth: 500),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white,
-                  Colors.cyan.shade50.withOpacity(0.3),
-                ],
-              ),
+              color: Colors.white,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -73,10 +66,8 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.cyan.shade400, Colors.blue.shade600],
-                    ),
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    color: AppColors.primaryRed,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                   ),
                   child: Row(
                     children: [
@@ -361,23 +352,23 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.blue.shade50.withOpacity(0.5),
+                              color: AppColors.primaryRed.withOpacity(0.5),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.blue.shade200),
+                              border: Border.all(color: AppColors.primaryRed),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.location_on, color: Colors.blue.shade600, size: 24),
+                                    Icon(Icons.location_on, color: AppColors.primaryRed, size: 24),
                                     const SizedBox(width: 12),
                                     Text(
                                       'Zone d\'affichage',
                                       style: TextStyle(
                                         fontWeight: FontWeight.w900,
                                         fontSize: 15,
-                                        color: Colors.blue.shade900,
+                                        color: AppColors.primaryRed,
                                       ),
                                     ),
                                   ],
@@ -546,14 +537,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                Colors.red.shade50.withOpacity(0.5),
-              ],
-            ),
+            color: Colors.white,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -561,9 +545,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.red.shade400, Colors.red.shade700],
-                  ),
+                  color: AppColors.errorRed,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -712,14 +694,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
               ),
               background: Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.cyan.shade400,
-                      Colors.blue.shade600,
-                    ],
-                  ),
+                  color: AppColors.primaryRed,
                 ),
                 child: Stack(
                   children: [
@@ -760,12 +735,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                               width: 140,
                               height: 140,
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.cyan.shade300.withOpacity(0.2),
-                                    Colors.blue.shade400.withOpacity(0.1),
-                                  ],
-                                ),
+                                color: AppColors.primaryRed,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
@@ -838,14 +808,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            Colors.cyan.shade50.withOpacity(0.3),
-          ],
-        ),
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.cyan.withOpacity(0.15),
@@ -869,9 +832,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                   height: 80,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      colors: [Colors.cyan.shade400, Colors.blue.shade600],
-                    ),
+                    color: AppColors.primaryRed,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.cyan.withOpacity(0.3),
@@ -943,19 +904,19 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.amber.shade100,
+                                color: AppColors.primaryRedLight.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.star, size: 14, color: Colors.amber.shade700),
+                                  Icon(Icons.star, size: 14, color: AppColors.primaryRed),
                                   const SizedBox(width: 4),
                                   Text(
                                     'En avant',
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: Colors.amber.shade700,
+                                      color: AppColors.primaryRed,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -977,9 +938,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.cyan.shade400, Colors.blue.shade600],
-                          ),
+                          color: AppColors.primaryRed,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -1000,11 +959,11 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
+                        color: AppColors.primaryRed,
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
-                        icon: Icon(Icons.edit, color: Colors.blue.shade700),
+                        icon: Icon(Icons.edit, color: AppColors.primaryRed),
                         onPressed: () => _showDrinkDialog(drink: drink),
                       ),
                     ),

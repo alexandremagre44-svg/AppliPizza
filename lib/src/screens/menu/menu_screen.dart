@@ -82,14 +82,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           Container(
             padding: const EdgeInsets.all(VisualConstants.paddingMedium),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                  Theme.of(context).scaffoldBackgroundColor,
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
             // refactor container style → app_theme standard
             child: Container(
@@ -158,15 +151,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     decoration: BoxDecoration(
-                      gradient: isSelected
-                          ? LinearGradient(
-                              colors: [
-                                Theme.of(context).colorScheme.primary,
-                                Theme.of(context).colorScheme.secondary,
-                              ],
-                            )
-                          : null,
-                      color: isSelected ? null : Colors.white,
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.primary 
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected

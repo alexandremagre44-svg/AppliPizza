@@ -34,9 +34,7 @@ class EmailTemplatePreviewDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppTheme.primaryRed, AppTheme.primaryRedDark],
-                ),
+                color: AppColors.primaryRed,
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(24)),
               ),
@@ -187,9 +185,7 @@ class EmailTemplatePreviewDialog extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppTheme.primaryRed, AppTheme.primaryRedDark],
-              ),
+              color: AppColors.primaryRed,
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Center(
@@ -241,9 +237,7 @@ class EmailTemplatePreviewDialog extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppTheme.primaryRed, AppTheme.primaryRedDark],
-                ),
+                color: AppColors.primaryRed,
                 borderRadius: BorderRadius.circular(50),
                 boxShadow: [
                   BoxShadow(
