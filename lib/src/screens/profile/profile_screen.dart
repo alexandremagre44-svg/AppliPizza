@@ -103,6 +103,29 @@ class ProfileScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
+                  if (authState.isKitchen)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.deepOrange,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.restaurant, size: 16, color: Colors.white),
+                          SizedBox(width: 4),
+                          Text(
+                            'CUISINE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   SizedBox(height: AppSpacing.sm),
                   // Email
                   // refactor text style → app_theme standard
@@ -146,6 +169,38 @@ class ProfileScreen extends ConsumerWidget {
             ),
 
             SizedBox(height: AppSpacing.xxl),
+
+            // Kitchen Mode Access (for kitchen role users)
+            if (authState.isKitchen || authState.isAdmin)
+              Padding(
+                padding: AppSpacing.paddingHorizontalLG,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => context.go(AppRoutes.kitchen),
+                    icon: const Icon(Icons.restaurant_menu, size: 24),
+                    label: const Text(
+                      'ACCÉDER AU MODE CUISINE',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            if (authState.isKitchen || authState.isAdmin)
+              SizedBox(height: AppSpacing.xxl),
 
             // Section Historique
             Padding(
