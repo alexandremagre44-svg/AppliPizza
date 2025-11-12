@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../models/order.dart';
 import '../../providers/order_provider.dart';
-import '../../services/order_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/order_status_badge.dart';
 import '../../widgets/order_detail_panel.dart';
@@ -46,7 +45,9 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
   }
   
   Future<void> _refresh() async {
-    await OrderService().refresh();
+    // Firebase auto-refreshes via streams, no manual refresh needed
+    // Just trigger a rebuild to show loading state
+    setState(() {});
   }
   
   void _showFilterDialog() {
@@ -173,25 +174,21 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
           ),
         ],
       ),
+      // Test data button removed - using Firebase now
+      floatingActionButton: null,
+      /*
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          // Générer des commandes de test
-          final testOrders = OrderTestData.generateTestOrders(10);
-          for (final order in testOrders) {
-            await OrderService().addOrder(order);
-          }
-          
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('10 commandes de test ajoutées !'),
-                backgroundColor: AppColors.successGreen,
-              ),
-            );
-          }
+          // Test data generation disabled with Firebase
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Test data génération désactivée - utiliser Firebase'),
+              backgroundColor: AppColors.warningOrange,
+            ),
+          );
         },
         icon: const Icon(Icons.add_circle),
-        label: const Text('Test Data'),
+        label: const Text('Test Data (disabled)'),
         backgroundColor: AppColors.infoBlue,
       ),
       body: showSplitView

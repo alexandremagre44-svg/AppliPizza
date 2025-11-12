@@ -3,17 +3,36 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/order.dart';
-import '../services/order_service.dart';
+import '../services/firebase_order_service.dart';
+import 'auth_provider.dart';
 
-/// Provider pour le service de commandes (singleton)
-final orderServiceProvider = Provider<OrderService>((ref) {
-  return OrderService();
+/// Provider pour le service de commandes Firebase
+final firebaseOrderServiceProvider = Provider<FirebaseOrderService>((ref) {
+  return FirebaseOrderService();
 });
 
 /// Provider pour le stream des commandes (temps réel)
+/// Affiche toutes les commandes pour admin/kitchen, seulement les commandes de l'utilisateur pour client
 final ordersStreamProvider = StreamProvider<List<Order>>((ref) {
-  final service = ref.watch(orderServiceProvider);
-  return service.ordersStream;
+  final service = ref.watch(firebaseOrderServiceProvider);
+  final authState = ref.watch(authProvider);
+  final authService = ref.watch(firebaseAuthServiceProvider);
+  
+  // Si admin ou kitchen, afficher toutes les commandes
+  if (authState.isAdmin || authState.isKitchen) {
+    return service.watchAllOrders();
+  }
+  
+  // Si client connecté, afficher uniquement ses commandes
+  if (authState.isLoggedIn) {
+    final user = authService.currentUser;
+    if (user != null) {
+      return service.watchUserOrders(user.uid);
+    }
+  }
+  
+  // Par défaut, retourner un stream vide
+  return Stream.value([]);
 });
 
 /// Provider pour obtenir les commandes non vues

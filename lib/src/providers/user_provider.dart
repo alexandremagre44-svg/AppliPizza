@@ -3,8 +3,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_profile.dart';
 import '../models/order.dart'; 
-import '../services/order_service.dart';
+import '../services/firebase_order_service.dart';
 import 'cart_provider.dart';
+import 'auth_provider.dart';
 // Note: L'ancienne importation vers '../models/cart.dart' est retirée
 
 final userProvider =
@@ -41,27 +42,28 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     // Utilisation de totalItems qui est la bonne propriété
     if (cartState.totalItems == 0) return; 
 
-    final newOrder = Order.fromCart(
-      cartState.items,
-      cartState.total,
-      customerName: customerName,
-      customerPhone: customerPhone,
-      customerEmail: customerEmail,
-      comment: comment,
-      pickupDate: pickupDate,
-      pickupTimeSlot: pickupTimeSlot,
-    );
+    // Récupérer l'email de l'utilisateur connecté si non fourni
+    final authState = _ref.read(authProvider);
+    final email = customerEmail ?? authState.userEmail;
 
-    // Ajouter à l'historique local du profil
-    final updatedHistory = [newOrder, ...state.orderHistory];
-    state = state.copyWith(
-      orderHistory: updatedHistory,
-    );
+    // Créer la commande dans Firebase
+    try {
+      await FirebaseOrderService().createOrder(
+        items: cartState.items,
+        total: cartState.total,
+        customerName: customerName,
+        customerPhone: customerPhone,
+        customerEmail: email,
+        comment: comment,
+        pickupDate: pickupDate,
+        pickupTimeSlot: pickupTimeSlot,
+      );
 
-    // Ajouter au service de commandes (pour l'admin)
-    await OrderService().addOrder(newOrder);
-
-    // Vider le panier après la commande (méthode de CartNotifier)
-    _ref.read(cartProvider.notifier).clearCart();
+      // Vider le panier après la commande (méthode de CartNotifier)
+      _ref.read(cartProvider.notifier).clearCart();
+    } catch (e) {
+      // Propager l'erreur pour qu'elle soit gérée par l'UI
+      rethrow;
+    }
   }
 }
