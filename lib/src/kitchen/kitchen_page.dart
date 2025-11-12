@@ -412,30 +412,53 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
   }
 
   Widget _buildOrdersGrid() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: KitchenConstants.gridCrossAxisCount,
-        childAspectRatio: KitchenConstants.gridChildAspectRatio,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
-      itemCount: _displayedOrders.length,
-      itemBuilder: (context, index) {
-        final order = _displayedOrders[index];
-        final previousStatus = KitchenConstants.getPreviousStatus(order.status);
-        final nextStatus = KitchenConstants.getNextStatus(order.status);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
         
-        return KitchenOrderCard(
-          order: order,
-          onTap: () => _showOrderDetail(order),
-          onPreviousStatus: previousStatus != null
-              ? () => _onPreviousStatus(order)
-              : null,
-          onNextStatus: nextStatus != null
-              ? () => _onNextStatus(order)
-              : null,
-          minutesSinceCreation: _getMinutesSinceCreation(order),
+        // Calculate number of columns based on screen width
+        final int cols;
+        if (width >= 2000) {
+          cols = 4;
+        } else if (width >= 1400) {
+          cols = 3;
+        } else if (width >= 900) {
+          cols = 2;
+        } else {
+          cols = 1;
+        }
+        
+        // Calculate column width and aspect ratio
+        const padding = KitchenConstants.gridSpacing;
+        final colWidth = (width - (cols - 1) * KitchenConstants.gridSpacing - padding * 2) / cols;
+        final childAspectRatio = colWidth / KitchenConstants.targetCardHeight;
+        
+        return GridView.builder(
+          padding: const EdgeInsets.all(padding),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cols,
+            childAspectRatio: childAspectRatio,
+            crossAxisSpacing: KitchenConstants.gridSpacing,
+            mainAxisSpacing: KitchenConstants.gridSpacing,
+          ),
+          itemCount: _displayedOrders.length,
+          itemBuilder: (context, index) {
+            final order = _displayedOrders[index];
+            final previousStatus = KitchenConstants.getPreviousStatus(order.status);
+            final nextStatus = KitchenConstants.getNextStatus(order.status);
+            
+            return KitchenOrderCard(
+              order: order,
+              onTap: () => _showOrderDetail(order),
+              onPreviousStatus: previousStatus != null
+                  ? () => _onPreviousStatus(order)
+                  : null,
+              onNextStatus: nextStatus != null
+                  ? () => _onNextStatus(order)
+                  : null,
+              minutesSinceCreation: _getMinutesSinceCreation(order),
+            );
+          },
         );
       },
     );
