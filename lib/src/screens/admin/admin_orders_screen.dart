@@ -11,6 +11,9 @@ import '../../theme/app_theme.dart';
 import '../../widgets/order_status_badge.dart';
 import '../../widgets/order_detail_panel.dart';
 import '../../widgets/new_order_notification.dart';
+import '../../utils/order_test_data.dart';
+import '../../utils/order_export.dart';
+import 'dart:html' as html;
 
 class AdminOrdersScreen extends ConsumerStatefulWidget {
   const AdminOrdersScreen({super.key});
@@ -50,6 +53,38 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
     showDialog(
       context: context,
       builder: (context) => _FilterDialog(),
+    );
+  }
+  
+  void _exportToCSV() {
+    final orders = ref.read(filteredOrdersProvider);
+    if (orders.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Aucune commande à exporter'),
+          backgroundColor: AppColors.warningOrange,
+        ),
+      );
+      return;
+    }
+    
+    final csv = OrderExport.toCSV(orders);
+    final filename = OrderExport.generateFilename();
+    
+    // Télécharger le fichier (Web uniquement)
+    final bytes = csv.codeUnits;
+    final blob = html.Blob([bytes]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute('download', filename)
+      ..click();
+    html.Url.revokeObjectUrl(url);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Export CSV: $filename'),
+        backgroundColor: AppColors.successGreen,
+      ),
     );
   }
   
@@ -124,6 +159,12 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
             onPressed: _showFilterDialog,
             tooltip: 'Filtres',
           ),
+          // Export CSV
+          IconButton(
+            icon: const Icon(Icons.download),
+            onPressed: _exportToCSV,
+            tooltip: 'Exporter CSV',
+          ),
           // Rafraîchir
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -131,6 +172,27 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
             tooltip: 'Actualiser',
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          // Générer des commandes de test
+          final testOrders = OrderTestData.generateTestOrders(10);
+          for (final order in testOrders) {
+            await OrderService().addOrder(order);
+          }
+          
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('10 commandes de test ajoutées !'),
+                backgroundColor: AppColors.successGreen,
+              ),
+            );
+          }
+        },
+        icon: const Icon(Icons.add_circle),
+        label: const Text('Test Data'),
+        backgroundColor: AppColors.infoBlue,
       ),
       body: showSplitView
           ? Row(
