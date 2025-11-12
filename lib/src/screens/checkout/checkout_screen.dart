@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../core/constants.dart';
+import '../../theme/app_theme.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
