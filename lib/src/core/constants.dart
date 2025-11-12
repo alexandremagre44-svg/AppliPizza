@@ -16,12 +16,14 @@ class AppRoutes {
   static const String adminPageBuilder = '/admin/page-builder';
   static const String adminMailing = '/admin/mailing';
   static const String adminOrders = '/admin/orders';
+  static const String kitchen = '/kitchen';
 }
 
 /// Rôles utilisateurs
 class UserRole {
   static const String admin = 'admin';
   static const String client = 'client';
+  static const String kitchen = 'kitchen';
 }
 
 /// Clés SharedPreferences

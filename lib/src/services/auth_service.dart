@@ -36,6 +36,8 @@ class AuthService {
       role = UserRole.admin;
     } else if (email == TestCredentials.clientEmail && password == TestCredentials.clientPassword) {
       role = UserRole.client;
+    } else if (email == 'kitchen@delizza.com' && password == 'kitchen123') {
+      role = UserRole.kitchen;
     } else {
       return false; // Échec de connexion
     }

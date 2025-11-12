@@ -26,6 +26,7 @@ class AuthState {
   });
 
   bool get isAdmin => userRole == UserRole.admin;
+  bool get isKitchen => userRole == UserRole.kitchen;
 
   AuthState copyWith({
     bool? isLoggedIn,
