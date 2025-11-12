@@ -17,10 +17,14 @@ class SubscribersTab extends StatefulWidget {
 
 class _SubscribersTabState extends State<SubscribersTab> {
   final MailingService _mailingService = MailingService();
+  final TextEditingController _searchController = TextEditingController();
   List<Subscriber> _subscribers = [];
   List<Subscriber> _filteredSubscribers = [];
   bool _isLoading = true;
   String _filterStatus = 'all';
+  String _filterTag = 'all';
+  String _sortBy = 'date'; // 'date', 'email'
+  Set<String> _selectedIds = {};
 
   @override
   void initState() {
@@ -28,23 +32,109 @@ class _SubscribersTabState extends State<SubscribersTab> {
     _loadSubscribers();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadSubscribers() async {
     setState(() => _isLoading = true);
     final subscribers = await _mailingService.loadSubscribers();
     setState(() {
       _subscribers = subscribers;
-      _applyFilter();
+      _applyFiltersAndSort();
       _isLoading = false;
     });
   }
 
-  void _applyFilter() {
-    if (_filterStatus == 'all') {
-      _filteredSubscribers = _subscribers;
-    } else {
-      _filteredSubscribers = _subscribers
-          .where((sub) => sub.status == _filterStatus)
-          .toList();
+  void _applyFiltersAndSort() {
+    List<Subscriber> filtered = _subscribers;
+
+    // Apply status filter
+    if (_filterStatus != 'all') {
+      filtered = filtered.where((sub) => sub.status == _filterStatus).toList();
+    }
+
+    // Apply tag filter
+    if (_filterTag != 'all') {
+      filtered = filtered.where((sub) => sub.tags.contains(_filterTag)).toList();
+    }
+
+    // Apply search filter
+    if (_searchController.text.isNotEmpty) {
+      final query = _searchController.text.toLowerCase();
+      filtered = filtered.where((sub) {
+        return sub.email.toLowerCase().contains(query);
+      }).toList();
+    }
+
+    // Apply sorting
+    switch (_sortBy) {
+      case 'email':
+        filtered.sort((a, b) => a.email.compareTo(b.email));
+        break;
+      case 'date':
+        filtered.sort((a, b) => b.dateInscription.compareTo(a.dateInscription));
+        break;
+    }
+
+    _filteredSubscribers = filtered;
+  }
+
+  Map<String, int> _getStatistics() {
+    return {
+      'total': _subscribers.length,
+      'active': _subscribers.where((s) => s.status == 'active').length,
+      'unsubscribed': _subscribers.where((s) => s.status == 'unsubscribed').length,
+      'vip': _subscribers.where((s) => s.tags.contains('vip')).length,
+    };
+  }
+
+  Future<void> _exportToCSV() async {
+    // This would export subscribers to CSV
+    // For now, just show a message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Export de ${_filteredSubscribers.length} abonné(s) en cours...'),
+        backgroundColor: AppTheme.accentGreen,
+      ),
+    );
+  }
+
+  Future<void> _bulkDelete() async {
+    if (_selectedIds.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmer la suppression'),
+        content: Text('Voulez-vous vraiment supprimer ${_selectedIds.length} abonné(s) ?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.errorRed),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      for (final id in _selectedIds) {
+        await _mailingService.deleteSubscriber(id);
+      }
+      _selectedIds.clear();
+      _loadSubscribers();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Abonnés supprimés avec succès')),
+        );
+      }
     }
   }
 
@@ -64,7 +154,7 @@ class _SubscribersTabState extends State<SubscribersTab> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+            constraints: const BoxConstraints(maxWidth: 500),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
               color: Colors.white,
@@ -109,13 +199,17 @@ class _SubscribersTabState extends State<SubscribersTab> {
                 ),
                 // Form content
                 Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Form(
-                      key: formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.6,
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                           TextFormField(
                             controller: emailController,
                             decoration: InputDecoration(
@@ -220,7 +314,8 @@ class _SubscribersTabState extends State<SubscribersTab> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -334,77 +429,212 @@ class _SubscribersTabState extends State<SubscribersTab> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    final stats = _getStatistics();
+
     return Column(
       children: [
+        // Statistics cards
+        Container(
+          padding: const EdgeInsets.all(16),
+          color: Colors.grey.shade50,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildStatCard('Total', stats['total']!, Icons.people, Colors.blue),
+                const SizedBox(width: 12),
+                _buildStatCard('Actifs', stats['active']!, Icons.check_circle, Colors.green),
+                const SizedBox(width: 12),
+                _buildStatCard('VIP', stats['vip']!, Icons.star, Colors.amber),
+                const SizedBox(width: 12),
+                _buildStatCard('Désinscrits', stats['unsubscribed']!, Icons.cancel, Colors.red),
+              ],
+            ),
+          ),
+        ),
         // Filter bar
         Container(
           padding: const EdgeInsets.all(16),
+          color: Colors.white,
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '${_filteredSubscribers.length} abonné(s)',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => _showSubscriberDialog(),
-                    icon: const Icon(Icons.add),
-                    label: const Text('Nouveau'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.accentGreen,
+                  Expanded(
+                    child: Text(
+                      '${_filteredSubscribers.length} abonné(s)',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
+                  if (_selectedIds.isNotEmpty)
+                    ElevatedButton.icon(
+                      onPressed: _bulkDelete,
+                      icon: const Icon(Icons.delete),
+                      label: Text('Supprimer (${_selectedIds.length})'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.errorRed,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  if (_selectedIds.isEmpty) ...[
+                    IconButton(
+                      icon: const Icon(Icons.download),
+                      onPressed: _exportToCSV,
+                      tooltip: 'Exporter CSV',
+                      color: AppTheme.accentGreen,
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: () => _showSubscriberDialog(),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Nouveau'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.accentGreen,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
               const SizedBox(height: 16),
+              // Search and sort
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Rechercher par email...',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _applyFiltersAndSort());
+                                },
+                              )
+                            : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() => _applyFiltersAndSort());
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  PopupMenuButton<String>(
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.sort, size: 20),
+                          SizedBox(width: 4),
+                          Icon(Icons.arrow_drop_down, size: 20),
+                        ],
+                      ),
+                    ),
+                    onSelected: (value) {
+                      setState(() {
+                        _sortBy = value;
+                        _applyFiltersAndSort();
+                      });
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'date',
+                        child: Text('Trier par date'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'email',
+                        child: Text('Trier par email'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               // Status filter chips
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    FilterChip(
-                      label: const Text('Tous'),
-                      selected: _filterStatus == 'all',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _filterStatus = 'all';
-                            _applyFilter();
-                          });
-                        }
-                      },
-                      selectedColor: AppTheme.accentGreen.withOpacity(0.3),
-                    ),
+                    _buildFilterChip('Tous', 'all', _filterStatus, (value) {
+                      setState(() {
+                        _filterStatus = value;
+                        _applyFiltersAndSort();
+                      });
+                    }),
                     const SizedBox(width: 8),
-                    FilterChip(
-                      label: const Text('Actifs'),
-                      selected: _filterStatus == 'active',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _filterStatus = 'active';
-                            _applyFilter();
-                          });
-                        }
-                      },
-                      selectedColor: Colors.green.withOpacity(0.3),
-                    ),
+                    _buildFilterChip('Actifs', 'active', _filterStatus, (value) {
+                      setState(() {
+                        _filterStatus = value;
+                        _applyFiltersAndSort();
+                      });
+                    }),
                     const SizedBox(width: 8),
-                    FilterChip(
-                      label: const Text('Désinscrits'),
-                      selected: _filterStatus == 'unsubscribed',
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() {
-                            _filterStatus = 'unsubscribed';
-                            _applyFilter();
-                          });
-                        }
-                      },
-                      selectedColor: Colors.red.withOpacity(0.3),
+                    _buildFilterChip('Désinscrits', 'unsubscribed', _filterStatus, (value) {
+                      setState(() {
+                        _filterStatus = value;
+                        _applyFiltersAndSort();
+                      });
+                    }),
+                    const SizedBox(width: 16),
+                    Container(
+                      width: 1,
+                      height: 24,
+                      color: Colors.grey.shade300,
                     ),
+                    const SizedBox(width: 16),
+                    _buildFilterChip('Tous tags', 'all', _filterTag, (value) {
+                      setState(() {
+                        _filterTag = value;
+                        _applyFiltersAndSort();
+                      });
+                    }),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('VIP', 'vip', _filterTag, (value) {
+                      setState(() {
+                        _filterTag = value;
+                        _applyFiltersAndSort();
+                      });
+                    }),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Nouveautés', 'nouveautes', _filterTag, (value) {
+                      setState(() {
+                        _filterTag = value;
+                        _applyFiltersAndSort();
+                      });
+                    }),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Promotions', 'promotions', _filterTag, (value) {
+                      setState(() {
+                        _filterTag = value;
+                        _applyFiltersAndSort();
+                      });
+                    }),
                   ],
                 ),
               ),
@@ -454,6 +684,7 @@ class _SubscribersTabState extends State<SubscribersTab> {
 
   Widget _buildSubscriberCard(Subscriber subscriber) {
     final isActive = subscriber.status == 'active';
+    final isSelected = _selectedIds.contains(subscriber.id);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -469,6 +700,19 @@ class _SubscribersTabState extends State<SubscribersTab> {
             children: [
               Row(
                 children: [
+                  Checkbox(
+                    value: isSelected,
+                    onChanged: (value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedIds.add(subscriber.id);
+                        } else {
+                          _selectedIds.remove(subscriber.id);
+                        }
+                      });
+                    },
+                    activeColor: AppTheme.accentGreen,
+                  ),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -588,5 +832,63 @@ class _SubscribersTabState extends State<SubscribersTab> {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Widget _buildStatCard(String label, int value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value.toString(),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: color.withOpacity(0.8),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, String value, String currentValue, Function(String) onSelected) {
+    final isSelected = currentValue == value;
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          onSelected(value);
+        }
+      },
+      selectedColor: AppTheme.accentGreen.withOpacity(0.2),
+      checkmarkColor: AppTheme.accentGreen,
+      backgroundColor: Colors.grey.shade100,
+      labelStyle: TextStyle(
+        color: isSelected ? AppTheme.accentGreen : AppTheme.textMedium,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+      ),
+    );
   }
 }

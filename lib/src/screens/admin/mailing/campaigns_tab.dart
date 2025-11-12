@@ -22,15 +22,25 @@ class _CampaignsTabState extends State<CampaignsTab> {
   final CampaignService _campaignService = CampaignService();
   final EmailTemplateService _templateService = EmailTemplateService();
   final MailingService _mailingService = MailingService();
+  final TextEditingController _searchController = TextEditingController();
   
   List<Campaign> _campaigns = [];
+  List<Campaign> _filteredCampaigns = [];
   List<EmailTemplate> _templates = [];
   bool _isLoading = true;
+  String _filterStatus = 'all';
+  String _sortBy = 'date'; // 'date', 'name'
 
   @override
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -40,8 +50,48 @@ class _CampaignsTabState extends State<CampaignsTab> {
     setState(() {
       _campaigns = campaigns;
       _templates = templates;
+      _applyFiltersAndSort();
       _isLoading = false;
     });
+  }
+
+  void _applyFiltersAndSort() {
+    List<Campaign> filtered = _campaigns;
+
+    // Apply status filter
+    if (_filterStatus != 'all') {
+      filtered = filtered.where((c) => c.status == _filterStatus).toList();
+    }
+
+    // Apply search filter
+    if (_searchController.text.isNotEmpty) {
+      final query = _searchController.text.toLowerCase();
+      filtered = filtered.where((campaign) {
+        return campaign.name.toLowerCase().contains(query);
+      }).toList();
+    }
+
+    // Apply sorting
+    switch (_sortBy) {
+      case 'name':
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case 'date':
+        filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+    }
+
+    _filteredCampaigns = filtered;
+  }
+
+  Map<String, int> _getStatistics() {
+    return {
+      'total': _campaigns.length,
+      'sent': _campaigns.where((c) => c.status == 'sent').length,
+      'scheduled': _campaigns.where((c) => c.status == 'scheduled').length,
+      'draft': _campaigns.where((c) => c.status == 'draft').length,
+      'failed': _campaigns.where((c) => c.status == 'failed').length,
+    };
   }
 
   Future<void> _showCampaignDialog({Campaign? campaign}) async {
@@ -58,7 +108,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
         builder: (context, setDialogState) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 600, maxHeight: 650),
+            constraints: const BoxConstraints(maxWidth: 600),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
               color: Colors.white,
@@ -99,13 +149,17 @@ class _CampaignsTabState extends State<CampaignsTab> {
                 ),
                 // Form content
                 Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Form(
-                      key: formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.6,
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                           TextFormField(
                             controller: nameController,
                             decoration: InputDecoration(
@@ -233,7 +287,8 @@ class _CampaignsTabState extends State<CampaignsTab> {
                               ),
                             ),
                           ],
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -392,34 +447,158 @@ class _CampaignsTabState extends State<CampaignsTab> {
       );
     }
 
+    final stats = _getStatistics();
+
     return Column(
       children: [
-        Padding(
+        // Statistics cards
+        Container(
           padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          color: Colors.grey.shade50,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildStatCard('Total', stats['total']!, Icons.campaign, Colors.blue),
+                const SizedBox(width: 12),
+                _buildStatCard('Envoyées', stats['sent']!, Icons.check_circle, Colors.green),
+                const SizedBox(width: 12),
+                _buildStatCard('Planifiées', stats['scheduled']!, Icons.schedule, Colors.orange),
+                const SizedBox(width: 12),
+                _buildStatCard('Brouillons', stats['draft']!, Icons.drafts, Colors.grey),
+              ],
+            ),
+          ),
+        ),
+        // Header with search and actions
+        Container(
+          padding: const EdgeInsets.all(16),
+          color: Colors.white,
+          child: Column(
             children: [
-              Text(
-                '${_campaigns.length} campagne(s)',
-                style: Theme.of(context).textTheme.titleMedium,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${_filteredCampaigns.length} campagne(s)',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showCampaignDialog(),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Nouvelle'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryRed,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              ElevatedButton.icon(
-                onPressed: () => _showCampaignDialog(),
-                icon: const Icon(Icons.add),
-                label: const Text('Nouvelle'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryRed,
+              const SizedBox(height: 16),
+              // Search and filters
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Rechercher une campagne...',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _applyFiltersAndSort());
+                                },
+                              )
+                            : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() => _applyFiltersAndSort());
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  PopupMenuButton<String>(
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.sort, size: 20),
+                          SizedBox(width: 4),
+                          Icon(Icons.arrow_drop_down, size: 20),
+                        ],
+                      ),
+                    ),
+                    onSelected: (value) {
+                      setState(() {
+                        _sortBy = value;
+                        _applyFiltersAndSort();
+                      });
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'date',
+                        child: Text('Trier par date'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'name',
+                        child: Text('Trier par nom'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Status filter chips
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildFilterChip('Toutes', 'all'),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Envoyées', 'sent'),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Planifiées', 'scheduled'),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Brouillons', 'draft'),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Échouées', 'failed'),
+                  ],
                 ),
               ),
             ],
           ),
         ),
+        // Campaigns list
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(VisualConstants.paddingMedium),
-            itemCount: _campaigns.length,
+            itemCount: _filteredCampaigns.length,
             itemBuilder: (context, index) {
-              final campaign = _campaigns[index];
+              final campaign = _filteredCampaigns[index];
               return _buildCampaignCard(campaign);
             },
           ),
@@ -635,5 +814,64 @@ class _CampaignsTabState extends State<CampaignsTab> {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Widget _buildStatCard(String label, int value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value.toString(),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: color.withOpacity(0.8),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, String value) {
+    final isSelected = _filterStatus == value;
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        setState(() {
+          _filterStatus = value;
+          _applyFiltersAndSort();
+        });
+      },
+      selectedColor: AppTheme.primaryRed.withOpacity(0.2),
+      checkmarkColor: AppTheme.primaryRed,
+      backgroundColor: Colors.grey.shade100,
+      labelStyle: TextStyle(
+        color: isSelected ? AppTheme.primaryRed : AppTheme.textMedium,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+      ),
+    );
   }
 }
