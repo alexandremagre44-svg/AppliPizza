@@ -1,4 +1,5 @@
 // lib/src/services/order_service.dart
+// DEPRECATED: Use FirebaseOrderService instead
 // Service de gestion des commandes avec stockage local (SharedPreferences)
 // Support pour le temps réel via Stream
 
@@ -7,6 +8,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/order.dart';
 
+@deprecated
 class OrderService {
   static const String _ordersKey = 'orders_list';
   
