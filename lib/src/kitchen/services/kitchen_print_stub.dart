@@ -29,7 +29,7 @@ class KitchenPrintService {
       
       AppLogger.info('Ticket imprimé avec succès');
     } catch (e) {
-      AppLogger.error('Erreur lors de l\'impression du ticket', e);
+      AppLogger.error('Erreur lors de l\'impression du ticket', error: e);
       rethrow;
     }
   }

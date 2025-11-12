@@ -79,7 +79,7 @@ class KitchenNotificationService {
       // Alternative: utiliser le son système si disponible
       // await _audioPlayer.play(AssetSource('sounds/notification.mp3'));
     } catch (e) {
-      AppLogger.error('Erreur lors de la lecture du son', e);
+      AppLogger.error('Erreur lors de la lecture du son', error: e);
     }
   }
 
