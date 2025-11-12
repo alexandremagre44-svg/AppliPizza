@@ -9,6 +9,7 @@ import 'firebase_options.dart';
 // Importez vos écrans
 import 'src/screens/splash/splash_screen.dart';
 import 'src/screens/auth/login_screen.dart';
+import 'src/screens/auth/signup_screen.dart';
 import 'src/screens/home/home_screen.dart'; 
 import 'src/screens/menu/menu_screen.dart'; 
 import 'src/screens/cart/cart_screen.dart';
@@ -66,9 +67,10 @@ class MyApp extends ConsumerWidget {
       redirect: (context, state) async {
         final authState = ref.read(authProvider);
         final isLoggingIn = state.matchedLocation == AppRoutes.login;
+        final isSigningUp = state.matchedLocation == '/signup';
         
-        // Si on est sur le splash ou login, laisser passer
-        if (state.matchedLocation == AppRoutes.splash || isLoggingIn) {
+        // Si on est sur le splash, login ou signup, laisser passer
+        if (state.matchedLocation == AppRoutes.splash || isLoggingIn || isSigningUp) {
           return null;
         }
         
@@ -89,6 +91,11 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.login,
           builder: (context, state) => const LoginScreen(),
+        ),
+        // Signup Screen
+        GoRoute(
+          path: '/signup',
+          builder: (context, state) => const SignupScreen(),
         ),
         // ShellRoute pour les écrans AVEC barre de navigation
         ShellRoute(
