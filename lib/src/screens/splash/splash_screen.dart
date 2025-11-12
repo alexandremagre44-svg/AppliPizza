@@ -58,17 +58,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // refactor splash screen → app_theme standard (colors)
+      // refactor splash screen → app_theme standard (solid red, no gradient)
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primaryRed,
-              AppColors.primaryRedDark,
-            ],
-          ),
+          color: AppColors.primaryRed,
         ),
         child: Center(
           child: FadeTransition(

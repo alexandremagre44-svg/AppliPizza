@@ -184,14 +184,14 @@ class _ProductCardState extends State<ProductCard>
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.accentGold,
+                            color: AppColors.primaryRedLight,
                             borderRadius: AppRadius.badge,
                             boxShadow: AppShadows.soft,
                           ),
                           child: Text(
                             'x${widget.cartQuantity}',
                             style: AppTextStyles.labelSmall.copyWith(
-                              color: AppColors.textDark,
+                              color: AppColors.surfaceWhite,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

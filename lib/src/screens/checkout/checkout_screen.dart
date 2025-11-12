@@ -203,12 +203,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).colorScheme.primary.withOpacity(0.15),
-                Theme.of(context).colorScheme.secondary.withOpacity(0.15),
-              ],
-            ),
+            color: AppColors.primaryRed.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(

@@ -41,16 +41,8 @@ class ProfileScreen extends ConsumerWidget {
             // Enhanced Profile Header
             Container(
               width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                  stops: const [0.4, 1.0],
-                ),
+              decoration: const BoxDecoration(
+                color: AppColors.primaryRed,
               ),
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
               child: Column(

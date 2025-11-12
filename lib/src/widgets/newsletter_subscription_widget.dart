@@ -289,7 +289,7 @@ class _NewsletterSubscriptionWidgetState
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppTheme.backgroundCream,
+                color: AppColors.backgroundLight,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: _consentGiven

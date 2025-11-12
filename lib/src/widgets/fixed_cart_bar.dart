@@ -154,7 +154,7 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                                 child: Container(
                                   padding: AppSpacing.paddingXS,
                                   decoration: const BoxDecoration(
-                                    color: AppColors.accentGold,
+                                    color: AppColors.surfaceWhite,
                                     shape: BoxShape.circle,
                                   ),
                                   constraints: const BoxConstraints(
@@ -164,7 +164,7 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                                   child: Text(
                                     itemCount.toString(),
                                     style: AppTextStyles.labelSmall.copyWith(
-                                      color: AppColors.textDark,
+                                      color: AppColors.primaryRed,
                                       fontWeight: FontWeight.bold,
                                     ),
                                     textAlign: TextAlign.center,
