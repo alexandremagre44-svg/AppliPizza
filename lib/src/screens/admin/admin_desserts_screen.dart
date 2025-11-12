@@ -44,7 +44,7 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
     final orderController = TextEditingController(text: dessert?.order.toString() ?? '0');
     bool isFeatured = dessert?.isFeatured ?? false;
     bool isActive = dessert?.isActive ?? true;
-    String displaySpot = dessert?.displaySpot ?? 'all';
+    String displaySpot = dessert?.displaySpot.value ?? 'all';
 
     final result = await showDialog<bool>(
       context: context,
@@ -467,11 +467,11 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
                               imageUrl: imageController.text.trim().isEmpty
                                   ? 'https://via.placeholder.com/200'
                                   : imageController.text.trim(),
-                              category: 'Desserts',
+                              category: ProductCategory.desserts,
                               isMenu: false,
                               isFeatured: isFeatured,
                               isActive: isActive,
-                              displaySpot: displaySpot,
+                              displaySpot: DisplaySpot.fromString(displaySpot),
                               order: int.tryParse(orderController.text) ?? 0,
                             );
 

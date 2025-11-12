@@ -44,7 +44,7 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
     final orderController = TextEditingController(text: drink?.order.toString() ?? '0');
     bool isFeatured = drink?.isFeatured ?? false;
     bool isActive = drink?.isActive ?? true;
-    String displaySpot = drink?.displaySpot ?? 'all';
+    String displaySpot = drink?.displaySpot.value ?? 'all';
 
     final result = await showDialog<bool>(
       context: context,
@@ -467,11 +467,11 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                               imageUrl: imageController.text.trim().isEmpty
                                   ? 'https://via.placeholder.com/200'
                                   : imageController.text.trim(),
-                              category: 'Boissons',
+                              category: ProductCategory.boissons,
                               isMenu: false,
                               isFeatured: isFeatured,
                               isActive: isActive,
-                              displaySpot: displaySpot,
+                              displaySpot: DisplaySpot.fromString(displaySpot),
                               order: int.tryParse(orderController.text) ?? 0,
                             );
 

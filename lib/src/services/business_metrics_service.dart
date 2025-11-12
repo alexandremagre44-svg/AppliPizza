@@ -79,7 +79,7 @@ class BusinessMetricsService {
       for (final item in order.items) {
         final product = productMap[item.productId];
         if (product != null) {
-          final category = product.category;
+          final category = product.category.value;
           categoryRevenue[category] = 
               (categoryRevenue[category] ?? 0.0) + (item.price * item.quantity);
         }

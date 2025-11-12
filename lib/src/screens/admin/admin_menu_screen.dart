@@ -48,7 +48,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     int drinkCount = menu?.drinkCount ?? 1;
     bool isFeatured = menu?.isFeatured ?? false;
     bool isActive = menu?.isActive ?? true;
-    String displaySpot = menu?.displaySpot ?? 'all';
+    String displaySpot = menu?.displaySpot.value ?? 'all';
 
     final result = await showDialog<bool>(
       context: context,
@@ -637,13 +637,13 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                               imageUrl: imageController.text.trim().isEmpty
                                   ? 'https://via.placeholder.com/200'
                                   : imageController.text.trim(),
-                              category: 'Menus',
+                              category: ProductCategory.menus,
                               isMenu: true,
                               pizzaCount: pizzaCount,
                               drinkCount: drinkCount,
                               isFeatured: isFeatured,
                               isActive: isActive,
-                              displaySpot: displaySpot,
+                              displaySpot: DisplaySpot.fromString(displaySpot),
                               order: int.tryParse(orderController.text) ?? 0,
                             );
 

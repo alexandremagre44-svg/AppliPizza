@@ -148,7 +148,7 @@ class _ProductCardState extends State<ProductCard>
                     ),
                     // Badge "Personnaliser" en overlay semi-transparent en bas à droite
                     // refactor badge style → app_theme standard (8px radius, spacing)
-                    if (widget.product.category == 'Pizza' || widget.product.isMenu)
+                    if (widget.product.category == ProductCategory.pizza || widget.product.isMenu)
                       Positioned(
                         bottom: AppSpacing.sm,
                         right: AppSpacing.sm,
