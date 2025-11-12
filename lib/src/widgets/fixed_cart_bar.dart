@@ -105,35 +105,31 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
       position: _slideAnimation,
       child: ScaleTransition(
         scale: _scaleAnimation,
+        // refactor container style → app_theme standard (colors, shadow)
         child: Container(
           decoration: BoxDecoration(
-            color: AppTheme.primaryRed,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+            color: AppColors.primaryRed,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(AppRadius.xl),
+              topRight: Radius.circular(AppRadius.xl),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 12,
-                offset: const Offset(0, -4),
-              ),
-            ],
+            boxShadow: AppShadows.medium,
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
             onTap: () => context.push('/cart'),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(AppRadius.xl),
+              topRight: Radius.circular(AppRadius.xl),
             ),
             child: SafeArea(
               top: false,
+              // refactor padding → app_theme standard
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
+                padding: AppSpacing.paddingLG.copyWith(
+                  top: AppSpacing.lg,
+                  bottom: AppSpacing.lg,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -141,12 +137,13 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                     // Icône panier avec badge de quantité
                     Row(
                       children: [
+                        // refactor icon and badge → app_theme standard
                         Stack(
                           clipBehavior: Clip.none,
                           children: [
                             const Icon(
                               Icons.shopping_bag,
-                              color: AppTheme.surfaceWhite,
+                              color: AppColors.surfaceWhite,
                               size: 28,
                             ),
                             // Badge quantité
@@ -155,9 +152,9 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                                 right: -8,
                                 top: -8,
                                 child: Container(
-                                  padding: const EdgeInsets.all(4),
+                                  padding: AppSpacing.paddingXS,
                                   decoration: const BoxDecoration(
-                                    color: AppTheme.accentGold,
+                                    color: AppColors.accentGold,
                                     shape: BoxShape.circle,
                                   ),
                                   constraints: const BoxConstraints(
@@ -166,9 +163,8 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                                   ),
                                   child: Text(
                                     itemCount.toString(),
-                                    style: const TextStyle(
-                                      color: AppTheme.textDark,
-                                      fontSize: 11,
+                                    style: AppTextStyles.labelSmall.copyWith(
+                                      color: AppColors.textDark,
                                       fontWeight: FontWeight.bold,
                                     ),
                                     textAlign: TextAlign.center,
@@ -177,19 +173,17 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                               ),
                           ],
                         ),
-                        const SizedBox(width: 16),
-                        const Text(
+                        SizedBox(width: AppSpacing.lg),
+                        Text(
                           'Voir le panier',
-                          style: TextStyle(
-                            color: AppTheme.surfaceWhite,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins',
+                          style: AppTextStyles.titleLarge.copyWith(
+                            color: AppColors.surfaceWhite,
                           ),
                         ),
                       ],
                     ),
                     // Total avec animation
+                    // refactor total badge → app_theme standard
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -197,15 +191,13 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: AppRadius.radiusXL,
                       ),
                       child: Text(
                         '${total.toStringAsFixed(2)} €',
-                        style: const TextStyle(
-                          color: AppTheme.surfaceWhite,
-                          fontSize: 17,
+                        style: AppTextStyles.titleLarge.copyWith(
+                          color: AppColors.surfaceWhite,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'Poppins',
                         ),
                       ),
                     ),

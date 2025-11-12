@@ -70,13 +70,14 @@ class _ProductCardState extends State<ProductCard>
   Widget build(BuildContext context) {
     return ScaleTransition(
       scale: _scaleAnimation,
+      // refactor card style → app_theme standard (8px radius)
       child: Card(
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.1),
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.card,
         ),
         child: GestureDetector(
           onTapDown: _handleTapDown,
@@ -85,7 +86,7 @@ class _ProductCardState extends State<ProductCard>
           onTap: widget.onAddToCart,
           child: Container(
             decoration: const BoxDecoration(
-              color: AppTheme.surfaceWhite,
+              color: AppColors.surfaceWhite,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -98,8 +99,8 @@ class _ProductCardState extends State<ProductCard>
                   children: [
                     // Image - suppression du pin gris placeholder si pas d'image
                     ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(AppRadius.sm),
                       ),
                       child: widget.product.imageUrl.isNotEmpty
                           ? Image.network(
@@ -108,14 +109,14 @@ class _ProductCardState extends State<ProductCard>
                               loadingBuilder: (context, child, loadingProgress) {
                                 if (loadingProgress == null) return child;
                                 return Container(
-                                  color: AppTheme.backgroundLight,
+                                  color: AppColors.backgroundLight,
                                   child: const Center(
                                     child: SizedBox(
                                       width: 24,
                                       height: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
-                                        color: AppTheme.primaryRed,
+                                        color: AppColors.primaryRed,
                                       ),
                                     ),
                                   ),
@@ -123,88 +124,75 @@ class _ProductCardState extends State<ProductCard>
                               },
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
-                                  color: AppTheme.backgroundLight,
+                                  color: AppColors.backgroundLight,
                                   child: const Center(
                                     child: Icon(
                                       Icons.local_pizza,
                                       size: 48,
-                                      color: AppTheme.textLight,
+                                      color: AppColors.textLight,
                                     ),
                                   ),
                                 );
                               },
                             )
                           : Container(
-                              color: AppTheme.backgroundLight,
+                              color: AppColors.backgroundLight,
                               child: const Center(
                                 child: Icon(
                                   Icons.local_pizza,
                                   size: 48,
-                                  color: AppTheme.textLight,
+                                  color: AppColors.textLight,
                                 ),
                               ),
                             ),
                     ),
                     // Badge "Personnaliser" en overlay semi-transparent en bas à droite
+                    // refactor badge style → app_theme standard (8px radius, spacing)
                     if (widget.product.category == 'Pizza' || widget.product.isMenu)
                       Positioned(
-                        bottom: 8,
-                        right: 8,
+                        bottom: AppSpacing.sm,
+                        right: AppSpacing.sm,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: AppTheme.primaryRed.withOpacity(0.9), // Semi-transparent
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            color: AppColors.primaryRed.withOpacity(0.9),
+                            borderRadius: AppRadius.badge,
+                            boxShadow: AppShadows.soft,
                           ),
-                          child: const Text(
+                          child: Text(
                             'Personnaliser',
-                            style: TextStyle(
-                              color: AppTheme.surfaceWhite,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.surfaceWhite,
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
                             ),
                           ),
                         ),
                       ),
                     // Badge quantité si dans le panier
+                    // refactor badge style → app_theme standard
                     if (widget.cartQuantity != null && widget.cartQuantity! > 0)
                       Positioned(
-                        top: 8,
-                        left: 8,
+                        top: AppSpacing.sm,
+                        left: AppSpacing.sm,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppTheme.accentGold,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            color: AppColors.accentGold,
+                            borderRadius: AppRadius.badge,
+                            boxShadow: AppShadows.soft,
                           ),
                           child: Text(
                             'x${widget.cartQuantity}',
-                            style: const TextStyle(
-                              color: AppTheme.textDark,
-                              fontSize: 11,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.textDark,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'Poppins',
                             ),
                           ),
                         ),
@@ -213,65 +201,56 @@ class _ProductCardState extends State<ProductCard>
                 ),
               ),
               // Contenu texte
+              // refactor padding and text styles → app_theme standard
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: AppSpacing.paddingMD,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Nom du produit - 2 lignes max
                       Text(
                         widget.product.name,
-                        style: const TextStyle(
-                          color: AppTheme.textDark,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Poppins',
+                        style: AppTextStyles.titleSmall.copyWith(
                           height: 1.2,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: AppSpacing.xs),
                       // Description courte
                       Expanded(
                         child: Text(
                           widget.product.description,
-                          style: const TextStyle(
-                            color: AppTheme.textMedium,
-                            fontSize: 11,
-                            fontFamily: 'Poppins',
+                          style: AppTextStyles.labelSmall.copyWith(
                             height: 1.3,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppSpacing.sm),
                       // Prix - Rouge #C62828, bold, taille 16
+                      // refactor price style → app_theme standard
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             '${widget.product.price.toStringAsFixed(2)} €',
-                            style: const TextStyle(
-                              color: Color(0xFFC62828), // Rouge exact #C62828
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Poppins',
-                            ),
+                            style: AppTextStyles.price,
                           ),
                           // Icône panier
+                          // refactor icon button → app_theme standard
                           Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryRed,
-                              borderRadius: BorderRadius.circular(8),
+                              color: AppColors.primaryRed,
+                              borderRadius: AppRadius.badge,
                             ),
                             child: const Icon(
                               Icons.add_shopping_cart,
                               size: 18,
-                              color: AppTheme.surfaceWhite,
+                              color: AppColors.surfaceWhite,
                             ),
                           ),
                         ],

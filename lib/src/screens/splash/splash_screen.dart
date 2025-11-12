@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -57,15 +58,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // refactor splash screen → app_theme standard (colors)
       body: Container(
         decoration: const BoxDecoration(
-          // Gradient Pizza Deli'Zza
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFC62828), // primaryRed
-              Color(0xFF8E0000), // primaryRedDark
+              AppColors.primaryRed,
+              AppColors.primaryRedDark,
             ],
           ),
         ),
@@ -95,7 +96,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: const Icon(
                       Icons.local_pizza,
                       size: 90,
-                      color: Color(0xFFC62828),
+                      color: AppColors.primaryRed,
                     ),
                   ),
                   const SizedBox(height: 40),

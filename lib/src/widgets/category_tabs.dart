@@ -26,19 +26,20 @@ class CategoryTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // refactor padding → app_theme standard
     return Container(
       height: 50,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: AppSpacing.paddingVerticalSM,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: AppSpacing.paddingHorizontalLG,
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final category = categories[index];
           final isSelected = category == selectedCategory;
           
           return Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: EdgeInsets.only(right: AppSpacing.md),
             child: _buildCategoryChip(
               context,
               category,
@@ -55,11 +56,12 @@ class CategoryTabs extends StatelessWidget {
     String category,
     bool isSelected,
   ) {
+    // refactor chip style → app_theme standard (colors, radius, shadow, text)
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () => onCategorySelected(category),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: AppRadius.radiusXL,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(
@@ -67,33 +69,21 @@ class CategoryTabs extends StatelessWidget {
             vertical: 8,
           ),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.primaryRed : Colors.transparent,
+            color: isSelected ? AppColors.primaryRed : Colors.transparent,
             border: Border.all(
-              color: AppTheme.primaryRed,
+              color: AppColors.primaryRed,
               width: 1.5,
             ),
-            borderRadius: BorderRadius.circular(20),
-            // Ombre légère pour détacher le pill rouge actif
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppTheme.primaryRed.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
+            borderRadius: AppRadius.radiusXL,
+            boxShadow: isSelected ? AppShadows.soft : null,
           ),
           child: Center(
             child: Text(
               category,
-              style: TextStyle(
+              style: AppTextStyles.titleSmall.copyWith(
                 color: isSelected
-                    ? AppTheme.surfaceWhite
-                    : AppTheme.primaryRed,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
+                    ? AppColors.surfaceWhite
+                    : AppColors.primaryRed,
               ),
             ),
           ),

@@ -110,11 +110,12 @@ class ProfileScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: AppSpacing.sm),
                   // Email
+                  // refactor text style → app_theme standard
                   Text(
                     authState.userEmail ?? userProfile.email,
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                    style: AppTextStyles.bodyLarge.copyWith(
                           color: Colors.white70,
                         ),
                   ),
@@ -122,11 +123,12 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xxl),
 
             // Statistiques rapides
+            // refactor padding → app_theme standard
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: AppSpacing.paddingHorizontalLG,
               child: Row(
                 children: [
                   Expanded(
@@ -137,7 +139,7 @@ class ProfileScreen extends ConsumerWidget {
                       value: history.length.toString(),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: AppSpacing.lg),
                   Expanded(
                     child: _buildStatCard(
                       context,
@@ -150,17 +152,17 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xxl),
 
             // Section Historique
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: AppSpacing.paddingHorizontalLG,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Historique des commandes',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: AppTextStyles.titleLarge,
                   ),
                   if (history.isNotEmpty)
                     TextButton(
@@ -173,17 +175,18 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.md),
 
             _buildOrderHistory(context, history),
 
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xxl),
           ],
         ),
       ),
     );
   }
 
+  // refactor stat card → app_theme standard (padding, radius, shadow)
   Widget _buildStatCard(
     BuildContext context, {
     required IconData icon,
@@ -191,10 +194,10 @@ class ProfileScreen extends ConsumerWidget {
     required String value,
   }) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: AppSpacing.paddingXL,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.cardLarge,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),

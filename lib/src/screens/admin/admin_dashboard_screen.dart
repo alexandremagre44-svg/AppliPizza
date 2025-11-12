@@ -91,32 +91,24 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
         ],
       ),
+      // refactor admin dashboard → app_theme standard
       body: CustomScrollView(
         slivers: [
           // En-tête avec message de bienvenue
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: AppSpacing.paddingXL,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Tableau de bord',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textDark,
-                      fontFamily: 'Poppins',
-                    ),
+                    style: AppTextStyles.headlineLarge,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: AppSpacing.sm),
                   Text(
                     'Gérez votre pizzeria Pizza Deli\'Zza',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppTheme.textMedium,
-                      fontFamily: 'Poppins',
-                    ),
+                    style: AppTextStyles.bodyMedium,
                   ),
                 ],
               ),
@@ -125,12 +117,12 @@ class AdminDashboardScreen extends StatelessWidget {
           
           // Grille de cartes admin
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: AppSpacing.paddingHorizontalLG,
             sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
+                crossAxisSpacing: AppSpacing.lg,
+                mainAxisSpacing: AppSpacing.lg,
                 childAspectRatio: 1.1,
               ),
               delegate: SliverChildListDelegate([
@@ -181,8 +173,8 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
           
           // Espace en bas
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 24),
+          SliverToBoxAdapter(
+            child: SizedBox(height: AppSpacing.xxl),
           ),
         ],
       ),
@@ -211,22 +203,22 @@ class AdminDashboardScreen extends StatelessWidget {
           ),
         );
       },
+      // refactor card style → app_theme standard (radius, padding, colors, text)
       child: Card(
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.1),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.cardLarge,
         ),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.cardLarge,
           child: AnimatedContainer(
-            // Micro-animation: Légère ombre au hover
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.paddingLG,
             decoration: BoxDecoration(
-              color: AppTheme.surfaceWhite,
-              borderRadius: BorderRadius.circular(16),
+              color: AppColors.surfaceWhite,
+              borderRadius: AppRadius.cardLarge,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -236,36 +228,27 @@ class AdminDashboardScreen extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryRed.withOpacity(0.1),
+                  color: AppColors.primaryRed.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
                   size: 30,
-                  color: AppTheme.primaryRed,
+                  color: AppColors.primaryRed,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.md),
               // Titre
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textDark,
-                  fontFamily: 'Poppins',
-                ),
+                style: AppTextStyles.titleLarge,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: AppSpacing.xs),
               // Sous-titre
               Text(
                 subtitle,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppTheme.textMedium,
-                  fontFamily: 'Poppins',
-                ),
+                style: AppTextStyles.bodySmall,
                 textAlign: TextAlign.center,
               ),
             ],

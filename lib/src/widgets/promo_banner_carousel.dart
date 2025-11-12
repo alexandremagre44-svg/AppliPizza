@@ -75,7 +75,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
             },
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppSpacing.md),
         // Indicateurs de page
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -88,21 +88,16 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
     );
   }
 
+  // refactor banner card → app_theme standard (spacing, radius, shadow)
   Widget _buildBannerCard(PromoBanner banner) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: AppSpacing.paddingHorizontalLG,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: AppRadius.radiusXL,
+        boxShadow: AppShadows.medium,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: AppRadius.radiusXL,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -112,12 +107,12 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  color: AppTheme.primaryRedLight,
+                  color: AppColors.primaryRedLight,
                   child: const Center(
                     child: Icon(
                       Icons.local_pizza,
                       size: 60,
-                      color: AppTheme.surfaceWhite,
+                      color: AppColors.surfaceWhite,
                     ),
                   ),
                 );
@@ -137,42 +132,38 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
               ),
             ),
             // Contenu texte
+            // refactor text and button → app_theme standard
             Positioned(
-              left: 20,
-              right: 20,
-              bottom: 20,
+              left: AppSpacing.xl,
+              right: AppSpacing.xl,
+              bottom: AppSpacing.xl,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     banner.title,
-                    style: const TextStyle(
-                      color: AppTheme.surfaceWhite,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
+                    style: AppTextStyles.headlineMedium.copyWith(
+                      color: AppColors.surfaceWhite,
                     ),
                   ),
                   if (banner.subtitle != null) ...[
-                    const SizedBox(height: 4),
+                    SizedBox(height: AppSpacing.xs),
                     Text(
                       banner.subtitle!,
-                      style: TextStyle(
-                        color: AppTheme.surfaceWhite.withOpacity(0.9),
-                        fontSize: 14,
-                        fontFamily: 'Poppins',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.surfaceWhite.withOpacity(0.9),
                       ),
                     ),
                   ],
-                  const SizedBox(height: 12),
+                  SizedBox(height: AppSpacing.md),
                   ElevatedButton(
                     onPressed: banner.onTap,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.surfaceWhite,
-                      foregroundColor: AppTheme.primaryRed,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+                      backgroundColor: AppColors.surfaceWhite,
+                      foregroundColor: AppColors.primaryRed,
+                      padding: AppSpacing.buttonPadding.copyWith(
+                        top: AppSpacing.md,
+                        bottom: AppSpacing.md,
                       ),
                     ),
                     child: const Text('Je commande maintenant'),
@@ -186,15 +177,16 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
     );
   }
 
+  // refactor page indicator → app_theme standard
   Widget _buildPageIndicator(bool isActive) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.symmetric(horizontal: 4),
+      margin: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       width: isActive ? 24 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: isActive ? AppTheme.primaryRed : AppTheme.textLight,
-        borderRadius: BorderRadius.circular(4),
+        color: isActive ? AppColors.primaryRed : AppColors.textLight,
+        borderRadius: AppRadius.radiusXS,
       ),
     );
   }
