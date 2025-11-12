@@ -61,8 +61,13 @@ class MyApp extends ConsumerWidget {
   }
 
   GoRouter _buildRouter(WidgetRef ref) {
+    // Create a listenable that refreshes when auth state changes
+    final authService = ref.read(firebaseAuthServiceProvider);
+    final refreshListenable = GoRouterRefreshStream(authService.authStateChanges);
+    
     return GoRouter(
       initialLocation: AppRoutes.splash,
+      refreshListenable: refreshListenable,
       redirect: (context, state) async {
         final authState = ref.read(authProvider);
         final isLoggingIn = state.matchedLocation == AppRoutes.login;
@@ -114,7 +119,7 @@ class MyApp extends ConsumerWidget {
             ),
             // Routes Admin dans le shell pour bottom bar
             GoRoute(
-              path: '/admin',
+              path: AppRoutes.admin,
               builder: (context, state) => const AdminDashboardScreen(),
             ),
             GoRoute(
@@ -151,13 +156,25 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.productDetail,
           builder: (context, state) {
+            // Secure data passing: validate type before casting
+            if (state.extra is! Product) {
+              // If invalid data, redirect to home
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go(AppRoutes.home);
+              });
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
             final product = state.extra as Product;
             return ProductDetailScreen(product: product);
           },
         ),
         // Route Checkout
         GoRoute(
-          path: '/checkout',
+          path: AppRoutes.checkout,
           builder: (context, state) => const CheckoutScreen(),
         ),
         // Route Kitchen Mode

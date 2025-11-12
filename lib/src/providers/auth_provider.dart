@@ -1,5 +1,7 @@
 // lib/src/providers/auth_provider.dart
 
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_auth_service.dart';
@@ -14,6 +16,25 @@ final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(ref.watch(firebaseAuthServiceProvider));
 });
+
+/// Listenable for GoRouter's refreshListenable parameter
+/// This notifies GoRouter when authentication state changes
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+      (dynamic _) => notifyListeners(),
+    );
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
 
 /// État d'authentification
 class AuthState {
