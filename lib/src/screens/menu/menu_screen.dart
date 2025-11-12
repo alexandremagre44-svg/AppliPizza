@@ -8,7 +8,7 @@ import '../../providers/product_provider.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/product_detail_modal.dart';
 import 'menu_customization_modal.dart';
-import '../home/elegant_pizza_customization_modal.dart';
+import '../home/pizza_customization_modal.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 
@@ -242,7 +242,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                                     context: context,
                                     isScrollControlled: true,
                                     backgroundColor: Colors.transparent,
-                                    builder: (context) => ElegantPizzaCustomizationModal(pizza: product),
+                                    builder: (context) => PizzaCustomizationModal(pizza: product),
                                   );
                                 }
                               // Pour les autres produits (boissons, desserts), ajout direct

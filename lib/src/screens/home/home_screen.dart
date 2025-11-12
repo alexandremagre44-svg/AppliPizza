@@ -14,7 +14,7 @@ import '../../widgets/home/promo_card_compact.dart';
 import '../../widgets/home/category_shortcuts.dart';
 import '../../widgets/home/info_banner.dart';
 import '../menu/menu_customization_modal.dart';
-import 'elegant_pizza_customization_modal.dart';
+import 'pizza_customization_modal.dart';
 import '../../theme/app_theme.dart';
 import '../../core/constants.dart';
 
@@ -272,7 +272,7 @@ class HomeScreen extends ConsumerWidget {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (context) => ElegantPizzaCustomizationModal(pizza: product),
+        builder: (context) => PizzaCustomizationModal(pizza: product),
       );
     }
     // For other products, add directly to cart
