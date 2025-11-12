@@ -213,7 +213,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
-                                            colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
+                                            colors: [AppTheme.primaryRed.shade400, AppTheme.primaryRed.shade600],
                                           ),
                                           borderRadius: BorderRadius.circular(8),
                                         ),
@@ -236,7 +236,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                         child: Row(
                                           children: [
                                             IconButton(
-                                              icon: Icon(Icons.remove, color: Colors.orange.shade700),
+                                              icon: Icon(Icons.remove, color: AppTheme.primaryRed.shade700),
                                               onPressed: pizzaCount > 0
                                                   ? () => setState(() => pizzaCount--)
                                                   : null,
@@ -245,7 +245,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                               decoration: BoxDecoration(
                                                 gradient: LinearGradient(
-                                                  colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
+                                                  colors: [AppTheme.primaryRed.shade400, AppTheme.primaryRed.shade600],
                                                 ),
                                                 borderRadius: BorderRadius.circular(8),
                                               ),
@@ -259,7 +259,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                               ),
                                             ),
                                             IconButton(
-                                              icon: Icon(Icons.add, color: Colors.orange.shade700),
+                                              icon: Icon(Icons.add, color: AppTheme.primaryRed.shade700),
                                               onPressed: pizzaCount < 5
                                                   ? () => setState(() => pizzaCount++)
                                                   : null,
@@ -847,14 +847,14 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Colors.white),
+                  const Text('✅', style: TextStyle(fontSize: 20)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text('${menu.name} supprimé avec succès'),
                   ),
                 ],
               ),
-              backgroundColor: Colors.green.shade600,
+              backgroundColor: AppTheme.primaryRed,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -1154,19 +1154,19 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.orange.shade50,
+                              color: AppTheme.primaryRed.shade50,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.local_pizza, size: 14, color: Colors.orange.shade700),
+                                Icon(Icons.local_pizza, size: 14, color: AppTheme.primaryRed.shade700),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${menu.pizzaCount}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.orange.shade700,
+                                    color: AppTheme.primaryRed.shade700,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),

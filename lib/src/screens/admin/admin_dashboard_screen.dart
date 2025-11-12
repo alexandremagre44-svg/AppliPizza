@@ -18,33 +18,68 @@ class AdminDashboardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        title: const Column(
-          mainAxisSize: MainAxisSize.min,
+        title: Row(
           children: [
-            Text(
-              'Pizza Deli\'Zza',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+            // Logo à gauche
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.local_pizza,
                 color: AppTheme.surfaceWhite,
-                fontFamily: 'Poppins',
+                size: 24,
               ),
             ),
-            Text(
-              'Administration',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.surfaceWhite,
-                fontFamily: 'Poppins',
-              ),
+            const SizedBox(width: 12),
+            const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pizza Deli\'Zza',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.surfaceWhite,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                Text(
+                  'Administration',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                    color: AppTheme.surfaceWhite,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        centerTitle: true,
+        centerTitle: false,
         backgroundColor: AppTheme.primaryRed,
-        elevation: 0,
+        elevation: 2, // Légère ombre pour l'admin
+        shadowColor: Colors.black.withOpacity(0.2),
         actions: [
+          // Nom utilisateur (simulé)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: Center(
+              child: Text(
+                'Admin',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.surfaceWhite,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          ),
           // Bouton déconnexion
           IconButton(
             icon: const Icon(Icons.logout),
@@ -154,7 +189,7 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  /// Carte admin avec design Pizza Deli'Zza
+  /// Carte admin avec design Pizza Deli'Zza et animation hover
   Widget _buildAdminCard(
     BuildContext context, {
     required IconData icon,
@@ -162,21 +197,37 @@ class AdminDashboardScreen extends StatelessWidget {
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return Card(
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppTheme.surfaceWhite,
-            borderRadius: BorderRadius.circular(16),
+    return TweenAnimationBuilder<double>(
+      // Micro-animation: FadeIn pour l'apparition des cartes
+      duration: const Duration(milliseconds: 400),
+      tween: Tween(begin: 0.0, end: 1.0),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - value)),
+            child: child,
           ),
+        );
+      },
+      child: Card(
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: AnimatedContainer(
+            // Micro-animation: Légère ombre au hover
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceWhite,
+              borderRadius: BorderRadius.circular(16),
+            ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

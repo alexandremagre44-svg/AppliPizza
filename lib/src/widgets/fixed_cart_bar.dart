@@ -11,6 +11,12 @@ import '../theme/app_theme.dart';
 /// - Fond rouge avec coins supérieurs arrondis
 /// - Icône panier + texte "Voir le panier" + total dynamique
 /// - Animation "pop" lors de l'ajout d'un produit
+/// 
+/// ANIMATIONS:
+/// 1. SlideTransition (400ms) - Entrée depuis le bas au premier produit
+/// 2. ScaleTransition (300ms) - Pop sur l'icône panier à chaque ajout
+/// Fichier: lib/src/widgets/fixed_cart_bar.dart
+/// But: Donner un feedback visuel dynamique et attirer l'attention sur le panier
 class FixedCartBar extends ConsumerStatefulWidget {
   const FixedCartBar({super.key});
 
@@ -19,35 +25,53 @@ class FixedCartBar extends ConsumerStatefulWidget {
 }
 
 class _FixedCartBarState extends ConsumerState<FixedCartBar>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+    with TickerProviderStateMixin {
+  late AnimationController _popController;
   late Animation<double> _scaleAnimation;
+  late AnimationController _slideController;
+  late Animation<Offset> _slideAnimation;
+  bool _isVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
+    // Animation "pop" quand un produit est ajouté
+    _popController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
       CurvedAnimation(
-        parent: _animationController,
+        parent: _popController,
         curve: Curves.easeOutBack,
       ),
     );
+
+    // Micro-animation: Slide-in depuis le bas au premier ajout
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOut,
+    ));
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _popController.dispose();
+    _slideController.dispose();
     super.dispose();
   }
 
   /// Déclenche l'animation "pop" quand un produit est ajouté
   void _triggerPopAnimation() {
-    _animationController.forward().then((_) {
-      _animationController.reverse();
+    _popController.forward().then((_) {
+      _popController.reverse();
     });
   }
 
@@ -57,21 +81,31 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
     final itemCount = cart.items.length;
     final total = cart.total;
 
-    // Déclencher l'animation si le panier change (nouveau produit ajouté)
+    // Déclencher les animations selon l'état du panier
     ref.listen<CartState>(cartProvider, (previous, next) {
-      if (previous != null && next.items.length > previous.items.length) {
+      // Premier produit ajouté: slide-in
+      if ((previous == null || previous.items.isEmpty) && next.items.isNotEmpty) {
+        _isVisible = true;
+        _slideController.forward();
+      }
+      // Produit supplémentaire: pop
+      else if (previous != null && next.items.length > previous.items.length) {
         _triggerPopAnimation();
       }
     });
 
     // Ne pas afficher la barre si le panier est vide
     if (itemCount == 0) {
+      _isVisible = false;
+      _slideController.reverse();
       return const SizedBox.shrink();
     }
 
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: Container(
+    return SlideTransition(
+      position: _slideAnimation,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
         decoration: BoxDecoration(
           color: AppTheme.primaryRed,
           borderRadius: const BorderRadius.only(

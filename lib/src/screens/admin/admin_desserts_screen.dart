@@ -667,14 +667,14 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Colors.white),
+                  const Text('✅', style: TextStyle(fontSize: 20)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text('${dessert.name} supprimée avec succès'),
                   ),
                 ],
               ),
-              backgroundColor: Colors.green.shade600,
+              backgroundColor: AppTheme.primaryRed,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

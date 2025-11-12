@@ -206,7 +206,7 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      _buildProductList(_pizzas, 'Pizza', Colors.orange),
+                      _buildProductList(_pizzas, 'Pizza', AppTheme.primaryRed),
                       _buildProductList(_menus, 'Menus', Colors.blue),
                       _buildProductList(_drinks, 'Boissons', Colors.cyan),
                       _buildProductList(_desserts, 'Desserts', Colors.pink),
@@ -293,7 +293,7 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.amber.shade400, Colors.orange.shade600],
+                      colors: [Colors.amber.shade400, AppTheme.primaryRed.shade600],
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
