@@ -1,14 +1,16 @@
 // lib/src/kitchen/widgets/kitchen_order_card.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../models/order.dart';
-import '../kitchen_constants.dart';
+import 'kitchen_colors.dart';
 import 'kitchen_status_badge.dart';
 
 /// Carte de commande pour le mode cuisine
 /// Affiche les infos essentielles avec zones tactiles gauche/droite pour changer le statut
-class KitchenOrderCard extends StatelessWidget {
+class KitchenOrderCard extends StatefulWidget {
   final Order order;
   final VoidCallback onTap;
   final VoidCallback? onPreviousStatus;
@@ -25,191 +27,228 @@ class KitchenOrderCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<KitchenOrderCard> createState() => _KitchenOrderCardState();
+}
+
+class _KitchenOrderCardState extends State<KitchenOrderCard> {
+  Timer? _chronoTimer;
+  late ValueNotifier<int> _elapsedMinutes;
+
+  @override
+  void initState() {
+    super.initState();
+    _elapsedMinutes = ValueNotifier<int>(widget.minutesSinceCreation);
+    
+    // Update elapsed time every 10 seconds
+    _chronoTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (mounted) {
+        final now = DateTime.now();
+        final minutes = now.difference(widget.order.date).inMinutes;
+        _elapsedMinutes.value = minutes;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _chronoTimer?.cancel();
+    _elapsedMinutes.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final orderNumber = order.id.substring(0, 8).toUpperCase();
     final timeFormat = DateFormat('HH:mm');
-    final createdTime = timeFormat.format(order.date);
+    final createdTime = timeFormat.format(widget.order.date);
+    final statusColor = KitchenColors.getStatusBackgroundColor(widget.order.status);
     
-    // Calculate ETA if pickup time is available
-    String? pickupTime;
-    if (order.pickupDate != null && order.pickupTimeSlot != null) {
-      pickupTime = '${order.pickupDate} ${order.pickupTimeSlot}';
+    // Calculate pickup time range
+    String? pickupTimeRange;
+    if (widget.order.pickupDate != null && widget.order.pickupTimeSlot != null) {
+      // Parse the pickup time slot (format: "HH:mm")
+      try {
+        final parts = widget.order.pickupTimeSlot!.split(':');
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        final startTime = '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+        final endTime = '${(hour + 1).toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+        pickupTimeRange = '$startTime-$endTime';
+      } catch (e) {
+        pickupTimeRange = widget.order.pickupTimeSlot;
+      }
     }
 
     return Container(
       decoration: BoxDecoration(
-        color: KitchenConstants.kitchenSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: KitchenConstants.getStatusColor(order.status).withOpacity(0.5),
-          width: 2,
-        ),
-        boxShadow: [
+        color: statusColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
           BoxShadow(
-            color: KitchenConstants.getStatusColor(order.status).withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: KitchenColors.cardShadow,
+            blurRadius: 12,
+            spreadRadius: 0,
+            offset: Offset(0, 6),
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Stack(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Stack(
             children: [
-              // Left zone for previous status
-              if (onPreviousStatus != null)
+              // Subtle gradient overlay for better text readability
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x00000000), // Transparent
+                        Color(0x1A000000), // Black at 10% opacity
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              
+              // Left tap zone for previous status (50% of card width)
+              if (widget.onPreviousStatus != null)
                 Positioned(
                   left: 0,
                   top: 0,
                   bottom: 0,
-                  width: MediaQuery.of(context).size.width * 0.3,
+                  width: constraints.maxWidth * 0.5,
                   child: GestureDetector(
-                    onTap: onPreviousStatus,
+                    onTap: () async {
+                      // Haptic feedback
+                      HapticFeedback.lightImpact();
+                      widget.onPreviousStatus!();
+                    },
                     child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          bottomLeft: Radius.circular(12),
-                        ),
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            Colors.white.withOpacity(0.05),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.arrow_back,
-                          color: Colors.white24,
-                          size: 32,
-                        ),
-                      ),
+                      color: Colors.transparent,
                     ),
                   ),
                 ),
               
-              // Right zone for next status
-              if (onNextStatus != null)
+              // Right tap zone for next status (50% of card width)
+              if (widget.onNextStatus != null)
                 Positioned(
                   right: 0,
                   top: 0,
                   bottom: 0,
-                  width: MediaQuery.of(context).size.width * 0.3,
+                  width: constraints.maxWidth * 0.5,
                   child: GestureDetector(
-                    onTap: onNextStatus,
+                    onTap: () async {
+                      // Haptic feedback
+                      HapticFeedback.lightImpact();
+                      widget.onNextStatus!();
+                    },
                     child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(12),
-                          bottomRight: Radius.circular(12),
-                        ),
-                        gradient: LinearGradient(
-                          begin: Alignment.centerRight,
-                          end: Alignment.centerLeft,
-                          colors: [
-                            Colors.white.withOpacity(0.05),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.arrow_forward,
-                          color: Colors.white24,
-                          size: 32,
-                        ),
-                      ),
+                      color: Colors.transparent,
                     ),
                   ),
                 ),
               
+              // Double-tap detector for opening details
+              Positioned.fill(
+                child: GestureDetector(
+                  onDoubleTap: widget.onTap,
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
+                ),
+              ),
+          
               // Main content
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header: Order number and status
+                    // Header: Order number and status badge
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           '#$orderNumber',
                           style: const TextStyle(
-                            color: KitchenConstants.kitchenText,
+                            color: KitchenColors.textPrimary,
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1,
                           ),
                         ),
                         KitchenStatusBadge(
-                          status: order.status,
-                          animate: !order.isViewed,
+                          status: widget.order.status,
+                          animate: !widget.order.isViewed,
                         ),
                       ],
                     ),
                     
                     const SizedBox(height: 8),
                     
-                    // Time info
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time,
-                          color: KitchenConstants.kitchenTextSecondary,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          createdTime,
-                          style: const TextStyle(
-                            color: KitchenConstants.kitchenTextSecondary,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'Depuis ${minutesSinceCreation}min',
-                            style: const TextStyle(
-                              color: Colors.orange,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                    // Line 2: Creation time + elapsed time badge
+                    ValueListenableBuilder<int>(
+                      valueListenable: _elapsedMinutes,
+                      builder: (context, minutes, child) {
+                        final badgeColor = KitchenColors.getElapsedTimeColor(minutes);
+                        return Row(
+                          children: [
+                            const Icon(
+                              Icons.access_time,
+                              color: KitchenColors.iconPrimary,
+                              size: 16,
                             ),
-                          ),
-                        ),
-                      ],
+                            const SizedBox(width: 4),
+                            Text(
+                              createdTime,
+                              style: const TextStyle(
+                                color: KitchenColors.textSecondary,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: badgeColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Depuis ${minutes}min',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                     
-                    if (pickupTime != null) ...[
-                      const SizedBox(height: 4),
+                    // Line 3: Pickup time range
+                    if (pickupTimeRange != null) ...[
+                      const SizedBox(height: 6),
                       Row(
                         children: [
                           const Icon(
                             Icons.schedule,
-                            color: KitchenConstants.kitchenTextSecondary,
+                            color: KitchenColors.iconPrimary,
                             size: 16,
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Retrait: $pickupTime',
+                            'Retrait: $pickupTimeRange',
                             style: const TextStyle(
-                              color: KitchenConstants.kitchenTextSecondary,
-                              fontSize: 12,
+                              color: KitchenColors.textSecondary,
+                              fontSize: 14,
                             ),
                           ),
                         ],
@@ -218,111 +257,97 @@ class KitchenOrderCard extends StatelessWidget {
                     
                     const SizedBox(height: 12),
                     
-                    // Items preview
+                    // Items block (max 4 lines visible)
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (final item in order.items) ...[
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      '${item.quantity}x',
-                                      style: const TextStyle(
-                                        color: KitchenConstants.kitchenText,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      item.productName,
-                                      style: const TextStyle(
-                                        color: KitchenConstants.kitchenText,
-                                        fontSize: 14,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (item.customDescription != null) ...[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 44, top: 2),
-                                  child: Text(
-                                    item.customDescription!,
-                                    style: const TextStyle(
-                                      color: KitchenConstants.kitchenTextSecondary,
-                                      fontSize: 11,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                              const SizedBox(height: 8),
-                            ],
-                          ],
-                        ),
-                      ),
+                      child: _buildItemsList(),
                     ),
-                    
-                    // New order indicator
-                    if (!order.isViewed)
-                      Container(
-                        margin: const EdgeInsets.only(top: 8),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Colors.blue,
-                            width: 1,
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.fiber_new,
-                              color: Colors.blue,
-                              size: 16,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'NOUVELLE',
-                              style: TextStyle(
-                                color: Colors.blue,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                   ],
                 ),
               ),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
+
+  Widget _buildItemsList() {
+    final maxVisibleItems = 4;
+    final itemsToShow = widget.order.items.take(maxVisibleItems).toList();
+    final remainingCount = widget.order.items.length - maxVisibleItems;
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final item in itemsToShow) ...[
+            _buildItemRow(item),
+            const SizedBox(height: 6),
+          ],
+          if (remainingCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                '+$remainingCount élément${remainingCount > 1 ? 's' : ''}',
+                style: const TextStyle(
+                  color: KitchenColors.textSecondary,
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItemRow(item) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${item.quantity}x',
+              style: const TextStyle(
+                color: KitchenColors.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                item.productName,
+                style: const TextStyle(
+                  color: KitchenColors.textPrimary,
+                  fontSize: 16,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        if (item.customDescription != null && item.customDescription!.isNotEmpty) ...[
+          const SizedBox(height: 2),
+          Padding(
+            padding: const EdgeInsets.only(left: 28),
+            child: Text(
+              item.customDescription!,
+              style: const TextStyle(
+                color: KitchenColors.textSecondary,
+                fontSize: 13,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+  
+  Order get order => widget.order;
 }

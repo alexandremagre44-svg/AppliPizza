@@ -17,6 +17,10 @@ class KitchenConstants {
   static const int gridCrossAxisCount = 2; // 2x3 by default
   static const double gridChildAspectRatio = 1.3;
   
+  // Card dimensions for responsive layout
+  static const double targetCardHeight = 380.0; // Target height for desktop cards
+  static const double gridSpacing = 16.0; // Gap between cards
+  
   // Status colors for kitchen mode (high contrast on black background)
   static const Color statusPending = Color(0xFF2196F3); // Blue
   static const Color statusPreparing = Color(0xFFE91E63); // Pink/Magenta
