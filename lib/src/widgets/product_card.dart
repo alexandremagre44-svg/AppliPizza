@@ -2,7 +2,7 @@
 // Carte produit redesignée - Style Pizza Deli'Zza
 
 import 'package:flutter/material.dart';
-import '../models/widget.product.dart';
+import '../models/product.dart';
 import '../theme/app_theme.dart';
 
 /// Carte produit avec le nouveau design Pizza Deli'Zza
@@ -17,13 +17,13 @@ import '../theme/app_theme.dart';
 class ProductCard extends StatefulWidget {
   final Product product;
   final VoidCallback onAddToCart;
-  final int? widget.cartQuantity; // Quantité dans le panier (optionnel)
+  final int? cartQuantity; // Quantité dans le panier (optionnel)
 
   const ProductCard({
     super.key,
     required this.product,
     required this.onAddToCart,
-    this.widget.cartQuantity,
+    this.cartQuantity,
   });
 
   @override
@@ -87,9 +87,9 @@ class _ProductCardState extends State<ProductCard>
             decoration: const BoxDecoration(
               color: AppTheme.surfaceWhite,
             ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               // Image du produit avec badges - Ratio 3:2 pour plus de hauteur
               AspectRatio(
                 aspectRatio: 3 / 2, // Ratio 3:2 pour images plus hautes
@@ -199,7 +199,7 @@ class _ProductCardState extends State<ProductCard>
                             ],
                           ),
                           child: Text(
-                            'x$widget.cartQuantity',
+                            'x${widget.cartQuantity}',
                             style: const TextStyle(
                               color: AppTheme.textDark,
                               fontSize: 11,
@@ -282,6 +282,7 @@ class _ProductCardState extends State<ProductCard>
               ),
             ],
           ),
+        ),
         ),
       ),
     );
