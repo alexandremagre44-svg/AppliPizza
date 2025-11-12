@@ -18,8 +18,11 @@ class EmailTemplatesTab extends StatefulWidget {
 
 class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
   final EmailTemplateService _templateService = EmailTemplateService();
+  final TextEditingController _searchController = TextEditingController();
   List<EmailTemplate> _templates = [];
+  List<EmailTemplate> _filteredTemplates = [];
   bool _isLoading = true;
+  String _sortBy = 'name'; // 'name', 'date'
 
   @override
   void initState() {
@@ -27,13 +30,69 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
     _loadTemplates();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadTemplates() async {
     setState(() => _isLoading = true);
     final templates = await _templateService.loadTemplates();
     setState(() {
       _templates = templates;
+      _applyFiltersAndSort();
       _isLoading = false;
     });
+  }
+
+  void _applyFiltersAndSort() {
+    List<EmailTemplate> filtered = _templates;
+
+    // Apply search filter
+    if (_searchController.text.isNotEmpty) {
+      final query = _searchController.text.toLowerCase();
+      filtered = filtered.where((template) {
+        return template.name.toLowerCase().contains(query) ||
+            template.subject.toLowerCase().contains(query);
+      }).toList();
+    }
+
+    // Apply sorting
+    switch (_sortBy) {
+      case 'name':
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case 'date':
+        filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+    }
+
+    _filteredTemplates = filtered;
+  }
+
+  Future<void> _duplicateTemplate(EmailTemplate template) async {
+    final newTemplate = EmailTemplate(
+      id: const Uuid().v4(),
+      name: '${template.name} (Copie)',
+      subject: template.subject,
+      htmlBody: template.htmlBody,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      ctaText: template.ctaText,
+      ctaUrl: template.ctaUrl,
+      bannerUrl: template.bannerUrl,
+    );
+
+    final success = await _templateService.addTemplate(newTemplate);
+    if (success) {
+      _loadTemplates();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Modèle dupliqué avec succès')),
+        );
+      }
+    }
   }
 
   Future<void> _showTemplateDialog({EmailTemplate? template}) async {
@@ -56,7 +115,7 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
           borderRadius: BorderRadius.circular(24),
         ),
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 700, maxHeight: 700),
+          constraints: const BoxConstraints(maxWidth: 700),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
             color: Colors.white,
@@ -104,12 +163,16 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
               ),
               // Form content
               Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      children: [
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.6,
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        children: [
                         TextFormField(
                           controller: nameController,
                           decoration: InputDecoration(
@@ -191,7 +254,8 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
                             return null;
                           },
                         ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -305,22 +369,44 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.description, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'Aucun modèle d\'email',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Créez votre premier modèle',
-              style: Theme.of(context).textTheme.bodyMedium,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryRed.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.description, size: 80, color: AppTheme.primaryRed),
             ),
             const SizedBox(height: 24),
+            Text(
+              'Aucun modèle d\'email',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                'Les modèles vous permettent de créer des emails personnalisés réutilisables pour vos campagnes',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textMedium,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () => _showTemplateDialog(),
               icon: const Icon(Icons.add),
-              label: const Text('Nouveau modèle'),
+              label: const Text('Créer mon premier modèle'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryRed,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+              ),
             ),
           ],
         ),
@@ -329,35 +415,141 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
 
     return Column(
       children: [
-        Padding(
+        // Header with search and actions
+        Container(
           padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          color: Colors.grey.shade50,
+          child: Column(
             children: [
-              Text(
-                '${_templates.length} modèle(s)',
-                style: Theme.of(context).textTheme.titleMedium,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${_filteredTemplates.length} modèle(s)',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showTemplateDialog(),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Nouveau'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryRed,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              ElevatedButton.icon(
-                onPressed: () => _showTemplateDialog(),
-                icon: const Icon(Icons.add),
-                label: const Text('Nouveau'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryRed,
-                ),
+              const SizedBox(height: 16),
+              // Search and sort bar
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Rechercher un modèle...',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _applyFiltersAndSort());
+                                },
+                              )
+                            : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() => _applyFiltersAndSort());
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  PopupMenuButton<String>(
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.sort, size: 20),
+                          SizedBox(width: 4),
+                          Icon(Icons.arrow_drop_down, size: 20),
+                        ],
+                      ),
+                    ),
+                    onSelected: (value) {
+                      setState(() {
+                        _sortBy = value;
+                        _applyFiltersAndSort();
+                      });
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'name',
+                        child: Text('Trier par nom'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'date',
+                        child: Text('Trier par date'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
         ),
+        // Templates list
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(VisualConstants.paddingMedium),
-            itemCount: _templates.length,
-            itemBuilder: (context, index) {
-              final template = _templates[index];
-              return _buildTemplateCard(template);
-            },
-          ),
+          child: _filteredTemplates.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Aucun modèle trouvé',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Essayez de modifier vos critères de recherche',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.textMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(VisualConstants.paddingMedium),
+                  itemCount: _filteredTemplates.length,
+                  itemBuilder: (context, index) {
+                    final template = _filteredTemplates[index];
+                    return _buildTemplateCard(template);
+                  },
+                ),
         ),
       ],
     );
@@ -411,6 +603,11 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
                     icon: Icon(Icons.visibility, color: AppTheme.primaryRed),
                     onPressed: () => _previewTemplate(template),
                     tooltip: 'Prévisualiser',
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.content_copy, color: Colors.blue),
+                    onPressed: () => _duplicateTemplate(template),
+                    tooltip: 'Dupliquer',
                   ),
                   IconButton(
                     icon: Icon(Icons.edit, color: AppTheme.primaryRed),
