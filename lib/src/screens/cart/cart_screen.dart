@@ -49,59 +49,50 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
+  // refactor empty cart → app_theme standard (colors, spacing, text styles)
   Widget _buildEmptyCart(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: AppSpacing.paddingXXXL,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               width: 140,
               height: 140,
-              decoration: BoxDecoration(
-                color: AppTheme.backgroundLight,
+              decoration: const BoxDecoration(
+                color: AppColors.backgroundLight,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.shopping_bag_outlined,
                 size: 70,
-                color: AppTheme.textLight,
+                color: AppColors.textLight,
               ),
             ),
-            const SizedBox(height: 32),
-            const Text(
+            SizedBox(height: AppSpacing.xxxl),
+            Text(
               'Votre panier est vide',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textDark,
-                fontFamily: 'Poppins',
-              ),
+              style: AppTextStyles.headlineMedium,
             ),
-            const SizedBox(height: 12),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40),
+            SizedBox(height: AppSpacing.md),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(
                 'Ajoutez de délicieuses pizzas pour commencer votre commande',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.textMedium,
-                  fontFamily: 'Poppins',
-                  height: 1.5,
-                ),
+                style: AppTextStyles.bodyMedium,
                 textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: AppSpacing.xxxl + AppSpacing.sm),
             SizedBox(
               height: 50,
               child: ElevatedButton.icon(
                 onPressed: () => context.go('/home'),
                 icon: const Icon(Icons.local_pizza, size: 22),
-                label: const Text(
+                label: Text(
                   'Découvrir le menu',
-                  style: TextStyle(fontSize: 16),
+                  style: AppTextStyles.titleLarge,
                 ),
               ),
             ),
@@ -112,21 +103,22 @@ class CartScreen extends ConsumerWidget {
   }
   
   /// Carte d'article du panier - Style Pizza Deli'Zza
+  /// refactor card style → app_theme standard (radius, shadow, padding)
   Widget _buildCartItemCard(
       BuildContext context, CartItem item, CartNotifier notifier) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: AppSpacing.md),
       elevation: 2,
       shadowColor: Colors.black.withOpacity(0.1),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.button),
       child: Padding(
-        padding: const EdgeInsets.all(12), 
+        padding: AppSpacing.paddingMD,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image produit
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: AppRadius.badge,
               child: Image.network(
                 item.imageUrl,
                 width: 70, 
@@ -136,17 +128,17 @@ class CartScreen extends ConsumerWidget {
                   return Container(
                     width: 70,
                     height: 70,
-                    color: AppTheme.backgroundLight,
+                    color: AppColors.backgroundLight,
                     child: const Icon(
                       Icons.local_pizza,
                       size: 30,
-                      color: AppTheme.textLight,
+                      color: AppColors.textLight,
                     ),
                   );
                 },
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: AppSpacing.md),
 
             // Détails du produit
             Expanded( 

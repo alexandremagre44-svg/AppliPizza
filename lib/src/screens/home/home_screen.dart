@@ -152,11 +152,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ],
             ),
-            backgroundColor: AppTheme.primaryRed,
+            // refactor snackbar style → app_theme standard
+            backgroundColor: AppColors.primaryRed,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 2),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: AppRadius.button,
             ),
           ),
         );
@@ -173,7 +174,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ref.invalidate(productListProvider);
               await ref.read(productListProvider.future);
             },
-            color: AppTheme.primaryRed,
+            color: AppColors.primaryRed,
             child: CustomScrollView(
               slivers: [
                 // Barre de catégories horizontale avec scroll
@@ -196,7 +197,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
                 
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
                 
                 // Bannière promotionnelle carousel (si promos disponibles)
                 if (promoProducts.isNotEmpty)
@@ -213,27 +214,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 
-                const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
                 
                 // En-tête de section centré et bold avec bouton filtres
+                // refactor padding → app_theme standard
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: AppSpacing.paddingHorizontalLG,
                     child: Column(
                       children: [
                         // Titre centré et bold
+                        // refactor text style → app_theme standard
                         Text(
                           _getCategoryTitle(_selectedCategory),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textDark,
-                            fontFamily: 'Poppins',
-                          ),
+                          style: AppTextStyles.headlineMedium,
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: AppSpacing.md),
                         // Bouton filtres centré en dessous
+                        // refactor button padding → app_theme standard
                         Align(
                           alignment: Alignment.centerRight,
                           child: OutlinedButton.icon(
@@ -246,10 +245,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             label: const Text('Filtres'),
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
+                              padding: AppSpacing.buttonPaddingSmall,
                             ),
                           ),
                         ),
@@ -258,27 +254,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
                 
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
                 
                 // Grille de produits 2 colonnes
+                // refactor empty state → app_theme standard
                 if (filteredProducts.isEmpty)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.inventory_2_outlined,
                             size: 64,
-                            color: AppTheme.textLight,
+                            color: AppColors.textLight,
                           ),
-                          SizedBox(height: 16),
+                          SizedBox(height: AppSpacing.lg),
                           Text(
                             'Aucun produit dans cette catégorie',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: AppTheme.textMedium,
-                              fontFamily: 'Poppins',
+                            style: AppTextStyles.bodyLarge.copyWith(
+                              color: AppColors.textMedium,
                             ),
                           ),
                         ],
@@ -286,13 +281,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   )
                 else
+                  // refactor padding → app_theme standard
                   SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: AppSpacing.paddingHorizontalLG,
                     sliver: SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      // refactor grid spacing → app_theme standard
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
+                        mainAxisSpacing: AppSpacing.lg,
+                        crossAxisSpacing: AppSpacing.lg,
                         childAspectRatio: 0.75,
                       ),
                       delegate: SliverChildBuilderDelegate(
