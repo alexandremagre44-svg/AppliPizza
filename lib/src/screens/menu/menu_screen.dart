@@ -90,13 +90,14 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 end: Alignment.bottomCenter,
               ),
             ),
+            // refactor container style → app_theme standard
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFFFFFFF), // Fond blanc pur
-                borderRadius: BorderRadius.circular(30), // Bords arrondis 30
+                color: AppColors.surfaceWhite,
+                borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15), // Ombre douce
+                    color: Colors.black.withOpacity(0.15),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
