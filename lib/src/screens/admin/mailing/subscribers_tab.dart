@@ -67,11 +67,7 @@ class _SubscribersTabState extends State<SubscribersTab> {
             constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.white, AppTheme.accentGreen.withOpacity(0.05)],
-              ),
+              color: Colors.white,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -80,9 +76,7 @@ class _SubscribersTabState extends State<SubscribersTab> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppTheme.accentGreen, Colors.teal.shade700],
-                    ),
+                    color: AppColors.primaryRed,
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(24)),
                   ),
@@ -478,11 +472,7 @@ class _SubscribersTabState extends State<SubscribersTab> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: isActive
-                            ? [AppTheme.accentGreen, Colors.teal.shade700]
-                            : [Colors.grey.shade400, Colors.grey.shade600],
-                      ),
+                      color: AppColors.primaryRed,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(

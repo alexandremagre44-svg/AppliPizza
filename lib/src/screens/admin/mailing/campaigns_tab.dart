@@ -61,11 +61,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
             constraints: const BoxConstraints(maxWidth: 600, maxHeight: 650),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.white, AppTheme.accentOrange.withOpacity(0.05)],
-              ),
+              color: Colors.white,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -74,9 +70,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppTheme.accentOrange, Colors.orange.shade700],
-                    ),
+                    color: AppColors.primaryRed,
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                   ),
                   child: Row(
@@ -455,9 +449,7 @@ class _CampaignsTabState extends State<CampaignsTab> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppTheme.accentOrange, Colors.orange.shade700],
-                      ),
+                      color: AppColors.primaryRed,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.campaign, color: Colors.white, size: 24),
