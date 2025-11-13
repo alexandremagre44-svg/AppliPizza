@@ -115,7 +115,30 @@ class AdminDashboardScreen extends StatelessWidget {
             ),
           ),
           
-          // Grille de cartes admin
+          // Section Opérations
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: AppSpacing.paddingHorizontalLG,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: AppSpacing.lg),
+                  Text(
+                    'Opérations',
+                    style: AppTextStyles.headlineMedium.copyWith(
+                      color: AppColors.primaryRed,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Gestion quotidienne de la pizzeria',
+                    style: AppTextStyles.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
           SliverPadding(
             padding: AppSpacing.paddingHorizontalLG,
             sliver: SliverGrid(
@@ -126,6 +149,20 @@ class AdminDashboardScreen extends StatelessWidget {
                 childAspectRatio: 1.1,
               ),
               delegate: SliverChildListDelegate([
+                _buildAdminCard(
+                  context,
+                  icon: Icons.shopping_bag,
+                  title: 'Commandes',
+                  subtitle: 'Gérer les commandes',
+                  onTap: () => context.push(AppRoutes.adminOrders),
+                ),
+                _buildAdminCard(
+                  context,
+                  icon: Icons.restaurant,
+                  title: 'Cuisine',
+                  subtitle: 'Mode cuisine',
+                  onTap: () => context.push(AppRoutes.kitchen),
+                ),
                 _buildAdminCard(
                   context,
                   icon: Icons.local_pizza,
@@ -154,26 +191,130 @@ class AdminDashboardScreen extends StatelessWidget {
                   subtitle: 'Gérer les desserts',
                   onTap: () => context.push(AppRoutes.adminDesserts),
                 ),
-                _buildAdminCard(
-                  context,
-                  icon: Icons.dashboard_customize,
-                  title: 'Page Builder',
-                  subtitle: 'Organiser l\'affichage',
-                  onTap: () => context.push(AppRoutes.adminPageBuilder),
-                ),
+              ]),
+            ),
+          ),
+
+          // Section Communication
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: AppSpacing.paddingHorizontalLG,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: AppSpacing.xxl),
+                  Text(
+                    'Communication',
+                    style: AppTextStyles.headlineMedium.copyWith(
+                      color: AppColors.primaryRed,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Marketing, promotions et fidélité',
+                    style: AppTextStyles.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          SliverPadding(
+            padding: AppSpacing.paddingHorizontalLG,
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: AppSpacing.lg,
+                mainAxisSpacing: AppSpacing.lg,
+                childAspectRatio: 1.1,
+              ),
+              delegate: SliverChildListDelegate([
                 _buildAdminCard(
                   context,
                   icon: Icons.email,
                   title: 'Mailing',
-                  subtitle: 'Marketing & Newsletters',
+                  subtitle: 'Campagnes & Newsletters',
                   onTap: () => context.push(AppRoutes.adminMailing),
                 ),
                 _buildAdminCard(
                   context,
-                  icon: Icons.shopping_bag,
-                  title: 'Commandes',
-                  subtitle: 'Gérer les commandes',
-                  onTap: () => context.push(AppRoutes.adminOrders),
+                  icon: Icons.local_offer,
+                  title: 'Promotions',
+                  subtitle: 'Gérer les promos',
+                  onTap: () => context.push(AppRoutes.communicationPromotions),
+                ),
+                _buildAdminCard(
+                  context,
+                  icon: Icons.loyalty,
+                  title: 'Fidélité & Segments',
+                  subtitle: 'Programme de fidélité',
+                  onTap: () => context.push(AppRoutes.communicationLoyalty),
+                ),
+              ]),
+            ),
+          ),
+
+          // Section Studio
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: AppSpacing.paddingHorizontalLG,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: AppSpacing.xxl),
+                  Text(
+                    'Studio',
+                    style: AppTextStyles.headlineMedium.copyWith(
+                      color: AppColors.primaryRed,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Configuration et personnalisation de l\'app',
+                    style: AppTextStyles.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          SliverPadding(
+            padding: AppSpacing.paddingHorizontalLG,
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: AppSpacing.lg,
+                mainAxisSpacing: AppSpacing.lg,
+                childAspectRatio: 1.1,
+              ),
+              delegate: SliverChildListDelegate([
+                _buildAdminCard(
+                  context,
+                  icon: Icons.home,
+                  title: 'Page d\'accueil',
+                  subtitle: 'Bannières & Blocs',
+                  onTap: () => context.push(AppRoutes.studioHomeConfig),
+                ),
+                _buildAdminCard(
+                  context,
+                  icon: Icons.card_giftcard,
+                  title: 'Popups & Roulette',
+                  subtitle: 'Animations & Gains',
+                  onTap: () => context.push(AppRoutes.studioPopupsRoulette),
+                ),
+                _buildAdminCard(
+                  context,
+                  icon: Icons.text_fields,
+                  title: 'Textes & Messages',
+                  subtitle: 'Personnaliser l\'app',
+                  onTap: () => context.push(AppRoutes.studioTexts),
+                ),
+                _buildAdminCard(
+                  context,
+                  icon: Icons.star,
+                  title: 'Mise en avant',
+                  subtitle: 'Tags produits',
+                  onTap: () => context.push(AppRoutes.studioFeaturedProducts),
                 ),
               ]),
             ),
