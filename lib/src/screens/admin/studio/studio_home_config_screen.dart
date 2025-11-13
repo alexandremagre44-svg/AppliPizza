@@ -2,35 +2,34 @@
 // Screen for configuring home page (hero, promo banner, dynamic blocks)
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/home_config.dart';
 import '../../../models/dynamic_block_model.dart';
 import '../../../services/home_config_service.dart';
+import '../../../providers/home_config_provider.dart';
 import '../../../theme/app_theme.dart';
 import 'dialogs/edit_hero_dialog.dart';
 import 'dialogs/edit_promo_banner_dialog.dart';
 import 'dialogs/edit_block_dialog.dart';
 
-class StudioHomeConfigScreen extends StatefulWidget {
+class StudioHomeConfigScreen extends ConsumerStatefulWidget {
   const StudioHomeConfigScreen({super.key});
 
   @override
-  State<StudioHomeConfigScreen> createState() => _StudioHomeConfigScreenState();
+  ConsumerState<StudioHomeConfigScreen> createState() => _StudioHomeConfigScreenState();
 }
 
-class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
+class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
     with SingleTickerProviderStateMixin {
   final HomeConfigService _service = HomeConfigService();
   late TabController _tabController;
-  
-  HomeConfig? _config;
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _loadConfig();
+    _initializeConfig();
   }
 
   @override
@@ -39,27 +38,20 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
     super.dispose();
   }
 
-  Future<void> _loadConfig() async {
-    setState(() => _isLoading = true);
-    
+  Future<void> _initializeConfig() async {
+    // Ensure default config exists
     final config = await _service.getHomeConfig();
     if (config == null) {
       await _service.initializeDefaultConfig();
-      final newConfig = await _service.getHomeConfig();
-      setState(() {
-        _config = newConfig;
-        _isLoading = false;
-      });
-    } else {
-      setState(() {
-        _config = config;
-        _isLoading = false;
-      });
+      // Invalidate the provider to force refresh
+      ref.invalidate(homeConfigProvider);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final homeConfigAsync = ref.watch(homeConfigProvider);
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -111,31 +103,55 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
             ),
           ),
 
-          _isLoading
-              ? const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              : SliverFillRemaining(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildHeroTab(),
-                      _buildPromoBannerTab(),
-                      _buildBlocksTab(),
-                    ],
-                  ),
+          homeConfigAsync.when(
+            data: (config) => SliverFillRemaining(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildHeroTab(config),
+                  _buildPromoBannerTab(config),
+                  _buildBlocksTab(config),
+                ],
+              ),
+            ),
+            loading: () => const SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primaryRed,
                 ),
+              ),
+            ),
+            error: (error, stack) => SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 48, color: AppColors.errorRed),
+                    SizedBox(height: AppSpacing.md),
+                    Text('Erreur: $error'),
+                    SizedBox(height: AppSpacing.md),
+                    ElevatedButton(
+                      onPressed: () {
+                        ref.invalidate(homeConfigProvider);
+                      },
+                      child: const Text('Réessayer'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildHeroTab() {
-    if (_config == null) {
-      return const Center(child: CircularProgressIndicator());
+  Widget _buildHeroTab(HomeConfig? config) {
+    if (config == null) {
+      return const Center(child: Text('Configuration non disponible'));
     }
     
-    final hero = _config!.hero;
+    final hero = config.hero;
     
     if (hero == null) {
       return const Center(child: Text('Configuration Hero non disponible'));
@@ -178,9 +194,12 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
                   activeColor: AppColors.primaryRed,
                   onChanged: (value) async {
                     final updated = hero.copyWith(isActive: value);
-                    await _service.updateHeroConfig(updated);
-                    _loadConfig();
-                    _showSnackBar('Hero ${value ? 'activé' : 'désactivé'}');
+                    final success = await _service.updateHeroConfig(updated);
+                    if (success && mounted) {
+                      _showSnackBar('Hero ${value ? 'activé' : 'désactivé'}');
+                    } else if (!success && mounted) {
+                      _showSnackBar('Erreur lors de la mise à jour', isError: true);
+                    }
                   },
                 ),
                 
@@ -220,12 +239,12 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
     );
   }
 
-  Widget _buildPromoBannerTab() {
-    if (_config == null) {
-      return const Center(child: CircularProgressIndicator());
+  Widget _buildPromoBannerTab(HomeConfig? config) {
+    if (config == null) {
+      return const Center(child: Text('Configuration non disponible'));
     }
     
-    final banner = _config!.promoBanner;
+    final banner = config.promoBanner;
     
     if (banner == null) {
       return const Center(child: Text('Configuration Bandeau Promo non disponible'));
@@ -268,9 +287,12 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
                   activeColor: AppColors.primaryRed,
                   onChanged: (value) async {
                     final updated = banner.copyWith(isActive: value);
-                    await _service.updatePromoBanner(updated);
-                    _loadConfig();
-                    _showSnackBar('Bandeau ${value ? 'activé' : 'désactivé'}');
+                    final success = await _service.updatePromoBanner(updated);
+                    if (success && mounted) {
+                      _showSnackBar('Bandeau ${value ? 'activé' : 'désactivé'}');
+                    } else if (!success && mounted) {
+                      _showSnackBar('Erreur lors de la mise à jour', isError: true);
+                    }
                   },
                 ),
                 
@@ -316,92 +338,130 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
     );
   }
 
-  Widget _buildBlocksTab() {
-    if (_config == null) {
-      return Center(child: CircularProgressIndicator());
+  Widget _buildBlocksTab(HomeConfig? config) {
+    if (config == null) {
+      return const Center(child: Text('Configuration non disponible'));
     }
     
-    return ListView(
-      padding: AppSpacing.paddingLG,
+    // Sort blocks by order for display
+    final sortedBlocks = List<ContentBlock>.from(config.blocks)
+      ..sort((a, b) => a.order.compareTo(b.order));
+    
+    return Column(
       children: [
-        Card(
-          elevation: 2,
-          color: AppColors.primaryRed.withOpacity(0.1),
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.cardLarge),
-          child: Padding(
-            padding: AppSpacing.paddingMD,
-            child: Row(
-              children: [
-                Icon(Icons.info_outline, color: AppColors.primaryRed),
-                SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    '${_config!.blocks.length} bloc(s) configuré(s)',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
+        // Header card
+        Padding(
+          padding: AppSpacing.paddingLG,
+          child: Card(
+            elevation: 2,
+            color: AppColors.primaryRed.withOpacity(0.1),
+            shape: RoundedRectangleBorder(borderRadius: AppRadius.cardLarge),
+            child: Padding(
+              padding: AppSpacing.paddingMD,
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: AppColors.primaryRed),
+                  SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${config.blocks.length} bloc(s) configuré(s)',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (config.blocks.isNotEmpty)
+                          Text(
+                            'Glissez-déposez pour réorganiser',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textMedium,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add, color: AppColors.primaryRed),
-                  onPressed: _showAddBlockDialog,
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: AppSpacing.lg),
-        
-        if (_config!.blocks.isEmpty)
-          Center(
-            child: Padding(
-              padding: AppSpacing.paddingXXL,
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.view_agenda_outlined,
-                    size: 80,
-                    color: AppColors.textLight,
-                  ),
-                  SizedBox(height: AppSpacing.md),
-                  Text(
-                    'Aucun bloc',
-                    style: AppTextStyles.titleLarge,
-                  ),
-                  SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Ajoutez des blocs pour personnaliser votre page',
-                    style: AppTextStyles.bodySmall,
-                    textAlign: TextAlign.center,
+                  IconButton(
+                    icon: Icon(Icons.add, color: AppColors.primaryRed),
+                    onPressed: _showAddBlockDialog,
                   ),
                 ],
               ),
             ),
+          ),
+        ),
+        
+        // Empty state or reorderable list
+        if (config.blocks.isEmpty)
+          Expanded(
+            child: Center(
+              child: Padding(
+                padding: AppSpacing.paddingXXL,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.view_agenda_outlined,
+                      size: 80,
+                      color: AppColors.textLight,
+                    ),
+                    SizedBox(height: AppSpacing.md),
+                    Text(
+                      'Aucun bloc',
+                      style: AppTextStyles.titleLarge,
+                    ),
+                    SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Ajoutez des blocs pour personnaliser votre page',
+                      style: AppTextStyles.bodySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           )
         else
-          ..._config!.blocks.map((block) => _buildBlockCard(block)),
+          Expanded(
+            child: ReorderableListView(
+              padding: AppSpacing.paddingLG,
+              onReorder: (oldIndex, newIndex) => _onReorderBlocks(sortedBlocks, oldIndex, newIndex),
+              children: sortedBlocks.map((block) {
+                return _buildBlockCard(block, key: ValueKey(block.id));
+              }).toList(),
+            ),
+          ),
       ],
     );
   }
 
-  Widget _buildBlockCard(ContentBlock block) {
+  Widget _buildBlockCard(ContentBlock block, {Key? key}) {
     return Card(
+      key: key,
       elevation: 1,
       margin: EdgeInsets.only(bottom: AppSpacing.md),
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: ExpansionTile(
-        leading: Container(
-          padding: EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: block.isActive
-                ? AppColors.primaryRed.withOpacity(0.1)
-                : AppColors.textLight.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            _getBlockIcon(block.type),
-            color: block.isActive ? AppColors.primaryRed : AppColors.textLight,
-          ),
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.drag_handle, color: AppColors.textMedium),
+            SizedBox(width: AppSpacing.sm),
+            Container(
+              padding: EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: block.isActive
+                    ? AppColors.primaryRed.withOpacity(0.1)
+                    : AppColors.textLight.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _getBlockIcon(block.type),
+                color: block.isActive ? AppColors.primaryRed : AppColors.textLight,
+              ),
+            ),
+          ],
         ),
         title: Text(block.title, style: AppTextStyles.titleMedium),
         subtitle: Text(
@@ -418,19 +478,20 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(block.content, style: AppTextStyles.bodyMedium),
+                if (block.content.isNotEmpty)
+                  Text(block.content, style: AppTextStyles.bodyMedium),
                 SizedBox(height: AppSpacing.md),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton.icon(
-                      icon: Icon(Icons.edit, size: 18),
-                      label: Text('Modifier'),
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text('Modifier'),
                       onPressed: () => _showEditBlockDialog(block),
                     ),
                     TextButton.icon(
-                      icon: Icon(Icons.delete, size: 18),
-                      label: Text('Supprimer'),
+                      icon: const Icon(Icons.delete, size: 18),
+                      label: const Text('Supprimer'),
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.errorRed,
                       ),
@@ -444,6 +505,32 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
         ],
       ),
     );
+  }
+
+  Future<void> _onReorderBlocks(List<ContentBlock> blocks, int oldIndex, int newIndex) async {
+    // Adjust index if moving down the list
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    // Create a new list with the reordered blocks
+    final reorderedBlocks = List<ContentBlock>.from(blocks);
+    final block = reorderedBlocks.removeAt(oldIndex);
+    reorderedBlocks.insert(newIndex, block);
+
+    // Update the order property to match new positions
+    final updatedBlocks = <ContentBlock>[];
+    for (int i = 0; i < reorderedBlocks.length; i++) {
+      updatedBlocks.add(reorderedBlocks[i].copyWith(order: i));
+    }
+
+    // Save to Firestore
+    final success = await _service.reorderBlocks(updatedBlocks);
+    if (success && mounted) {
+      _showSnackBar('Blocs réorganisés avec succès');
+    } else if (!success && mounted) {
+      _showSnackBar('Erreur lors de la réorganisation', isError: true);
+    }
   }
 
   IconData _getBlockIcon(String type) {
@@ -478,11 +565,10 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
           );
           
           final success = await _service.addContentBlock(contentBlock);
-          if (success) {
-            _loadConfig();
-            _showSnackBar('Bloc ajouté');
-          } else {
-            _showSnackBar('Erreur lors de l\'ajout', isError: true);
+          if (success && mounted) {
+            _showSnackBar('Bloc ajouté avec succès');
+          } else if (!success && mounted) {
+            _showSnackBar('Erreur lors de l\'ajout du bloc', isError: true);
           }
         },
       ),
@@ -515,10 +601,9 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
           );
           
           final success = await _service.updateContentBlock(updatedBlock);
-          if (success) {
-            _loadConfig();
-            _showSnackBar('Bloc modifié');
-          } else {
+          if (success && mounted) {
+            _showSnackBar('Bloc modifié avec succès');
+          } else if (!success && mounted) {
             _showSnackBar('Erreur lors de la modification', isError: true);
           }
         },
@@ -530,12 +615,12 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Supprimer le bloc ?'),
-        content: Text('Cette action est irréversible.'),
+        title: const Text('Supprimer le bloc ?'),
+        content: const Text('Cette action est irréversible.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Annuler'),
+            child: const Text('Annuler'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -543,7 +628,7 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
               backgroundColor: AppColors.errorRed,
               foregroundColor: Colors.white,
             ),
-            child: Text('Supprimer'),
+            child: const Text('Supprimer'),
           ),
         ],
       ),
@@ -551,10 +636,9 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
     
     if (confirmed == true) {
       final success = await _service.deleteContentBlock(id);
-      if (success) {
-        _loadConfig();
-        _showSnackBar('Bloc supprimé');
-      } else {
+      if (success && mounted) {
+        _showSnackBar('Bloc supprimé avec succès');
+      } else if (!success && mounted) {
         _showSnackBar('Erreur lors de la suppression', isError: true);
       }
     }
@@ -578,9 +662,12 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
       builder: (context) => EditHeroDialog(
         hero: hero,
         onSave: (updatedHero) async {
-          await _service.updateHeroConfig(updatedHero);
-          _loadConfig();
-          _showSnackBar('Hero mis à jour');
+          final success = await _service.updateHeroConfig(updatedHero);
+          if (success && mounted) {
+            _showSnackBar('Hero mis à jour avec succès');
+          } else if (!success && mounted) {
+            _showSnackBar('Erreur lors de la mise à jour', isError: true);
+          }
         },
       ),
     );
@@ -593,9 +680,12 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
       builder: (context) => EditPromoBannerDialog(
         banner: banner,
         onSave: (updatedBanner) async {
-          await _service.updatePromoBanner(updatedBanner);
-          _loadConfig();
-          _showSnackBar('Bandeau mis à jour');
+          final success = await _service.updatePromoBanner(updatedBanner);
+          if (success && mounted) {
+            _showSnackBar('Bandeau mis à jour avec succès');
+          } else if (!success && mounted) {
+            _showSnackBar('Erreur lors de la mise à jour', isError: true);
+          }
         },
       ),
     );

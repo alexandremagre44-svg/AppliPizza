@@ -52,6 +52,9 @@ dependencies:
   
   # Color picker for UI customization
   flutter_colorpicker: ^1.0.3
+  
+  # Shimmer effect for loading states
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:
