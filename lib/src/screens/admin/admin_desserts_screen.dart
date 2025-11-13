@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/product.dart';
 import '../../services/product_crud_service.dart';
+import '../../services/firestore_unified_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 
@@ -17,6 +18,7 @@ class AdminDessertsScreen extends StatefulWidget {
 
 class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
   final ProductCrudService _crudService = ProductCrudService();
+  final FirestoreUnifiedService _firestoreService = FirestoreUnifiedService();
   List<Product> _desserts = [];
   bool _isLoading = true;
 
@@ -28,9 +30,22 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
 
   Future<void> _loadDesserts() async {
     setState(() => _isLoading = true);
-    final desserts = await _crudService.loadDesserts();
+    
+    // Charger depuis Firestore (priorité) et SharedPreferences (backup local)
+    final firestoreDesserts = await _firestoreService.loadDesserts();
+    final localDesserts = await _crudService.loadDesserts();
+    
+    // Fusionner: Firestore a la priorité
+    final allDesserts = <String, Product>{};
+    for (var dessert in localDesserts) {
+      allDesserts[dessert.id] = dessert;
+    }
+    for (var dessert in firestoreDesserts) {
+      allDesserts[dessert.id] = dessert;
+    }
+    
     setState(() {
-      _desserts = desserts;
+      _desserts = allDesserts.values.toList()..sort((a, b) => a.order.compareTo(b.order));
       _isLoading = false;
     });
   }
@@ -476,11 +491,20 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
                             );
 
                             bool success;
-                            if (dessert == null) {
+                            final isNew = dessert == null;
+                            
+                            // Sauvegarder dans Firestore (priorité)
+                            final firestoreSuccess = await _firestoreService.saveDessert(newDessert);
+                            
+                            // Sauvegarder aussi en local pour backup
+                            if (isNew) {
                               success = await _crudService.addDessert(newDessert);
                             } else {
                               success = await _crudService.updateDessert(newDessert);
                             }
+                            
+                            // Considérer comme succès si Firestore a réussi
+                            success = firestoreSuccess || success;
 
                             if (success && context.mounted) {
                               Navigator.pop(context, true);
@@ -641,7 +665,13 @@ class _AdminDessertsScreenState extends State<AdminDessertsScreen> {
     );
 
     if (confirm == true) {
-      final success = await _crudService.deleteDessert(dessert.id);
+      // Supprimer de Firestore (priorité)
+      final firestoreSuccess = await _firestoreService.deleteDessert(dessert.id);
+      
+      // Supprimer aussi du local
+      final localSuccess = await _crudService.deleteDessert(dessert.id);
+      
+      final success = firestoreSuccess || localSuccess;
       if (success) {
         _loadDesserts();
         if (mounted) {

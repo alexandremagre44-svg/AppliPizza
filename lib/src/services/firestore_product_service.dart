@@ -129,8 +129,6 @@ class MockFirestoreProductService implements FirestoreProductService {
 }
 
 // Implémentation réelle avec Firestore
-// Décommentez et utilisez cette classe si vous avez Firebase configuré
-/*
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreProductServiceImpl implements FirestoreProductService {
@@ -358,13 +356,9 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
     return _deleteProduct(dessertId, 'desserts');
   }
 }
-*/
 
 // Factory pour créer le bon service selon la configuration
 FirestoreProductService createFirestoreProductService() {
-  // Si vous avez Firebase configuré, retournez FirestoreProductServiceImpl()
-  // return FirestoreProductServiceImpl();
-  
-  // Sinon, retournez le mock
-  return MockFirestoreProductService();
+  // Firestore est maintenant activé
+  return FirestoreProductServiceImpl();
 }

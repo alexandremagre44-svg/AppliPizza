@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/product.dart';
 import '../../services/product_crud_service.dart';
+import '../../services/firestore_unified_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/ingredient_selector.dart';
@@ -18,6 +19,7 @@ class AdminPizzaScreen extends StatefulWidget {
 
 class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
   final ProductCrudService _crudService = ProductCrudService();
+  final FirestoreUnifiedService _firestoreService = FirestoreUnifiedService();
   List<Product> _pizzas = [];
   bool _isLoading = true;
 
@@ -29,9 +31,22 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
 
   Future<void> _loadPizzas() async {
     setState(() => _isLoading = true);
-    final pizzas = await _crudService.loadPizzas();
+    
+    // Charger depuis Firestore (priorité) et SharedPreferences (backup local)
+    final firestorePizzas = await _firestoreService.loadPizzas();
+    final localPizzas = await _crudService.loadPizzas();
+    
+    // Fusionner: Firestore a la priorité
+    final allPizzas = <String, Product>{};
+    for (var pizza in localPizzas) {
+      allPizzas[pizza.id] = pizza;
+    }
+    for (var pizza in firestorePizzas) {
+      allPizzas[pizza.id] = pizza;
+    }
+    
     setState(() {
-      _pizzas = pizzas;
+      _pizzas = allPizzas.values.toList()..sort((a, b) => a.order.compareTo(b.order));
       _isLoading = false;
     });
   }
@@ -493,11 +508,19 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
 
                           bool success;
                           final isNew = pizza == null;
+                          
+                          // Sauvegarder dans Firestore (priorité)
+                          final firestoreSuccess = await _firestoreService.savePizza(newPizza);
+                          
+                          // Sauvegarder aussi en local pour backup
                           if (isNew) {
                             success = await _crudService.addPizza(newPizza);
                           } else {
                             success = await _crudService.updatePizza(newPizza);
                           }
+                          
+                          // Considérer comme succès si Firestore a réussi
+                          success = firestoreSuccess || success;
 
                           if (success && context.mounted) {
                             Navigator.pop(context, true);
@@ -686,7 +709,13 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
     );
 
     if (confirm == true) {
-      final success = await _crudService.deletePizza(pizza.id);
+      // Supprimer de Firestore (priorité)
+      final firestoreSuccess = await _firestoreService.deletePizza(pizza.id);
+      
+      // Supprimer aussi du local
+      final localSuccess = await _crudService.deletePizza(pizza.id);
+      
+      final success = firestoreSuccess || localSuccess;
       if (success) {
         _loadPizzas();
         if (mounted) {

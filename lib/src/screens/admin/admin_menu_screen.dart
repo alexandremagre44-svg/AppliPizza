@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/product.dart';
 import '../../services/product_crud_service.dart';
+import '../../services/firestore_unified_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 
@@ -17,6 +18,7 @@ class AdminMenuScreen extends StatefulWidget {
 
 class _AdminMenuScreenState extends State<AdminMenuScreen> {
   final ProductCrudService _crudService = ProductCrudService();
+  final FirestoreUnifiedService _firestoreService = FirestoreUnifiedService();
   List<Product> _menus = [];
   bool _isLoading = true;
 
@@ -28,9 +30,22 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
 
   Future<void> _loadMenus() async {
     setState(() => _isLoading = true);
-    final menus = await _crudService.loadMenus();
+    
+    // Charger depuis Firestore (priorité) et SharedPreferences (backup local)
+    final firestoreMenus = await _firestoreService.loadMenus();
+    final localMenus = await _crudService.loadMenus();
+    
+    // Fusionner: Firestore a la priorité
+    final allMenus = <String, Product>{};
+    for (var menu in localMenus) {
+      allMenus[menu.id] = menu;
+    }
+    for (var menu in firestoreMenus) {
+      allMenus[menu.id] = menu;
+    }
+    
     setState(() {
-      _menus = menus;
+      _menus = allMenus.values.toList()..sort((a, b) => a.order.compareTo(b.order));
       _isLoading = false;
     });
   }
@@ -648,11 +663,20 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                             );
 
                             bool success;
-                            if (menu == null) {
+                            final isNew = menu == null;
+                            
+                            // Sauvegarder dans Firestore (priorité)
+                            final firestoreSuccess = await _firestoreService.saveMenu(newMenu);
+                            
+                            // Sauvegarder aussi en local pour backup
+                            if (isNew) {
                               success = await _crudService.addMenu(newMenu);
                             } else {
                               success = await _crudService.updateMenu(newMenu);
                             }
+                            
+                            // Considérer comme succès si Firestore a réussi
+                            success = firestoreSuccess || success;
 
                             if (success && context.mounted) {
                               Navigator.pop(context, true);
@@ -813,7 +837,13 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
     );
 
     if (confirm == true) {
-      final success = await _crudService.deleteMenu(menu.id);
+      // Supprimer de Firestore (priorité)
+      final firestoreSuccess = await _firestoreService.deleteMenu(menu.id);
+      
+      // Supprimer aussi du local
+      final localSuccess = await _crudService.deleteMenu(menu.id);
+      
+      final success = firestoreSuccess || localSuccess;
       if (success) {
         _loadMenus();
         if (mounted) {
