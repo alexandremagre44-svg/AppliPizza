@@ -197,6 +197,8 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
                     final success = await _service.updateHeroConfig(updated);
                     if (success && mounted) {
                       _showSnackBar('Hero ${value ? 'activé' : 'désactivé'}');
+                      // Refresh the provider to ensure UI updates
+                      ref.invalidate(homeConfigProvider);
                     } else if (!success && mounted) {
                       _showSnackBar('Erreur lors de la mise à jour', isError: true);
                     }
@@ -290,6 +292,8 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
                     final success = await _service.updatePromoBanner(updated);
                     if (success && mounted) {
                       _showSnackBar('Bandeau ${value ? 'activé' : 'désactivé'}');
+                      // Refresh the provider to ensure UI updates
+                      ref.invalidate(homeConfigProvider);
                     } else if (!success && mounted) {
                       _showSnackBar('Erreur lors de la mise à jour', isError: true);
                     }
@@ -528,6 +532,8 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
     final success = await _service.reorderBlocks(updatedBlocks);
     if (success && mounted) {
       _showSnackBar('Blocs réorganisés avec succès');
+      // Refresh the provider to ensure UI updates
+      ref.invalidate(homeConfigProvider);
     } else if (!success && mounted) {
       _showSnackBar('Erreur lors de la réorganisation', isError: true);
     }
@@ -567,6 +573,8 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
           final success = await _service.addContentBlock(contentBlock);
           if (success && mounted) {
             _showSnackBar('Bloc ajouté avec succès');
+            // Refresh the provider to ensure UI updates
+            ref.invalidate(homeConfigProvider);
           } else if (!success && mounted) {
             _showSnackBar('Erreur lors de l\'ajout du bloc', isError: true);
           }
@@ -603,6 +611,8 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
           final success = await _service.updateContentBlock(updatedBlock);
           if (success && mounted) {
             _showSnackBar('Bloc modifié avec succès');
+            // Refresh the provider to ensure UI updates
+            ref.invalidate(homeConfigProvider);
           } else if (!success && mounted) {
             _showSnackBar('Erreur lors de la modification', isError: true);
           }
@@ -638,6 +648,8 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
       final success = await _service.deleteContentBlock(id);
       if (success && mounted) {
         _showSnackBar('Bloc supprimé avec succès');
+        // Refresh the provider to ensure UI updates
+        ref.invalidate(homeConfigProvider);
       } else if (!success && mounted) {
         _showSnackBar('Erreur lors de la suppression', isError: true);
       }
@@ -665,6 +677,8 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
           final success = await _service.updateHeroConfig(updatedHero);
           if (success && mounted) {
             _showSnackBar('Hero mis à jour avec succès');
+            // Refresh the provider to ensure UI updates
+            ref.invalidate(homeConfigProvider);
           } else if (!success && mounted) {
             _showSnackBar('Erreur lors de la mise à jour', isError: true);
           }
@@ -683,6 +697,8 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
           final success = await _service.updatePromoBanner(updatedBanner);
           if (success && mounted) {
             _showSnackBar('Bandeau mis à jour avec succès');
+            // Refresh the provider to ensure UI updates
+            ref.invalidate(homeConfigProvider);
           } else if (!success && mounted) {
             _showSnackBar('Erreur lors de la mise à jour', isError: true);
           }
