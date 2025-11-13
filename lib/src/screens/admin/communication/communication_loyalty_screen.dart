@@ -3,7 +3,9 @@
 
 import 'package:flutter/material.dart';
 import '../../../models/user_profile.dart';
+import '../../../models/loyalty_settings.dart';
 import '../../../services/user_profile_service.dart';
+import '../../../services/loyalty_settings_service.dart';
 import '../../../theme/app_theme.dart';
 
 class CommunicationLoyaltyScreen extends StatefulWidget {
@@ -18,9 +20,11 @@ class _CommunicationLoyaltyScreenState
     extends State<CommunicationLoyaltyScreen>
     with SingleTickerProviderStateMixin {
   final UserProfileService _service = UserProfileService();
+  final LoyaltySettingsService _settingsService = LoyaltySettingsService();
   
   late TabController _tabController;
   List<UserProfile> _users = [];
+  LoyaltySettings? _loyaltySettings;
   bool _isLoading = true;
 
   @override
@@ -40,9 +44,11 @@ class _CommunicationLoyaltyScreenState
     setState(() => _isLoading = true);
     
     final users = await _service.getAllUserProfiles();
+    final settings = await _settingsService.getLoyaltySettings();
     
     setState(() {
       _users = users;
+      _loyaltySettings = settings;
       _isLoading = false;
     });
   }
@@ -236,18 +242,26 @@ class _CommunicationLoyaltyScreenState
                   children: [
                     Icon(Icons.loyalty, color: AppColors.primaryRed),
                     SizedBox(width: AppSpacing.sm),
-                    Text(
-                      'Programme de fidélité',
-                      style: AppTextStyles.titleLarge,
+                    Expanded(
+                      child: Text(
+                        'Programme de fidélité',
+                        style: AppTextStyles.titleLarge,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.edit, color: AppColors.primaryRed),
+                      onPressed: _showLoyaltySettingsDialog,
                     ),
                   ],
                 ),
                 SizedBox(height: AppSpacing.lg),
                 
-                _buildSettingRow('Points par € dépensé', '1'),
-                _buildSettingRow('Seuil Bronze', '0 points'),
-                _buildSettingRow('Seuil Silver', '500 points'),
-                _buildSettingRow('Seuil Gold', '1000 points'),
+                if (_loyaltySettings != null) ...[
+                  _buildSettingRow('Points par € dépensé', '${_loyaltySettings!.pointsPerEuro}'),
+                  _buildSettingRow('Seuil Bronze', '${_loyaltySettings!.bronzeThreshold} points'),
+                  _buildSettingRow('Seuil Silver', '${_loyaltySettings!.silverThreshold} points'),
+                  _buildSettingRow('Seuil Gold', '${_loyaltySettings!.goldThreshold} points'),
+                ],
                 
                 SizedBox(height: AppSpacing.lg),
                 
@@ -375,5 +389,136 @@ class _CommunicationLoyaltyScreenState
       default:
         return AppColors.textLight;
     }
+  }
+
+  void _showLoyaltySettingsDialog() {
+    final settings = _loyaltySettings ?? LoyaltySettings.defaultSettings();
+    final pointsPerEuroController = TextEditingController(text: settings.pointsPerEuro.toString());
+    final bronzeThresholdController = TextEditingController(text: settings.bronzeThreshold.toString());
+    final silverThresholdController = TextEditingController(text: settings.silverThreshold.toString());
+    final goldThresholdController = TextEditingController(text: settings.goldThreshold.toString());
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Paramètres de fidélité'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: pointsPerEuroController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Points par € dépensé',
+                  border: OutlineInputBorder(),
+                  helperText: 'Ex: 1 point = 1€',
+                ),
+              ),
+              SizedBox(height: AppSpacing.md),
+              TextField(
+                controller: bronzeThresholdController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Seuil Bronze (points)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: AppSpacing.md),
+              TextField(
+                controller: silverThresholdController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Seuil Silver (points)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: AppSpacing.md),
+              TextField(
+                controller: goldThresholdController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Seuil Gold (points)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: AppSpacing.md),
+              Container(
+                padding: AppSpacing.paddingMD,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryRed.withOpacity(0.1),
+                  borderRadius: AppRadius.card,
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: AppColors.primaryRed, size: 20),
+                    SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        'Ces paramètres seront appliqués à tous les clients',
+                        style: AppTextStyles.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final pointsPerEuro = int.tryParse(pointsPerEuroController.text) ?? 1;
+              final bronzeThreshold = int.tryParse(bronzeThresholdController.text) ?? 0;
+              final silverThreshold = int.tryParse(silverThresholdController.text) ?? 500;
+              final goldThreshold = int.tryParse(goldThresholdController.text) ?? 1000;
+              
+              final newSettings = LoyaltySettings(
+                id: 'main',
+                pointsPerEuro: pointsPerEuro,
+                bronzeThreshold: bronzeThreshold,
+                silverThreshold: silverThreshold,
+                goldThreshold: goldThreshold,
+                updatedAt: DateTime.now(),
+              );
+              
+              final success = await _settingsService.saveLoyaltySettings(newSettings);
+              
+              Navigator.pop(context);
+              
+              if (success) {
+                _loadUsers();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Paramètres sauvegardés'),
+                    backgroundColor: AppColors.primaryRed,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Erreur lors de la sauvegarde'),
+                    backgroundColor: AppColors.errorRed,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryRed,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Sauvegarder'),
+          ),
+        ],
+      ),
+    );
   }
 }

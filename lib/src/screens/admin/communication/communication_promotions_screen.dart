@@ -173,9 +173,7 @@ class _CommunicationPromotionsScreenState
                     TextButton.icon(
                       icon: Icon(Icons.edit, size: 18),
                       label: Text('Modifier'),
-                      onPressed: () {
-                        // Edit functionality would go here
-                      },
+                      onPressed: () => _showEditPromotionDialog(promo),
                     ),
                     TextButton.icon(
                       icon: Icon(Icons.delete, size: 18),
@@ -215,76 +213,213 @@ class _CommunicationPromotionsScreenState
   }
 
   void _showAddPromotionDialog() {
-    final nameController = TextEditingController();
-    final descController = TextEditingController();
-    final valueController = TextEditingController();
-    String selectedType = 'percent_discount';
+    _showPromotionDialog();
+  }
+
+  void _showEditPromotionDialog(Promotion promo) {
+    _showPromotionDialog(existingPromo: promo);
+  }
+
+  void _showPromotionDialog({Promotion? existingPromo}) {
+    final isEditing = existingPromo != null;
+    final nameController = TextEditingController(text: existingPromo?.name);
+    final descController = TextEditingController(text: existingPromo?.description);
+    final valueController = TextEditingController(
+      text: existingPromo?.value?.toString() ?? '',
+    );
+    
+    String selectedType = existingPromo?.type ?? 'percent_discount';
+    bool isActive = existingPromo?.isActive ?? true;
+    bool showOnHomeBanner = existingPromo?.showOnHomeBanner ?? false;
+    bool showInPromoBlock = existingPromo?.showInPromoBlock ?? true;
+    bool useInRoulette = existingPromo?.useInRoulette ?? false;
+    bool useInPopup = existingPromo?.useInPopup ?? false;
+    bool useInMailing = existingPromo?.useInMailing ?? false;
+    DateTime? startDate = existingPromo?.startDate;
+    DateTime? endDate = existingPromo?.endDate;
     
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Nouvelle promotion'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: 'Nom',
-                  border: OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(isEditing ? 'Modifier la promotion' : 'Nouvelle promotion'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Nom*',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
-              SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: descController,
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
+                SizedBox(height: AppSpacing.md),
+                TextField(
+                  controller: descController,
+                  decoration: InputDecoration(
+                    labelText: 'Description*',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
                 ),
-                maxLines: 2,
-              ),
-              SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: valueController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Valeur',
-                  border: OutlineInputBorder(),
+                SizedBox(height: AppSpacing.md),
+                DropdownButtonFormField<String>(
+                  value: selectedType,
+                  decoration: InputDecoration(
+                    labelText: 'Type de promotion',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    DropdownMenuItem(value: 'percent_discount', child: Text('Réduction en %')),
+                    DropdownMenuItem(value: 'fixed_discount', child: Text('Réduction fixe')),
+                    DropdownMenuItem(value: 'free_item', child: Text('Produit offert')),
+                    DropdownMenuItem(value: 'buy_x_get_y', child: Text('Achetez X obtenez Y')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => selectedType = value);
+                    }
+                  },
                 ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Annuler'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newPromo = Promotion(
-                id: const Uuid().v4(),
-                name: nameController.text,
-                description: descController.text,
-                type: selectedType,
-                value: double.tryParse(valueController.text),
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
-              );
-              
-              await _service.createPromotion(newPromo);
-              _loadPromotions();
-              Navigator.pop(context);
-              _showSnackBar('Promotion créée');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryRed,
-              foregroundColor: Colors.white,
+                SizedBox(height: AppSpacing.md),
+                TextField(
+                  controller: valueController,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: selectedType == 'percent_discount' ? 'Valeur (%)' : 'Valeur (€)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.lg),
+                Text('Canaux d\'utilisation', style: AppTextStyles.labelLarge),
+                SizedBox(height: AppSpacing.xs),
+                CheckboxListTile(
+                  dense: true,
+                  title: Text('Bannière accueil'),
+                  value: showOnHomeBanner,
+                  onChanged: (value) {
+                    setState(() => showOnHomeBanner = value ?? false);
+                  },
+                ),
+                CheckboxListTile(
+                  dense: true,
+                  title: Text('Bloc promo'),
+                  value: showInPromoBlock,
+                  onChanged: (value) {
+                    setState(() => showInPromoBlock = value ?? false);
+                  },
+                ),
+                CheckboxListTile(
+                  dense: true,
+                  title: Text('Roulette'),
+                  value: useInRoulette,
+                  onChanged: (value) {
+                    setState(() => useInRoulette = value ?? false);
+                  },
+                ),
+                CheckboxListTile(
+                  dense: true,
+                  title: Text('Popup'),
+                  value: useInPopup,
+                  onChanged: (value) {
+                    setState(() => useInPopup = value ?? false);
+                  },
+                ),
+                CheckboxListTile(
+                  dense: true,
+                  title: Text('Mailing'),
+                  value: useInMailing,
+                  onChanged: (value) {
+                    setState(() => useInMailing = value ?? false);
+                  },
+                ),
+                SizedBox(height: AppSpacing.md),
+                SwitchListTile(
+                  title: Text('Promotion active'),
+                  value: isActive,
+                  activeColor: AppColors.primaryRed,
+                  onChanged: (value) {
+                    setState(() => isActive = value);
+                  },
+                ),
+              ],
             ),
-            child: Text('Créer'),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Validation
+                if (nameController.text.trim().isEmpty) {
+                  _showSnackBar('Le nom est requis', isError: true);
+                  return;
+                }
+                if (descController.text.trim().isEmpty) {
+                  _showSnackBar('La description est requise', isError: true);
+                  return;
+                }
+                
+                final value = double.tryParse(valueController.text);
+                if (value == null) {
+                  _showSnackBar('La valeur doit être un nombre', isError: true);
+                  return;
+                }
+                
+                final promo = isEditing
+                    ? existingPromo.copyWith(
+                        name: nameController.text.trim(),
+                        description: descController.text.trim(),
+                        type: selectedType,
+                        value: value,
+                        isActive: isActive,
+                        showOnHomeBanner: showOnHomeBanner,
+                        showInPromoBlock: showInPromoBlock,
+                        useInRoulette: useInRoulette,
+                        useInPopup: useInPopup,
+                        useInMailing: useInMailing,
+                        updatedAt: DateTime.now(),
+                      )
+                    : Promotion(
+                        id: const Uuid().v4(),
+                        name: nameController.text.trim(),
+                        description: descController.text.trim(),
+                        type: selectedType,
+                        value: value,
+                        isActive: isActive,
+                        showOnHomeBanner: showOnHomeBanner,
+                        showInPromoBlock: showInPromoBlock,
+                        useInRoulette: useInRoulette,
+                        useInPopup: useInPopup,
+                        useInMailing: useInMailing,
+                        createdAt: DateTime.now(),
+                        updatedAt: DateTime.now(),
+                      );
+                
+                final success = isEditing
+                    ? await _service.updatePromotion(promo)
+                    : await _service.createPromotion(promo);
+                
+                if (success) {
+                  _loadPromotions();
+                  Navigator.pop(context);
+                  _showSnackBar(isEditing ? 'Promotion modifiée' : 'Promotion créée');
+                } else {
+                  _showSnackBar('Erreur lors de l\'enregistrement', isError: true);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryRed,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(isEditing ? 'Modifier' : 'Créer'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -319,11 +454,11 @@ class _CommunicationPromotionsScreenState
     }
   }
 
-  void _showSnackBar(String message) {
+  void _showSnackBar(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppColors.primaryRed,
+        backgroundColor: isError ? AppColors.errorRed : AppColors.primaryRed,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       ),
