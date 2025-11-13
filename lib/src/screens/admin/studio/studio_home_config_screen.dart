@@ -4,8 +4,12 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/home_config.dart';
+import '../../../models/dynamic_block_model.dart';
 import '../../../services/home_config_service.dart';
 import '../../../theme/app_theme.dart';
+import 'dialogs/edit_hero_dialog.dart';
+import 'dialogs/edit_promo_banner_dialog.dart';
+import 'dialogs/edit_block_dialog.dart';
 
 class StudioHomeConfigScreen extends StatefulWidget {
   const StudioHomeConfigScreen({super.key});
@@ -128,13 +132,13 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
 
   Widget _buildHeroTab() {
     if (_config == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     
     final hero = _config!.hero;
     
     if (hero == null) {
-      return Center(child: Text('Configuration Hero non disponible'));
+      return const Center(child: Text('Configuration Hero non disponible'));
     }
     
     return ListView(
@@ -152,13 +156,24 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
                   children: [
                     Icon(Icons.image, color: AppColors.primaryRed),
                     SizedBox(width: AppSpacing.sm),
-                    Text('Bannière Hero', style: AppTextStyles.titleLarge),
+                    Expanded(
+                      child: Text('Bannière Hero', style: AppTextStyles.titleLarge),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _showEditHeroDialog(hero),
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text('Modifier'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryRed,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
                 SizedBox(height: AppSpacing.lg),
                 
                 SwitchListTile(
-                  title: Text('Activer le Hero'),
+                  title: const Text('Activer le Hero'),
                   value: hero.isActive,
                   activeColor: AppColors.primaryRed,
                   onChanged: (value) async {
@@ -171,31 +186,32 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
                 
                 Divider(height: AppSpacing.xxl),
                 
-                _buildTextField('Titre', hero.title, (value) async {
-                  final updated = hero.copyWith(title: value);
-                  await _service.updateHeroConfig(updated);
-                  _loadConfig();
-                }),
-                _buildTextField('Sous-titre', hero.subtitle, (value) async {
-                  final updated = hero.copyWith(subtitle: value);
-                  await _service.updateHeroConfig(updated);
-                  _loadConfig();
-                }),
-                _buildTextField('URL de l\'image', hero.imageUrl, (value) async {
-                  final updated = hero.copyWith(imageUrl: value);
-                  await _service.updateHeroConfig(updated);
-                  _loadConfig();
-                }),
-                _buildTextField('Texte du bouton', hero.ctaText, (value) async {
-                  final updated = hero.copyWith(ctaText: value);
-                  await _service.updateHeroConfig(updated);
-                  _loadConfig();
-                }),
-                _buildTextField('Action du bouton', hero.ctaAction, (value) async {
-                  final updated = hero.copyWith(ctaAction: value);
-                  await _service.updateHeroConfig(updated);
-                  _loadConfig();
-                }),
+                // Preview
+                _buildInfoRow('Titre', hero.title),
+                _buildInfoRow('Sous-titre', hero.subtitle),
+                _buildInfoRow('Texte du bouton', hero.ctaText),
+                _buildInfoRow('Action', hero.ctaAction),
+                if (hero.imageUrl.isNotEmpty) ...[
+                  SizedBox(height: AppSpacing.md),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      hero.imageUrl,
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 150,
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: Icon(Icons.broken_image, size: 48),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -206,13 +222,109 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
 
   Widget _buildPromoBannerTab() {
     if (_config == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     
     final banner = _config!.promoBanner;
     
     if (banner == null) {
-      return Center(child: Text('Configuration Bandeau Promo non disponible'));
+      return const Center(child: Text('Configuration Bandeau Promo non disponible'));
+    }
+    
+    return ListView(
+      padding: AppSpacing.paddingLG,
+      children: [
+        Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.cardLarge),
+          child: Padding(
+            padding: AppSpacing.paddingLG,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.notifications, color: AppColors.primaryRed),
+                    SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text('Bandeau Promo', style: AppTextStyles.titleLarge),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _showEditPromoBannerDialog(banner),
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text('Modifier'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryRed,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: AppSpacing.lg),
+                
+                SwitchListTile(
+                  title: const Text('Activer le bandeau'),
+                  value: banner.isActive,
+                  activeColor: AppColors.primaryRed,
+                  onChanged: (value) async {
+                    final updated = banner.copyWith(isActive: value);
+                    await _service.updatePromoBanner(updated);
+                    _loadConfig();
+                    _showSnackBar('Bandeau ${value ? 'activé' : 'désactivé'}');
+                  },
+                ),
+                
+                Divider(height: AppSpacing.xxl),
+                
+                // Preview
+                _buildInfoRow('Texte', banner.text),
+                _buildInfoRow('Couleur de fond', banner.backgroundColor ?? '#D32F2F'),
+                _buildInfoRow('Couleur du texte', banner.textColor ?? '#FFFFFF'),
+                SizedBox(height: AppSpacing.md),
+                
+                // Preview banner
+                if (banner.text.isNotEmpty) Container(
+                  padding: EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Color(ColorConverter.hexToColor(banner.backgroundColor) ?? 0xFFD32F2F),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.local_offer,
+                        color: Color(ColorConverter.hexToColor(banner.textColor) ?? 0xFFFFFFFF),
+                      ),
+                      SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Text(
+                          banner.text,
+                          style: TextStyle(
+                            color: Color(ColorConverter.hexToColor(banner.textColor) ?? 0xFFFFFFFF),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOldPromoBannerTab() {
+    if (_config == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
+    final banner = _config!.promoBanner;
+    
+    if (banner == null) {
+      return const Center(child: Text('Configuration Bandeau Promo non disponible'));
     }
     
     return ListView(
@@ -236,7 +348,7 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
                 SizedBox(height: AppSpacing.lg),
                 
                 SwitchListTile(
-                  title: Text('Activer le bandeau'),
+                  title: const Text('Activer le bandeau'),
                   value: banner.isActive,
                   activeColor: AppColors.primaryRed,
                   onChanged: (value) async {
@@ -628,6 +740,64 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
         backgroundColor: isError ? AppColors.errorRed : AppColors.primaryRed,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+      ),
+    );
+  }
+
+  // Show edit hero dialog
+  void _showEditHeroDialog(HeroConfig hero) {
+    showDialog(
+      context: context,
+      builder: (context) => EditHeroDialog(
+        hero: hero,
+        onSave: (updatedHero) async {
+          await _service.updateHeroConfig(updatedHero);
+          _loadConfig();
+          _showSnackBar('Hero mis à jour');
+        },
+      ),
+    );
+  }
+
+  // Show edit promo banner dialog
+  void _showEditPromoBannerDialog(PromoBannerConfig banner) {
+    showDialog(
+      context: context,
+      builder: (context) => EditPromoBannerDialog(
+        banner: banner,
+        onSave: (updatedBanner) async {
+          await _service.updatePromoBanner(updatedBanner);
+          _loadConfig();
+          _showSnackBar('Bandeau mis à jour');
+        },
+      ),
+    );
+  }
+
+  // Helper method to build info rows
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textMedium,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value.isEmpty ? '(vide)' : value,
+              style: AppTextStyles.bodyMedium,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -58,6 +58,29 @@ class HomeConfig {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  /// Create initial default configuration
+  factory HomeConfig.initial() {
+    return HomeConfig(
+      id: 'main',
+      hero: HeroConfig(
+        isActive: true,
+        imageUrl: '',
+        title: 'Bienvenue chez Pizza Deli\'Zza',
+        subtitle: 'Découvrez nos pizzas artisanales',
+        ctaText: 'Voir le menu',
+        ctaAction: '/menu',
+      ),
+      promoBanner: PromoBannerConfig(
+        isActive: false,
+        text: 'Offre spéciale : -20% sur toutes les pizzas',
+        backgroundColor: '#D32F2F',
+        textColor: '#FFFFFF',
+      ),
+      blocks: [],
+      updatedAt: DateTime.now(),
+    );
+  }
 }
 
 // Hero Banner Configuration
@@ -124,6 +147,7 @@ class PromoBannerConfig {
   final bool isActive;
   final String text;
   final String? backgroundColor;
+  final String? textColor;
   final DateTime? startDate;
   final DateTime? endDate;
 
@@ -131,6 +155,7 @@ class PromoBannerConfig {
     required this.isActive,
     required this.text,
     this.backgroundColor,
+    this.textColor,
     this.startDate,
     this.endDate,
   });
@@ -140,6 +165,7 @@ class PromoBannerConfig {
       'isActive': isActive,
       'text': text,
       'backgroundColor': backgroundColor,
+      'textColor': textColor,
       'startDate': startDate?.toIso8601String(),
       'endDate': endDate?.toIso8601String(),
     };
@@ -150,6 +176,7 @@ class PromoBannerConfig {
       isActive: json['isActive'] as bool? ?? false,
       text: json['text'] as String? ?? '',
       backgroundColor: json['backgroundColor'] as String?,
+      textColor: json['textColor'] as String?,
       startDate: json['startDate'] != null
           ? DateTime.parse(json['startDate'] as String)
           : null,
@@ -163,6 +190,7 @@ class PromoBannerConfig {
     bool? isActive,
     String? text,
     String? backgroundColor,
+    String? textColor,
     DateTime? startDate,
     DateTime? endDate,
   }) {
@@ -170,6 +198,7 @@ class PromoBannerConfig {
       isActive: isActive ?? this.isActive,
       text: text ?? this.text,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      textColor: textColor ?? this.textColor,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
     );
@@ -255,5 +284,41 @@ class ContentBlock {
       isActive: isActive ?? this.isActive,
       order: order ?? this.order,
     );
+  }
+}
+
+/// Utility class for color conversion between Flutter Color and Hex String
+class ColorConverter {
+  /// Convert hex string to Color
+  /// Supports formats: '#RRGGBB', '#AARRGGBB', 'RRGGBB', 'AARRGGBB'
+  static int? hexToColor(String? hexString) {
+    if (hexString == null || hexString.isEmpty) return null;
+    
+    String hex = hexString.replaceAll('#', '');
+    
+    // Add alpha if not present
+    if (hex.length == 6) {
+      hex = 'FF$hex';
+    }
+    
+    try {
+      return int.parse(hex, radix: 16);
+    } catch (e) {
+      print('Error converting hex to color: $e');
+      return null;
+    }
+  }
+
+  /// Convert Color to hex string with alpha
+  /// Returns format: '#AARRGGBB'
+  static String colorToHex(int colorValue) {
+    return '#${colorValue.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+  }
+
+  /// Convert Color to hex string without alpha
+  /// Returns format: '#RRGGBB'
+  static String colorToHexWithoutAlpha(int colorValue) {
+    final hex = colorValue.toRadixString(16).padLeft(8, '0').toUpperCase();
+    return '#${hex.substring(2)}'; // Skip the alpha channel
   }
 }
