@@ -24,6 +24,12 @@ import 'src/screens/admin/admin_desserts_screen.dart';
 import 'src/screens/admin/admin_page_builder_screen.dart';
 import 'src/screens/admin/admin_mailing_screen.dart';
 import 'src/screens/admin/admin_orders_screen.dart';
+import 'src/screens/admin/studio/studio_home_config_screen.dart';
+import 'src/screens/admin/studio/studio_popups_roulette_screen.dart';
+import 'src/screens/admin/studio/studio_texts_screen.dart';
+import 'src/screens/admin/studio/studio_featured_products_screen.dart';
+import 'src/screens/admin/communication/communication_promotions_screen.dart';
+import 'src/screens/admin/communication/communication_loyalty_screen.dart';
 import 'src/kitchen/kitchen_page.dart';
 
 // Importez le composant de barre de navigation
@@ -156,6 +162,32 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: AppRoutes.adminOrders,
               builder: (context, state) => const AdminOrdersScreen(),
+            ),
+            // Studio routes
+            GoRoute(
+              path: AppRoutes.studioHomeConfig,
+              builder: (context, state) => const StudioHomeConfigScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.studioPopupsRoulette,
+              builder: (context, state) => const StudioPopupsRouletteScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.studioTexts,
+              builder: (context, state) => const StudioTextsScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.studioFeaturedProducts,
+              builder: (context, state) => const StudioFeaturedProductsScreen(),
+            ),
+            // Communication routes
+            GoRoute(
+              path: AppRoutes.communicationPromotions,
+              builder: (context, state) => const CommunicationPromotionsScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.communicationLoyalty,
+              builder: (context, state) => const CommunicationLoyaltyScreen(),
             ),
           ],
         ),

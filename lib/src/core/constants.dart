@@ -19,6 +19,16 @@ class AppRoutes {
   static const String adminOrders = '/admin/orders';
   static const String checkout = '/checkout';
   static const String kitchen = '/kitchen';
+  
+  // Studio routes
+  static const String studioHomeConfig = '/admin/studio/home-config';
+  static const String studioPopupsRoulette = '/admin/studio/popups-roulette';
+  static const String studioTexts = '/admin/studio/texts';
+  static const String studioFeaturedProducts = '/admin/studio/featured-products';
+  
+  // Communication routes
+  static const String communicationPromotions = '/admin/communication/promotions';
+  static const String communicationLoyalty = '/admin/communication/loyalty';
 }
 
 /// Rôles utilisateurs

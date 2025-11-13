@@ -64,6 +64,11 @@ class Product {
   final bool isActive; // Produit actif ou inactif
   final DisplaySpot displaySpot; // Où afficher le produit: 'home', 'promotions', 'new', 'all'
   final int order; // Ordre d'affichage (priorité numérique)
+  // NOUVEAU: Tags de mise en avant pour Studio
+  final bool isBestSeller; // Produit best-seller
+  final bool isNew; // Nouveau produit
+  final bool isChefSpecial; // Spécialité du chef
+  final bool isKidFriendly; // Adapté aux enfants
 
   Product({
     required this.id,
@@ -80,6 +85,10 @@ class Product {
     this.isActive = true, // Par défaut actif
     this.displaySpot = DisplaySpot.all, // Par défaut affiché partout
     this.order = 0, // Par défaut ordre 0
+    this.isBestSeller = false,
+    this.isNew = false,
+    this.isChefSpecial = false,
+    this.isKidFriendly = false,
   });
 
   // Méthode pour créer une copie d'un produit avec des modifications
@@ -98,6 +107,10 @@ class Product {
     bool? isActive,
     DisplaySpot? displaySpot,
     int? order,
+    bool? isBestSeller,
+    bool? isNew,
+    bool? isChefSpecial,
+    bool? isKidFriendly,
   }) {
     return Product(
       id: id ?? this.id,
@@ -114,6 +127,10 @@ class Product {
       isActive: isActive ?? this.isActive,
       displaySpot: displaySpot ?? this.displaySpot,
       order: order ?? this.order,
+      isBestSeller: isBestSeller ?? this.isBestSeller,
+      isNew: isNew ?? this.isNew,
+      isChefSpecial: isChefSpecial ?? this.isChefSpecial,
+      isKidFriendly: isKidFriendly ?? this.isKidFriendly,
     );
   }
 
@@ -134,6 +151,10 @@ class Product {
       'isActive': isActive,
       'displaySpot': displaySpot.value,
       'order': order,
+      'isBestSeller': isBestSeller,
+      'isNew': isNew,
+      'isChefSpecial': isChefSpecial,
+      'isKidFriendly': isKidFriendly,
     };
   }
 
@@ -158,6 +179,10 @@ class Product {
       isActive: json['isActive'] as bool? ?? true,
       displaySpot: DisplaySpot.fromString(json['displaySpot'] as String? ?? 'all'),
       order: json['order'] as int? ?? 0,
+      isBestSeller: json['isBestSeller'] as bool? ?? false,
+      isNew: json['isNew'] as bool? ?? false,
+      isChefSpecial: json['isChefSpecial'] as bool? ?? false,
+      isKidFriendly: json['isKidFriendly'] as bool? ?? false,
     );
   }
 }
