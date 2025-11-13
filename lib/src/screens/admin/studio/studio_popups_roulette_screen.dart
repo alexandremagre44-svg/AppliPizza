@@ -556,6 +556,7 @@ class _StudioPopupsRouletteScreenState
                         ctaText: ctaTextController.text.trim().isEmpty ? null : ctaTextController.text.trim(),
                         ctaAction: ctaActionController.text.trim().isEmpty ? null : ctaActionController.text.trim(),
                         isActive: isActive,
+                        createdAt: DateTime.now(),
                       );
                 
                 final success = isEditing

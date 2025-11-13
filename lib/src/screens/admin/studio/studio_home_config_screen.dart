@@ -133,6 +133,10 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
     
     final hero = _config!.hero;
     
+    if (hero == null) {
+      return Center(child: Text('Configuration Hero non disponible'));
+    }
+    
     return ListView(
       padding: AppSpacing.paddingLG,
       children: [
@@ -206,6 +210,10 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
     }
     
     final banner = _config!.promoBanner;
+    
+    if (banner == null) {
+      return Center(child: Text('Configuration Bandeau Promo non disponible'));
+    }
     
     return ListView(
       padding: AppSpacing.paddingLG,
