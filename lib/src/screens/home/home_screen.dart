@@ -295,6 +295,12 @@ class HomeScreen extends ConsumerWidget {
           widgets.add(SectionHeader(title: block.title ?? '⭐ Produits phares'));
           widgets.add(SizedBox(height: AppSpacing.lg));
           widgets.add(_buildProductGrid(context, ref, featured));
+        } else {
+          // No featured products found - display empty message or skip
+          // For better UX, we show the section with an empty state
+          widgets.add(SectionHeader(title: block.title ?? '⭐ Produits phares'));
+          widgets.add(SizedBox(height: AppSpacing.lg));
+          widgets.add(_buildEmptySection('Aucun produit en vedette pour le moment'));
         }
         break;
 
@@ -309,6 +315,10 @@ class HomeScreen extends ConsumerWidget {
           widgets.add(SectionHeader(title: block.title ?? '🔥 Best-sellers'));
           widgets.add(SizedBox(height: AppSpacing.lg));
           widgets.add(_buildProductGrid(context, ref, products));
+        } else {
+          widgets.add(SectionHeader(title: block.title ?? '🔥 Best-sellers'));
+          widgets.add(SizedBox(height: AppSpacing.lg));
+          widgets.add(_buildEmptySection('Aucun best-seller disponible'));
         }
         break;
 
