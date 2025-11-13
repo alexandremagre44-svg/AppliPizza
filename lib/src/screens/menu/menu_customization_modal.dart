@@ -209,10 +209,10 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
     return productsAsync.when(
       data: (allProducts) {
         final pizzaOptions = allProducts
-            .where((p) => p.category == 'Pizza' && !p.isMenu)
+            .where((p) => p.category == ProductCategory.pizza && !p.isMenu)
             .toList();
         final drinkOptions = allProducts
-            .where((p) => p.category == 'Boissons')
+            .where((p) => p.category == ProductCategory.boissons)
             .toList();
         
         return _buildContent(context, pizzaOptions, drinkOptions);

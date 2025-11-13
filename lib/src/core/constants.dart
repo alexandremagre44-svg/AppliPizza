@@ -9,6 +9,7 @@ class AppRoutes {
   static const String cart = '/cart';
   static const String profile = '/profile';
   static const String productDetail = '/details';
+  static const String admin = '/admin';
   static const String adminMenu = '/admin/menu';
   static const String adminPizza = '/admin/pizza';
   static const String adminDrinks = '/admin/drinks';
@@ -16,6 +17,7 @@ class AppRoutes {
   static const String adminPageBuilder = '/admin/page-builder';
   static const String adminMailing = '/admin/mailing';
   static const String adminOrders = '/admin/orders';
+  static const String checkout = '/checkout';
   static const String kitchen = '/kitchen';
 }
 

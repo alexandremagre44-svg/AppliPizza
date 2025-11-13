@@ -89,14 +89,14 @@ class HomeScreen extends ConsumerWidget {
     
     // Get promo products (max 3)
     final promoProducts = activeProducts
-        .where((p) => p.displaySpot == 'promotions')
+        .where((p) => p.displaySpot == DisplaySpot.promotions)
         .take(3)
         .toList();
     
     // Get best sellers - use isFeatured or fallback to first pizzas
     final bestSellers = activeProducts.where((p) => p.isFeatured).toList();
     final fallbackBestSellers = bestSellers.isEmpty
-        ? activeProducts.where((p) => p.category == 'Pizza').take(4).toList()
+        ? activeProducts.where((p) => p.category == ProductCategory.pizza).take(4).toList()
         : bestSellers.take(4).toList();
 
     return RefreshIndicator(
@@ -267,7 +267,7 @@ class HomeScreen extends ConsumerWidget {
       );
     }
     // If pizza, show pizza customization modal
-    else if (product.category == 'Pizza') {
+    else if (product.category == ProductCategory.pizza) {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,

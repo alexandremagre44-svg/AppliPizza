@@ -14,7 +14,8 @@ abstract class ProductRepository {
 }
 
 // Implémentation concrète (fusionne les données mockées, admin et Firestore)
-class MockProductRepository implements ProductRepository {
+// Renamed from MockProductRepository to better reflect its combined data source functionality
+class CombinedProductRepository implements ProductRepository {
   final ProductCrudService _crudService = ProductCrudService();
   final FirestoreProductService _firestoreService = createFirestoreProductService();
 
@@ -112,7 +113,7 @@ class MockProductRepository implements ProductRepository {
     }
     
     developer.log('✅ Repository: Total de ${allProducts.length} produits fusionnés');
-    developer.log('📊 Repository: Catégories présentes: ${allProducts.values.map((p) => p.category).toSet().join(", ")}');
+    developer.log('📊 Repository: Catégories présentes: ${allProducts.values.map((p) => p.category.value).toSet().join(", ")}');
     
     // Trier les produits par ordre (priorité)
     final sortedProducts = allProducts.values.toList()
@@ -125,16 +126,85 @@ class MockProductRepository implements ProductRepository {
 
   @override
   Future<Product?> getProductById(String id) async {
-    final allProducts = await fetchAllProducts();
-    try {
-      return allProducts.firstWhere((p) => p.id == id);
-    } catch (e) {
-      return null;
+    developer.log('🔍 Repository: Recherche du produit ID: $id');
+    
+    // OPTIMISATION: Rechercher dans l'ordre de priorité et s'arrêter dès qu'on trouve
+    // Ordre: Firestore (priorité max) → SharedPreferences → Mock Data
+    
+    // 1. D'abord chercher dans Firestore (priorité maximale)
+    developer.log('  → Recherche dans Firestore...');
+    final firestorePizzas = await _firestoreService.loadPizzas();
+    var product = firestorePizzas.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
+    if (product != null) {
+      developer.log('  ✅ Produit trouvé dans Firestore (pizzas)');
+      return product;
     }
+    
+    final firestoreMenus = await _firestoreService.loadMenus();
+    product = firestoreMenus.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
+    if (product != null) {
+      developer.log('  ✅ Produit trouvé dans Firestore (menus)');
+      return product;
+    }
+    
+    final firestoreDrinks = await _firestoreService.loadDrinks();
+    product = firestoreDrinks.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
+    if (product != null) {
+      developer.log('  ✅ Produit trouvé dans Firestore (boissons)');
+      return product;
+    }
+    
+    final firestoreDesserts = await _firestoreService.loadDesserts();
+    product = firestoreDesserts.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
+    if (product != null) {
+      developer.log('  ✅ Produit trouvé dans Firestore (desserts)');
+      return product;
+    }
+    
+    // 2. Ensuite chercher dans SharedPreferences (admin local)
+    developer.log('  → Recherche dans SharedPreferences...');
+    final adminPizzas = await _crudService.loadPizzas();
+    product = adminPizzas.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
+    if (product != null) {
+      developer.log('  ✅ Produit trouvé dans SharedPreferences (pizzas)');
+      return product;
+    }
+    
+    final adminMenus = await _crudService.loadMenus();
+    product = adminMenus.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
+    if (product != null) {
+      developer.log('  ✅ Produit trouvé dans SharedPreferences (menus)');
+      return product;
+    }
+    
+    final adminDrinks = await _crudService.loadDrinks();
+    product = adminDrinks.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
+    if (product != null) {
+      developer.log('  ✅ Produit trouvé dans SharedPreferences (boissons)');
+      return product;
+    }
+    
+    final adminDesserts = await _crudService.loadDesserts();
+    product = adminDesserts.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
+    if (product != null) {
+      developer.log('  ✅ Produit trouvé dans SharedPreferences (desserts)');
+      return product;
+    }
+    
+    // 3. Enfin chercher dans les mock data
+    developer.log('  → Recherche dans mock data...');
+    product = mockProducts.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
+    if (product != null) {
+      developer.log('  ✅ Produit trouvé dans mock data');
+      return product;
+    }
+    
+    developer.log('  ❌ Produit non trouvé');
+    return null;
   }
 }
 
 // Le provider pour fournir l'instance du Repository
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
-  return MockProductRepository();
+  return CombinedProductRepository();
 });

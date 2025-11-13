@@ -44,7 +44,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     
     // 2. Filter by category
     if (_selectedCategory != 'Tous') {
-      products = products.where((p) => p.category == _selectedCategory).toList();
+      products = products.where((p) => p.category.value == _selectedCategory).toList();
     }
 
     // 3. Filter by search query
@@ -237,7 +237,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                                   );
                                 } 
                                 // Si c'est une pizza, afficher la modal de personnalisation élégante
-                                else if (product.category == 'Pizza') {
+                                else if (product.category == ProductCategory.pizza) {
                                   showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,

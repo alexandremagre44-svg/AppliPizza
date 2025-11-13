@@ -26,7 +26,7 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
   void initState() {
     super.initState();
     // Initialisation d'une taille par défaut si applicable
-    if (widget.product.category.contains('Pizza')) {
+    if (widget.product.category == ProductCategory.pizza) {
       _selectedSize = 'Moyenne (30cm)';
     }
   }
@@ -39,7 +39,7 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
 
   // Simule le calcul du prix selon la taille
   double get _currentPrice {
-    if (widget.product.category.contains('Pizza') && _selectedSize == 'Grande (40cm)') {
+    if (widget.product.category == ProductCategory.pizza && _selectedSize == 'Grande (40cm)') {
       return widget.product.price + 3.0;
     }
     return widget.product.price;
@@ -139,7 +139,7 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                           ],
                           
                           // Section Personnalisation (Exemple de sélection de taille)
-                          if (widget.product.category.contains('Pizza')) ...[
+                          if (widget.product.category == ProductCategory.pizza) ...[
                             Text(
                               'Choisir la Taille',
                               style: Theme.of(context).textTheme.titleLarge,

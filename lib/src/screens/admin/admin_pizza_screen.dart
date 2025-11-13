@@ -45,7 +45,7 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
     final orderController = TextEditingController(text: pizza?.order.toString() ?? '0');
     bool isFeatured = pizza?.isFeatured ?? false;
     bool isActive = pizza?.isActive ?? true;
-    String displaySpot = pizza?.displaySpot ?? 'all';
+    String displaySpot = pizza?.displaySpot.value ?? 'all';
     List<String> selectedIngredients = List.from(pizza?.baseIngredients ?? []);
 
     final result = await showDialog<bool>(
@@ -482,12 +482,12 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                             imageUrl: imageController.text.trim().isEmpty
                                 ? 'https://via.placeholder.com/200'
                                 : imageController.text.trim(),
-                            category: 'Pizza',
+                            category: ProductCategory.pizza,
                             isMenu: false,
                             baseIngredients: selectedIngredients, // ✨ Inclure les ingrédients sélectionnés
                             isFeatured: isFeatured,
                             isActive: isActive,
-                            displaySpot: displaySpot,
+                            displaySpot: DisplaySpot.fromString(displaySpot),
                             order: int.tryParse(orderController.text) ?? 0,
                           );
 
