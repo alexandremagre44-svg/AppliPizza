@@ -154,71 +154,16 @@ class HomeScreen extends ConsumerWidget {
             
             SizedBox(height: AppSpacing.xxxl),
             
-            // 2. Promos section (if available)
-            if (promoProducts.isNotEmpty) ...[
-              const SectionHeader(
-                title: '🔥 Promos du moment',
-              ),
-              SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                height: 180,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: AppSpacing.paddingHorizontalLG,
-                  itemCount: promoProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = promoProducts[index];
-                    return PromoCardCompact(
-                      product: product,
-                      onTap: () => _handleProductTap(context, ref, product),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(height: AppSpacing.xxxl),
-            ],
-            
-            // 3. Best sellers section
-            const SectionHeader(
-              title: '⭐ Best-sellers',
-            ),
-            SizedBox(height: AppSpacing.lg),
-            
-            if (fallbackBestSellers.isEmpty)
-              _buildEmptySection('Aucun best-seller disponible')
+            // 2. Dynamic blocks from configuration
+            if (homeConfig?.blocks != null && homeConfig!.blocks.isNotEmpty)
+              ..._buildDynamicBlocks(context, ref, homeConfig.blocks, activeProducts)
             else
-              Padding(
-                padding: AppSpacing.paddingHorizontalLG,
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.75,
-                  ),
-                  itemCount: fallbackBestSellers.length,
-                  itemBuilder: (context, index) {
-                    final product = fallbackBestSellers[index];
-                    final cart = ref.watch(cartProvider);
-                    final cartItem = cart.items.cast<CartItem?>().firstWhere(
-                      (item) => item?.productId == product.id,
-                      orElse: () => null,
-                    );
-                    
-                    return ProductCard(
-                      product: product,
-                      onAddToCart: () => _handleProductTap(context, ref, product),
-                      cartQuantity: cartItem?.quantity,
-                    );
-                  },
-                ),
-              ),
+              // Fallback to default sections if no blocks configured
+              ..._buildDefaultSections(context, ref, promoProducts, fallbackBestSellers),
             
             SizedBox(height: AppSpacing.xxxl),
             
-            // 4. Category shortcuts
+            // 3. Category shortcuts (always shown)
             const SectionHeader(
               title: 'Nos catégories',
             ),
@@ -283,6 +228,178 @@ class HomeScreen extends ConsumerWidget {
             child: const Text('Réessayer'),
           ),
         ],
+      ),
+    );
+  }
+
+  // Build dynamic blocks based on configuration
+  List<Widget> _buildDynamicBlocks(
+    BuildContext context,
+    WidgetRef ref,
+    List<dynamic> blocks,
+    List<Product> allProducts,
+  ) {
+    // Sort blocks by order and filter visible ones
+    final sortedBlocks = blocks
+        .where((b) => b.isActive == true)
+        .toList()
+      ..sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+
+    final widgets = <Widget>[];
+
+    for (final block in sortedBlocks) {
+      widgets.addAll(_buildBlockContent(context, ref, block, allProducts));
+      widgets.add(SizedBox(height: AppSpacing.xxxl));
+    }
+
+    return widgets;
+  }
+
+  // Build content for a specific block type
+  List<Widget> _buildBlockContent(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic block,
+    List<Product> allProducts,
+  ) {
+    final widgets = <Widget>[];
+    final maxItems = block.maxItems ?? 6;
+
+    switch (block.type) {
+      case 'featuredProducts':
+      case 'featured_products':
+        // Show featured products
+        final featured = allProducts
+            .where((p) => p.isFeatured)
+            .take(maxItems)
+            .toList();
+        
+        if (featured.isNotEmpty) {
+          widgets.add(SectionHeader(title: block.title ?? '⭐ Produits phares'));
+          widgets.add(SizedBox(height: AppSpacing.lg));
+          widgets.add(_buildProductGrid(context, ref, featured));
+        }
+        break;
+
+      case 'bestSellers':
+        // Show best sellers (use isFeatured as proxy or first pizzas)
+        final bestSellers = allProducts.where((p) => p.isFeatured).toList();
+        final products = bestSellers.isEmpty
+            ? allProducts.where((p) => p.category == ProductCategory.pizza).take(maxItems).toList()
+            : bestSellers.take(maxItems).toList();
+        
+        if (products.isNotEmpty) {
+          widgets.add(SectionHeader(title: block.title ?? '🔥 Best-sellers'));
+          widgets.add(SizedBox(height: AppSpacing.lg));
+          widgets.add(_buildProductGrid(context, ref, products));
+        }
+        break;
+
+      case 'categories':
+        // Show categories section
+        widgets.add(SectionHeader(title: block.title ?? 'Nos catégories'));
+        widgets.add(SizedBox(height: AppSpacing.lg));
+        widgets.add(const CategoryShortcuts());
+        break;
+
+      case 'promotions':
+        // Show promo products
+        final promos = allProducts
+            .where((p) => p.displaySpot == DisplaySpot.promotions)
+            .take(maxItems)
+            .toList();
+        
+        if (promos.isNotEmpty) {
+          widgets.add(SectionHeader(title: block.title ?? '🔥 Promos du moment'));
+          widgets.add(SizedBox(height: AppSpacing.lg));
+          widgets.add(_buildPromoCarousel(context, ref, promos));
+        }
+        break;
+
+      default:
+        // Unknown block type, skip
+        break;
+    }
+
+    return widgets;
+  }
+
+  // Build default sections (fallback when no blocks configured)
+  List<Widget> _buildDefaultSections(
+    BuildContext context,
+    WidgetRef ref,
+    List<Product> promoProducts,
+    List<Product> bestSellers,
+  ) {
+    final widgets = <Widget>[];
+
+    // Promos section
+    if (promoProducts.isNotEmpty) {
+      widgets.add(const SectionHeader(title: '🔥 Promos du moment'));
+      widgets.add(SizedBox(height: AppSpacing.lg));
+      widgets.add(_buildPromoCarousel(context, ref, promoProducts));
+      widgets.add(SizedBox(height: AppSpacing.xxxl));
+    }
+
+    // Best sellers section
+    widgets.add(const SectionHeader(title: '⭐ Best-sellers'));
+    widgets.add(SizedBox(height: AppSpacing.lg));
+    if (bestSellers.isEmpty) {
+      widgets.add(_buildEmptySection('Aucun best-seller disponible'));
+    } else {
+      widgets.add(_buildProductGrid(context, ref, bestSellers));
+    }
+
+    return widgets;
+  }
+
+  // Build product grid
+  Widget _buildProductGrid(BuildContext context, WidgetRef ref, List<Product> products) {
+    return Padding(
+      padding: AppSpacing.paddingHorizontalLG,
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 0.75,
+        ),
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          final cart = ref.watch(cartProvider);
+          final cartItem = cart.items.cast<CartItem?>().firstWhere(
+            (item) => item?.productId == product.id,
+            orElse: () => null,
+          );
+          
+          return ProductCard(
+            product: product,
+            onAddToCart: () => _handleProductTap(context, ref, product),
+            cartQuantity: cartItem?.quantity,
+          );
+        },
+      ),
+    );
+  }
+
+  // Build promo carousel
+  Widget _buildPromoCarousel(BuildContext context, WidgetRef ref, List<Product> products) {
+    return SizedBox(
+      height: 180,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: AppSpacing.paddingHorizontalLG,
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          return PromoCardCompact(
+            product: product,
+            onTap: () => _handleProductTap(context, ref, product),
+          );
+        },
       ),
     );
   }

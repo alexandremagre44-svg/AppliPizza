@@ -316,69 +316,6 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
     );
   }
 
-  Widget _buildOldPromoBannerTab() {
-    if (_config == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    
-    final banner = _config!.promoBanner;
-    
-    if (banner == null) {
-      return const Center(child: Text('Configuration Bandeau Promo non disponible'));
-    }
-    
-    return ListView(
-      padding: AppSpacing.paddingLG,
-      children: [
-        Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.cardLarge),
-          child: Padding(
-            padding: AppSpacing.paddingLG,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.notifications, color: AppColors.primaryRed),
-                    SizedBox(width: AppSpacing.sm),
-                    Text('Bandeau Promo', style: AppTextStyles.titleLarge),
-                  ],
-                ),
-                SizedBox(height: AppSpacing.lg),
-                
-                SwitchListTile(
-                  title: const Text('Activer le bandeau'),
-                  value: banner.isActive,
-                  activeColor: AppColors.primaryRed,
-                  onChanged: (value) async {
-                    final updated = banner.copyWith(isActive: value);
-                    await _service.updatePromoBanner(updated);
-                    _loadConfig();
-                    _showSnackBar('Bandeau ${value ? 'activé' : 'désactivé'}');
-                  },
-                ),
-                
-                Divider(height: AppSpacing.xxl),
-                
-                _buildTextField('Texte du bandeau', banner.text, (value) async {
-                  final updated = banner.copyWith(text: value);
-                  await _service.updatePromoBanner(updated);
-                  _loadConfig();
-                }),
-                _buildTextField('Couleur (hex)', banner.backgroundColor ?? '#D32F2F', (value) async {
-                  final updated = banner.copyWith(backgroundColor: value);
-                  await _service.updatePromoBanner(updated);
-                  _loadConfig();
-                }),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildBlocksTab() {
     if (_config == null) {
       return Center(child: CircularProgressIndicator());
@@ -525,139 +462,66 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
   }
 
   void _showAddBlockDialog() {
-    _showBlockDialog();
+    // Convert ContentBlock to DynamicBlock for the dialog
+    showDialog(
+      context: context,
+      builder: (context) => EditBlockDialog(
+        onSave: (dynamicBlock) async {
+          // Convert DynamicBlock to ContentBlock for saving
+          final contentBlock = ContentBlock(
+            id: dynamicBlock.id,
+            type: dynamicBlock.type,
+            title: dynamicBlock.title,
+            maxItems: dynamicBlock.maxItems,
+            order: dynamicBlock.order,
+            isActive: dynamicBlock.isVisible,
+          );
+          
+          final success = await _service.addContentBlock(contentBlock);
+          if (success) {
+            _loadConfig();
+            _showSnackBar('Bloc ajouté');
+          } else {
+            _showSnackBar('Erreur lors de l\'ajout', isError: true);
+          }
+        },
+      ),
+    );
   }
 
   void _showEditBlockDialog(ContentBlock block) {
-    _showBlockDialog(existingBlock: block);
-  }
-
-  void _showBlockDialog({ContentBlock? existingBlock}) {
-    final isEditing = existingBlock != null;
-    final titleController = TextEditingController(text: existingBlock?.title);
-    final contentController = TextEditingController(text: existingBlock?.content);
-    String selectedType = existingBlock?.type ?? 'featured_products';
-    bool isActive = existingBlock?.isActive ?? true;
-    int order = existingBlock?.order ?? 0;
+    // Convert ContentBlock to DynamicBlock for the dialog
+    final dynamicBlock = DynamicBlock(
+      id: block.id,
+      type: block.type,
+      title: block.title,
+      maxItems: block.maxItems,
+      order: block.order,
+      isVisible: block.isActive,
+    );
     
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(isEditing ? 'Modifier le bloc' : 'Nouveau bloc'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    labelText: 'Titre*',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                SizedBox(height: AppSpacing.md),
-                DropdownButtonFormField<String>(
-                  value: selectedType,
-                  decoration: InputDecoration(
-                    labelText: 'Type de bloc',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: [
-                    DropdownMenuItem(value: 'featured_products', child: Text('Produits en vedette')),
-                    DropdownMenuItem(value: 'promotions', child: Text('Promotions')),
-                    DropdownMenuItem(value: 'categories', child: Text('Catégories')),
-                    DropdownMenuItem(value: 'text', child: Text('Texte libre')),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => selectedType = value);
-                    }
-                  },
-                ),
-                SizedBox(height: AppSpacing.md),
-                TextField(
-                  controller: contentController,
-                  decoration: InputDecoration(
-                    labelText: 'Contenu',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-                SizedBox(height: AppSpacing.md),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Position (ordre)',
-                    border: OutlineInputBorder(),
-                  ),
-                  controller: TextEditingController(text: order.toString()),
-                  onChanged: (value) {
-                    order = int.tryParse(value) ?? 0;
-                  },
-                ),
-                SizedBox(height: AppSpacing.md),
-                SwitchListTile(
-                  title: Text('Bloc actif'),
-                  value: isActive,
-                  activeColor: AppColors.primaryRed,
-                  onChanged: (value) {
-                    setState(() => isActive = value);
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Annuler'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (titleController.text.trim().isEmpty) {
-                  _showSnackBar('Le titre est requis', isError: true);
-                  return;
-                }
-                
-                final block = isEditing
-                    ? existingBlock.copyWith(
-                        title: titleController.text.trim(),
-                        type: selectedType,
-                        content: contentController.text.trim(),
-                        order: order,
-                        isActive: isActive,
-                      )
-                    : ContentBlock(
-                        id: const Uuid().v4(),
-                        title: titleController.text.trim(),
-                        type: selectedType,
-                        content: contentController.text.trim(),
-                        order: order,
-                        isActive: isActive,
-                      );
-                
-                final success = isEditing
-                    ? await _service.updateContentBlock(block)
-                    : await _service.addContentBlock(block);
-                
-                if (success) {
-                  _loadConfig();
-                  Navigator.pop(context);
-                  _showSnackBar(isEditing ? 'Bloc modifié' : 'Bloc ajouté');
-                } else {
-                  _showSnackBar('Erreur lors de l\'enregistrement', isError: true);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryRed,
-                foregroundColor: Colors.white,
-              ),
-              child: Text(isEditing ? 'Modifier' : 'Ajouter'),
-            ),
-          ],
-        ),
+      builder: (context) => EditBlockDialog(
+        block: dynamicBlock,
+        onSave: (updatedDynamicBlock) async {
+          // Convert back to ContentBlock for saving
+          final updatedBlock = block.copyWith(
+            type: updatedDynamicBlock.type,
+            title: updatedDynamicBlock.title,
+            maxItems: updatedDynamicBlock.maxItems,
+            order: updatedDynamicBlock.order,
+            isActive: updatedDynamicBlock.isVisible,
+          );
+          
+          final success = await _service.updateContentBlock(updatedBlock);
+          if (success) {
+            _loadConfig();
+            _showSnackBar('Bloc modifié');
+          } else {
+            _showSnackBar('Erreur lors de la modification', isError: true);
+          }
+        },
       ),
     );
   }
@@ -694,43 +558,6 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
         _showSnackBar('Erreur lors de la suppression', isError: true);
       }
     }
-  }
-
-  Widget _buildTextField(
-    String label,
-    String value,
-    Future<void> Function(String) onSaved,
-  ) {
-    final controller = TextEditingController(text: value);
-    
-    return Padding(
-      padding: EdgeInsets.only(bottom: AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: AppTextStyles.labelLarge),
-          SizedBox(height: AppSpacing.xs),
-          TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(borderRadius: AppRadius.input),
-              contentPadding: AppSpacing.paddingMD,
-            ),
-            onSubmitted: (newValue) async {
-              await onSaved(newValue);
-              _showSnackBar('Enregistré');
-            },
-          ),
-          SizedBox(height: AppSpacing.xs),
-          Text(
-            'Appuyez sur Entrée pour sauvegarder',
-            style: AppTextStyles.bodySmall.copyWith(
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
