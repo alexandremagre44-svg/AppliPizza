@@ -260,9 +260,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                   : const Text('Se connecter', style: TextStyle(fontSize: 18)),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
 
-                          // Comptes de test
+                          // Lien vers inscription
+                          TextButton(
+                            onPressed: () {
+                              context.go('/signup');
+                            },
+                            child: const Text('Pas de compte ? Créer un compte'),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Info Firebase
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
@@ -278,7 +287,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     const Icon(Icons.info_outline, size: 20, color: AppColors.primaryRed),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'Comptes de test',
+                                      'Première utilisation ?',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.textDark,
@@ -286,10 +295,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
-                                _buildTestAccount('Admin', TestCredentials.adminEmail, TestCredentials.adminPassword),
                                 const SizedBox(height: 8),
-                                _buildTestAccount('Client', TestCredentials.clientEmail, TestCredentials.clientPassword),
+                                Text(
+                                  'Créez un compte administrateur pour commencer. Les comptes doivent être créés dans Firebase.',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                                ),
                               ],
                             ),
                           ),
@@ -305,27 +315,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTestAccount(String role, String email, String password) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$role:',
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          email,
-          style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-        ),
-        Text(
-          password,
-          style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-        ),
-      ],
     );
   }
 }
