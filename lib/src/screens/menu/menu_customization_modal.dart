@@ -167,6 +167,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         title,
@@ -251,6 +252,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
                 const SizedBox(height: 16),
@@ -280,11 +282,13 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Poignée de glissement et titre avec gradient
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
                       height: 5,
@@ -583,6 +587,7 @@ class _SelectionOptionsModal extends StatelessWidget {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Handle bar
           Container(
@@ -707,6 +712,7 @@ class _SelectionOptionsModal extends StatelessWidget {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
                                     option.name,
