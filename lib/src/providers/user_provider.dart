@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_profile.dart';
 import '../models/order.dart'; 
 import '../services/firebase_order_service.dart';
+import '../services/user_profile_service.dart';
 import 'cart_provider.dart';
 import 'auth_provider.dart';
-// Note: L'ancienne importation vers '../models/cart.dart' est retirée
 
 final userProvider =
     StateNotifierProvider<UserProfileNotifier, UserProfile>((ref) {
@@ -15,17 +15,49 @@ final userProvider =
 
 class UserProfileNotifier extends StateNotifier<UserProfile> {
   final Ref _ref;
+  final UserProfileService _profileService = UserProfileService();
 
   UserProfileNotifier(this._ref) : super(UserProfile.initial());
 
-  void toggleFavorite(String productId) {
+  /// Charger le profil utilisateur depuis Firestore
+  Future<void> loadProfile(String userId) async {
+    final profile = await _profileService.getUserProfile(userId);
+    if (profile != null) {
+      state = profile;
+    }
+  }
+
+  /// Sauvegarder le profil utilisateur dans Firestore
+  Future<bool> saveProfile() async {
+    return await _profileService.saveUserProfile(state);
+  }
+
+  /// Basculer un produit dans les favoris
+  Future<void> toggleFavorite(String productId) async {
     final favorites = [...state.favoriteProducts];
-    if (favorites.contains(productId)) {
+    final wasInFavorites = favorites.contains(productId);
+    
+    if (wasInFavorites) {
       favorites.remove(productId);
+      await _profileService.removeFromFavorites(state.id, productId);
     } else {
       favorites.add(productId);
+      await _profileService.addToFavorites(state.id, productId);
     }
+    
     state = state.copyWith(favoriteProducts: favorites);
+  }
+
+  /// Mettre à jour l'adresse
+  Future<void> updateAddress(String address) async {
+    await _profileService.updateAddress(state.id, address);
+    state = state.copyWith(address: address);
+  }
+
+  /// Mettre à jour l'image de profil
+  Future<void> updateProfileImage(String imageUrl) async {
+    await _profileService.updateProfileImage(state.id, imageUrl);
+    state = state.copyWith(imageUrl: imageUrl);
   }
 
   Future<void> addOrder({

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/product.dart';
 import '../../services/product_crud_service.dart';
+import '../../services/firestore_unified_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 
@@ -17,6 +18,7 @@ class AdminDrinksScreen extends StatefulWidget {
 
 class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
   final ProductCrudService _crudService = ProductCrudService();
+  final FirestoreUnifiedService _firestoreService = FirestoreUnifiedService();
   List<Product> _drinks = [];
   bool _isLoading = true;
 
@@ -28,9 +30,22 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
 
   Future<void> _loadDrinks() async {
     setState(() => _isLoading = true);
-    final drinks = await _crudService.loadDrinks();
+    
+    // Charger depuis Firestore (priorité) et SharedPreferences (backup local)
+    final firestoreDrinks = await _firestoreService.loadDrinks();
+    final localDrinks = await _crudService.loadDrinks();
+    
+    // Fusionner: Firestore a la priorité
+    final allDrinks = <String, Product>{};
+    for (var drink in localDrinks) {
+      allDrinks[drink.id] = drink;
+    }
+    for (var drink in firestoreDrinks) {
+      allDrinks[drink.id] = drink;
+    }
+    
     setState(() {
-      _drinks = drinks;
+      _drinks = allDrinks.values.toList()..sort((a, b) => a.order.compareTo(b.order));
       _isLoading = false;
     });
   }
@@ -476,11 +491,20 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
                             );
 
                             bool success;
-                            if (drink == null) {
+                            final isNew = drink == null;
+                            
+                            // Sauvegarder dans Firestore (priorité)
+                            final firestoreSuccess = await _firestoreService.saveDrink(newDrink);
+                            
+                            // Sauvegarder aussi en local pour backup
+                            if (isNew) {
                               success = await _crudService.addDrink(newDrink);
                             } else {
                               success = await _crudService.updateDrink(newDrink);
                             }
+                            
+                            // Considérer comme succès si Firestore a réussi
+                            success = firestoreSuccess || success;
 
                             if (success && context.mounted) {
                               Navigator.pop(context, true);
@@ -641,7 +665,13 @@ class _AdminDrinksScreenState extends State<AdminDrinksScreen> {
     );
 
     if (confirm == true) {
-      final success = await _crudService.deleteDrink(drink.id);
+      // Supprimer de Firestore (priorité)
+      final firestoreSuccess = await _firestoreService.deleteDrink(drink.id);
+      
+      // Supprimer aussi du local
+      final localSuccess = await _crudService.deleteDrink(drink.id);
+      
+      final success = firestoreSuccess || localSuccess;
       if (success) {
         _loadDrinks();
         if (mounted) {

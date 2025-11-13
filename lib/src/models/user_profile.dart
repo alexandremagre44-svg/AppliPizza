@@ -26,7 +26,7 @@ class UserProfile {
     String? imageUrl,
     String? address,
     List<String>? favoriteProducts,
-    List<Order>? orderHistory, // CORRIGÉ
+    List<Order>? orderHistory,
   }) {
     return UserProfile(
       id: id ?? this.id,
@@ -35,7 +35,36 @@ class UserProfile {
       imageUrl: imageUrl ?? this.imageUrl,
       address: address ?? this.address,
       favoriteProducts: favoriteProducts ?? this.favoriteProducts,
-      orderHistory: orderHistory ?? this.orderHistory, // CORRIGÉ
+      orderHistory: orderHistory ?? this.orderHistory,
+    );
+  }
+
+  // Conversion vers JSON pour Firestore
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+      'imageUrl': imageUrl,
+      'address': address,
+      'favoriteProducts': favoriteProducts,
+      // Note: orderHistory n'est pas stocké dans le profil, il est dans une collection séparée
+    };
+  }
+
+  // Création depuis JSON (compatible Firestore)
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    return UserProfile(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      email: json['email'] as String,
+      imageUrl: json['imageUrl'] as String,
+      address: json['address'] as String,
+      favoriteProducts: (json['favoriteProducts'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      orderHistory: [], // Les commandes sont chargées séparément
     );
   }
 
