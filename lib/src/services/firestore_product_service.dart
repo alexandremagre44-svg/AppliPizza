@@ -5,6 +5,7 @@
 //   - firebase_core: ^2.24.0
 
 import 'dart:developer' as developer;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/product.dart';
 
 // Interface abstraite pour permettre la compatibilité avec/sans Firebase
@@ -129,8 +130,6 @@ class MockFirestoreProductService implements FirestoreProductService {
 }
 
 // Implémentation réelle avec Firestore
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class FirestoreProductServiceImpl implements FirestoreProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
