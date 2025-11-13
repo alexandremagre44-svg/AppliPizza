@@ -15,6 +15,7 @@ import '../../widgets/home/section_header.dart';
 import '../../widgets/home/promo_card_compact.dart';
 import '../../widgets/home/category_shortcuts.dart';
 import '../../widgets/home/info_banner.dart';
+import '../../widgets/home/home_shimmer_loading.dart';
 import '../menu/menu_customization_modal.dart';
 import 'pizza_customization_modal.dart';
 import '../../theme/app_theme.dart';
@@ -35,19 +36,11 @@ class HomeScreen extends ConsumerWidget {
       appBar: _buildAppBar(context),
       body: productsAsync.when(
         data: (products) => homeConfigAsync.when(
-          data: (homeConfig) => _buildContent(context, ref, products, homeConfig),
-          loading: () => const Center(
-            child: CircularProgressIndicator(
-              color: AppColors.primaryRed,
-            ),
-          ),
-          error: (error, stack) => _buildContent(context, ref, products, null),
+          data: (homeConfig) => _buildContentWithAnimation(context, ref, products, homeConfig),
+          loading: () => const HomeShimmerLoading(),
+          error: (error, stack) => _buildContentWithAnimation(context, ref, products, null),
         ),
-        loading: () => const Center(
-          child: CircularProgressIndicator(
-            color: AppColors.primaryRed,
-          ),
-        ),
+        loading: () => const HomeShimmerLoading(),
         error: (error, stack) => _buildErrorState(context, ref, error),
       ),
     );
@@ -91,6 +84,24 @@ class HomeScreen extends ConsumerWidget {
           onPressed: () => context.push(AppRoutes.profile),
         ),
       ],
+    );
+  }
+
+  /// Wrapper with fade-in animation
+  Widget _buildContentWithAnimation(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig) {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 500),
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: _buildContent(context, ref, allProducts, homeConfig),
     );
   }
 

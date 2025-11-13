@@ -343,87 +343,125 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
       return const Center(child: Text('Configuration non disponible'));
     }
     
-    return ListView(
-      padding: AppSpacing.paddingLG,
+    // Sort blocks by order for display
+    final sortedBlocks = List<ContentBlock>.from(config.blocks)
+      ..sort((a, b) => a.order.compareTo(b.order));
+    
+    return Column(
       children: [
-        Card(
-          elevation: 2,
-          color: AppColors.primaryRed.withOpacity(0.1),
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.cardLarge),
-          child: Padding(
-            padding: AppSpacing.paddingMD,
-            child: Row(
-              children: [
-                Icon(Icons.info_outline, color: AppColors.primaryRed),
-                SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    '${config.blocks.length} bloc(s) configuré(s)',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w600,
+        // Header card
+        Padding(
+          padding: AppSpacing.paddingLG,
+          child: Card(
+            elevation: 2,
+            color: AppColors.primaryRed.withOpacity(0.1),
+            shape: RoundedRectangleBorder(borderRadius: AppRadius.cardLarge),
+            child: Padding(
+              padding: AppSpacing.paddingMD,
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: AppColors.primaryRed),
+                  SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${config.blocks.length} bloc(s) configuré(s)',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (config.blocks.isNotEmpty)
+                          Text(
+                            'Glissez-déposez pour réorganiser',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textMedium,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add, color: AppColors.primaryRed),
-                  onPressed: _showAddBlockDialog,
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: AppSpacing.lg),
-        
-        if (config.blocks.isEmpty)
-          Center(
-            child: Padding(
-              padding: AppSpacing.paddingXXL,
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.view_agenda_outlined,
-                    size: 80,
-                    color: AppColors.textLight,
-                  ),
-                  SizedBox(height: AppSpacing.md),
-                  Text(
-                    'Aucun bloc',
-                    style: AppTextStyles.titleLarge,
-                  ),
-                  SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Ajoutez des blocs pour personnaliser votre page',
-                    style: AppTextStyles.bodySmall,
-                    textAlign: TextAlign.center,
+                  IconButton(
+                    icon: Icon(Icons.add, color: AppColors.primaryRed),
+                    onPressed: _showAddBlockDialog,
                   ),
                 ],
               ),
             ),
+          ),
+        ),
+        
+        // Empty state or reorderable list
+        if (config.blocks.isEmpty)
+          Expanded(
+            child: Center(
+              child: Padding(
+                padding: AppSpacing.paddingXXL,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.view_agenda_outlined,
+                      size: 80,
+                      color: AppColors.textLight,
+                    ),
+                    SizedBox(height: AppSpacing.md),
+                    Text(
+                      'Aucun bloc',
+                      style: AppTextStyles.titleLarge,
+                    ),
+                    SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Ajoutez des blocs pour personnaliser votre page',
+                      style: AppTextStyles.bodySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           )
         else
-          ...config.blocks.map((block) => _buildBlockCard(block)),
+          Expanded(
+            child: ReorderableListView(
+              padding: AppSpacing.paddingLG,
+              onReorder: (oldIndex, newIndex) => _onReorderBlocks(sortedBlocks, oldIndex, newIndex),
+              children: sortedBlocks.map((block) {
+                return _buildBlockCard(block, key: ValueKey(block.id));
+              }).toList(),
+            ),
+          ),
       ],
     );
   }
 
-  Widget _buildBlockCard(ContentBlock block) {
+  Widget _buildBlockCard(ContentBlock block, {Key? key}) {
     return Card(
+      key: key,
       elevation: 1,
       margin: EdgeInsets.only(bottom: AppSpacing.md),
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: ExpansionTile(
-        leading: Container(
-          padding: EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: block.isActive
-                ? AppColors.primaryRed.withOpacity(0.1)
-                : AppColors.textLight.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            _getBlockIcon(block.type),
-            color: block.isActive ? AppColors.primaryRed : AppColors.textLight,
-          ),
+        leading: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.drag_handle, color: AppColors.textMedium),
+            SizedBox(width: AppSpacing.sm),
+            Container(
+              padding: EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: block.isActive
+                    ? AppColors.primaryRed.withOpacity(0.1)
+                    : AppColors.textLight.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _getBlockIcon(block.type),
+                color: block.isActive ? AppColors.primaryRed : AppColors.textLight,
+              ),
+            ),
+          ],
         ),
         title: Text(block.title, style: AppTextStyles.titleMedium),
         subtitle: Text(
@@ -440,19 +478,20 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(block.content, style: AppTextStyles.bodyMedium),
+                if (block.content.isNotEmpty)
+                  Text(block.content, style: AppTextStyles.bodyMedium),
                 SizedBox(height: AppSpacing.md),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton.icon(
-                      icon: Icon(Icons.edit, size: 18),
-                      label: Text('Modifier'),
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text('Modifier'),
                       onPressed: () => _showEditBlockDialog(block),
                     ),
                     TextButton.icon(
-                      icon: Icon(Icons.delete, size: 18),
-                      label: Text('Supprimer'),
+                      icon: const Icon(Icons.delete, size: 18),
+                      label: const Text('Supprimer'),
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.errorRed,
                       ),
@@ -466,6 +505,32 @@ class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
         ],
       ),
     );
+  }
+
+  Future<void> _onReorderBlocks(List<ContentBlock> blocks, int oldIndex, int newIndex) async {
+    // Adjust index if moving down the list
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    // Create a new list with the reordered blocks
+    final reorderedBlocks = List<ContentBlock>.from(blocks);
+    final block = reorderedBlocks.removeAt(oldIndex);
+    reorderedBlocks.insert(newIndex, block);
+
+    // Update the order property to match new positions
+    final updatedBlocks = <ContentBlock>[];
+    for (int i = 0; i < reorderedBlocks.length; i++) {
+      updatedBlocks.add(reorderedBlocks[i].copyWith(order: i));
+    }
+
+    // Save to Firestore
+    final success = await _service.reorderBlocks(updatedBlocks);
+    if (success && mounted) {
+      _showSnackBar('Blocs réorganisés avec succès');
+    } else if (!success && mounted) {
+      _showSnackBar('Erreur lors de la réorganisation', isError: true);
+    }
   }
 
   IconData _getBlockIcon(String type) {

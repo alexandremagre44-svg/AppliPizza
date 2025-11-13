@@ -195,42 +195,116 @@ class _EditHeroDialogState extends State<EditHeroDialog> {
                 ),
                 const SizedBox(height: 16),
 
-                // Image URL field with upload button
-                Row(
+                // Image picker with preview
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _imageUrlController,
-                        decoration: InputDecoration(
-                          labelText: 'URL de l\'image',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          prefixIcon: const Icon(Icons.link),
-                        ),
+                    const Text(
+                      'Image de la bannière',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: _isUploading ? null : _pickAndUploadImage,
-                      icon: _isUploading
-                          ? SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                value: _uploadProgress,
+                    const SizedBox(height: 8),
+                    
+                    // Image preview or placeholder
+                    if (_imageUrlController.text.isNotEmpty)
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              _imageUrlController.text,
+                              height: 150,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  height: 150,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Center(
+                                    child: Icon(Icons.broken_image, size: 48),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                            )
-                          : const Icon(Icons.upload_file),
-                      label: Text(_isUploading ? 'Upload...' : 'Choisir'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryRed,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 20,
+                              child: IconButton(
+                                icon: const Icon(Icons.close, color: Colors.white, size: 20),
+                                onPressed: () {
+                                  setState(() {
+                                    _imageUrlController.text = '';
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Container(
+                        height: 150,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.image, size: 48, color: Colors.grey[400]),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Aucune image sélectionnée',
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    
+                    const SizedBox(height: 12),
+                    
+                    // Upload button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _isUploading ? null : _pickAndUploadImage,
+                        icon: _isUploading
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  value: _uploadProgress,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.upload_file),
+                        label: Text(
+                          _isUploading 
+                              ? 'Upload en cours... ${(_uploadProgress * 100).toInt()}%' 
+                              : _imageUrlController.text.isEmpty
+                                  ? 'Choisir une image'
+                                  : 'Changer l\'image',
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryRed,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                       ),
                     ),
