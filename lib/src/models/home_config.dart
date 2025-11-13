@@ -123,12 +123,14 @@ class HeroConfig {
 class PromoBannerConfig {
   final bool isActive;
   final String text;
+  final String? backgroundColor;
   final DateTime? startDate;
   final DateTime? endDate;
 
   PromoBannerConfig({
     required this.isActive,
     required this.text,
+    this.backgroundColor,
     this.startDate,
     this.endDate,
   });
@@ -137,6 +139,7 @@ class PromoBannerConfig {
     return {
       'isActive': isActive,
       'text': text,
+      'backgroundColor': backgroundColor,
       'startDate': startDate?.toIso8601String(),
       'endDate': endDate?.toIso8601String(),
     };
@@ -146,6 +149,7 @@ class PromoBannerConfig {
     return PromoBannerConfig(
       isActive: json['isActive'] as bool? ?? false,
       text: json['text'] as String? ?? '',
+      backgroundColor: json['backgroundColor'] as String?,
       startDate: json['startDate'] != null
           ? DateTime.parse(json['startDate'] as String)
           : null,
@@ -158,12 +162,14 @@ class PromoBannerConfig {
   PromoBannerConfig copyWith({
     bool? isActive,
     String? text,
+    String? backgroundColor,
     DateTime? startDate,
     DateTime? endDate,
   }) {
     return PromoBannerConfig(
       isActive: isActive ?? this.isActive,
       text: text ?? this.text,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
     );
@@ -183,6 +189,7 @@ class ContentBlock {
   final String id;
   final String type; // 'specialiteChef', 'produitsPhares', 'menus', 'desserts', 'boissons', 'custom'
   final String title;
+  final String content;
   final List<String> productIds;
   final int maxItems;
   final bool isActive;
@@ -192,6 +199,7 @@ class ContentBlock {
     required this.id,
     required this.type,
     required this.title,
+    this.content = '',
     this.productIds = const [],
     this.maxItems = 6,
     this.isActive = true,
@@ -203,6 +211,7 @@ class ContentBlock {
       'id': id,
       'type': type,
       'title': title,
+      'content': content,
       'productIds': productIds,
       'maxItems': maxItems,
       'isActive': isActive,
@@ -215,6 +224,7 @@ class ContentBlock {
       id: json['id'] as String,
       type: json['type'] as String,
       title: json['title'] as String,
+      content: json['content'] as String? ?? '',
       productIds: (json['productIds'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
@@ -229,6 +239,7 @@ class ContentBlock {
     String? id,
     String? type,
     String? title,
+    String? content,
     List<String>? productIds,
     int? maxItems,
     bool? isActive,
@@ -238,6 +249,7 @@ class ContentBlock {
       id: id ?? this.id,
       type: type ?? this.type,
       title: title ?? this.title,
+      content: content ?? this.content,
       productIds: productIds ?? this.productIds,
       maxItems: maxItems ?? this.maxItems,
       isActive: isActive ?? this.isActive,

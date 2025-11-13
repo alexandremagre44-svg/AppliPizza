@@ -9,11 +9,13 @@ import '../../theme/app_theme.dart';
 class InfoBanner extends StatelessWidget {
   final String text;
   final IconData? icon;
+  final Color? backgroundColor;
 
   const InfoBanner({
     super.key,
     required this.text,
     this.icon,
+    this.backgroundColor,
   });
 
   @override
@@ -22,7 +24,7 @@ class InfoBanner extends StatelessWidget {
       margin: AppSpacing.paddingHorizontalLG,
       padding: AppSpacing.paddingLG,
       decoration: BoxDecoration(
-        color: AppColors.backgroundLight,
+        color: backgroundColor ?? AppColors.backgroundLight,
         borderRadius: AppRadius.radiusMD,
         border: Border.all(
           color: AppColors.textLight.withOpacity(0.2),
