@@ -269,40 +269,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             },
                             child: const Text('Pas de compte ? Créer un compte'),
                           ),
-                          const SizedBox(height: 8),
-
-                          // Info Firebase
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppColors.backgroundLight,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.textLight.withOpacity(0.3)),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(Icons.info_outline, size: 20, color: AppColors.primaryRed),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Première utilisation ?',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.textDark,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Créez un compte administrateur pour commencer. Les comptes doivent être créés dans Firebase.',
-                                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                                ),
-                              ],
-                            ),
-                          ),
                         ],
                       ),
                     ),
