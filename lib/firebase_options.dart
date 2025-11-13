@@ -19,12 +19,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'your-web-api-key',
-    appId: 'your-web-app-id',
-    messagingSenderId: '123456789',
+    apiKey: 'AIzaSyAlpwxkjsw2CqZUavn2RliatAKzJciQzo0',
+    appId: '1:739748566859:web:7e7644cfeacc93ddb37ace',
+    messagingSenderId: '739748566859',
     projectId: 'pizza-delizza-prod',
     authDomain: 'pizza-delizza-prod.firebaseapp.com',
-    storageBucket: 'pizza-delizza-prod.appspot.com',
+    storageBucket: 'pizza-delizza-prod.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
