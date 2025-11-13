@@ -3,7 +3,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/order.dart';
+import '../models/order.dart' as models;
 import '../providers/cart_provider.dart';
 
 class FirebaseOrderService {
@@ -40,7 +40,7 @@ class FirebaseOrderService {
       'customerEmail': customerEmail ?? user.email,
       'customerName': customerName,
       'customerPhone': customerPhone,
-      'status': OrderStatus.pending,
+      'status': models.OrderStatus.pending,
       'items': items.map((item) => {
         'id': item.id,
         'productId': item.productId,
@@ -65,7 +65,7 @@ class FirebaseOrderService {
       'isViewed': false,
       'statusHistory': [
         {
-          'status': OrderStatus.pending,
+          'status': models.OrderStatus.pending,
           'timestamp': now.toIso8601String(),
           'note': 'Commande créée',
         }
@@ -77,7 +77,7 @@ class FirebaseOrderService {
   }
 
   /// Stream de toutes les commandes (pour admin/kitchen)
-  Stream<List<Order>> watchAllOrders() {
+  Stream<List<models.Order>> watchAllOrders() {
     return _ordersCollection
         .orderBy('createdAt', descending: true)
         .snapshots()
@@ -88,7 +88,7 @@ class FirebaseOrderService {
   }
 
   /// Stream des commandes d'un utilisateur spécifique
-  Stream<List<Order>> watchUserOrders(String uid) {
+  Stream<List<models.Order>> watchUserOrders(String uid) {
     return _ordersCollection
         .where('uid', isEqualTo: uid)
         .orderBy('createdAt', descending: true)
@@ -100,7 +100,7 @@ class FirebaseOrderService {
   }
 
   /// Récupérer une commande par ID
-  Future<Order?> getOrderById(String orderId) async {
+  Future<models.Order?> getOrderById(String orderId) async {
     try {
       final doc = await _ordersCollection.doc(orderId).get();
       if (!doc.exists) return null;
@@ -156,7 +156,7 @@ class FirebaseOrderService {
   }
 
   /// Obtenir les commandes par statut
-  Stream<List<Order>> watchOrdersByStatus(String status) {
+  Stream<List<models.Order>> watchOrdersByStatus(String status) {
     return _ordersCollection
         .where('status', isEqualTo: status)
         .orderBy('createdAt', descending: true)
@@ -168,7 +168,7 @@ class FirebaseOrderService {
   }
 
   /// Obtenir les commandes non vues
-  Stream<List<Order>> watchUnviewedOrders() {
+  Stream<List<models.Order>> watchUnviewedOrders() {
     return _ordersCollection
         .where('isViewed', isEqualTo: false)
         .orderBy('createdAt', descending: true)
@@ -185,7 +185,7 @@ class FirebaseOrderService {
   }
 
   /// Convertir un document Firestore en Order
-  Order _orderFromFirestore(String id, Map<String, dynamic> data) {
+  models.Order _orderFromFirestore(String id, Map<String, dynamic> data) {
     // Gérer les timestamps Firestore
     DateTime createdAt = DateTime.now();
     if (data['createdAt'] != null) {
@@ -228,7 +228,7 @@ class FirebaseOrderService {
         timestamp = DateTime.parse(h['timestamp']);
       }
 
-      return OrderStatusHistory(
+      return models.OrderStatusHistory(
         status: h['status'] as String,
         timestamp: timestamp,
         note: h['note'] as String?,
@@ -243,12 +243,12 @@ class FirebaseOrderService {
       total = (data['total'] as num).toDouble();
     }
 
-    return Order(
+    return models.Order(
       id: id,
       total: total,
       date: createdAt,
       items: items,
-      status: data['status'] as String? ?? OrderStatus.pending,
+      status: data['status'] as String? ?? models.OrderStatus.pending,
       customerName: data['customerName'] as String?,
       customerPhone: data['customerPhone'] as String?,
       customerEmail: data['customerEmail'] as String?,
