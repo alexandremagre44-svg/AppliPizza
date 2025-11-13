@@ -28,6 +28,8 @@ class UserProfileService {
         'imageUrl': profile.imageUrl,
         'address': profile.address,
         'favoriteProducts': profile.favoriteProducts,
+        'loyaltyPoints': profile.loyaltyPoints,
+        'loyaltyLevel': profile.loyaltyLevel,
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
@@ -64,10 +66,43 @@ class UserProfileService {
                 .toList() ??
             [],
         orderHistory: [], // Les commandes sont chargées séparément
+        loyaltyPoints: data['loyaltyPoints'] as int? ?? 0,
+        loyaltyLevel: data['loyaltyLevel'] as String? ?? 'Bronze',
       );
     } catch (e) {
       developer.log('❌ Erreur lors de la récupération du profil utilisateur: $e');
       return null;
+    }
+  }
+
+  /// Récupérer tous les profils utilisateurs
+  Future<List<UserProfile>> getAllUserProfiles() async {
+    try {
+      final querySnapshot = await _profilesCollection.get();
+      
+      final profiles = querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return UserProfile(
+          id: data['id'] as String? ?? doc.id,
+          name: data['name'] as String? ?? 'Utilisateur',
+          email: data['email'] as String? ?? '',
+          imageUrl: data['imageUrl'] as String? ?? 'https://picsum.photos/200/200?user',
+          address: data['address'] as String? ?? '',
+          favoriteProducts: (data['favoriteProducts'] as List<dynamic>?)
+                  ?.map((e) => e as String)
+                  .toList() ??
+              [],
+          orderHistory: [], // Les commandes sont chargées séparément
+          loyaltyPoints: data['loyaltyPoints'] as int? ?? 0,
+          loyaltyLevel: data['loyaltyLevel'] as String? ?? 'Bronze',
+        );
+      }).toList();
+      
+      developer.log('✅ ${profiles.length} profils utilisateurs récupérés');
+      return profiles;
+    } catch (e) {
+      developer.log('❌ Erreur lors de la récupération des profils utilisateurs: $e');
+      return [];
     }
   }
 
@@ -92,6 +127,8 @@ class UserProfileService {
                 .toList() ??
             [],
         orderHistory: [],
+        loyaltyPoints: data['loyaltyPoints'] as int? ?? 0,
+        loyaltyLevel: data['loyaltyLevel'] as String? ?? 'Bronze',
       );
     }).handleError((error) {
       developer.log('❌ Erreur stream profil utilisateur: $error');
@@ -179,6 +216,8 @@ class UserProfileService {
         address: '',
         favoriteProducts: [],
         orderHistory: [],
+        loyaltyPoints: 0,
+        loyaltyLevel: 'Bronze',
       );
 
       return await saveUserProfile(profile);

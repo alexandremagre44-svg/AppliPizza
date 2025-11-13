@@ -8,6 +8,8 @@ class UserProfile {
   final String address;
   final List<String> favoriteProducts;
   final List<Order> orderHistory; // CORRIGÉ: Utilise la classe Order
+  final int loyaltyPoints;
+  final String loyaltyLevel;
 
   UserProfile({
     required this.id,
@@ -17,6 +19,8 @@ class UserProfile {
     required this.address,
     required this.favoriteProducts,
     required this.orderHistory,
+    this.loyaltyPoints = 0,
+    this.loyaltyLevel = 'Bronze',
   });
 
   UserProfile copyWith({
@@ -27,6 +31,8 @@ class UserProfile {
     String? address,
     List<String>? favoriteProducts,
     List<Order>? orderHistory,
+    int? loyaltyPoints,
+    String? loyaltyLevel,
   }) {
     return UserProfile(
       id: id ?? this.id,
@@ -36,6 +42,8 @@ class UserProfile {
       address: address ?? this.address,
       favoriteProducts: favoriteProducts ?? this.favoriteProducts,
       orderHistory: orderHistory ?? this.orderHistory,
+      loyaltyPoints: loyaltyPoints ?? this.loyaltyPoints,
+      loyaltyLevel: loyaltyLevel ?? this.loyaltyLevel,
     );
   }
 
@@ -48,6 +56,8 @@ class UserProfile {
       'imageUrl': imageUrl,
       'address': address,
       'favoriteProducts': favoriteProducts,
+      'loyaltyPoints': loyaltyPoints,
+      'loyaltyLevel': loyaltyLevel,
       // Note: orderHistory n'est pas stocké dans le profil, il est dans une collection séparée
     };
   }
@@ -65,6 +75,8 @@ class UserProfile {
               .toList() ??
           [],
       orderHistory: [], // Les commandes sont chargées séparément
+      loyaltyPoints: json['loyaltyPoints'] as int? ?? 0,
+      loyaltyLevel: json['loyaltyLevel'] as String? ?? 'Bronze',
     );
   }
 
@@ -78,6 +90,8 @@ class UserProfile {
       address: '12 Rue de la Faim, 75000 Paris',
       favoriteProducts: [],
       orderHistory: [],
+      loyaltyPoints: 0,
+      loyaltyLevel: 'Bronze',
     );
   }
 }
