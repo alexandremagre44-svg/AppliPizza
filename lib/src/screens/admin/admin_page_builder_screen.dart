@@ -200,7 +200,7 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      _buildProductList(_pizzas, 'Pizza', AppColors.primaryRedSwatch),
+                      _buildProductList(_pizzas, 'Pizza', AppColors.primarySwatch),
                       _buildProductList(_menus, 'Menus', Colors.blue),
                       _buildProductList(_drinks, 'Boissons', Colors.cyan),
                       _buildProductList(_desserts, 'Desserts', Colors.pink),

@@ -20,7 +20,7 @@ export 'cards.dart';
 export 'badges.dart';
 export 'tables.dart';
 export 'dialogs.dart';
-export 'sections.dart';
+// Note: sections.dart is not exported to avoid conflicts with widgets/home/section_header.dart
 
 /// Configuration du thème de l'application Pizza Deli'Zza
 /// 
@@ -294,7 +294,7 @@ class AppTheme {
       ),
       
       // === Dialog Theme ===
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.white,
         elevation: 8,
         shape: RoundedRectangleBorder(
@@ -393,7 +393,7 @@ class AppTheme {
       ),
       
       // === Tab Bar Theme ===
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: AppColors.primary,
         unselectedLabelColor: AppColors.textSecondary,
         labelStyle: AppTextStyles.labelLarge,
