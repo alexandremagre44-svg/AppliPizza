@@ -283,12 +283,6 @@ class AppSpacing {
   // RÉTROCOMPATIBILITÉ - Aliases anciens noms
   // ═══════════════════════════════════════════════════════════════
   
-  @Deprecated('Use AppSpacing.md instead')
-  static const double lg = md;
-  
-  @Deprecated('Use AppSpacing.lg instead')
-  static const double xl = lg;
-  
-  @Deprecated('Use AppSpacing.lg instead')
-  static const double xxl = lg;
+  // Note: Les anciennes valeurs lg, xl, xxl existent déjà dans la section ESPACEMENT DE BASE
+  // Pas d'aliases nécessaires car les noms sont identiques
 }

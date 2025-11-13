@@ -240,7 +240,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                         child: Row(
                                           children: [
                                             IconButton(
-                                              icon: Icon(Icons.remove, color: AppColors.primaryRedSwatch.shade700),
+                                              icon: Icon(Icons.remove, color: AppColors.primarySwatch.shade700),
                                               onPressed: pizzaCount > 0
                                                   ? () => setState(() => pizzaCount--)
                                                   : null,
@@ -261,7 +261,7 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                                               ),
                                             ),
                                             IconButton(
-                                              icon: Icon(Icons.add, color: AppColors.primaryRedSwatch.shade700),
+                                              icon: Icon(Icons.add, color: AppColors.primarySwatch.shade700),
                                               onPressed: pizzaCount < 5
                                                   ? () => setState(() => pizzaCount++)
                                                   : null,
@@ -1135,19 +1135,19 @@ class _AdminMenuScreenState extends State<AdminMenuScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AppColors.primaryRedSwatch.shade50,
+                              color: AppColors.primarySwatch.shade50,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.local_pizza, size: 14, color: AppColors.primaryRedSwatch.shade700),
+                                Icon(Icons.local_pizza, size: 14, color: AppColors.primarySwatch.shade700),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${menu.pizzaCount}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.primaryRedSwatch.shade700,
+                                    color: AppColors.primarySwatch.shade700,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
