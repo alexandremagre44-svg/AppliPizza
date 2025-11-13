@@ -212,30 +212,79 @@ class _StudioTextsScreenState extends State<StudioTextsScreen> {
     Future<void> Function(String) onSaved,
   ) {
     final controller = TextEditingController(text: value);
+    bool hasChanges = false;
     
-    return Padding(
-      padding: EdgeInsets.only(bottom: AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: AppTextStyles.labelLarge),
-          SizedBox(height: AppSpacing.xs),
-          TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(borderRadius: AppRadius.input),
-              contentPadding: AppSpacing.paddingMD,
-            ),
-            onSubmitted: onSaved,
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: AppTextStyles.labelLarge),
+              SizedBox(height: AppSpacing.xs),
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(borderRadius: AppRadius.input),
+                  contentPadding: AppSpacing.paddingMD,
+                  suffixIcon: hasChanges
+                      ? IconButton(
+                          icon: Icon(Icons.check_circle, color: AppColors.successGreen),
+                          onPressed: () async {
+                            if (controller.text.trim().isEmpty) {
+                              _showSnackBar('Le texte ne peut pas être vide', isError: true);
+                              return;
+                            }
+                            await onSaved(controller.text);
+                            setState(() => hasChanges = false);
+                            _showSnackBar('Enregistré');
+                          },
+                        )
+                      : null,
+                ),
+                onChanged: (newValue) {
+                  if (newValue != value) {
+                    setState(() => hasChanges = true);
+                  } else {
+                    setState(() => hasChanges = false);
+                  }
+                },
+                onSubmitted: (newValue) async {
+                  if (newValue.trim().isEmpty) {
+                    _showSnackBar('Le texte ne peut pas être vide', isError: true);
+                    return;
+                  }
+                  await onSaved(newValue);
+                  setState(() => hasChanges = false);
+                  _showSnackBar('Enregistré');
+                },
+              ),
+              SizedBox(height: AppSpacing.xs),
+              Text(
+                hasChanges
+                    ? 'Cliquez sur ✓ ou appuyez sur Entrée pour sauvegarder'
+                    : 'Appuyez sur Entrée pour sauvegarder',
+                style: AppTextStyles.bodySmall.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: hasChanges ? AppColors.primaryRed : AppColors.textMedium,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: AppSpacing.xs),
-          Text(
-            'Appuyez sur Entrée pour sauvegarder',
-            style: AppTextStyles.bodySmall.copyWith(
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
+        );
+      },
+    );
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? AppColors.errorRed : AppColors.primaryRed,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+        duration: Duration(seconds: 2),
       ),
     );
   }

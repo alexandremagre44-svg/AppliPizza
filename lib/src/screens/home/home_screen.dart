@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
+import '../../providers/home_config_provider.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/home/hero_banner.dart';
 import '../../widgets/home/section_header.dart';
@@ -27,11 +28,20 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(productListProvider);
+    final homeConfigAsync = ref.watch(homeConfigProvider);
 
     return Scaffold(
       appBar: _buildAppBar(context),
       body: productsAsync.when(
-        data: (products) => _buildContent(context, ref, products),
+        data: (products) => homeConfigAsync.when(
+          data: (homeConfig) => _buildContent(context, ref, products, homeConfig),
+          loading: () => const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primaryRed,
+            ),
+          ),
+          error: (error, stack) => _buildContent(context, ref, products, null),
+        ),
         loading: () => const Center(
           child: CircularProgressIndicator(
             color: AppColors.primaryRed,
@@ -83,7 +93,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, List<Product> allProducts) {
+  Widget _buildContent(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig) {
     // Filter active products
     final activeProducts = allProducts.where((p) => p.isActive).toList();
     
@@ -111,13 +121,36 @@ class HomeScreen extends ConsumerWidget {
           children: [
             SizedBox(height: AppSpacing.lg),
             
-            // 1. Hero Banner
-            HeroBanner(
-              title: 'Bienvenue chez\nPizza Deli\'Zza',
-              subtitle: 'Découvrez nos pizzas artisanales et nos menus gourmands',
-              buttonText: 'Voir le menu',
-              onPressed: () => context.push(AppRoutes.menu),
-            ),
+            // 1. Hero Banner (from home config or default)
+            if (homeConfig?.hero?.isActive ?? true)
+              HeroBanner(
+                title: homeConfig?.hero?.title ?? 'Bienvenue chez\nPizza Deli\'Zza',
+                subtitle: homeConfig?.hero?.subtitle ?? 'Découvrez nos pizzas artisanales et nos menus gourmands',
+                buttonText: homeConfig?.hero?.ctaText ?? 'Voir le menu',
+                imageUrl: homeConfig?.hero?.imageUrl,
+                onPressed: () {
+                  final action = homeConfig?.hero?.ctaAction ?? AppRoutes.menu;
+                  if (action.startsWith('/')) {
+                    context.push(action);
+                  } else {
+                    context.push(AppRoutes.menu);
+                  }
+                },
+              ),
+            
+            // Promo banner (if active)
+            if (homeConfig?.promoBanner?.isActive ?? false)
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
+                ),
+                child: InfoBanner(
+                  text: homeConfig!.promoBanner.text,
+                  icon: Icons.local_offer,
+                  backgroundColor: AppColors.primaryRed,
+                ),
+              ),
             
             SizedBox(height: AppSpacing.xxxl),
             
