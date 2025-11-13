@@ -4,6 +4,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../core/constants.dart';
+import 'loyalty_service.dart';
 
 class FirebaseAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -48,6 +49,9 @@ class FirebaseAuthService {
         // Créer le profil utilisateur s'il n'existe pas
         await _createUserProfile(credential.user!, UserRole.client);
       }
+
+      // Initialiser le système de fidélité
+      await LoyaltyService().initializeLoyalty(credential.user!.uid);
 
       return {
         'success': true,
@@ -116,6 +120,9 @@ class FirebaseAuthService {
 
       // Créer le profil utilisateur dans Firestore
       await _createUserProfile(credential.user!, role, displayName: displayName);
+
+      // Initialiser le système de fidélité
+      await LoyaltyService().initializeLoyalty(credential.user!.uid);
 
       return {
         'success': true,
