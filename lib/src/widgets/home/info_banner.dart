@@ -10,12 +10,16 @@ class InfoBanner extends StatelessWidget {
   final String text;
   final IconData? icon;
   final Color? backgroundColor;
+  final Color? textColor;
+  final Color? iconColor;
 
   const InfoBanner({
     super.key,
     required this.text,
     this.icon,
     this.backgroundColor,
+    this.textColor,
+    this.iconColor,
   });
 
   @override
@@ -37,7 +41,7 @@ class InfoBanner extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: AppColors.textMedium,
+              color: iconColor ?? textColor ?? AppColors.textMedium,
             ),
             SizedBox(width: AppSpacing.md),
           ],
@@ -45,7 +49,8 @@ class InfoBanner extends StatelessWidget {
             child: Text(
               text,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textDark,
+                color: textColor ?? AppColors.textDark,
+                fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
             ),

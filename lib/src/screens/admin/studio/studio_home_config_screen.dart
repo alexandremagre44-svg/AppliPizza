@@ -4,8 +4,12 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/home_config.dart';
+import '../../../models/dynamic_block_model.dart';
 import '../../../services/home_config_service.dart';
 import '../../../theme/app_theme.dart';
+import 'dialogs/edit_hero_dialog.dart';
+import 'dialogs/edit_promo_banner_dialog.dart';
+import 'dialogs/edit_block_dialog.dart';
 
 class StudioHomeConfigScreen extends StatefulWidget {
   const StudioHomeConfigScreen({super.key});
@@ -128,13 +132,13 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
 
   Widget _buildHeroTab() {
     if (_config == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     
     final hero = _config!.hero;
     
     if (hero == null) {
-      return Center(child: Text('Configuration Hero non disponible'));
+      return const Center(child: Text('Configuration Hero non disponible'));
     }
     
     return ListView(
@@ -152,13 +156,24 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
                   children: [
                     Icon(Icons.image, color: AppColors.primaryRed),
                     SizedBox(width: AppSpacing.sm),
-                    Text('Bannière Hero', style: AppTextStyles.titleLarge),
+                    Expanded(
+                      child: Text('Bannière Hero', style: AppTextStyles.titleLarge),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _showEditHeroDialog(hero),
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text('Modifier'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryRed,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
                 SizedBox(height: AppSpacing.lg),
                 
                 SwitchListTile(
-                  title: Text('Activer le Hero'),
+                  title: const Text('Activer le Hero'),
                   value: hero.isActive,
                   activeColor: AppColors.primaryRed,
                   onChanged: (value) async {
@@ -171,31 +186,32 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
                 
                 Divider(height: AppSpacing.xxl),
                 
-                _buildTextField('Titre', hero.title, (value) async {
-                  final updated = hero.copyWith(title: value);
-                  await _service.updateHeroConfig(updated);
-                  _loadConfig();
-                }),
-                _buildTextField('Sous-titre', hero.subtitle, (value) async {
-                  final updated = hero.copyWith(subtitle: value);
-                  await _service.updateHeroConfig(updated);
-                  _loadConfig();
-                }),
-                _buildTextField('URL de l\'image', hero.imageUrl, (value) async {
-                  final updated = hero.copyWith(imageUrl: value);
-                  await _service.updateHeroConfig(updated);
-                  _loadConfig();
-                }),
-                _buildTextField('Texte du bouton', hero.ctaText, (value) async {
-                  final updated = hero.copyWith(ctaText: value);
-                  await _service.updateHeroConfig(updated);
-                  _loadConfig();
-                }),
-                _buildTextField('Action du bouton', hero.ctaAction, (value) async {
-                  final updated = hero.copyWith(ctaAction: value);
-                  await _service.updateHeroConfig(updated);
-                  _loadConfig();
-                }),
+                // Preview
+                _buildInfoRow('Titre', hero.title),
+                _buildInfoRow('Sous-titre', hero.subtitle),
+                _buildInfoRow('Texte du bouton', hero.ctaText),
+                _buildInfoRow('Action', hero.ctaAction),
+                if (hero.imageUrl.isNotEmpty) ...[
+                  SizedBox(height: AppSpacing.md),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      hero.imageUrl,
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 150,
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: Icon(Icons.broken_image, size: 48),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -206,13 +222,13 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
 
   Widget _buildPromoBannerTab() {
     if (_config == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     
     final banner = _config!.promoBanner;
     
     if (banner == null) {
-      return Center(child: Text('Configuration Bandeau Promo non disponible'));
+      return const Center(child: Text('Configuration Bandeau Promo non disponible'));
     }
     
     return ListView(
@@ -230,13 +246,24 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
                   children: [
                     Icon(Icons.notifications, color: AppColors.primaryRed),
                     SizedBox(width: AppSpacing.sm),
-                    Text('Bandeau Promo', style: AppTextStyles.titleLarge),
+                    Expanded(
+                      child: Text('Bandeau Promo', style: AppTextStyles.titleLarge),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _showEditPromoBannerDialog(banner),
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text('Modifier'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryRed,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
                 SizedBox(height: AppSpacing.lg),
                 
                 SwitchListTile(
-                  title: Text('Activer le bandeau'),
+                  title: const Text('Activer le bandeau'),
                   value: banner.isActive,
                   activeColor: AppColors.primaryRed,
                   onChanged: (value) async {
@@ -249,16 +276,38 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
                 
                 Divider(height: AppSpacing.xxl),
                 
-                _buildTextField('Texte du bandeau', banner.text, (value) async {
-                  final updated = banner.copyWith(text: value);
-                  await _service.updatePromoBanner(updated);
-                  _loadConfig();
-                }),
-                _buildTextField('Couleur (hex)', banner.backgroundColor ?? '#D32F2F', (value) async {
-                  final updated = banner.copyWith(backgroundColor: value);
-                  await _service.updatePromoBanner(updated);
-                  _loadConfig();
-                }),
+                // Preview
+                _buildInfoRow('Texte', banner.text),
+                _buildInfoRow('Couleur de fond', banner.backgroundColor ?? '#D32F2F'),
+                _buildInfoRow('Couleur du texte', banner.textColor ?? '#FFFFFF'),
+                SizedBox(height: AppSpacing.md),
+                
+                // Preview banner
+                if (banner.text.isNotEmpty) Container(
+                  padding: EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Color(ColorConverter.hexToColor(banner.backgroundColor) ?? 0xFFD32F2F),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.local_offer,
+                        color: Color(ColorConverter.hexToColor(banner.textColor) ?? 0xFFFFFFFF),
+                      ),
+                      SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Text(
+                          banner.text,
+                          style: TextStyle(
+                            color: Color(ColorConverter.hexToColor(banner.textColor) ?? 0xFFFFFFFF),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -413,139 +462,66 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
   }
 
   void _showAddBlockDialog() {
-    _showBlockDialog();
+    // Convert ContentBlock to DynamicBlock for the dialog
+    showDialog(
+      context: context,
+      builder: (context) => EditBlockDialog(
+        onSave: (dynamicBlock) async {
+          // Convert DynamicBlock to ContentBlock for saving
+          final contentBlock = ContentBlock(
+            id: dynamicBlock.id,
+            type: dynamicBlock.type,
+            title: dynamicBlock.title,
+            maxItems: dynamicBlock.maxItems,
+            order: dynamicBlock.order,
+            isActive: dynamicBlock.isVisible,
+          );
+          
+          final success = await _service.addContentBlock(contentBlock);
+          if (success) {
+            _loadConfig();
+            _showSnackBar('Bloc ajouté');
+          } else {
+            _showSnackBar('Erreur lors de l\'ajout', isError: true);
+          }
+        },
+      ),
+    );
   }
 
   void _showEditBlockDialog(ContentBlock block) {
-    _showBlockDialog(existingBlock: block);
-  }
-
-  void _showBlockDialog({ContentBlock? existingBlock}) {
-    final isEditing = existingBlock != null;
-    final titleController = TextEditingController(text: existingBlock?.title);
-    final contentController = TextEditingController(text: existingBlock?.content);
-    String selectedType = existingBlock?.type ?? 'featured_products';
-    bool isActive = existingBlock?.isActive ?? true;
-    int order = existingBlock?.order ?? 0;
+    // Convert ContentBlock to DynamicBlock for the dialog
+    final dynamicBlock = DynamicBlock(
+      id: block.id,
+      type: block.type,
+      title: block.title,
+      maxItems: block.maxItems,
+      order: block.order,
+      isVisible: block.isActive,
+    );
     
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(isEditing ? 'Modifier le bloc' : 'Nouveau bloc'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    labelText: 'Titre*',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                SizedBox(height: AppSpacing.md),
-                DropdownButtonFormField<String>(
-                  value: selectedType,
-                  decoration: InputDecoration(
-                    labelText: 'Type de bloc',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: [
-                    DropdownMenuItem(value: 'featured_products', child: Text('Produits en vedette')),
-                    DropdownMenuItem(value: 'promotions', child: Text('Promotions')),
-                    DropdownMenuItem(value: 'categories', child: Text('Catégories')),
-                    DropdownMenuItem(value: 'text', child: Text('Texte libre')),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => selectedType = value);
-                    }
-                  },
-                ),
-                SizedBox(height: AppSpacing.md),
-                TextField(
-                  controller: contentController,
-                  decoration: InputDecoration(
-                    labelText: 'Contenu',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-                SizedBox(height: AppSpacing.md),
-                TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Position (ordre)',
-                    border: OutlineInputBorder(),
-                  ),
-                  controller: TextEditingController(text: order.toString()),
-                  onChanged: (value) {
-                    order = int.tryParse(value) ?? 0;
-                  },
-                ),
-                SizedBox(height: AppSpacing.md),
-                SwitchListTile(
-                  title: Text('Bloc actif'),
-                  value: isActive,
-                  activeColor: AppColors.primaryRed,
-                  onChanged: (value) {
-                    setState(() => isActive = value);
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Annuler'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (titleController.text.trim().isEmpty) {
-                  _showSnackBar('Le titre est requis', isError: true);
-                  return;
-                }
-                
-                final block = isEditing
-                    ? existingBlock.copyWith(
-                        title: titleController.text.trim(),
-                        type: selectedType,
-                        content: contentController.text.trim(),
-                        order: order,
-                        isActive: isActive,
-                      )
-                    : ContentBlock(
-                        id: const Uuid().v4(),
-                        title: titleController.text.trim(),
-                        type: selectedType,
-                        content: contentController.text.trim(),
-                        order: order,
-                        isActive: isActive,
-                      );
-                
-                final success = isEditing
-                    ? await _service.updateContentBlock(block)
-                    : await _service.addContentBlock(block);
-                
-                if (success) {
-                  _loadConfig();
-                  Navigator.pop(context);
-                  _showSnackBar(isEditing ? 'Bloc modifié' : 'Bloc ajouté');
-                } else {
-                  _showSnackBar('Erreur lors de l\'enregistrement', isError: true);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryRed,
-                foregroundColor: Colors.white,
-              ),
-              child: Text(isEditing ? 'Modifier' : 'Ajouter'),
-            ),
-          ],
-        ),
+      builder: (context) => EditBlockDialog(
+        block: dynamicBlock,
+        onSave: (updatedDynamicBlock) async {
+          // Convert back to ContentBlock for saving
+          final updatedBlock = block.copyWith(
+            type: updatedDynamicBlock.type,
+            title: updatedDynamicBlock.title,
+            maxItems: updatedDynamicBlock.maxItems,
+            order: updatedDynamicBlock.order,
+            isActive: updatedDynamicBlock.isVisible,
+          );
+          
+          final success = await _service.updateContentBlock(updatedBlock);
+          if (success) {
+            _loadConfig();
+            _showSnackBar('Bloc modifié');
+          } else {
+            _showSnackBar('Erreur lors de la modification', isError: true);
+          }
+        },
       ),
     );
   }
@@ -584,43 +560,6 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
     }
   }
 
-  Widget _buildTextField(
-    String label,
-    String value,
-    Future<void> Function(String) onSaved,
-  ) {
-    final controller = TextEditingController(text: value);
-    
-    return Padding(
-      padding: EdgeInsets.only(bottom: AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: AppTextStyles.labelLarge),
-          SizedBox(height: AppSpacing.xs),
-          TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(borderRadius: AppRadius.input),
-              contentPadding: AppSpacing.paddingMD,
-            ),
-            onSubmitted: (newValue) async {
-              await onSaved(newValue);
-              _showSnackBar('Enregistré');
-            },
-          ),
-          SizedBox(height: AppSpacing.xs),
-          Text(
-            'Appuyez sur Entrée pour sauvegarder',
-            style: AppTextStyles.bodySmall.copyWith(
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showSnackBar(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -628,6 +567,64 @@ class _StudioHomeConfigScreenState extends State<StudioHomeConfigScreen>
         backgroundColor: isError ? AppColors.errorRed : AppColors.primaryRed,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+      ),
+    );
+  }
+
+  // Show edit hero dialog
+  void _showEditHeroDialog(HeroConfig hero) {
+    showDialog(
+      context: context,
+      builder: (context) => EditHeroDialog(
+        hero: hero,
+        onSave: (updatedHero) async {
+          await _service.updateHeroConfig(updatedHero);
+          _loadConfig();
+          _showSnackBar('Hero mis à jour');
+        },
+      ),
+    );
+  }
+
+  // Show edit promo banner dialog
+  void _showEditPromoBannerDialog(PromoBannerConfig banner) {
+    showDialog(
+      context: context,
+      builder: (context) => EditPromoBannerDialog(
+        banner: banner,
+        onSave: (updatedBanner) async {
+          await _service.updatePromoBanner(updatedBanner);
+          _loadConfig();
+          _showSnackBar('Bandeau mis à jour');
+        },
+      ),
+    );
+  }
+
+  // Helper method to build info rows
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textMedium,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value.isEmpty ? '(vide)' : value,
+              style: AppTextStyles.bodyMedium,
+            ),
+          ),
+        ],
       ),
     );
   }
