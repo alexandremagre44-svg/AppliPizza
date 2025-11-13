@@ -78,8 +78,8 @@ class _CategoryButton extends StatelessWidget {
           child: InkWell(
             onTap: () => context.push(category.route),
             borderRadius: AppRadius.radiusLG,
-            child: Container(
-              padding: AppSpacing.paddingLG,
+            child: Padding(
+              padding: AppSpacing.paddingMD,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -96,15 +96,17 @@ class _CategoryButton extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: AppSpacing.sm),
-                  Text(
-                    category.name,
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.textDark,
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: Text(
+                      category.name,
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: AppColors.textDark,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

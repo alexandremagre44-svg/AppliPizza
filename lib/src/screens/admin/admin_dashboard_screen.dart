@@ -146,7 +146,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: AppSpacing.lg,
                 mainAxisSpacing: AppSpacing.lg,
-                childAspectRatio: 1.1,
+                childAspectRatio: 0.95,
               ),
               delegate: SliverChildListDelegate([
                 _buildAdminCard(
@@ -226,7 +226,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: AppSpacing.lg,
                 mainAxisSpacing: AppSpacing.lg,
-                childAspectRatio: 1.1,
+                childAspectRatio: 0.95,
               ),
               delegate: SliverChildListDelegate([
                 _buildAdminCard(
@@ -285,7 +285,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: AppSpacing.lg,
                 mainAxisSpacing: AppSpacing.lg,
-                childAspectRatio: 1.1,
+                childAspectRatio: 0.95,
               ),
               delegate: SliverChildListDelegate([
                 _buildAdminCard(
@@ -370,6 +370,7 @@ class AdminDashboardScreen extends StatelessWidget {
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
               // Icône avec fond rouge
               Container(
@@ -387,17 +388,25 @@ class AdminDashboardScreen extends StatelessWidget {
               ),
               SizedBox(height: AppSpacing.md),
               // Titre
-              Text(
-                title,
-                style: AppTextStyles.titleLarge,
-                textAlign: TextAlign.center,
+              Flexible(
+                child: Text(
+                  title,
+                  style: AppTextStyles.titleLarge,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               SizedBox(height: AppSpacing.xs),
               // Sous-titre
-              Text(
-                subtitle,
-                style: AppTextStyles.bodySmall,
-                textAlign: TextAlign.center,
+              Flexible(
+                child: Text(
+                  subtitle,
+                  style: AppTextStyles.bodySmall,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),

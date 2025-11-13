@@ -105,6 +105,21 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
             Image.network(
               banner.imageUrl,
               fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  color: AppColors.primaryRedLight,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.surfaceWhite,
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  ),
+                );
+              },
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   color: AppColors.primaryRedLight,
