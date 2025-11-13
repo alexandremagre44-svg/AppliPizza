@@ -39,6 +39,7 @@ class GoRouterRefreshStream extends ChangeNotifier {
 /// État d'authentification
 class AuthState {
   final bool isLoggedIn;
+  final String? userId;
   final String? userEmail;
   final String? userRole;
   final String? displayName;
@@ -48,6 +49,7 @@ class AuthState {
 
   AuthState({
     this.isLoggedIn = false,
+    this.userId,
     this.userEmail,
     this.userRole,
     this.displayName,
@@ -61,6 +63,7 @@ class AuthState {
 
   AuthState copyWith({
     bool? isLoggedIn,
+    String? userId,
     String? userEmail,
     String? userRole,
     String? displayName,
@@ -70,6 +73,7 @@ class AuthState {
   }) {
     return AuthState(
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,
+      userId: userId ?? this.userId,
       userEmail: userEmail ?? this.userEmail,
       userRole: userRole ?? this.userRole,
       displayName: displayName ?? this.displayName,
@@ -102,6 +106,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         
         state = AuthState(
           isLoggedIn: true,
+          userId: user.uid,
           userEmail: user.email,
           userRole: role,
           displayName: displayName,
@@ -154,6 +159,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       
       state = AuthState(
         isLoggedIn: true,
+        userId: user.uid,
         userEmail: user.email,
         userRole: role,
         displayName: displayName,
