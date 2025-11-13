@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/order.dart' as app_models;
 import '../providers/cart_provider.dart';
+import 'loyalty_service.dart';
 
 class FirebaseOrderService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -73,6 +74,10 @@ class FirebaseOrderService {
     };
 
     final docRef = await _ordersCollection.add(orderData);
+    
+    // Ajouter les points de fidélité après la commande
+    await LoyaltyService().addPointsFromOrder(user.uid, total);
+    
     return docRef.id;
   }
 

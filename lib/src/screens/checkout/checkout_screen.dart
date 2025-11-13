@@ -6,6 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/loyalty_provider.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/loyalty_service.dart';
+import '../../models/loyalty_reward.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 
@@ -19,6 +23,11 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   DateTime? _selectedDate;
   String? _selectedTimeSlot;
+  
+  // Récompenses sélectionnées pour utilisation
+  String? _selectedFreePizzaRewardType;
+  String? _selectedFreeDrinkRewardType;
+  String? _selectedFreeDessertRewardType;
   
   // Créneaux horaires disponibles
   final List<String> _timeSlots = [
@@ -61,7 +70,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return now.hour < slotHour || (now.hour == slotHour && now.minute < slotMinute);
   }
 
-  void _confirmOrder() {
+  Future<void> _confirmOrder() async {
     if (_selectedTimeSlot == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -72,67 +81,114 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       return;
     }
 
-    // Créer la commande avec les informations de retrait
-    ref.read(userProvider.notifier).addOrder(
-      pickupDate: '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-      pickupTimeSlot: _selectedTimeSlot,
-      customerName: 'Client', // TODO: Récupérer depuis le profil utilisateur
-    );
-    
-    // Afficher confirmation
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 32),
-            SizedBox(width: 12),
-            Text('Commande confirmée !'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Votre commande a été enregistrée.'),
-            const SizedBox(height: 12),
-            Text(
-              'Retrait prévu:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text(
-              '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-            ),
-            Text(_selectedTimeSlot!),
-            const SizedBox(height: 12),
-            Text(
-              'Statut: En préparation 🍕',
-              style: TextStyle(
-                color: Colors.orange,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.go('/profile'); // Voir historique
-            },
-            child: const Text('Voir mes commandes'),
+    try {
+      // Marquer les récompenses comme utilisées
+      final authState = ref.read(authProvider);
+      final uid = authState.userId;
+      
+      if (uid != null) {
+        if (_selectedFreePizzaRewardType != null) {
+          await LoyaltyService().useReward(uid, RewardType.freePizza);
+        }
+        if (_selectedFreeDrinkRewardType != null) {
+          await LoyaltyService().useReward(uid, RewardType.freeDrink);
+        }
+        if (_selectedFreeDessertRewardType != null) {
+          await LoyaltyService().useReward(uid, RewardType.freeDessert);
+        }
+      }
+
+      // Créer la commande avec les informations de retrait
+      await ref.read(userProvider.notifier).addOrder(
+        pickupDate: '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+        pickupTimeSlot: _selectedTimeSlot,
+        customerName: 'Client', // TODO: Récupérer depuis le profil utilisateur
+      );
+      
+      if (!mounted) return;
+      
+      // Afficher confirmation
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 32),
+              SizedBox(width: 12),
+              Text('Commande confirmée !'),
+            ],
           ),
-        ],
-      ),
-    );
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Votre commande a été enregistrée.'),
+              const SizedBox(height: 12),
+              Text(
+                'Retrait prévu:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+              ),
+              Text(_selectedTimeSlot!),
+              const SizedBox(height: 12),
+              Text(
+                'Statut: En préparation 🍕',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                context.go('/profile'); // Voir historique
+              },
+              child: const Text('Voir mes commandes'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur lors de la commande: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final cartState = ref.watch(cartProvider);
+    final loyaltyInfoAsync = ref.watch(loyaltyInfoProvider);
+    
     const deliveryFee = 5.00;
-    final total = cartState.total + deliveryFee;
+    double subtotal = cartState.total;
+    
+    // Apply VIP discount
+    String? vipTier;
+    double vipDiscount = 0.0;
+    
+    loyaltyInfoAsync.whenData((loyaltyInfo) {
+      if (loyaltyInfo != null) {
+        vipTier = loyaltyInfo['vipTier'] as String?;
+        if (vipTier != null) {
+          final discountRate = VipTier.getDiscount(vipTier!);
+          vipDiscount = subtotal * discountRate;
+          subtotal = subtotal - vipDiscount;
+        }
+      }
+    });
+    
+    final total = subtotal + deliveryFee;
 
     return Scaffold(
       appBar: AppBar(
@@ -156,7 +212,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Récapitulatif commande
-            _buildOrderSummary(cartState, deliveryFee, total),
+            _buildOrderSummary(cartState, deliveryFee, total, vipDiscount, vipTier),
+            
+            const SizedBox(height: 32),
+            
+            // Loyalty rewards section
+            loyaltyInfoAsync.when(
+              data: (loyaltyInfo) {
+                if (loyaltyInfo == null) return const SizedBox.shrink();
+                return _buildRewardsSection(loyaltyInfo);
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
             
             const SizedBox(height: 32),
             
@@ -228,7 +296,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Widget _buildOrderSummary(CartState cartState, double deliveryFee, double total) {
+  Widget _buildOrderSummary(CartState cartState, double deliveryFee, double total, double vipDiscount, String? vipTier) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -268,6 +336,25 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 Text('${cartState.total.toStringAsFixed(2)} €'),
               ],
             ),
+            if (vipDiscount > 0) ...[
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text('Réduction VIP ${vipTier?.toUpperCase()}'),
+                      const SizedBox(width: 4),
+                      Icon(Icons.star, size: 16, color: Colors.amber),
+                    ],
+                  ),
+                  Text(
+                    '-${vipDiscount.toStringAsFixed(2)} €',
+                    style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -298,6 +385,78 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildRewardsSection(Map<String, dynamic> loyaltyInfo) {
+    final rewards = loyaltyInfo['rewards'] as List<LoyaltyReward>;
+    final availableRewards = rewards.where((r) => !r.used).toList();
+    
+    if (availableRewards.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(context, 'Utiliser des récompenses', Icons.card_giftcard),
+        const SizedBox(height: 16),
+        
+        ...availableRewards.map((reward) {
+          String label;
+          IconData icon;
+          Color color;
+          bool isSelected = false;
+
+          switch (reward.type) {
+            case RewardType.freePizza:
+              label = 'Pizza Gratuite';
+              icon = Icons.local_pizza;
+              color = AppColors.primaryRed;
+              isSelected = _selectedFreePizzaRewardType != null;
+              break;
+            case RewardType.freeDrink:
+              label = 'Boisson Gratuite';
+              icon = Icons.local_drink;
+              color = Colors.blue;
+              isSelected = _selectedFreeDrinkRewardType != null;
+              break;
+            case RewardType.freeDessert:
+              label = 'Dessert Gratuit';
+              icon = Icons.cake;
+              color = Colors.pink;
+              isSelected = _selectedFreeDessertRewardType != null;
+              break;
+            default:
+              label = 'Récompense';
+              icon = Icons.card_giftcard;
+              color = Colors.grey;
+          }
+
+          return CheckboxListTile(
+            title: Row(
+              children: [
+                Icon(icon, color: color, size: 20),
+                const SizedBox(width: 8),
+                Text(label),
+              ],
+            ),
+            subtitle: Text('Utilisable sur cette commande'),
+            value: isSelected,
+            onChanged: (value) {
+              setState(() {
+                if (reward.type == RewardType.freePizza) {
+                  _selectedFreePizzaRewardType = value == true ? reward.type : null;
+                } else if (reward.type == RewardType.freeDrink) {
+                  _selectedFreeDrinkRewardType = value == true ? reward.type : null;
+                } else if (reward.type == RewardType.freeDessert) {
+                  _selectedFreeDessertRewardType = value == true ? reward.type : null;
+                }
+              });
+            },
+          );
+        }).toList(),
+      ],
     );
   }
 
