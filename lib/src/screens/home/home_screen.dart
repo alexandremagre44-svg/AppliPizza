@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/product.dart';
+import '../../models/home_config.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/home_config_provider.dart';
@@ -139,16 +140,21 @@ class HomeScreen extends ConsumerWidget {
               ),
             
             // Promo banner (if active)
-            if (homeConfig?.promoBanner?.isActive ?? false)
+            if (homeConfig?.promoBanner?.isCurrentlyActive ?? false)
               Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSpacing.lg,
                   vertical: AppSpacing.md,
                 ),
                 child: InfoBanner(
-                  text: homeConfig!.promoBanner.text,
+                  text: homeConfig!.promoBanner!.text,
                   icon: Icons.local_offer,
-                  backgroundColor: AppColors.primaryRed,
+                  backgroundColor: homeConfig.promoBanner!.backgroundColor != null
+                      ? Color(ColorConverter.hexToColor(homeConfig.promoBanner!.backgroundColor) ?? 0xFFD32F2F)
+                      : AppColors.primaryRed,
+                  textColor: homeConfig.promoBanner!.textColor != null
+                      ? Color(ColorConverter.hexToColor(homeConfig.promoBanner!.textColor) ?? 0xFFFFFFFF)
+                      : Colors.white,
                 ),
               ),
             
