@@ -41,6 +41,10 @@ class HeroBanner extends StatelessWidget {
               Image.network(
                 imageUrl!,
                 fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return _buildGradientBackground();
+                },
                 errorBuilder: (context, error, stackTrace) {
                   return _buildGradientBackground();
                 },
