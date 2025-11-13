@@ -211,6 +211,7 @@ class _NewsletterSubscriptionWidgetState
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Header
             Row(
@@ -231,6 +232,7 @@ class _NewsletterSubscriptionWidgetState
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         'Newsletter',
@@ -388,6 +390,7 @@ class _NewsletterSubscriptionWidgetState
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Success icon
           Container(

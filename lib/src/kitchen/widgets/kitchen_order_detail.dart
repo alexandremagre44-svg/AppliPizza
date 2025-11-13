@@ -60,6 +60,7 @@ class KitchenOrderDetail extends StatelessWidget {
       ),
       body: SafeArea(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Main content (scrollable)
             Expanded(
@@ -67,6 +68,7 @@ class KitchenOrderDetail extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Status badge
                     Center(
@@ -199,6 +201,7 @@ class KitchenOrderDetail extends StatelessWidget {
                 ],
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Status change buttons
                   Row(
@@ -274,6 +277,7 @@ class KitchenOrderDetail extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
@@ -335,6 +339,7 @@ class KitchenOrderDetail extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

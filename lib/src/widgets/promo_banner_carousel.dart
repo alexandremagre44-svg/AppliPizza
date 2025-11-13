@@ -59,6 +59,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
     }
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
           height: 200,
@@ -132,6 +133,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
               bottom: AppSpacing.xl,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     banner.title,

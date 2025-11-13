@@ -210,6 +210,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         padding: const EdgeInsets.all(VisualConstants.paddingMedium),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Récapitulatif commande
             _buildOrderSummary(cartState, deliveryFee, total, vipDiscount, vipTier),
@@ -302,6 +303,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'Récapitulatif',
@@ -398,6 +400,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         _buildSectionHeader(context, 'Utiliser des récompenses', Icons.card_giftcard),
         const SizedBox(height: 16),
@@ -494,6 +497,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 label,

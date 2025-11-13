@@ -219,6 +219,7 @@ class _ElegantPizzaCustomizationModalState
               ],
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Modern handle bar
                 _buildModernHandleBar(),
@@ -254,6 +255,7 @@ class _ElegantPizzaCustomizationModalState
     return Container(
       margin: const EdgeInsets.only(top: 20, bottom: 12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 60,
@@ -375,6 +377,7 @@ class _ElegantPizzaCustomizationModalState
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     widget.pizza.name,
@@ -484,6 +487,7 @@ class _ElegantPizzaCustomizationModalState
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Section: Ingrédients de base (pré-remplis)
           _buildSectionHeader(
@@ -554,6 +558,7 @@ class _ElegantPizzaCustomizationModalState
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Sélection de taille avec animation
           _buildSectionHeader(
@@ -615,6 +620,7 @@ class _ElegantPizzaCustomizationModalState
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
@@ -906,6 +912,7 @@ class _ElegantPizzaCustomizationModalState
                           ],
                   ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
@@ -1061,6 +1068,7 @@ class _ElegantPizzaCustomizationModalState
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         'Prix total',

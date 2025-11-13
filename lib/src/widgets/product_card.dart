@@ -90,6 +90,7 @@ class _ProductCardState extends State<ProductCard>
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
               children: [
               // Image du produit avec badges - Ratio 3:2 pour plus de hauteur
               AspectRatio(
@@ -203,6 +204,7 @@ class _ProductCardState extends State<ProductCard>
                       right: AppSpacing.sm,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           if (widget.product.isBestSeller)
                             Container(
@@ -328,6 +330,7 @@ class _ProductCardState extends State<ProductCard>
                   padding: AppSpacing.paddingMD,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       // Nom du produit - 2 lignes max
                       Text(

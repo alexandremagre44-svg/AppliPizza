@@ -32,6 +32,7 @@ class CartScreen extends ConsumerWidget {
       body: cartState.items.isEmpty
           ? _buildEmptyCart(context)
           : Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Expanded(
                   child: ListView.builder(
@@ -56,6 +57,7 @@ class CartScreen extends ConsumerWidget {
         padding: AppSpacing.paddingXXXL,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 140,
@@ -144,6 +146,7 @@ class CartScreen extends ConsumerWidget {
             Expanded( 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     item.productName,
@@ -236,6 +239,7 @@ class CartScreen extends ConsumerWidget {
             // Prix et supprimer
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   '${item.total.toStringAsFixed(2)} €',

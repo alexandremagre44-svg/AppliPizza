@@ -41,6 +41,7 @@ class ProfileScreen extends ConsumerWidget {
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Enhanced Profile Header
             Container(
@@ -50,6 +51,7 @@ class ProfileScreen extends ConsumerWidget {
               ),
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Enhanced Avatar
                   Container(
@@ -271,6 +273,7 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             icon,
@@ -304,6 +307,7 @@ class ProfileScreen extends ConsumerWidget {
         ),
         child: Center(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.shopping_bag_outlined,
@@ -371,6 +375,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 4),
                 Text(formattedDate),
@@ -395,6 +400,7 @@ class ProfileScreen extends ConsumerWidget {
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 item.productName,
@@ -485,6 +491,7 @@ class ProfileScreen extends ConsumerWidget {
       padding: AppSpacing.paddingHorizontalLG,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Section Header
           Row(
@@ -525,12 +532,14 @@ class ProfileScreen extends ConsumerWidget {
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'Points Fidélité',
@@ -669,6 +678,7 @@ class ProfileScreen extends ConsumerWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'Niveau $tierLabel',
