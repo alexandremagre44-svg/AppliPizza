@@ -112,6 +112,7 @@ class _IngredientSelectorState extends State<IngredientSelector> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // ===============================================
           // EN-TÊTE: Titre et compteur

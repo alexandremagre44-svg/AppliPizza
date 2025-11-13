@@ -131,6 +131,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
           boxShadow: AppShadows.deep,
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // En-tête
             Container(
@@ -151,6 +152,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             'Commande #${widget.order.id.substring(0, 8)}',
@@ -183,6 +185,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                 padding: AppSpacing.paddingLG,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Statut actuel
                     _buildSection(
@@ -197,6 +200,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                         title: 'Client',
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             _buildInfoRow(
                               Icons.person,
@@ -224,6 +228,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                         title: 'Retrait prévu',
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             _buildInfoRow(
                               Icons.calendar_today,
@@ -244,6 +249,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                     _buildSection(
                       title: 'Produits',
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: widget.order.items.map((item) {
                           return Container(
                             margin: const EdgeInsets.only(bottom: 12),
@@ -275,6 +281,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
                                         '${item.quantity}x ${item.productName}',
@@ -353,6 +360,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                       _buildSection(
                         title: 'Historique',
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: widget.order.statusHistory!.map((history) {
                             return Container(
                               margin: const EdgeInsets.only(bottom: 8),
@@ -404,6 +412,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
               child: SafeArea(
                 top: false,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     if (widget.order.status != OrderStatus.cancelled) ...[
                       Row(
@@ -465,6 +474,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
   Widget _buildSection({required String title, required Widget child}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           title,

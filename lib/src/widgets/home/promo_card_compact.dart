@@ -31,6 +31,7 @@ class PromoCardCompact extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Image with promo badge
             Stack(
@@ -100,6 +101,7 @@ class PromoCardCompact extends StatelessWidget {
               padding: AppSpacing.paddingMD,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     product.name,

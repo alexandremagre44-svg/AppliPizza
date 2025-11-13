@@ -149,6 +149,7 @@ class _PizzaCustomizationModalState
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Handle bar
           Container(
@@ -167,6 +168,7 @@ class _PizzaCustomizationModalState
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Visuel de la pizza en haut
                   _buildPizzaPreview(theme, primaryRed),
@@ -269,6 +271,7 @@ class _PizzaCustomizationModalState
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Image de la pizza
           Container(
@@ -369,6 +372,7 @@ class _PizzaCustomizationModalState
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // En-tête de section
           Container(
@@ -395,6 +399,7 @@ class _PizzaCustomizationModalState
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         title,
@@ -455,6 +460,7 @@ class _PizzaCustomizationModalState
                   ),
                 ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.local_pizza,
@@ -560,6 +566,7 @@ class _PizzaCustomizationModalState
 
   Widget _buildSupplementOptions(List<Ingredient> ingredients, Color primaryRed) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: ingredients.map((ingredient) {
         final isSelected = _extraIngredients.contains(ingredient.name);
         return Container(

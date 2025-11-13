@@ -218,6 +218,7 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
                 padding: const EdgeInsets.all(18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Header: Order number and status badge
                     Row(
@@ -369,6 +370,7 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           for (final item in itemsToShow) ...[
             _buildItemRow(item),
@@ -394,6 +396,7 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
   Widget _buildItemRow(item) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,6 +527,7 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: widgets,
     );
   }
