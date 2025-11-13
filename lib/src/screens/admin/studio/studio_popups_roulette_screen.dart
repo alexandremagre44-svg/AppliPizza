@@ -2,6 +2,7 @@
 // Screen for managing popups and roulette configuration
 
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../../../models/popup_config.dart';
 import '../../../models/roulette_config.dart';
 import '../../../services/popup_service.dart';
@@ -154,6 +155,10 @@ class _StudioPopupsRouletteScreenState
                     ),
                   ),
                 ),
+                IconButton(
+                  icon: Icon(Icons.add, color: AppColors.primaryRed),
+                  onPressed: _showAddPopupDialog,
+                ),
               ],
             ),
           ),
@@ -187,39 +192,7 @@ class _StudioPopupsRouletteScreenState
             ),
           )
         else
-          ..._popups.map((popup) => Card(
-                elevation: 1,
-                margin: EdgeInsets.only(bottom: AppSpacing.md),
-                shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
-                child: ListTile(
-                  leading: Container(
-                    padding: EdgeInsets.all(AppSpacing.sm),
-                    decoration: BoxDecoration(
-                      color: popup.isActive
-                          ? AppColors.primaryRed.withOpacity(0.1)
-                          : AppColors.textLight.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _getPopupIcon(popup.type),
-                      color: popup.isActive
-                          ? AppColors.primaryRed
-                          : AppColors.textLight,
-                    ),
-                  ),
-                  title: Text(popup.title, style: AppTextStyles.titleMedium),
-                  subtitle: Text(
-                    '${popup.type} • ${popup.targetAudience}',
-                    style: AppTextStyles.bodySmall,
-                  ),
-                  trailing: Icon(
-                    popup.isActive ? Icons.check_circle : Icons.circle_outlined,
-                    color: popup.isActive
-                        ? AppColors.successGreen
-                        : AppColors.textLight,
-                  ),
-                ),
-              )),
+          ..._popups.map((popup) => _buildPopupCard(popup)),
       ],
     );
   }
@@ -331,11 +304,323 @@ class _StudioPopupsRouletteScreenState
     }
   }
 
-  void _showSnackBar(String message) {
+  Widget _buildPopupCard(PopupConfig popup) {
+    return Card(
+      elevation: 1,
+      margin: EdgeInsets.only(bottom: AppSpacing.md),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+      child: ExpansionTile(
+        leading: Container(
+          padding: EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: popup.isActive
+                ? AppColors.primaryRed.withOpacity(0.1)
+                : AppColors.textLight.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            _getPopupIcon(popup.type),
+            color: popup.isActive ? AppColors.primaryRed : AppColors.textLight,
+          ),
+        ),
+        title: Text(popup.title, style: AppTextStyles.titleMedium),
+        subtitle: Text(
+          '${popup.type} • ${popup.targetAudience}',
+          style: AppTextStyles.bodySmall,
+        ),
+        trailing: Icon(
+          popup.isActive ? Icons.check_circle : Icons.circle_outlined,
+          color: popup.isActive ? AppColors.successGreen : AppColors.textLight,
+        ),
+        children: [
+          Padding(
+            padding: AppSpacing.paddingLG,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(popup.message, style: AppTextStyles.bodyMedium),
+                SizedBox(height: AppSpacing.md),
+                _buildInfoRow('Condition', popup.displayCondition),
+                _buildInfoRow('Priorité', popup.priority.toString()),
+                if (popup.ctaText != null)
+                  _buildInfoRow('Bouton', popup.ctaText!),
+                SizedBox(height: AppSpacing.md),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton.icon(
+                      icon: Icon(Icons.edit, size: 18),
+                      label: Text('Modifier'),
+                      onPressed: () => _showEditPopupDialog(popup),
+                    ),
+                    TextButton.icon(
+                      icon: Icon(Icons.delete, size: 18),
+                      label: Text('Supprimer'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.errorRed,
+                      ),
+                      onPressed: () => _deletePopup(popup.id),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddPopupDialog() {
+    _showPopupDialog();
+  }
+
+  void _showEditPopupDialog(PopupConfig popup) {
+    _showPopupDialog(existingPopup: popup);
+  }
+
+  void _showPopupDialog({PopupConfig? existingPopup}) {
+    final isEditing = existingPopup != null;
+    final titleController = TextEditingController(text: existingPopup?.title);
+    final messageController = TextEditingController(text: existingPopup?.message);
+    final ctaTextController = TextEditingController(text: existingPopup?.ctaText);
+    final ctaActionController = TextEditingController(text: existingPopup?.ctaAction);
+    
+    String selectedType = existingPopup?.type ?? 'info';
+    String selectedAudience = existingPopup?.targetAudience ?? 'all';
+    String selectedCondition = existingPopup?.displayCondition ?? 'always';
+    bool isActive = existingPopup?.isActive ?? true;
+    int priority = existingPopup?.priority ?? 0;
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(isEditing ? 'Modifier le popup' : 'Nouveau popup'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Titre*',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+                TextField(
+                  controller: messageController,
+                  decoration: InputDecoration(
+                    labelText: 'Message*',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                ),
+                SizedBox(height: AppSpacing.md),
+                DropdownButtonFormField<String>(
+                  value: selectedType,
+                  decoration: InputDecoration(
+                    labelText: 'Type',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    DropdownMenuItem(value: 'info', child: Text('Information')),
+                    DropdownMenuItem(value: 'promo', child: Text('Promotion')),
+                    DropdownMenuItem(value: 'fidelite', child: Text('Fidélité')),
+                    DropdownMenuItem(value: 'systeme', child: Text('Système')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => selectedType = value);
+                    }
+                  },
+                ),
+                SizedBox(height: AppSpacing.md),
+                DropdownButtonFormField<String>(
+                  value: selectedAudience,
+                  decoration: InputDecoration(
+                    labelText: 'Audience',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    DropdownMenuItem(value: 'all', child: Text('Tous')),
+                    DropdownMenuItem(value: 'new', child: Text('Nouveaux clients')),
+                    DropdownMenuItem(value: 'loyal', child: Text('Clients fidèles')),
+                    DropdownMenuItem(value: 'bronze', child: Text('Bronze')),
+                    DropdownMenuItem(value: 'silver', child: Text('Silver')),
+                    DropdownMenuItem(value: 'gold', child: Text('Gold')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => selectedAudience = value);
+                    }
+                  },
+                ),
+                SizedBox(height: AppSpacing.md),
+                DropdownButtonFormField<String>(
+                  value: selectedCondition,
+                  decoration: InputDecoration(
+                    labelText: 'Condition d\'affichage',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    DropdownMenuItem(value: 'always', child: Text('Toujours')),
+                    DropdownMenuItem(value: 'onceEver', child: Text('Une seule fois')),
+                    DropdownMenuItem(value: 'oncePerDay', child: Text('Une fois par jour')),
+                    DropdownMenuItem(value: 'oncePerSession', child: Text('Une fois par session')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => selectedCondition = value);
+                    }
+                  },
+                ),
+                SizedBox(height: AppSpacing.md),
+                TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Priorité',
+                    border: OutlineInputBorder(),
+                  ),
+                  controller: TextEditingController(text: priority.toString()),
+                  onChanged: (value) {
+                    priority = int.tryParse(value) ?? 0;
+                  },
+                ),
+                SizedBox(height: AppSpacing.md),
+                TextField(
+                  controller: ctaTextController,
+                  decoration: InputDecoration(
+                    labelText: 'Texte du bouton (optionnel)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+                TextField(
+                  controller: ctaActionController,
+                  decoration: InputDecoration(
+                    labelText: 'Action du bouton (optionnel)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+                SwitchListTile(
+                  title: Text('Popup actif'),
+                  value: isActive,
+                  activeColor: AppColors.primaryRed,
+                  onChanged: (value) {
+                    setState(() => isActive = value);
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (titleController.text.trim().isEmpty) {
+                  _showSnackBar('Le titre est requis', isError: true);
+                  return;
+                }
+                if (messageController.text.trim().isEmpty) {
+                  _showSnackBar('Le message est requis', isError: true);
+                  return;
+                }
+                
+                final popup = isEditing
+                    ? existingPopup.copyWith(
+                        title: titleController.text.trim(),
+                        message: messageController.text.trim(),
+                        type: selectedType,
+                        targetAudience: selectedAudience,
+                        displayCondition: selectedCondition,
+                        priority: priority,
+                        ctaText: ctaTextController.text.trim().isEmpty ? null : ctaTextController.text.trim(),
+                        ctaAction: ctaActionController.text.trim().isEmpty ? null : ctaActionController.text.trim(),
+                        isActive: isActive,
+                      )
+                    : PopupConfig(
+                        id: const Uuid().v4(),
+                        title: titleController.text.trim(),
+                        message: messageController.text.trim(),
+                        type: selectedType,
+                        targetAudience: selectedAudience,
+                        displayCondition: selectedCondition,
+                        priority: priority,
+                        ctaText: ctaTextController.text.trim().isEmpty ? null : ctaTextController.text.trim(),
+                        ctaAction: ctaActionController.text.trim().isEmpty ? null : ctaActionController.text.trim(),
+                        isActive: isActive,
+                      );
+                
+                final success = isEditing
+                    ? await _popupService.updatePopup(popup)
+                    : await _popupService.createPopup(popup);
+                
+                if (success) {
+                  _loadData();
+                  Navigator.pop(context);
+                  _showSnackBar(isEditing ? 'Popup modifié' : 'Popup créé');
+                } else {
+                  _showSnackBar('Erreur lors de l\'enregistrement', isError: true);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryRed,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(isEditing ? 'Modifier' : 'Créer'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deletePopup(String id) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Supprimer le popup ?'),
+        content: Text('Cette action est irréversible.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.errorRed,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirmed == true) {
+      final success = await _popupService.deletePopup(id);
+      if (success) {
+        _loadData();
+        _showSnackBar('Popup supprimé');
+      } else {
+        _showSnackBar('Erreur lors de la suppression', isError: true);
+      }
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppColors.primaryRed,
+        backgroundColor: isError ? AppColors.errorRed : AppColors.primaryRed,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       ),
