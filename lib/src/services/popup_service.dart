@@ -17,7 +17,7 @@ class PopupService {
           .get();
 
       return snapshot.docs
-          .map((doc) => PopupConfig.fromJson(doc.data()))
+          .map((doc) => PopupConfig.fromFirestore(doc.data()))
           .toList();
     } catch (e) {
       print('Error getting popups: $e');
@@ -31,12 +31,12 @@ class PopupService {
       final now = DateTime.now();
       final snapshot = await _firestore
           .collection(_collection)
-          .where('isActive', isEqualTo: true)
+          .where('isEnabled', isEqualTo: true)
           .orderBy('priority', descending: true)
           .get();
 
       return snapshot.docs
-          .map((doc) => PopupConfig.fromJson(doc.data()))
+          .map((doc) => PopupConfig.fromFirestore(doc.data()))
           .where((popup) => popup.isCurrentlyActive)
           .toList();
     } catch (e) {
@@ -50,7 +50,7 @@ class PopupService {
     try {
       final doc = await _firestore.collection(_collection).doc(id).get();
       if (doc.exists && doc.data() != null) {
-        return PopupConfig.fromJson(doc.data()!);
+        return PopupConfig.fromFirestore(doc.data()!);
       }
       return null;
     } catch (e) {
@@ -62,12 +62,17 @@ class PopupService {
   // Create popup
   Future<bool> createPopup(PopupConfig popup) async {
     try {
-      await _firestore.collection(_collection).doc(popup.id).set(popup.toJson());
+      await _firestore.collection(_collection).doc(popup.id).set(popup.toMap());
       return true;
     } catch (e) {
       print('Error creating popup: $e');
       return false;
     }
+  }
+  
+  // Save popup (alias for backward compatibility)
+  Future<bool> savePopup(PopupConfig popup) async {
+    return await updatePopup(popup);
   }
 
   // Update popup
@@ -76,7 +81,7 @@ class PopupService {
       await _firestore
           .collection(_collection)
           .doc(popup.id)
-          .update(popup.toJson());
+          .update(popup.toMap());
       return true;
     } catch (e) {
       print('Error updating popup: $e');
@@ -103,7 +108,7 @@ class PopupService {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
-          .map((doc) => PopupConfig.fromJson(doc.data()))
+          .map((doc) => PopupConfig.fromFirestore(doc.data()))
           .toList();
     });
   }

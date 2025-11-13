@@ -2,6 +2,7 @@
 // Service for managing roulette (wheel) configuration in Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import '../models/roulette_config.dart';
 import 'dart:math';
 
@@ -15,7 +16,7 @@ class RouletteService {
     try {
       final doc = await _firestore.collection(_collection).doc(_configDocId).get();
       if (doc.exists && doc.data() != null) {
-        return RouletteConfig.fromJson(doc.data()!);
+        return RouletteConfig.fromMap(doc.data()!);
       }
       return null;
     } catch (e) {
@@ -28,7 +29,7 @@ class RouletteService {
   Future<bool> saveRouletteConfig(RouletteConfig config) async {
     try {
       await _firestore.collection(_collection).doc(_configDocId).set(
-            config.toJson(),
+            config.toMap(),
             SetOptions(merge: true),
           );
       return true;
@@ -67,6 +68,9 @@ class RouletteService {
       RouletteSegment(
         id: '1',
         label: '+100 points',
+        rewardId: 'bonus_points_100',
+        probability: 30.0,
+        color: const Color(0xFFFFD700), // Gold
         type: 'bonus_points',
         value: 100,
         weight: 30.0,
@@ -74,12 +78,18 @@ class RouletteService {
       RouletteSegment(
         id: '2',
         label: 'Pizza offerte',
+        rewardId: 'free_pizza',
+        probability: 5.0,
+        color: const Color(0xFFFF6B6B), // Red
         type: 'free_pizza',
         weight: 5.0,
       ),
       RouletteSegment(
         id: '3',
         label: '+50 points',
+        rewardId: 'bonus_points_50',
+        probability: 25.0,
+        color: const Color(0xFF4ECDC4), // Teal
         type: 'bonus_points',
         value: 50,
         weight: 25.0,
@@ -87,18 +97,27 @@ class RouletteService {
       RouletteSegment(
         id: '4',
         label: 'Raté !',
+        rewardId: 'nothing',
+        probability: 20.0,
+        color: const Color(0xFF95A5A6), // Gray
         type: 'nothing',
         weight: 20.0,
       ),
       RouletteSegment(
         id: '5',
         label: 'Boisson offerte',
+        rewardId: 'free_drink',
+        probability: 10.0,
+        color: const Color(0xFF3498DB), // Blue
         type: 'free_drink',
         weight: 10.0,
       ),
       RouletteSegment(
         id: '6',
         label: 'Dessert offert',
+        rewardId: 'free_dessert',
+        probability: 10.0,
+        color: const Color(0xFF9B59B6), // Purple
         type: 'free_dessert',
         weight: 10.0,
       ),
@@ -168,22 +187,22 @@ class RouletteService {
     }
   }
 
-  // Spin the wheel (weighted random selection)
+  // Spin the wheel (probability-based random selection)
   RouletteSegment spinWheel(List<RouletteSegment> segments) {
     if (segments.isEmpty) {
       throw Exception('No segments available');
     }
 
-    final totalWeight = segments.fold<double>(
+    final totalProbability = segments.fold<double>(
       0,
-      (sum, segment) => sum + segment.weight,
+      (sum, segment) => sum + segment.probability,
     );
 
     final random = Random();
-    double randomValue = random.nextDouble() * totalWeight;
+    double randomValue = random.nextDouble() * totalProbability;
 
     for (final segment in segments) {
-      randomValue -= segment.weight;
+      randomValue -= segment.probability;
       if (randomValue <= 0) {
         return segment;
       }
@@ -201,7 +220,7 @@ class RouletteService {
         .snapshots()
         .map((snapshot) {
       if (snapshot.exists && snapshot.data() != null) {
-        return RouletteConfig.fromJson(snapshot.data()!);
+        return RouletteConfig.fromMap(snapshot.data()!);
       }
       return null;
     });
