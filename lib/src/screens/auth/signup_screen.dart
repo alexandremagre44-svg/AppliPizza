@@ -23,7 +23,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
-  bool _createAsAdmin = false;
   String? _errorMessage;
 
   @override
@@ -45,7 +44,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       final email = _emailController.text.trim();
       final password = _passwordController.text;
       final displayName = _displayNameController.text.trim();
-      final role = _createAsAdmin ? UserRole.admin : UserRole.client;
+      final role = UserRole.client;
 
       final authService = FirebaseAuthService();
       final result = await authService.signUp(
@@ -285,24 +284,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               }
                               return null;
                             },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Option admin
-                          CheckboxListTile(
-                            title: const Text('Créer un compte administrateur'),
-                            subtitle: const Text(
-                              'Utilisez cette option uniquement pour le premier compte admin',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                            value: _createAsAdmin,
-                            onChanged: (value) {
-                              setState(() {
-                                _createAsAdmin = value ?? false;
-                              });
-                            },
-                            controlAffinity: ListTileControlAffinity.leading,
-                            contentPadding: EdgeInsets.zero,
                           ),
                           const SizedBox(height: 24),
 
