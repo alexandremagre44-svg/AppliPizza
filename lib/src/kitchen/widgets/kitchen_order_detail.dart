@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../models/order.dart';
+import '../features/orders/data/models/order.dart';
 import '../kitchen_constants.dart';
 import '../services/kitchen_print_stub.dart';
 import 'kitchen_status_badge.dart';

@@ -4,10 +4,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../models/order.dart';
-import '../core/constants.dart';
-import '../providers/auth_provider.dart';
-import '../providers/order_provider.dart';
+import '../features/orders/data/models/order.dart';
+import '../features/shared/constants/constants.dart';
+import '../features/auth/application/auth_provider.dart';
+import '../features/orders/application/order_provider.dart';
 import 'kitchen_constants.dart';
 import 'widgets/kitchen_order_card.dart';
 import 'widgets/kitchen_order_detail.dart';
@@ -204,12 +204,12 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
   }
 
   Future<void> _changeOrderStatus(Order order, String newStatus) async {
-    final orderService = ref.read(firebaseOrderServiceProvider);
-    await orderService.updateOrderStatus(order.id, newStatus);
+    final orderRepository = ref.read(firebaseOrderRepositoryProvider);
+    await orderRepository.updateOrderStatus(order.id, newStatus);
     
     // Mark as viewed if not already
     if (!order.isViewed) {
-      await orderService.markAsSeenByKitchen(order.id);
+      await orderRepository.markAsSeenByKitchen(order.id);
       _notificationService.markOrderAsSeen(order.id);
     }
   }
@@ -231,8 +231,8 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
   Future<void> _showOrderDetail(Order order) async {
     // Mark as viewed
     if (!order.isViewed) {
-      final orderService = ref.read(firebaseOrderServiceProvider);
-      await orderService.markAsSeenByKitchen(order.id);
+      final orderRepository = ref.read(firebaseOrderRepositoryProvider);
+      await orderRepository.markAsSeenByKitchen(order.id);
       _notificationService.markOrderAsSeen(order.id);
     }
     

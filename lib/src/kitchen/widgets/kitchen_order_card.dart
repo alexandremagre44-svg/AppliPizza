@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import '../../models/order.dart';
+import '../features/orders/data/models/order.dart';
 import 'kitchen_colors.dart';
 import 'kitchen_status_badge.dart';
 
