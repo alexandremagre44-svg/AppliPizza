@@ -345,13 +345,41 @@ class _StudioPopupsRouletteScreenState
           ),
         ),
         title: Text(popup.title, style: AppTextStyles.titleMedium),
-        subtitle: Text(
-          '${popup.type} • ${popup.targetAudience}',
-          style: AppTextStyles.bodySmall,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${popup.type} • ${popup.targetAudience}',
+              style: AppTextStyles.bodySmall,
+            ),
+            SizedBox(height: AppSpacing.xs),
+            // Statistics placeholders as required
+            Text(
+              'Affichages: - • Clics: -',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textLight,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
         ),
-        trailing: Icon(
-          popup.isActive ? Icons.check_circle : Icons.circle_outlined,
-          color: popup.isActive ? AppColors.successGreen : AppColors.textLight,
+        trailing: SizedBox(
+          width: 50,
+          child: Switch(
+            value: popup.isEnabled,
+            activeColor: AppColors.primaryRed,
+            onChanged: (value) async {
+              // Toggle isEnabled state directly from the list
+              final updatedPopup = popup.copyWith(isEnabled: value);
+              final success = await _popupService.updatePopup(updatedPopup);
+              if (success) {
+                _loadData();
+                _showSnackBar('Popup ${value ? 'activé' : 'désactivé'}');
+              } else {
+                _showSnackBar('Erreur lors de la modification', isError: true);
+              }
+            },
+          ),
         ),
         children: [
           Padding(
