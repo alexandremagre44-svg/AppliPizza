@@ -1,4 +1,4 @@
-// lib/src/services/roulette_service.dart
+// lib/src/features/roulette/data/repositories/roulette_repository.dart
 // Service for managing roulette (wheel) configuration in Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:pizza_delizza/src/features/roulette/data/models/roulette_config.dart';
 import 'dart:math';
 
-class RouletteService {
+class RouletteRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String _collection = 'app_roulette_config';
   static const String _configDocId = 'main';

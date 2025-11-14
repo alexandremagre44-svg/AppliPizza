@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/models/subscriber.dart';
-import 'package:pizza_delizza/src/services/mailing_service.dart';
+import 'package:pizza_delizza/src/features/mailing/data/repositories/mailing_repository.dart';
 import '../theme/app_theme.dart';
 
 class NewsletterSubscriptionWidget extends StatefulWidget {
@@ -22,7 +22,7 @@ class NewsletterSubscriptionWidget extends StatefulWidget {
 
 class _NewsletterSubscriptionWidgetState
     extends State<NewsletterSubscriptionWidget> {
-  final MailingService _mailingService = MailingService();
+  final MailingRepository _mailingRepository = MailingRepository();
   final TextEditingController _emailController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   

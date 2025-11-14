@@ -6,7 +6,7 @@ import 'package:confetti/confetti.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 import '../../data/models/roulette_config.dart';
-import 'package:pizza_delizza/src/services/user_profile_service.dart';
+import 'package:pizza_delizza/src/features/auth/data/repositories/user_profile_repository.dart';
 import '../../shared/design_system/app_theme.dart';
 
 class RewardCelebrationScreen extends StatefulWidget {
@@ -28,7 +28,7 @@ class _RewardCelebrationScreenState extends State<RewardCelebrationScreen>
   final ConfettiController _confettiController = ConfettiController(
     duration: const Duration(seconds: 5),
   );
-  final UserProfileService _userProfileService = UserProfileService();
+  final UserProfileRepository _userProfileRepository = UserProfileRepository();
   
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
@@ -71,7 +71,7 @@ class _RewardCelebrationScreenState extends State<RewardCelebrationScreen>
   Future<void> _addRewardToProfile() async {
     // Add reward to user profile - INSTANT REWARD IMPLEMENTATION
     try {
-      final profile = await _userProfileService.getUserProfile(widget.userId);
+      final profile = await _userProfileRepository.getUserProfile(widget.userId);
       
       if (profile != null) {
         // Add reward based on type
@@ -82,7 +82,7 @@ class _RewardCelebrationScreenState extends State<RewardCelebrationScreen>
           
           if (points > 0) {
             final updatedPoints = (profile.loyaltyPoints ?? 0) + points;
-            await _userProfileService.saveUserProfile(
+            await _userProfileRepository.saveUserProfile(
               profile.copyWith(loyaltyPoints: updatedPoints),
             );
           }

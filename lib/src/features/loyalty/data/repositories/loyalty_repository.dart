@@ -1,17 +1,17 @@
-// lib/src/services/loyalty_service.dart
+// lib/src/features/loyalty/data/repositories/loyalty_repository.dart
 // Service de gestion du système de fidélité
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 import 'package:pizza_delizza/src/features/loyalty/data/models/loyalty_reward.dart';
 
-class LoyaltyService {
+class LoyaltyRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Singleton
-  static final LoyaltyService _instance = LoyaltyService._internal();
-  factory LoyaltyService() => _instance;
-  LoyaltyService._internal();
+  static final LoyaltyRepository _instance = LoyaltyRepository._internal();
+  factory LoyaltyRepository() => _instance;
+  LoyaltyRepository._internal();
 
   /// Collection des utilisateurs
   CollectionReference get _usersCollection => _firestore.collection('users');

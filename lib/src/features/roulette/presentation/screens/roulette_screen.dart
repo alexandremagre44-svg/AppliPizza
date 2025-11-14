@@ -9,7 +9,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import '../../data/models/roulette_config.dart';
-import 'package:pizza_delizza/src/services/roulette_service.dart';
+import 'package:pizza_delizza/src/features/roulette/data/repositories/roulette_repository.dart';
 import '../../shared/design_system/app_theme.dart';
 import 'reward_celebration_screen.dart';
 
@@ -23,7 +23,7 @@ class RouletteScreen extends StatefulWidget {
 }
 
 class _RouletteScreenState extends State<RouletteScreen> {
-  final RouletteService _rouletteService = RouletteService();
+  final RouletteRepository _rouletteRepository = RouletteRepository();
   final StreamController<int> _selectedController = StreamController<int>();
   final ConfettiController _confettiController = ConfettiController(
     duration: const Duration(seconds: 3),
@@ -53,8 +53,8 @@ class _RouletteScreenState extends State<RouletteScreen> {
   Future<void> _loadConfig() async {
     setState(() => _isLoading = true);
     
-    final config = await _rouletteService.getRouletteConfig();
-    final canSpin = await _rouletteService.canUserSpinToday(widget.userId);
+    final config = await _rouletteRepository.getRouletteConfig();
+    final canSpin = await _rouletteRepository.canUserSpinToday(widget.userId);
     
     setState(() {
       _config = config;
@@ -92,7 +92,7 @@ class _RouletteScreenState extends State<RouletteScreen> {
     });
     
     // Determine winning segment
-    final winningSegment = _rouletteService.spinWheel(_config!.segments);
+    final winningSegment = _rouletteRepository.spinWheel(_config!.segments);
     final winningIndex = _config!.segments.indexWhere((s) => s.id == winningSegment.id);
     
     // Set the selected index to trigger the wheel spin
@@ -111,7 +111,7 @@ class _RouletteScreenState extends State<RouletteScreen> {
     }
     
     // Record the spin
-    await _rouletteService.recordSpin(widget.userId, winningSegment);
+    await _rouletteRepository.recordSpin(widget.userId, winningSegment);
     
     // Victory haptic feedback (stronger impact)
     HapticFeedback.heavyImpact();

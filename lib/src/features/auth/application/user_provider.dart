@@ -3,8 +3,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/user_profile.dart';
 import '../../orders/data/models/order.dart'; 
-import 'package:pizza_delizza/src/services/firebase_order_service.dart';
-import 'package:pizza_delizza/src/services/user_profile_service.dart';
+import 'package:pizza_delizza/src/features/orders/data/repositories/firebase_order_repository.dart';
+import 'package:pizza_delizza/src/features/auth/data/repositories/user_profile_repository.dart';
 import 'cart_provider.dart';
 import 'auth_provider.dart';
 
@@ -15,13 +15,13 @@ final userProvider =
 
 class UserProfileNotifier extends StateNotifier<UserProfile> {
   final Ref _ref;
-  final UserProfileService _profileService = UserProfileService();
+  final UserProfileRepository _profileRepository = UserProfileRepository();
 
   UserProfileNotifier(this._ref) : super(UserProfile.initial());
 
   /// Charger le profil utilisateur depuis Firestore
   Future<void> loadProfile(String userId) async {
-    final profile = await _profileService.getUserProfile(userId);
+    final profile = await _profileRepository.getUserProfile(userId);
     if (profile != null) {
       state = profile;
     }
@@ -29,7 +29,7 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
 
   /// Sauvegarder le profil utilisateur dans Firestore
   Future<bool> saveProfile() async {
-    return await _profileService.saveUserProfile(state);
+    return await _profileRepository.saveUserProfile(state);
   }
 
   /// Basculer un produit dans les favoris
@@ -39,10 +39,10 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     
     if (wasInFavorites) {
       favorites.remove(productId);
-      await _profileService.removeFromFavorites(state.id, productId);
+      await _profileRepository.removeFromFavorites(state.id, productId);
     } else {
       favorites.add(productId);
-      await _profileService.addToFavorites(state.id, productId);
+      await _profileRepository.addToFavorites(state.id, productId);
     }
     
     state = state.copyWith(favoriteProducts: favorites);
@@ -50,13 +50,13 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
 
   /// Mettre à jour l'adresse
   Future<void> updateAddress(String address) async {
-    await _profileService.updateAddress(state.id, address);
+    await _profileRepository.updateAddress(state.id, address);
     state = state.copyWith(address: address);
   }
 
   /// Mettre à jour l'image de profil
   Future<void> updateProfileImage(String imageUrl) async {
-    await _profileService.updateProfileImage(state.id, imageUrl);
+    await _profileRepository.updateProfileImage(state.id, imageUrl);
     state = state.copyWith(imageUrl: imageUrl);
   }
 
@@ -80,7 +80,7 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
 
     // Créer la commande dans Firebase
     try {
-      await FirebaseOrderService().createOrder(
+      await FirebaseOrderRepository().createOrder(
         items: cartState.items,
         total: cartState.total,
         customerName: customerName,

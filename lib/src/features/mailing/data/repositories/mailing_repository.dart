@@ -1,4 +1,4 @@
-// lib/src/services/mailing_service.dart
+// lib/src/features/mailing/data/repositories/mailing_repository.dart
 // Service pour gérer les abonnés à la newsletter
 
 import 'dart:convert';
@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:pizza_delizza/src/features/mailing/data/models/subscriber.dart';
 
-class MailingService {
+class MailingRepository {
   static const String _subscribersKey = 'subscribers_list';
   final Uuid _uuid = const Uuid();
 

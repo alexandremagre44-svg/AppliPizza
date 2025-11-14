@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../data/models/order.dart';
 import '../theme/app_theme.dart';
-import 'package:pizza_delizza/src/services/firebase_order_service.dart';
+import 'package:pizza_delizza/src/features/orders/data/repositories/firebase_order_repository.dart';
 import '../../../orders/application/order_provider.dart';
 import 'order_status_badge.dart';
 
@@ -49,7 +49,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
     _controller.forward();
     
     // Marquer comme vue
-    ref.read(firebaseOrderServiceProvider).markOrderAsViewed(widget.order.id);
+    ref.read(firebaseOrderRepositoryProvider).markOrderAsViewed(widget.order.id);
   }
   
   @override
@@ -64,7 +64,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
   }
   
   Future<void> _changeStatus(String newStatus) async {
-    await ref.read(firebaseOrderServiceProvider).updateOrderStatus(
+    await ref.read(firebaseOrderRepositoryProvider).updateOrderStatus(
       widget.order.id,
       newStatus,
       note: 'Statut changé par admin',

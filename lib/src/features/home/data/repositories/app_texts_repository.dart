@@ -1,10 +1,10 @@
-// lib/src/services/app_texts_service.dart
+// lib/src/features/home/data/repositories/app_texts_repository.dart
 // Service for managing configurable app texts in Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pizza_delizza/src/features/home/data/models/app_texts_config.dart';
 
-class AppTextsService {
+class AppTextsRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String _collection = 'app_texts_config';
   static const String _configDocId = 'main';

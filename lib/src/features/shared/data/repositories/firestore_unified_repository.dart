@@ -1,4 +1,4 @@
-// lib/src/services/firestore_unified_service.dart
+// lib/src/features/shared/data/repositories/firestore_unified_repository.dart
 // Service unifié pour gérer TOUTES les opérations Firestore (produits + admin)
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,13 +7,13 @@ import 'package:pizza_delizza/src/features/product/data/models/product.dart';
 
 /// Service unifié qui gère les opérations Firestore pour tous les produits
 /// Ce service est utilisé par les écrans admin pour écrire directement dans Firestore
-class FirestoreUnifiedService {
+class FirestoreUnifiedRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
   // Singleton
-  static final FirestoreUnifiedService _instance = FirestoreUnifiedService._internal();
-  factory FirestoreUnifiedService() => _instance;
-  FirestoreUnifiedService._internal();
+  static final FirestoreUnifiedRepository _instance = FirestoreUnifiedRepository._internal();
+  factory FirestoreUnifiedRepository() => _instance;
+  FirestoreUnifiedRepository._internal();
 
   // ===============================================
   // FONCTION CENTRALISÉE: Mapper le nom de collection

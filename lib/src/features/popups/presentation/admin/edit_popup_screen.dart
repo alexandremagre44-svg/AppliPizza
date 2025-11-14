@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
 import '../../data/models/popup_config.dart';
-import 'package:pizza_delizza/src/services/popup_service.dart';
-import 'package:pizza_delizza/src/services/image_upload_service.dart';
+import 'package:pizza_delizza/src/features/popups/data/repositories/popup_repository.dart';
+import 'package:pizza_delizza/src/features/shared/data/repositories/image_upload_repository.dart';
 import '../../shared/design_system/app_theme.dart';
 
 class EditPopupScreen extends StatefulWidget {
@@ -19,8 +19,8 @@ class EditPopupScreen extends StatefulWidget {
 }
 
 class _EditPopupScreenState extends State<EditPopupScreen> {
-  final PopupService _popupService = PopupService();
-  final ImageUploadService _imageUploadService = ImageUploadService();
+  final PopupRepository _popupRepository = PopupRepository();
+  final ImageUploadRepository _imageUploadRepository = ImageUploadRepository();
   
   late TextEditingController _titleController;
   late TextEditingController _messageController;
@@ -63,9 +63,9 @@ class _EditPopupScreenState extends State<EditPopupScreen> {
   }
 
   Future<void> _pickImage() async {
-    final file = await _imageUploadService.pickImageFromGallery();
+    final file = await _imageUploadRepository.pickImageFromGallery();
     if (file != null) {
-      if (_imageUploadService.isValidImage(file)) {
+      if (_imageUploadRepository.isValidImage(file)) {
         setState(() {
           _selectedImageFile = file;
         });
@@ -80,7 +80,7 @@ class _EditPopupScreenState extends State<EditPopupScreen> {
     
     setState(() => _isUploading = true);
     
-    final url = await _imageUploadService.uploadImage(
+    final url = await _imageUploadRepository.uploadImage(
       _selectedImageFile!,
       'popups',
     );
@@ -193,8 +193,8 @@ class _EditPopupScreenState extends State<EditPopupScreen> {
     );
     
     final success = widget.existingPopup == null
-        ? await _popupService.createPopup(popup)
-        : await _popupService.updatePopup(popup);
+        ? await _popupRepository.createPopup(popup)
+        : await _popupRepository.updatePopup(popup);
     
     setState(() => _isSaving = false);
     

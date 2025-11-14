@@ -4,8 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/models/product.dart';
-import 'package:pizza_delizza/src/services/product_crud_service.dart';
-import 'package:pizza_delizza/src/services/firestore_unified_service.dart';
+import 'package:pizza_delizza/src/features/product/data/repositories/product_crud_repository.dart';
+import 'package:pizza_delizza/src/features/shared/data/repositories/firestore_unified_repository.dart';
 import '../../../shared/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../presentation/widgets/ingredient_selector.dart';
@@ -18,8 +18,8 @@ class AdminPizzaScreen extends StatefulWidget {
 }
 
 class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
-  final ProductCrudService _crudService = ProductCrudService();
-  final FirestoreUnifiedService _firestoreService = FirestoreUnifiedService();
+  final ProductCrudRepository _crudRepository = ProductCrudRepository();
+  final FirestoreUnifiedRepository _firestoreRepository = FirestoreUnifiedRepository();
   List<Product> _pizzas = [];
   bool _isLoading = true;
 
@@ -33,8 +33,8 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
     setState(() => _isLoading = true);
     
     // Charger depuis Firestore (priorité) et SharedPreferences (backup local)
-    final firestorePizzas = await _firestoreService.loadPizzas();
-    final localPizzas = await _crudService.loadPizzas();
+    final firestorePizzas = await _firestoreRepository.loadPizzas();
+    final localPizzas = await _crudRepository.loadPizzas();
     
     // Fusionner: Firestore a la priorité
     final allPizzas = <String, Product>{};
@@ -510,13 +510,13 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
                           final isNew = pizza == null;
                           
                           // Sauvegarder dans Firestore (priorité)
-                          final firestoreSuccess = await _firestoreService.savePizza(newPizza);
+                          final firestoreSuccess = await _firestoreRepository.savePizza(newPizza);
                           
                           // Sauvegarder aussi en local pour backup
                           if (isNew) {
-                            success = await _crudService.addPizza(newPizza);
+                            success = await _crudRepository.addPizza(newPizza);
                           } else {
-                            success = await _crudService.updatePizza(newPizza);
+                            success = await _crudRepository.updatePizza(newPizza);
                           }
                           
                           // Considérer comme succès si Firestore a réussi
@@ -710,10 +710,10 @@ class _AdminPizzaScreenState extends State<AdminPizzaScreen> {
 
     if (confirm == true) {
       // Supprimer de Firestore (priorité)
-      final firestoreSuccess = await _firestoreService.deletePizza(pizza.id);
+      final firestoreSuccess = await _firestoreRepository.deletePizza(pizza.id);
       
       // Supprimer aussi du local
-      final localSuccess = await _crudService.deletePizza(pizza.id);
+      final localSuccess = await _crudRepository.deletePizza(pizza.id);
       
       final success = firestoreSuccess || localSuccess;
       if (success) {

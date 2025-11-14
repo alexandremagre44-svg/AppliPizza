@@ -1,4 +1,4 @@
-// lib/src/services/image_upload_service.dart
+// lib/src/features/shared/data/repositories/image_upload_repository.dart
 // Service for uploading images to Firebase Storage
 
 import 'dart:io';
@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 /// Service for handling image uploads to Firebase Storage
-class ImageUploadService {
+class ImageUploadRepository {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final ImagePicker _picker = ImagePicker();
 

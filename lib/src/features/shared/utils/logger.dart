@@ -11,7 +11,7 @@ import 'dart:developer' as developer;
 /// 
 /// Usage:
 /// ```dart
-/// AppLogger.info('User logged in', tag: 'AuthService');
+/// AppLogger.info('User logged in', tag: 'AuthRepository');
 /// AppLogger.error('Failed to load products', tag: 'ProductRepository', error: e);
 /// ```
 class AppLogger {

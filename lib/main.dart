@@ -71,8 +71,8 @@ class MyApp extends ConsumerWidget {
 
   GoRouter _buildRouter(WidgetRef ref) {
     // Create a listenable that refreshes when auth state changes
-    final authService = ref.read(firebaseAuthServiceProvider);
-    final refreshListenable = GoRouterRefreshStream(authService.authStateChanges);
+    final authRepository = ref.read(firebaseAuthRepositoryProvider);
+    final refreshListenable = GoRouterRefreshStream(authRepository.authStateChanges);
     
     return GoRouter(
       initialLocation: AppRoutes.splash,

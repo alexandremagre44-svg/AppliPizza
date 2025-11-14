@@ -8,7 +8,7 @@ import '../../../cart/application/cart_provider.dart';
 import '../../../auth/application/user_provider.dart';
 import '../../../loyalty/application/loyalty_provider.dart';
 import '../../../auth/application/auth_provider.dart';
-import 'package:pizza_delizza/src/services/loyalty_service.dart';
+import 'package:pizza_delizza/src/features/loyalty/data/repositories/loyalty_repository.dart';
 import '../../../loyalty/data/models/loyalty_reward.dart';
 import '../../../shared/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -88,13 +88,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       
       if (uid != null) {
         if (_selectedFreePizzaRewardType != null) {
-          await LoyaltyService().useReward(uid, RewardType.freePizza);
+          await LoyaltyRepository().useReward(uid, RewardType.freePizza);
         }
         if (_selectedFreeDrinkRewardType != null) {
-          await LoyaltyService().useReward(uid, RewardType.freeDrink);
+          await LoyaltyRepository().useReward(uid, RewardType.freeDrink);
         }
         if (_selectedFreeDessertRewardType != null) {
-          await LoyaltyService().useReward(uid, RewardType.freeDessert);
+          await LoyaltyRepository().useReward(uid, RewardType.freeDessert);
         }
       }
 

@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../product/data/models/product.dart';
-import 'package:pizza_delizza/src/services/product_crud_service.dart';
+import 'package:pizza_delizza/src/features/product/data/repositories/product_crud_repository.dart';
 import '../../../shared/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
 
@@ -15,7 +15,7 @@ class AdminPageBuilderScreen extends StatefulWidget {
 }
 
 class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with SingleTickerProviderStateMixin {
-  final ProductCrudService _crudService = ProductCrudService();
+  final ProductCrudRepository _crudRepository = ProductCrudRepository();
   late TabController _tabController;
   
   List<Product> _pizzas = [];
@@ -40,10 +40,10 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
   Future<void> _loadAllProducts() async {
     setState(() => _isLoading = true);
     
-    final pizzas = await _crudService.loadPizzas();
-    final menus = await _crudService.loadMenus();
-    final drinks = await _crudService.loadDrinks();
-    final desserts = await _crudService.loadDesserts();
+    final pizzas = await _crudRepository.loadPizzas();
+    final menus = await _crudRepository.loadMenus();
+    final drinks = await _crudRepository.loadDrinks();
+    final desserts = await _crudRepository.loadDesserts();
     
     setState(() {
       _pizzas = pizzas;
@@ -60,16 +60,16 @@ class _AdminPageBuilderScreenState extends State<AdminPageBuilderScreen> with Si
     bool success = false;
     switch (category) {
       case 'Pizza':
-        success = await _crudService.updatePizza(updatedProduct);
+        success = await _crudRepository.updatePizza(updatedProduct);
         break;
       case 'Menus':
-        success = await _crudService.updateMenu(updatedProduct);
+        success = await _crudRepository.updateMenu(updatedProduct);
         break;
       case 'Boissons':
-        success = await _crudService.updateDrink(updatedProduct);
+        success = await _crudRepository.updateDrink(updatedProduct);
         break;
       case 'Desserts':
-        success = await _crudService.updateDessert(updatedProduct);
+        success = await _crudRepository.updateDessert(updatedProduct);
         break;
     }
 

@@ -1,12 +1,12 @@
-// lib/src/services/api_service.dart
+// lib/src/features/shared/data/repositories/api_repository.dart
 // Service API - préparé pour future intégration backend
 
 import 'package:pizza_delizza/src/features/product/data/models/product.dart';
 
-class ApiService {
-  static final ApiService _instance = ApiService._internal();
-  factory ApiService() => _instance;
-  ApiService._internal();
+class ApiRepository {
+  static final ApiRepository _instance = ApiRepository._internal();
+  factory ApiRepository() => _instance;
+  ApiRepository._internal();
 
   // Base URL (à configurer plus tard)
   static const String baseUrl = 'https://api.pizzadelizza.com';

@@ -1,4 +1,4 @@
-// lib/src/services/firestore_product_service.dart
+// lib/src/features/product/data/repositories/firestore_product_repository.dart
 // Service pour charger et sauvegarder les produits depuis Firestore
 // Note: Nécessite les dépendances Firebase dans pubspec.yaml:
 //   - cloud_firestore: ^4.13.0
@@ -9,7 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pizza_delizza/src/features/product/data/models/product.dart';
 
 // Interface abstraite pour permettre la compatibilité avec/sans Firebase
-abstract class FirestoreProductService {
+abstract class FirestoreProductRepository {
   // CRUD pour toutes les catégories de produits
   Future<List<Product>> loadPizzas();
   Future<List<Product>> loadMenus();
@@ -37,100 +37,100 @@ abstract class FirestoreProductService {
 }
 
 // Implémentation mock pour quand Firebase n'est pas disponible
-class MockFirestoreProductService implements FirestoreProductService {
+class MockFirestoreProductRepository implements FirestoreProductRepository {
   @override
   Future<List<Product>> loadPizzas() async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, retourne liste vide');
     return [];
   }
 
   @override
   Future<List<Product>> loadMenus() async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, retourne liste vide');
     return [];
   }
 
   @override
   Future<List<Product>> loadDrinks() async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, retourne liste vide');
     return [];
   }
 
   @override
   Future<List<Product>> loadDesserts() async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, retourne liste vide');
     return [];
   }
 
   @override
   Future<List<Product>> loadAllProducts() async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, retourne liste vide');
     return [];
   }
 
   @override
   Future<List<Product>> loadProductsByCategory(String category) async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide pour $category');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, retourne liste vide pour $category');
     return [];
   }
 
   @override
   Stream<List<Product>> watchProductsByCategory(String category) {
-    developer.log('MockFirestoreProductService: Firebase non configuré, retourne stream vide pour $category');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, retourne stream vide pour $category');
     return Stream.value([]);
   }
 
   @override
   Future<bool> savePizza(Product pizza) async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, sauvegarde ignorée');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, sauvegarde ignorée');
     return false;
   }
 
   @override
   Future<bool> saveMenu(Product menu) async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, sauvegarde ignorée');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, sauvegarde ignorée');
     return false;
   }
 
   @override
   Future<bool> saveDrink(Product drink) async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, sauvegarde ignorée');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, sauvegarde ignorée');
     return false;
   }
 
   @override
   Future<bool> saveDessert(Product dessert) async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, sauvegarde ignorée');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, sauvegarde ignorée');
     return false;
   }
 
   @override
   Future<bool> deletePizza(String pizzaId) async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, suppression ignorée');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, suppression ignorée');
     return false;
   }
 
   @override
   Future<bool> deleteMenu(String menuId) async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, suppression ignorée');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, suppression ignorée');
     return false;
   }
 
   @override
   Future<bool> deleteDrink(String drinkId) async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, suppression ignorée');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, suppression ignorée');
     return false;
   }
 
   @override
   Future<bool> deleteDessert(String dessertId) async {
-    developer.log('MockFirestoreProductService: Firebase non configuré, suppression ignorée');
+    developer.log('MockFirestoreProductRepository: Firebase non configuré, suppression ignorée');
     return false;
   }
 }
 
 // Implémentation réelle avec Firestore
-class FirestoreProductServiceImpl implements FirestoreProductService {
+class FirestoreProductRepositoryImpl implements FirestoreProductRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
   // ===============================================
@@ -158,7 +158,7 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
   Future<List<Product>> loadProductsByCategory(String category) async {
     try {
       final collectionName = _getCollectionName(category);
-      developer.log('🔥 FirestoreProductService: Chargement de $category depuis Firestore ($collectionName)...');
+      developer.log('🔥 FirestoreProductRepository: Chargement de $category depuis Firestore ($collectionName)...');
       
       final snapshot = await _firestore
           .collection(collectionName)
@@ -197,7 +197,7 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
   @override
   Stream<List<Product>> watchProductsByCategory(String category) {
     final collectionName = _getCollectionName(category);
-    developer.log('🔄 FirestoreProductService: Écoute en temps réel de $category ($collectionName)...');
+    developer.log('🔄 FirestoreProductRepository: Écoute en temps réel de $category ($collectionName)...');
     
     return _firestore
         .collection(collectionName)
@@ -254,7 +254,7 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
   // ===============================================
   @override
   Future<List<Product>> loadAllProducts() async {
-    developer.log('🔥 FirestoreProductService: Chargement de TOUS les produits depuis Firestore...');
+    developer.log('🔥 FirestoreProductRepository: Chargement de TOUS les produits depuis Firestore...');
     
     try {
       // Load all categories in parallel for better performance
@@ -357,7 +357,7 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
 }
 
 // Factory pour créer le bon service selon la configuration
-FirestoreProductService createFirestoreProductService() {
+FirestoreProductRepository createFirestoreProductService() {
   // Firestore est maintenant activé
-  return FirestoreProductServiceImpl();
+  return FirestoreProductRepositoryImpl();
 }

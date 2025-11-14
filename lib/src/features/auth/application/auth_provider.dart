@@ -4,17 +4,17 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pizza_delizza/src/services/firebase_auth_service.dart';
+import 'package:pizza_delizza/src/features/auth/data/repositories/firebase_auth_repository.dart';
 import '../../shared/constants/constants.dart';
 
 /// Provider pour le service d'authentification Firebase
-final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
-  return FirebaseAuthService();
+final firebaseAuthRepositoryProvider = Provider<FirebaseAuthRepository>((ref) {
+  return FirebaseAuthRepository();
 });
 
 /// Provider pour l'état d'authentification
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(ref.watch(firebaseAuthServiceProvider));
+  return AuthNotifier(ref.watch(firebaseAuthRepositoryProvider));
 });
 
 /// Listenable for GoRouter's refreshListenable parameter
@@ -86,7 +86,7 @@ class AuthState {
 
 /// Notifier pour gérer l'authentification
 class AuthNotifier extends StateNotifier<AuthState> {
-  final FirebaseAuthService _authService;
+  final FirebaseAuthRepository _authRepository;
 
   AuthNotifier(this._authService) : super(AuthState()) {
     _initialize();

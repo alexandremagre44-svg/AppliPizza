@@ -9,7 +9,7 @@ import '../../../loyalty/application/loyalty_provider.dart';
 import '../../../orders/data/models/order.dart';
 import '../../../loyalty/data/models/loyalty_reward.dart';
 import '../../../cart/application/cart_provider.dart';
-import 'package:pizza_delizza/src/services/loyalty_service.dart';
+import 'package:pizza_delizza/src/features/loyalty/data/repositories/loyalty_repository.dart';
 import '../../../shared/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
 
@@ -787,7 +787,7 @@ class ProfileScreen extends ConsumerWidget {
       // Attendre un peu pour l'effet
       await Future.delayed(Duration(seconds: 2));
 
-      final result = await LoyaltyService().spinRewardWheel(uid);
+      final result = await LoyaltyRepository().spinRewardWheel(uid);
       
       if (context.mounted) {
         Navigator.pop(context); // Fermer le dialogue de chargement

@@ -1,5 +1,5 @@
-// lib/src/services/order_service.dart
-// DEPRECATED: Use FirebaseOrderService instead
+// lib/src/features/orders/data/repositories/order_repository.dart
+// DEPRECATED: Use FirebaseOrderRepository instead
 // Service de gestion des commandes avec stockage local (SharedPreferences)
 // Support pour le temps réel via Stream
 
@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pizza_delizza/src/features/orders/data/models/order.dart';
 
 @deprecated
-class OrderService {
+class OrderRepository {
   static const String _ordersKey = 'orders_list';
   
   // StreamController pour diffuser les changements en temps réel
@@ -19,9 +19,9 @@ class OrderService {
   List<Order> _cachedOrders = [];
   
   // Singleton
-  static final OrderService _instance = OrderService._internal();
-  factory OrderService() => _instance;
-  OrderService._internal() {
+  static final OrderRepository _instance = OrderRepository._internal();
+  factory OrderRepository() => _instance;
+  OrderRepository._internal() {
     _loadOrders();
   }
   

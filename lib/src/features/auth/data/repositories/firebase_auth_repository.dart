@@ -1,4 +1,4 @@
-// lib/src/services/firebase_auth_service.dart
+// lib/src/features/auth/data/repositories/firebase_auth_repository.dart
 // Service d'authentification Firebase avec gestion des rôles
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,15 +7,15 @@ import '../core/constants.dart';
 import 'loyalty_service.dart';
 import 'user_profile_service.dart';
 
-class FirebaseAuthService {
+class FirebaseAuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final UserProfileService _profileService = UserProfileService();
+  final UserProfileRepository _profileRepository = UserProfileRepository();
 
   // Singleton
-  static final FirebaseAuthService _instance = FirebaseAuthService._internal();
-  factory FirebaseAuthService() => _instance;
-  FirebaseAuthService._internal();
+  static final FirebaseAuthRepository _instance = FirebaseAuthRepository._internal();
+  factory FirebaseAuthRepository() => _instance;
+  FirebaseAuthRepository._internal();
 
   // Stream de l'état d'authentification
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -52,7 +52,7 @@ class FirebaseAuthService {
         await _createUserProfile(credential.user!, UserRole.client);
         
         // Créer aussi le profil complet
-        await _profileService.createInitialProfile(
+        await _profileRepository.createInitialProfile(
           credential.user!.uid,
           credential.user!.email ?? '',
           name: credential.user!.displayName,
@@ -60,7 +60,7 @@ class FirebaseAuthService {
       }
 
       // Initialiser le système de fidélité
-      await LoyaltyService().initializeLoyalty(credential.user!.uid);
+      await LoyaltyRepository().initializeLoyalty(credential.user!.uid);
 
       return {
         'success': true,
@@ -131,14 +131,14 @@ class FirebaseAuthService {
       await _createUserProfile(credential.user!, role, displayName: displayName);
       
       // Créer le profil complet dans Firestore (collection 'user_profiles')
-      await _profileService.createInitialProfile(
+      await _profileRepository.createInitialProfile(
         credential.user!.uid,
         email,
         name: displayName,
       );
 
       // Initialiser le système de fidélité
-      await LoyaltyService().initializeLoyalty(credential.user!.uid);
+      await LoyaltyRepository().initializeLoyalty(credential.user!.uid);
 
       return {
         'success': true,

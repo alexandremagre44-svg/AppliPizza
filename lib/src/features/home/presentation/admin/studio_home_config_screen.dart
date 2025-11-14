@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/models/home_config.dart';
 import '../../data/models/dynamic_block_model.dart';
-import 'package:pizza_delizza/src/services/home_config_service.dart';
+import 'package:pizza_delizza/src/features/home/data/repositories/home_config_repository.dart';
 import '../../application/home_config_provider.dart';
 import '../../../shared/theme/app_theme.dart';
 import 'dialogs/edit_hero_dialog.dart';
@@ -22,7 +22,7 @@ class StudioHomeConfigScreen extends ConsumerStatefulWidget {
 
 class _StudioHomeConfigScreenState extends ConsumerState<StudioHomeConfigScreen>
     with SingleTickerProviderStateMixin {
-  final HomeConfigService _service = HomeConfigService();
+  final HomeConfigRepository _service = HomeConfigRepository();
   late TabController _tabController;
 
   @override

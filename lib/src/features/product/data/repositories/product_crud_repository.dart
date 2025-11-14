@@ -1,4 +1,4 @@
-// lib/src/services/product_crud_service.dart
+// lib/src/features/product/data/repositories/product_crud_repository.dart
 // Service CRUD local pour pizzas et menus - utilise SharedPreferences
 
 import 'dart:convert';
@@ -6,10 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pizza_delizza/src/features/product/data/models/product.dart';
 import '../core/constants.dart';
 
-class ProductCrudService {
-  static final ProductCrudService _instance = ProductCrudService._internal();
-  factory ProductCrudService() => _instance;
-  ProductCrudService._internal();
+class ProductCrudRepository {
+  static final ProductCrudRepository _instance = ProductCrudRepository._internal();
+  factory ProductCrudRepository() => _instance;
+  ProductCrudRepository._internal();
 
   /// Charger les pizzas depuis le stockage local
   Future<List<Product>> loadPizzas() async {

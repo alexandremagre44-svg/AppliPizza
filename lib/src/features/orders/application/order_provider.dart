@@ -3,20 +3,20 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/order.dart';
-import 'package:pizza_delizza/src/services/firebase_order_service.dart';
+import 'package:pizza_delizza/src/features/orders/data/repositories/firebase_order_repository.dart';
 import 'auth_provider.dart';
 
 /// Provider pour le service de commandes Firebase
-final firebaseOrderServiceProvider = Provider<FirebaseOrderService>((ref) {
-  return FirebaseOrderService();
+final firebaseOrderRepositoryProvider = Provider<FirebaseOrderRepository>((ref) {
+  return FirebaseOrderRepository();
 });
 
 /// Provider pour le stream des commandes (temps réel)
 /// Affiche toutes les commandes pour admin/kitchen, seulement les commandes de l'utilisateur pour client
 final ordersStreamProvider = StreamProvider<List<Order>>((ref) {
-  final service = ref.watch(firebaseOrderServiceProvider);
+  final service = ref.watch(firebaseOrderRepositoryProvider);
   final authState = ref.watch(authProvider);
-  final authService = ref.watch(firebaseAuthServiceProvider);
+  final authRepository = ref.watch(firebaseAuthRepositoryProvider);
   
   // Si admin ou kitchen, afficher toutes les commandes
   if (authState.isAdmin || authState.isKitchen) {
@@ -25,7 +25,7 @@ final ordersStreamProvider = StreamProvider<List<Order>>((ref) {
   
   // Si client connecté, afficher uniquement ses commandes
   if (authState.isLoggedIn) {
-    final user = authService.currentUser;
+    final user = authRepository.currentUser;
     if (user != null) {
       return service.watchUserOrders(user.uid);
     }

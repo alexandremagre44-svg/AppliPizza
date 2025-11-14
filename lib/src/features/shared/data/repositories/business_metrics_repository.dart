@@ -1,10 +1,10 @@
-// lib/src/services/business_metrics_service.dart
+// lib/src/features/shared/data/repositories/business_metrics_repository.dart
 
 import 'package:pizza_delizza/src/features/orders/data/models/order.dart';
 import 'package:pizza_delizza/src/features/product/data/models/product.dart';
 
 /// Service de métriques métier pour analyser les performances de l'application
-class BusinessMetricsService {
+class BusinessMetricsRepository {
   /// Calcule les revenus totaux d'une liste de commandes
   static double calculateTotalRevenue(List<Order> orders) {
     return orders.fold(0.0, (sum, order) => sum + order.totalAmount);

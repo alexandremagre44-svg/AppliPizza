@@ -1,4 +1,4 @@
-// lib/src/services/email_template_service.dart
+// lib/src/features/mailing/data/repositories/email_template_repository.dart
 // Service pour gérer les templates d'emails
 
 import 'dart:convert';
@@ -7,7 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:pizza_delizza/src/features/mailing/data/models/email_template.dart';
 import '../utils/email_templates.dart';
 
-class EmailTemplateService {
+class EmailTemplateRepository {
   static const String _templatesKey = 'email_templates_list';
   final Uuid _uuid = const Uuid();
 

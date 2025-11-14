@@ -1,4 +1,4 @@
-// lib/src/services/firebase_order_service.dart
+// lib/src/features/orders/data/repositories/firebase_order_repository.dart
 // Service de gestion des commandes avec Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,14 +7,14 @@ import 'package:pizza_delizza/src/features/orders/data/models/order.dart' as app
 import 'package:pizza_delizza/src/features/cart/application/cart_provider.dart';
 import 'loyalty_service.dart';
 
-class FirebaseOrderService {
+class FirebaseOrderRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Singleton
-  static final FirebaseOrderService _instance = FirebaseOrderService._internal();
-  factory FirebaseOrderService() => _instance;
-  FirebaseOrderService._internal();
+  static final FirebaseOrderRepository _instance = FirebaseOrderRepository._internal();
+  factory FirebaseOrderRepository() => _instance;
+  FirebaseOrderRepository._internal();
 
   /// Collection de commandes
   CollectionReference get _ordersCollection => _firestore.collection('orders');
@@ -76,7 +76,7 @@ class FirebaseOrderService {
     final docRef = await _ordersCollection.add(orderData);
     
     // Ajouter les points de fidélité après la commande
-    await LoyaltyService().addPointsFromOrder(user.uid, total);
+    await LoyaltyRepository().addPointsFromOrder(user.uid, total);
     
     return docRef.id;
   }

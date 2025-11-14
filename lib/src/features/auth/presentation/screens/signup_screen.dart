@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pizza_delizza/src/services/firebase_auth_service.dart';
+import 'package:pizza_delizza/src/features/auth/data/repositories/firebase_auth_repository.dart';
 import '../../../shared/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
 
@@ -46,8 +46,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       final displayName = _displayNameController.text.trim();
       final role = UserRole.client;
 
-      final authService = FirebaseAuthService();
-      final result = await authService.signUp(
+      final authRepository = FirebaseAuthRepository();
+      final result = await authRepository.signUp(
         email,
         password,
         displayName: displayName.isEmpty ? null : displayName,

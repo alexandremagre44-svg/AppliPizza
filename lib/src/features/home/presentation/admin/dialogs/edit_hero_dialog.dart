@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../data/models/home_config.dart';
-import 'package:pizza_delizza/src/services/image_upload_service.dart';
+import 'package:pizza_delizza/src/features/shared/data/repositories/image_upload_repository.dart';
 import '../../../../shared/theme/app_theme.dart';
 
 class EditHeroDialog extends StatefulWidget {
@@ -27,7 +27,7 @@ class _EditHeroDialogState extends State<EditHeroDialog> {
   late TextEditingController _ctaActionController;
   late TextEditingController _imageUrlController;
   
-  final ImageUploadService _imageService = ImageUploadService();
+  final ImageUploadRepository _imageRepository = ImageUploadRepository();
   bool _isUploading = false;
   double _uploadProgress = 0.0;
 
@@ -52,12 +52,12 @@ class _EditHeroDialogState extends State<EditHeroDialog> {
   }
 
   Future<void> _pickAndUploadImage() async {
-    final imageFile = await _imageService.pickImageFromGallery();
+    final imageFile = await _imageRepository.pickImageFromGallery();
     
     if (imageFile == null) return;
 
     // Validate image
-    if (!_imageService.isValidImage(imageFile)) {
+    if (!_imageRepository.isValidImage(imageFile)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -74,7 +74,7 @@ class _EditHeroDialogState extends State<EditHeroDialog> {
       _uploadProgress = 0.0;
     });
 
-    final imageUrl = await _imageService.uploadImageWithProgress(
+    final imageUrl = await _imageRepository.uploadImageWithProgress(
       imageFile,
       'home/hero',
       onProgress: (progress) {

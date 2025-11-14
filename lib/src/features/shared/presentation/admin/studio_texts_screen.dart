@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../models/app_texts_config.dart';
-import 'package:pizza_delizza/src/services/app_texts_service.dart';
+import 'package:pizza_delizza/src/features/home/data/repositories/app_texts_repository.dart';
 import '../../../shared/theme/app_theme.dart';
 
 class StudioTextsScreen extends StatefulWidget {
@@ -14,7 +14,7 @@ class StudioTextsScreen extends StatefulWidget {
 }
 
 class _StudioTextsScreenState extends State<StudioTextsScreen> {
-  final AppTextsService _service = AppTextsService();
+  final AppTextsRepository _service = AppTextsRepository();
   
   AppTextsConfig? _config;
   bool _isLoading = true;

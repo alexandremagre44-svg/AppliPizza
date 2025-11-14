@@ -6,7 +6,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:math' as math;
 import '../../data/models/roulette_config.dart';
-import 'package:pizza_delizza/src/services/roulette_service.dart';
+import 'package:pizza_delizza/src/features/roulette/data/repositories/roulette_repository.dart';
 import '../../shared/design_system/app_theme.dart';
 
 class EditRouletteScreen extends StatefulWidget {
@@ -19,7 +19,7 @@ class EditRouletteScreen extends StatefulWidget {
 }
 
 class _EditRouletteScreenState extends State<EditRouletteScreen> {
-  final RouletteService _rouletteService = RouletteService();
+  final RouletteRepository _rouletteRepository = RouletteRepository();
   
   late bool _isEnabled;
   late List<RouletteSegment> _segments;
@@ -60,7 +60,7 @@ class _EditRouletteScreenState extends State<EditRouletteScreen> {
       updatedAt: DateTime.now(),
     );
     
-    final success = await _rouletteService.saveRouletteConfig(config);
+    final success = await _rouletteRepository.saveRouletteConfig(config);
     
     setState(() => _isSaving = false);
     

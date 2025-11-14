@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/email_template.dart';
-import 'package:pizza_delizza/src/services/email_template_service.dart';
+import 'package:pizza_delizza/src/features/mailing/data/repositories/email_template_repository.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/constants/constants.dart';
 import 'email_template_preview_dialog.dart';
@@ -17,7 +17,7 @@ class EmailTemplatesTab extends StatefulWidget {
 }
 
 class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
-  final EmailTemplateService _templateService = EmailTemplateService();
+  final EmailTemplateRepository _templateRepository = EmailTemplateRepository();
   final TextEditingController _searchController = TextEditingController();
   List<EmailTemplate> _templates = [];
   List<EmailTemplate> _filteredTemplates = [];

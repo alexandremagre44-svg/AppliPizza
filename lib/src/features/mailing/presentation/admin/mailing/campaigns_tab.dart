@@ -6,9 +6,9 @@ import 'package:uuid/uuid.dart';
 import 'package:csv/csv.dart';
 import '../../../models/campaign.dart';
 import '../../../models/email_template.dart';
-import 'package:pizza_delizza/src/services/campaign_service.dart';
-import 'package:pizza_delizza/src/services/email_template_service.dart';
-import 'package:pizza_delizza/src/services/mailing_service.dart';
+import 'package:pizza_delizza/src/features/mailing/data/repositories/campaign_repository.dart';
+import 'package:pizza_delizza/src/features/mailing/data/repositories/email_template_repository.dart';
+import 'package:pizza_delizza/src/features/mailing/data/repositories/mailing_repository.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/constants/constants.dart';
 
@@ -20,9 +20,9 @@ class CampaignsTab extends StatefulWidget {
 }
 
 class _CampaignsTabState extends State<CampaignsTab> {
-  final CampaignService _campaignService = CampaignService();
-  final EmailTemplateService _templateService = EmailTemplateService();
-  final MailingService _mailingService = MailingService();
+  final CampaignRepository _campaignRepository = CampaignRepository();
+  final EmailTemplateRepository _templateRepository = EmailTemplateRepository();
+  final MailingRepository _mailingRepository = MailingRepository();
   final TextEditingController _searchController = TextEditingController();
   
   List<Campaign> _campaigns = [];

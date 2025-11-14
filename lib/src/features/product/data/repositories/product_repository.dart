@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:developer' as developer;
 import '../models/product.dart';
 import '../data/mock_data.dart';
-import 'package:pizza_delizza/src/services/product_crud_service.dart';
-import 'package:pizza_delizza/src/services/firestore_product_service.dart';
+import 'package:pizza_delizza/src/features/product/data/repositories/product_crud_repository.dart';
+import 'package:pizza_delizza/src/features/product/data/repositories/firestore_product_repository.dart';
 
 // Définition de l'interface (contrat) pour le Repository
 abstract class ProductRepository {
@@ -16,8 +16,8 @@ abstract class ProductRepository {
 // Implémentation concrète (fusionne les données mockées, admin et Firestore)
 // Renamed from MockProductRepository to better reflect its combined data source functionality
 class CombinedProductRepository implements ProductRepository {
-  final ProductCrudService _crudService = ProductCrudService();
-  final FirestoreProductService _firestoreService = createFirestoreProductService();
+  final ProductCrudRepository _crudRepository = ProductCrudRepository();
+  final FirestoreProductRepository _firestoreRepository = createFirestoreProductService();
 
   // Simule un délai réseau pour les appels asynchrones
   Future<T> _simulateDelay<T>(T result) {
@@ -31,10 +31,10 @@ class CombinedProductRepository implements ProductRepository {
     // ===============================================
     // ÉTAPE 1: Charger depuis SharedPreferences (Admin local)
     // ===============================================
-    final adminPizzas = await _crudService.loadPizzas();
-    final adminMenus = await _crudService.loadMenus();
-    final adminDrinks = await _crudService.loadDrinks();
-    final adminDesserts = await _crudService.loadDesserts();
+    final adminPizzas = await _crudRepository.loadPizzas();
+    final adminMenus = await _crudRepository.loadMenus();
+    final adminDrinks = await _crudRepository.loadDrinks();
+    final adminDesserts = await _crudRepository.loadDesserts();
     
     developer.log('📱 Repository: ${adminPizzas.length} pizzas depuis SharedPreferences');
     developer.log('📱 Repository: ${adminMenus.length} menus depuis SharedPreferences');
@@ -44,10 +44,10 @@ class CombinedProductRepository implements ProductRepository {
     // ===============================================
     // ÉTAPE 2: Charger depuis Firestore (toutes catégories)
     // ===============================================
-    final firestorePizzas = await _firestoreService.loadPizzas();
-    final firestoreMenus = await _firestoreService.loadMenus();
-    final firestoreDrinks = await _firestoreService.loadDrinks();
-    final firestoreDesserts = await _firestoreService.loadDesserts();
+    final firestorePizzas = await _firestoreRepository.loadPizzas();
+    final firestoreMenus = await _firestoreRepository.loadMenus();
+    final firestoreDrinks = await _firestoreRepository.loadDrinks();
+    final firestoreDesserts = await _firestoreRepository.loadDesserts();
     
     developer.log('🔥 Repository: ${firestorePizzas.length} pizzas depuis Firestore');
     developer.log('🔥 Repository: ${firestoreMenus.length} menus depuis Firestore');
@@ -133,28 +133,28 @@ class CombinedProductRepository implements ProductRepository {
     
     // 1. D'abord chercher dans Firestore (priorité maximale)
     developer.log('  → Recherche dans Firestore...');
-    final firestorePizzas = await _firestoreService.loadPizzas();
+    final firestorePizzas = await _firestoreRepository.loadPizzas();
     var product = firestorePizzas.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
     if (product != null) {
       developer.log('  ✅ Produit trouvé dans Firestore (pizzas)');
       return product;
     }
     
-    final firestoreMenus = await _firestoreService.loadMenus();
+    final firestoreMenus = await _firestoreRepository.loadMenus();
     product = firestoreMenus.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
     if (product != null) {
       developer.log('  ✅ Produit trouvé dans Firestore (menus)');
       return product;
     }
     
-    final firestoreDrinks = await _firestoreService.loadDrinks();
+    final firestoreDrinks = await _firestoreRepository.loadDrinks();
     product = firestoreDrinks.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
     if (product != null) {
       developer.log('  ✅ Produit trouvé dans Firestore (boissons)');
       return product;
     }
     
-    final firestoreDesserts = await _firestoreService.loadDesserts();
+    final firestoreDesserts = await _firestoreRepository.loadDesserts();
     product = firestoreDesserts.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
     if (product != null) {
       developer.log('  ✅ Produit trouvé dans Firestore (desserts)');
@@ -163,28 +163,28 @@ class CombinedProductRepository implements ProductRepository {
     
     // 2. Ensuite chercher dans SharedPreferences (admin local)
     developer.log('  → Recherche dans SharedPreferences...');
-    final adminPizzas = await _crudService.loadPizzas();
+    final adminPizzas = await _crudRepository.loadPizzas();
     product = adminPizzas.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
     if (product != null) {
       developer.log('  ✅ Produit trouvé dans SharedPreferences (pizzas)');
       return product;
     }
     
-    final adminMenus = await _crudService.loadMenus();
+    final adminMenus = await _crudRepository.loadMenus();
     product = adminMenus.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
     if (product != null) {
       developer.log('  ✅ Produit trouvé dans SharedPreferences (menus)');
       return product;
     }
     
-    final adminDrinks = await _crudService.loadDrinks();
+    final adminDrinks = await _crudRepository.loadDrinks();
     product = adminDrinks.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
     if (product != null) {
       developer.log('  ✅ Produit trouvé dans SharedPreferences (boissons)');
       return product;
     }
     
-    final adminDesserts = await _crudService.loadDesserts();
+    final adminDesserts = await _crudRepository.loadDesserts();
     product = adminDesserts.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
     if (product != null) {
       developer.log('  ✅ Produit trouvé dans SharedPreferences (desserts)');

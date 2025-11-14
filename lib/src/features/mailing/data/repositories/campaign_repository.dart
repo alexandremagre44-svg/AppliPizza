@@ -1,4 +1,4 @@
-// lib/src/services/campaign_service.dart
+// lib/src/features/mailing/data/repositories/campaign_repository.dart
 // Service pour gérer les campagnes d'emailing
 
 import 'dart:convert';
@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:pizza_delizza/src/features/mailing/data/models/campaign.dart';
 
-class CampaignService {
+class CampaignRepository {
   static const String _campaignsKey = 'campaigns_list';
   final Uuid _uuid = const Uuid();
 

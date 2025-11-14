@@ -1,10 +1,10 @@
-// lib/src/services/home_config_service.dart
+// lib/src/features/home/data/repositories/home_config_repository.dart
 // Service for managing home page configuration in Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pizza_delizza/src/features/home/data/models/home_config.dart';
 
-class HomeConfigService {
+class HomeConfigRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String _collection = 'app_home_config';
   static const String _configDocId = 'main';
@@ -26,15 +26,15 @@ class HomeConfigService {
   // Save home configuration
   Future<bool> saveHomeConfig(HomeConfig config) async {
     try {
-      print('HomeConfigService: Saving config with ${config.blocks.length} blocks');
+      print('HomeConfigRepository: Saving config with ${config.blocks.length} blocks');
       final jsonData = config.toJson();
-      print('HomeConfigService: JSON blocks: ${jsonData['blocks']}');
+      print('HomeConfigRepository: JSON blocks: ${jsonData['blocks']}');
       
       await _firestore.collection(_collection).doc(_configDocId).set(
             jsonData,
             SetOptions(merge: true),
           );
-      print('HomeConfigService: Save to Firestore successful');
+      print('HomeConfigRepository: Save to Firestore successful');
       return true;
     } catch (e, stackTrace) {
       print('Error saving home config: $e');
@@ -74,16 +74,16 @@ class HomeConfigService {
   // Add content block
   Future<bool> addContentBlock(ContentBlock block) async {
     try {
-      print('HomeConfigService: Starting addContentBlock for block ${block.id}');
+      print('HomeConfigRepository: Starting addContentBlock for block ${block.id}');
       final config = await getHomeConfig();
       if (config == null) {
-        print('HomeConfigService: ERROR - config is null');
+        print('HomeConfigRepository: ERROR - config is null');
         return false;
       }
 
-      print('HomeConfigService: Current blocks count: ${config.blocks.length}');
+      print('HomeConfigRepository: Current blocks count: ${config.blocks.length}');
       final updatedBlocks = List<ContentBlock>.from(config.blocks)..add(block);
-      print('HomeConfigService: Updated blocks count: ${updatedBlocks.length}');
+      print('HomeConfigRepository: Updated blocks count: ${updatedBlocks.length}');
       
       final updatedConfig = config.copyWith(
         blocks: updatedBlocks,
@@ -91,7 +91,7 @@ class HomeConfigService {
       );
 
       final result = await saveHomeConfig(updatedConfig);
-      print('HomeConfigService: Save result: $result');
+      print('HomeConfigRepository: Save result: $result');
       return result;
     } catch (e, stackTrace) {
       print('Error adding content block: $e');

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/models/popup_config.dart';
 import '../../../roulette/data/models/roulette_config.dart';
-import 'package:pizza_delizza/src/services/popup_service.dart';
-import 'package:pizza_delizza/src/services/roulette_service.dart';
+import 'package:pizza_delizza/src/features/popups/data/repositories/popup_repository.dart';
+import 'package:pizza_delizza/src/features/roulette/data/repositories/roulette_repository.dart';
 import '../../shared/design_system/app_theme.dart';
 import 'edit_popup_screen.dart';
 import 'edit_roulette_screen.dart';
@@ -21,8 +21,8 @@ class StudioPopupsRouletteScreen extends StatefulWidget {
 
 class _StudioPopupsRouletteScreenState
     extends State<StudioPopupsRouletteScreen> with SingleTickerProviderStateMixin {
-  final PopupService _popupService = PopupService();
-  final RouletteService _rouletteService = RouletteService();
+  final PopupRepository _popupRepository = PopupRepository();
+  final RouletteRepository _rouletteRepository = RouletteRepository();
   
   late TabController _tabController;
   List<PopupConfig> _popups = [];
@@ -45,12 +45,12 @@ class _StudioPopupsRouletteScreenState
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     
-    final popups = await _popupService.getAllPopups();
-    final roulette = await _rouletteService.getRouletteConfig();
+    final popups = await _popupRepository.getAllPopups();
+    final roulette = await _rouletteRepository.getRouletteConfig();
     
     if (roulette == null) {
-      await _rouletteService.initializeDefaultConfig();
-      final newRoulette = await _rouletteService.getRouletteConfig();
+      await _rouletteRepository.initializeDefaultConfig();
+      final newRoulette = await _rouletteRepository.getRouletteConfig();
       setState(() {
         _popups = popups;
         _rouletteConfig = newRoulette;
@@ -244,7 +244,7 @@ class _StudioPopupsRouletteScreenState
                   onChanged: (value) async {
                     if (roulette == null) return;
                     final updated = roulette.copyWith(isActive: value, updatedAt: DateTime.now());
-                    await _rouletteService.saveRouletteConfig(updated);
+                    await _rouletteRepository.saveRouletteConfig(updated);
                     _loadData();
                     _showSnackBar('Roulette ${value ? 'activée' : 'désactivée'}');
                   },
@@ -371,7 +371,7 @@ class _StudioPopupsRouletteScreenState
             onChanged: (value) async {
               // Toggle isEnabled state directly from the list
               final updatedPopup = popup.copyWith(isEnabled: value);
-              final success = await _popupService.updatePopup(updatedPopup);
+              final success = await _popupRepository.updatePopup(updatedPopup);
               if (success) {
                 _loadData();
                 _showSnackBar('Popup ${value ? 'activé' : 'désactivé'}');
@@ -640,8 +640,8 @@ class _StudioPopupsRouletteScreenState
                       );
                 
                 final success = isEditing
-                    ? await _popupService.updatePopup(popup)
-                    : await _popupService.createPopup(popup);
+                    ? await _popupRepository.updatePopup(popup)
+                    : await _popupRepository.createPopup(popup);
                 
                 if (success) {
                   _loadData();
@@ -687,7 +687,7 @@ class _StudioPopupsRouletteScreenState
     );
     
     if (confirmed == true) {
-      final success = await _popupService.deletePopup(id);
+      final success = await _popupRepository.deletePopup(id);
       if (success) {
         _loadData();
         _showSnackBar('Popup supprimé');

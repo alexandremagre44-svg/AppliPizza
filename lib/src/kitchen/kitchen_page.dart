@@ -204,12 +204,12 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
   }
 
   Future<void> _changeOrderStatus(Order order, String newStatus) async {
-    final orderService = ref.read(firebaseOrderServiceProvider);
-    await orderService.updateOrderStatus(order.id, newStatus);
+    final orderRepository = ref.read(firebaseOrderRepositoryProvider);
+    await orderRepository.updateOrderStatus(order.id, newStatus);
     
     // Mark as viewed if not already
     if (!order.isViewed) {
-      await orderService.markAsSeenByKitchen(order.id);
+      await orderRepository.markAsSeenByKitchen(order.id);
       _notificationService.markOrderAsSeen(order.id);
     }
   }
@@ -231,8 +231,8 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
   Future<void> _showOrderDetail(Order order) async {
     // Mark as viewed
     if (!order.isViewed) {
-      final orderService = ref.read(firebaseOrderServiceProvider);
-      await orderService.markAsSeenByKitchen(order.id);
+      final orderRepository = ref.read(firebaseOrderRepositoryProvider);
+      await orderRepository.markAsSeenByKitchen(order.id);
       _notificationService.markOrderAsSeen(order.id);
     }
     

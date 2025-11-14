@@ -1,4 +1,4 @@
-// lib/src/services/user_profile_service.dart
+// lib/src/features/auth/data/repositories/user_profile_repository.dart
 // Service Firestore pour gérer les profils utilisateurs complets
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,13 +7,13 @@ import 'package:pizza_delizza/src/features/auth/data/models/user_profile.dart';
 import 'package:pizza_delizza/src/features/orders/data/models/order.dart';
 
 /// Service pour gérer les profils utilisateurs dans Firestore
-class UserProfileService {
+class UserProfileRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
   // Singleton
-  static final UserProfileService _instance = UserProfileService._internal();
-  factory UserProfileService() => _instance;
-  UserProfileService._internal();
+  static final UserProfileRepository _instance = UserProfileRepository._internal();
+  factory UserProfileRepository() => _instance;
+  UserProfileRepository._internal();
 
   /// Collection des profils utilisateurs
   CollectionReference get _profilesCollection => _firestore.collection('user_profiles');

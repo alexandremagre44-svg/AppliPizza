@@ -4,11 +4,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/models/popup_config.dart';
-import 'package:pizza_delizza/src/services/popup_service.dart';
+import 'package:pizza_delizza/src/features/popups/data/repositories/popup_repository.dart';
 import '../presentation/widgets/popup_dialog.dart';
 
 class PopupManager {
-  final PopupService _popupService = PopupService();
+  final PopupRepository _popupRepository = PopupRepository();
   static const String _dismissedPopupsKey = 'dismissed_popups';
   
   // Session storage for oncePerSession popups
@@ -20,7 +20,7 @@ class PopupManager {
     PopupTrigger trigger, {
     required String userId,
   }) async {
-    final popups = await _popupService.getActivePopups();
+    final popups = await _popupRepository.getActivePopups();
     
     // Filter by trigger
     final triggeredPopups = popups.where((p) => p.trigger == trigger).toList();
@@ -52,7 +52,7 @@ class PopupManager {
     }
     
     // Check Firestore-based display conditions
-    return await _popupService.shouldShowPopup(popup, userId);
+    return await _popupRepository.shouldShowPopup(popup, userId);
   }
   
   Future<void> _showPopup(
@@ -64,7 +64,7 @@ class PopupManager {
     _shownThisSession.add(popup.id);
     
     // Record view in Firestore
-    await _popupService.recordPopupView(userId, popup.id);
+    await _popupRepository.recordPopupView(userId, popup.id);
     
     if (!context.mounted) return;
     

@@ -4,8 +4,8 @@
 import 'package:flutter/material.dart';
 import '../../../auth/data/models/user_profile.dart';
 import '../../data/models/loyalty_settings.dart';
-import 'package:pizza_delizza/src/services/user_profile_service.dart';
-import 'package:pizza_delizza/src/services/loyalty_settings_service.dart';
+import 'package:pizza_delizza/src/features/auth/data/repositories/user_profile_repository.dart';
+import 'package:pizza_delizza/src/features/loyalty/data/repositories/loyalty_settings_repository.dart';
 import '../../../shared/theme/app_theme.dart';
 
 class CommunicationLoyaltyScreen extends StatefulWidget {
@@ -19,8 +19,8 @@ class CommunicationLoyaltyScreen extends StatefulWidget {
 class _CommunicationLoyaltyScreenState
     extends State<CommunicationLoyaltyScreen>
     with SingleTickerProviderStateMixin {
-  final UserProfileService _service = UserProfileService();
-  final LoyaltySettingsService _settingsService = LoyaltySettingsService();
+  final UserProfileRepository _service = UserProfileRepository();
+  final LoyaltySettingsRepository _settingsRepository = LoyaltySettingsRepository();
   
   late TabController _tabController;
   List<UserProfile> _users = [];
@@ -44,7 +44,7 @@ class _CommunicationLoyaltyScreenState
     setState(() => _isLoading = true);
     
     final users = await _service.getAllUserProfiles();
-    final settings = await _settingsService.getLoyaltySettings();
+    final settings = await _settingsRepository.getLoyaltySettings();
     
     setState(() {
       _users = users;
@@ -486,7 +486,7 @@ class _CommunicationLoyaltyScreenState
                 updatedAt: DateTime.now(),
               );
               
-              final success = await _settingsService.saveLoyaltySettings(newSettings);
+              final success = await _settingsRepository.saveLoyaltySettings(newSettings);
               
               Navigator.pop(context);
               

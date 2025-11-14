@@ -1,15 +1,15 @@
-// lib/src/services/auth_service.dart
-// DEPRECATED: Use FirebaseAuthService instead
+// lib/src/features/auth/data/repositories/auth_repository.dart
+// DEPRECATED: Use FirebaseAuthRepository instead
 // Service d'authentification local - remplacé par Firebase
 
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
 
 @deprecated
-class AuthService {
-  static final AuthService _instance = AuthService._internal();
-  factory AuthService() => _instance;
-  AuthService._internal();
+class AuthRepository {
+  static final AuthRepository _instance = AuthRepository._internal();
+  factory AuthRepository() => _instance;
+  AuthRepository._internal();
 
   // État de connexion
   bool _isLoggedIn = false;
