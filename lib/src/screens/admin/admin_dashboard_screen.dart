@@ -316,6 +316,13 @@ class AdminDashboardScreen extends StatelessWidget {
                   subtitle: 'Tags produits',
                   onTap: () => context.push(AppRoutes.studioFeaturedProducts),
                 ),
+                _buildAdminCard(
+                  context,
+                  icon: Icons.language,
+                  title: 'Studio de Contenu',
+                  subtitle: 'CMS Headless I18N',
+                  onTap: () => context.push(AppRoutes.studioContent),
+                ),
               ]),
             ),
           ),
