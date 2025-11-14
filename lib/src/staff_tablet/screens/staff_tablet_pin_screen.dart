@@ -1,9 +1,13 @@
 // lib/src/staff_tablet/screens/staff_tablet_pin_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../design_system/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../design_system/app_theme.dart';
 import 'package:go_router/go_router.dart';
+import '../../design_system/app_theme.dart';
 import '../providers/staff_tablet_auth_provider.dart';
+import '../../design_system/app_theme.dart';
 
 class StaffTabletPinScreen extends ConsumerStatefulWidget {
   const StaffTabletPinScreen({Key? key}) : super(key: key);
@@ -66,7 +70,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
             colors: [
               const Color(0xFF1A237E), // Deep blue
               const Color(0xFF311B92), // Deep purple
-              Colors.orange[900]!,
+              AppColors.primary[900]!,
             ],
           ),
         ),
@@ -101,13 +105,13 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  Colors.orange[600]!,
-                                  Colors.orange[800]!,
+                                  AppColors.primary[600]!,
+                                  AppColors.primary[800]!,
                                 ],
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.orange.withOpacity(0.3),
+                                  color: AppColors.primary.withOpacity(0.3),
                                   blurRadius: 20,
                                   spreadRadius: 5,
                                 ),
@@ -159,18 +163,18 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: isFilled
-                                  ? (_isError ? Colors.red[600] : Colors.orange[700])
+                                  ? (_isError ? Colors.red[600] : AppColors.primary)
                                   : Colors.transparent,
                               border: Border.all(
                                 color: _isError
                                     ? Colors.red[600]!
-                                    : (isFilled ? Colors.orange[700]! : Colors.grey[400]!),
+                                    : (isFilled ? AppColors.primary! : Colors.grey[400]!),
                                 width: 2.5,
                               ),
                               boxShadow: isFilled
                                   ? [
                                       BoxShadow(
-                                        color: (_isError ? Colors.red : Colors.orange)
+                                        color: (_isError ? Colors.red : AppColors.primary)
                                             .withOpacity(0.3),
                                         blurRadius: 8,
                                         spreadRadius: 1,
@@ -324,15 +328,15 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.orange[50],
+            color: AppColors.primaryLighter,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.orange[200]!,
+              color: AppColors.primary[200]!,
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.orange.withOpacity(0.1),
+                color: AppColors.primary.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -342,7 +346,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
             child: Icon(
               Icons.backspace_rounded,
               size: 28,
-              color: Colors.orange[700],
+              color: AppColors.primary,
             ),
           ),
         ),

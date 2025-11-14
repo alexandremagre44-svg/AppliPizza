@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/product.dart';
 import '../../providers/product_provider.dart';
+import '../../design_system/app_theme.dart';
 import '../providers/staff_tablet_cart_provider.dart';
 import '../providers/staff_tablet_auth_provider.dart';
 import '../widgets/staff_tablet_cart_summary.dart';
+import '../widgets/staff_pizza_customization_modal.dart';
 
 class StaffTabletCatalogScreen extends ConsumerStatefulWidget {
   const StaffTabletCatalogScreen({Key? key}) : super(key: key);
@@ -27,7 +29,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: Colors.orange[700],
+        backgroundColor: AppColors.primary,
         title: const Text(
           'Mode Caisse - Prise de Commande',
           style: TextStyle(
@@ -174,8 +176,8 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             decoration: BoxDecoration(
               gradient: isSelected
-                  ? LinearGradient(
-                      colors: [Colors.orange[600]!, Colors.orange[800]!],
+                  ? const LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryDark],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     )
@@ -183,13 +185,13 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
               color: isSelected ? null : Colors.white,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isSelected ? Colors.orange[700]! : Colors.grey[300]!,
+                color: isSelected ? AppColors.primary : Colors.grey[300]!,
                 width: isSelected ? 2 : 1.5,
               ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: Colors.orange.withOpacity(0.3),
+                        color: AppColors.primary.withOpacity(0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -208,7 +210,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                 Icon(
                   icon,
                   size: 22,
-                  color: isSelected ? Colors.white : Colors.orange[700],
+                  color: isSelected ? Colors.white : AppColors.primary,
                 ),
                 const SizedBox(width: 10),
                 Text(
@@ -237,28 +239,39 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
       ),
       child: InkWell(
         onTap: () {
-          ref.read(staffTabletCartProvider.notifier).addItem(product);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      '${product.name} ajouté au panier',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          // Show customization modal for pizzas, direct add for others
+          if (product.category == ProductCategory.pizza && product.baseIngredients.isNotEmpty) {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => StaffPizzaCustomizationModal(pizza: product),
+            );
+          } else {
+            // Direct add for non-pizza items
+            ref.read(staffTabletCartProvider.notifier).addItem(product);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.white),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '${product.name} ajouté au panier',
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                duration: const Duration(milliseconds: 1200),
+                backgroundColor: AppColors.success,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                margin: const EdgeInsets.all(16),
               ),
-              duration: const Duration(milliseconds: 1200),
-              backgroundColor: Colors.green[700],
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              margin: const EdgeInsets.all(16),
-            ),
-          );
+            );
+          }
         },
         borderRadius: BorderRadius.circular(16),
         child: Column(
@@ -288,8 +301,8 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                                             loadingProgress.expectedTotalBytes!
                                         : null,
                                     strokeWidth: 3,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.orange[700]!,
+                                    valueColor: const AlwaysStoppedAnimation<Color>(
+                                      AppColors.primary,
                                     ),
                                   ),
                                 ),
@@ -390,28 +403,28 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.orange[50],
+                            color: AppColors.primaryLighter,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             '${product.price.toStringAsFixed(2)} €',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
-                              color: Colors.orange[700],
+                              color: AppColors.primary,
                             ),
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.orange[600]!, Colors.orange[800]!],
+                            gradient: const LinearGradient(
+                              colors: [AppColors.primary, AppColors.primaryDark],
                             ),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.orange.withOpacity(0.4),
+                                color: AppColors.primary.withOpacity(0.4),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),

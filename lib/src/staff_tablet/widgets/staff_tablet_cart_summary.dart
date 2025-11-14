@@ -1,9 +1,13 @@
 // lib/src/staff_tablet/widgets/staff_tablet_cart_summary.dart
 
 import 'package:flutter/material.dart';
+import '../../design_system/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../design_system/app_theme.dart';
 import 'package:go_router/go_router.dart';
+import '../../design_system/app_theme.dart';
 import '../providers/staff_tablet_cart_provider.dart';
+import '../../design_system/app_theme.dart';
 
 class StaffTabletCartSummary extends ConsumerWidget {
   const StaffTabletCartSummary({Key? key}) : super(key: key);
@@ -19,13 +23,13 @@ class StaffTabletCartSummary extends ConsumerWidget {
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange[600]!, Colors.orange[800]!],
+              colors: [AppColors.primary[600]!, AppColors.primaryDark!],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.orange.withOpacity(0.3),
+                color: AppColors.primary.withOpacity(0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -176,7 +180,7 @@ class StaffTabletCartSummary extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w800,
-                        color: Colors.orange[700],
+                        color: AppColors.primary,
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -258,14 +262,14 @@ class StaffTabletCartSummary extends ConsumerWidget {
                   gradient: cart.items.isEmpty
                       ? null
                       : LinearGradient(
-                          colors: [Colors.orange[600]!, Colors.orange[800]!],
+                          colors: [AppColors.primary[600]!, AppColors.primaryDark!],
                         ),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: cart.items.isEmpty
                       ? null
                       : [
                           BoxShadow(
-                            color: Colors.orange.withOpacity(0.4),
+                            color: AppColors.primary.withOpacity(0.4),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -478,10 +482,10 @@ class _CartItemTile extends ConsumerWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.orange[50],
+                        color: AppColors.primaryLighter,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Colors.orange[200]!,
+                          color: AppColors.primary[200]!,
                           width: 1,
                         ),
                       ),
@@ -490,7 +494,7 @@ class _CartItemTile extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
-                          color: Colors.orange[700],
+                          color: AppColors.primary,
                         ),
                       ),
                     ),
