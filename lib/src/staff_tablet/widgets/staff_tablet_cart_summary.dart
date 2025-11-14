@@ -23,7 +23,7 @@ class StaffTabletCartSummary extends ConsumerWidget {
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.primary[600]!, AppColors.primaryDark!],
+              colors: [AppColors.primarySwatch[600]!, AppColors.primaryDark!],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -262,7 +262,7 @@ class StaffTabletCartSummary extends ConsumerWidget {
                   gradient: cart.items.isEmpty
                       ? null
                       : LinearGradient(
-                          colors: [AppColors.primary[600]!, AppColors.primaryDark!],
+                          colors: [AppColors.primarySwatch[600]!, AppColors.primaryDark!],
                         ),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: cart.items.isEmpty
@@ -485,7 +485,7 @@ class _CartItemTile extends ConsumerWidget {
                         color: AppColors.primaryLighter,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: AppColors.primary[200]!,
+                          color: AppColors.primarySwatch[200]!,
                           width: 1,
                         ),
                       ),

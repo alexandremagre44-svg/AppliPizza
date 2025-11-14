@@ -26,7 +26,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.primary[600]!, AppColors.primaryDark!],
+              colors: [AppColors.primarySwatch[600]!, AppColors.primaryDark!],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -371,7 +371,7 @@ class _OrderCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.primaryLighter,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.primary[200]!, width: 1),
+                        border: Border.all(color: AppColors.primarySwatch[200]!, width: 1),
                       ),
                       child: Row(
                         children: [
@@ -431,7 +431,7 @@ class _OrderCard extends StatelessWidget {
                 height: 2,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.primary[200]!, Colors.transparent],
+                    colors: [AppColors.primarySwatch[200]!, Colors.transparent],
                   ),
                 ),
               ),
@@ -442,10 +442,10 @@ class _OrderCard extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.primaryLighter!, AppColors.primary[200]!],
+                    colors: [AppColors.primaryLighter!, AppColors.primarySwatch[200]!],
                   ),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.primary[400]!, width: 2),
+                  border: Border.all(color: AppColors.primarySwatch[400]!, width: 2),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

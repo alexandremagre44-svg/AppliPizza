@@ -70,7 +70,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
             colors: [
               const Color(0xFF1A237E), // Deep blue
               const Color(0xFF311B92), // Deep purple
-              AppColors.primary[900]!,
+              AppColors.primarySwatch[900]!,
             ],
           ),
         ),
@@ -105,8 +105,8 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  AppColors.primary[600]!,
-                                  AppColors.primary[800]!,
+                                  AppColors.primarySwatch[600]!,
+                                  AppColors.primarySwatch[800]!,
                                 ],
                               ),
                               boxShadow: [
@@ -331,7 +331,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
             color: AppColors.primaryLighter,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: AppColors.primary[200]!,
+              color: AppColors.primarySwatch[200]!,
               width: 1.5,
             ),
             boxShadow: [
