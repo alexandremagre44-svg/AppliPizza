@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 import '../../data/models/roulette_config.dart';
 import 'package:pizza_delizza/src/features/auth/data/repositories/user_profile_repository.dart';
-import '../../shared/design_system/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/design_system/app_theme.dart';
 
 class RewardCelebrationScreen extends StatefulWidget {
   final RouletteSegment segment;

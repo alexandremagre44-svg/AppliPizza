@@ -10,8 +10,8 @@ import '../../../loyalty/application/loyalty_provider.dart';
 import '../../../auth/application/auth_provider.dart';
 import 'package:pizza_delizza/src/features/loyalty/data/repositories/loyalty_repository.dart';
 import '../../../loyalty/data/models/loyalty_reward.dart';
-import '../../../shared/constants/constants.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});

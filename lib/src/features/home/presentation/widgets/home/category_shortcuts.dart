@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 /// Category shortcut button data
 class CategoryShortcut {

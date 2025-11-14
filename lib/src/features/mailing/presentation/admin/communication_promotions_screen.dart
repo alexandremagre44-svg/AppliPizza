@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/promotion.dart';
 import 'package:pizza_delizza/src/features/mailing/data/repositories/promotion_repository.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 class CommunicationPromotionsScreen extends StatefulWidget {
   const CommunicationPromotionsScreen({super.key});

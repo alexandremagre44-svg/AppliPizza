@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import '../../../product/data/models/product.dart';
 import 'package:pizza_delizza/src/features/product/data/repositories/product_crud_repository.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 class StudioFeaturedProductsScreen extends StatefulWidget {
   const StudioFeaturedProductsScreen({super.key});

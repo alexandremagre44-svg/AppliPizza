@@ -3,7 +3,7 @@
 // Service d'authentification local - remplacé par Firebase
 
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/constants.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
 
 @deprecated
 class AuthRepository {

@@ -9,8 +9,8 @@ import '../../../product/presentation/widgets/product_card.dart';
 import '../../../product/presentation/widgets/product_detail_modal.dart';
 import 'menu_customization_modal.dart';
 import '../home/pizza_customization_modal.dart';
-import '../../../shared/constants/constants.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});

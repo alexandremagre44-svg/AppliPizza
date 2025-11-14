@@ -7,7 +7,7 @@
 export '../design_system/app_theme.dart';
 
 // Rétrocompatibilité: les anciennes classes sont maintenant des aliases
-import '../../shared/design_system/app_theme.dart' as ds;
+import 'package:pizza_delizza/src/features/shared/design_system/app_theme.dart' as ds;
 
 // Ancienne classe AppColors (alias vers le nouveau)
 typedef AppColors = ds.AppColors;

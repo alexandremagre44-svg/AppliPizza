@@ -3,8 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../shared/constants/constants.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 /// Dashboard admin avec design cohérent Pizza Deli'Zza
 /// - En-tête rouge avec logo et bouton déconnexion

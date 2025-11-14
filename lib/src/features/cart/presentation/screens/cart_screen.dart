@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../cart/application/cart_provider.dart'; 
 import '../../../auth/application/user_provider.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 /// Écran du panier - Redesign Pizza Deli'Zza
 /// Style cohérent avec le reste de l'application

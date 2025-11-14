@@ -7,7 +7,7 @@ import 'dart:io';
 import '../../data/models/popup_config.dart';
 import 'package:pizza_delizza/src/features/popups/data/repositories/popup_repository.dart';
 import 'package:pizza_delizza/src/features/shared/data/repositories/image_upload_repository.dart';
-import '../../shared/design_system/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/design_system/app_theme.dart';
 
 class EditPopupScreen extends StatefulWidget {
   final PopupConfig? existingPopup;

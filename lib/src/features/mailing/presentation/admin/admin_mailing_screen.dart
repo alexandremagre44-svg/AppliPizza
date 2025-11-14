@@ -2,8 +2,8 @@
 // Écran principal du module Mailing avec 3 onglets: Modèles, Campagnes, Abonnés
 
 import 'package:flutter/material.dart';
-import '../../../shared/theme/app_theme.dart';
-import '../../../shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
 import 'mailing/email_templates_tab.dart';
 import 'mailing/campaigns_tab.dart';
 import 'mailing/subscribers_tab.dart';

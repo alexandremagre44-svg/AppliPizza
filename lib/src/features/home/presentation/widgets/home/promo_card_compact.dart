@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../product/data/models/product.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 /// Compact promo card for displaying promotional products
 /// Used in horizontal carousel on home page

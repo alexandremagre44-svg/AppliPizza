@@ -7,8 +7,8 @@ import 'package:csv/csv.dart';
 import 'dart:convert';
 import '../../../models/subscriber.dart';
 import 'package:pizza_delizza/src/features/mailing/data/repositories/mailing_repository.dart';
-import '../../../shared/theme/app_theme.dart';
-import '../../../shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
 
 class SubscribersTab extends StatefulWidget {
   const SubscribersTab({super.key});

@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/app_texts_config.dart';
 import 'package:pizza_delizza/src/features/home/data/repositories/app_texts_repository.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 class StudioTextsScreen extends StatefulWidget {
   const StudioTextsScreen({super.key});

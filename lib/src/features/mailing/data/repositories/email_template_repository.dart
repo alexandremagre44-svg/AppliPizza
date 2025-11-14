@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:pizza_delizza/src/features/mailing/data/models/email_template.dart';
-import '../utils/email_templates.dart';
+import 'package:pizza_delizza/src/features/mailing/utils/email_templates.dart';
 
 class EmailTemplateRepository {
   static const String _templatesKey = 'email_templates_list';

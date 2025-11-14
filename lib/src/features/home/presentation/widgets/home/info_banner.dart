@@ -2,7 +2,7 @@
 // Info banner widget for displaying business hours
 
 import 'package:flutter/material.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 /// Info banner widget for displaying important information
 /// Used on home page to show opening hours and other details

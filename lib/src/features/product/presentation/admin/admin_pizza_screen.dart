@@ -6,8 +6,8 @@ import 'package:uuid/uuid.dart';
 import '../../data/models/product.dart';
 import 'package:pizza_delizza/src/features/product/data/repositories/product_crud_repository.dart';
 import 'package:pizza_delizza/src/features/shared/data/repositories/firestore_unified_repository.dart';
-import '../../../shared/constants/constants.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 import '../../presentation/widgets/ingredient_selector.dart';
 
 class AdminPizzaScreen extends StatefulWidget {

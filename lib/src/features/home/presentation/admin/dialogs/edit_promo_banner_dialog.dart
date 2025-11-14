@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../../../data/models/home_config.dart';
-import '../../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 class EditPromoBannerDialog extends StatefulWidget {
   final PromoBannerConfig banner;

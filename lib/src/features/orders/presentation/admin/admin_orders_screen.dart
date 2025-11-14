@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../data/models/order.dart';
 import '../../../orders/application/order_provider.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 import '../../presentation/widgets/order_status_badge.dart';
 import '../../presentation/widgets/order_detail_panel.dart';
 import '../../presentation/widgets/new_order_notification.dart';

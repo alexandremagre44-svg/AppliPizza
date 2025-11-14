@@ -6,7 +6,7 @@ import '../../../auth/data/models/user_profile.dart';
 import '../../data/models/loyalty_settings.dart';
 import 'package:pizza_delizza/src/features/auth/data/repositories/user_profile_repository.dart';
 import 'package:pizza_delizza/src/features/loyalty/data/repositories/loyalty_settings_repository.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 class CommunicationLoyaltyScreen extends StatefulWidget {
   const CommunicationLoyaltyScreen({super.key});

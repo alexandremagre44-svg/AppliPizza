@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/dynamic_block_model.dart';
-import '../../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 class EditBlockDialog extends StatefulWidget {
   final DynamicBlock? block;

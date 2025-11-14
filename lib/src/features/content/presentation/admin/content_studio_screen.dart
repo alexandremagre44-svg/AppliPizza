@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/content_provider.dart';
 import '../../data/content_service.dart';
 import 'debouncer.dart';
-import '../../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 /// Admin screen for managing content strings in the headless CMS
 /// Features:

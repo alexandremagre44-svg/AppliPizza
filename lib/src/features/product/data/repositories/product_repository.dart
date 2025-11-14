@@ -3,7 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:developer' as developer;
 import '../models/product.dart';
-import '../data/mock_data.dart';
+import 'package:pizza_delizza/src/features/shared/data/mock_data.dart';
 import 'package:pizza_delizza/src/features/product/data/repositories/product_crud_repository.dart';
 import 'package:pizza_delizza/src/features/product/data/repositories/firestore_product_repository.dart';
 

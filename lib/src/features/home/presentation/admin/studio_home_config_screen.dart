@@ -8,7 +8,7 @@ import '../../data/models/home_config.dart';
 import '../../data/models/dynamic_block_model.dart';
 import 'package:pizza_delizza/src/features/home/data/repositories/home_config_repository.dart';
 import '../../application/home_config_provider.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 import 'dialogs/edit_hero_dialog.dart';
 import 'dialogs/edit_promo_banner_dialog.dart';
 import 'dialogs/edit_block_dialog.dart';

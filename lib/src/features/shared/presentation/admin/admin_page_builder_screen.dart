@@ -4,8 +4,8 @@
 import 'package:flutter/material.dart';
 import '../../../product/data/models/product.dart';
 import 'package:pizza_delizza/src/features/product/data/repositories/product_crud_repository.dart';
-import '../../../shared/constants/constants.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 class AdminPageBuilderScreen extends StatefulWidget {
   const AdminPageBuilderScreen({super.key});

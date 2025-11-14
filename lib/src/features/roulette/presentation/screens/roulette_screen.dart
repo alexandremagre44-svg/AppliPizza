@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import '../../data/models/roulette_config.dart';
 import 'package:pizza_delizza/src/features/roulette/data/repositories/roulette_repository.dart';
-import '../../shared/design_system/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/design_system/app_theme.dart';
 import 'reward_celebration_screen.dart';
 
 class RouletteScreen extends StatefulWidget {

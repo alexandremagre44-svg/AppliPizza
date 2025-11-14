@@ -2,7 +2,7 @@
 // Section header widget for home page
 
 import 'package:flutter/material.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 /// Section header widget for home page sections
 /// Displays a title with consistent styling

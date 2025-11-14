@@ -18,8 +18,8 @@ import '../../presentation/widgets/home/info_banner.dart';
 import '../../presentation/widgets/home/home_shimmer_loading.dart';
 import '../menu/menu_customization_modal.dart';
 import 'pizza_customization_modal.dart';
-import '../../../shared/theme/app_theme.dart';
-import '../../../shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
 
 /// Home screen - Professional showcase page
 /// Displays hero banner, promos, bestsellers, category shortcuts, and info

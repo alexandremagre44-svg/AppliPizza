@@ -2,7 +2,7 @@
 // Hero banner for home page with image, title, subtitle and CTA button
 
 import 'package:flutter/material.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 /// Hero banner widget for the home page
 /// Displays a prominent banner with image, title, subtitle and CTA button

@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pizza_delizza/src/features/auth/data/repositories/firebase_auth_repository.dart';
-import '../../shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
 
 /// Provider pour le service d'authentification Firebase
 final firebaseAuthRepositoryProvider = Provider<FirebaseAuthRepository>((ref) {

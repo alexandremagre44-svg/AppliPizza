@@ -9,7 +9,7 @@ import 'dart:ui';
 import '../../../product/data/models/product.dart';
 import '../../data/mock_data.dart';
 import '../../../cart/application/cart_provider.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 const _uuid = Uuid();
 

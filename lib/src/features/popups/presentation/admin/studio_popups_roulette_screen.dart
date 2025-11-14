@@ -7,7 +7,7 @@ import '../../data/models/popup_config.dart';
 import '../../../roulette/data/models/roulette_config.dart';
 import 'package:pizza_delizza/src/features/popups/data/repositories/popup_repository.dart';
 import 'package:pizza_delizza/src/features/roulette/data/repositories/roulette_repository.dart';
-import '../../shared/design_system/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/design_system/app_theme.dart';
 import 'edit_popup_screen.dart';
 import 'edit_roulette_screen.dart';
 

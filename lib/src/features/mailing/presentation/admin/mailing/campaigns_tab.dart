@@ -9,8 +9,8 @@ import '../../../models/email_template.dart';
 import 'package:pizza_delizza/src/features/mailing/data/repositories/campaign_repository.dart';
 import 'package:pizza_delizza/src/features/mailing/data/repositories/email_template_repository.dart';
 import 'package:pizza_delizza/src/features/mailing/data/repositories/mailing_repository.dart';
-import '../../../shared/theme/app_theme.dart';
-import '../../../shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
 
 class CampaignsTab extends StatefulWidget {
   const CampaignsTab({super.key});

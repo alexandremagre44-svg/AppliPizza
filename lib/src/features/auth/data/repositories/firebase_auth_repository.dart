@@ -3,9 +3,9 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../core/constants.dart';
-import 'loyalty_service.dart';
-import 'user_profile_service.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/loyalty/data/repositories/loyalty_repository.dart';
+import 'package:pizza_delizza/src/features/auth/data/repositories/user_profile_repository.dart';
 
 class FirebaseAuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;

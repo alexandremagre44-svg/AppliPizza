@@ -10,8 +10,8 @@ import '../../../orders/data/models/order.dart';
 import '../../../loyalty/data/models/loyalty_reward.dart';
 import '../../../cart/application/cart_provider.dart';
 import 'package:pizza_delizza/src/features/loyalty/data/repositories/loyalty_repository.dart';
-import '../../../shared/constants/constants.dart';
-import '../../../shared/theme/app_theme.dart';
+import 'package:pizza_delizza/src/features/shared/constants/constants.dart';
+import 'package:pizza_delizza/src/features/shared/theme/app_theme.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
