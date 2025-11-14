@@ -7,39 +7,39 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 // Importez vos écrans
-import 'src/screens/splash/splash_screen.dart';
-import 'src/screens/auth/login_screen.dart';
-import 'src/screens/auth/signup_screen.dart';
-import 'src/screens/home/home_screen.dart'; 
-import 'src/screens/menu/menu_screen.dart'; 
-import 'src/screens/cart/cart_screen.dart';
-import 'src/screens/checkout/checkout_screen.dart';
-import 'src/screens/profile/profile_screen.dart'; 
-import 'src/screens/product_detail/product_detail_screen.dart';
-import 'src/screens/admin/admin_dashboard_screen.dart';
-import 'src/screens/admin/admin_pizza_screen.dart';
-import 'src/screens/admin/admin_menu_screen.dart';
-import 'src/screens/admin/admin_drinks_screen.dart';
-import 'src/screens/admin/admin_desserts_screen.dart';
-import 'src/screens/admin/admin_page_builder_screen.dart';
-import 'src/screens/admin/admin_mailing_screen.dart';
-import 'src/screens/admin/admin_orders_screen.dart';
-import 'src/screens/admin/studio/studio_home_config_screen.dart';
-import 'src/screens/admin/studio/studio_popups_roulette_screen.dart';
-import 'src/screens/admin/studio/studio_texts_screen.dart';
-import 'src/screens/admin/studio/studio_featured_products_screen.dart';
-import 'src/screens/admin/communication/communication_promotions_screen.dart';
-import 'src/screens/admin/communication/communication_loyalty_screen.dart';
+import 'src/features/splash/presentation/screens/splash_screen.dart';
+import 'src/features/auth/presentation/screens/login_screen.dart';
+import 'src/features/auth/presentation/screens/signup_screen.dart';
+import 'src/features/home/presentation/screens/home_screen.dart'; 
+import 'src/features/menu/presentation/screens/menu_screen.dart'; 
+import 'src/features/cart/presentation/screens/cart_screen.dart';
+import 'src/features/checkout/presentation/screens/checkout_screen.dart';
+import 'src/features/profile/presentation/screens/profile_screen.dart'; 
+import 'src/features/product/presentation/screens/product_detail_screen.dart';
+import 'src/features/shared/presentation/admin/admin_dashboard_screen.dart';
+import 'src/features/product/presentation/admin/admin_pizza_screen.dart';
+import 'src/features/product/presentation/admin/admin_menu_screen.dart';
+import 'src/features/product/presentation/admin/admin_drinks_screen.dart';
+import 'src/features/product/presentation/admin/admin_desserts_screen.dart';
+import 'src/features/shared/presentation/admin/admin_page_builder_screen.dart';
+import 'src/features/mailing/presentation/admin/admin_mailing_screen.dart';
+import 'src/features/orders/presentation/admin/admin_orders_screen.dart';
+import 'src/features/home/presentation/admin/studio_home_config_screen.dart';
+import 'src/features/popups/presentation/admin/studio_popups_roulette_screen.dart';
+import 'src/features/shared/presentation/admin/studio_texts_screen.dart';
+import 'src/features/home/presentation/admin/studio_featured_products_screen.dart';
+import 'src/features/mailing/presentation/admin/communication_promotions_screen.dart';
+import 'src/features/loyalty/presentation/admin/communication_loyalty_screen.dart';
 import 'src/features/content/presentation/admin/content_studio_screen.dart';
 import 'src/kitchen/kitchen_page.dart';
-import 'src/screens/roulette/roulette_screen.dart';
+import 'src/features/roulette/presentation/screens/roulette_screen.dart';
 
 // Importez le composant de barre de navigation
-import 'src/widgets/scaffold_with_nav_bar.dart'; 
-import 'src/models/product.dart';
-import 'src/theme/app_theme.dart';
-import 'src/core/constants.dart';
-import 'src/providers/auth_provider.dart';
+import 'src/features/shared/widgets/scaffold_with_nav_bar.dart'; 
+import 'src/features/product/data/models/product.dart';
+import 'src/features/shared/theme/app_theme.dart';
+import 'src/features/shared/constants/constants.dart';
+import 'src/features/auth/application/auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
