@@ -1,38 +1,44 @@
 // lib/src/design_system/shadows.dart
-// Système d'ombres cohérent - Design System Pizza Deli'Zza
+// Système d'ombres cohérent - Design System Pizza Deli'Zza Material 3 (2025)
 
 import 'package:flutter/material.dart';
 import 'colors.dart';
 
-/// Système d'ombres cohérent pour donner de la profondeur
+/// Système d'ombres légères Material 3
 /// 
-/// Niveaux: None, Soft, Medium, Strong, Floating
-/// Usage: Cartes, Boutons, Modales, Éléments flottants
+/// Spécifications Material 3:
+/// - shadowSmall: 0 1px 2px rgba(0,0,0,0.08)
+/// - shadowMedium: 0 2px 6px rgba(0,0,0,0.12)
+/// 
+/// Niveaux: None, Small, Medium, Strong, Floating
 class AppShadows {
   // ═══════════════════════════════════════════════════════════════
-  // OMBRES STANDARD - Niveaux de profondeur
+  // OMBRES MATERIAL 3 - Légères et subtiles
   // ═══════════════════════════════════════════════════════════════
   
   /// Aucune ombre
   static const List<BoxShadow> none = [];
   
-  /// Ombre très douce - Pour cartes au repos
-  /// Blur: 4px, Offset: (0, 1), Opacity: 0.05
-  static final List<BoxShadow> soft = [
+  /// Ombre très petite - Material 3 Small
+  /// 0 1px 2px rgba(0,0,0,0.08)
+  static final List<BoxShadow> small = [
     BoxShadow(
-      color: AppColors.black.withOpacity(0.05),
-      blurRadius: 4,
+      color: AppColors.black.withOpacity(0.08),
+      blurRadius: 2,
       offset: const Offset(0, 1),
       spreadRadius: 0,
     ),
   ];
   
-  /// Ombre douce - Pour cartes et composants standards
-  /// Blur: 8px, Offset: (0, 2), Opacity: 0.08
+  /// Ombre légère - Pour cartes au repos (alias de small)
+  static final List<BoxShadow> soft = small;
+  
+  /// Ombre moyenne - Material 3 Medium
+  /// 0 2px 6px rgba(0,0,0,0.12)
   static final List<BoxShadow> medium = [
     BoxShadow(
-      color: AppColors.black.withOpacity(0.08),
-      blurRadius: 8,
+      color: AppColors.black.withOpacity(0.12),
+      blurRadius: 6,
       offset: const Offset(0, 2),
       spreadRadius: 0,
     ),

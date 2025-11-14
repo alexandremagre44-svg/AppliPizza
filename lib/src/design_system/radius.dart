@@ -1,34 +1,40 @@
 // lib/src/design_system/radius.dart
-// Système de radius (coins arrondis) - Design System Pizza Deli'Zza
+// Système de radius (coins arrondis) - Design System Pizza Deli'Zza Material 3 (2025)
 
 import 'package:flutter/material.dart';
 
-/// Système de radius cohérent pour tous les composants
+/// Système de radius Material 3 pour tous les composants
 /// 
-/// Échelle: 4, 8, 12, 16, 20, 24
-/// Usage: Cartes, Boutons, Inputs, Badges, Modales
+/// Spécifications Material 3:
+/// - Global: 16px
+/// - Buttons: 12px
+/// - BottomSheets: 24px
+/// - Chips: 16px
 class AppRadius {
   // ═══════════════════════════════════════════════════════════════
-  // RADIUS DE BASE - Valeurs numériques
+  // RADIUS DE BASE - Valeurs numériques Material 3
   // ═══════════════════════════════════════════════════════════════
   
   /// Extra Small - 4px
   static const double xs = 4.0;
   
-  /// Small - 8px (Standard pour cartes)
+  /// Small - 8px
   static const double small = 8.0;
   
-  /// Medium - 12px (Standard pour boutons et inputs)
+  /// Medium - 12px (Standard pour boutons Material 3)
   static const double medium = 12.0;
   
-  /// Large - 16px (Pour grandes cartes)
+  /// Large - 16px (Global Material 3)
   static const double large = 16.0;
   
   /// Extra Large - 20px
   static const double xl = 20.0;
   
-  /// Extra Extra Large - 24px
+  /// Extra Extra Large - 24px (BottomSheets Material 3)
   static const double xxl = 24.0;
+  
+  /// Extra Extra Extra Large - 28px (Grande modales)
+  static const double xxxl = 28.0;
   
   /// Circulaire complet - 9999px
   static const double full = 9999.0;
@@ -59,44 +65,44 @@ class AppRadius {
   static final BorderRadius radiusFull = BorderRadius.circular(full);
 
   // ═══════════════════════════════════════════════════════════════
-  // RADIUS CONTEXTUELS - Pour composants spécifiques
+  // RADIUS CONTEXTUELS - Material 3
   // ═══════════════════════════════════════════════════════════════
   
   // CARTES
   
-  /// Radius standard pour cartes - 8px
-  static final BorderRadius card = radiusSmall;
+  /// Radius standard pour cartes - 16px (Material 3 Global)
+  static final BorderRadius card = radiusLarge;
   
-  /// Radius pour grandes cartes - 12px
-  static final BorderRadius cardLarge = radiusMedium;
+  /// Radius pour grandes cartes - 16px
+  static final BorderRadius cardLarge = radiusLarge;
   
-  /// Radius pour petites cartes - 8px
-  static final BorderRadius cardSmall = radiusSmall;
+  /// Radius pour petites cartes - 12px
+  static final BorderRadius cardSmall = radiusMedium;
   
-  /// Radius pour cartes de section - 12px
-  static final BorderRadius cardSection = radiusMedium;
+  /// Radius pour cartes de section - 16px
+  static final BorderRadius cardSection = radiusLarge;
   
   // BOUTONS
   
-  /// Radius standard pour boutons - 12px
+  /// Radius standard pour boutons - 12px (Material 3)
   static final BorderRadius button = radiusMedium;
   
-  /// Radius pour petits boutons - 8px
-  static final BorderRadius buttonSmall = radiusSmall;
+  /// Radius pour petits boutons - 12px
+  static final BorderRadius buttonSmall = radiusMedium;
   
-  /// Radius pour grands boutons - 16px
-  static final BorderRadius buttonLarge = radiusLarge;
+  /// Radius pour grands boutons - 12px
+  static final BorderRadius buttonLarge = radiusMedium;
   
   /// Radius pour boutons ronds (icon buttons) - 9999px
   static final BorderRadius buttonRound = radiusFull;
   
   // INPUTS
   
-  /// Radius standard pour inputs - 12px
+  /// Radius standard pour inputs - 12px (Material 3)
   static final BorderRadius input = radiusMedium;
   
-  /// Radius pour petits inputs - 8px
-  static final BorderRadius inputSmall = radiusSmall;
+  /// Radius pour petits inputs - 12px
+  static final BorderRadius inputSmall = radiusMedium;
   
   /// Radius pour grands inputs - 12px
   static final BorderRadius inputLarge = radiusMedium;
@@ -114,14 +120,22 @@ class AppRadius {
   
   // MODALES & DIALOGS
   
-  /// Radius pour modales standard - 16px
-  static final BorderRadius dialog = radiusLarge;
+  /// Radius pour modales standard - 24px (Material 3)
+  static final BorderRadius dialog = radiusXXL;
   
-  /// Radius pour grandes modales - 20px
-  static final BorderRadius dialogLarge = radiusXL;
+  /// Radius pour grandes modales - 28px
+  static final BorderRadius dialogLarge = BorderRadius.circular(xxxl);
   
-  /// Radius pour petites modales - 12px
-  static final BorderRadius dialogSmall = radiusMedium;
+  /// Radius pour petites modales - 16px
+  static final BorderRadius dialogSmall = radiusLarge;
+  
+  // BOTTOM SHEETS
+  
+  /// Radius pour BottomSheets - 24px (Material 3)
+  static final BorderRadius bottomSheet = radiusXXL;
+  
+  /// Radius pour grandes BottomSheets - 28px
+  static final BorderRadius bottomSheetLarge = BorderRadius.circular(xxxl);
   
   // IMAGES
   
@@ -139,11 +153,11 @@ class AppRadius {
   /// Radius pour tooltips - 8px
   static final BorderRadius tooltip = radiusSmall;
   
-  /// Radius pour snackbars - 8px
-  static final BorderRadius snackbar = radiusSmall;
+  /// Radius pour snackbars - 12px
+  static final BorderRadius snackbar = radiusMedium;
   
-  /// Radius pour chips - 9999px
-  static final BorderRadius chip = radiusFull;
+  /// Radius pour chips - 16px (Material 3)
+  static final BorderRadius chip = radiusLarge;
   
   /// Radius pour tabs - 12px en haut uniquement
   static const BorderRadius tab = BorderRadius.only(

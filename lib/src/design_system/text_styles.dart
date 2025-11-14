@@ -1,23 +1,25 @@
 // lib/src/design_system/text_styles.dart
-// Hiérarchie typographique complète - Design System Pizza Deli'Zza
+// Hiérarchie typographique complète - Design System Pizza Deli'Zza Material 3 (2025)
 
 import 'package:flutter/material.dart';
 import 'colors.dart';
 
-/// Hiérarchie typographique complète pour Pizza Deli'Zza
+/// Hiérarchie typographique Material 3 pour Pizza Deli'Zza
 /// 
-/// Organisation:
+/// Famille: Inter (fallback Roboto)
+/// 
+/// Organisation Material 3:
 /// - Display (32-40px) - Titres très grands
 /// - Headline (20-28px) - Titres de section
-/// - Title (14-18px) - Titres de cartes et sous-sections
-/// - Body (12-16px) - Corps de texte
-/// - Label (11-14px) - Labels de formulaire et badges
-/// - Caption (10-12px) - Texte très petit
+/// - Title (14-20px) - Titres de cartes
+/// - Body (14-16px) - Corps de texte
+/// - Label (11-14px) - Labels et badges
 /// 
-/// Poids disponibles: 400 (Regular), 500 (Medium), 600 (SemiBold), 700 (Bold)
+/// Poids: 400 (Regular), 500 (Medium), 600 (SemiBold), 700 (Bold)
 class AppTextStyles {
-  // Police par défaut
-  static const String _fontFamily = 'Poppins';
+  // Police par défaut - Inter avec fallback Roboto
+  static const String _fontFamily = 'Inter';
+  static const List<String> _fontFamilyFallback = ['Inter', 'Roboto'];
 
   // ═══════════════════════════════════════════════════════════════
   // DISPLAY - Titres très grands (Hero sections, Landing)
@@ -128,12 +130,12 @@ class AppTextStyles {
   );
 
   // ═══════════════════════════════════════════════════════════════
-  // TITLE - Titres de cartes et sous-sections
+  // TITLE - Titres de cartes et sous-sections (Material 3)
   // ═══════════════════════════════════════════════════════════════
   
-  /// Title Large - 18px / SemiBold
+  /// Title Large - 20px / SemiBold (Material 3)
   static const TextStyle titleLarge = TextStyle(
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: FontWeight.w600,
     height: 1.4,
     letterSpacing: 0,
@@ -141,9 +143,9 @@ class AppTextStyles {
     fontFamily: _fontFamily,
   );
   
-  /// Title Medium - 16px / SemiBold
+  /// Title Medium - 18px / SemiBold (Material 3)
   static const TextStyle titleMedium = TextStyle(
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: FontWeight.w600,
     height: 1.4,
     letterSpacing: 0,
@@ -196,15 +198,15 @@ class AppTextStyles {
   );
 
   // ═══════════════════════════════════════════════════════════════
-  // BODY - Corps de texte
+  // BODY - Corps de texte (Material 3)
   // ═══════════════════════════════════════════════════════════════
   
-  /// Body Large - 16px / Regular
+  /// Body Large - 16px / Regular (Material 3)
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w400,
-    height: 1.6,
-    letterSpacing: 0.1,
+    height: 1.5,
+    letterSpacing: 0.15,
     color: AppColors.textPrimary,
     fontFamily: _fontFamily,
   );
@@ -213,18 +215,18 @@ class AppTextStyles {
   static const TextStyle bodyLargeMedium = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w500,
-    height: 1.6,
-    letterSpacing: 0.1,
+    height: 1.5,
+    letterSpacing: 0.15,
     color: AppColors.textPrimary,
     fontFamily: _fontFamily,
   );
   
-  /// Body Medium - 14px / Regular
+  /// Body Medium - 14px / Regular (Material 3)
   static const TextStyle bodyMedium = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    height: 1.5,
-    letterSpacing: 0.1,
+    height: 1.4,
+    letterSpacing: 0.25,
     color: AppColors.textPrimary,
     fontFamily: _fontFamily,
   );
@@ -233,8 +235,8 @@ class AppTextStyles {
   static const TextStyle bodyMediumSemiBold = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w600,
-    height: 1.5,
-    letterSpacing: 0.1,
+    height: 1.4,
+    letterSpacing: 0.25,
     color: AppColors.textPrimary,
     fontFamily: _fontFamily,
   );
@@ -243,8 +245,8 @@ class AppTextStyles {
   static const TextStyle bodySmall = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w400,
-    height: 1.5,
-    letterSpacing: 0.2,
+    height: 1.33,
+    letterSpacing: 0.4,
     color: AppColors.textSecondary,
     fontFamily: _fontFamily,
   );
@@ -253,42 +255,42 @@ class AppTextStyles {
   static const TextStyle bodySmallMedium = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w500,
-    height: 1.5,
-    letterSpacing: 0.2,
+    height: 1.33,
+    letterSpacing: 0.4,
     color: AppColors.textSecondary,
     fontFamily: _fontFamily,
   );
 
   // ═══════════════════════════════════════════════════════════════
-  // LABEL - Labels de formulaire, boutons, badges
+  // LABEL - Labels de formulaire, boutons, badges (Material 3)
   // ═══════════════════════════════════════════════════════════════
   
-  /// Label Large - 14px / SemiBold
+  /// Label Large - 14px / Medium (Material 3)
   static const TextStyle labelLarge = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w600,
-    height: 1.4,
-    letterSpacing: 0.3,
+    fontWeight: FontWeight.w500,
+    height: 1.43,
+    letterSpacing: 0.1,
     color: AppColors.textPrimary,
     fontFamily: _fontFamily,
   );
   
-  /// Label Medium - 13px / Medium
+  /// Label Medium - 13px / Medium (Material 3)
   static const TextStyle labelMedium = TextStyle(
     fontSize: 13,
     fontWeight: FontWeight.w500,
-    height: 1.4,
-    letterSpacing: 0.3,
+    height: 1.33,
+    letterSpacing: 0.5,
     color: AppColors.textSecondary,
     fontFamily: _fontFamily,
   );
   
-  /// Label Small - 11px / Medium
+  /// Label Small - 11px / Medium (Material 3)
   static const TextStyle labelSmall = TextStyle(
     fontSize: 11,
     fontWeight: FontWeight.w500,
-    height: 1.3,
-    letterSpacing: 0.4,
+    height: 1.45,
+    letterSpacing: 0.5,
     color: AppColors.textSecondary,
     fontFamily: _fontFamily,
   );

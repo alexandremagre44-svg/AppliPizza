@@ -1,5 +1,5 @@
 // lib/src/design_system/app_theme.dart
-// Thème principal et configuration - Design System Pizza Deli'Zza
+// Thème principal et configuration - Design System Pizza Deli'Zza Material 3 (2025)
 
 import 'package:flutter/material.dart';
 import 'colors.dart';
@@ -22,7 +22,9 @@ export 'tables.dart';
 export 'dialogs.dart';
 // Note: sections.dart is not exported to avoid conflicts with widgets/home/section_header.dart
 
-/// Configuration du thème de l'application Pizza Deli'Zza
+/// Configuration du thème Material 3 de l'application Pizza Deli'Zza
+/// 
+/// Thème officiel Material 3 (2025) avec la palette Pizza Deli'Zza
 /// 
 /// Utilisation:
 /// ```dart
@@ -52,45 +54,61 @@ class AppTheme {
   static const Color infoBlue = AppColors.info;
 
   // ═══════════════════════════════════════════════════════════════
-  // THEME PRINCIPAL - Light Theme
+  // THEME PRINCIPAL - Material 3 Light Theme
   // ═══════════════════════════════════════════════════════════════
   
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       
-      // === Color Scheme ===
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
-        primary: AppColors.primary,
-        onPrimary: AppColors.white,
-        primaryContainer: AppColors.primaryLighter,
-        onPrimaryContainer: AppColors.primaryDark,
-        secondary: AppColors.primaryLight,
-        onSecondary: AppColors.white,
+      // === Color Scheme Material 3 ===
+      colorScheme: const ColorScheme.light(
+        // Primary
+        primary: AppColors.primary, // #D32F2F
+        onPrimary: AppColors.onPrimary, // #FFFFFF
+        primaryContainer: AppColors.primaryContainer, // #F9DEDE
+        onPrimaryContainer: AppColors.onPrimaryContainer, // #7A1212
+        
+        // Secondary
+        secondary: AppColors.secondary, // #8E4C4C
+        onSecondary: AppColors.onSecondary, // #FFFFFF
+        secondaryContainer: AppColors.secondaryContainer, // #F5E3E3
+        onSecondaryContainer: AppColors.onPrimaryContainer, // #7A1212
+        
+        // Tertiary
         tertiary: AppColors.accentGold,
         onTertiary: AppColors.textPrimary,
-        error: AppColors.danger,
+        
+        // Error
+        error: AppColors.error, // #C62828
         onError: AppColors.white,
-        errorContainer: AppColors.dangerLight,
+        errorContainer: AppColors.errorContainer, // #F9DADA
         onErrorContainer: AppColors.dangerDark,
-        surface: AppColors.white,
-        onSurface: AppColors.textPrimary,
-        surfaceVariant: AppColors.neutral100,
-        onSurfaceVariant: AppColors.textSecondary,
-        outline: AppColors.border,
-        outlineVariant: AppColors.borderSubtle,
-        shadow: AppColors.black.withOpacity(0.15),
+        
+        // Surface & Background
+        surface: AppColors.surface, // #FFFFFF
+        onSurface: AppColors.onSurface, // #323232
+        onSurfaceVariant: AppColors.onSurfaceVariant, // #5A5A5A
+        
+        // Outline
+        outline: AppColors.outline, // #BEBEBE
+        outlineVariant: AppColors.outlineVariant, // #E0E0E0
+        
+        // Shadow & Scrim
+        shadow: AppColors.black,
         scrim: AppColors.overlay,
+        
+        // Inverse
         inverseSurface: AppColors.neutral900,
         onInverseSurface: AppColors.white,
         inversePrimary: AppColors.primaryLight,
+        
         brightness: Brightness.light,
       ),
       
-      // === Background Colors ===
-      scaffoldBackgroundColor: AppColors.background,
-      canvasColor: AppColors.white,
+      // === Background Colors Material 3 ===
+      scaffoldBackgroundColor: AppColors.background, // #FAFAFA
+      canvasColor: AppColors.surface,
       
       // === AppBar Theme ===
       appBarTheme: AppBarTheme(
@@ -113,32 +131,45 @@ class AppTheme {
         ),
       ),
       
-      // === Card Theme ===
+      // === Card Theme Material 3 ===
       cardTheme: CardThemeData(
         elevation: 0,
-        shadowColor: AppColors.black.withOpacity(0.1),
+        shadowColor: AppColors.black.withOpacity(0.08),
         shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.card,
+          borderRadius: AppRadius.card, // 16px
         ),
         clipBehavior: Clip.antiAlias,
-        color: AppColors.white,
+        color: AppColors.surfaceContainerLow, // #F5F5F5
         margin: EdgeInsets.zero,
       ),
       
-      // === Button Themes ===
+      // === Button Themes Material 3 ===
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.white,
+          backgroundColor: AppColors.primary, // #D32F2F
+          foregroundColor: AppColors.onPrimary, // #FFFFFF
           elevation: 0,
           shadowColor: AppColors.primary.withOpacity(0.3),
           padding: AppSpacing.buttonPadding,
           shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.button,
+            borderRadius: AppRadius.button, // 12px
           ),
-          textStyle: AppTextStyles.button,
+          textStyle: AppTextStyles.labelLarge,
           disabledBackgroundColor: AppColors.neutral300,
           disabledForegroundColor: AppColors.neutral500,
+        ),
+      ),
+      
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          elevation: 0,
+          padding: AppSpacing.buttonPadding,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppRadius.button, // 12px
+          ),
+          textStyle: AppTextStyles.labelLarge,
         ),
       ),
       
@@ -147,21 +178,21 @@ class AppTheme {
           foregroundColor: AppColors.primary,
           padding: AppSpacing.buttonPaddingSmall,
           shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.button,
+            borderRadius: AppRadius.button, // 12px
           ),
-          textStyle: AppTextStyles.button,
+          textStyle: AppTextStyles.labelLarge,
         ),
       ),
       
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          side: const BorderSide(color: AppColors.outline, width: 1),
           padding: AppSpacing.buttonPadding,
           shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.button,
+            borderRadius: AppRadius.button, // 12px
           ),
-          textStyle: AppTextStyles.button,
+          textStyle: AppTextStyles.labelLarge,
         ),
       ),
       
@@ -172,18 +203,18 @@ class AppTheme {
         ),
       ),
       
-      // === Input Decoration Theme ===
+      // === Input Decoration Theme Material 3 ===
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.white,
+        fillColor: AppColors.surface,
         contentPadding: AppSpacing.inputPadding,
         border: OutlineInputBorder(
-          borderRadius: AppRadius.input,
-          borderSide: BorderSide(color: AppColors.border),
+          borderRadius: AppRadius.input, // 12px
+          borderSide: const BorderSide(color: AppColors.outline),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: AppRadius.input,
-          borderSide: BorderSide(color: AppColors.border),
+          borderSide: const BorderSide(color: AppColors.outline), // #BEBEBE
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppRadius.input,
@@ -191,31 +222,30 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: AppRadius.input,
-          borderSide: BorderSide(color: AppColors.danger),
+          borderSide: const BorderSide(color: AppColors.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: AppRadius.input,
-          borderSide: const BorderSide(color: AppColors.danger, width: 2),
+          borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: AppRadius.input,
-          borderSide: BorderSide(color: AppColors.neutral200),
+          borderSide: const BorderSide(color: AppColors.outlineVariant),
         ),
-        labelStyle: AppTextStyles.titleSmall.copyWith(
-          color: AppColors.textSecondary,
+        labelStyle: AppTextStyles.bodyLarge.copyWith(
+          color: AppColors.onSurfaceVariant,
         ),
-        floatingLabelStyle: AppTextStyles.titleSmall.copyWith(
+        floatingLabelStyle: AppTextStyles.bodySmall.copyWith(
           color: AppColors.primary,
-          fontWeight: FontWeight.w600,
         ),
-        hintStyle: AppTextStyles.bodyMedium.copyWith(
-          color: AppColors.neutral500,
+        hintStyle: AppTextStyles.bodyLarge.copyWith(
+          color: AppColors.onSurfaceVariant,
         ),
         helperStyle: AppTextStyles.bodySmall.copyWith(
-          color: AppColors.textSecondary,
+          color: AppColors.onSurfaceVariant,
         ),
         errorStyle: AppTextStyles.bodySmall.copyWith(
-          color: AppColors.danger,
+          color: AppColors.error,
         ),
       ),
       
@@ -293,15 +323,25 @@ class AppTheme {
         elevation: 3,
       ),
       
-      // === Dialog Theme ===
+      // === Dialog Theme Material 3 ===
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.white,
-        elevation: 8,
+        backgroundColor: AppColors.surface,
+        elevation: 6,
         shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.dialog,
+          borderRadius: AppRadius.dialog, // 24px Material 3
         ),
         titleTextStyle: AppTextStyles.headlineMedium,
         contentTextStyle: AppTextStyles.bodyMedium,
+      ),
+      
+      // === Bottom Sheet Theme Material 3 ===
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: AppColors.surface,
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.bottomSheet, // 24px Material 3
+        ),
+        clipBehavior: Clip.antiAlias,
       ),
       
       // === Tooltip Theme ===
@@ -319,22 +359,23 @@ class AppTheme {
         ),
       ),
       
-      // === Chip Theme ===
+      // === Chip Theme Material 3 ===
       chipTheme: ChipThemeData(
-        backgroundColor: AppColors.neutral100,
-        deleteIconColor: AppColors.neutral600,
-        disabledColor: AppColors.neutral200,
-        selectedColor: AppColors.primaryLighter,
-        secondarySelectedColor: AppColors.primaryLight,
+        backgroundColor: AppColors.surfaceContainerLow,
+        deleteIconColor: AppColors.onSurfaceVariant,
+        disabledColor: AppColors.surfaceContainer,
+        selectedColor: AppColors.primaryContainer, // #F9DEDE
+        secondarySelectedColor: AppColors.secondaryContainer,
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
+          horizontal: AppSpacing.md,
           vertical: AppSpacing.xs,
         ),
-        labelStyle: AppTextStyles.labelMedium,
-        secondaryLabelStyle: AppTextStyles.labelMedium,
+        side: const BorderSide(color: AppColors.outline), // Border primary pour Chips
+        labelStyle: AppTextStyles.labelLarge,
+        secondaryLabelStyle: AppTextStyles.labelLarge,
         brightness: Brightness.light,
         shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.chip,
+          borderRadius: AppRadius.chip, // 16px Material 3
         ),
       ),
       
@@ -376,8 +417,9 @@ class AppTheme {
         labelSmall: AppTextStyles.labelSmall,
       ),
       
-      // === Font Family ===
-      fontFamily: 'Poppins',
+      // === Font Family Material 3 ===
+      fontFamily: 'Inter', // Material 3 - Inter with fallback to Roboto
+      fontFamilyFallback: const ['Inter', 'Roboto'],
       
       // === Autres ===
       splashColor: AppColors.primary.withOpacity(0.1),
