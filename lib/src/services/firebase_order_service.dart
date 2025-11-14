@@ -3,8 +3,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/order.dart' as app_models;
-import '../providers/cart_provider.dart';
+import 'package:pizza_delizza/src/features/orders/data/models/order.dart' as app_models;
+import 'package:pizza_delizza/src/features/cart/application/cart_provider.dart';
 import 'loyalty_service.dart';
 
 class FirebaseOrderService {

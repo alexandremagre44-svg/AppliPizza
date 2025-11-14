@@ -2,7 +2,7 @@
 // Service for managing configurable app texts in Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/app_texts_config.dart';
+import 'package:pizza_delizza/src/features/home/data/models/app_texts_config.dart';
 
 class AppTextsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

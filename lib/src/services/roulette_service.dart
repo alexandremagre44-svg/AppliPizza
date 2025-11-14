@@ -3,7 +3,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../models/roulette_config.dart';
+import 'package:pizza_delizza/src/features/roulette/data/models/roulette_config.dart';
 import 'dart:math';
 
 class RouletteService {

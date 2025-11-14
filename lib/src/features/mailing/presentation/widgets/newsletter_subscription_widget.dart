@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../models/subscriber.dart';
+import '../../data/models/subscriber.dart';
 import 'package:pizza_delizza/src/services/mailing_service.dart';
 import '../theme/app_theme.dart';
 

@@ -6,7 +6,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/order.dart';
+import 'package:pizza_delizza/src/features/orders/data/models/order.dart';
 
 @deprecated
 class OrderService {

@@ -3,7 +3,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:developer' as developer;
-import '../models/product.dart';
+import 'package:pizza_delizza/src/features/product/data/models/product.dart';
 
 /// Service unifié qui gère les opérations Firestore pour tous les produits
 /// Ce service est utilisé par les écrans admin pour écrire directement dans Firestore

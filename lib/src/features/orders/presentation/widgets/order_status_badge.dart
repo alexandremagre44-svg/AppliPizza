@@ -2,7 +2,7 @@
 // Badge de statut pour afficher l'état d'une commande
 
 import 'package:flutter/material.dart';
-import '../models/order.dart';
+import '../data/models/order.dart';
 import '../theme/app_theme.dart';
 
 class OrderStatusBadge extends StatelessWidget {

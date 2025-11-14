@@ -6,7 +6,7 @@
 
 import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/product.dart';
+import 'package:pizza_delizza/src/features/product/data/models/product.dart';
 
 // Interface abstraite pour permettre la compatibilité avec/sans Firebase
 abstract class FirestoreProductService {

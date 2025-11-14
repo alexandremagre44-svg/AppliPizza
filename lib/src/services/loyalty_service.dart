@@ -3,7 +3,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
-import '../models/loyalty_reward.dart';
+import 'package:pizza_delizza/src/features/loyalty/data/models/loyalty_reward.dart';
 
 class LoyaltyService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

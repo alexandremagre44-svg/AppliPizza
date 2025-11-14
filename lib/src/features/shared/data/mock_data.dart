@@ -1,6 +1,6 @@
 // lib/src/data/mock_data.dart
 
-import '../models/product.dart';
+import '../../product/data/models/product.dart';
 
 // ===============================================
 // INGRÉDIENTS (pour la personnalisation future)

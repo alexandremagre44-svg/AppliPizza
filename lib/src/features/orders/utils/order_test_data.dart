@@ -2,7 +2,7 @@
 // Générateur de données de test pour les commandes
 
 import 'package:uuid/uuid.dart';
-import '../models/order.dart';
+import '../data/models/order.dart';
 import '../../../cart/application/cart_provider.dart';
 
 class OrderTestData {

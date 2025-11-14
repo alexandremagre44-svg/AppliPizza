@@ -4,7 +4,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
-import '../models/subscriber.dart';
+import 'package:pizza_delizza/src/features/mailing/data/models/subscriber.dart';
 
 class MailingService {
   static const String _subscribersKey = 'subscribers_list';

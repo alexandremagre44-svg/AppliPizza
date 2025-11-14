@@ -2,7 +2,7 @@
 // Provider for home configuration
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/home_config.dart';
+import '../data/models/home_config.dart';
 import 'package:pizza_delizza/src/services/home_config_service.dart';
 
 // Service provider

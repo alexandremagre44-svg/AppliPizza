@@ -3,8 +3,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:developer' as developer;
-import '../models/user_profile.dart';
-import '../models/order.dart';
+import 'package:pizza_delizza/src/features/auth/data/models/user_profile.dart';
+import 'package:pizza_delizza/src/features/orders/data/models/order.dart';
 
 /// Service pour gérer les profils utilisateurs dans Firestore
 class UserProfileService {

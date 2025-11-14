@@ -1,7 +1,7 @@
 // lib/src/services/api_service.dart
 // Service API - préparé pour future intégration backend
 
-import '../models/product.dart';
+import 'package:pizza_delizza/src/features/product/data/models/product.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();

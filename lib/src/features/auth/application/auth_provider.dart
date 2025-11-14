@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../data/repositories/firebase_auth_repository.dart';
+import 'package:pizza_delizza/src/services/firebase_auth_service.dart';
 import '../../shared/constants/constants.dart';
 
 /// Provider pour le service d'authentification Firebase

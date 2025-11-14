@@ -2,7 +2,7 @@
 // Service for managing promotions in Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/promotion.dart';
+import 'package:pizza_delizza/src/features/mailing/data/models/promotion.dart';
 
 class PromotionService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

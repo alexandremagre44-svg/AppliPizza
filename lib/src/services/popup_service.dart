@@ -2,7 +2,7 @@
 // Service for managing popup configurations in Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/popup_config.dart';
+import 'package:pizza_delizza/src/features/popups/data/models/popup_config.dart';
 
 class PopupService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

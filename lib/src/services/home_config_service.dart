@@ -2,7 +2,7 @@
 // Service for managing home page configuration in Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/home_config.dart';
+import 'package:pizza_delizza/src/features/home/data/models/home_config.dart';
 
 class HomeConfigService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

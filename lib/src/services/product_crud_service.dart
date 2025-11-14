@@ -3,7 +3,7 @@
 
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/product.dart';
+import 'package:pizza_delizza/src/features/product/data/models/product.dart';
 import '../core/constants.dart';
 
 class ProductCrudService {

@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../models/order.dart';
+import '../data/models/order.dart';
 import '../theme/app_theme.dart';
 import 'package:pizza_delizza/src/services/firebase_order_service.dart';
 import '../../../orders/application/order_provider.dart';

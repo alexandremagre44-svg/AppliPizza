@@ -3,7 +3,7 @@
 
 import 'package:csv/csv.dart';
 import 'package:intl/intl.dart';
-import '../models/order.dart';
+import '../data/models/order.dart';
 
 class OrderExport {
   /// Convertit une liste de commandes en CSV

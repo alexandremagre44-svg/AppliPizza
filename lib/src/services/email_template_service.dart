@@ -4,7 +4,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
-import '../models/email_template.dart';
+import 'package:pizza_delizza/src/features/mailing/data/models/email_template.dart';
 import '../utils/email_templates.dart';
 
 class EmailTemplateService {

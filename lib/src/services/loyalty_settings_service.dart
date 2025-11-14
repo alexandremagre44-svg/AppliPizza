@@ -2,7 +2,7 @@
 // Service for managing loyalty program settings in Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/loyalty_settings.dart';
+import 'package:pizza_delizza/src/features/loyalty/data/models/loyalty_settings.dart';
 
 class LoyaltySettingsService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

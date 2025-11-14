@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../data/repositories/firebase_auth_repository.dart';
+import 'package:pizza_delizza/src/services/firebase_auth_service.dart';
 import '../../../shared/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
 
