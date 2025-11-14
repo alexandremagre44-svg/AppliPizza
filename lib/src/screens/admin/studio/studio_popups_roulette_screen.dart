@@ -7,7 +7,9 @@ import '../../../models/popup_config.dart';
 import '../../../models/roulette_config.dart';
 import '../../../services/popup_service.dart';
 import '../../../services/roulette_service.dart';
-import '../../../theme/app_theme.dart';
+import '../../../design_system/app_theme.dart';
+import 'edit_popup_screen.dart';
+import 'edit_roulette_screen.dart';
 
 class StudioPopupsRouletteScreen extends StatefulWidget {
   const StudioPopupsRouletteScreen({super.key});
@@ -212,13 +214,23 @@ class _StudioPopupsRouletteScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.casino, color: AppColors.primaryRed),
-                    SizedBox(width: AppSpacing.sm),
-                    Text(
-                      'Configuration de la roulette',
-                      style: AppTextStyles.titleLarge,
+                    Row(
+                      children: [
+                        Icon(Icons.casino, color: AppColors.primaryRed),
+                        SizedBox(width: AppSpacing.sm),
+                        Text(
+                          'Configuration de la roulette',
+                          style: AppTextStyles.titleLarge,
+                        ),
+                      ],
                     ),
+                    if (roulette != null)
+                      IconButton(
+                        icon: Icon(Icons.edit, color: AppColors.primaryRed),
+                        onPressed: () => _editRoulette(roulette),
+                      ),
                   ],
                 ),
                 SizedBox(height: AppSpacing.lg),
@@ -231,7 +243,7 @@ class _StudioPopupsRouletteScreenState
                   activeColor: AppColors.primaryRed,
                   onChanged: (value) async {
                     if (roulette == null) return;
-                    final updated = roulette.copyWith(isActive: value);
+                    final updated = roulette.copyWith(isActive: value, updatedAt: DateTime.now());
                     await _rouletteService.saveRouletteConfig(updated);
                     _loadData();
                     _showSnackBar('Roulette ${value ? 'activée' : 'désactivée'}');
@@ -254,10 +266,19 @@ class _StudioPopupsRouletteScreenState
                         margin: EdgeInsets.only(bottom: AppSpacing.sm),
                         child: ListTile(
                           dense: true,
+                          leading: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: segment.color,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.textLight),
+                            ),
+                          ),
                           title: Text(segment.label),
-                          subtitle: Text(segment.type),
+                          subtitle: Text(segment.rewardId),
                           trailing: Text(
-                            'Poids: ${segment.weight.toStringAsFixed(1)}',
+                            '${segment.probability.toStringAsFixed(1)}%',
                             style: AppTextStyles.bodySmall,
                           ),
                         ),
@@ -371,12 +392,43 @@ class _StudioPopupsRouletteScreenState
     );
   }
 
-  void _showAddPopupDialog() {
-    _showPopupDialog();
+  Future<void> _showAddPopupDialog() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const EditPopupScreen(),
+      ),
+    );
+    
+    if (result == true) {
+      _loadData();
+    }
   }
 
-  void _showEditPopupDialog(PopupConfig popup) {
-    _showPopupDialog(existingPopup: popup);
+  Future<void> _showEditPopupDialog(PopupConfig popup) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPopupScreen(existingPopup: popup),
+      ),
+    );
+    
+    if (result == true) {
+      _loadData();
+    }
+  }
+  
+  Future<void> _editRoulette(RouletteConfig config) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditRouletteScreen(config: config),
+      ),
+    );
+    
+    if (result == true) {
+      _loadData();
+    }
   }
 
   void _showPopupDialog({PopupConfig? existingPopup}) {

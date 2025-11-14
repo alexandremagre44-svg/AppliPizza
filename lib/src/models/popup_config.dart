@@ -1,114 +1,197 @@
 // lib/src/models/popup_config.dart
 // Model for configurable popups in the app
 
+enum PopupTrigger {
+  onAppOpen,
+  onHomeScroll,
+}
+
+enum PopupAudience {
+  all,
+  newUsers,
+  loyalUsers,
+}
+
 class PopupConfig {
   final String id;
-  final String type; // 'promo', 'info', 'fidelite', 'systeme'
   final String title;
   final String message;
-  final String? ctaText;
-  final String? ctaAction; // Navigation action
-  final String displayCondition; // 'always', 'oncePerSession', 'oncePerDay', 'onceEver'
-  final String targetAudience; // 'all', 'new', 'loyal', 'gold'
+  final String? imageUrl;
+  final String? buttonText;
+  final String? buttonLink; // GoRouter route
+  final PopupTrigger trigger;
+  final PopupAudience audience;
   final DateTime? startDate;
   final DateTime? endDate;
-  final bool isActive;
+  final bool isEnabled;
   final int priority; // Higher priority shows first
   final DateTime createdAt;
+  
+  // Legacy fields for backward compatibility
+  final String? type; // 'promo', 'info', 'fidelite', 'systeme'
+  final String? ctaText;
+  final String? ctaAction;
+  final String? displayCondition;
+  final String? targetAudience;
 
   PopupConfig({
     required this.id,
-    required this.type,
     required this.title,
     required this.message,
-    this.ctaText,
-    this.ctaAction,
-    this.displayCondition = 'oncePerDay',
-    this.targetAudience = 'all',
+    this.imageUrl,
+    this.buttonText,
+    this.buttonLink,
+    this.trigger = PopupTrigger.onAppOpen,
+    this.audience = PopupAudience.all,
     this.startDate,
     this.endDate,
-    this.isActive = true,
+    this.isEnabled = true,
     this.priority = 0,
     required this.createdAt,
+    // Legacy fields
+    this.type,
+    this.ctaText,
+    this.ctaAction,
+    this.displayCondition,
+    this.targetAudience,
   });
 
-  Map<String, dynamic> toJson() {
+  // Convert to Firestore map
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'type': type,
       'title': title,
       'message': message,
+      'imageUrl': imageUrl,
+      'buttonText': buttonText,
+      'buttonLink': buttonLink,
+      'trigger': trigger.name,
+      'audience': audience.name,
+      'startDate': startDate?.toIso8601String(),
+      'endDate': endDate?.toIso8601String(),
+      'isEnabled': isEnabled,
+      'priority': priority,
+      'createdAt': createdAt.toIso8601String(),
+      // Legacy fields
+      'type': type,
       'ctaText': ctaText,
       'ctaAction': ctaAction,
       'displayCondition': displayCondition,
       'targetAudience': targetAudience,
-      'startDate': startDate?.toIso8601String(),
-      'endDate': endDate?.toIso8601String(),
-      'isActive': isActive,
-      'priority': priority,
-      'createdAt': createdAt.toIso8601String(),
+      'isActive': isEnabled, // For backward compatibility
     };
   }
 
-  factory PopupConfig.fromJson(Map<String, dynamic> json) {
+  // Alias for backward compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  // Create from Firestore document
+  factory PopupConfig.fromFirestore(Map<String, dynamic> data) {
     return PopupConfig(
-      id: json['id'] as String,
-      type: json['type'] as String,
-      title: json['title'] as String,
-      message: json['message'] as String,
-      ctaText: json['ctaText'] as String?,
-      ctaAction: json['ctaAction'] as String?,
-      displayCondition: json['displayCondition'] as String? ?? 'oncePerDay',
-      targetAudience: json['targetAudience'] as String? ?? 'all',
-      startDate: json['startDate'] != null
-          ? DateTime.parse(json['startDate'] as String)
+      id: data['id'] as String,
+      title: data['title'] as String,
+      message: data['message'] as String,
+      imageUrl: data['imageUrl'] as String?,
+      buttonText: data['buttonText'] as String?,
+      buttonLink: data['buttonLink'] as String?,
+      trigger: _parseTrigger(data['trigger'] as String?),
+      audience: _parseAudience(data['audience'] as String?),
+      startDate: data['startDate'] != null
+          ? DateTime.parse(data['startDate'] as String)
           : null,
-      endDate: json['endDate'] != null
-          ? DateTime.parse(json['endDate'] as String)
+      endDate: data['endDate'] != null
+          ? DateTime.parse(data['endDate'] as String)
           : null,
-      isActive: json['isActive'] as bool? ?? true,
-      priority: json['priority'] as int? ?? 0,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      isEnabled: data['isEnabled'] as bool? ?? data['isActive'] as bool? ?? true,
+      priority: data['priority'] as int? ?? 0,
+      createdAt: data['createdAt'] != null 
+          ? DateTime.parse(data['createdAt'] as String)
+          : DateTime.now(),
+      // Legacy fields
+      type: data['type'] as String?,
+      ctaText: data['ctaText'] as String?,
+      ctaAction: data['ctaAction'] as String?,
+      displayCondition: data['displayCondition'] as String?,
+      targetAudience: data['targetAudience'] as String?,
     );
+  }
+
+  // Alias for backward compatibility
+  factory PopupConfig.fromJson(Map<String, dynamic> json) => 
+      PopupConfig.fromFirestore(json);
+
+  static PopupTrigger _parseTrigger(String? value) {
+    switch (value) {
+      case 'onHomeScroll':
+        return PopupTrigger.onHomeScroll;
+      default:
+        return PopupTrigger.onAppOpen;
+    }
+  }
+
+  static PopupAudience _parseAudience(String? value) {
+    switch (value) {
+      case 'newUsers':
+        return PopupAudience.newUsers;
+      case 'loyalUsers':
+        return PopupAudience.loyalUsers;
+      default:
+        return PopupAudience.all;
+    }
   }
 
   PopupConfig copyWith({
     String? id,
-    String? type,
     String? title,
     String? message,
+    String? imageUrl,
+    String? buttonText,
+    String? buttonLink,
+    PopupTrigger? trigger,
+    PopupAudience? audience,
+    DateTime? startDate,
+    DateTime? endDate,
+    bool? isEnabled,
+    int? priority,
+    DateTime? createdAt,
+    // Legacy fields
+    String? type,
     String? ctaText,
     String? ctaAction,
     String? displayCondition,
     String? targetAudience,
-    DateTime? startDate,
-    DateTime? endDate,
-    bool? isActive,
-    int? priority,
-    DateTime? createdAt,
   }) {
     return PopupConfig(
       id: id ?? this.id,
-      type: type ?? this.type,
       title: title ?? this.title,
       message: message ?? this.message,
+      imageUrl: imageUrl ?? this.imageUrl,
+      buttonText: buttonText ?? this.buttonText,
+      buttonLink: buttonLink ?? this.buttonLink,
+      trigger: trigger ?? this.trigger,
+      audience: audience ?? this.audience,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      isEnabled: isEnabled ?? this.isEnabled,
+      priority: priority ?? this.priority,
+      createdAt: createdAt ?? this.createdAt,
+      // Legacy fields
+      type: type ?? this.type,
       ctaText: ctaText ?? this.ctaText,
       ctaAction: ctaAction ?? this.ctaAction,
       displayCondition: displayCondition ?? this.displayCondition,
       targetAudience: targetAudience ?? this.targetAudience,
-      startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
-      isActive: isActive ?? this.isActive,
-      priority: priority ?? this.priority,
-      createdAt: createdAt ?? this.createdAt,
     );
   }
 
   bool get isCurrentlyActive {
-    if (!isActive) return false;
+    if (!isEnabled) return false;
     final now = DateTime.now();
     if (startDate != null && now.isBefore(startDate!)) return false;
     if (endDate != null && now.isAfter(endDate!)) return false;
     return true;
   }
+  
+  // Legacy getter for backward compatibility
+  bool get isActive => isEnabled;
 }

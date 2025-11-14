@@ -19,6 +19,7 @@ class AppRoutes {
   static const String adminOrders = '/admin/orders';
   static const String checkout = '/checkout';
   static const String kitchen = '/kitchen';
+  static const String roulette = '/roulette';
   
   // Studio routes
   static const String studioHomeConfig = '/admin/studio/home-config';
