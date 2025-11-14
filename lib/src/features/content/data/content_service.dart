@@ -6,6 +6,8 @@ import 'models/content_string_model.dart';
 
 /// Service for managing content strings in the headless CMS
 /// Provides CRUD operations on the studio_content collection
+/// 
+/// Security: Firestore rules should restrict write access to admin users only
 class ContentService {
   final FirebaseFirestore _firestore;
   static const String _collection = 'studio_content';
