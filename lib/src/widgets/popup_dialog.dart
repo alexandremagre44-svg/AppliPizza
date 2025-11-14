@@ -29,8 +29,9 @@ class _PopupDialogState extends State<PopupDialog>
   @override
   void initState() {
     super.initState();
+    // MANDATORY 400ms animation as specified in requirements
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     
@@ -40,7 +41,7 @@ class _PopupDialogState extends State<PopupDialog>
     );
     
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.1),
+      begin: const Offset(0, 0.3),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _controller,

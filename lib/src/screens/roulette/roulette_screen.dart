@@ -70,11 +70,26 @@ class _RouletteScreenState extends State<RouletteScreen> {
     
     setState(() => _isSpinning = true);
     
-    // Play spin sound (optional - would need audio asset)
-    // await _audioPlayer.play(AssetSource('sounds/spin.mp3'));
-    
-    // Haptic feedback
+    // Initial haptic feedback on spin start
     HapticFeedback.mediumImpact();
+    
+    // Play tick sound in loop during rotation (when audio asset is available)
+    // The tick sound should be short (~0.1s) and play repeatedly
+    try {
+      // await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      // await _audioPlayer.play(AssetSource('sounds/tick.mp3'));
+    } catch (e) {
+      print('Audio not available: $e');
+    }
+    
+    // Simulate click haptics during spin (lighter feedback every 200ms)
+    Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      if (!_isSpinning || !mounted) {
+        timer.cancel();
+        return;
+      }
+      HapticFeedback.selectionClick();
+    });
     
     // Determine winning segment
     final winningSegment = _rouletteService.spinWheel(_config!.segments);
@@ -88,15 +103,26 @@ class _RouletteScreenState extends State<RouletteScreen> {
     
     if (!mounted) return;
     
+    // Stop tick sound
+    try {
+      // await _audioPlayer.stop();
+    } catch (e) {
+      print('Audio stop error: $e');
+    }
+    
     // Record the spin
     await _rouletteService.recordSpin(widget.userId, winningSegment);
     
-    // Victory haptic
+    // Victory haptic feedback (stronger impact)
     HapticFeedback.heavyImpact();
     
-    // Play victory sound if not "nothing"
+    // Play victory sound and show confetti if not "nothing"
     if (winningSegment.rewardId != 'nothing') {
-      // await _audioPlayer.play(AssetSource('sounds/win.mp3'));
+      try {
+        // await _audioPlayer.play(AssetSource('sounds/win.mp3'));
+      } catch (e) {
+        print('Victory audio not available: $e');
+      }
       _confettiController.play();
     }
     

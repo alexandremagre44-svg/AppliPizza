@@ -50,20 +50,39 @@ class RouletteConfig {
       displayLocation: data['displayLocation'] as String? ?? 'home',
       delaySeconds: data['delaySeconds'] as int? ?? 5,
       maxUsesPerDay: data['maxUsesPerDay'] as int? ?? 1,
-      startDate: data['startDate'] != null
-          ? DateTime.parse(data['startDate'] as String)
-          : null,
-      endDate: data['endDate'] != null
-          ? DateTime.parse(data['endDate'] as String)
-          : null,
+      startDate: _parseDateTime(data['startDate']),
+      endDate: _parseDateTime(data['endDate']),
       segments: (data['segments'] as List<dynamic>?)
               ?.map((s) => RouletteSegment.fromMap(s as Map<String, dynamic>))
               .toList() ??
           [],
-      updatedAt: data['updatedAt'] != null
-          ? DateTime.parse(data['updatedAt'] as String)
-          : DateTime.now(),
+      updatedAt: _parseDateTime(data['updatedAt']) ?? DateTime.now(),
     );
+  }
+  
+  // Parse DateTime from either String (ISO8601) or Firestore Timestamp
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        print('Error parsing date string: $e');
+        return null;
+      }
+    }
+    // Handle Firestore Timestamp (has toDate() method)
+    if (value is Map && value.containsKey('_seconds')) {
+      final seconds = value['_seconds'] as int;
+      return DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+    }
+    // Try dynamic method call for Timestamp object
+    try {
+      return (value as dynamic).toDate() as DateTime;
+    } catch (e) {
+      print('Error converting Timestamp to DateTime: $e');
+      return null;
+    }
   }
   
   // Alias for backward compatibility

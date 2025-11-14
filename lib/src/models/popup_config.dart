@@ -96,17 +96,11 @@ class PopupConfig {
       buttonLink: data['buttonLink'] as String?,
       trigger: _parseTrigger(data['trigger'] as String?),
       audience: _parseAudience(data['audience'] as String?),
-      startDate: data['startDate'] != null
-          ? DateTime.parse(data['startDate'] as String)
-          : null,
-      endDate: data['endDate'] != null
-          ? DateTime.parse(data['endDate'] as String)
-          : null,
+      startDate: _parseDateTime(data['startDate']),
+      endDate: _parseDateTime(data['endDate']),
       isEnabled: data['isEnabled'] as bool? ?? data['isActive'] as bool? ?? true,
       priority: data['priority'] as int? ?? 0,
-      createdAt: data['createdAt'] != null 
-          ? DateTime.parse(data['createdAt'] as String)
-          : DateTime.now(),
+      createdAt: _parseDateTime(data['createdAt']) ?? DateTime.now(),
       // Legacy fields
       type: data['type'] as String?,
       ctaText: data['ctaText'] as String?,
@@ -114,6 +108,31 @@ class PopupConfig {
       displayCondition: data['displayCondition'] as String?,
       targetAudience: data['targetAudience'] as String?,
     );
+  }
+  
+  // Parse DateTime from either String (ISO8601) or Firestore Timestamp
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        print('Error parsing date string: $e');
+        return null;
+      }
+    }
+    // Handle Firestore Timestamp (has toDate() method)
+    if (value is Map && value.containsKey('_seconds')) {
+      final seconds = value['_seconds'] as int;
+      return DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+    }
+    // Try dynamic method call for Timestamp object
+    try {
+      return (value as dynamic).toDate() as DateTime;
+    } catch (e) {
+      print('Error converting Timestamp to DateTime: $e');
+      return null;
+    }
   }
 
   // Alias for backward compatibility

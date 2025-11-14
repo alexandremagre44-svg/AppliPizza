@@ -73,4 +73,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # Vous pouvez ajouter ici la section assets, fonts, etc.
+  # Assets for roulette sounds and other resources
+  assets:
+    - assets/sounds/

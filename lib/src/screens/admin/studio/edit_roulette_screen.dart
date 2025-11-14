@@ -116,8 +116,14 @@ class _EditRouletteScreenState extends State<EditRouletteScreen> {
         actions: [
           if (!_isSaving)
             IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _saveConfig,
+              icon: Icon(
+                Icons.save,
+                color: _isProbabilityValid ? Colors.white : Colors.white.withOpacity(0.3),
+              ),
+              onPressed: _isProbabilityValid ? _saveConfig : null,
+              tooltip: _isProbabilityValid 
+                  ? 'Enregistrer' 
+                  : 'La somme des probabilités doit être égale à 100%',
             ),
           if (_isSaving)
             const Padding(

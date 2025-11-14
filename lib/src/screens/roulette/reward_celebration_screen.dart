@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 import '../../models/roulette_config.dart';
 import '../../services/user_profile_service.dart';
@@ -68,8 +69,7 @@ class _RewardCelebrationScreenState extends State<RewardCelebrationScreen>
   }
 
   Future<void> _addRewardToProfile() async {
-    // Add reward to user profile
-    // This would depend on your user profile structure
+    // Add reward to user profile - INSTANT REWARD IMPLEMENTATION
     try {
       final profile = await _userProfileService.getUserProfile(widget.userId);
       
@@ -86,16 +86,65 @@ class _RewardCelebrationScreenState extends State<RewardCelebrationScreen>
               profile.copyWith(loyaltyPoints: updatedPoints),
             );
           }
+        } else {
+          // For other reward types (free_pizza, free_drink, free_dessert, etc.)
+          // Create a user-specific coupon that will be added to their account
+          await _createUserCoupon(widget.userId, widget.segment);
         }
-        // For other reward types (free_pizza, free_drink, etc.),
-        // you would add them to the user's coupons/rewards list
-        // This depends on your implementation of promotions/coupons
       }
     } catch (e) {
       print('Error adding reward to profile: $e');
     } finally {
       setState(() => _isProcessing = false);
     }
+  }
+  
+  /// Create a user-specific coupon for the roulette reward
+  Future<void> _createUserCoupon(String userId, RouletteSegment segment) async {
+    try {
+      // Create a coupon document in user_coupons collection
+      final couponData = {
+        'userId': userId,
+        'rewardId': segment.rewardId,
+        'rewardLabel': segment.label,
+        'type': _getCouponType(segment.rewardId),
+        'value': _getCouponValue(segment.rewardId),
+        'isUsed': false,
+        'source': 'roulette',
+        'createdAt': DateTime.now().toIso8601String(),
+        'expiresAt': DateTime.now().add(const Duration(days: 30)).toIso8601String(),
+      };
+      
+      await FirebaseFirestore.instance
+          .collection('user_coupons')
+          .add(couponData);
+      
+      print('Coupon created for user: $userId - ${segment.label}');
+    } catch (e) {
+      print('Error creating user coupon: $e');
+      rethrow;
+    }
+  }
+  
+  String _getCouponType(String rewardId) {
+    if (rewardId.contains('pizza')) return 'free_item';
+    if (rewardId.contains('drink')) return 'free_item';
+    if (rewardId.contains('dessert')) return 'free_item';
+    if (rewardId.contains('promo')) return 'percent_discount';
+    return 'special';
+  }
+  
+  double _getCouponValue(String rewardId) {
+    // Extract numeric value from rewardId if present
+    final match = RegExp(r'\d+').firstMatch(rewardId);
+    if (match != null) {
+      return double.tryParse(match.group(0) ?? '0') ?? 0;
+    }
+    // Default values for specific types
+    if (rewardId.contains('pizza')) return 1;
+    if (rewardId.contains('drink')) return 1;
+    if (rewardId.contains('dessert')) return 1;
+    return 0;
   }
 
   IconData _getRewardIcon() {
