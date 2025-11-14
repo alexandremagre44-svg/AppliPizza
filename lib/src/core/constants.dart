@@ -22,6 +22,7 @@ class AppRoutes {
   static const String roulette = '/roulette';
   
   // Studio routes
+  static const String adminStudio = '/admin/studio'; // Studio Builder main screen
   static const String studioHomeConfig = '/admin/studio/home-config';
   static const String studioPopupsRoulette = '/admin/studio/popups-roulette';
   static const String studioTexts = '/admin/studio/texts';
