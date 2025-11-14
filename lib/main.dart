@@ -31,6 +31,7 @@ import 'src/screens/admin/studio/studio_featured_products_screen.dart';
 import 'src/screens/admin/communication/communication_promotions_screen.dart';
 import 'src/screens/admin/communication/communication_loyalty_screen.dart';
 import 'src/kitchen/kitchen_page.dart';
+import 'src/screens/roulette/roulette_screen.dart';
 
 // Importez le composant de barre de navigation
 import 'src/widgets/scaffold_with_nav_bar.dart'; 
@@ -220,6 +221,16 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.kitchen,
           builder: (context, state) => const KitchenPage(),
+        ),
+        // Route Roulette
+        GoRoute(
+          path: AppRoutes.roulette,
+          builder: (context, state) {
+            // Get userId from auth state
+            final authState = ref.read(authProvider);
+            final userId = authState.userEmail ?? 'guest';
+            return RouletteScreen(userId: userId);
+          },
         ),
       ],
     );
