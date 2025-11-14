@@ -24,6 +24,7 @@ import 'src/screens/admin/admin_desserts_screen.dart';
 import 'src/screens/admin/admin_page_builder_screen.dart';
 import 'src/screens/admin/admin_mailing_screen.dart';
 import 'src/screens/admin/admin_orders_screen.dart';
+import 'src/screens/admin/admin_studio_screen.dart';
 import 'src/screens/admin/studio/studio_home_config_screen.dart';
 import 'src/screens/admin/studio/studio_popups_roulette_screen.dart';
 import 'src/screens/admin/studio/studio_texts_screen.dart';
@@ -173,6 +174,10 @@ class MyApp extends ConsumerWidget {
               builder: (context, state) => const AdminOrdersScreen(),
             ),
             // Studio routes
+            GoRoute(
+              path: AppRoutes.adminStudio,
+              builder: (context, state) => const AdminStudioScreen(),
+            ),
             GoRoute(
               path: AppRoutes.studioHomeConfig,
               builder: (context, state) => const StudioHomeConfigScreen(),

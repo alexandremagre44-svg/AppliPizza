@@ -290,6 +290,13 @@ class AdminDashboardScreen extends StatelessWidget {
               delegate: SliverChildListDelegate([
                 _buildAdminCard(
                   context,
+                  icon: Icons.palette,
+                  title: 'Studio Builder',
+                  subtitle: 'Interface unifiée',
+                  onTap: () => context.push(AppRoutes.adminStudio),
+                ),
+                _buildAdminCard(
+                  context,
                   icon: Icons.home,
                   title: 'Page d\'accueil',
                   subtitle: 'Bannières & Blocs',
