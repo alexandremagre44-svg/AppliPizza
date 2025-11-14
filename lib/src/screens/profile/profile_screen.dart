@@ -186,6 +186,36 @@ class ProfileScreen extends ConsumerWidget {
 
             SizedBox(height: AppSpacing.xxl),
 
+            // Staff Tablet Access (for all staff)
+            Padding(
+              padding: AppSpacing.paddingHorizontalLG,
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => context.go(AppRoutes.staffTabletPin),
+                  icon: const Icon(Icons.tablet_mac, size: 24),
+                  label: const Text(
+                    'MODE CAISSE - TABLETTE',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange[700],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: AppSpacing.md),
+
             // Kitchen Mode Access (for kitchen role users)
             if (authState.isKitchen || authState.isAdmin)
               Padding(
@@ -216,7 +246,9 @@ class ProfileScreen extends ConsumerWidget {
               ),
 
             if (authState.isKitchen || authState.isAdmin)
-              SizedBox(height: AppSpacing.xxl),
+              SizedBox(height: AppSpacing.md),
+
+            SizedBox(height: AppSpacing.xxl),
 
             // Section Historique
             Padding(
