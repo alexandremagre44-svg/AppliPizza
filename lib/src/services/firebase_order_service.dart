@@ -29,6 +29,8 @@ class FirebaseOrderService {
     String? comment,
     String? pickupDate,
     String? pickupTimeSlot,
+    String source = 'client',
+    String? paymentMethod,
   }) async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -64,6 +66,8 @@ class FirebaseOrderService {
       'comment': comment,
       'seenByKitchen': false,
       'isViewed': false,
+      'source': source,
+      'paymentMethod': paymentMethod,
       'statusHistory': [
         {
           'status': app_models.OrderStatus.pending,
@@ -75,8 +79,10 @@ class FirebaseOrderService {
 
     final docRef = await _ordersCollection.add(orderData);
     
-    // Ajouter les points de fidélité après la commande
-    await LoyaltyService().addPointsFromOrder(user.uid, total);
+    // Ajouter les points de fidélité après la commande (only for client orders)
+    if (source == 'client') {
+      await LoyaltyService().addPointsFromOrder(user.uid, total);
+    }
     
     return docRef.id;
   }
@@ -263,6 +269,8 @@ class FirebaseOrderService {
       viewedAt: viewedAt,
       pickupDate: data['pickupDate'] as String?,
       pickupTimeSlot: data['pickupTimeSlot'] as String?,
+      source: data['source'] as String? ?? 'client',
+      paymentMethod: data['paymentMethod'] as String?,
     );
   }
 }

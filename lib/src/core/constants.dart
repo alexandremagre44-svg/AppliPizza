@@ -31,6 +31,12 @@ class AppRoutes {
   // Communication routes
   static const String communicationPromotions = '/admin/communication/promotions';
   static const String communicationLoyalty = '/admin/communication/loyalty';
+  
+  // Staff Tablet routes
+  static const String staffTabletPin = '/staff-tablet';
+  static const String staffTabletCatalog = '/staff-tablet/catalog';
+  static const String staffTabletCheckout = '/staff-tablet/checkout';
+  static const String staffTabletHistory = '/staff-tablet/history';
 }
 
 /// Rôles utilisateurs
