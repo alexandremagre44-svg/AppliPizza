@@ -4,7 +4,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:developer' as developer;
 import '../models/user_profile.dart';
-import '../models/order.dart';
+import '../../../orders/data/models/order.dart';
 
 /// Service pour gérer les profils utilisateurs dans Firestore
 class UserProfileService {

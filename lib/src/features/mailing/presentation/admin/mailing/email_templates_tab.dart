@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/email_template.dart';
-import '../../../services/email_template_service.dart';
+import 'package:pizza_delizza/src/services/email_template_service.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/constants/constants.dart';
 import 'email_template_preview_dialog.dart';

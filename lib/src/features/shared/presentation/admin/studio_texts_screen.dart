@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../models/app_texts_config.dart';
-import '../../../services/app_texts_service.dart';
+import 'package:pizza_delizza/src/services/app_texts_service.dart';
 import '../../../shared/theme/app_theme.dart';
 
 class StudioTextsScreen extends StatefulWidget {

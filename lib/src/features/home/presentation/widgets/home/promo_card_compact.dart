@@ -2,7 +2,7 @@
 // Compact promo card for horizontal carousel
 
 import 'package:flutter/material.dart';
-import '../../models/product.dart';
+import '../../../product/data/models/product.dart';
 import '../../../shared/theme/app_theme.dart';
 
 /// Compact promo card for displaying promotional products

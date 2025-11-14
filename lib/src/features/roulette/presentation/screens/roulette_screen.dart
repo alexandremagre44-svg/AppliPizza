@@ -8,9 +8,9 @@ import 'package:confetti/confetti.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 import 'dart:math' as math;
-import '../../models/roulette_config.dart';
-import '../../services/roulette_service.dart';
-import '../../design_system/app_theme.dart';
+import '../../data/models/roulette_config.dart';
+import 'package:pizza_delizza/src/services/roulette_service.dart';
+import '../../shared/design_system/app_theme.dart';
 import 'reward_celebration_screen.dart';
 
 class RouletteScreen extends StatefulWidget {

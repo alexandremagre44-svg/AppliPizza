@@ -3,11 +3,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../../../models/popup_config.dart';
-import '../../../models/roulette_config.dart';
-import '../../../services/popup_service.dart';
-import '../../../services/roulette_service.dart';
-import '../../../design_system/app_theme.dart';
+import '../../data/models/popup_config.dart';
+import '../../../roulette/data/models/roulette_config.dart';
+import 'package:pizza_delizza/src/services/popup_service.dart';
+import 'package:pizza_delizza/src/services/roulette_service.dart';
+import '../../shared/design_system/app_theme.dart';
 import 'edit_popup_screen.dart';
 import 'edit_roulette_screen.dart';
 

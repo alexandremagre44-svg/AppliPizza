@@ -3,7 +3,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/home_config.dart';
-import '../services/home_config_service.dart';
+import 'package:pizza_delizza/src/services/home_config_service.dart';
 
 // Service provider
 final homeConfigServiceProvider = Provider<HomeConfigService>((ref) {

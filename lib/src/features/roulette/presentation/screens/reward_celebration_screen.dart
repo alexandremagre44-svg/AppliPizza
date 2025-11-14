@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
-import '../../models/roulette_config.dart';
-import '../../services/user_profile_service.dart';
-import '../../design_system/app_theme.dart';
+import '../../data/models/roulette_config.dart';
+import 'package:pizza_delizza/src/services/user_profile_service.dart';
+import '../../shared/design_system/app_theme.dart';
 
 class RewardCelebrationScreen extends StatefulWidget {
   final RouletteSegment segment;

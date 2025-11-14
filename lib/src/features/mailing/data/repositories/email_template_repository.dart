@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../models/email_template.dart';
-import '../utils/email_templates.dart';
+import '../../../mailing/utils/email_templates.dart';
 
 class EmailTemplateService {
   static const String _templatesKey = 'email_templates_list';

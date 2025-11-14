@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/subscriber.dart';
-import '../services/mailing_service.dart';
+import 'package:pizza_delizza/src/services/mailing_service.dart';
 import '../theme/app_theme.dart';
 
 class NewsletterSubscriptionWidget extends StatefulWidget {

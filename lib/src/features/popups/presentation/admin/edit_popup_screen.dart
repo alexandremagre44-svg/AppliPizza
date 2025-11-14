@@ -4,10 +4,10 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
-import '../../../models/popup_config.dart';
-import '../../../services/popup_service.dart';
-import '../../../services/image_upload_service.dart';
-import '../../../design_system/app_theme.dart';
+import '../../data/models/popup_config.dart';
+import 'package:pizza_delizza/src/services/popup_service.dart';
+import 'package:pizza_delizza/src/services/image_upload_service.dart';
+import '../../shared/design_system/app_theme.dart';
 
 class EditPopupScreen extends StatefulWidget {
   final PopupConfig? existingPopup;

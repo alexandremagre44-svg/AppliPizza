@@ -2,8 +2,8 @@
 // Dialog for editing Hero banner configuration
 
 import 'package:flutter/material.dart';
-import '../../../../models/home_config.dart';
-import '../../../../services/image_upload_service.dart';
+import '../../../data/models/home_config.dart';
+import 'package:pizza_delizza/src/services/image_upload_service.dart';
 import '../../../../shared/theme/app_theme.dart';
 
 class EditHeroDialog extends StatefulWidget {

@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/product.dart';
-import '../../providers/cart_provider.dart';
+import '../../data/models/product.dart';
+import '../../../cart/application/cart_provider.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   final Product product;

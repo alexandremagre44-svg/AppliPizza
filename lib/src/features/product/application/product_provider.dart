@@ -2,7 +2,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:developer' as developer;
-import '../models/product.dart';
+import '../data/models/product.dart';
 import '../repositories/product_repository.dart'; 
 
 // 1. FutureProvider pour obtenir la liste complète des produits

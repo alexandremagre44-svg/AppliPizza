@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../models/order.dart';
 import '../theme/app_theme.dart';
-import '../services/firebase_order_service.dart';
-import '../providers/order_provider.dart';
+import 'package:pizza_delizza/src/services/firebase_order_service.dart';
+import '../../../orders/application/order_provider.dart';
 import 'order_status_badge.dart';
 
 class OrderDetailPanel extends ConsumerStatefulWidget {

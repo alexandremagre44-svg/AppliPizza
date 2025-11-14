@@ -2,8 +2,8 @@
 // Écran de gestion du Page Builder pour mettre en avant des produits
 
 import 'package:flutter/material.dart';
-import '../../models/product.dart';
-import '../../services/product_crud_service.dart';
+import '../../../product/data/models/product.dart';
+import 'package:pizza_delizza/src/services/product_crud_service.dart';
 import '../../../shared/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
 

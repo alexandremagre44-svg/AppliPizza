@@ -6,9 +6,9 @@ import 'package:uuid/uuid.dart';
 import 'package:csv/csv.dart';
 import '../../../models/campaign.dart';
 import '../../../models/email_template.dart';
-import '../../../services/campaign_service.dart';
-import '../../../services/email_template_service.dart';
-import '../../../services/mailing_service.dart';
+import 'package:pizza_delizza/src/services/campaign_service.dart';
+import 'package:pizza_delizza/src/services/email_template_service.dart';
+import 'package:pizza_delizza/src/services/mailing_service.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/constants/constants.dart';
 

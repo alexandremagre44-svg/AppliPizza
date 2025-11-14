@@ -3,13 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../providers/user_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/loyalty_provider.dart';
-import '../../models/order.dart';
-import '../../models/loyalty_reward.dart';
-import '../../providers/cart_provider.dart';
-import '../../services/loyalty_service.dart';
+import '../../../auth/application/user_provider.dart';
+import '../../../auth/application/auth_provider.dart';
+import '../../../loyalty/application/loyalty_provider.dart';
+import '../../../orders/data/models/order.dart';
+import '../../../loyalty/data/models/loyalty_reward.dart';
+import '../../../cart/application/cart_provider.dart';
+import 'package:pizza_delizza/src/services/loyalty_service.dart';
 import '../../../shared/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
 

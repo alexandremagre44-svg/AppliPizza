@@ -6,9 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:ui';
 
-import '../../models/product.dart';
+import '../../../product/data/models/product.dart';
 import '../../data/mock_data.dart';
-import '../../providers/cart_provider.dart';
+import '../../../cart/application/cart_provider.dart';
 import '../../../shared/theme/app_theme.dart';
 
 const _uuid = Uuid();

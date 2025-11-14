@@ -2,10 +2,10 @@
 // Screen for managing loyalty program and customer segments
 
 import 'package:flutter/material.dart';
-import '../../../models/user_profile.dart';
-import '../../../models/loyalty_settings.dart';
-import '../../../services/user_profile_service.dart';
-import '../../../services/loyalty_settings_service.dart';
+import '../../../auth/data/models/user_profile.dart';
+import '../../data/models/loyalty_settings.dart';
+import 'package:pizza_delizza/src/services/user_profile_service.dart';
+import 'package:pizza_delizza/src/services/loyalty_settings_service.dart';
 import '../../../shared/theme/app_theme.dart';
 
 class CommunicationLoyaltyScreen extends StatefulWidget {

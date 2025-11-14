@@ -1,10 +1,10 @@
 ﻿// lib/src/providers/user_provider.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/user_profile.dart';
-import '../models/order.dart'; 
-import '../services/firebase_order_service.dart';
-import '../services/user_profile_service.dart';
+import '../data/models/user_profile.dart';
+import '../../orders/data/models/order.dart'; 
+import 'package:pizza_delizza/src/services/firebase_order_service.dart';
+import 'package:pizza_delizza/src/services/user_profile_service.dart';
 import 'cart_provider.dart';
 import 'auth_provider.dart';
 

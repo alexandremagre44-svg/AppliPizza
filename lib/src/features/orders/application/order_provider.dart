@@ -3,7 +3,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/order.dart';
-import '../services/firebase_order_service.dart';
+import 'package:pizza_delizza/src/services/firebase_order_service.dart';
 import 'auth_provider.dart';
 
 /// Provider pour le service de commandes Firebase

@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../models/dynamic_block_model.dart';
+import '../../../data/models/dynamic_block_model.dart';
 import '../../../../shared/theme/app_theme.dart';
 
 class EditBlockDialog extends StatefulWidget {

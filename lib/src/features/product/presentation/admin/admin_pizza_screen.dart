@@ -3,12 +3,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../../models/product.dart';
-import '../../services/product_crud_service.dart';
-import '../../services/firestore_unified_service.dart';
+import '../../data/models/product.dart';
+import 'package:pizza_delizza/src/services/product_crud_service.dart';
+import 'package:pizza_delizza/src/services/firestore_unified_service.dart';
 import '../../../shared/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
-import '../../widgets/ingredient_selector.dart';
+import '../../presentation/widgets/ingredient_selector.dart';
 
 class AdminPizzaScreen extends StatefulWidget {
   const AdminPizzaScreen({super.key});

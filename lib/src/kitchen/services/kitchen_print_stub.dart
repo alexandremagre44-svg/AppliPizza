@@ -1,6 +1,6 @@
 // lib/src/kitchen/services/kitchen_print_stub.dart
 
-import '../../models/order.dart';
+import '../features/orders/data/models/order.dart';
 import '../../utils/logger.dart';
 
 /// Service stub pour l'impression des tickets cuisine

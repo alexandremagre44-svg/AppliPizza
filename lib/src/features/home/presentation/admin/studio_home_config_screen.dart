@@ -4,10 +4,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../../../models/home_config.dart';
-import '../../../models/dynamic_block_model.dart';
-import '../../../services/home_config_service.dart';
-import '../../../providers/home_config_provider.dart';
+import '../../data/models/home_config.dart';
+import '../../data/models/dynamic_block_model.dart';
+import 'package:pizza_delizza/src/services/home_config_service.dart';
+import '../../application/home_config_provider.dart';
 import '../../../shared/theme/app_theme.dart';
 import 'dialogs/edit_hero_dialog.dart';
 import 'dialogs/edit_promo_banner_dialog.dart';

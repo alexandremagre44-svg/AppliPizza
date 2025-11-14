@@ -2,7 +2,7 @@
 
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
-import '../../models/order.dart';
+import '../features/orders/data/models/order.dart';
 import '../../utils/logger.dart';
 import '../kitchen_constants.dart';
 

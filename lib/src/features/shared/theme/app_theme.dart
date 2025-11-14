@@ -7,7 +7,7 @@
 export '../design_system/app_theme.dart';
 
 // Rétrocompatibilité: les anciennes classes sont maintenant des aliases
-import '../design_system/app_theme.dart' as ds;
+import '../../shared/design_system/app_theme.dart' as ds;
 
 // Ancienne classe AppColors (alias vers le nouveau)
 typedef AppColors = ds.AppColors;

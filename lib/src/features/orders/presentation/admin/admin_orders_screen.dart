@@ -4,12 +4,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../models/order.dart';
-import '../../providers/order_provider.dart';
+import '../../data/models/order.dart';
+import '../../../orders/application/order_provider.dart';
 import '../../../shared/theme/app_theme.dart';
-import '../../widgets/order_status_badge.dart';
-import '../../widgets/order_detail_panel.dart';
-import '../../widgets/new_order_notification.dart';
+import '../../presentation/widgets/order_status_badge.dart';
+import '../../presentation/widgets/order_detail_panel.dart';
+import '../../presentation/widgets/new_order_notification.dart';
 import '../../utils/order_test_data.dart';
 import '../../utils/order_export.dart';
 import 'dart:html' as html;

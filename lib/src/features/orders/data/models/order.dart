@@ -1,7 +1,7 @@
 // lib/src/models/order.dart
 
 import 'package:uuid/uuid.dart';
-import '../providers/cart_provider.dart'; 
+import '../../../cart/application/cart_provider.dart'; 
 // Assurez-vous d'avoir 'package:uuid/uuid.dart' dans votre pubspec.yaml
 
 /// Statuts possibles pour une commande

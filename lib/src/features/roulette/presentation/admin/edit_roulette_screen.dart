@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:math' as math;
-import '../../../models/roulette_config.dart';
-import '../../../services/roulette_service.dart';
-import '../../../design_system/app_theme.dart';
+import '../../data/models/roulette_config.dart';
+import 'package:pizza_delizza/src/services/roulette_service.dart';
+import '../../shared/design_system/app_theme.dart';
 
 class EditRouletteScreen extends StatefulWidget {
   final RouletteConfig config;

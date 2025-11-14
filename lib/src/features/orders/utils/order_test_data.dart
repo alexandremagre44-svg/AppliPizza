@@ -3,7 +3,7 @@
 
 import 'package:uuid/uuid.dart';
 import '../models/order.dart';
-import '../providers/cart_provider.dart';
+import '../../../cart/application/cart_provider.dart';
 
 class OrderTestData {
   static const _uuid = Uuid();

@@ -2,8 +2,8 @@
 // Screen for managing product tags and featured status
 
 import 'package:flutter/material.dart';
-import '../../../models/product.dart';
-import '../../../services/product_crud_service.dart';
+import '../../../product/data/models/product.dart';
+import 'package:pizza_delizza/src/services/product_crud_service.dart';
 import '../../../shared/theme/app_theme.dart';
 
 class StudioFeaturedProductsScreen extends StatefulWidget {

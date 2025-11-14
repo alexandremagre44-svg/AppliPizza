@@ -3,8 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../models/popup_config.dart';
-import '../design_system/app_theme.dart';
+import '../../data/models/popup_config.dart';
+import '../../shared/design_system/app_theme.dart';
 
 class PopupDialog extends StatefulWidget {
   final PopupConfig popup;

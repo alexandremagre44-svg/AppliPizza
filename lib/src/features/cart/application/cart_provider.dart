@@ -3,7 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/product.dart'; 
+import '../../product/data/models/product.dart'; 
 
 const _uuid = Uuid();
 

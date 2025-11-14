@@ -3,9 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/popup_config.dart';
-import '../services/popup_service.dart';
-import '../widgets/popup_dialog.dart';
+import '../data/models/popup_config.dart';
+import 'package:pizza_delizza/src/services/popup_service.dart';
+import '../presentation/widgets/popup_dialog.dart';
 
 class PopupManager {
   final PopupService _popupService = PopupService();

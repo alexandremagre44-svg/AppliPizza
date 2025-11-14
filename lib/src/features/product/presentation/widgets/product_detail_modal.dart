@@ -1,7 +1,7 @@
 ﻿// lib/src/widgets/product_detail_modal.dart
 
 import 'package:flutter/material.dart';
-import '../models/product.dart';
+import '../../data/models/product.dart';
 
 class ProductDetailModal extends StatefulWidget {
   final Product product;

@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../models/product.dart';
+import '../../../product/data/models/product.dart';
 import '../../data/mock_data.dart';
-import '../../providers/cart_provider.dart';
+import '../../../cart/application/cart_provider.dart';
 
 const _uuid = Uuid();
 

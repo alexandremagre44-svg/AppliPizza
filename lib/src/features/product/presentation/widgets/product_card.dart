@@ -2,7 +2,7 @@
 // Carte produit redesignée - Style Pizza Deli'Zza
 
 import 'package:flutter/material.dart';
-import '../models/product.dart';
+import '../../data/models/product.dart';
 import '../theme/app_theme.dart';
 
 /// Carte produit avec le nouveau design Pizza Deli'Zza

@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/product.dart';
-import '../../providers/cart_provider.dart';
-import '../../providers/product_provider.dart';
-import '../../widgets/product_card.dart';
-import '../../widgets/product_detail_modal.dart';
+import '../../../product/data/models/product.dart';
+import '../../../cart/application/cart_provider.dart';
+import '../../../product/application/product_provider.dart';
+import '../../../product/presentation/widgets/product_card.dart';
+import '../../../product/presentation/widgets/product_detail_modal.dart';
 import 'menu_customization_modal.dart';
 import '../home/pizza_customization_modal.dart';
 import '../../../shared/constants/constants.dart';

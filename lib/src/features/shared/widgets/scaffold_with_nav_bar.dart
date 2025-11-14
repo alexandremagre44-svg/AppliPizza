@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:badges/badges.dart' as badges;
-import '../providers/cart_provider.dart';
-import '../providers/auth_provider.dart';
+import '../../../cart/application/cart_provider.dart';
+import '../../../auth/application/auth_provider.dart';
 
 class ScaffoldWithNavBar extends ConsumerWidget {
   const ScaffoldWithNavBar({

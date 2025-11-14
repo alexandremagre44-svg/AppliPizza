@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/promotion.dart';
-import '../../../services/promotion_service.dart';
+import 'package:pizza_delizza/src/services/promotion_service.dart';
 import '../../../shared/theme/app_theme.dart';
 
 class CommunicationPromotionsScreen extends StatefulWidget {

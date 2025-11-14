@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'dart:js' as js;
 import '../../../models/email_template.dart';
-import '../../../services/email_template_service.dart';
+import 'package:pizza_delizza/src/services/email_template_service.dart';
 import '../../../shared/theme/app_theme.dart';
 
 class EmailTemplatePreviewDialog extends StatelessWidget {

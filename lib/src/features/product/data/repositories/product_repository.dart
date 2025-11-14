@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:developer' as developer;
 import '../models/product.dart';
 import '../data/mock_data.dart';
-import '../services/product_crud_service.dart';
-import '../services/firestore_product_service.dart';
+import 'package:pizza_delizza/src/services/product_crud_service.dart';
+import 'package:pizza_delizza/src/services/firestore_product_service.dart';
 
 // Définition de l'interface (contrat) pour le Repository
 abstract class ProductRepository {
