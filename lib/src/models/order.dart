@@ -41,6 +41,13 @@ class OrderStatusHistory {
   );
 }
 
+/// Order source types
+class OrderSource {
+  static const String client = 'client';
+  static const String staffTablet = 'staff_tablet';
+  static const String admin = 'admin';
+}
+
 class Order {
   final String id;
   final double total;
@@ -56,6 +63,8 @@ class Order {
   final DateTime? viewedAt;
   final String? pickupDate;
   final String? pickupTimeSlot;
+  final String source; // Source of the order: client, staff_tablet, admin
+  final String? paymentMethod; // Payment method for staff tablet: cash, card, other
 
   Order({
     required this.id,
@@ -72,6 +81,8 @@ class Order {
     this.viewedAt,
     this.pickupDate,
     this.pickupTimeSlot,
+    this.source = OrderSource.client,
+    this.paymentMethod,
   });
 
   // Factory pour créer une commande à partir du contenu du panier
@@ -84,6 +95,8 @@ class Order {
     String? comment,
     String? pickupDate,
     String? pickupTimeSlot,
+    String source = OrderSource.client,
+    String? paymentMethod,
   }) {
     final itemsCopy = cartItems.map((item) => CartItem(
       id: item.id,
@@ -110,6 +123,8 @@ class Order {
       comment: comment,
       pickupDate: pickupDate,
       pickupTimeSlot: pickupTimeSlot,
+      source: source,
+      paymentMethod: paymentMethod,
       statusHistory: [
         OrderStatusHistory(
           status: OrderStatus.pending,
@@ -136,6 +151,8 @@ class Order {
     DateTime? viewedAt,
     String? pickupDate,
     String? pickupTimeSlot,
+    String? source,
+    String? paymentMethod,
   }) {
     return Order(
       id: id ?? this.id,
@@ -152,6 +169,8 @@ class Order {
       viewedAt: viewedAt ?? this.viewedAt,
       pickupDate: pickupDate ?? this.pickupDate,
       pickupTimeSlot: pickupTimeSlot ?? this.pickupTimeSlot,
+      source: source ?? this.source,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
     );
   }
   
@@ -180,6 +199,8 @@ class Order {
     'viewedAt': viewedAt?.toIso8601String(),
     'pickupDate': pickupDate,
     'pickupTimeSlot': pickupTimeSlot,
+    'source': source,
+    'paymentMethod': paymentMethod,
   };
   
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -210,5 +231,7 @@ class Order {
         : null,
     pickupDate: json['pickupDate'] as String?,
     pickupTimeSlot: json['pickupTimeSlot'] as String?,
+    source: json['source'] as String? ?? OrderSource.client,
+    paymentMethod: json['paymentMethod'] as String?,
   );
 }

@@ -34,6 +34,13 @@ import 'src/features/content/presentation/admin/content_studio_screen.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 
+// Staff Tablet imports
+import 'src/staff_tablet/screens/staff_tablet_pin_screen.dart';
+import 'src/staff_tablet/screens/staff_tablet_catalog_screen.dart';
+import 'src/staff_tablet/screens/staff_tablet_checkout_screen.dart';
+import 'src/staff_tablet/screens/staff_tablet_history_screen.dart';
+import 'src/staff_tablet/providers/staff_tablet_auth_provider.dart';
+
 // Importez le composant de barre de navigation
 import 'src/widgets/scaffold_with_nav_bar.dart'; 
 import 'src/models/product.dart';
@@ -235,6 +242,62 @@ class MyApp extends ConsumerWidget {
             final authState = ref.read(authProvider);
             final userId = authState.userEmail ?? 'guest';
             return RouletteScreen(userId: userId);
+          },
+        ),
+        // Staff Tablet Routes
+        GoRoute(
+          path: AppRoutes.staffTabletPin,
+          builder: (context, state) => const StaffTabletPinScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.staffTabletCatalog,
+          builder: (context, state) {
+            // Check if authenticated
+            final staffAuth = ref.read(staffTabletAuthProvider);
+            if (!staffAuth.isAuthenticated) {
+              // Redirect to PIN screen if not authenticated
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go(AppRoutes.staffTabletPin);
+              });
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return const StaffTabletCatalogScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.staffTabletCheckout,
+          builder: (context, state) {
+            // Check if authenticated
+            final staffAuth = ref.read(staffTabletAuthProvider);
+            if (!staffAuth.isAuthenticated) {
+              // Redirect to PIN screen if not authenticated
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go(AppRoutes.staffTabletPin);
+              });
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return const StaffTabletCheckoutScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.staffTabletHistory,
+          builder: (context, state) {
+            // Check if authenticated
+            final staffAuth = ref.read(staffTabletAuthProvider);
+            if (!staffAuth.isAuthenticated) {
+              // Redirect to PIN screen if not authenticated
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go(AppRoutes.staffTabletPin);
+              });
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            return const StaffTabletHistoryScreen();
           },
         ),
       ],
