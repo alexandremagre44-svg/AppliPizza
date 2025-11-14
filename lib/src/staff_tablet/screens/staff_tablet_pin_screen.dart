@@ -58,104 +58,221 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
-      body: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo/Title
-              Icon(
-                Icons.lock_outline,
-                size: 80,
-                color: Colors.orange[700],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF1A237E), // Deep blue
+              const Color(0xFF311B92), // Deep purple
+              Colors.orange[900]!,
+            ],
+          ),
+        ),
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 520),
+            padding: const EdgeInsets.all(40),
+            child: Card(
+              elevation: 20,
+              shadowColor: Colors.black54,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Mode Caisse',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Entrez le code PIN',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey[400],
-                ),
-              ),
-              const SizedBox(height: 48),
-
-              // PIN dots display
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(4, (index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 12),
-                    width: 20,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: index < _enteredPin.length
-                          ? (_isError ? Colors.red : Colors.orange[700])
-                          : Colors.grey[700],
-                      border: Border.all(
-                        color: _isError ? Colors.red : Colors.grey[600]!,
-                        width: 2,
+              child: Container(
+                padding: const EdgeInsets.all(40),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Logo/Title with animation
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      duration: const Duration(milliseconds: 800),
+                      curve: Curves.elasticOut,
+                      builder: (context, value, child) {
+                        return Transform.scale(
+                          scale: value,
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.orange[600]!,
+                                  Colors.orange[800]!,
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.orange.withOpacity(0.3),
+                                  blurRadius: 20,
+                                  spreadRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.point_of_sale_rounded,
+                              size: 64,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 28),
+                    Text(
+                      'Mode Caisse',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[900],
+                        letterSpacing: -0.5,
                       ),
                     ),
-                  );
-                }),
-              ),
-              
-              if (_isError) ...[
-                const SizedBox(height: 16),
-                Text(
-                  'Code PIN incorrect',
-                  style: TextStyle(
-                    color: Colors.red[400],
-                    fontSize: 16,
-                  ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Entrez votre code PIN',
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 44),
+
+                    // PIN dots display with animation
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(4, (index) {
+                          final isFilled = index < _enteredPin.length;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            margin: const EdgeInsets.symmetric(horizontal: 10),
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isFilled
+                                  ? (_isError ? Colors.red[600] : Colors.orange[700])
+                                  : Colors.transparent,
+                              border: Border.all(
+                                color: _isError
+                                    ? Colors.red[600]!
+                                    : (isFilled ? Colors.orange[700]! : Colors.grey[400]!),
+                                width: 2.5,
+                              ),
+                              boxShadow: isFilled
+                                  ? [
+                                      BoxShadow(
+                                        color: (_isError ? Colors.red : Colors.orange)
+                                            .withOpacity(0.3),
+                                        blurRadius: 8,
+                                        spreadRadius: 1,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                    
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: _isError
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 20),
+                              key: const ValueKey('error'),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.red[50],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.red[200]!,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.error_outline,
+                                      color: Colors.red[700],
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Code PIN incorrect',
+                                      style: TextStyle(
+                                        color: Colors.red[700],
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : const SizedBox(height: 52, key: ValueKey('empty')),
+                    ),
+
+                    const SizedBox(height: 36),
+
+                    // Number pad with improved design
+                    GridView.count(
+                      shrinkWrap: true,
+                      crossAxisCount: 3,
+                      childAspectRatio: 1.3,
+                      crossAxisSpacing: 14,
+                      mainAxisSpacing: 14,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => _buildNumberButton(num.toString())),
+                        const SizedBox(), // Empty space
+                        _buildNumberButton('0'),
+                        _buildBackspaceButton(),
+                      ],
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Back to home button with better styling
+                    TextButton.icon(
+                      onPressed: () => context.go('/home'),
+                      icon: Icon(
+                        Icons.arrow_back_rounded,
+                        color: Colors.grey[600],
+                        size: 20,
+                      ),
+                      label: Text(
+                        'Retour à l\'accueil',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-
-              const SizedBox(height: 48),
-
-              // Number pad
-              GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 3,
-                childAspectRatio: 1.5,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => _buildNumberButton(num.toString())),
-                  const SizedBox(), // Empty space
-                  _buildNumberButton('0'),
-                  _buildBackspaceButton(),
-                ],
               ),
-
-              const SizedBox(height: 32),
-
-              // Back to home button
-              TextButton(
-                onPressed: () => context.go('/home'),
-                child: Text(
-                  'Retour à l\'accueil',
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -163,40 +280,72 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
   }
 
   Widget _buildNumberButton(String number) {
-    return ElevatedButton(
-      onPressed: () => _onNumberPressed(number),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[800],
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        elevation: 4,
-      ),
-      child: Text(
-        number,
-        style: const TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _onNumberPressed(number),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.grey[300]!,
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildBackspaceButton() {
-    return ElevatedButton(
-      onPressed: _onBackspace,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[800],
-        foregroundColor: Colors.orange[700],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _onBackspace,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.orange[50],
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.orange[200]!,
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.orange.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Icon(
+              Icons.backspace_rounded,
+              size: 28,
+              color: Colors.orange[700],
+            ),
+          ),
         ),
-        elevation: 4,
-      ),
-      child: const Icon(
-        Icons.backspace_outlined,
-        size: 28,
       ),
     );
   }

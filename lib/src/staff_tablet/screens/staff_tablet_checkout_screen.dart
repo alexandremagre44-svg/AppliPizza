@@ -210,19 +210,46 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: Colors.orange[700],
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text(
-          'Finaliser la commande',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.orange[600]!, Colors.orange[800]!],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 26),
+          onPressed: () => context.pop(),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.receipt_long_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Finaliser la commande',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+        elevation: 0,
       ),
       body: cart.items.isEmpty
           ? Center(
@@ -378,34 +405,60 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                         ),
                         const SizedBox(height: 32),
 
-                        // Submit button
-                        ElevatedButton(
-                          onPressed: _isProcessing ? null : _submitOrder,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange[700],
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(double.infinity, 70),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 4,
+                        // Submit button with enhanced design
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: _isProcessing
+                                ? null
+                                : LinearGradient(
+                                    colors: [Colors.green[600]!, Colors.green[800]!],
+                                  ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: _isProcessing
+                                ? null
+                                : [
+                                    BoxShadow(
+                                      color: Colors.green.withOpacity(0.4),
+                                      blurRadius: 16,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
                           ),
-                          child: _isProcessing
-                              ? const SizedBox(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 3,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          child: ElevatedButton.icon(
+                            onPressed: _isProcessing ? null : _submitOrder,
+                            icon: _isProcessing
+                                ? const SizedBox(
+                                    height: 26,
+                                    width: 26,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.check_circle_rounded,
+                                    size: 30,
                                   ),
-                                )
-                              : const Text(
-                                  'Valider la commande',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                            label: Text(
+                              _isProcessing ? 'Traitement...' : 'Valider la commande',
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  _isProcessing ? Colors.grey[400] : Colors.transparent,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(double.infinity, 72),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -418,68 +471,167 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
 
   Widget _buildOrderSummaryCard(CartState cart) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+      elevation: 4,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white,
+              Colors.grey[50]!,
+            ],
+          ),
+        ),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.receipt_long, color: Colors.orange[700], size: 28),
-                const SizedBox(width: 12),
-                const Text(
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.orange[600]!, Colors.orange[800]!],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.shopping_bag_rounded,
+                    color: Colors.white,
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Text(
                   'Résumé de la commande',
                   style: TextStyle(
                     fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.grey[900],
                   ),
                 ),
               ],
             ),
-            const Divider(height: 24),
-            ...cart.items.map((item) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+            const SizedBox(height: 20),
+            Container(
+              height: 2,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.orange[300]!, Colors.transparent],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...cart.items.map((item) => Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey[200]!, width: 1),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text(
-                      '${item.quantity}x ${item.productName}',
-                      style: const TextStyle(fontSize: 16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange[100],
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '${item.quantity}x',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.orange[900],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            item.productName,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Text(
                     '${item.total.toStringAsFixed(2)} €',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey[900],
                     ),
                   ),
                 ],
               ),
             )),
-            const Divider(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Total',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+            const SizedBox(height: 8),
+            Container(
+              height: 2,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.orange[300]!, Colors.transparent],
                 ),
-                Text(
-                  '${cart.total.toStringAsFixed(2)} €',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange[700],
-                  ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.orange[50]!, Colors.orange[100]!],
                 ),
-              ],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange[300]!, width: 2),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.calculate_rounded,
+                          color: Colors.orange[800], size: 28),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Total',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.grey[900],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    '${cart.total.toStringAsFixed(2)} €',
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.orange[800],
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -493,27 +645,52 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
     required Widget child,
   }) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+      elevation: 3,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+        ),
+        padding: const EdgeInsets.all(22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(icon, color: Colors.orange[700], size: 28),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.orange[200]!, width: 1.5),
+                  ),
+                  child: Icon(icon, color: Colors.orange[700], size: 26),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.grey[900],
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
+            Container(
+              height: 1.5,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.orange[200]!, Colors.transparent],
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
             child,
           ],
         ),
