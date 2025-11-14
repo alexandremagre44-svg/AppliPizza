@@ -221,7 +221,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange[600]!, Colors.orange[800]!],
+              colors: [AppColors.primary[600]!, AppColors.primaryDark!],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -504,7 +504,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.orange[600]!, Colors.orange[800]!],
+                      colors: [AppColors.primary[600]!, AppColors.primaryDark!],
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -530,7 +530,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               height: 2,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.orange[300]!, Colors.transparent],
+                  colors: [AppColors.primary[300]!, Colors.transparent],
                 ),
               ),
             ),
@@ -555,7 +555,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.orange[100],
+                            color: AppColors.primaryLighter,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -597,7 +597,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               height: 2,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.orange[300]!, Colors.transparent],
+                  colors: [AppColors.primary[300]!, Colors.transparent],
                 ),
               ),
             ),
@@ -606,10 +606,10 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.orange[50]!, Colors.orange[100]!],
+                  colors: [AppColors.primaryLighter!, AppColors.primaryLighter!],
                 ),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange[300]!, width: 2),
+                border: Border.all(color: AppColors.primary[300]!, width: 2),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -617,7 +617,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   Row(
                     children: [
                       Icon(Icons.calculate_rounded,
-                          color: Colors.orange[800], size: 28),
+                          color: AppColors.primaryDark, size: 28),
                       const SizedBox(width: 10),
                       Text(
                         'Total',
@@ -634,7 +634,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w900,
-                      color: Colors.orange[800],
+                      color: AppColors.primaryDark,
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -670,9 +670,9 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.orange[50],
+                    color: AppColors.primaryLighter,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange[200]!, width: 1.5),
+                    border: Border.all(color: AppColors.primary[200]!, width: 1.5),
                   ),
                   child: Icon(icon, color: AppColors.primary, size: 26),
                 ),
@@ -694,7 +694,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               height: 1.5,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.orange[200]!, Colors.transparent],
+                  colors: [AppColors.primary[200]!, Colors.transparent],
                 ),
               ),
             ),

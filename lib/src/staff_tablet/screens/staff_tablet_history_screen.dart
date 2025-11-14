@@ -26,7 +26,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.orange[600]!, Colors.orange[800]!],
+              colors: [AppColors.primary[600]!, AppColors.primaryDark!],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -371,7 +371,7 @@ class _OrderCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.primaryLighter,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.orange[200]!, width: 1),
+                        border: Border.all(color: AppColors.primary[200]!, width: 1),
                       ),
                       child: Row(
                         children: [
@@ -431,7 +431,7 @@ class _OrderCard extends StatelessWidget {
                 height: 2,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.orange[200]!, Colors.transparent],
+                    colors: [AppColors.primary[200]!, Colors.transparent],
                   ),
                 ),
               ),
@@ -442,10 +442,10 @@ class _OrderCard extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.orange[100]!, Colors.orange[200]!],
+                    colors: [AppColors.primaryLighter!, AppColors.primary[200]!],
                   ),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.orange[400]!, width: 2),
+                  border: Border.all(color: AppColors.primary[400]!, width: 2),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
