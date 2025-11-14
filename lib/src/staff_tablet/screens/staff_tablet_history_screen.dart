@@ -18,34 +18,64 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: Colors.orange[700],
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Historique du jour',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.orange[600]!, Colors.orange[800]!],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 26),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.history_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Historique du jour',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+        elevation: 0,
       ),
       body: Column(
         children: [
-          // Statistics card
+          // Statistics card with improved design
           Container(
             margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.white, Colors.grey[50]!],
+              ),
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -53,23 +83,40 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: _buildStatItem(
-                    icon: Icons.shopping_bag,
+                    icon: Icons.shopping_bag_rounded,
                     label: 'Commandes',
                     value: orderCount.toString(),
                     color: Colors.blue[700]!,
+                    gradient: LinearGradient(
+                      colors: [Colors.blue[50]!, Colors.blue[100]!],
+                    ),
                   ),
                 ),
                 Container(
-                  width: 1,
-                  height: 60,
-                  color: Colors.grey[300],
+                  width: 2,
+                  height: 80,
+                  margin: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.grey[200]!,
+                        Colors.grey[400]!,
+                        Colors.grey[200]!,
+                      ],
+                    ),
+                  ),
                 ),
                 Expanded(
                   child: _buildStatItem(
-                    icon: Icons.euro,
+                    icon: Icons.euro_rounded,
                     label: 'Chiffre d\'affaires',
                     value: '${todayRevenue.toStringAsFixed(2)} €',
                     color: Colors.green[700]!,
+                    gradient: LinearGradient(
+                      colors: [Colors.green[50]!, Colors.green[100]!],
+                    ),
                   ),
                 ),
               ],
@@ -115,28 +162,50 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
     required String label,
     required String value,
     required Color color,
+    required Gradient gradient,
   }) {
-    return Column(
-      children: [
-        Icon(icon, size: 32, color: color),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: color.withOpacity(0.3), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(icon, size: 36, color: color),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: color,
+          const SizedBox(height: 12),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+              letterSpacing: 0.3,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+              color: color,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -174,16 +243,25 @@ class _OrderCard extends StatelessWidget {
     final timeFormat = DateFormat('HH:mm');
     
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.only(bottom: 14),
+      elevation: 3,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
           _showOrderDetails(context);
         },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.white, Colors.grey[50]!],
+            ),
+          ),
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -191,120 +269,208 @@ class _OrderCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Time
-                  Row(
-                    children: [
-                      Icon(Icons.access_time, size: 20, color: Colors.grey[600]),
-                      const SizedBox(width: 8),
-                      Text(
-                        timeFormat.format(order.date),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Status badge
+                  // Time with enhanced styling
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(order.status).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                        colors: [Colors.blue[50]!, Colors.blue[100]!],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue[200]!, width: 1.5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.access_time_rounded,
+                            size: 20, color: Colors.blue[800]),
+                        const SizedBox(width: 8),
+                        Text(
+                          timeFormat.format(order.date),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.blue[900],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Status badge with improved design
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(order.status).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: _getStatusColor(order.status),
-                        width: 1.5,
+                        width: 2,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _getStatusColor(order.status).withOpacity(0.2),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Text(
                       _getStatusLabel(order.status),
                       style: TextStyle(
                         color: _getStatusColor(order.status),
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                         fontSize: 14,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
 
               // Customer name if available
               if (order.customerName != null && order.customerName!.isNotEmpty) ...[
-                Row(
-                  children: [
-                    Icon(Icons.person, size: 18, color: Colors.grey[600]),
-                    const SizedBox(width: 8),
-                    Text(
-                      order.customerName!,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.purple[50],
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.purple[200]!, width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.person_rounded, size: 20, color: Colors.purple[700]),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          order.customerName!,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.purple[900],
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
               ],
 
-              // Items summary
+              // Items and payment summary in a row
               Row(
                 children: [
-                  Icon(Icons.shopping_bag, size: 18, color: Colors.grey[600]),
-                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      '${order.items.length} article${order.items.length > 1 ? 's' : ''}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.orange[50],
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.orange[200]!, width: 1),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.shopping_bag_rounded,
+                              size: 18, color: Colors.orange[700]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${order.items.length} article${order.items.length > 1 ? 's' : ''}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.orange[900],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
+                  if (order.paymentMethod != null) ...[
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.green[50],
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.green[200]!, width: 1),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.payment_rounded,
+                                size: 18, color: Colors.green[700]),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _getPaymentMethodLabel(order.paymentMethod!),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.green[900],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 14),
 
-              // Payment method
-              if (order.paymentMethod != null) ...[
-                Row(
+              // Divider
+              Container(
+                height: 2,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.orange[200]!, Colors.transparent],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // Total with enhanced design
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.orange[100]!, Colors.orange[200]!],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange[400]!, width: 2),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.payment, size: 18, color: Colors.grey[600]),
-                    const SizedBox(width: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.calculate_rounded,
+                            color: Colors.orange[900], size: 24),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Total',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.grey[900],
+                          ),
+                        ),
+                      ],
+                    ),
                     Text(
-                      _getPaymentMethodLabel(order.paymentMethod!),
+                      '${order.total.toStringAsFixed(2)} €',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.orange[900],
+                        letterSpacing: -0.5,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-              ],
-
-              const Divider(height: 16),
-
-              // Total
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Total',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '${order.total.toStringAsFixed(2)} €',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange[700],
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
