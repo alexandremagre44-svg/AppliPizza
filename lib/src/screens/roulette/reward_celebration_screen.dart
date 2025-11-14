@@ -82,8 +82,7 @@ class _RewardCelebrationScreenState extends State<RewardCelebrationScreen>
           
           if (points > 0) {
             final updatedPoints = (profile.loyaltyPoints ?? 0) + points;
-            await _userProfileService.updateUserProfile(
-              widget.userId,
+            await _userProfileService.saveUserProfile(
               profile.copyWith(loyaltyPoints: updatedPoints),
             );
           }
