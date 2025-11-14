@@ -221,7 +221,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.primary[600]!, AppColors.primaryDark!],
+              colors: [AppColors.primarySwatch[600]!, AppColors.primaryDark!],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -504,7 +504,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [AppColors.primary[600]!, AppColors.primaryDark!],
+                      colors: [AppColors.primarySwatch[600]!, AppColors.primaryDark!],
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -530,7 +530,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               height: 2,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primary[300]!, Colors.transparent],
+                  colors: [AppColors.primarySwatch[300]!, Colors.transparent],
                 ),
               ),
             ),
@@ -597,7 +597,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               height: 2,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primary[300]!, Colors.transparent],
+                  colors: [AppColors.primarySwatch[300]!, Colors.transparent],
                 ),
               ),
             ),
@@ -609,7 +609,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   colors: [AppColors.primaryLighter!, AppColors.primaryLighter!],
                 ),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primary[300]!, width: 2),
+                border: Border.all(color: AppColors.primarySwatch[300]!, width: 2),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -672,7 +672,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   decoration: BoxDecoration(
                     color: AppColors.primaryLighter,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primary[200]!, width: 1.5),
+                    border: Border.all(color: AppColors.primarySwatch[200]!, width: 1.5),
                   ),
                   child: Icon(icon, color: AppColors.primary, size: 26),
                 ),
@@ -694,7 +694,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               height: 1.5,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primary[200]!, Colors.transparent],
+                  colors: [AppColors.primarySwatch[200]!, Colors.transparent],
                 ),
               ),
             ),
