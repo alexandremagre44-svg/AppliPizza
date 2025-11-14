@@ -1,5 +1,5 @@
 // lib/src/design_system/buttons.dart
-// Composants boutons réutilisables - Design System Pizza Deli'Zza
+// Composants boutons réutilisables - Design System Pizza Deli'Zza Material 3 (2025)
 
 import 'package:flutter/material.dart';
 import 'colors.dart';
@@ -8,34 +8,42 @@ import 'spacing.dart';
 import 'radius.dart';
 import 'shadows.dart';
 
-/// Énumération des tailles de bouton
+/// Énumération des tailles de bouton Material 3
 enum ButtonSize {
   small,
   medium,
   large,
 }
 
-/// Énumération des variantes de bouton
+/// Énumération des variantes de bouton Material 3
+/// 
+/// Material 3 button variants:
+/// - Filled (Primary): High emphasis
+/// - Tonal (Secondary): Medium emphasis
+/// - Outlined: Medium emphasis
+/// - Text (Ghost): Low emphasis
 enum ButtonVariant {
-  primary,
-  secondary,
-  outline,
-  ghost,
-  danger,
+  primary,    // Filled button
+  secondary,  // Tonal button
+  outline,    // Outlined button
+  ghost,      // Text button
+  danger,     // Error variant
 }
 
 // ═══════════════════════════════════════════════════════════════
 // BOUTON PRINCIPAL - AppButton
 // ═══════════════════════════════════════════════════════════════
 
-/// Bouton principal avec toutes les variantes
+/// Bouton principal Material 3 avec toutes les variantes
 /// 
-/// Variantes:
-/// - Primary: Fond rouge, texte blanc
-/// - Secondary: Fond gris clair, texte noir
-/// - Outline: Bordure rouge, fond transparent
-/// - Ghost: Transparent, texte rouge
-/// - Danger: Fond rouge danger, texte blanc
+/// Variantes Material 3:
+/// - Primary (Filled): Fond #D32F2F, texte blanc
+/// - Secondary (Tonal): Fond #F9DEDE (primaryContainer), texte #7A1212
+/// - Outline: Bordure #BEBEBE, fond transparent
+/// - Ghost (Text): Transparent, texte #D32F2F
+/// - Danger: Fond #C62828, texte blanc
+/// 
+/// Radius: 12px (Material 3)
 class AppButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -224,23 +232,25 @@ class AppButton extends StatelessWidget {
         );
       
       case ButtonVariant.secondary:
+        // Material 3 Tonal button: uses primaryContainer
         return ElevatedButton.styleFrom(
-          backgroundColor: AppColors.neutral100,
-          foregroundColor: AppColors.textPrimary,
+          backgroundColor: AppColors.primaryContainer, // #F9DEDE
+          foregroundColor: AppColors.onPrimaryContainer, // #7A1212
           elevation: 0,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.button),
-          disabledBackgroundColor: AppColors.neutral200,
+          disabledBackgroundColor: AppColors.surfaceContainer,
           disabledForegroundColor: AppColors.neutral400,
         );
       
       case ButtonVariant.outline:
+        // Material 3 Outlined button
         return ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           foregroundColor: AppColors.primary,
           elevation: 0,
           shadowColor: Colors.transparent,
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          side: const BorderSide(color: AppColors.outline, width: 1), // #BEBEBE
           shape: RoundedRectangleBorder(borderRadius: AppRadius.button),
           disabledBackgroundColor: Colors.transparent,
           disabledForegroundColor: AppColors.neutral400,

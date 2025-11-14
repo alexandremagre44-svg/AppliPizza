@@ -1,10 +1,10 @@
 // lib/src/design_system/design_system_showcase.dart
-// Showcase du Design System - Exemples d'utilisation
+// Showcase du Design System Material 3 - Exemples d'utilisation
 
 import 'package:flutter/material.dart';
 import 'app_theme.dart';
 
-/// Écran de démonstration du design system
+/// Écran de démonstration du design system Material 3 Pizza Deli'Zza
 /// 
 /// Pour tester: Créer une route vers DesignSystemShowcase() dans l'app
 class DesignSystemShowcase extends StatelessWidget {
@@ -14,7 +14,7 @@ class DesignSystemShowcase extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Design System Showcase'),
+        title: const Text('Design System Material 3 - Pizza Deli\'Zza'),
       ),
       body: SingleChildScrollView(
         padding: AppSpacing.screenPadding,
