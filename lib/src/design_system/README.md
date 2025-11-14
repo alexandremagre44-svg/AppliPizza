@@ -1,10 +1,11 @@
-# Design System Pizza Deli'Zza
+# Design System Pizza Deli'Zza - Material 3 (2025)
 
-Système de design complet et professionnel pour l'application Admin Pizza Deli'Zza.
+Système de design officiel Material 3 pour l'application Pizza Deli'Zza.
 
 ## 📋 Table des matières
 
 - [Vue d'ensemble](#vue-densemble)
+- [Material 3](#material-3)
 - [Installation](#installation)
 - [Composants](#composants)
 - [Utilisation](#utilisation)
@@ -12,16 +13,59 @@ Système de design complet et professionnel pour l'application Admin Pizza Deli'
 
 ## 🎯 Vue d'ensemble
 
-Ce design system fournit une collection complète de composants UI réutilisables, cohérents et modernes pour l'application Pizza Deli'Zza.
+Ce design system fournit une collection complète de composants UI réutilisables, cohérents et modernes pour l'application Pizza Deli'Zza, entièrement basé sur Material 3 (2025).
 
 ### Caractéristiques
 
-- ✅ **Cohérent**: Tous les composants partagent le même langage visuel
+- ✅ **Material 3**: Design system officiel Google 2025
+- ✅ **Cohérent**: Tous les composants partagent la palette Pizza Deli'Zza
 - ✅ **Accessible**: Design WCAG compliant avec bon contraste
 - ✅ **Responsive**: S'adapte automatiquement aux différentes tailles d'écran
-- ✅ **Moderne**: Inspiré de Stripe, Linear et Shopify
+- ✅ **Moderne**: Utilise Inter (fallback Roboto) et les dernières best practices
 - ✅ **Scalable**: Facile à étendre et maintenir
 - ✅ **Rétrocompatible**: Les anciens imports continuent de fonctionner
+
+## 🎨 Material 3
+
+### Spécifications officielles
+
+**Palette officielle Pizza Deli'Zza:**
+- Primary: `#D32F2F` (Rouge Pizza Deli'Zza)
+- OnPrimary: `#FFFFFF`
+- PrimaryContainer: `#F9DEDE`
+- OnPrimaryContainer: `#7A1212`
+- Secondary: `#8E4C4C`
+- SecondaryContainer: `#F5E3E3`
+- Background: `#FAFAFA`
+- Surface: `#FFFFFF`
+- SurfaceContainerLow: `#F5F5F5`
+- SurfaceContainer: `#EEEEEE`
+- Success: `#3FA35B`
+- Warning: `#F2994A`
+- Error: `#C62828`
+
+**Typographie Material 3:**
+- Famille: Inter (fallback Roboto)
+- TitleLarge: 20px semi-bold
+- TitleMedium: 18px semi-bold
+- BodyLarge: 16px
+- BodyMedium: 14px
+- LabelMedium: 13px
+- LabelSmall: 11px
+
+**Radius Material 3:**
+- Global: 16px
+- Buttons: 12px
+- BottomSheets: 24px
+- Chips: 16px
+
+**Spacing Material 3:**
+- 4 / 8 / 12 / 16 / 24 / 32
+
+**Shadows Material 3:**
+- Light et subtiles
+- shadowSmall: 0 1px 2px rgba(0,0,0,0.08)
+- shadowMedium: 0 2px 6px rgba(0,0,0,0.12)
 
 ## 🚀 Installation
 
@@ -59,27 +103,49 @@ MaterialApp(
 
 ### 1. Couleurs (`colors.dart`)
 
-#### Couleurs primaires
+#### Couleurs primaires Material 3
 ```dart
-AppColors.primary          // Rouge principal #B00020
-AppColors.primaryLight     // Rouge clair #E53935
-AppColors.primaryDark      // Rouge foncé #8E0000
+AppColors.primary              // Rouge principal #D32F2F
+AppColors.onPrimary            // Sur primaire #FFFFFF
+AppColors.primaryContainer     // Container primaire #F9DEDE
+AppColors.onPrimaryContainer   // Sur container #7A1212
+
+// Aliases rétrocompatibles
+AppColors.primaryLight         // Rouge clair #E53935
+AppColors.primaryDark          // Rouge foncé #8E0000
 ```
 
-#### Couleurs neutres (échelle 50-900)
+#### Surface & Background Material 3
 ```dart
-AppColors.neutral50        // Gris très clair
-AppColors.neutral100       // Background secondaire
-AppColors.neutral200       // Bordures subtiles
-AppColors.neutral300       // Bordures normales
+AppColors.background           // #FAFAFA
+AppColors.surface              // #FFFFFF
+AppColors.surfaceContainerLow  // #F5F5F5
+AppColors.surfaceContainer     // #EEEEEE
+AppColors.surfaceContainerHigh // #E6E6E6
+AppColors.onSurface            // #323232
+AppColors.onSurfaceVariant     // #5A5A5A
+AppColors.outline              // #BEBEBE
+AppColors.outlineVariant       // #E0E0E0
+```
+
+#### Couleurs neutres (échelle 50-900 - Rétrocompatibilité)
+```dart
+AppColors.neutral50        // = background
+AppColors.neutral100       // = surfaceContainerLow
+AppColors.neutral200       // = surfaceContainer
+AppColors.neutral300       // = outlineVariant
 AppColors.neutral900       // Texte principal
 ```
 
-#### Couleurs d'état
+#### Couleurs d'état Material 3
 ```dart
-AppColors.success          // Vert succès
-AppColors.warning          // Orange avertissement
-AppColors.danger           // Rouge erreur
+AppColors.success          // Vert succès #3FA35B
+AppColors.successContainer // Container succès #E5F5EB
+AppColors.warning          // Orange avertissement #F2994A
+AppColors.warningContainer // Container avertissement #FDE9D9
+AppColors.error            // Rouge erreur #C62828
+AppColors.errorContainer   // Container erreur #F9DADA
+AppColors.danger           // Alias de error
 AppColors.info             // Bleu information
 ```
 
@@ -116,17 +182,17 @@ AppTextStyles.price
 AppTextStyles.priceLarge
 ```
 
-### 3. Boutons (`buttons.dart`)
+### 3. Boutons (`buttons.dart`) - Material 3
 
-#### Variantes
+#### Variantes Material 3
 ```dart
-// Bouton principal (rouge)
+// Bouton Filled (primary) - High emphasis
 AppButton.primary(
   text: 'Enregistrer',
   onPressed: () {},
 )
 
-// Bouton secondaire (gris)
+// Bouton Tonal (secondary) - Medium emphasis - Uses primaryContainer
 AppButton.secondary(
   text: 'Annuler',
   onPressed: () {},
@@ -509,7 +575,7 @@ ResponsiveGrid(
 
 ## 📐 Spacing & Sizing
 
-### Espacements
+### Espacements Material 3
 ```dart
 AppSpacing.xxs   // 4px
 AppSpacing.xs    // 8px
@@ -520,19 +586,21 @@ AppSpacing.xl    // 32px
 AppSpacing.xxl   // 48px
 ```
 
-### Radius
+### Radius Material 3
 ```dart
-AppRadius.small   // 8px (cartes)
-AppRadius.medium  // 12px (boutons, inputs)
-AppRadius.large   // 16px (modales)
+AppRadius.small     // 8px
+AppRadius.medium    // 12px (boutons Material 3)
+AppRadius.large     // 16px (cartes Material 3)
+AppRadius.xxl       // 24px (BottomSheets Material 3)
+AppRadius.chip      // 16px (Chips Material 3)
 ```
 
-### Ombres
+### Ombres Material 3 (Légères)
 ```dart
-AppShadows.soft      // Légère
-AppShadows.medium    // Normale
-AppShadows.strong    // Forte
-AppShadows.card      // Pour cartes
+AppShadows.small     // 0 1px 2px rgba(0,0,0,0.08) - Material 3
+AppShadows.medium    // 0 2px 6px rgba(0,0,0,0.12) - Material 3
+AppShadows.strong    // Pour hover
+AppShadows.card      // Pour cartes (alias small)
 AppShadows.primary   // Colorée rouge
 ```
 
@@ -600,4 +668,6 @@ Pour ajouter un nouveau composant :
 
 ---
 
-**Pizza Deli'Zza Design System** - Version 1.0.0
+**Pizza Deli'Zza Design System - Material 3 (2025)** - Version 2.0.0
+
+Migration complète vers Material 3 avec la palette officielle Pizza Deli'Zza.

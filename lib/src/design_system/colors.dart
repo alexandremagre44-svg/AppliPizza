@@ -1,28 +1,39 @@
 // lib/src/design_system/colors.dart
-// Palette de couleurs complète - Design System Pizza Deli'Zza
+// Palette de couleurs complète - Design System Pizza Deli'Zza Material 3 (2025)
 
 import 'package:flutter/material.dart';
 
-/// Palette de couleurs complète et cohérente pour Pizza Deli'Zza
+/// Palette de couleurs officielle Pizza Deli'Zza - Material 3 (2025)
 /// 
-/// Organisation:
-/// - Couleurs primaires (Rouge Deli'Zza + variantes)
-/// - Couleurs neutres (Gris 50 → 900)
-/// - Couleurs d'état (Success, Warning, Danger, Info)
-/// - Couleurs d'effets (Shadow, Overlay, Border)
+/// Organisation Material 3:
+/// - Couleurs primaires (Rouge Deli'Zza #D32F2F)
+/// - Couleurs secondaires (#8E4C4C)
+/// - Surface & Background
+/// - Success, Warning, Error
+/// - Outline & Borders
 class AppColors {
   // ═══════════════════════════════════════════════════════════════
-  // PALETTE PRIMAIRE - Rouge Pizza Deli'Zza
+  // PALETTE PRIMAIRE - Rouge Pizza Deli'Zza (Material 3)
   // ═══════════════════════════════════════════════════════════════
   
-  /// Rouge principal Pizza Deli'Zza #B00020
-  static const Color primary = Color(0xFFB00020);
+  /// Rouge principal Pizza Deli'Zza #D32F2F (Material 3 Primary)
+  static const Color primary = Color(0xFFD32F2F);
   
+  /// Blanc sur primaire #FFFFFF
+  static const Color onPrimary = Color(0xFFFFFFFF);
+  
+  /// Container primaire #F9DEDE
+  static const Color primaryContainer = Color(0xFFF9DEDE);
+  
+  /// Texte sur container primaire #7A1212
+  static const Color onPrimaryContainer = Color(0xFF7A1212);
+  
+  // Aliases pour compatibilité
   /// Rouge clair pour survol et états actifs #E53935
   static const Color primaryLight = Color(0xFFE53935);
   
-  /// Rouge très clair pour backgrounds #FFEBEE
-  static const Color primaryLighter = Color(0xFFFFEBEE);
+  /// Rouge très clair pour backgrounds #FFEBEE (alias de primaryContainer)
+  static const Color primaryLighter = primaryContainer;
   
   /// Rouge foncé pour texte et ombres #8E0000
   static const Color primaryDark = Color(0xFF8E0000);
@@ -31,20 +42,64 @@ class AppColors {
   static const Color primaryDarker = Color(0xFF6D0000);
 
   // ═══════════════════════════════════════════════════════════════
-  // COULEURS NEUTRES - Échelle de gris cohérente
+  // COULEURS SECONDAIRES - Material 3
+  // ═══════════════════════════════════════════════════════════════
+  
+  /// Secondaire #8E4C4C
+  static const Color secondary = Color(0xFF8E4C4C);
+  
+  /// Blanc sur secondaire #FFFFFF
+  static const Color onSecondary = Color(0xFFFFFFFF);
+  
+  /// Container secondaire #F5E3E3
+  static const Color secondaryContainer = Color(0xFFF5E3E3);
+
+  // ═══════════════════════════════════════════════════════════════
+  // SURFACE & BACKGROUND - Material 3
+  // ═══════════════════════════════════════════════════════════════
+  
+  /// Background principal #FAFAFA
+  static const Color background = Color(0xFFFAFAFA);
+  
+  /// Surface blanche #FFFFFF
+  static const Color surface = Color(0xFFFFFFFF);
+  
+  /// Surface Container Low #F5F5F5
+  static const Color surfaceContainerLow = Color(0xFFF5F5F5);
+  
+  /// Surface Container #EEEEEE
+  static const Color surfaceContainer = Color(0xFFEEEEEE);
+  
+  /// Surface Container High #E6E6E6
+  static const Color surfaceContainerHigh = Color(0xFFE6E6E6);
+  
+  /// Texte sur surface #323232
+  static const Color onSurface = Color(0xFF323232);
+  
+  /// Texte sur surface variant #5A5A5A
+  static const Color onSurfaceVariant = Color(0xFF5A5A5A);
+  
+  /// Outline #BEBEBE
+  static const Color outline = Color(0xFFBEBEBE);
+  
+  /// Outline Variant #E0E0E0
+  static const Color outlineVariant = Color(0xFFE0E0E0);
+
+  // ═══════════════════════════════════════════════════════════════
+  // COULEURS NEUTRES - Échelle de gris (pour compatibilité)
   // ═══════════════════════════════════════════════════════════════
   
   /// Gris 50 - Background le plus clair #FAFAFA
-  static const Color neutral50 = Color(0xFFFAFAFA);
+  static const Color neutral50 = background;
   
   /// Gris 100 - Background secondaire #F5F5F5
-  static const Color neutral100 = Color(0xFFF5F5F5);
+  static const Color neutral100 = surfaceContainerLow;
   
   /// Gris 200 - Bordures subtiles #EEEEEE
-  static const Color neutral200 = Color(0xFFEEEEEE);
+  static const Color neutral200 = surfaceContainer;
   
   /// Gris 300 - Bordures normales #E0E0E0
-  static const Color neutral300 = Color(0xFFE0E0E0);
+  static const Color neutral300 = outlineVariant;
   
   /// Gris 400 - Bordures accentuées #BDBDBD
   static const Color neutral400 = Color(0xFFBDBDBD);
@@ -65,32 +120,44 @@ class AppColors {
   static const Color neutral900 = Color(0xFF212121);
 
   // ═══════════════════════════════════════════════════════════════
-  // COULEURS D'ÉTAT - Success, Warning, Danger, Info
+  // COULEURS D'ÉTAT - Material 3
   // ═══════════════════════════════════════════════════════════════
   
-  /// Vert succès #4CAF50
-  static const Color success = Color(0xFF4CAF50);
+  /// Vert succès #3FA35B
+  static const Color success = Color(0xFF3FA35B);
   
-  /// Vert succès clair pour backgrounds #E8F5E9
-  static const Color successLight = Color(0xFFE8F5E9);
+  /// Container succès #E5F5EB
+  static const Color successContainer = Color(0xFFE5F5EB);
+  
+  /// Vert succès clair pour backgrounds (alias)
+  static const Color successLight = successContainer;
   
   /// Vert succès foncé pour texte #2E7D32
   static const Color successDark = Color(0xFF2E7D32);
   
-  /// Orange avertissement #FF9800
-  static const Color warning = Color(0xFFFF9800);
+  /// Orange avertissement #F2994A
+  static const Color warning = Color(0xFFF2994A);
   
-  /// Orange avertissement clair pour backgrounds #FFF3E0
-  static const Color warningLight = Color(0xFFFFF3E0);
+  /// Container avertissement #FDE9D9
+  static const Color warningContainer = Color(0xFFFDE9D9);
+  
+  /// Orange avertissement clair pour backgrounds (alias)
+  static const Color warningLight = warningContainer;
   
   /// Orange avertissement foncé pour texte #E65100
   static const Color warningDark = Color(0xFFE65100);
   
-  /// Rouge danger #D32F2F
-  static const Color danger = Color(0xFFD32F2F);
+  /// Rouge erreur #C62828
+  static const Color error = Color(0xFFC62828);
   
-  /// Rouge danger clair pour backgrounds #FFEBEE
-  static const Color dangerLight = Color(0xFFFFEBEE);
+  /// Container erreur #F9DADA
+  static const Color errorContainer = Color(0xFFF9DADA);
+  
+  /// Rouge danger (alias de error)
+  static const Color danger = error;
+  
+  /// Rouge danger clair pour backgrounds (alias)
+  static const Color dangerLight = errorContainer;
   
   /// Rouge danger foncé pour texte #B71C1C
   static const Color dangerDark = Color(0xFFB71C1C);
@@ -118,7 +185,7 @@ class AppColors {
   static const Color accentGreen = Color(0xFF4CAF50);
 
   // ═══════════════════════════════════════════════════════════════
-  // COULEURS DE BASE - Surface & Background
+  // COULEURS DE BASE
   // ═══════════════════════════════════════════════════════════════
   
   /// Blanc pur #FFFFFF
@@ -126,22 +193,16 @@ class AppColors {
   
   /// Noir pur #000000
   static const Color black = Color(0xFF000000);
-  
-  /// Surface blanche (cartes, modales)
-  static const Color surface = Color(0xFFFFFFFF);
-  
-  /// Background principal
-  static const Color background = Color(0xFFF5F5F5);
 
   // ═══════════════════════════════════════════════════════════════
   // COULEURS SÉMANTIQUES - Alias pour usage contextuel
   // ═══════════════════════════════════════════════════════════════
   
-  /// Texte principal (noir/gris très foncé)
-  static const Color textPrimary = neutral900;
+  /// Texte principal #323232 (utilise onSurface)
+  static const Color textPrimary = onSurface;
   
-  /// Texte secondaire (gris moyen)
-  static const Color textSecondary = neutral600;
+  /// Texte secondaire #5A5A5A (utilise onSurfaceVariant)
+  static const Color textSecondary = onSurfaceVariant;
   
   /// Texte tertiaire (gris clair)
   static const Color textTertiary = neutral500;
@@ -150,13 +211,13 @@ class AppColors {
   static const Color textDisabled = neutral400;
   
   /// Texte sur fond rouge
-  static const Color textOnPrimary = white;
+  static const Color textOnPrimary = onPrimary;
   
-  /// Bordure subtile
-  static const Color borderSubtle = neutral200;
+  /// Bordure subtile (utilise outlineVariant)
+  static const Color borderSubtle = outlineVariant;
   
-  /// Bordure normale
-  static const Color border = neutral300;
+  /// Bordure normale (utilise outline)
+  static const Color border = outline;
   
   /// Bordure accentuée
   static const Color borderStrong = neutral400;
@@ -212,17 +273,17 @@ class AppColors {
   // ═══════════════════════════════════════════════════════════════
   
   static const MaterialColor primarySwatch = MaterialColor(
-    0xFFB00020,
+    0xFFD32F2F, // Primary #D32F2F
     <int, Color>{
-      50: Color(0xFFFFEBEE),
+      50: Color(0xFFF9DEDE),  // primaryContainer
       100: Color(0xFFFFCDD2),
       200: Color(0xFFEF9A9A),
       300: Color(0xFFE57373),
       400: Color(0xFFEF5350),
-      500: Color(0xFFB00020),
-      600: Color(0xFFE53935),
-      700: Color(0xFFD32F2F),
-      800: Color(0xFFB00020),
+      500: Color(0xFFD32F2F), // primary
+      600: Color(0xFFC62828),
+      700: Color(0xFFB71C1C),
+      800: Color(0xFF7A1212), // onPrimaryContainer
       900: Color(0xFF8E0000),
     },
   );

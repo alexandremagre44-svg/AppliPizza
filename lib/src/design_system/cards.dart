@@ -1,5 +1,5 @@
 // lib/src/design_system/cards.dart
-// Composants cartes réutilisables - Design System Pizza Deli'Zza
+// Composants cartes réutilisables - Design System Pizza Deli'Zza Material 3 (2025)
 
 import 'package:flutter/material.dart';
 import 'colors.dart';
@@ -12,7 +12,12 @@ import 'shadows.dart';
 // CARTE STANDARD - AppCard
 // ═══════════════════════════════════════════════════════════════
 
-/// Carte standard avec padding et ombre
+/// Carte standard Material 3 avec padding et ombre
+/// 
+/// Material 3:
+/// - Background: surfaceContainerLow (#F5F5F5)
+/// - Radius: 16px
+/// - Shadow: light (0 1px 2px rgba(0,0,0,0.08))
 class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
@@ -38,10 +43,10 @@ class AppCard extends StatelessWidget {
     final card = Container(
       padding: padding ?? AppSpacing.cardPadding,
       decoration: BoxDecoration(
-        color: color ?? AppColors.white,
-        borderRadius: borderRadius ?? AppRadius.card,
-        boxShadow: boxShadow ?? AppShadows.card,
-        border: Border.all(color: AppColors.borderSubtle, width: 1),
+        color: color ?? AppColors.surfaceContainerLow, // Material 3: #F5F5F5
+        borderRadius: borderRadius ?? AppRadius.card, // Material 3: 16px
+        boxShadow: boxShadow ?? AppShadows.small, // Material 3: light shadow
+        border: Border.all(color: AppColors.outlineVariant, width: 1),
       ),
       child: child,
     );
@@ -222,16 +227,16 @@ class _AppInteractiveCardState extends State<AppInteractiveCard> {
         padding: widget.padding ?? AppSpacing.cardPadding,
         decoration: BoxDecoration(
           color: widget.selected
-              ? AppColors.primaryLighter
-              : (_isHovering ? AppColors.neutral50 : AppColors.white),
-          borderRadius: AppRadius.card,
+              ? AppColors.primaryContainer // Material 3: #F9DEDE
+              : (_isHovering ? AppColors.surfaceContainerLow : AppColors.surface),
+          borderRadius: AppRadius.card, // Material 3: 16px
           boxShadow: _isHovering || widget.selected
-              ? AppShadows.cardHover
-              : AppShadows.card,
+              ? AppShadows.medium
+              : AppShadows.small,
           border: Border.all(
             color: widget.selected
                 ? AppColors.primary
-                : (_isHovering ? AppColors.border : AppColors.borderSubtle),
+                : (_isHovering ? AppColors.outline : AppColors.outlineVariant),
             width: widget.selected ? 2 : 1,
           ),
         ),

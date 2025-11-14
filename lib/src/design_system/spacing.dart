@@ -1,11 +1,12 @@
 // lib/src/design_system/spacing.dart
-// Système d'espacement cohérent - Design System Pizza Deli'Zza
+// Système d'espacement cohérent - Design System Pizza Deli'Zza Material 3 (2025)
 
 import 'package:flutter/material.dart';
 
-/// Système d'espacement cohérent basé sur une échelle de 4px
+/// Système d'espacement Material 3 basé sur une échelle de 4px
 /// 
-/// Échelle: 4, 8, 12, 16, 24, 32, 48, 64, 96
+/// Spécifications Material 3: 4 / 8 / 12 / 16 / 24 / 32
+/// Échelle complète: 4, 8, 12, 16, 24, 32, 48, 64, 96
 /// Usage: Margins, Paddings, Gaps
 class AppSpacing {
   // ═══════════════════════════════════════════════════════════════
