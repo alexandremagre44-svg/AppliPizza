@@ -10,6 +10,7 @@ import '../providers/staff_tablet_cart_provider.dart';
 import '../providers/staff_tablet_auth_provider.dart';
 import '../widgets/staff_tablet_cart_summary.dart';
 import '../widgets/staff_pizza_customization_modal.dart';
+import '../widgets/staff_menu_customization_modal.dart';
 
 class StaffTabletCatalogScreen extends ConsumerStatefulWidget {
   const StaffTabletCatalogScreen({Key? key}) : super(key: key);
@@ -239,8 +240,17 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
       ),
       child: InkWell(
         onTap: () {
-          // Show customization modal for pizzas, direct add for others
-          if (product.category == ProductCategory.pizza && product.baseIngredients.isNotEmpty) {
+          // Show customization modal for menus
+          if (product.isMenu) {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => StaffMenuCustomizationModal(menu: product),
+            );
+          }
+          // Show customization modal for pizzas
+          else if (product.category == ProductCategory.pizza && product.baseIngredients.isNotEmpty) {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -248,7 +258,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
               builder: (context) => StaffPizzaCustomizationModal(pizza: product),
             );
           } else {
-            // Direct add for non-pizza items
+            // Direct add for other items (drinks, desserts, etc.)
             ref.read(staffTabletCartProvider.notifier).addItem(product);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
