@@ -340,7 +340,7 @@ class _StudioPopupsRouletteScreenState
             shape: BoxShape.circle,
           ),
           child: Icon(
-            _getPopupIcon(popup.type),
+            _getPopupIcon(popup.type ?? 'info'),
             color: popup.isActive ? AppColors.primaryRed : AppColors.textLight,
           ),
         ),
@@ -361,7 +361,7 @@ class _StudioPopupsRouletteScreenState
               children: [
                 Text(popup.message, style: AppTextStyles.bodyMedium),
                 SizedBox(height: AppSpacing.md),
-                _buildInfoRow('Condition', popup.displayCondition),
+                _buildInfoRow('Condition', popup.displayCondition ?? 'Non définie'),
                 _buildInfoRow('Priorité', popup.priority.toString()),
                 if (popup.ctaText != null)
                   _buildInfoRow('Bouton', popup.ctaText!),
@@ -595,7 +595,7 @@ class _StudioPopupsRouletteScreenState
                         priority: priority,
                         ctaText: ctaTextController.text.trim().isEmpty ? null : ctaTextController.text.trim(),
                         ctaAction: ctaActionController.text.trim().isEmpty ? null : ctaActionController.text.trim(),
-                        isActive: isActive,
+                        isEnabled: isActive,
                       )
                     : PopupConfig(
                         id: const Uuid().v4(),
@@ -607,7 +607,7 @@ class _StudioPopupsRouletteScreenState
                         priority: priority,
                         ctaText: ctaTextController.text.trim().isEmpty ? null : ctaTextController.text.trim(),
                         ctaAction: ctaActionController.text.trim().isEmpty ? null : ctaActionController.text.trim(),
-                        isActive: isActive,
+                        isEnabled: isActive,
                         createdAt: DateTime.now(),
                       );
                 
