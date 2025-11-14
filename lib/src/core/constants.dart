@@ -26,6 +26,7 @@ class AppRoutes {
   static const String studioPopupsRoulette = '/admin/studio/popups-roulette';
   static const String studioTexts = '/admin/studio/texts';
   static const String studioFeaturedProducts = '/admin/studio/featured-products';
+  static const String studioContent = '/admin/studio/content'; // New CMS route
   
   // Communication routes
   static const String communicationPromotions = '/admin/communication/promotions';

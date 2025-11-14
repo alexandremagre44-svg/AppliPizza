@@ -30,6 +30,7 @@ import 'src/screens/admin/studio/studio_texts_screen.dart';
 import 'src/screens/admin/studio/studio_featured_products_screen.dart';
 import 'src/screens/admin/communication/communication_promotions_screen.dart';
 import 'src/screens/admin/communication/communication_loyalty_screen.dart';
+import 'src/features/content/presentation/admin/content_studio_screen.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 
@@ -180,6 +181,10 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: AppRoutes.studioFeaturedProducts,
               builder: (context, state) => const StudioFeaturedProductsScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.studioContent,
+              builder: (context, state) => const ContentStudioScreen(),
             ),
             // Communication routes
             GoRoute(
