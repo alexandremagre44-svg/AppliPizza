@@ -1,10 +1,15 @@
 // lib/src/staff_tablet/screens/staff_tablet_history_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../design_system/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../design_system/app_theme.dart';
 import 'package:intl/intl.dart';
+import '../../design_system/app_theme.dart';
 import '../../models/order.dart';
+import '../../design_system/app_theme.dart';
 import '../providers/staff_tablet_orders_provider.dart';
+import '../../design_system/app_theme.dart';
 
 class StaffTabletHistoryScreen extends ConsumerWidget {
   const StaffTabletHistoryScreen({Key? key}) : super(key: key);
@@ -218,7 +223,7 @@ class _OrderCard extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status) {
       case OrderStatus.pending:
-        return Colors.orange[700]!;
+        return AppColors.primary!;
       case OrderStatus.preparing:
         return Colors.blue[700]!;
       case OrderStatus.baking:
@@ -364,14 +369,14 @@ class _OrderCard extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.orange[50],
+                        color: AppColors.primaryLighter,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.orange[200]!, width: 1),
                       ),
                       child: Row(
                         children: [
                           Icon(Icons.shopping_bag_rounded,
-                              size: 18, color: Colors.orange[700]),
+                              size: 18, color: AppColors.primary),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -379,7 +384,7 @@ class _OrderCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.orange[900],
+                                color: AppColors.primaryDarker,
                               ),
                             ),
                           ),
@@ -448,7 +453,7 @@ class _OrderCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.calculate_rounded,
-                            color: Colors.orange[900], size: 24),
+                            color: AppColors.primaryDarker, size: 24),
                         const SizedBox(width: 10),
                         Text(
                           'Total',
@@ -465,7 +470,7 @@ class _OrderCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
-                        color: Colors.orange[900],
+                        color: AppColors.primaryDarker,
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -553,7 +558,7 @@ class _OrderCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.orange[700],
+                      color: AppColors.primary,
                     ),
                   ),
                 ],

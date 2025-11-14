@@ -1,13 +1,21 @@
 // lib/src/staff_tablet/screens/staff_tablet_checkout_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../design_system/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../design_system/app_theme.dart';
 import 'package:go_router/go_router.dart';
+import '../../design_system/app_theme.dart';
 import 'package:intl/intl.dart';
+import '../../design_system/app_theme.dart';
 import '../../models/order.dart';
+import '../../design_system/app_theme.dart';
 import '../../providers/cart_provider.dart';
+import '../../design_system/app_theme.dart';
 import '../../services/firebase_order_service.dart';
+import '../../design_system/app_theme.dart';
 import '../providers/staff_tablet_cart_provider.dart';
+import '../../design_system/app_theme.dart';
 
 class StaffTabletCheckoutScreen extends ConsumerStatefulWidget {
   const StaffTabletCheckoutScreen({Key? key}) : super(key: key);
@@ -118,7 +126,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.orange[700],
+                              color: AppColors.primary,
                             ),
                           ),
                         ],
@@ -161,7 +169,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   context.go('/staff-tablet/catalog');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange[700],
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 ),
@@ -266,7 +274,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   ElevatedButton(
                     onPressed: () => context.pop(),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange[700],
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     ),
@@ -321,7 +329,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                                     _selectedTimeSlot = null;
                                   });
                                 },
-                                activeColor: Colors.orange[700],
+                                activeColor: AppColors.primary,
                               ),
                               RadioListTile<String>(
                                 title: const Text('Créneau spécifique', style: TextStyle(fontSize: 18)),
@@ -332,7 +340,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                                     _pickupTime = value!;
                                   });
                                 },
-                                activeColor: Colors.orange[700],
+                                activeColor: AppColors.primary,
                               ),
                               if (_pickupTime == 'scheduled') ...[
                                 const SizedBox(height: 12),
@@ -348,7 +356,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                                           _selectedTimeSlot = selected ? slot : null;
                                         });
                                       },
-                                      selectedColor: Colors.orange[700],
+                                      selectedColor: AppColors.primary,
                                       labelStyle: TextStyle(
                                         color: _selectedTimeSlot == slot ? Colors.white : Colors.black,
                                       ),
@@ -376,7 +384,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                                     _paymentMethod = value!;
                                   });
                                 },
-                                activeColor: Colors.orange[700],
+                                activeColor: AppColors.primary,
                               ),
                               RadioListTile<String>(
                                 title: const Text('Carte bancaire', style: TextStyle(fontSize: 18)),
@@ -387,7 +395,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                                     _paymentMethod = value!;
                                   });
                                 },
-                                activeColor: Colors.orange[700],
+                                activeColor: AppColors.primary,
                               ),
                               RadioListTile<String>(
                                 title: const Text('Autre', style: TextStyle(fontSize: 18)),
@@ -398,7 +406,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                                     _paymentMethod = value!;
                                   });
                                 },
-                                activeColor: Colors.orange[700],
+                                activeColor: AppColors.primary,
                               ),
                             ],
                           ),
@@ -555,7 +563,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
-                              color: Colors.orange[900],
+                              color: AppColors.primaryDarker,
                             ),
                           ),
                         ),
@@ -666,7 +674,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.orange[200]!, width: 1.5),
                   ),
-                  child: Icon(icon, color: Colors.orange[700], size: 26),
+                  child: Icon(icon, color: AppColors.primary, size: 26),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
