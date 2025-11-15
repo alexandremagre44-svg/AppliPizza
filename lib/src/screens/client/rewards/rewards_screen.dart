@@ -27,7 +27,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
   final RewardService _rewardService = RewardService();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final userId = authState.userId ?? 'guest';
     
@@ -295,7 +295,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.accentGold.withOpacity(0.2),
-                  borderRadius: AppRadius.badgeSmall,
+                  borderRadius: AppRadius.badge,
                 ),
                 child: Text(
                   _getSourceLabel(ticket.action.source!),
@@ -417,7 +417,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                 color: ticket.isUsed 
                     ? AppColors.success.withOpacity(0.1)
                     : AppColors.textTertiary.withOpacity(0.1),
-                borderRadius: AppRadius.badgeSmall,
+                borderRadius: AppRadius.badge,
               ),
               child: Text(
                 ticket.isUsed ? 'Utilisé' : 'Expiré',
