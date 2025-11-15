@@ -37,58 +37,159 @@ class AppTextsService {
     }
   }
 
-  // Update general texts
-  Future<bool> updateGeneralTexts(GeneralTexts texts) async {
+  // Update individual module texts
+  Future<bool> updateHomeTexts(HomeTexts texts) async {
     try {
       await _firestore.collection(_collection).doc(_configDocId).update({
-        'general': texts.toJson(),
+        'home': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
       return true;
     } catch (e) {
-      print('Error updating general texts: $e');
+      print('Error updating home texts: $e');
       return false;
     }
   }
 
-  // Update order messages
-  Future<bool> updateOrderMessages(OrderMessages messages) async {
+  Future<bool> updateProfileTexts(ProfileTexts texts) async {
     try {
       await _firestore.collection(_collection).doc(_configDocId).update({
-        'orderMessages': messages.toJson(),
+        'profile': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
       return true;
     } catch (e) {
-      print('Error updating order messages: $e');
+      print('Error updating profile texts: $e');
       return false;
     }
   }
 
-  // Update error messages
-  Future<bool> updateErrorMessages(ErrorMessages messages) async {
+  Future<bool> updateRewardsTexts(RewardsTexts texts) async {
     try {
       await _firestore.collection(_collection).doc(_configDocId).update({
-        'errorMessages': messages.toJson(),
+        'rewards': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
       return true;
     } catch (e) {
-      print('Error updating error messages: $e');
+      print('Error updating rewards texts: $e');
       return false;
     }
   }
 
-  // Update loyalty texts
+  Future<bool> updateRouletteTexts(RouletteTexts texts) async {
+    try {
+      await _firestore.collection(_collection).doc(_configDocId).update({
+        'roulette': texts.toJson(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      return true;
+    } catch (e) {
+      print('Error updating roulette texts: $e');
+      return false;
+    }
+  }
+
   Future<bool> updateLoyaltyTexts(LoyaltyTexts texts) async {
     try {
       await _firestore.collection(_collection).doc(_configDocId).update({
-        'loyaltyTexts': texts.toJson(),
+        'loyalty': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
       return true;
     } catch (e) {
       print('Error updating loyalty texts: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateCatalogTexts(CatalogTexts texts) async {
+    try {
+      await _firestore.collection(_collection).doc(_configDocId).update({
+        'catalog': texts.toJson(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      return true;
+    } catch (e) {
+      print('Error updating catalog texts: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateCartTexts(CartTexts texts) async {
+    try {
+      await _firestore.collection(_collection).doc(_configDocId).update({
+        'cart': texts.toJson(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      return true;
+    } catch (e) {
+      print('Error updating cart texts: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateCheckoutTexts(CheckoutTexts texts) async {
+    try {
+      await _firestore.collection(_collection).doc(_configDocId).update({
+        'checkout': texts.toJson(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      return true;
+    } catch (e) {
+      print('Error updating checkout texts: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateAuthTexts(AuthTexts texts) async {
+    try {
+      await _firestore.collection(_collection).doc(_configDocId).update({
+        'auth': texts.toJson(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      return true;
+    } catch (e) {
+      print('Error updating auth texts: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateAdminTexts(AdminTexts texts) async {
+    try {
+      await _firestore.collection(_collection).doc(_configDocId).update({
+        'admin': texts.toJson(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      return true;
+    } catch (e) {
+      print('Error updating admin texts: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateErrorTexts(ErrorTexts texts) async {
+    try {
+      await _firestore.collection(_collection).doc(_configDocId).update({
+        'errors': texts.toJson(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      return true;
+    } catch (e) {
+      print('Error updating error texts: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateNotificationTexts(NotificationTexts texts) async {
+    try {
+      await _firestore.collection(_collection).doc(_configDocId).update({
+        'notifications': texts.toJson(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      return true;
+    } catch (e) {
+      print('Error updating notification texts: $e');
       return false;
     }
   }
