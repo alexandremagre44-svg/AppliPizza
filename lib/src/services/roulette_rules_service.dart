@@ -116,7 +116,8 @@ class RouletteRulesService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Get current roulette rules from Firestore
-  Future<RouletteRules> getRules() async {
+  /// Returns null if document doesn't exist (not configured)
+  Future<RouletteRules?> getRules() async {
     try {
       final doc = await _firestore
           .collection('config')
@@ -127,11 +128,11 @@ class RouletteRulesService {
         return RouletteRules.fromMap(doc.data()!);
       }
       
-      // Return default rules if not configured
-      return const RouletteRules();
+      // Return null if not configured (document doesn't exist)
+      return null;
     } catch (e) {
       print('Error getting roulette rules: $e');
-      return const RouletteRules();
+      return null;
     }
   }
 
@@ -153,6 +154,11 @@ class RouletteRulesService {
     try {
       // Get rules
       final rules = await getRules();
+      
+      // Check if roulette is configured
+      if (rules == null) {
+        return RouletteStatus.denied('La roulette n\'est pas encore configurée.');
+      }
       
       // Check if roulette is globally enabled
       if (!rules.isEnabled) {
@@ -415,7 +421,8 @@ class RouletteRulesService {
   }
 
   /// Watch rules in real-time
-  Stream<RouletteRules> watchRules() {
+  /// Emits null if document doesn't exist (not configured)
+  Stream<RouletteRules?> watchRules() {
     return _firestore
         .collection('config')
         .doc('roulette_rules')
@@ -424,7 +431,7 @@ class RouletteRulesService {
       if (snapshot.exists && snapshot.data() != null) {
         return RouletteRules.fromMap(snapshot.data()!);
       }
-      return const RouletteRules();
+      return null;
     });
   }
 }

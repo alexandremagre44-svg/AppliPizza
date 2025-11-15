@@ -4,8 +4,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../../../theme/app_theme.dart';
-import '../../roulette/roulette_screen.dart';
+import '../../../core/constants.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/reward_service.dart';
 import '../../../models/reward_ticket.dart';
@@ -115,12 +116,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => RouletteScreen(userId: userId),
-                        ),
-                      );
+                      context.go(AppRoutes.roulette);
                     },
                     icon: const Icon(Icons.casino, size: 28),
                     label: Text(

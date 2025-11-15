@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/roulette_config.dart';
 import '../../services/roulette_segment_service.dart';
 import '../../services/roulette_service.dart';
@@ -10,8 +11,8 @@ import '../../services/roulette_rules_service.dart';
 import '../../widgets/pizza_roulette_wheel.dart';
 import '../../providers/cart_provider.dart';
 import '../../design_system/app_theme.dart';
+import '../../core/constants.dart';
 import '../../utils/roulette_reward_mapper.dart';
-import '../client/rewards/rewards_screen.dart';
 
 class RouletteScreen extends ConsumerStatefulWidget {
   final String userId;
@@ -239,12 +240,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
                 // Navigate to rewards screen to see the ticket
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const RewardsScreen(),
-                  ),
-                );
+                context.go(AppRoutes.rewards);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -325,7 +321,11 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       );
     }
     
-    if (_segments.isEmpty) {
+    // Show proper message when roulette is not configured or segments are empty
+    if (_segments.isEmpty || (_eligibilityStatus != null && 
+        _eligibilityStatus!.reason == 'La roulette n\'est pas encore configurée.')) {
+      final isNotConfigured = _eligibilityStatus?.reason == 'La roulette n\'est pas encore configurée.';
+      
       return Scaffold(
         appBar: AppBar(
           title: const Text('Roue de la Chance'),
@@ -345,13 +345,17 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'La roue n\'est pas disponible',
+                  isNotConfigured 
+                      ? 'La roulette n\'est pas encore disponible.'
+                      : 'La roue n\'est pas disponible',
                   style: AppTextStyles.titleLarge,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Revenez plus tard pour tenter votre chance !',
+                  isNotConfigured
+                      ? 'Veuillez réessayer plus tard.'
+                      : 'Revenez plus tard pour tenter votre chance !',
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSecondary,
                   ),
