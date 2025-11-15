@@ -30,6 +30,8 @@ import 'src/screens/admin/studio/studio_popups_roulette_screen.dart';
 import 'src/screens/admin/studio/studio_texts_screen.dart';
 import 'src/screens/admin/studio/studio_featured_products_screen.dart';
 import 'src/screens/admin/studio/banner_block_editor.dart';
+import 'src/screens/admin/studio/hero_block_editor.dart';
+import 'src/screens/admin/studio/popup_block_list.dart';
 import 'src/screens/admin/communication/communication_promotions_screen.dart';
 import 'src/screens/admin/communication/communication_loyalty_screen.dart';
 import 'src/features/content/presentation/admin/content_studio_screen.dart';
@@ -184,8 +186,16 @@ class MyApp extends ConsumerWidget {
               builder: (context, state) => const StudioHomeConfigScreen(),
             ),
             GoRoute(
+              path: AppRoutes.studioHero,
+              builder: (context, state) => const HeroBlockEditor(),
+            ),
+            GoRoute(
               path: AppRoutes.studioPopupsRoulette,
               builder: (context, state) => const StudioPopupsRouletteScreen(),
+            ),
+            GoRoute(
+              path: AppRoutes.studioPopupsList,
+              builder: (context, state) => const PopupBlockList(),
             ),
             GoRoute(
               path: AppRoutes.studioTexts,
