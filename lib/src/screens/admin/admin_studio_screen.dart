@@ -61,12 +61,7 @@ class AdminStudioScreen extends StatelessWidget {
             title: 'Bandeau',
             subtitle: 'Gérer le bandeau promotionnel',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Section Bandeau - À venir'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
+              context.push(AppRoutes.studioBanner);
             },
           ),
           SizedBox(height: AppSpacing.md),
