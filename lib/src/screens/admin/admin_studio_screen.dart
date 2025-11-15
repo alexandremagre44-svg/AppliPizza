@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart';
 import '../../core/constants.dart';
+import 'studio/hero_block_editor.dart';
+import 'studio/banner_block_editor.dart';
+import 'studio/popup_block_list.dart';
+import 'studio/studio_texts_screen.dart';
+import '../../features/content/presentation/admin/content_studio_screen.dart';
 
 /// Studio Builder - Interface unifiée pour gérer l'apparence de l'application
 /// 
@@ -46,11 +51,9 @@ class AdminStudioScreen extends StatelessWidget {
             title: 'Hero',
             subtitle: 'Modifier la bannière principale',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Section Hero - À venir'),
-                  duration: Duration(seconds: 2),
-                ),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HeroBlockEditor()),
               );
             },
           ),
@@ -61,7 +64,10 @@ class AdminStudioScreen extends StatelessWidget {
             title: 'Bandeau',
             subtitle: 'Gérer le bandeau promotionnel',
             onTap: () {
-              context.push(AppRoutes.studioBanner);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BannerBlockEditor()),
+              );
             },
           ),
           SizedBox(height: AppSpacing.md),
@@ -71,7 +77,10 @@ class AdminStudioScreen extends StatelessWidget {
             title: 'Popups',
             subtitle: 'Popups, messages, roulette',
             onTap: () {
-              context.push(AppRoutes.studioPopupsRoulette);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PopupBlockList()),
+              );
             },
           ),
           SizedBox(height: AppSpacing.md),
@@ -81,7 +90,10 @@ class AdminStudioScreen extends StatelessWidget {
             title: 'Textes',
             subtitle: 'Textes et messages de l\'application',
             onTap: () {
-              context.push(AppRoutes.studioTexts);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const StudioTextsScreen()),
+              );
             },
           ),
           SizedBox(height: AppSpacing.md),
@@ -91,7 +103,10 @@ class AdminStudioScreen extends StatelessWidget {
             title: 'Contenu',
             subtitle: 'Studio de contenu',
             onTap: () {
-              context.push(AppRoutes.studioContent);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ContentStudioScreen()),
+              );
             },
           ),
           SizedBox(height: AppSpacing.md),

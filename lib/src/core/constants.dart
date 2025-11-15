@@ -24,7 +24,9 @@ class AppRoutes {
   // Studio routes
   static const String adminStudio = '/admin/studio'; // Studio Builder main screen
   static const String studioHomeConfig = '/admin/studio/home-config';
+  static const String studioHero = '/admin/studio/hero'; // Hero block editor
   static const String studioPopupsRoulette = '/admin/studio/popups-roulette';
+  static const String studioPopupsList = '/admin/studio/popups'; // Popup block list
   static const String studioTexts = '/admin/studio/texts';
   static const String studioFeaturedProducts = '/admin/studio/featured-products';
   static const String studioContent = '/admin/studio/content'; // New CMS route
