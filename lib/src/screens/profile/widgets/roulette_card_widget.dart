@@ -6,10 +6,11 @@ import 'package:go_router/go_router.dart';
 import '../../../design_system/app_theme.dart';
 import '../../../core/constants.dart';
 import '../../../models/app_texts_config.dart';
+import '../../../services/roulette_rules_service.dart';
 
 /// Dedicated card for roulette access
 /// Shows icon, configurable title/description, and CTA button
-class RouletteCardWidget extends StatelessWidget {
+class RouletteCardWidget extends StatefulWidget {
   final RouletteTexts texts;
   final String userId;
 
@@ -20,7 +21,43 @@ class RouletteCardWidget extends StatelessWidget {
   });
 
   @override
+  State<RouletteCardWidget> createState() => _RouletteCardWidgetState();
+}
+
+class _RouletteCardWidgetState extends State<RouletteCardWidget> {
+  final RouletteRulesService _rulesService = RouletteRulesService();
+  RouletteStatus? _status;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkEligibility();
+  }
+
+  Future<void> _checkEligibility() async {
+    try {
+      final status = await _rulesService.checkEligibility(widget.userId);
+      if (mounted) {
+        setState(() {
+          _status = status;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final canSpin = _status?.canSpin ?? false;
+    final isLoading = _isLoading;
+    
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -31,10 +68,11 @@ class RouletteCardWidget extends StatelessWidget {
         ),
       ),
       child: InkWell(
-        onTap: () {
-          // Navigate to roulette screen
-          context.push('${AppRoutes.roulette}?userId=$userId');
-        },
+        onTap: canSpin && !isLoading
+            ? () {
+                context.push('${AppRoutes.roulette}?userId=${widget.userId}');
+              }
+            : null,
         borderRadius: AppRadius.card,
         child: Padding(
           padding: AppSpacing.paddingLG,
@@ -46,34 +84,49 @@ class RouletteCardWidget extends StatelessWidget {
                 height: 80,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      Colors.amber,
-                      Colors.amber.shade700,
-                    ],
+                    colors: canSpin && !isLoading
+                        ? [
+                            Colors.amber,
+                            Colors.amber.shade700,
+                          ]
+                        : [
+                            Colors.grey.shade300,
+                            Colors.grey.shade400,
+                          ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.amber.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
+                  boxShadow: canSpin && !isLoading
+                      ? [
+                          BoxShadow(
+                            color: Colors.amber.withOpacity(0.3),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                          ),
+                        ]
+                      : [],
                 ),
-                child: Icon(
-                  Icons.casino,
-                  size: 40,
-                  color: Colors.white,
-                ),
+                child: isLoading
+                    ? const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Icon(
+                        canSpin ? Icons.casino : Icons.block,
+                        size: 40,
+                        color: Colors.white,
+                      ),
               ),
               
               SizedBox(height: AppSpacing.lg),
               
               // Title
               Text(
-                texts.playTitle,
+                widget.texts.playTitle,
                 style: AppTextStyles.titleMedium.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -82,16 +135,50 @@ class RouletteCardWidget extends StatelessWidget {
               
               SizedBox(height: AppSpacing.sm),
               
-              // Description
-              Text(
-                texts.playDescription,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+              // Description or status
+              if (isLoading)
+                Text(
+                  'Vérification...',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                )
+              else if (!canSpin && _status?.reason != null)
+                Column(
+                  children: [
+                    Text(
+                      _status!.reason!,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.warning,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (_status!.nextEligibleAt != null) ...[
+                      SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _formatNextEligibleTime(_status!.nextEligibleAt!),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                )
+              else
+                Text(
+                  widget.texts.playDescription,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
               
               SizedBox(height: AppSpacing.lg),
               
@@ -99,14 +186,23 @@ class RouletteCardWidget extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    context.push('${AppRoutes.roulette}?userId=$userId');
-                  },
-                  icon: Icon(Icons.casino, size: 20),
-                  label: Text(texts.playButton),
+                  onPressed: canSpin && !isLoading
+                      ? () {
+                          context.push('${AppRoutes.roulette}?userId=${widget.userId}');
+                        }
+                      : null,
+                  icon: Icon(
+                    canSpin ? Icons.casino : Icons.block,
+                    size: 20,
+                  ),
+                  label: Text(
+                    canSpin ? widget.texts.playButton : 'Non disponible',
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.amber,
-                    foregroundColor: Colors.black87,
+                    backgroundColor: canSpin ? Colors.amber : AppColors.neutral300,
+                    foregroundColor: canSpin ? Colors.black87 : AppColors.neutral600,
+                    disabledBackgroundColor: AppColors.neutral300,
+                    disabledForegroundColor: AppColors.neutral600,
                     padding: EdgeInsets.symmetric(
                       vertical: AppSpacing.sm + 2,
                     ),
@@ -122,5 +218,20 @@ class RouletteCardWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatNextEligibleTime(DateTime nextTime) {
+    final now = DateTime.now();
+    final difference = nextTime.difference(now);
+    
+    if (difference.inDays > 0) {
+      return 'Disponible dans ${difference.inDays} jour${difference.inDays > 1 ? 's' : ''}';
+    } else if (difference.inHours > 0) {
+      return 'Disponible dans ${difference.inHours} heure${difference.inHours > 1 ? 's' : ''}';
+    } else if (difference.inMinutes > 0) {
+      return 'Disponible dans ${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''}';
+    } else {
+      return 'Disponible maintenant';
+    }
   }
 }

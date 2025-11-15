@@ -1,0 +1,430 @@
+// lib/src/services/roulette_rules_service.dart
+// Service for managing roulette eligibility rules and validation
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+/// Status result for roulette eligibility check
+class RouletteStatus {
+  /// Whether the user can spin the roulette now
+  final bool canSpin;
+  
+  /// Reason why user cannot spin (null if canSpin is true)
+  final String? reason;
+  
+  /// Next time the user will be eligible (null if already eligible)
+  final DateTime? nextEligibleAt;
+
+  const RouletteStatus({
+    required this.canSpin,
+    this.reason,
+    this.nextEligibleAt,
+  });
+
+  factory RouletteStatus.allowed() {
+    return const RouletteStatus(canSpin: true);
+  }
+
+  factory RouletteStatus.denied(String reason, {DateTime? nextEligibleAt}) {
+    return RouletteStatus(
+      canSpin: false,
+      reason: reason,
+      nextEligibleAt: nextEligibleAt,
+    );
+  }
+}
+
+/// Rules configuration for the roulette
+class RouletteRules {
+  /// Minimum delay in hours between spins
+  final int minDelayHours;
+  
+  /// Maximum spins per day (0 = unlimited)
+  final int dailyLimit;
+  
+  /// Maximum spins per week (0 = unlimited)
+  final int weeklyLimit;
+  
+  /// Maximum spins per month (0 = unlimited)
+  final int monthlyLimit;
+  
+  /// Hour when roulette becomes available (0-23)
+  final int allowedStartHour;
+  
+  /// Hour when roulette becomes unavailable (0-23)
+  final int allowedEndHour;
+  
+  /// Global enable/disable flag
+  final bool isEnabled;
+
+  const RouletteRules({
+    this.minDelayHours = 24,
+    this.dailyLimit = 1,
+    this.weeklyLimit = 0,
+    this.monthlyLimit = 0,
+    this.allowedStartHour = 0,
+    this.allowedEndHour = 23,
+    this.isEnabled = true,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'minDelayHours': minDelayHours,
+      'dailyLimit': dailyLimit,
+      'weeklyLimit': weeklyLimit,
+      'monthlyLimit': monthlyLimit,
+      'allowedStartHour': allowedStartHour,
+      'allowedEndHour': allowedEndHour,
+      'isEnabled': isEnabled,
+    };
+  }
+
+  factory RouletteRules.fromMap(Map<String, dynamic> map) {
+    return RouletteRules(
+      minDelayHours: map['minDelayHours'] as int? ?? 24,
+      dailyLimit: map['dailyLimit'] as int? ?? 1,
+      weeklyLimit: map['weeklyLimit'] as int? ?? 0,
+      monthlyLimit: map['monthlyLimit'] as int? ?? 0,
+      allowedStartHour: map['allowedStartHour'] as int? ?? 0,
+      allowedEndHour: map['allowedEndHour'] as int? ?? 23,
+      isEnabled: map['isEnabled'] as bool? ?? true,
+    );
+  }
+
+  RouletteRules copyWith({
+    int? minDelayHours,
+    int? dailyLimit,
+    int? weeklyLimit,
+    int? monthlyLimit,
+    int? allowedStartHour,
+    int? allowedEndHour,
+    bool? isEnabled,
+  }) {
+    return RouletteRules(
+      minDelayHours: minDelayHours ?? this.minDelayHours,
+      dailyLimit: dailyLimit ?? this.dailyLimit,
+      weeklyLimit: weeklyLimit ?? this.weeklyLimit,
+      monthlyLimit: monthlyLimit ?? this.monthlyLimit,
+      allowedStartHour: allowedStartHour ?? this.allowedStartHour,
+      allowedEndHour: allowedEndHour ?? this.allowedEndHour,
+      isEnabled: isEnabled ?? this.isEnabled,
+    );
+  }
+}
+
+/// Service for managing roulette rules and eligibility
+class RouletteRulesService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  /// Get current roulette rules from Firestore
+  Future<RouletteRules> getRules() async {
+    try {
+      final doc = await _firestore
+          .collection('config')
+          .doc('roulette_rules')
+          .get();
+      
+      if (doc.exists && doc.data() != null) {
+        return RouletteRules.fromMap(doc.data()!);
+      }
+      
+      // Return default rules if not configured
+      return const RouletteRules();
+    } catch (e) {
+      print('Error getting roulette rules: $e');
+      return const RouletteRules();
+    }
+  }
+
+  /// Save roulette rules to Firestore
+  Future<void> saveRules(RouletteRules rules) async {
+    try {
+      await _firestore
+          .collection('config')
+          .doc('roulette_rules')
+          .set(rules.toMap(), SetOptions(merge: true));
+    } catch (e) {
+      print('Error saving roulette rules: $e');
+      rethrow;
+    }
+  }
+
+  /// Check if user is eligible to spin the roulette
+  Future<RouletteStatus> checkEligibility(String userId) async {
+    try {
+      // Get rules
+      final rules = await getRules();
+      
+      // Check if roulette is globally enabled
+      if (!rules.isEnabled) {
+        return RouletteStatus.denied('La roulette est actuellement désactivée');
+      }
+      
+      // Check time slot restrictions
+      final now = DateTime.now();
+      final currentHour = now.hour;
+      
+      if (!_isWithinAllowedHours(currentHour, rules)) {
+        final nextAvailable = _getNextAllowedTime(now, rules);
+        return RouletteStatus.denied(
+          'La roulette est disponible de ${rules.allowedStartHour}h à ${rules.allowedEndHour}h',
+          nextEligibleAt: nextAvailable,
+        );
+      }
+      
+      // Get user document
+      final userDoc = await _firestore
+          .collection('users')
+          .doc(userId)
+          .get();
+      
+      if (!userDoc.exists) {
+        return RouletteStatus.denied('Utilisateur non trouvé');
+      }
+      
+      final userData = userDoc.data() ?? {};
+      
+      // Check if user is banned
+      if (userData['isBanned'] == true) {
+        return RouletteStatus.denied('Compte suspendu');
+      }
+      
+      // Check cooldown (lastSpinAt)
+      final lastSpinAt = _parseDateTime(userData['lastSpinAt']);
+      if (lastSpinAt != null) {
+        final hoursSinceLastSpin = now.difference(lastSpinAt).inHours;
+        if (hoursSinceLastSpin < rules.minDelayHours) {
+          final nextAvailable = lastSpinAt.add(Duration(hours: rules.minDelayHours));
+          final hoursRemaining = rules.minDelayHours - hoursSinceLastSpin;
+          return RouletteStatus.denied(
+            'Prochain tirage disponible dans $hoursRemaining heure${hoursRemaining > 1 ? 's' : ''}',
+            nextEligibleAt: nextAvailable,
+          );
+        }
+      }
+      
+      // Check daily limit
+      if (rules.dailyLimit > 0) {
+        final todayCount = await _getSpinCount(userId, _getStartOfDay(now));
+        if (todayCount >= rules.dailyLimit) {
+          final tomorrow = now.add(const Duration(days: 1));
+          final nextAvailable = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, rules.allowedStartHour);
+          return RouletteStatus.denied(
+            'Vous avez déjà joué aujourd\'hui',
+            nextEligibleAt: nextAvailable,
+          );
+        }
+      }
+      
+      // Check weekly limit
+      if (rules.weeklyLimit > 0) {
+        final weekStart = _getStartOfWeek(now);
+        final weekCount = await _getSpinCount(userId, weekStart);
+        if (weekCount >= rules.weeklyLimit) {
+          final nextWeek = weekStart.add(const Duration(days: 7));
+          return RouletteStatus.denied(
+            'Limite hebdomadaire atteinte',
+            nextEligibleAt: nextWeek,
+          );
+        }
+      }
+      
+      // Check monthly limit
+      if (rules.monthlyLimit > 0) {
+        final monthStart = _getStartOfMonth(now);
+        final monthCount = await _getSpinCount(userId, monthStart);
+        if (monthCount >= rules.monthlyLimit) {
+          final nextMonth = DateTime(now.year, now.month + 1, 1, rules.allowedStartHour);
+          return RouletteStatus.denied(
+            'Limite mensuelle atteinte',
+            nextEligibleAt: nextMonth,
+          );
+        }
+      }
+      
+      // All checks passed
+      return RouletteStatus.allowed();
+    } catch (e) {
+      print('Error checking eligibility: $e');
+      return RouletteStatus.denied('Erreur lors de la vérification');
+    }
+  }
+
+  /// Record a spin in audit trail
+  Future<void> recordSpinAudit({
+    required String userId,
+    required String segmentId,
+    required String resultType,
+    String? ticketId,
+    DateTime? expiration,
+    String? deviceInfo,
+  }) async {
+    try {
+      final now = DateTime.now();
+      final dateKey = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      
+      // Create entry in audit trail
+      await _firestore
+          .collection('roulette_history')
+          .doc(userId)
+          .collection(dateKey)
+          .add({
+        'hour': now.hour,
+        'resultType': resultType,
+        'segmentId': segmentId,
+        'ticketId': ticketId,
+        'expiration': expiration?.toIso8601String(),
+        'deviceInfo': deviceInfo ?? 'unknown',
+        'usedAt': null,
+        'createdAt': now.toIso8601String(),
+      });
+      
+      // Update user's lastSpinAt
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .set({
+        'lastSpinAt': now.toIso8601String(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error recording spin audit: $e');
+    }
+  }
+
+  /// Get count of spins since a specific date
+  Future<int> _getSpinCount(String userId, DateTime since) async {
+    try {
+      final sinceStr = since.toIso8601String();
+      
+      // Count from roulette_history collections
+      // This is a simplified approach - in production you might want to use aggregation
+      final userHistoryRef = _firestore
+          .collection('roulette_history')
+          .doc(userId);
+      
+      final snapshot = await userHistoryRef
+          .collection('_count')
+          .where('timestamp', isGreaterThanOrEqualTo: sinceStr)
+          .get();
+      
+      // Fallback: count from user_roulette_spins (legacy)
+      if (snapshot.docs.isEmpty) {
+        final legacySnapshot = await _firestore
+            .collection('user_roulette_spins')
+            .where('userId', isEqualTo: userId)
+            .where('spunAt', isGreaterThanOrEqualTo: sinceStr)
+            .get();
+        return legacySnapshot.docs.length;
+      }
+      
+      return snapshot.docs.length;
+    } catch (e) {
+      print('Error getting spin count: $e');
+      // Fallback to checking user_roulette_spins
+      try {
+        final snapshot = await _firestore
+            .collection('user_roulette_spins')
+            .where('userId', isEqualTo: userId)
+            .where('spunAt', isGreaterThanOrEqualTo: since.toIso8601String())
+            .get();
+        return snapshot.docs.length;
+      } catch (e2) {
+        print('Error in fallback spin count: $e2');
+        return 0;
+      }
+    }
+  }
+
+  /// Check if current hour is within allowed hours
+  bool _isWithinAllowedHours(int currentHour, RouletteRules rules) {
+    if (rules.allowedStartHour <= rules.allowedEndHour) {
+      // Normal case: 11h - 22h
+      return currentHour >= rules.allowedStartHour && 
+             currentHour <= rules.allowedEndHour;
+    } else {
+      // Crosses midnight: 22h - 2h
+      return currentHour >= rules.allowedStartHour || 
+             currentHour <= rules.allowedEndHour;
+    }
+  }
+
+  /// Get next allowed time based on rules
+  DateTime _getNextAllowedTime(DateTime now, RouletteRules rules) {
+    final currentHour = now.hour;
+    
+    if (rules.allowedStartHour <= rules.allowedEndHour) {
+      // Normal case
+      if (currentHour < rules.allowedStartHour) {
+        // Same day
+        return DateTime(now.year, now.month, now.day, rules.allowedStartHour);
+      } else {
+        // Next day
+        final tomorrow = now.add(const Duration(days: 1));
+        return DateTime(tomorrow.year, tomorrow.month, tomorrow.day, rules.allowedStartHour);
+      }
+    } else {
+      // Crosses midnight
+      if (currentHour <= rules.allowedEndHour) {
+        // We're in the early morning allowed period, next is tonight
+        return DateTime(now.year, now.month, now.day, rules.allowedStartHour);
+      } else if (currentHour < rules.allowedStartHour) {
+        // We're in the forbidden middle period, next is tonight
+        return DateTime(now.year, now.month, now.day, rules.allowedStartHour);
+      } else {
+        // We're in the late night allowed period, next is early morning
+        final tomorrow = now.add(const Duration(days: 1));
+        return DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 0);
+      }
+    }
+  }
+
+  /// Parse DateTime from various formats
+  DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    
+    if (value is Timestamp) {
+      return value.toDate();
+    }
+    
+    return null;
+  }
+
+  /// Get start of current day
+  DateTime _getStartOfDay(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  /// Get start of current week (Monday)
+  DateTime _getStartOfWeek(DateTime date) {
+    final weekday = date.weekday; // 1 = Monday, 7 = Sunday
+    final daysToSubtract = weekday - 1;
+    final monday = date.subtract(Duration(days: daysToSubtract));
+    return DateTime(monday.year, monday.month, monday.day);
+  }
+
+  /// Get start of current month
+  DateTime _getStartOfMonth(DateTime date) {
+    return DateTime(date.year, date.month, 1);
+  }
+
+  /// Watch rules in real-time
+  Stream<RouletteRules> watchRules() {
+    return _firestore
+        .collection('config')
+        .doc('roulette_rules')
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.exists && snapshot.data() != null) {
+        return RouletteRules.fromMap(snapshot.data()!);
+      }
+      return const RouletteRules();
+    });
+  }
+}

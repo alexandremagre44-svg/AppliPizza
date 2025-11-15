@@ -11,6 +11,7 @@ import 'studio/popup_block_list.dart';
 import 'studio/studio_texts_screen.dart';
 import 'studio/roulette_segments_list_screen.dart';
 import 'studio/roulette_settings_screen.dart';
+import 'roulette/roulette_rules_admin_screen.dart';
 import '../../features/content/presentation/admin/content_studio_screen.dart';
 import 'products_admin_screen.dart';
 import 'mailing_admin_screen.dart';
@@ -150,6 +151,19 @@ class AdminStudioScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const RouletteSettingsScreen()),
+              );
+            },
+          ),
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.rule_rounded,
+            title: 'Règles de la roulette',
+            subtitle: 'Cooldown, limites et plages horaires',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RouletteRulesAdminScreen()),
               );
             },
           ),

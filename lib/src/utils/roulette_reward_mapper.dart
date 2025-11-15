@@ -5,6 +5,7 @@ import '../models/roulette_config.dart' as roulette;
 import '../models/reward_action.dart';
 import '../models/reward_ticket.dart';
 import '../services/reward_service.dart';
+import '../services/roulette_rules_service.dart';
 
 /// Map a RouletteSegment to a RewardAction
 /// 
@@ -61,33 +62,62 @@ RewardAction mapSegmentToRewardAction(roulette.RouletteSegment segment) {
 /// Parameters:
 /// - [userId]: The user who won
 /// - [segment]: The winning segment
-/// - [validity]: How long the ticket is valid (default: 30 days)
+/// - [validity]: How long the ticket is valid (default: 7 days for roulette)
 /// 
 /// Returns the created ticket
 Future<RewardTicket?> createTicketFromRouletteSegment({
   required String userId,
   required roulette.RouletteSegment segment,
-  Duration validity = const Duration(days: 30),
+  Duration? validity,
 }) async {
   try {
     // Don't create tickets for "nothing" segments
     if (segment.rewardType == roulette.RewardType.none) {
       print('Segment is "nothing", no ticket created');
+      
+      // Still record in audit trail
+      final rulesService = RouletteRulesService();
+      await rulesService.recordSpinAudit(
+        userId: userId,
+        segmentId: segment.id,
+        resultType: 'none',
+      );
+      
       return null;
     }
     
-    // Map segment to reward action
-    final action = mapSegmentToRewardAction(segment);
+    // Generate unique identifier: roulette_{segmentId}_{timestamp}
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    
+    // Map segment to reward action with source "roulette"
+    final action = mapSegmentToRewardAction(segment).copyWith(
+      source: 'roulette',
+    );
+    
+    // Determine validity based on reward type
+    final ticketValidity = validity ?? 
+        Duration(days: 7); // Default 7 days for roulette rewards
     
     // Create ticket via RewardService
     final service = RewardService();
     final ticket = await service.createTicket(
       userId: userId,
       action: action,
-      validity: validity,
+      validity: ticketValidity,
     );
     
-    print('Created reward ticket: ${ticket.id} for user: $userId');
+    // Record in audit trail
+    final rulesService = RouletteRulesService();
+    await rulesService.recordSpinAudit(
+      userId: userId,
+      segmentId: segment.id,
+      resultType: segment.rewardType.toString(),
+      ticketId: ticket.id,
+      expiration: ticket.expiresAt,
+      deviceInfo: 'mobile_app',
+    );
+    
+    print('Created reward ticket: ${ticket.id} for user: $userId (roulette_${segment.id}_$timestamp)');
     return ticket;
   } catch (e) {
     print('Error creating ticket from roulette segment: $e');
