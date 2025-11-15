@@ -6,14 +6,20 @@ import 'package:go_router/go_router.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/loyalty_provider.dart';
+import '../../providers/reward_tickets_provider.dart';
 import '../../models/order.dart';
 import '../../models/loyalty_reward.dart';
+import '../../models/app_texts_config.dart';
 import '../../providers/cart_provider.dart';
 import '../../services/loyalty_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 import '../../services/roulette_settings_service.dart';
 import '../../models/roulette_settings.dart';
+import 'widgets/loyalty_section_widget.dart';
+import 'widgets/rewards_tickets_widget.dart';
+import 'widgets/roulette_card_widget.dart';
+import 'widgets/account_activity_widget.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -24,6 +30,8 @@ class ProfileScreen extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final history = userProfile.orderHistory;
     final loyaltyInfoAsync = ref.watch(loyaltyInfoProvider);
+    final activeTicketsAsync = ref.watch(activeRewardTicketsProvider);
+    final appTextsAsync = ref.watch(appTextsConfigProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -147,11 +155,32 @@ class ProfileScreen extends ConsumerWidget {
 
             SizedBox(height: AppSpacing.xxl),
 
-            // Loyalty Information Section
+            // ═══════════════════════════════════════════════════════════
+            // SECTION 1 — Fidélité (carte compacte)
+            // ═══════════════════════════════════════════════════════════
             loyaltyInfoAsync.when(
               data: (loyaltyInfo) {
                 if (loyaltyInfo == null) return const SizedBox.shrink();
-                return _buildLoyaltySection(context, ref, loyaltyInfo);
+                
+                return appTextsAsync.when(
+                  data: (appTexts) {
+                    final loyaltyPoints = loyaltyInfo['loyaltyPoints'] as int;
+                    final lifetimePoints = loyaltyInfo['lifetimePoints'] as int;
+                    final vipTier = loyaltyInfo['vipTier'] as String;
+                    
+                    return Padding(
+                      padding: AppSpacing.paddingHorizontalLG,
+                      child: LoyaltySectionWidget(
+                        loyaltyPoints: loyaltyPoints,
+                        lifetimePoints: lifetimePoints,
+                        vipTier: vipTier,
+                        texts: appTexts.profileTexts,
+                      ),
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (_, __) => const SizedBox.shrink(),
@@ -159,37 +188,77 @@ class ProfileScreen extends ConsumerWidget {
 
             SizedBox(height: AppSpacing.xxl),
 
-            // Statistiques rapides
-            // refactor padding → app_theme standard
-            Padding(
-              padding: AppSpacing.paddingHorizontalLG,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      icon: Icons.shopping_bag,
-                      title: 'Commandes',
-                      value: history.length.toString(),
-                    ),
-                  ),
-                  SizedBox(width: AppSpacing.lg),
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      icon: Icons.favorite,
-                      title: 'Favoris',
-                      value: userProfile.favoriteProducts.length.toString(),
-                    ),
-                  ),
-                ],
-              ),
+            // ═══════════════════════════════════════════════════════════
+            // SECTION 2 — Mes récompenses (tickets)
+            // ═══════════════════════════════════════════════════════════
+            activeTicketsAsync.when(
+              data: (activeTickets) {
+                if (activeTickets.isEmpty) return const SizedBox.shrink();
+                
+                return appTextsAsync.when(
+                  data: (appTexts) {
+                    return Padding(
+                      padding: AppSpacing.paddingHorizontalLG,
+                      child: RewardsTicketsWidget(
+                        activeTickets: activeTickets,
+                        profileTexts: appTexts.profileTexts,
+                        rewardsTexts: appTexts.rewardsTexts,
+                      ),
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
             ),
 
             SizedBox(height: AppSpacing.xxl),
 
-            // Rewards Card (conditional display based on roulette settings)
-            _buildRewardsCard(context),
+            // ═══════════════════════════════════════════════════════════
+            // SECTION 3 — Roulette de la chance
+            // ═══════════════════════════════════════════════════════════
+            appTextsAsync.when(
+              data: (appTexts) {
+                final userId = authState.userId ?? 'guest';
+                return Padding(
+                  padding: AppSpacing.paddingHorizontalLG,
+                  child: RouletteCardWidget(
+                    texts: appTexts.rouletteTexts,
+                    userId: userId,
+                  ),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+
+            SizedBox(height: AppSpacing.xxl),
+
+            // ═══════════════════════════════════════════════════════════
+            // SECTION 4 — Activité du compte
+            // ═══════════════════════════════════════════════════════════
+            appTextsAsync.when(
+              data: (appTexts) {
+                return Padding(
+                  padding: AppSpacing.paddingHorizontalLG,
+                  child: AccountActivityWidget(
+                    ordersCount: history.length,
+                    favoritesCount: userProfile.favoriteProducts.length,
+                    texts: appTexts.profileTexts,
+                    onOrdersTap: () {
+                      // Scroll to orders section (already visible below)
+                    },
+                    onFavoritesTap: () {
+                      // Navigate to favorites (could be implemented)
+                    },
+                  ),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
 
             SizedBox(height: AppSpacing.xxl),
 
@@ -289,48 +358,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  // refactor stat card → app_theme standard (padding, radius, shadow)
-  Widget _buildStatCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return Container(
-      padding: AppSpacing.paddingXL,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: AppRadius.cardLarge,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            size: 32,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildOrderHistory(BuildContext context, List<Order> history) {
     if (history.isEmpty) {
@@ -509,477 +537,4 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildLoyaltySection(BuildContext context, WidgetRef ref, Map<String, dynamic> loyaltyInfo) {
-    final loyaltyPoints = loyaltyInfo['loyaltyPoints'] as int;
-    final lifetimePoints = loyaltyInfo['lifetimePoints'] as int;
-    final vipTier = loyaltyInfo['vipTier'] as String;
-    final rewards = loyaltyInfo['rewards'] as List<LoyaltyReward>;
-    final availableSpins = loyaltyInfo['availableSpins'] as int;
-
-    // Calculer la progression vers la prochaine pizza
-    final progressToFreePizza = (loyaltyPoints % 1000) / 1000.0;
-    final pointsNeeded = 1000 - (loyaltyPoints % 1000);
-
-    return Padding(
-      padding: AppSpacing.paddingHorizontalLG,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section Header
-          Row(
-            children: [
-              Icon(Icons.stars, color: Colors.amber, size: 28),
-              SizedBox(width: AppSpacing.sm),
-              Text(
-                'Programme de Fidélité',
-                style: AppTextStyles.titleLarge.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: AppSpacing.lg),
-
-          // VIP Tier Badge
-          _buildVipTierCard(context, vipTier, lifetimePoints),
-          SizedBox(height: AppSpacing.lg),
-
-          // Points Card
-          Container(
-            padding: AppSpacing.paddingXL,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.primaryRed, AppColors.primaryRed.withOpacity(0.7)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: AppRadius.cardLarge,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryRed.withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Points Fidélité',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '$loyaltyPoints pts',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(Icons.stars, color: Colors.white, size: 32),
-                    ),
-                  ],
-                ),
-                SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Progression vers une pizza gratuite',
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
-                ),
-                SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: progressToFreePizza,
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    minHeight: 8,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Plus que $pointsNeeded points',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-
-          SizedBox(height: AppSpacing.lg),
-
-          // Available Rewards
-          if (rewards.where((r) => !r.used).isNotEmpty) ...[
-            Text(
-              'Récompenses disponibles',
-              style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: AppSpacing.md),
-            _buildRewardsList(context, rewards),
-            SizedBox(height: AppSpacing.lg),
-          ],
-
-          // Spin the Wheel Button
-          if (availableSpins > 0)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _spinWheel(context, ref),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  foregroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                icon: Icon(Icons.casino, size: 24),
-                label: Text(
-                  'Tourner la Roue ($availableSpins disponible${availableSpins > 1 ? 's' : ''})',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVipTierCard(BuildContext context, String vipTier, int lifetimePoints) {
-    Color tierColor;
-    String tierLabel;
-    IconData tierIcon;
-
-    switch (vipTier) {
-      case VipTier.gold:
-        tierColor = Colors.amber.shade700;
-        tierLabel = 'GOLD';
-        tierIcon = Icons.workspace_premium;
-        break;
-      case VipTier.silver:
-        tierColor = Colors.grey.shade400;
-        tierLabel = 'SILVER';
-        tierIcon = Icons.military_tech;
-        break;
-      default:
-        tierColor = Colors.brown.shade400;
-        tierLabel = 'BRONZE';
-        tierIcon = Icons.emoji_events;
-    }
-
-    return Container(
-      padding: AppSpacing.paddingLG,
-      decoration: BoxDecoration(
-        color: tierColor.withOpacity(0.1),
-        borderRadius: AppRadius.cardLarge,
-        border: Border.all(color: tierColor, width: 2),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: tierColor,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(tierIcon, color: Colors.white, size: 28),
-          ),
-          SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Niveau $tierLabel',
-                  style: TextStyle(
-                    color: tierColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                Text(
-                  '$lifetimePoints points à vie',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (vipTier == VipTier.silver || vipTier == VipTier.gold)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: tierColor,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                '-${(VipTier.getDiscount(vipTier) * 100).toInt()}%',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRewardsList(BuildContext context, List<LoyaltyReward> rewards) {
-    final availableRewards = rewards.where((r) => !r.used).toList();
-    
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: availableRewards.map((reward) {
-        IconData icon;
-        String label;
-        Color color;
-
-        switch (reward.type) {
-          case RewardType.freePizza:
-            icon = Icons.local_pizza;
-            label = 'Pizza Gratuite';
-            color = AppColors.primaryRed;
-            break;
-          case RewardType.freeDrink:
-            icon = Icons.local_drink;
-            label = 'Boisson Gratuite';
-            color = Colors.blue;
-            break;
-          case RewardType.freeDessert:
-            icon = Icons.cake;
-            label = 'Dessert Gratuit';
-            color = Colors.pink;
-            break;
-          default:
-            icon = Icons.card_giftcard;
-            label = 'Récompense';
-            color = Colors.grey;
-        }
-
-        return Chip(
-          avatar: Icon(icon, color: Colors.white, size: 18),
-          label: Text(label),
-          backgroundColor: color,
-          labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        );
-      }).toList(),
-    );
-  }
-
-  Future<void> _spinWheel(BuildContext context, WidgetRef ref) async {
-    final authState = ref.read(authProvider);
-    final uid = authState.userId;
-    
-    if (uid == null) return;
-
-    try {
-      // Afficher un dialogue de chargement
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => Center(
-          child: Container(
-            padding: EdgeInsets.all(40),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 20),
-                Text(
-                  'La roue tourne...',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-
-      // Attendre un peu pour l'effet
-      await Future.delayed(Duration(seconds: 2));
-
-      final result = await LoyaltyService().spinRewardWheel(uid);
-      
-      if (context.mounted) {
-        Navigator.pop(context); // Fermer le dialogue de chargement
-
-        // Afficher le résultat
-        String message;
-        IconData icon;
-        Color color;
-
-        if (result['rewardType'] == null) {
-          message = 'Dommage ! Essayez encore !';
-          icon = Icons.sentiment_dissatisfied;
-          color = Colors.grey;
-        } else if (result['rewardType'] == RewardType.bonusPoints) {
-          message = 'Félicitations ! Vous avez gagné ${result['bonusPoints']} points !';
-          icon = Icons.stars;
-          color = Colors.amber;
-        } else if (result['rewardType'] == RewardType.freeDrink) {
-          message = 'Félicitations ! Vous avez gagné une boisson gratuite !';
-          icon = Icons.local_drink;
-          color = Colors.blue;
-        } else if (result['rewardType'] == RewardType.freeDessert) {
-          message = 'Félicitations ! Vous avez gagné un dessert gratuit !';
-          icon = Icons.cake;
-          color = Colors.pink;
-        } else {
-          message = 'Vous avez gagné une récompense !';
-          icon = Icons.card_giftcard;
-          color = Colors.green;
-        }
-
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Row(
-              children: [
-                Icon(icon, color: color, size: 32),
-                SizedBox(width: 12),
-                Expanded(child: Text('Roue de la Chance')),
-              ],
-            ),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('OK'),
-              ),
-            ],
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.pop(context); // Fermer le dialogue de chargement
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  /// Build the Rewards card with conditional display based on roulette settings
-  Widget _buildRewardsCard(BuildContext context) {
-    return FutureBuilder<RouletteSettings?>(
-      future: RouletteSettingsService().getRouletteSettings(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data == null) {
-          return const SizedBox.shrink();
-        }
-
-        final settings = snapshot.data!;
-        final now = DateTime.now();
-
-        // Check all conditions
-        if (!settings.isEnabled) return const SizedBox.shrink();
-        if (!settings.isWithinValidityPeriod(now)) return const SizedBox.shrink();
-        if (!settings.isActiveOnDay(now.weekday)) return const SizedBox.shrink();
-        if (!settings.isActiveAtHour(now.hour)) return const SizedBox.shrink();
-
-        // All conditions met - show the card
-        return Padding(
-          padding: AppSpacing.paddingHorizontalLG,
-          child: Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: AppRadius.card,
-              side: BorderSide(
-                color: AppColors.outlineVariant,
-                width: 1,
-              ),
-            ),
-            child: InkWell(
-              onTap: () => context.push(AppRoutes.rewards),
-              borderRadius: AppRadius.card,
-              child: Padding(
-                padding: AppSpacing.paddingLG,
-                child: Row(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.primary,
-                            AppColors.primary.withOpacity(0.7),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: AppRadius.cardSmall,
-                      ),
-                      child: const Icon(
-                        Icons.card_giftcard,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
-                    SizedBox(width: AppSpacing.lg),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Récompenses',
-                            style: AppTextStyles.titleMedium.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: AppSpacing.xs),
-                          Text(
-                            'Gérez vos récompenses et tournez la roue',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: AppColors.textTertiary,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 }
