@@ -49,14 +49,17 @@ class _RouletteRulesAdminScreenState extends State<RouletteRulesAdminScreen> {
     try {
       final rules = await _service.getRules();
       
+      // If rules don't exist, use defaults
+      final effectiveRules = rules ?? const RouletteRules();
+      
       setState(() {
-        _isEnabled = rules.isEnabled;
-        _minDelayHours = rules.minDelayHours;
-        _dailyLimit = rules.dailyLimit;
-        _weeklyLimit = rules.weeklyLimit;
-        _monthlyLimit = rules.monthlyLimit;
-        _allowedStartHour = rules.allowedStartHour;
-        _allowedEndHour = rules.allowedEndHour;
+        _isEnabled = effectiveRules.isEnabled;
+        _minDelayHours = effectiveRules.minDelayHours;
+        _dailyLimit = effectiveRules.dailyLimit;
+        _weeklyLimit = effectiveRules.weeklyLimit;
+        _monthlyLimit = effectiveRules.monthlyLimit;
+        _allowedStartHour = effectiveRules.allowedStartHour;
+        _allowedEndHour = effectiveRules.allowedEndHour;
         
         _minDelayController = TextEditingController(text: _minDelayHours.toString());
         _dailyLimitController = TextEditingController(text: _dailyLimit.toString());
