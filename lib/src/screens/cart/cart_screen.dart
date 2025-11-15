@@ -1,11 +1,13 @@
 // lib/src/screens/cart/cart_screen.dart
 // CartScreen redesigné - Style Pizza Deli'Zza
+// PROMPT 3F - Uses centralized text system
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/cart_provider.dart'; 
 import '../../providers/user_provider.dart';
+import '../../providers/app_texts_provider.dart';
 import '../../theme/app_theme.dart';
 
 /// Écran du panier - Redesign Pizza Deli'Zza
@@ -17,40 +19,77 @@ class CartScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartState = ref.watch(cartProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
+    final appTextsAsync = ref.watch(appTextsConfigProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mon Panier'),
-        centerTitle: true,
-        backgroundColor: AppTheme.primaryRed,
-        foregroundColor: AppTheme.surfaceWhite,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'), 
+    return appTextsAsync.when(
+      data: (appTexts) => Scaffold(
+        appBar: AppBar(
+          title: Text(appTexts.cart.title),
+          centerTitle: true,
+          backgroundColor: AppTheme.primaryRed,
+          foregroundColor: AppTheme.surfaceWhite,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go('/home'), 
+          ),
         ),
-      ),
-      body: cartState.items.isEmpty
-          ? _buildEmptyCart(context)
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    itemCount: cartState.items.length,
-                    itemBuilder: (context, index) {
-                      final item = cartState.items[index];
-                      return _buildCartItemCard(context, item, cartNotifier); 
-                    },
+        body: cartState.items.isEmpty
+            ? _buildEmptyCart(context, appTexts.cart)
+            : Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16.0),
+                      itemCount: cartState.items.length,
+                      itemBuilder: (context, index) {
+                        final item = cartState.items[index];
+                        return _buildCartItemCard(context, item, cartNotifier); 
+                      },
+                    ),
                   ),
-                ),
-                _buildSummary(context, ref, cartState.total), 
-              ],
-            ),
+                  _buildSummary(context, ref, cartState.total, appTexts.cart), 
+                ],
+              ),
+      ),
+      loading: () => Scaffold(
+        appBar: AppBar(
+          title: const Text('Mon Panier'),
+          centerTitle: true,
+          backgroundColor: AppTheme.primaryRed,
+          foregroundColor: AppTheme.surfaceWhite,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, __) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Mon Panier'),
+          centerTitle: true,
+          backgroundColor: AppTheme.primaryRed,
+          foregroundColor: AppTheme.surfaceWhite,
+        ),
+        body: cartState.items.isEmpty
+            ? _buildEmptyCart(context, null)
+            : Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16.0),
+                      itemCount: cartState.items.length,
+                      itemBuilder: (context, index) {
+                        final item = cartState.items[index];
+                        return _buildCartItemCard(context, item, cartNotifier); 
+                      },
+                    ),
+                  ),
+                  _buildSummary(context, ref, cartState.total, null), 
+                ],
+              ),
+      ),
     );
   }
 
   // refactor empty cart → app_theme standard (colors, spacing, text styles)
-  Widget _buildEmptyCart(BuildContext context) {
+  Widget _buildEmptyCart(BuildContext context, dynamic cartTexts) {
     return Center(
       child: Padding(
         padding: AppSpacing.paddingXXXL,
@@ -72,14 +111,14 @@ class CartScreen extends ConsumerWidget {
             ),
             SizedBox(height: AppSpacing.xxxl),
             Text(
-              'Votre panier est vide',
+              cartTexts?.emptyTitle ?? 'Votre panier est vide',
               style: AppTextStyles.headlineMedium,
             ),
             SizedBox(height: AppSpacing.md),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(
-                'Ajoutez de délicieuses pizzas pour commencer votre commande',
+                cartTexts?.emptyMessage ?? 'Ajoutez de délicieuses pizzas pour commencer votre commande',
                 style: AppTextStyles.bodyMedium,
                 textAlign: TextAlign.center,
               ),
@@ -91,7 +130,7 @@ class CartScreen extends ConsumerWidget {
                 onPressed: () => context.go('/home'),
                 icon: const Icon(Icons.local_pizza, size: 22),
                 label: Text(
-                  'Découvrir le menu',
+                  cartTexts?.ctaViewMenu ?? 'Découvrir le menu',
                   style: AppTextStyles.titleLarge,
                 ),
               ),
@@ -264,7 +303,7 @@ class CartScreen extends ConsumerWidget {
   }
   
   /// Résumé du panier - À emporter uniquement (pas de frais de livraison)
-  Widget _buildSummary(BuildContext context, WidgetRef ref, double total) {
+  Widget _buildSummary(BuildContext context, WidgetRef ref, double total, dynamic cartTexts) {
     void handleOrder() {
       ref.read(userProvider.notifier).addOrder();
       context.go('/profile'); 
@@ -334,9 +373,9 @@ class CartScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Sous-total',
-                  style: TextStyle(
+                Text(
+                  cartTexts?.subtotalLabel ?? 'Sous-total',
+                  style: const TextStyle(
                     fontSize: 15,
                     color: AppTheme.textMedium,
                     fontFamily: 'Poppins',
@@ -357,9 +396,9 @@ class CartScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Total à payer',
-                  style: TextStyle(
+                Text(
+                  cartTexts?.totalLabel ?? 'Total à payer',
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textDark,
@@ -390,9 +429,9 @@ class CartScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Valider ma commande',
-                  style: TextStyle(
+                child: Text(
+                  cartTexts?.ctaCheckout ?? 'Valider ma commande',
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Poppins',
