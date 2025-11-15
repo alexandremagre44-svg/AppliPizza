@@ -19,6 +19,7 @@ import 'src/screens/product_detail/product_detail_screen.dart';
 import 'src/screens/admin/admin_studio_screen.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
+import 'src/screens/client/rewards/rewards_screen.dart';
 
 // Staff Tablet imports
 import 'src/staff_tablet/screens/staff_tablet_pin_screen.dart';
@@ -171,6 +172,11 @@ class MyApp extends ConsumerWidget {
             final userId = authState.userEmail ?? 'guest';
             return RouletteScreen(userId: userId);
           },
+        ),
+        // Route Rewards
+        GoRoute(
+          path: AppRoutes.rewards,
+          builder: (context, state) => const RewardsScreen(),
         ),
         // Staff Tablet Routes
         GoRoute(

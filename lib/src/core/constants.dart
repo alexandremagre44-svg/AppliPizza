@@ -12,6 +12,7 @@ class AppRoutes {
   static const String checkout = '/checkout';
   static const String kitchen = '/kitchen';
   static const String roulette = '/roulette';
+  static const String rewards = '/rewards';
   
   // Studio Builder - Admin entry point
   static const String adminStudio = '/admin/studio';
