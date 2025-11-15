@@ -12,6 +12,8 @@ import '../../providers/cart_provider.dart';
 import '../../services/loyalty_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../services/roulette_settings_service.dart';
+import '../../models/roulette_settings.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -186,76 +188,8 @@ class ProfileScreen extends ConsumerWidget {
 
             SizedBox(height: AppSpacing.xxl),
 
-            // Rewards Card
-            Padding(
-              padding: AppSpacing.paddingHorizontalLG,
-              child: Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: AppRadius.card,
-                  side: BorderSide(
-                    color: AppColors.outlineVariant,
-                    width: 1,
-                  ),
-                ),
-                child: InkWell(
-                  onTap: () => context.push(AppRoutes.rewards),
-                  borderRadius: AppRadius.card,
-                  child: Padding(
-                    padding: AppSpacing.paddingLG,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.primary,
-                                AppColors.primary.withOpacity(0.7),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: AppRadius.cardSmall,
-                          ),
-                          child: const Icon(
-                            Icons.card_giftcard,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        SizedBox(width: AppSpacing.lg),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Récompenses',
-                                style: AppTextStyles.titleMedium.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: AppSpacing.xs),
-                              Text(
-                                'Gérez vos récompenses et tournez la roue',
-                                style: AppTextStyles.bodyMedium.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right,
-                          color: AppColors.textTertiary,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Rewards Card (conditional display based on roulette settings)
+            _buildRewardsCard(context),
 
             SizedBox(height: AppSpacing.xxl),
 
@@ -955,5 +889,97 @@ class ProfileScreen extends ConsumerWidget {
         );
       }
     }
+  }
+
+  /// Build the Rewards card with conditional display based on roulette settings
+  Widget _buildRewardsCard(BuildContext context) {
+    return FutureBuilder<RouletteSettings?>(
+      future: RouletteSettingsService().getRouletteSettings(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data == null) {
+          return const SizedBox.shrink();
+        }
+
+        final settings = snapshot.data!;
+        final now = DateTime.now();
+
+        // Check all conditions
+        if (!settings.isEnabled) return const SizedBox.shrink();
+        if (!settings.isWithinValidityPeriod(now)) return const SizedBox.shrink();
+        if (!settings.isActiveOnDay(now.weekday)) return const SizedBox.shrink();
+        if (!settings.isActiveAtHour(now.hour)) return const SizedBox.shrink();
+
+        // All conditions met - show the card
+        return Padding(
+          padding: AppSpacing.paddingHorizontalLG,
+          child: Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: AppRadius.card,
+              side: BorderSide(
+                color: AppColors.outlineVariant,
+                width: 1,
+              ),
+            ),
+            child: InkWell(
+              onTap: () => context.push(AppRoutes.rewards),
+              borderRadius: AppRadius.card,
+              child: Padding(
+                padding: AppSpacing.paddingLG,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primary,
+                            AppColors.primary.withOpacity(0.7),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: AppRadius.cardSmall,
+                      ),
+                      child: const Icon(
+                        Icons.card_giftcard,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.lg),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Récompenses',
+                            style: AppTextStyles.titleMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: AppSpacing.xs),
+                          Text(
+                            'Gérez vos récompenses et tournez la roue',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textTertiary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
