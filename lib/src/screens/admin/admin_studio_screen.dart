@@ -9,6 +9,7 @@ import 'studio/hero_block_editor.dart';
 import 'studio/banner_block_editor.dart';
 import 'studio/popup_block_list.dart';
 import 'studio/studio_texts_screen.dart';
+import 'studio/roulette_segments_list_screen.dart';
 import '../../features/content/presentation/admin/content_studio_screen.dart';
 
 /// Studio Builder - Interface unifiée pour gérer l'apparence de l'application
@@ -80,6 +81,19 @@ class AdminStudioScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const PopupBlockList()),
+              );
+            },
+          ),
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.casino_rounded,
+            title: 'Roue de la chance',
+            subtitle: 'Segments et configuration',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RouletteSegmentsListScreen()),
               );
             },
           ),
