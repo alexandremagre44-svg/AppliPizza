@@ -17,261 +17,176 @@ import '../../core/constants.dart';
 /// - Bandeau: Gestion des bannières
 /// - Popups: Configuration des popups et animations
 /// - Textes: Personnalisation des messages
-/// - Mise en avant: Gestion des tags produits
 /// - Contenu: CMS Headless pour le contenu
+/// - Paramètres: Configuration de l'application
 class AdminStudioScreen extends StatelessWidget {
   const AdminStudioScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.surfaceContainerLow,
       appBar: AppBar(
-        title: Row(
-          children: [
-            // Logo Studio Builder
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.palette,
-                color: AppColors.white,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Studio Builder',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.white,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                Text(
-                  'Configuration de l\'app',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.white,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        centerTitle: false,
-        backgroundColor: AppColors.primary,
-        elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.2),
+        title: const Text('Studio'),
+        centerTitle: true,
+        backgroundColor: AppColors.surface,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
       ),
-      body: CustomScrollView(
-        slivers: [
-          // En-tête avec description
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: AppSpacing.paddingXL,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Gérez l\'apparence de votre app',
-                    style: AppTextStyles.headlineLarge,
-                  ),
-                  SizedBox(height: AppSpacing.sm),
-                  Text(
-                    'Configurez tous les aspects visuels et le contenu de votre application depuis un seul endroit.',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      body: ListView(
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        children: [
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.image_rounded,
+            title: 'Hero',
+            subtitle: 'Modifier la bannière principale',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Section Hero - À venir'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
           ),
-
-          // Grille des sections
-          SliverPadding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.lg,
-            ),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: AppSpacing.md,
-                mainAxisSpacing: AppSpacing.md,
-                childAspectRatio: 0.95,
-              ),
-              delegate: SliverChildListDelegate([
-                _buildSectionCard(
-                  context,
-                  icon: Icons.panorama,
-                  title: 'Hero',
-                  subtitle: 'Bandeau principal',
-                  color: AppColors.primary,
-                  onTap: () {
-                    // TODO: Navigation vers la page Hero (à créer)
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Section Hero - À venir'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  },
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.flag_rounded,
+            title: 'Bandeau',
+            subtitle: 'Gérer le bandeau promotionnel',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Section Bandeau - À venir'),
+                  duration: Duration(seconds: 2),
                 ),
-                _buildSectionCard(
-                  context,
-                  icon: Icons.view_carousel,
-                  title: 'Bandeau',
-                  subtitle: 'Bannières',
-                  color: AppColors.accentGold,
-                  onTap: () {
-                    // TODO: Navigation vers la page Bandeau (à créer)
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Section Bandeau - À venir'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                ),
-                _buildSectionCard(
-                  context,
-                  icon: Icons.celebration,
-                  title: 'Popups',
-                  subtitle: 'Animations & Gains',
-                  color: AppColors.info,
-                  onTap: () {
-                    // Navigation vers l'écran Popups existant
-                    context.push(AppRoutes.studioPopupsRoulette);
-                  },
-                ),
-                _buildSectionCard(
-                  context,
-                  icon: Icons.text_fields,
-                  title: 'Textes',
-                  subtitle: 'Messages personnalisés',
-                  color: AppColors.accentGreen,
-                  onTap: () {
-                    // Navigation vers l'écran Textes existant
-                    context.push(AppRoutes.studioTexts);
-                  },
-                ),
-                _buildSectionCard(
-                  context,
-                  icon: Icons.star,
-                  title: 'Mise en avant',
-                  subtitle: 'Tags produits',
-                  color: AppColors.warning,
-                  onTap: () {
-                    // Navigation vers l'écran Mise en avant existant
-                    context.push(AppRoutes.studioFeaturedProducts);
-                  },
-                ),
-                _buildSectionCard(
-                  context,
-                  icon: Icons.article,
-                  title: 'Contenu',
-                  subtitle: 'CMS Headless',
-                  color: AppColors.secondary,
-                  onTap: () {
-                    // Navigation vers l'écran Contenu existant
-                    context.push(AppRoutes.studioContent);
-                  },
-                ),
-              ]),
-            ),
+              );
+            },
           ),
-
-          // Espace en bas
-          SliverToBoxAdapter(
-            child: SizedBox(height: AppSpacing.xxl),
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.campaign_rounded,
+            title: 'Popups',
+            subtitle: 'Popups, messages, roulette',
+            onTap: () {
+              context.push(AppRoutes.studioPopupsRoulette);
+            },
           ),
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.notes_rounded,
+            title: 'Textes',
+            subtitle: 'Textes et messages de l\'application',
+            onTap: () {
+              context.push(AppRoutes.studioTexts);
+            },
+          ),
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.widgets_rounded,
+            title: 'Contenu',
+            subtitle: 'Studio de contenu',
+            onTap: () {
+              context.push(AppRoutes.studioContent);
+            },
+          ),
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.settings_rounded,
+            title: 'Paramètres',
+            subtitle: 'Paramètres de l\'application',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Section Paramètres - À venir'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
+          SizedBox(height: AppSpacing.md),
         ],
       ),
     );
   }
 
-  /// Construit une carte de section cliquable avec le style Material 3
+  /// Construit un bloc de section cliquable avec le style Material 3
   /// 
   /// Design:
-  /// - Radius: 16px (Material 3 standard)
-  /// - Background: surfaceContainerLow (#F5F5F5)
-  /// - Spacing: 16px entre les cartes
-  /// - Animation de hover/tap
-  Widget _buildSectionCard(
+  /// - Card Material 3 avec background surface (#FFFFFF)
+  /// - Padding: 16px
+  /// - Radius: 16px
+  /// - Avatar circulaire tonal avec icône
+  /// - Titre + sous-titre + chevron
+  Widget _buildStudioBlock(
     BuildContext context, {
-    required IconData icon,
+    required IconData iconData,
     required String title,
     required String subtitle,
-    required Color color,
     required VoidCallback onTap,
   }) {
     return Card(
       elevation: 0,
-      shadowColor: Colors.black.withOpacity(0.05),
-      color: AppColors.surfaceContainerLow,
+      color: AppColors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: AppRadius.card, // 16px
+        borderRadius: AppRadius.card,
       ),
       child: InkWell(
         onTap: onTap,
         borderRadius: AppRadius.card,
         child: Padding(
-          padding: AppSpacing.paddingMD,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
+          padding: EdgeInsets.all(AppSpacing.md),
+          child: Row(
             children: [
-              // Icône avec fond coloré
+              // Avatar circulaire tonal
               Container(
-                width: 64,
-                height: 64,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
+                  color: AppColors.primaryContainer,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  icon,
-                  size: 32,
-                  color: color,
+                  iconData,
+                  color: AppColors.primary,
+                  size: 24,
+                  weight: 300,
                 ),
               ),
-              SizedBox(height: AppSpacing.md),
-              // Titre
-              Text(
-                title,
-                style: AppTextStyles.titleLarge.copyWith(
-                  fontWeight: FontWeight.bold,
+              SizedBox(width: AppSpacing.md),
+              // Titre et sous-titre
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyles.titleMedium,
+                    ),
+                    Text(
+                      subtitle,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(height: AppSpacing.xs),
-              // Sous-titre
-              Text(
-                subtitle,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              // Chevron
+              Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.onSurfaceVariant,
+                size: 24,
               ),
             ],
           ),
