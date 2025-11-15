@@ -38,7 +38,7 @@ class _RewardProductSelectorScreenState
 
   @override
   Widget build(BuildContext context) {
-    final productsAsync = ref.watch(productProvider);
+    final productsAsync = ref.watch(productListProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -249,7 +249,7 @@ class _RewardProductSelectorScreenState
                         ),
                         decoration: BoxDecoration(
                           color: AppColors.success,
-                          borderRadius: AppRadius.badgeSmall,
+                          borderRadius: AppRadius.badge,
                         ),
                         child: Text(
                           'OFFERT',
