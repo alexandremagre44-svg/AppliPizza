@@ -287,7 +287,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         filled: true,
         fillColor: AppColors.surface,
         border: OutlineInputBorder(
-          borderRadius: AppRadius.small,
+          borderRadius: AppRadius.radiusSmall,
           borderSide: BorderSide.none,
         ),
       ),

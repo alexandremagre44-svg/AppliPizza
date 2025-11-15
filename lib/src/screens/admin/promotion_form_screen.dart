@@ -45,13 +45,13 @@ class _PromotionFormScreenState extends State<PromotionFormScreen> {
     
     if (widget.promotion != null) {
       final promo = widget.promotion!;
-      _titleController.text = promo.title;
+      _titleController.text = promo.title ?? promo.name;
       _descriptionController.text = promo.description;
       _codeController.text = promo.code ?? '';
-      _discountType = promo.discountType;
-      _discountValueController.text = promo.discountValue.toString();
+      _discountType = promo.discountType ?? promo.type;
+      _discountValueController.text = (promo.discountValue ?? promo.value ?? 0).toString();
       _minOrderAmountController.text = promo.minOrderAmount?.toString() ?? '';
-      _startDate = promo.startDate;
+      _startDate = promo.startDate ?? DateTime.now();
       _endDate = promo.endDate;
       _isActive = promo.isActive;
       _showOnHomeBanner = promo.showOnHomeBanner;
@@ -240,7 +240,7 @@ class _PromotionFormScreenState extends State<PromotionFormScreen> {
         filled: true,
         fillColor: AppColors.surface,
         border: OutlineInputBorder(
-          borderRadius: AppRadius.small,
+          borderRadius: AppRadius.radiusSmall,
           borderSide: BorderSide.none,
         ),
       ),
@@ -357,11 +357,15 @@ class _PromotionFormScreenState extends State<PromotionFormScreen> {
     setState(() => _isSaving = true);
 
     try {
+      final titleText = _titleController.text.trim();
       final promotion = Promotion(
         id: widget.promotion?.id ?? _uuid.v4(),
-        title: _titleController.text.trim(),
+        name: titleText,
         description: _descriptionController.text.trim(),
+        type: _discountType,
+        value: double.parse(_discountValueController.text.trim()),
         code: _codeController.text.trim().isNotEmpty ? _codeController.text.trim() : null,
+        title: titleText,
         discountType: _discountType,
         discountValue: double.parse(_discountValueController.text.trim()),
         minOrderAmount: _minOrderAmountController.text.trim().isNotEmpty

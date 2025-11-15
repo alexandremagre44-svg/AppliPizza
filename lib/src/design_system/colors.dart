@@ -53,6 +53,12 @@ class AppColors {
   
   /// Container secondaire #F5E3E3
   static const Color secondaryContainer = Color(0xFFF5E3E3);
+  
+  /// Texte sur container secondaire #4A2626
+  static const Color onSecondaryContainer = Color(0xFF4A2626);
+  
+  /// Tertiaire #7D5260
+  static const Color tertiary = Color(0xFF7D5260);
 
   // ═══════════════════════════════════════════════════════════════
   // SURFACE & BACKGROUND - Material 3
@@ -152,6 +158,9 @@ class AppColors {
   
   /// Container erreur #F9DADA
   static const Color errorContainer = Color(0xFFF9DADA);
+  
+  /// Texte sur container erreur #7A1212
+  static const Color onErrorContainer = Color(0xFF7A1212);
   
   /// Rouge danger (alias de error)
   static const Color danger = error;
