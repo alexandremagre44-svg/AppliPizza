@@ -56,7 +56,7 @@ class ProfileScreen extends ConsumerWidget {
             Container(
               width: double.infinity,
               decoration: const BoxDecoration(
-                color: AppColors.primaryRed,
+                color: AppColors.primary,
               ),
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 40),
               child: Column(
