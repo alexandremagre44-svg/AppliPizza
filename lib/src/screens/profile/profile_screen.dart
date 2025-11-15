@@ -186,6 +186,79 @@ class ProfileScreen extends ConsumerWidget {
 
             SizedBox(height: AppSpacing.xxl),
 
+            // Rewards Card
+            Padding(
+              padding: AppSpacing.paddingHorizontalLG,
+              child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppRadius.card,
+                  side: BorderSide(
+                    color: AppColors.outlineVariant,
+                    width: 1,
+                  ),
+                ),
+                child: InkWell(
+                  onTap: () => context.push(AppRoutes.rewards),
+                  borderRadius: AppRadius.card,
+                  child: Padding(
+                    padding: AppSpacing.paddingLG,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.primary,
+                                AppColors.primary.withOpacity(0.7),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: AppRadius.cardSmall,
+                          ),
+                          child: const Icon(
+                            Icons.card_giftcard,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                        SizedBox(width: AppSpacing.lg),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Récompenses',
+                                style: AppTextStyles.titleMedium.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: AppSpacing.xs),
+                              Text(
+                                'Gérez vos récompenses et tournez la roue',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: AppColors.textTertiary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            SizedBox(height: AppSpacing.xxl),
+
             // Staff Tablet Access (for all staff)
             Padding(
               padding: AppSpacing.paddingHorizontalLG,

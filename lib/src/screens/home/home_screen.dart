@@ -20,6 +20,8 @@ import '../menu/menu_customization_modal.dart';
 import 'pizza_customization_modal.dart';
 import '../../theme/app_theme.dart';
 import '../../core/constants.dart';
+import '../../services/roulette_settings_service.dart';
+import '../../models/roulette_settings.dart';
 
 /// Home screen - Professional showcase page
 /// Displays hero banner, promos, bestsellers, category shortcuts, and info
@@ -168,6 +170,9 @@ class HomeScreen extends ConsumerWidget {
                       : Colors.white,
                 ),
               ),
+            
+            // Roulette promotional banner (conditionally displayed)
+            _buildRouletteBanner(context, ref),
             
             SizedBox(height: AppSpacing.xxxl),
             
@@ -475,6 +480,122 @@ class HomeScreen extends ConsumerWidget {
         ),
       );
     }
+  }
+
+  /// Build the roulette promotional banner
+  /// Only displayed when roulette is enabled and all conditions are met
+  Widget _buildRouletteBanner(BuildContext context, WidgetRef ref) {
+    return FutureBuilder<RouletteSettings?>(
+      future: RouletteSettingsService().getRouletteSettings(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data == null) {
+          return const SizedBox.shrink();
+        }
+
+        final settings = snapshot.data!;
+        final now = DateTime.now();
+
+        // Check all conditions
+        if (!settings.isEnabled) return const SizedBox.shrink();
+        if (!settings.isWithinValidityPeriod(now)) return const SizedBox.shrink();
+        if (!settings.isActiveOnDay(now.weekday)) return const SizedBox.shrink();
+        if (!settings.isActiveAtHour(now.hour)) return const SizedBox.shrink();
+
+        // All conditions met - show the banner
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Card(
+            elevation: 0,
+            margin: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: AppRadius.card,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary,
+                    AppColors.secondary,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: AppRadius.card,
+              ),
+              child: Padding(
+                padding: AppSpacing.paddingLG,
+                child: Row(
+                  children: [
+                    // Icon
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: AppRadius.cardSmall,
+                      ),
+                      child: const Icon(
+                        Icons.casino,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.lg),
+                    // Text content
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Tentez votre chance !',
+                            style: AppTextStyles.titleMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: AppSpacing.xs),
+                          Text(
+                            'Tournez la roue et gagnez des récompenses 🎁',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.md),
+                    // CTA Button
+                    ElevatedButton(
+                      onPressed: () => context.push(AppRoutes.rewards),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppRadius.button,
+                        ),
+                      ),
+                      child: const Text(
+                        'Jouer',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 
