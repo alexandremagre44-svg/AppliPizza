@@ -148,7 +148,7 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
             children: [
               // Image du produit
               ClipRRect(
-                borderRadius: AppRadius.small,
+                borderRadius: AppRadius.radiusSmall,
                 child: Image.network(
                   product.imageUrl,
                   width: 80,
@@ -191,7 +191,7 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
                             ),
                             decoration: BoxDecoration(
                               color: AppColors.errorContainer,
-                              borderRadius: AppRadius.small,
+                              borderRadius: AppRadius.radiusSmall,
                             ),
                             child: Text(
                               'Inactif',

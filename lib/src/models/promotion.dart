@@ -11,6 +11,12 @@ class Promotion {
   final DateTime? endDate;
   final bool isActive;
   
+  // Additional properties for compatibility
+  final String? title; // Alias for name
+  final String? code; // Promotion code
+  final String? discountType; // Alias for type
+  final double? discountValue; // Alias for value
+  
   // Multi-channel targeting
   final bool showOnHomeBanner;
   final bool showInPromoBlock;
@@ -43,7 +49,13 @@ class Promotion {
     this.applicableCategories,
     required this.createdAt,
     required this.updatedAt,
-  });
+    String? title,
+    this.code,
+    String? discountType,
+    double? discountValue,
+  }) : title = title ?? name,
+       discountType = discountType ?? type,
+       discountValue = discountValue ?? value;
 
   Map<String, dynamic> toJson() {
     return {
@@ -64,6 +76,10 @@ class Promotion {
       'applicableCategories': applicableCategories,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'title': title,
+      'code': code,
+      'discountType': discountType,
+      'discountValue': discountValue,
     };
   }
 
@@ -92,6 +108,10 @@ class Promotion {
           .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      title: json['title'] as String?,
+      code: json['code'] as String?,
+      discountType: json['discountType'] as String?,
+      discountValue: (json['discountValue'] as num?)?.toDouble(),
     );
   }
 
@@ -113,6 +133,10 @@ class Promotion {
     List<String>? applicableCategories,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? title,
+    String? code,
+    String? discountType,
+    double? discountValue,
   }) {
     return Promotion(
       id: id ?? this.id,
@@ -132,6 +156,10 @@ class Promotion {
       applicableCategories: applicableCategories ?? this.applicableCategories,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      title: title ?? this.title,
+      code: code ?? this.code,
+      discountType: discountType ?? this.discountType,
+      discountValue: discountValue ?? this.discountValue,
     );
   }
 

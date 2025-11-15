@@ -17,7 +17,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
     // PROTECTION: Vérifier que l'utilisateur est admin
     final authState = ref.watch(authProvider);
     if (!authState.isAdmin) {
-      return _buildUnauthorizedScreen(context);
+      return _buildUnauthorizedScreen();
     }
     
     final todayOrders = ref.watch(staffTabletTodayOrdersProvider);
@@ -160,58 +160,6 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
                       return _OrderCard(order: order);
                     },
                   ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-    required Gradient gradient,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: gradient,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: color.withOpacity(0.3), width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(icon, size: 36, color: color),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[600],
-              letterSpacing: 0.3,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w900,
-              color: color,
-              letterSpacing: -0.5,
-            ),
           ),
         ],
       ),
@@ -596,8 +544,60 @@ class _OrderCard extends StatelessWidget {
     );
   }
 
+  Widget _buildStatItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    required Gradient gradient,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: gradient,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: color.withOpacity(0.3), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(icon, size: 36, color: color),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+              color: color,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Widget d'écran non autorisé pour les non-admins
-  Widget _buildUnauthorizedScreen(BuildContext context) {
+  Widget _buildUnauthorizedScreen() {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -615,37 +615,39 @@ class _OrderCard extends StatelessWidget {
             margin: EdgeInsets.all(AppSpacing.xl),
             child: Padding(
               padding: EdgeInsets.all(AppSpacing.xl),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.lock,
-                    size: 80,
-                    color: Colors.red,
-                  ),
-                  SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Accès non autorisé',
-                    style: AppTextStyles.headlineMedium.copyWith(
-                      fontWeight: FontWeight.bold,
+              child: Builder(
+                builder: (context) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.lock,
+                      size: 80,
+                      color: Colors.red,
                     ),
-                  ),
-                  SizedBox(height: AppSpacing.md),
-                  Text(
-                    'Le module CAISSE est réservé aux administrateurs uniquement.',
-                    style: AppTextStyles.bodyLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: AppSpacing.xl),
-                  FilledButton.icon(
-                    onPressed: () => context.go('/home'),
-                    icon: const Icon(Icons.home),
-                    label: const Text('Retour à l\'accueil'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                    SizedBox(height: AppSpacing.lg),
+                    Text(
+                      'Accès non autorisé',
+                      style: AppTextStyles.headlineMedium.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: AppSpacing.md),
+                    Text(
+                      'Le module CAISSE est réservé aux administrateurs uniquement.',
+                      style: AppTextStyles.bodyLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: AppSpacing.xl),
+                    FilledButton.icon(
+                      onPressed: () => context.go('/home'),
+                      icon: const Icon(Icons.home),
+                      label: const Text('Retour à l\'accueil'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

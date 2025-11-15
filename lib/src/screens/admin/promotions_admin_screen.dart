@@ -94,7 +94,7 @@ class _PromotionsAdminScreenState extends State<PromotionsAdminScreen> {
     }
 
     final activePromotions = _promotions.where((p) => p.isActive && p.isCurrentlyActive).toList();
-    final scheduledPromotions = _promotions.where((p) => p.isActive && !p.isCurrentlyActive && p.startDate.isAfter(DateTime.now())).toList();
+    final scheduledPromotions = _promotions.where((p) => p.isActive && !p.isCurrentlyActive && p.startDate != null && p.startDate!.isAfter(DateTime.now())).toList();
     final inactivePromotions = _promotions.where((p) => !p.isActive || (p.endDate != null && p.endDate!.isBefore(DateTime.now()))).toList();
 
     return ListView(
@@ -238,7 +238,7 @@ class _PromotionsAdminScreenState extends State<PromotionsAdminScreen> {
                           : isScheduled
                               ? AppColors.secondaryContainer
                               : AppColors.errorContainer,
-                      borderRadius: AppRadius.small,
+                      borderRadius: AppRadius.radiusSmall,
                     ),
                     child: Text(
                       isActive
@@ -259,8 +259,8 @@ class _PromotionsAdminScreenState extends State<PromotionsAdminScreen> {
                   // Discount
                   Text(
                     promotion.discountType == 'percentage'
-                        ? '-${promotion.discountValue.toInt()}%'
-                        : '-${promotion.discountValue.toStringAsFixed(2)}€',
+                        ? '-${promotion.discountValue?.toInt() ?? 0}%'
+                        : '-${promotion.discountValue?.toStringAsFixed(2) ?? '0.00'}€',
                     style: AppTextStyles.titleLarge.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -271,7 +271,7 @@ class _PromotionsAdminScreenState extends State<PromotionsAdminScreen> {
               SizedBox(height: AppSpacing.sm),
               // Titre
               Text(
-                promotion.title,
+                promotion.title ?? promotion.name,
                 style: AppTextStyles.titleMedium.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -297,7 +297,7 @@ class _PromotionsAdminScreenState extends State<PromotionsAdminScreen> {
                   ),
                   SizedBox(width: 4),
                   Text(
-                    '${_formatDate(promotion.startDate)} - ${promotion.endDate != null ? _formatDate(promotion.endDate!) : 'Illimité'}',
+                    '${promotion.startDate != null ? _formatDate(promotion.startDate!) : 'Non défini'} - ${promotion.endDate != null ? _formatDate(promotion.endDate!) : 'Illimité'}',
                     style: AppTextStyles.labelSmall.copyWith(
                       color: AppColors.onSurfaceVariant,
                     ),
@@ -387,7 +387,7 @@ class _PromotionsAdminScreenState extends State<PromotionsAdminScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmer la suppression'),
-        content: Text('Voulez-vous vraiment supprimer "${promotion.title}" ?'),
+        content: Text('Voulez-vous vraiment supprimer "${promotion.title ?? promotion.name}" ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
