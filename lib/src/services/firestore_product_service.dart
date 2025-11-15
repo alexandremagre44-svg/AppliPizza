@@ -19,6 +19,9 @@ abstract class FirestoreProductService {
   // OPTIMIZATION: Load all products at once instead of separate calls per category
   Future<List<Product>> loadAllProducts();
   
+  // Alias for loadAllProducts for consistency with other naming conventions
+  Future<List<Product>> getAllProducts();
+  
   // Fonction centralisée pour charger par catégorie
   Future<List<Product>> loadProductsByCategory(String category);
   
@@ -64,6 +67,12 @@ class MockFirestoreProductService implements FirestoreProductService {
 
   @override
   Future<List<Product>> loadAllProducts() async {
+    developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
+    return [];
+  }
+
+  @override
+  Future<List<Product>> getAllProducts() async {
     developer.log('MockFirestoreProductService: Firebase non configuré, retourne liste vide');
     return [];
   }
@@ -274,6 +283,12 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
       developer.log('❌ Erreur lors du chargement de tous les produits: $e');
       return [];
     }
+  }
+
+  // Alias for loadAllProducts for consistency with other naming conventions
+  @override
+  Future<List<Product>> getAllProducts() async {
+    return loadAllProducts();
   }
 
   // ===============================================
