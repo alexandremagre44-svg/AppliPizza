@@ -1,21 +1,25 @@
 // lib/src/staff_tablet/screens/staff_tablet_history_screen.dart
 
 import 'package:flutter/material.dart';
-import '../../design_system/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../design_system/app_theme.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart';
 import '../../models/order.dart';
-import '../../design_system/app_theme.dart';
+import '../../providers/auth_provider.dart';
 import '../providers/staff_tablet_orders_provider.dart';
-import '../../design_system/app_theme.dart';
 
 class StaffTabletHistoryScreen extends ConsumerWidget {
   const StaffTabletHistoryScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // PROTECTION: Vérifier que l'utilisateur est admin
+    final authState = ref.watch(authProvider);
+    if (!authState.isAdmin) {
+      return _buildUnauthorizedScreen(context);
+    }
+    
     final todayOrders = ref.watch(staffTabletTodayOrdersProvider);
     final todayRevenue = ref.watch(staffTabletTodayRevenueProvider);
     final orderCount = ref.watch(staffTabletTodayOrdersCountProvider);
@@ -588,6 +592,64 @@ class _OrderCard extends StatelessWidget {
           ),
           Text(value),
         ],
+      ),
+    );
+  }
+
+  /// Widget d'écran non autorisé pour les non-admins
+  Widget _buildUnauthorizedScreen(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.red[900]!,
+              Colors.red[700]!,
+            ],
+          ),
+        ),
+        child: Center(
+          child: Card(
+            margin: EdgeInsets.all(AppSpacing.xl),
+            child: Padding(
+              padding: EdgeInsets.all(AppSpacing.xl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.lock,
+                    size: 80,
+                    color: Colors.red,
+                  ),
+                  SizedBox(height: AppSpacing.lg),
+                  Text(
+                    'Accès non autorisé',
+                    style: AppTextStyles.headlineMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Le module CAISSE est réservé aux administrateurs uniquement.',
+                    style: AppTextStyles.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: AppSpacing.xl),
+                  FilledButton.icon(
+                    onPressed: () => context.go('/home'),
+                    icon: const Icon(Icons.home),
+                    label: const Text('Retour à l\'accueil'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -17,7 +17,12 @@ class AppRoutes {
   // Studio Builder - Admin entry point
   static const String adminStudio = '/admin/studio';
   
-  // Staff Tablet routes
+  // Admin management routes
+  static const String adminProducts = '/admin/products';
+  static const String adminMailing = '/admin/mailing';
+  static const String adminPromotions = '/admin/promotions';
+  
+  // Staff Tablet routes (CAISSE - Admin Only)
   static const String staffTabletPin = '/staff-tablet';
   static const String staffTabletCatalog = '/staff-tablet/catalog';
   static const String staffTabletCheckout = '/staff-tablet/checkout';

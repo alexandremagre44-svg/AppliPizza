@@ -178,15 +178,48 @@ class MyApp extends ConsumerWidget {
           path: AppRoutes.rewards,
           builder: (context, state) => const RewardsScreen(),
         ),
-        // Staff Tablet Routes
+        // Staff Tablet Routes (CAISSE - Admin Only)
         GoRoute(
           path: AppRoutes.staffTabletPin,
-          builder: (context, state) => const StaffTabletPinScreen(),
+          builder: (context, state) {
+            // PROTECTION: Staff tablet (CAISSE) est réservé aux admins
+            final authState = ref.read(authProvider);
+            if (!authState.isAdmin) {
+              // Redirect to home if not admin
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go(AppRoutes.home);
+              });
+              return Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock, size: 64, color: Colors.red),
+                      SizedBox(height: 16),
+                      Text('Accès réservé aux administrateurs'),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return const StaffTabletPinScreen();
+          },
         ),
         GoRoute(
           path: AppRoutes.staffTabletCatalog,
           builder: (context, state) {
-            // Check if authenticated
+            // PROTECTION: Admin only
+            final authState = ref.read(authProvider);
+            if (!authState.isAdmin) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go(AppRoutes.home);
+              });
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            
+            // Check if authenticated in staff tablet
             final staffAuth = ref.read(staffTabletAuthProvider);
             if (!staffAuth.isAuthenticated) {
               // Redirect to PIN screen if not authenticated
@@ -203,7 +236,18 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.staffTabletCheckout,
           builder: (context, state) {
-            // Check if authenticated
+            // PROTECTION: Admin only
+            final authState = ref.read(authProvider);
+            if (!authState.isAdmin) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go(AppRoutes.home);
+              });
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            
+            // Check if authenticated in staff tablet
             final staffAuth = ref.read(staffTabletAuthProvider);
             if (!staffAuth.isAuthenticated) {
               // Redirect to PIN screen if not authenticated
@@ -220,7 +264,18 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.staffTabletHistory,
           builder: (context, state) {
-            // Check if authenticated
+            // PROTECTION: Admin only
+            final authState = ref.read(authProvider);
+            if (!authState.isAdmin) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go(AppRoutes.home);
+              });
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            
+            // Check if authenticated in staff tablet
             final staffAuth = ref.read(staffTabletAuthProvider);
             if (!staffAuth.isAuthenticated) {
               // Redirect to PIN screen if not authenticated
