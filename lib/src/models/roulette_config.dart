@@ -122,13 +122,41 @@ class RouletteConfig {
   }
 }
 
+/// Reward type enum for roulette segments
+enum RewardType {
+  none('none'),
+  percentageDiscount('percentage_discount'),
+  fixedAmountDiscount('fixed_amount_discount'),
+  freeProduct('free_product'),
+  freeDrink('free_drink');
+
+  const RewardType(this.value);
+  final String value;
+
+  static RewardType fromString(String value) {
+    return RewardType.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => RewardType.none,
+    );
+  }
+}
+
 // Individual segment on the wheel
 class RouletteSegment {
   final String id;
   final String label; // Text displayed on wheel
-  final String rewardId; // What the player wins
+  final String rewardId; // What the player wins (for backward compatibility)
   final double probability; // Probability percentage (0-100)
   final Color color; // Segment color
+  
+  // New fields for enhanced segment configuration
+  final String? description; // Optional description
+  final RewardType rewardType; // Type of reward
+  final double? rewardValue; // Numeric value (percentage or amount)
+  final String? productId; // Product ID for free_product/free_drink
+  final String? iconName; // Material icon name (e.g., "local_pizza")
+  final bool isActive; // Whether segment is active
+  final int position; // Display order on wheel
   
   // Legacy fields for backward compatibility
   final String? type;
@@ -141,6 +169,14 @@ class RouletteSegment {
     required this.rewardId,
     required this.probability,
     required this.color,
+    // New fields
+    this.description,
+    this.rewardType = RewardType.none,
+    this.rewardValue,
+    this.productId,
+    this.iconName,
+    this.isActive = true,
+    this.position = 0,
     // Legacy fields
     this.type,
     this.value,
@@ -154,6 +190,14 @@ class RouletteSegment {
       'rewardId': rewardId,
       'probability': probability,
       'colorHex': _colorToHex(color),
+      // New fields
+      'description': description,
+      'rewardType': rewardType.value,
+      'rewardValue': rewardValue,
+      'productId': productId,
+      'iconName': iconName,
+      'isActive': isActive,
+      'position': position,
       // Legacy fields
       'type': type ?? rewardId,
       'value': value,
@@ -188,6 +232,14 @@ class RouletteSegment {
       probability: (data['probability'] as num?)?.toDouble() ?? 
                    (data['weight'] as num?)?.toDouble() ?? 0.0,
       color: _hexToColor(data['colorHex'] as String?),
+      // New fields
+      description: data['description'] as String?,
+      rewardType: RewardType.fromString(data['rewardType'] as String? ?? 'none'),
+      rewardValue: (data['rewardValue'] as num?)?.toDouble(),
+      productId: data['productId'] as String?,
+      iconName: data['iconName'] as String?,
+      isActive: data['isActive'] as bool? ?? true,
+      position: data['position'] as int? ?? 0,
       // Legacy fields
       type: data['type'] as String?,
       value: data['value'] as int?,
@@ -205,6 +257,14 @@ class RouletteSegment {
     String? rewardId,
     double? probability,
     Color? color,
+    // New fields
+    String? description,
+    RewardType? rewardType,
+    double? rewardValue,
+    String? productId,
+    String? iconName,
+    bool? isActive,
+    int? position,
     // Legacy fields
     String? type,
     int? value,
@@ -216,6 +276,14 @@ class RouletteSegment {
       rewardId: rewardId ?? this.rewardId,
       probability: probability ?? this.probability,
       color: color ?? this.color,
+      // New fields
+      description: description ?? this.description,
+      rewardType: rewardType ?? this.rewardType,
+      rewardValue: rewardValue ?? this.rewardValue,
+      productId: productId ?? this.productId,
+      iconName: iconName ?? this.iconName,
+      isActive: isActive ?? this.isActive,
+      position: position ?? this.position,
       // Legacy fields
       type: type ?? this.type,
       value: value ?? this.value,
