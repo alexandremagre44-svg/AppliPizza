@@ -7,6 +7,9 @@ class AppTextsConfig {
   final OrderMessages orderMessages;
   final ErrorMessages errorMessages;
   final LoyaltyTexts loyaltyTexts;
+  final ProfileTexts profileTexts;
+  final RewardsTexts rewardsTexts;
+  final RouletteTexts rouletteTexts;
   final DateTime updatedAt;
 
   AppTextsConfig({
@@ -15,6 +18,9 @@ class AppTextsConfig {
     required this.orderMessages,
     required this.errorMessages,
     required this.loyaltyTexts,
+    required this.profileTexts,
+    required this.rewardsTexts,
+    required this.rouletteTexts,
     required this.updatedAt,
   });
 
@@ -25,6 +31,9 @@ class AppTextsConfig {
       'orderMessages': orderMessages.toJson(),
       'errorMessages': errorMessages.toJson(),
       'loyaltyTexts': loyaltyTexts.toJson(),
+      'profileTexts': profileTexts.toJson(),
+      'rewardsTexts': rewardsTexts.toJson(),
+      'rouletteTexts': rouletteTexts.toJson(),
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
@@ -36,6 +45,9 @@ class AppTextsConfig {
       orderMessages: OrderMessages.fromJson(json['orderMessages'] as Map<String, dynamic>),
       errorMessages: ErrorMessages.fromJson(json['errorMessages'] as Map<String, dynamic>),
       loyaltyTexts: LoyaltyTexts.fromJson(json['loyaltyTexts'] as Map<String, dynamic>),
+      profileTexts: ProfileTexts.fromJson(json['profileTexts'] as Map<String, dynamic>? ?? {}),
+      rewardsTexts: RewardsTexts.fromJson(json['rewardsTexts'] as Map<String, dynamic>? ?? {}),
+      rouletteTexts: RouletteTexts.fromJson(json['rouletteTexts'] as Map<String, dynamic>? ?? {}),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
@@ -46,6 +58,9 @@ class AppTextsConfig {
     OrderMessages? orderMessages,
     ErrorMessages? errorMessages,
     LoyaltyTexts? loyaltyTexts,
+    ProfileTexts? profileTexts,
+    RewardsTexts? rewardsTexts,
+    RouletteTexts? rouletteTexts,
     DateTime? updatedAt,
   }) {
     return AppTextsConfig(
@@ -54,6 +69,9 @@ class AppTextsConfig {
       orderMessages: orderMessages ?? this.orderMessages,
       errorMessages: errorMessages ?? this.errorMessages,
       loyaltyTexts: loyaltyTexts ?? this.loyaltyTexts,
+      profileTexts: profileTexts ?? this.profileTexts,
+      rewardsTexts: rewardsTexts ?? this.rewardsTexts,
+      rouletteTexts: rouletteTexts ?? this.rouletteTexts,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -65,6 +83,9 @@ class AppTextsConfig {
       orderMessages: OrderMessages.defaultMessages(),
       errorMessages: ErrorMessages.defaultMessages(),
       loyaltyTexts: LoyaltyTexts.defaultTexts(),
+      profileTexts: ProfileTexts.defaultTexts(),
+      rewardsTexts: RewardsTexts.defaultTexts(),
+      rouletteTexts: RouletteTexts.defaultTexts(),
       updatedAt: DateTime.now(),
     );
   }
@@ -284,6 +305,244 @@ class LoyaltyTexts {
       bronzeLevelText: bronzeLevelText ?? this.bronzeLevelText,
       silverLevelText: silverLevelText ?? this.silverLevelText,
       goldLevelText: goldLevelText ?? this.goldLevelText,
+    );
+  }
+}
+
+// Profile section texts
+class ProfileTexts {
+  final String loyaltySectionTitle;
+  final String loyaltySectionPoints;
+  final String loyaltySectionProgress;
+  final String loyaltySectionPointsNeeded;
+  final String loyaltySectionViewRewards;
+  final String rewardsSectionTitle;
+  final String rewardsSectionViewAll;
+  final String rewardsSectionEmpty;
+  final String rouletteSectionTitle;
+  final String rouletteSectionDescription;
+  final String rouletteSectionButton;
+  final String activitySectionMyOrders;
+  final String activitySectionMyFavorites;
+
+  ProfileTexts({
+    required this.loyaltySectionTitle,
+    required this.loyaltySectionPoints,
+    required this.loyaltySectionProgress,
+    required this.loyaltySectionPointsNeeded,
+    required this.loyaltySectionViewRewards,
+    required this.rewardsSectionTitle,
+    required this.rewardsSectionViewAll,
+    required this.rewardsSectionEmpty,
+    required this.rouletteSectionTitle,
+    required this.rouletteSectionDescription,
+    required this.rouletteSectionButton,
+    required this.activitySectionMyOrders,
+    required this.activitySectionMyFavorites,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'loyaltySectionTitle': loyaltySectionTitle,
+      'loyaltySectionPoints': loyaltySectionPoints,
+      'loyaltySectionProgress': loyaltySectionProgress,
+      'loyaltySectionPointsNeeded': loyaltySectionPointsNeeded,
+      'loyaltySectionViewRewards': loyaltySectionViewRewards,
+      'rewardsSectionTitle': rewardsSectionTitle,
+      'rewardsSectionViewAll': rewardsSectionViewAll,
+      'rewardsSectionEmpty': rewardsSectionEmpty,
+      'rouletteSectionTitle': rouletteSectionTitle,
+      'rouletteSectionDescription': rouletteSectionDescription,
+      'rouletteSectionButton': rouletteSectionButton,
+      'activitySectionMyOrders': activitySectionMyOrders,
+      'activitySectionMyFavorites': activitySectionMyFavorites,
+    };
+  }
+
+  factory ProfileTexts.fromJson(Map<String, dynamic> json) {
+    return ProfileTexts(
+      loyaltySectionTitle: json['loyaltySectionTitle'] as String? ?? 'Programme de Fidélité',
+      loyaltySectionPoints: json['loyaltySectionPoints'] as String? ?? 'Points Fidélité',
+      loyaltySectionProgress: json['loyaltySectionProgress'] as String? ?? 'Progression vers une pizza gratuite',
+      loyaltySectionPointsNeeded: json['loyaltySectionPointsNeeded'] as String? ?? 'Plus que {points} points',
+      loyaltySectionViewRewards: json['loyaltySectionViewRewards'] as String? ?? 'Voir mes récompenses fidélité',
+      rewardsSectionTitle: json['rewardsSectionTitle'] as String? ?? 'Mes récompenses',
+      rewardsSectionViewAll: json['rewardsSectionViewAll'] as String? ?? 'Voir toutes les récompenses',
+      rewardsSectionEmpty: json['rewardsSectionEmpty'] as String? ?? 'Aucune récompense disponible',
+      rouletteSectionTitle: json['rouletteSectionTitle'] as String? ?? 'Roue de la Chance',
+      rouletteSectionDescription: json['rouletteSectionDescription'] as String? ?? 'Tentez votre chance et gagnez des récompenses !',
+      rouletteSectionButton: json['rouletteSectionButton'] as String? ?? 'Tourner la roue',
+      activitySectionMyOrders: json['activitySectionMyOrders'] as String? ?? 'Mes commandes',
+      activitySectionMyFavorites: json['activitySectionMyFavorites'] as String? ?? 'Mes favoris',
+    );
+  }
+
+  factory ProfileTexts.defaultTexts() {
+    return ProfileTexts(
+      loyaltySectionTitle: 'Programme de Fidélité',
+      loyaltySectionPoints: 'Points Fidélité',
+      loyaltySectionProgress: 'Progression vers une pizza gratuite',
+      loyaltySectionPointsNeeded: 'Plus que {points} points',
+      loyaltySectionViewRewards: 'Voir mes récompenses fidélité',
+      rewardsSectionTitle: 'Mes récompenses',
+      rewardsSectionViewAll: 'Voir toutes les récompenses',
+      rewardsSectionEmpty: 'Aucune récompense disponible',
+      rouletteSectionTitle: 'Roue de la Chance',
+      rouletteSectionDescription: 'Tentez votre chance et gagnez des récompenses !',
+      rouletteSectionButton: 'Tourner la roue',
+      activitySectionMyOrders: 'Mes commandes',
+      activitySectionMyFavorites: 'Mes favoris',
+    );
+  }
+
+  ProfileTexts copyWith({
+    String? loyaltySectionTitle,
+    String? loyaltySectionPoints,
+    String? loyaltySectionProgress,
+    String? loyaltySectionPointsNeeded,
+    String? loyaltySectionViewRewards,
+    String? rewardsSectionTitle,
+    String? rewardsSectionViewAll,
+    String? rewardsSectionEmpty,
+    String? rouletteSectionTitle,
+    String? rouletteSectionDescription,
+    String? rouletteSectionButton,
+    String? activitySectionMyOrders,
+    String? activitySectionMyFavorites,
+  }) {
+    return ProfileTexts(
+      loyaltySectionTitle: loyaltySectionTitle ?? this.loyaltySectionTitle,
+      loyaltySectionPoints: loyaltySectionPoints ?? this.loyaltySectionPoints,
+      loyaltySectionProgress: loyaltySectionProgress ?? this.loyaltySectionProgress,
+      loyaltySectionPointsNeeded: loyaltySectionPointsNeeded ?? this.loyaltySectionPointsNeeded,
+      loyaltySectionViewRewards: loyaltySectionViewRewards ?? this.loyaltySectionViewRewards,
+      rewardsSectionTitle: rewardsSectionTitle ?? this.rewardsSectionTitle,
+      rewardsSectionViewAll: rewardsSectionViewAll ?? this.rewardsSectionViewAll,
+      rewardsSectionEmpty: rewardsSectionEmpty ?? this.rewardsSectionEmpty,
+      rouletteSectionTitle: rouletteSectionTitle ?? this.rouletteSectionTitle,
+      rouletteSectionDescription: rouletteSectionDescription ?? this.rouletteSectionDescription,
+      rouletteSectionButton: rouletteSectionButton ?? this.rouletteSectionButton,
+      activitySectionMyOrders: activitySectionMyOrders ?? this.activitySectionMyOrders,
+      activitySectionMyFavorites: activitySectionMyFavorites ?? this.activitySectionMyFavorites,
+    );
+  }
+}
+
+// Rewards section texts
+class RewardsTexts {
+  final String ticketExpiresOn;
+  final String ticketExpired;
+  final String ticketUsed;
+  final String ticketActive;
+
+  RewardsTexts({
+    required this.ticketExpiresOn,
+    required this.ticketExpired,
+    required this.ticketUsed,
+    required this.ticketActive,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ticketExpiresOn': ticketExpiresOn,
+      'ticketExpired': ticketExpired,
+      'ticketUsed': ticketUsed,
+      'ticketActive': ticketActive,
+    };
+  }
+
+  factory RewardsTexts.fromJson(Map<String, dynamic> json) {
+    return RewardsTexts(
+      ticketExpiresOn: json['ticketExpiresOn'] as String? ?? 'Expire le {date}',
+      ticketExpired: json['ticketExpired'] as String? ?? 'Expiré',
+      ticketUsed: json['ticketUsed'] as String? ?? 'Utilisé',
+      ticketActive: json['ticketActive'] as String? ?? 'Actif',
+    );
+  }
+
+  factory RewardsTexts.defaultTexts() {
+    return RewardsTexts(
+      ticketExpiresOn: 'Expire le {date}',
+      ticketExpired: 'Expiré',
+      ticketUsed: 'Utilisé',
+      ticketActive: 'Actif',
+    );
+  }
+
+  RewardsTexts copyWith({
+    String? ticketExpiresOn,
+    String? ticketExpired,
+    String? ticketUsed,
+    String? ticketActive,
+  }) {
+    return RewardsTexts(
+      ticketExpiresOn: ticketExpiresOn ?? this.ticketExpiresOn,
+      ticketExpired: ticketExpired ?? this.ticketExpired,
+      ticketUsed: ticketUsed ?? this.ticketUsed,
+      ticketActive: ticketActive ?? this.ticketActive,
+    );
+  }
+}
+
+// Roulette section texts
+class RouletteTexts {
+  final String playTitle;
+  final String playDescription;
+  final String playButton;
+  final String noSpinsAvailable;
+  final String spinsRemaining;
+
+  RouletteTexts({
+    required this.playTitle,
+    required this.playDescription,
+    required this.playButton,
+    required this.noSpinsAvailable,
+    required this.spinsRemaining,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'playTitle': playTitle,
+      'playDescription': playDescription,
+      'playButton': playButton,
+      'noSpinsAvailable': noSpinsAvailable,
+      'spinsRemaining': spinsRemaining,
+    };
+  }
+
+  factory RouletteTexts.fromJson(Map<String, dynamic> json) {
+    return RouletteTexts(
+      playTitle: json['playTitle'] as String? ?? 'Roue de la Chance',
+      playDescription: json['playDescription'] as String? ?? 'Tentez votre chance chaque jour !',
+      playButton: json['playButton'] as String? ?? 'Tourner la roue',
+      noSpinsAvailable: json['noSpinsAvailable'] as String? ?? 'Aucun tour disponible',
+      spinsRemaining: json['spinsRemaining'] as String? ?? '{count} tour(s) disponible(s)',
+    );
+  }
+
+  factory RouletteTexts.defaultTexts() {
+    return RouletteTexts(
+      playTitle: 'Roue de la Chance',
+      playDescription: 'Tentez votre chance chaque jour !',
+      playButton: 'Tourner la roue',
+      noSpinsAvailable: 'Aucun tour disponible',
+      spinsRemaining: '{count} tour(s) disponible(s)',
+    );
+  }
+
+  RouletteTexts copyWith({
+    String? playTitle,
+    String? playDescription,
+    String? playButton,
+    String? noSpinsAvailable,
+    String? spinsRemaining,
+  }) {
+    return RouletteTexts(
+      playTitle: playTitle ?? this.playTitle,
+      playDescription: playDescription ?? this.playDescription,
+      playButton: playButton ?? this.playButton,
+      noSpinsAvailable: noSpinsAvailable ?? this.noSpinsAvailable,
+      spinsRemaining: spinsRemaining ?? this.spinsRemaining,
     );
   }
 }
