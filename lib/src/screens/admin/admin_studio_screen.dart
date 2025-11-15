@@ -12,6 +12,9 @@ import 'studio/studio_texts_screen.dart';
 import 'studio/roulette_segments_list_screen.dart';
 import 'studio/roulette_settings_screen.dart';
 import '../../features/content/presentation/admin/content_studio_screen.dart';
+import 'products_admin_screen.dart';
+import 'mailing_admin_screen.dart';
+import 'promotions_admin_screen.dart';
 
 /// Studio Builder - Interface unifiée pour gérer l'apparence de l'application
 /// 
@@ -46,6 +49,45 @@ class AdminStudioScreen extends StatelessWidget {
       body: ListView(
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
         children: [
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.inventory_2_rounded,
+            title: 'Catalogue Produits',
+            subtitle: 'Pizzas, menus, boissons, desserts',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProductsAdminScreen()),
+              );
+            },
+          ),
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.local_offer_rounded,
+            title: 'Promotions',
+            subtitle: 'Gérer les promotions et réductions',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PromotionsAdminScreen()),
+              );
+            },
+          ),
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.email_rounded,
+            title: 'Mailing',
+            subtitle: 'Gérer les abonnés et campagnes email',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MailingAdminScreen()),
+              );
+            },
+          ),
           SizedBox(height: AppSpacing.md),
           _buildStudioBlock(
             context,

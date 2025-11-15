@@ -1,21 +1,15 @@
 // lib/src/staff_tablet/screens/staff_tablet_checkout_screen.dart
 
 import 'package:flutter/material.dart';
-import '../../design_system/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../design_system/app_theme.dart';
 import 'package:go_router/go_router.dart';
-import '../../design_system/app_theme.dart';
 import 'package:intl/intl.dart';
 import '../../design_system/app_theme.dart';
 import '../../models/order.dart';
-import '../../design_system/app_theme.dart';
 import '../../providers/cart_provider.dart';
-import '../../design_system/app_theme.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/firebase_order_service.dart';
-import '../../design_system/app_theme.dart';
 import '../providers/staff_tablet_cart_provider.dart';
-import '../../design_system/app_theme.dart';
 
 class StaffTabletCheckoutScreen extends ConsumerStatefulWidget {
   const StaffTabletCheckoutScreen({Key? key}) : super(key: key);
@@ -213,6 +207,12 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
 
   @override
   Widget build(BuildContext context) {
+    // PROTECTION: Vérifier que l'utilisateur est admin
+    final authState = ref.watch(authProvider);
+    if (!authState.isAdmin) {
+      return _buildUnauthorizedScreen(context);
+    }
+    
     final cart = ref.watch(staffTabletCartProvider);
 
     return Scaffold(
@@ -701,6 +701,64 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
             const SizedBox(height: 18),
             child,
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Widget d'écran non autorisé pour les non-admins
+  Widget _buildUnauthorizedScreen(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.red[900]!,
+              Colors.red[700]!,
+            ],
+          ),
+        ),
+        child: Center(
+          child: Card(
+            margin: EdgeInsets.all(AppSpacing.xl),
+            child: Padding(
+              padding: EdgeInsets.all(AppSpacing.xl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.lock,
+                    size: 80,
+                    color: Colors.red,
+                  ),
+                  SizedBox(height: AppSpacing.lg),
+                  Text(
+                    'Accès non autorisé',
+                    style: AppTextStyles.headlineMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Le module CAISSE est réservé aux administrateurs uniquement.',
+                    style: AppTextStyles.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: AppSpacing.xl),
+                  FilledButton.icon(
+                    onPressed: () => context.go('/home'),
+                    icon: const Icon(Icons.home),
+                    label: const Text('Retour à l\'accueil'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
