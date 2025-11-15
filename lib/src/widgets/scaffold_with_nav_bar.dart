@@ -129,10 +129,10 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   // Logique pour naviguer au clic
   void _onItemTapped(BuildContext context, int index, bool isAdmin) {
     if (isAdmin) {
-      // Layout admin : Admin, Accueil, Menu, Panier, Profil
+      // Layout admin : Studio Builder, Accueil, Menu, Panier, Profil
       switch (index) {
         case 0:
-          context.go('/admin');
+          context.go('/admin/studio');
           break;
         case 1:
           context.go('/home');
