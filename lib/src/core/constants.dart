@@ -9,32 +9,12 @@ class AppRoutes {
   static const String cart = '/cart';
   static const String profile = '/profile';
   static const String productDetail = '/details';
-  static const String admin = '/admin';
-  static const String adminMenu = '/admin/menu';
-  static const String adminPizza = '/admin/pizza';
-  static const String adminDrinks = '/admin/drinks';
-  static const String adminDesserts = '/admin/desserts';
-  static const String adminPageBuilder = '/admin/page-builder';
-  static const String adminMailing = '/admin/mailing';
-  static const String adminOrders = '/admin/orders';
   static const String checkout = '/checkout';
   static const String kitchen = '/kitchen';
   static const String roulette = '/roulette';
   
-  // Studio routes
-  static const String adminStudio = '/admin/studio'; // Studio Builder main screen
-  static const String studioHomeConfig = '/admin/studio/home-config';
-  static const String studioHero = '/admin/studio/hero'; // Hero block editor
-  static const String studioPopupsRoulette = '/admin/studio/popups-roulette';
-  static const String studioPopupsList = '/admin/studio/popups'; // Popup block list
-  static const String studioTexts = '/admin/studio/texts';
-  static const String studioFeaturedProducts = '/admin/studio/featured-products';
-  static const String studioContent = '/admin/studio/content'; // New CMS route
-  static const String studioBanner = '/admin/studio/banner'; // Banner editor
-  
-  // Communication routes
-  static const String communicationPromotions = '/admin/communication/promotions';
-  static const String communicationLoyalty = '/admin/communication/loyalty';
+  // Studio Builder - Admin entry point
+  static const String adminStudio = '/admin/studio';
   
   // Staff Tablet routes
   static const String staffTabletPin = '/staff-tablet';

@@ -16,25 +16,7 @@ import 'src/screens/cart/cart_screen.dart';
 import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
 import 'src/screens/product_detail/product_detail_screen.dart';
-import 'src/screens/admin/admin_dashboard_screen.dart';
-import 'src/screens/admin/admin_pizza_screen.dart';
-import 'src/screens/admin/admin_menu_screen.dart';
-import 'src/screens/admin/admin_drinks_screen.dart';
-import 'src/screens/admin/admin_desserts_screen.dart';
-import 'src/screens/admin/admin_page_builder_screen.dart';
-import 'src/screens/admin/admin_mailing_screen.dart';
-import 'src/screens/admin/admin_orders_screen.dart';
 import 'src/screens/admin/admin_studio_screen.dart';
-import 'src/screens/admin/studio/studio_home_config_screen.dart';
-import 'src/screens/admin/studio/studio_popups_roulette_screen.dart';
-import 'src/screens/admin/studio/studio_texts_screen.dart';
-import 'src/screens/admin/studio/studio_featured_products_screen.dart';
-import 'src/screens/admin/studio/banner_block_editor.dart';
-import 'src/screens/admin/studio/hero_block_editor.dart';
-import 'src/screens/admin/studio/popup_block_list.dart';
-import 'src/screens/admin/communication/communication_promotions_screen.dart';
-import 'src/screens/admin/communication/communication_loyalty_screen.dart';
-import 'src/features/content/presentation/admin/content_studio_screen.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 
@@ -143,84 +125,10 @@ class MyApp extends ConsumerWidget {
               path: AppRoutes.profile,
               builder: (context, state) => const ProfileScreen(),
             ),
-            // Routes Admin dans le shell pour bottom bar
-            GoRoute(
-              path: AppRoutes.admin,
-              builder: (context, state) => const AdminDashboardScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.adminPizza,
-              builder: (context, state) => const AdminPizzaScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.adminMenu,
-              builder: (context, state) => const AdminMenuScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.adminDrinks,
-              builder: (context, state) => const AdminDrinksScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.adminDesserts,
-              builder: (context, state) => const AdminDessertsScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.adminPageBuilder,
-              builder: (context, state) => const AdminPageBuilderScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.adminMailing,
-              builder: (context, state) => const AdminMailingScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.adminOrders,
-              builder: (context, state) => const AdminOrdersScreen(),
-            ),
-            // Studio routes
+            // Studio Builder route - main admin entry point
             GoRoute(
               path: AppRoutes.adminStudio,
               builder: (context, state) => const AdminStudioScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.studioHomeConfig,
-              builder: (context, state) => const StudioHomeConfigScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.studioHero,
-              builder: (context, state) => const HeroBlockEditor(),
-            ),
-            GoRoute(
-              path: AppRoutes.studioPopupsRoulette,
-              builder: (context, state) => const StudioPopupsRouletteScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.studioPopupsList,
-              builder: (context, state) => const PopupBlockList(),
-            ),
-            GoRoute(
-              path: AppRoutes.studioTexts,
-              builder: (context, state) => const StudioTextsScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.studioFeaturedProducts,
-              builder: (context, state) => const StudioFeaturedProductsScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.studioBanner,
-              builder: (context, state) => const BannerBlockEditor(),
-            ),
-            GoRoute(
-              path: AppRoutes.studioContent,
-              builder: (context, state) => const ContentStudioScreen(),
-            ),
-            // Communication routes
-            GoRoute(
-              path: AppRoutes.communicationPromotions,
-              builder: (context, state) => const CommunicationPromotionsScreen(),
-            ),
-            GoRoute(
-              path: AppRoutes.communicationLoyalty,
-              builder: (context, state) => const CommunicationLoyaltyScreen(),
             ),
           ],
         ),
