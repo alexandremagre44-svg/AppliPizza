@@ -47,7 +47,7 @@ class RewardsTicketsWidget extends StatelessWidget {
                 ),
                 SizedBox(width: AppSpacing.sm),
                 Text(
-                  profileTexts.rewardsSectionTitle,
+                  profileTexts.rewardsTitle,
                   style: AppTextStyles.titleMedium.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -60,7 +60,7 @@ class RewardsTicketsWidget extends StatelessWidget {
                   context.push(AppRoutes.rewards);
                 },
                 icon: Icon(Icons.arrow_forward, size: 16),
-                label: Text(profileTexts.rewardsSectionViewAll),
+                label: Text(profileTexts.rewardsCtaViewAll),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,
@@ -85,7 +85,7 @@ class RewardsTicketsWidget extends StatelessWidget {
               onPressed: () {
                 context.push(AppRoutes.rewards);
               },
-              child: Text(profileTexts.rewardsSectionViewAll),
+              child: Text(profileTexts.rewardsCtaViewAll),
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.symmetric(
                   vertical: AppSpacing.sm,
@@ -170,7 +170,7 @@ class RewardsTicketsWidget extends StatelessWidget {
                       ),
                       SizedBox(width: AppSpacing.xxs),
                       Text(
-                        rewardsTexts.ticketExpiresOn.replaceAll('{date}', formattedDate),
+                        rewardsTexts.expireAt.replaceAll('{date}', formattedDate),
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.textTertiary,
                         ),
@@ -192,7 +192,7 @@ class RewardsTicketsWidget extends StatelessWidget {
                 borderRadius: AppRadius.badge,
               ),
               child: Text(
-                rewardsTexts.ticketActive,
+                rewardsTexts.active,
                 style: AppTextStyles.labelSmall.copyWith(
                   color: AppColors.success,
                   fontWeight: FontWeight.bold,

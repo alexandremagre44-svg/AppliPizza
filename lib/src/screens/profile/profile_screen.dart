@@ -174,7 +174,7 @@ class ProfileScreen extends ConsumerWidget {
                         loyaltyPoints: loyaltyPoints,
                         lifetimePoints: lifetimePoints,
                         vipTier: vipTier,
-                        texts: appTexts.profileTexts,
+                        texts: appTexts.profile,
                       ),
                     );
                   },
@@ -201,8 +201,8 @@ class ProfileScreen extends ConsumerWidget {
                       padding: AppSpacing.paddingHorizontalLG,
                       child: RewardsTicketsWidget(
                         activeTickets: activeTickets,
-                        profileTexts: appTexts.profileTexts,
-                        rewardsTexts: appTexts.rewardsTexts,
+                        profileTexts: appTexts.profile,
+                        rewardsTexts: appTexts.rewards,
                       ),
                     );
                   },
@@ -225,7 +225,7 @@ class ProfileScreen extends ConsumerWidget {
                 return Padding(
                   padding: AppSpacing.paddingHorizontalLG,
                   child: RouletteCardWidget(
-                    texts: appTexts.rouletteTexts,
+                    texts: appTexts.roulette,
                     userId: userId,
                   ),
                 );
@@ -246,7 +246,7 @@ class ProfileScreen extends ConsumerWidget {
                   child: AccountActivityWidget(
                     ordersCount: history.length,
                     favoritesCount: userProfile.favoriteProducts.length,
-                    texts: appTexts.profileTexts,
+                    texts: appTexts.profile,
                     onOrdersTap: () {
                       // Scroll to orders section (already visible below)
                     },
