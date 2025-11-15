@@ -59,7 +59,7 @@ class LoyaltySectionWidget extends StatelessWidget {
                     ),
                     SizedBox(width: AppSpacing.sm),
                     Text(
-                      texts.loyaltySectionTitle,
+                      texts.loyaltyTitle,
                       style: AppTextStyles.titleMedium.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -112,7 +112,7 @@ class LoyaltySectionWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        texts.loyaltySectionPoints,
+                        texts.loyaltyPoints,
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -150,7 +150,7 @@ class LoyaltySectionWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  texts.loyaltySectionProgress,
+                  texts.loyaltyProgress,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -167,7 +167,7 @@ class LoyaltySectionWidget extends StatelessWidget {
                 ),
                 SizedBox(height: AppSpacing.xs),
                 Text(
-                  texts.loyaltySectionPointsNeeded.replaceAll('{points}', pointsNeeded.toString()),
+                  texts.loyaltyPointsNeeded.replaceAll('{points}', pointsNeeded.toString()),
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.textTertiary,
                   ),
@@ -186,7 +186,7 @@ class LoyaltySectionWidget extends StatelessWidget {
                   context.push(AppRoutes.rewards);
                 },
                 icon: Icon(Icons.emoji_events, size: 18),
-                label: Text(texts.loyaltySectionViewRewards),
+                label: Text(texts.loyaltyCtaViewRewards),
                 style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.symmetric(
                     vertical: AppSpacing.sm,
