@@ -1,153 +1,301 @@
 // lib/src/screens/roulette/roulette_screen.dart
-// Client-side roulette wheel screen with sounds, haptics, and confetti
+// Client-side roulette wheel screen using custom PizzaRouletteWheel widget
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
-import 'package:confetti/confetti.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'dart:async';
-import 'dart:math' as math;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/roulette_config.dart';
+import '../../services/roulette_segment_service.dart';
 import '../../services/roulette_service.dart';
+import '../../widgets/pizza_roulette_wheel.dart';
+import '../../providers/cart_provider.dart';
 import '../../design_system/app_theme.dart';
-import 'reward_celebration_screen.dart';
 
-class RouletteScreen extends StatefulWidget {
+class RouletteScreen extends ConsumerStatefulWidget {
   final String userId;
   
   const RouletteScreen({super.key, required this.userId});
 
   @override
-  State<RouletteScreen> createState() => _RouletteScreenState();
+  ConsumerState<RouletteScreen> createState() => _RouletteScreenState();
 }
 
-class _RouletteScreenState extends State<RouletteScreen> {
+class _RouletteScreenState extends ConsumerState<RouletteScreen> {
+  final RouletteSegmentService _segmentService = RouletteSegmentService();
   final RouletteService _rouletteService = RouletteService();
-  final StreamController<int> _selectedController = StreamController<int>();
-  final ConfettiController _confettiController = ConfettiController(
-    duration: const Duration(seconds: 3),
-  );
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final GlobalKey<PizzaRouletteWheelState> _wheelKey = GlobalKey<PizzaRouletteWheelState>();
   
-  RouletteConfig? _config;
+  List<RouletteSegment> _segments = [];
   bool _isLoading = true;
   bool _isSpinning = false;
   bool _canSpin = false;
-  int? _selectedIndex;
+  RouletteSegment? _lastResult;
   
   @override
   void initState() {
     super.initState();
-    _loadConfig();
+    _loadSegmentsAndCheckSpinAvailability();
   }
 
-  @override
-  void dispose() {
-    _selectedController.close();
-    _confettiController.dispose();
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadConfig() async {
+  Future<void> _loadSegmentsAndCheckSpinAvailability() async {
     setState(() => _isLoading = true);
     
-    final config = await _rouletteService.getRouletteConfig();
-    final canSpin = await _rouletteService.canUserSpinToday(widget.userId);
-    
-    setState(() {
-      _config = config;
-      _canSpin = canSpin;
-      _isLoading = false;
-    });
+    try {
+      final segments = await _segmentService.getActiveSegments();
+      final canSpin = await _rouletteService.canUserSpinToday(widget.userId);
+      
+      setState(() {
+        _segments = segments;
+        _canSpin = canSpin;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading segments: $e');
+      setState(() => _isLoading = false);
+    }
   }
 
-  Future<void> _spin() async {
-    if (!_canSpin || _isSpinning || _config == null || _config!.segments.isEmpty) {
+  void _onSpinPressed() {
+    if (!_canSpin || _isSpinning || _segments.isEmpty) {
       return;
     }
     
-    setState(() => _isSpinning = true);
-    
-    // Initial haptic feedback on spin start
-    HapticFeedback.mediumImpact();
-    
-    // Play tick sound in loop during rotation (when audio asset is available)
-    // The tick sound should be short (~0.1s) and play repeatedly
-    try {
-      // await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      // await _audioPlayer.play(AssetSource('sounds/tick.mp3'));
-    } catch (e) {
-      print('Audio not available: $e');
-    }
-    
-    // Simulate click haptics during spin (lighter feedback every 200ms)
-    Timer.periodic(const Duration(milliseconds: 200), (timer) {
-      if (!_isSpinning || !mounted) {
-        timer.cancel();
-        return;
-      }
-      HapticFeedback.selectionClick();
+    setState(() {
+      _isSpinning = true;
+      _lastResult = null;
     });
     
-    // Determine winning segment
-    final winningSegment = _rouletteService.spinWheel(_config!.segments);
-    final winningIndex = _config!.segments.indexWhere((s) => s.id == winningSegment.id);
-    
-    // Set the selected index to trigger the wheel spin
-    _selectedController.add(winningIndex);
-    
-    // Wait for wheel to finish spinning (fortune wheel takes ~5 seconds)
-    await Future.delayed(const Duration(seconds: 5));
-    
-    if (!mounted) return;
-    
-    // Stop tick sound
-    try {
-      // await _audioPlayer.stop();
-    } catch (e) {
-      print('Audio stop error: $e');
-    }
-    
-    // Record the spin
-    await _rouletteService.recordSpin(widget.userId, winningSegment);
-    
-    // Victory haptic feedback (stronger impact)
-    HapticFeedback.heavyImpact();
-    
-    // Play victory sound and show confetti if not "nothing"
-    if (winningSegment.rewardId != 'nothing') {
-      try {
-        // await _audioPlayer.play(AssetSource('sounds/win.mp3'));
-      } catch (e) {
-        print('Victory audio not available: $e');
-      }
-      _confettiController.play();
-    }
+    // Trigger the wheel spin via GlobalKey
+    _wheelKey.currentState?.spin();
+  }
+
+  Future<void> _onResult(RouletteSegment result) async {
+    // Record the spin in Firestore
+    await _rouletteService.recordSpin(widget.userId, result);
     
     setState(() {
-      _selectedIndex = winningIndex;
+      _lastResult = result;
       _isSpinning = false;
       _canSpin = false;
     });
     
-    // Show celebration screen
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
+    // Apply the reward to cart
+    _applyReward(result);
     
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RewardCelebrationScreen(
-          segment: winningSegment,
-          userId: widget.userId,
+    // Show result dialog after a brief delay
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (mounted) {
+      _showResultDialog(result);
+    }
+  }
+
+  void _applyReward(RouletteSegment segment) {
+    final cartNotifier = ref.read(cartProvider.notifier);
+    
+    switch (segment.rewardType) {
+      case RewardType.percentageDiscount:
+        if (segment.rewardValue != null && segment.rewardValue! > 0) {
+          cartNotifier.applyPercentageDiscount(segment.rewardValue!);
+        }
+        break;
+        
+      case RewardType.fixedAmountDiscount:
+        if (segment.rewardValue != null && segment.rewardValue! > 0) {
+          cartNotifier.applyFixedAmountDiscount(segment.rewardValue!);
+        }
+        break;
+        
+      case RewardType.freeProduct:
+        if (segment.productId != null && segment.productId!.isNotEmpty) {
+          cartNotifier.setPendingFreeItem(segment.productId!, 'product');
+        }
+        break;
+        
+      case RewardType.freeDrink:
+        if (segment.productId != null && segment.productId!.isNotEmpty) {
+          cartNotifier.setPendingFreeItem(segment.productId!, 'drink');
+        }
+        break;
+        
+      case RewardType.none:
+        // No reward to apply
+        break;
+    }
+  }
+
+  void _showResultDialog(RouletteSegment segment) {
+    final isWin = segment.rewardType != RewardType.none;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.dialog,
         ),
+        title: Row(
+          children: [
+            Icon(
+              isWin ? Icons.celebration : Icons.sentiment_dissatisfied,
+              color: isWin ? AppColors.success : AppColors.textSecondary,
+              size: 32,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                isWin ? 'Félicitations !' : 'Dommage...',
+                style: AppTextStyles.titleLarge.copyWith(
+                  color: isWin ? AppColors.success : AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isWin 
+                ? 'Vous avez gagné :'
+                : 'Réessayez demain pour tenter votre chance !',
+              style: AppTextStyles.bodyMedium,
+            ),
+            if (isWin) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: AppSpacing.paddingMD,
+                decoration: BoxDecoration(
+                  color: segment.color.withOpacity(0.1),
+                  borderRadius: AppRadius.card,
+                  border: Border.all(
+                    color: segment.color.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    if (segment.iconName != null)
+                      Icon(
+                        _getIconData(segment.iconName!),
+                        color: segment.color,
+                        size: 32,
+                      ),
+                    if (segment.iconName != null) const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            segment.label,
+                            style: AppTextStyles.titleMedium.copyWith(
+                              color: segment.color,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (segment.description != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              segment.description!,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (segment.rewardType != RewardType.none) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: AppSpacing.paddingMD,
+                  decoration: BoxDecoration(
+                    color: AppColors.info.withOpacity(0.1),
+                    borderRadius: AppRadius.card,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: AppColors.info,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _getRewardInstructions(segment),
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fermer'),
+          ),
+          if (isWin)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to cart or products
+                // This could be implemented based on the app's navigation structure
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Voir le panier'),
+            ),
+        ],
       ),
     );
-    
-    // Reload to check if user can spin again
-    _loadConfig();
+  }
+
+  String _getRewardInstructions(RouletteSegment segment) {
+    switch (segment.rewardType) {
+      case RewardType.percentageDiscount:
+        return 'Votre réduction de ${segment.rewardValue?.toStringAsFixed(0)}% a été appliquée au panier.';
+      case RewardType.fixedAmountDiscount:
+        return 'Votre réduction de ${segment.rewardValue?.toStringAsFixed(2)}€ a été appliquée au panier.';
+      case RewardType.freeProduct:
+        return 'Votre produit gratuit vous attend dans le panier !';
+      case RewardType.freeDrink:
+        return 'Votre boisson gratuite vous attend dans le panier !';
+      case RewardType.none:
+        return '';
+    }
+  }
+
+  IconData _getIconData(String iconName) {
+    switch (iconName) {
+      case 'local_pizza':
+        return Icons.local_pizza;
+      case 'local_drink':
+        return Icons.local_drink;
+      case 'cake':
+        return Icons.cake;
+      case 'stars':
+        return Icons.stars;
+      case 'percent':
+        return Icons.percent;
+      case 'euro':
+        return Icons.euro;
+      case 'close':
+        return Icons.close;
+      case 'card_giftcard':
+        return Icons.card_giftcard;
+      default:
+        return Icons.card_giftcard;
+    }
   }
 
   @override
@@ -156,7 +304,7 @@ class _RouletteScreenState extends State<RouletteScreen> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Roue de la Chance'),
-          backgroundColor: AppColors.primaryRed,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
         ),
         body: const Center(
@@ -165,11 +313,11 @@ class _RouletteScreenState extends State<RouletteScreen> {
       );
     }
     
-    if (_config == null || !_config!.isCurrentlyActive) {
+    if (_segments.isEmpty) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Roue de la Chance'),
-          backgroundColor: AppColors.primaryRed,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
         ),
         body: Center(
@@ -181,18 +329,20 @@ class _RouletteScreenState extends State<RouletteScreen> {
                 Icon(
                   Icons.casino,
                   size: 80,
-                  color: AppColors.textLight,
+                  color: AppColors.textTertiary,
                 ),
-                SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: 24),
                 Text(
                   'La roue n\'est pas disponible',
                   style: AppTextStyles.titleLarge,
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: AppSpacing.md),
+                const SizedBox(height: 16),
                 Text(
                   'Revenez plus tard pour tenter votre chance !',
-                  style: AppTextStyles.bodyMedium,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -205,193 +355,171 @@ class _RouletteScreenState extends State<RouletteScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Roue de la Chance'),
-        backgroundColor: AppColors.primaryRed,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: Stack(
+      body: Column(
         children: [
-          // Background gradient
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.primaryRed.withOpacity(0.1),
-                  Colors.white,
+          // Status banner if user can't spin
+          if (!_canSpin && !_isSpinning)
+            Container(
+              width: double.infinity,
+              padding: AppSpacing.paddingMD,
+              decoration: BoxDecoration(
+                color: AppColors.warning.withOpacity(0.1),
+                border: Border(
+                  bottom: BorderSide(
+                    color: AppColors.warning,
+                    width: 2,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppColors.warning,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Limite atteinte pour aujourd\'hui',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.warning,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-          
-          // Confetti overlay
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirection: math.pi / 2,
-              maxBlastForce: 5,
-              minBlastForce: 2,
-              emissionFrequency: 0.05,
-              numberOfParticles: 50,
-              gravity: 0.1,
-            ),
-          ),
           
           // Main content
-          Center(
+          Expanded(
             child: SingleChildScrollView(
-              padding: AppSpacing.paddingXL,
+              padding: AppSpacing.paddingLG,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Title
                   Text(
                     'Tentez votre chance !',
-                    style: AppTextStyles.displaySmall,
+                    style: AppTextStyles.displaySmall.copyWith(
+                      color: AppColors.primary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tournez la roue pour gagner des récompenses',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   
-                  SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: 32),
                   
-                  if (!_canSpin)
+                  // Pizza Roulette Wheel
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    child: PizzaRouletteWheel(
+                      key: _wheelKey,
+                      segments: _segments,
+                      onResult: _onResult,
+                      isSpinning: _isSpinning,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Result display
+                  if (_lastResult != null)
                     Container(
                       padding: AppSpacing.paddingMD,
                       decoration: BoxDecoration(
-                        color: AppColors.warningOrange.withOpacity(0.1),
+                        color: _lastResult!.rewardType != RewardType.none
+                            ? AppColors.success.withOpacity(0.1)
+                            : AppColors.neutral200,
                         borderRadius: AppRadius.card,
-                        border: Border.all(color: AppColors.warningOrange),
+                        border: Border.all(
+                          color: _lastResult!.rewardType != RewardType.none
+                              ? AppColors.success
+                              : AppColors.neutral400,
+                          width: 2,
+                        ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                      child: Column(
                         children: [
-                          Icon(Icons.info, color: AppColors.warningOrange),
-                          SizedBox(width: AppSpacing.sm),
+                          Icon(
+                            _lastResult!.rewardType != RewardType.none
+                                ? Icons.celebration
+                                : Icons.sentiment_dissatisfied,
+                            size: 48,
+                            color: _lastResult!.rewardType != RewardType.none
+                                ? AppColors.success
+                                : AppColors.textSecondary,
+                          ),
+                          const SizedBox(height: 12),
                           Text(
-                            'Limite atteinte pour aujourd\'hui',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.warningOrange,
+                            _lastResult!.rewardType != RewardType.none
+                                ? 'Félicitations, vous avez gagné :'
+                                : 'Dommage...',
+                            style: AppTextStyles.titleMedium.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _lastResult!.label,
+                            style: AppTextStyles.titleLarge.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
                   
-                  SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: 24),
                   
-                  // Fortune Wheel
+                  // Spin button
                   SizedBox(
-                    height: 400,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        FortuneWheel(
-                          selected: _selectedController.stream,
-                          animateFirst: false,
-                          duration: const Duration(seconds: 5),
-                          indicators: const [
-                            FortuneIndicator(
-                              alignment: Alignment.topCenter,
-                              child: TriangleIndicator(
-                                color: Colors.red,
-                              ),
-                            ),
-                          ],
-                          items: _config!.segments.map((segment) {
-                            return FortuneItem(
-                              child: Text(
-                                segment.label,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black,
-                                      offset: Offset(1, 1),
-                                      blurRadius: 2,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              style: FortuneItemStyle(
-                                color: segment.color,
-                                borderColor: Colors.white,
-                                borderWidth: 2,
-                              ),
-                            );
-                          }).toList(),
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: (_canSpin && !_isSpinning) ? _onSpinPressed : null,
+                      icon: Icon(
+                        _isSpinning ? Icons.hourglass_empty : Icons.casino,
+                      ),
+                      label: Text(
+                        _isSpinning 
+                            ? 'La roue tourne...' 
+                            : 'Tourner la roue',
+                        style: AppTextStyles.titleMedium,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: AppColors.neutral300,
+                        disabledForegroundColor: AppColors.neutral600,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
                         ),
-                        
-                        // Center button
-                        if (!_isSpinning)
-                          GestureDetector(
-                            onTap: _canSpin ? _spin : null,
-                            child: Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _canSpin 
-                                    ? AppColors.primaryRed 
-                                    : AppColors.textLight,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.play_arrow,
-                                size: 40,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        
-                        if (_isSpinning)
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.textLight,
-                            ),
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            ),
-                          ),
-                      ],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppRadius.button,
+                        ),
+                      ),
                     ),
                   ),
                   
-                  SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: 16),
                   
-                  if (_canSpin)
-                    ElevatedButton.icon(
-                      onPressed: _isSpinning ? null : _spin,
-                      icon: const Icon(Icons.casino),
-                      label: const Text('Faire tourner'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryRed,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: AppSpacing.xl,
-                          vertical: AppSpacing.md,
-                        ),
-                        textStyle: AppTextStyles.titleMedium,
-                      ),
-                    ),
-                  
-                  SizedBox(height: AppSpacing.lg),
-                  
+                  // Info text
                   Text(
-                    'Vous pouvez tourner ${_config!.maxUsesPerDay} fois par jour',
+                    'Vous pouvez tourner 1 fois par jour',
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textMedium,
+                      color: AppColors.textSecondary,
                     ),
                     textAlign: TextAlign.center,
                   ),
