@@ -142,7 +142,7 @@ class _RouletteSegmentsListScreenState extends State<RouletteSegmentsListScreen>
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
-              'Segments: $_activeCount actifs / ${_segments.length} total',
+              'Segments: $activeCount actifs / ${_segments.length} total',
               style: AppTextStyles.bodyMedium.copyWith(
                 color: AppColors.onPrimaryContainer,
               ),

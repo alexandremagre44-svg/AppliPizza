@@ -25,7 +25,7 @@ class RouletteSegmentEditorScreen extends StatefulWidget {
 class _RouletteSegmentEditorScreenState extends State<RouletteSegmentEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   final RouletteSegmentService _service = RouletteSegmentService();
-  final FirestoreProductService _productService = FirestoreProductService();
+  final FirestoreProductService _productService = createFirestoreProductService();
 
   // Form controllers
   late TextEditingController _labelController;
