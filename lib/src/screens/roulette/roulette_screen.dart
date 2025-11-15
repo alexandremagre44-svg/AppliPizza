@@ -9,6 +9,8 @@ import '../../services/roulette_service.dart';
 import '../../widgets/pizza_roulette_wheel.dart';
 import '../../providers/cart_provider.dart';
 import '../../design_system/app_theme.dart';
+import '../../utils/roulette_reward_mapper.dart';
+import '../client/rewards/rewards_screen.dart';
 
 class RouletteScreen extends ConsumerStatefulWidget {
   final String userId;
@@ -78,8 +80,8 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       _canSpin = false;
     });
     
-    // Apply the reward to cart
-    _applyReward(result);
+    // NOUVEAU: Create reward ticket instead of applying directly to cart
+    await _createRewardTicket(result);
     
     // Show result dialog after a brief delay
     await Future.delayed(const Duration(milliseconds: 500));
@@ -88,37 +90,23 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
     }
   }
 
-  void _applyReward(RouletteSegment segment) {
-    final cartNotifier = ref.read(cartProvider.notifier);
-    
-    switch (segment.rewardType) {
-      case RewardType.percentageDiscount:
-        if (segment.rewardValue != null && segment.rewardValue! > 0) {
-          cartNotifier.applyPercentageDiscount(segment.rewardValue!);
-        }
-        break;
-        
-      case RewardType.fixedAmountDiscount:
-        if (segment.rewardValue != null && segment.rewardValue! > 0) {
-          cartNotifier.applyFixedAmountDiscount(segment.rewardValue!);
-        }
-        break;
-        
-      case RewardType.freeProduct:
-        if (segment.productId != null && segment.productId!.isNotEmpty) {
-          cartNotifier.setPendingFreeItem(segment.productId!, 'product');
-        }
-        break;
-        
-      case RewardType.freeDrink:
-        if (segment.productId != null && segment.productId!.isNotEmpty) {
-          cartNotifier.setPendingFreeItem(segment.productId!, 'drink');
-        }
-        break;
-        
-      case RewardType.none:
-        // No reward to apply
-        break;
+  /// Create a reward ticket from the roulette segment
+  Future<void> _createRewardTicket(RouletteSegment segment) async {
+    try {
+      // Don't create tickets for "nothing" segments
+      if (segment.rewardType == RewardType.none) {
+        return;
+      }
+
+      // Create ticket using the mapper utility
+      await createTicketFromRouletteSegment(
+        userId: widget.userId,
+        segment: segment,
+      );
+      
+      print('Reward ticket created for segment: ${segment.label}');
+    } catch (e) {
+      print('Error creating reward ticket: $e');
     }
   }
 
@@ -246,14 +234,19 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Navigate to cart or products
-                // This could be implemented based on the app's navigation structure
+                // Navigate to rewards screen to see the ticket
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const RewardsScreen(),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Voir le panier'),
+              child: const Text('Voir mes récompenses'),
             ),
         ],
       ),
@@ -263,13 +256,13 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   String _getRewardInstructions(RouletteSegment segment) {
     switch (segment.rewardType) {
       case RewardType.percentageDiscount:
-        return 'Votre réduction de ${segment.rewardValue?.toStringAsFixed(0)}% a été appliquée au panier.';
+        return 'Un ticket de réduction de ${segment.rewardValue?.toStringAsFixed(0)}% a été ajouté à vos récompenses.';
       case RewardType.fixedAmountDiscount:
-        return 'Votre réduction de ${segment.rewardValue?.toStringAsFixed(2)}€ a été appliquée au panier.';
+        return 'Un ticket de réduction de ${segment.rewardValue?.toStringAsFixed(2)}€ a été ajouté à vos récompenses.';
       case RewardType.freeProduct:
-        return 'Votre produit gratuit vous attend dans le panier !';
+        return 'Un ticket pour un produit gratuit a été ajouté à vos récompenses !';
       case RewardType.freeDrink:
-        return 'Votre boisson gratuite vous attend dans le panier !';
+        return 'Un ticket pour une boisson gratuite a été ajouté à vos récompenses !';
       case RewardType.none:
         return '';
     }

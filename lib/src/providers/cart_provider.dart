@@ -3,7 +3,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/product.dart'; 
+import '../models/product.dart';
+import '../models/reward_ticket.dart';
+import '../models/reward_action.dart';
+import '../services/reward_service.dart'; 
 
 const _uuid = Uuid();
 
@@ -46,6 +49,7 @@ class CartState {
   final double? discountAmount;       // Montant fixe de réduction (ex: 5.0 pour 5€)
   final String? pendingFreeItemId;    // ID du produit gratuit en attente
   final String? pendingFreeItemType;  // Type: 'product' ou 'drink'
+  final RewardTicket? appliedTicket;  // Ticket de récompense appliqué au panier
 
   CartState(
     this.items, {
@@ -53,6 +57,7 @@ class CartState {
     this.discountAmount,
     this.pendingFreeItemId,
     this.pendingFreeItemType,
+    this.appliedTicket,
   });
 
   // Propriété calculée pour le total du panier sans réduction
@@ -148,6 +153,7 @@ class CartNotifier extends StateNotifier<CartState> {
         discountAmount: state.discountAmount,
         pendingFreeItemId: state.pendingFreeItemId,
         pendingFreeItemType: state.pendingFreeItemType,
+        appliedTicket: state.appliedTicket,
       );
     }
   }
@@ -160,6 +166,7 @@ class CartNotifier extends StateNotifier<CartState> {
       discountAmount: state.discountAmount,
       pendingFreeItemId: state.pendingFreeItemId,
       pendingFreeItemType: state.pendingFreeItemType,
+      appliedTicket: state.appliedTicket,
     );
   }
 
@@ -171,6 +178,7 @@ class CartNotifier extends StateNotifier<CartState> {
       discountAmount: state.discountAmount,
       pendingFreeItemId: state.pendingFreeItemId,
       pendingFreeItemType: state.pendingFreeItemType,
+      appliedTicket: state.appliedTicket,
     );
   }
 
@@ -193,6 +201,7 @@ class CartNotifier extends StateNotifier<CartState> {
       discountAmount: state.discountAmount,
       pendingFreeItemId: state.pendingFreeItemId,
       pendingFreeItemType: state.pendingFreeItemType,
+      appliedTicket: state.appliedTicket,
     );
   }
 
@@ -206,6 +215,7 @@ class CartNotifier extends StateNotifier<CartState> {
       discountAmount: state.discountAmount,
       pendingFreeItemId: state.pendingFreeItemId,
       pendingFreeItemType: state.pendingFreeItemType,
+      appliedTicket: state.appliedTicket,
     );
   }
 
@@ -222,6 +232,7 @@ class CartNotifier extends StateNotifier<CartState> {
         discountAmount: state.discountAmount,
         pendingFreeItemId: state.pendingFreeItemId,
         pendingFreeItemType: state.pendingFreeItemType,
+        appliedTicket: state.appliedTicket,
       );
     }
   }
@@ -243,6 +254,7 @@ class CartNotifier extends StateNotifier<CartState> {
       discountAmount: state.discountAmount,
       pendingFreeItemId: state.pendingFreeItemId,
       pendingFreeItemType: state.pendingFreeItemType,
+      appliedTicket: state.appliedTicket,
     );
   }
 
@@ -254,6 +266,7 @@ class CartNotifier extends StateNotifier<CartState> {
       discountAmount: amount,
       pendingFreeItemId: state.pendingFreeItemId,
       pendingFreeItemType: state.pendingFreeItemType,
+      appliedTicket: state.appliedTicket,
     );
   }
 
@@ -265,6 +278,7 @@ class CartNotifier extends StateNotifier<CartState> {
       discountAmount: state.discountAmount,
       pendingFreeItemId: productId,
       pendingFreeItemType: type,
+      appliedTicket: state.appliedTicket,
     );
   }
 
@@ -276,6 +290,7 @@ class CartNotifier extends StateNotifier<CartState> {
       discountAmount: null,
       pendingFreeItemId: state.pendingFreeItemId,
       pendingFreeItemType: state.pendingFreeItemType,
+      appliedTicket: null, // Also clear applied ticket
     );
   }
 
@@ -287,6 +302,7 @@ class CartNotifier extends StateNotifier<CartState> {
       discountAmount: state.discountAmount,
       pendingFreeItemId: null,
       pendingFreeItemType: null,
+      appliedTicket: state.appliedTicket,
     );
   }
 
@@ -298,6 +314,84 @@ class CartNotifier extends StateNotifier<CartState> {
       discountAmount: null,
       pendingFreeItemId: null,
       pendingFreeItemType: null,
+      appliedTicket: null,
     );
+  }
+
+  // =============================================
+  // NOUVEAU: GESTION DES REWARD TICKETS
+  // =============================================
+
+  /// Applique un ticket de récompense au panier
+  /// 
+  /// Cette méthode gère l'application d'un ticket en fonction de son type:
+  /// - Réductions: applique directement au panier
+  /// - Produits gratuits: ne fait rien ici (géré par RewardProductSelectorScreen)
+  /// 
+  /// Note: Les produits gratuits sont ajoutés via le sélecteur de produits
+  /// et marqués comme utilisés dans RewardProductSelectorScreen
+  Future<void> applyTicket(RewardTicket ticket) async {
+    // Validate ticket
+    if (ticket.isUsed) {
+      throw Exception('Ce ticket a déjà été utilisé');
+    }
+    if (ticket.isExpired) {
+      throw Exception('Ce ticket a expiré');
+    }
+
+    final rewardService = RewardService();
+
+    // Apply based on reward type
+    switch (ticket.action.type) {
+      case RewardType.percentageDiscount:
+        if (ticket.action.percentage != null) {
+          applyPercentageDiscount(ticket.action.percentage!);
+          await rewardService.markTicketUsed(ticket.userId, ticket.id);
+          state = CartState(
+            state.items,
+            discountPercent: state.discountPercent,
+            discountAmount: state.discountAmount,
+            pendingFreeItemId: state.pendingFreeItemId,
+            pendingFreeItemType: state.pendingFreeItemType,
+            appliedTicket: ticket,
+          );
+        }
+        break;
+
+      case RewardType.fixedDiscount:
+        if (ticket.action.amount != null) {
+          applyFixedAmountDiscount(ticket.action.amount!);
+          await rewardService.markTicketUsed(ticket.userId, ticket.id);
+          state = CartState(
+            state.items,
+            discountPercent: state.discountPercent,
+            discountAmount: state.discountAmount,
+            pendingFreeItemId: state.pendingFreeItemId,
+            pendingFreeItemType: state.pendingFreeItemType,
+            appliedTicket: ticket,
+          );
+        }
+        break;
+
+      // Free products are handled by RewardProductSelectorScreen
+      // which adds the product directly and marks the ticket as used
+      case RewardType.freeProduct:
+      case RewardType.freeCategory:
+      case RewardType.freeAnyPizza:
+      case RewardType.freeDrink:
+        // Just store the ticket reference, product selection is done elsewhere
+        state = CartState(
+          state.items,
+          discountPercent: state.discountPercent,
+          discountAmount: state.discountAmount,
+          pendingFreeItemId: state.pendingFreeItemId,
+          pendingFreeItemType: state.pendingFreeItemType,
+          appliedTicket: ticket,
+        );
+        break;
+
+      default:
+        throw Exception('Type de récompense non pris en charge: ${ticket.action.type}');
+    }
   }
 }
