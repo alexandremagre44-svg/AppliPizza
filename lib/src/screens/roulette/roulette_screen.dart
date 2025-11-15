@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/roulette_config.dart';
 import '../../services/roulette_segment_service.dart';
 import '../../services/roulette_service.dart';
+import '../../services/roulette_rules_service.dart';
 import '../../widgets/pizza_roulette_wheel.dart';
 import '../../providers/cart_provider.dart';
 import '../../design_system/app_theme.dart';
@@ -24,6 +25,7 @@ class RouletteScreen extends ConsumerStatefulWidget {
 class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   final RouletteSegmentService _segmentService = RouletteSegmentService();
   final RouletteService _rouletteService = RouletteService();
+  final RouletteRulesService _rulesService = RouletteRulesService();
   final GlobalKey<PizzaRouletteWheelState> _wheelKey = GlobalKey<PizzaRouletteWheelState>();
   
   List<RouletteSegment> _segments = [];
@@ -31,6 +33,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   bool _isSpinning = false;
   bool _canSpin = false;
   RouletteSegment? _lastResult;
+  RouletteStatus? _eligibilityStatus;
   
   @override
   void initState() {
@@ -43,11 +46,12 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
     
     try {
       final segments = await _segmentService.getActiveSegments();
-      final canSpin = await _rouletteService.canUserSpinToday(widget.userId);
+      final status = await _rulesService.checkEligibility(widget.userId);
       
       setState(() {
         _segments = segments;
-        _canSpin = canSpin;
+        _eligibilityStatus = status;
+        _canSpin = status.canSpin;
         _isLoading = false;
       });
     } catch (e) {
@@ -291,6 +295,21 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
     }
   }
 
+  String _formatNextEligibleTime(DateTime nextTime) {
+    final now = DateTime.now();
+    final difference = nextTime.difference(now);
+    
+    if (difference.inDays > 0) {
+      return 'Disponible dans ${difference.inDays} jour${difference.inDays > 1 ? 's' : ''}';
+    } else if (difference.inHours > 0) {
+      return 'Disponible dans ${difference.inHours} heure${difference.inHours > 1 ? 's' : ''}';
+    } else if (difference.inMinutes > 0) {
+      return 'Disponible dans ${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''}';
+    } else {
+      return 'Disponible maintenant';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -354,7 +373,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       body: Column(
         children: [
           // Status banner if user can't spin
-          if (!_canSpin && !_isSpinning)
+          if (!_canSpin && !_isSpinning && _eligibilityStatus != null)
             Container(
               width: double.infinity,
               padding: AppSpacing.paddingMD,
@@ -367,21 +386,38 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
                   ),
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: AppColors.warning,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: AppColors.warning,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _eligibilityStatus!.reason ?? 'Non disponible',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.warning,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Limite atteinte pour aujourd\'hui',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.warning,
-                      fontWeight: FontWeight.bold,
+                  if (_eligibilityStatus!.nextEligibleAt != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatNextEligibleTime(_eligibilityStatus!.nextEligibleAt!),
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -508,13 +544,44 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
                   
                   const SizedBox(height: 16),
                   
-                  // Info text
-                  Text(
-                    'Vous pouvez tourner 1 fois par jour',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+                  // Info text with rules
+                  Container(
+                    padding: AppSpacing.paddingMD,
+                    decoration: BoxDecoration(
+                      color: AppColors.info.withOpacity(0.1),
+                      borderRadius: AppRadius.card,
                     ),
-                    textAlign: TextAlign.center,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: AppColors.info,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Règles de la roulette',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.info,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Vos gains sont automatiquement ajoutés à vos récompenses et utilisables sur votre prochaine commande.',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
