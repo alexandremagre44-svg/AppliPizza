@@ -163,8 +163,8 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     final totalRotation = fullRotations * 2 * math.pi + targetAngle;
     
     _animation = Tween<double>(
-      begin: _currentRotation,
-      end: _currentRotation + totalRotation,
+      begin: 0.0,
+      end: totalRotation,
     ).animate(
       CurvedAnimation(
         parent: _controller,
@@ -230,7 +230,7 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
 
   void _onSpinComplete() {
     setState(() {
-      _currentRotation = _animation.value;
+      _currentRotation = 0.0;
       _isSpinning = false;
     });
     
