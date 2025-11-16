@@ -201,55 +201,29 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
   }
 
   /// Calculates the target angle to position the winning segment at the top (INDEX-BASED)
-  /// 
-  /// This calculation MUST match the drawing logic in _WheelPainter to ensure
-  /// pixel-perfect alignment between the visual segment and the cursor.
-  /// 
-  /// The _WheelPainter draws segments with:
-  ///   startAngle = index * anglePerSegment - π/2 + visualOffset
-  /// where visualOffset = -π/6
-  /// 
-  /// Algorithm:
-  /// 1. Calculate the segment's start angle (without visualOffset)
-  /// 2. Find the center of the segment
-  /// 3. Calculate rotation needed to align center with cursor at -π/2
-  /// 4. Normalize to [0, 2π)
-  /// 5. Apply visualOffset to compensate for painter's visual offset
   double _calculateTargetAngleFromIndex(int index) {
     final segments = widget.segments;
 
+    // Trouver l'index via l'id
     if (index < 0 || index >= segments.length) {
-      print('⚠️ [ANGLE] Invalid index: $index (segments length: ${segments.length})');
       return 0.0;
     }
 
     final anglePerSegment = 2 * math.pi / segments.length;
 
-    // Calculate start angle WITHOUT visualOffset first
-    final startAngle = index * anglePerSegment - math.pi / 2;
-    
-    // Calculate center of the segment
-    final centerAngle = startAngle + anglePerSegment / 2;
+    // Curseur fixé en haut (-π/2)
+    const double cursorAngle = -math.pi / 2;
 
-    // The cursor is fixed at -π/2 (top of wheel)
-    const cursorAngle = -math.pi / 2;
+    // Angle de départ utilisé par le painter (sans offset)
+    final double startAngle = index * anglePerSegment - math.pi / 2;
+    final double centerAngle = startAngle + anglePerSegment / 2;
 
-    // To align the segment center with the cursor, we need to rotate by:
-    // targetRotation = cursorAngle - centerAngle
+    // Angle cible : aligner le centre du segment sur le curseur
     double targetAngle = cursorAngle - centerAngle;
 
-    // Normalize to [0, 2π)
-    targetAngle = targetAngle % (2 * math.pi);
-    if (targetAngle < 0) {
-      targetAngle += 2 * math.pi;
-    }
-
-    // Apply the same visualOffset used by _WheelPainter
-    const visualOffset = -math.pi / 6;
-    targetAngle = (targetAngle + visualOffset) % (2 * math.pi);
-
-    // Debug logging
-    print('[ANGLE DEBUG] index:$index, visualOffset:$visualOffset, startAngle:${startAngle.toStringAsFixed(4)}, centerAngle:${centerAngle.toStringAsFixed(4)}, cursorAngle:$cursorAngle, targetAngle:${targetAngle.toStringAsFixed(4)}');
+    // Normaliser 0 → 2π
+    targetAngle %= (2 * math.pi);
+    if (targetAngle < 0) targetAngle += 2 * math.pi;
 
     return targetAngle;
   }
@@ -348,12 +322,7 @@ class _WheelPainter extends CustomPainter {
 
   // Visual offset to align the wheel correctly with the needle
   // This constant adjusts the initial drawing position of segments
-  // 
-  // TEST VALUES (uncomment the one that aligns segment 0 under the needle):
-  // static const double _visualOffset = math.pi / 6;      // +π/6 ≈ +30°
-  static const double _visualOffset = -math.pi / 6;     // -π/6 ≈ -30°
-  // static const double _visualOffset = math.pi / 3;      // +π/3 ≈ +60°
-  // static const double _visualOffset = -math.pi / 3;     // -π/3 ≈ -60°
+  static const double _visualOffset = 0.0;
 
   _WheelPainter({required this.segments});
 
