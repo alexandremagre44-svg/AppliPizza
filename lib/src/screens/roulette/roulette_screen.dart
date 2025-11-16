@@ -119,7 +119,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
     }
   }
 
-  void _onSpinPressed() {
+  Future<void> _onSpinPressed() async {
     if (!_canSpin || _isSpinning || _segments.isEmpty) {
       return;
     }
@@ -129,8 +129,19 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       _lastResult = null;
     });
     
-    // Trigger the wheel spin via GlobalKey
-    _wheelKey.currentState?.spin();
+    try {
+      // NEW ARCHITECTURE: Service picks the winning segment (single source of truth)
+      final result = await _segmentService.pickRandomSegment();
+      
+      // Pass the result to the wheel for visual animation
+      _wheelKey.currentState?.spinWithResult(result);
+    } catch (e) {
+      print('❌ Error picking random segment: $e');
+      setState(() {
+        _isSpinning = false;
+        _canSpin = true;
+      });
+    }
   }
 
   Future<void> _onResult(RouletteSegment result) async {

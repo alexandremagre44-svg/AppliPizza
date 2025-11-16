@@ -62,7 +62,7 @@ void main() {
       expect(find.byType(CustomPaint), findsWidgets);
     });
 
-    testWidgets('calls onResult when spin completes', (WidgetTester tester) async {
+    testWidgets('calls onResult when spinWithResult completes', (WidgetTester tester) async {
       RouletteSegment? result;
       final key = GlobalKey<PizzaRouletteWheelState>();
 
@@ -80,15 +80,16 @@ void main() {
         ),
       );
 
-      // Trigger spin
-      key.currentState?.spin();
+      // NEW ARCHITECTURE: Pass the pre-selected segment to spinWithResult
+      final targetSegment = testSegments[1]; // Select second segment
+      key.currentState?.spinWithResult(targetSegment);
       
       // Wait for animation to complete
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
-      // Verify a result was selected
+      // Verify the exact result matches what we passed
       expect(result, isNotNull);
-      expect(testSegments.contains(result), isTrue);
+      expect(result, equals(targetSegment));
     });
 
     testWidgets('handles empty segments gracefully', (WidgetTester tester) async {
@@ -107,7 +108,7 @@ void main() {
       expect(find.byType(PizzaRouletteWheel), findsOneWidget);
     });
 
-    testWidgets('spin method is accessible via GlobalKey', (WidgetTester tester) async {
+    testWidgets('spinWithResult method is accessible via GlobalKey', (WidgetTester tester) async {
       final key = GlobalKey<PizzaRouletteWheelState>();
 
       await tester.pumpWidget(
@@ -122,9 +123,9 @@ void main() {
         ),
       );
 
-      // Verify we can access the state and call spin
+      // Verify we can access the state and call spinWithResult
       expect(key.currentState, isNotNull);
-      expect(() => key.currentState?.spin(), returnsNormally);
+      expect(() => key.currentState?.spinWithResult(testSegments[0]), returnsNormally);
     });
 
     testWidgets('does not spin when already spinning', (WidgetTester tester) async {
@@ -146,11 +147,11 @@ void main() {
       );
 
       // Trigger first spin
-      key.currentState?.spin();
+      key.currentState?.spinWithResult(testSegments[0]);
       
       // Immediately try to spin again (should be ignored)
-      key.currentState?.spin();
-      key.currentState?.spin();
+      key.currentState?.spinWithResult(testSegments[1]);
+      key.currentState?.spinWithResult(testSegments[2]);
 
       // Wait for animation to complete
       await tester.pumpAndSettle(const Duration(seconds: 5));
@@ -159,8 +160,10 @@ void main() {
       expect(resultCount, equals(1));
     });
 
-    test('probability-based selection distributes correctly', () {
-      // This is a statistical test - run multiple times
+    testWidgets('widget displays the segment passed to spinWithResult', (WidgetTester tester) async {
+      // This test verifies that the widget displays exactly what it's told to display
+      // Probability-based selection is now the responsibility of RouletteSegmentService
+      
       final segments = [
         RouletteSegment(
           id: 'high',
@@ -178,31 +181,33 @@ void main() {
         ),
       ];
 
-      final results = <String, int>{};
-      const iterations = 1000;
+      RouletteSegment? result;
+      final key = GlobalKey<PizzaRouletteWheelState>();
 
-      // Create a temporary widget to test selection logic
-      for (int i = 0; i < iterations; i++) {
-        // Simulate selection by creating widget and checking internal logic
-        // Note: This is a simplified test of the probability logic
-        final totalProb = segments.fold<double>(0, (sum, s) => sum + s.probability);
-        final random = (i / iterations) * totalProb;
-        
-        double cumulative = 0;
-        for (final segment in segments) {
-          cumulative += segment.probability;
-          if (random <= cumulative) {
-            results[segment.id] = (results[segment.id] ?? 0) + 1;
-            break;
-          }
-        }
-      }
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PizzaRouletteWheel(
+              key: key,
+              segments: segments,
+              onResult: (segment) {
+                result = segment;
+              },
+            ),
+          ),
+        ),
+      );
 
-      // High probability segment should appear roughly 80% of the time
-      // Allow for some variance (70-90% range)
-      final highCount = results['high'] ?? 0;
-      expect(highCount, greaterThan(iterations * 0.70));
-      expect(highCount, lessThan(iterations * 0.90));
+      // Test with first segment
+      key.currentState?.spinWithResult(segments[0]);
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+      expect(result, equals(segments[0]));
+
+      // Reset and test with second segment
+      result = null;
+      key.currentState?.spinWithResult(segments[1]);
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+      expect(result, equals(segments[1]));
     });
 
     testWidgets('winning segment aligns correctly with pointer after spin', (WidgetTester tester) async {
@@ -235,34 +240,37 @@ void main() {
         ),
       );
 
-      // Trigger spin
-      key.currentState?.spin();
+      // NEW ARCHITECTURE: Test with specific target segment
+      final targetSegment = segments[3]; // Select segment at index 3
+      key.currentState?.spinWithResult(targetSegment);
       
       // Wait for animation to complete
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
-      // Verify a result was selected and it's one of our segments
+      // Verify the exact result matches what we passed
       expect(result, isNotNull);
-      expect(segments.contains(result), isTrue);
+      expect(result, equals(targetSegment));
       
-      // The test validates that the segment selection works
+      // The test validates that the segment passed to spinWithResult
+      // is the exact one returned via onResult callback
       // The actual angle alignment is verified visually by the user
       // as the pointer should point to the correct reward
     });
 
     test('angle calculation correctly aligns segment center with cursor', () {
       // This test verifies the mathematical correctness of the angle calculation
-      // using the formula from the fixed implementation
+      // using the formula from the fixed implementation with visualOffset
       
       const numSegments = 6;
       const anglePerSegment = 2 * 3.14159265359 / numSegments; // 2π/6 ≈ 1.047
       const cursorAngle = -3.14159265359 / 2; // -π/2
+      const visualOffset = -3.14159265359 / 6; // -π/6 (must match _WheelPainter._visualOffset)
       
       // Test each segment
       for (int segmentIndex = 0; segmentIndex < numSegments; segmentIndex++) {
-        // Calculate angles as per the implementation
-        // Painter draws at: (i + 1) * anglePerSegment - π/2
-        final startAngle = (segmentIndex + 1) * anglePerSegment - 3.14159265359 / 2;
+        // Calculate angles as per the NEW implementation
+        // Painter draws at: index * anglePerSegment - π/2 + visualOffset
+        final startAngle = segmentIndex * anglePerSegment - 3.14159265359 / 2 + visualOffset;
         final centerAngle = startAngle + anglePerSegment / 2;
         
         // Calculate target rotation
