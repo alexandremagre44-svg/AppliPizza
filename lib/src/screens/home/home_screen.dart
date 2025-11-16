@@ -22,8 +22,7 @@ import '../menu/menu_customization_modal.dart';
 import 'pizza_customization_modal.dart';
 import '../../theme/app_theme.dart';
 import '../../core/constants.dart';
-import '../../services/roulette_settings_service.dart';
-import '../../models/roulette_settings.dart';
+import '../../services/roulette_rules_service.dart';
 
 /// Home screen - Professional showcase page
 /// Displays hero banner, promos, bestsellers, category shortcuts, and info
@@ -507,21 +506,23 @@ class HomeScreen extends ConsumerWidget {
   /// Build the roulette promotional banner
   /// Only displayed when roulette is enabled and all conditions are met
   Widget _buildRouletteBanner(BuildContext context, WidgetRef ref) {
-    return FutureBuilder<RouletteSettings?>(
-      future: RouletteSettingsService().getRouletteSettings(),
+    return FutureBuilder<RouletteRules?>(
+      future: RouletteRulesService().getRules(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data == null) {
           return const SizedBox.shrink();
         }
 
-        final settings = snapshot.data!;
+        final rules = snapshot.data!;
         final now = DateTime.now();
 
         // Check all conditions
-        if (!settings.isEnabled) return const SizedBox.shrink();
-        if (!settings.isWithinValidityPeriod(now)) return const SizedBox.shrink();
-        if (!settings.isActiveOnDay(now.weekday)) return const SizedBox.shrink();
-        if (!settings.isActiveAtHour(now.hour)) return const SizedBox.shrink();
+        if (!rules.isEnabled) return const SizedBox.shrink();
+        
+        // Check time slot restrictions
+        final currentHour = now.hour;
+        final isWithinHours = _isWithinAllowedHours(currentHour, rules);
+        if (!isWithinHours) return const SizedBox.shrink();
 
         // All conditions met - show the banner
         return Padding(
@@ -618,6 +619,19 @@ class HomeScreen extends ConsumerWidget {
         );
       },
     );
+  }
+
+  /// Check if current hour is within allowed hours
+  bool _isWithinAllowedHours(int currentHour, RouletteRules rules) {
+    if (rules.allowedStartHour <= rules.allowedEndHour) {
+      // Normal case: 11h - 22h
+      return currentHour >= rules.allowedStartHour && 
+             currentHour <= rules.allowedEndHour;
+    } else {
+      // Crosses midnight: 22h - 2h
+      return currentHour >= rules.allowedStartHour || 
+             currentHour <= rules.allowedEndHour;
+    }
   }
 }
 
