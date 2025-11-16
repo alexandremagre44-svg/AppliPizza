@@ -277,6 +277,10 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         return 'Un ticket pour un produit gratuit a été ajouté à vos récompenses !';
       case RewardType.freeDrink:
         return 'Un ticket pour une boisson gratuite a été ajouté à vos récompenses !';
+      case RewardType.freePizza:
+        return 'Un ticket pour une pizza gratuite a été ajouté à vos récompenses !';
+      case RewardType.freeDessert:
+        return 'Un ticket pour un dessert gratuit a été ajouté à vos récompenses !';
       case RewardType.none:
         return '';
     }
