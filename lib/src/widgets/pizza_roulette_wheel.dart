@@ -168,6 +168,8 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
 
   /// Calculates the target angle to position the winning segment at the top
   double _calculateTargetAngle(RouletteSegment winningSegment) {
+    const double correctionOffset = math.pi / 6; // 30°
+    
     final segments = widget.segments;
     final segmentIndex = segments.indexOf(winningSegment);
 
@@ -202,7 +204,7 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     // Debug logging
     print('[ANGLE DEBUG] index:$segmentIndex, angleStart:${startAngle.toStringAsFixed(4)}, angleCenter:${centerAngle.toStringAsFixed(4)}, cursorAngle:${cursorAngle.toStringAsFixed(4)}, targetAngle:${targetAngle.toStringAsFixed(4)}');
 
-    return targetAngle;
+    return (targetAngle + correctionOffset) % (2 * math.pi);
   }
 
   void _onSpinComplete() {
