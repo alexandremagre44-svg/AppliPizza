@@ -288,7 +288,7 @@ class RouletteSegmentService {
       RouletteSegment(
         id: 'seg_6',
         label: 'Raté !',
-        rewardId: null, // null for nothing type
+        rewardId: '', // empty string for nothing type
         probability: 20.0,
         color: const Color(0xFF95A5A6), // Gray
         description: 'Dommage, réessayez demain',
