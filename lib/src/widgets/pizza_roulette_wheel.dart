@@ -297,6 +297,15 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
 class _WheelPainter extends CustomPainter {
   final List<RouletteSegment> segments;
 
+  // Visual offset to align the wheel correctly with the needle
+  // This constant adjusts the initial drawing position of segments
+  // 
+  // TEST VALUES (uncomment the one that aligns segment 0 under the needle):
+  // static const double _visualOffset = math.pi / 6;      // +π/6 ≈ +30°
+  static const double _visualOffset = -math.pi / 6;     // -π/6 ≈ -30°
+  // static const double _visualOffset = math.pi / 3;      // +π/3 ≈ +60°
+  // static const double _visualOffset = -math.pi / 3;     // -π/3 ≈ -60°
+
   _WheelPainter({required this.segments});
 
   @override
@@ -332,7 +341,7 @@ class _WheelPainter extends CustomPainter {
     // Draw each segment
     for (int i = 0; i < segments.length; i++) {
       final segment = segments[i];
-      final startAngle = (i * anglePerSegment - math.pi / 2) + anglePerSegment; // Start from top
+      final startAngle = i * anglePerSegment - math.pi / 2 + _visualOffset;
       
       _drawSegment(
         canvas,
