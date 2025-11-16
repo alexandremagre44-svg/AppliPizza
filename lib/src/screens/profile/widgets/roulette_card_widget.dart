@@ -2,11 +2,23 @@
 // Roulette card for profile screen (Material 3)
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../../design_system/app_theme.dart';
 import '../../../core/constants.dart';
 import '../../../models/app_texts_config.dart';
+import '../../../models/roulette_config.dart';
 import '../../../services/roulette_rules_service.dart';
+import '../../../services/roulette_segment_service.dart';
+import '../../../screens/roulette/roulette_screen.dart';
+
+/// State of the roulette widget
+enum RouletteWidgetState {
+  loading,
+  disabled,
+  unavailable,
+  cooldown,
+  timeRestricted,
+  ready,
+}
 
 /// Dedicated card for roulette access
 /// Shows icon, configurable title/description, and CTA button
@@ -26,37 +38,174 @@ class RouletteCardWidget extends StatefulWidget {
 
 class _RouletteCardWidgetState extends State<RouletteCardWidget> {
   final RouletteRulesService _rulesService = RouletteRulesService();
-  RouletteStatus? _status;
-  bool _isLoading = true;
+  final RouletteSegmentService _segmentService = RouletteSegmentService();
+  
+  RouletteWidgetState _state = RouletteWidgetState.loading;
+  String _statusMessage = '';
+  DateTime? _nextEligibleAt;
+  RouletteRules? _rules;
+  List<RouletteSegment> _segments = [];
 
   @override
   void initState() {
     super.initState();
+    _checkRouletteAvailability();
+  }
+
+  Future<void> _checkRouletteAvailability() async {
+    setState(() {
+      _state = RouletteWidgetState.loading;
+    });
+
+    try {
+      // 1. Load segments first
+      final segments = await _segmentService.getActiveSegments();
+      
+      // 2. Load rules
+      final rules = await _rulesService.getRules();
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _segments = segments;
+        _rules = rules;
+      });
+      
+      // 3. Determine state based on loaded data
+      _determineState();
+      
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _state = RouletteWidgetState.unavailable;
+          _statusMessage = 'Erreur lors du chargement';
+        });
+      }
+    }
+  }
+
+  void _determineState() {
+    // Check if rules exist
+    if (_rules == null) {
+      setState(() {
+        _state = RouletteWidgetState.unavailable;
+        _statusMessage = 'La roulette n\'est pas configurée';
+      });
+      return;
+    }
+    
+    // Check if roulette is enabled
+    if (!_rules!.isEnabled) {
+      setState(() {
+        _state = RouletteWidgetState.disabled;
+        _statusMessage = 'La roulette est désactivée';
+      });
+      return;
+    }
+    
+    // Check if there are active segments
+    if (_segments.isEmpty) {
+      setState(() {
+        _state = RouletteWidgetState.unavailable;
+        _statusMessage = 'La roulette n\'est pas disponible';
+      });
+      return;
+    }
+    
+    // Check time restrictions
+    final now = DateTime.now();
+    final currentHour = now.hour;
+    
+    if (!_isWithinAllowedHours(currentHour)) {
+      setState(() {
+        _state = RouletteWidgetState.timeRestricted;
+        _statusMessage = 'Disponible de ${_rules!.allowedStartHour}h à ${_rules!.allowedEndHour}h';
+        _nextEligibleAt = _getNextAllowedTime(now);
+      });
+      return;
+    }
+    
+    // Check cooldown via eligibility
     _checkEligibility();
   }
 
   Future<void> _checkEligibility() async {
     try {
       final status = await _rulesService.checkEligibility(widget.userId);
-      if (mounted) {
+      
+      if (!mounted) return;
+      
+      if (status.canSpin) {
         setState(() {
-          _status = status;
-          _isLoading = false;
+          _state = RouletteWidgetState.ready;
+          _statusMessage = widget.texts.playDescription;
+        });
+      } else {
+        setState(() {
+          _state = RouletteWidgetState.cooldown;
+          _statusMessage = status.reason ?? 'Revenez demain !';
+          _nextEligibleAt = status.nextEligibleAt;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          _state = RouletteWidgetState.unavailable;
+          _statusMessage = 'Erreur lors de la vérification';
         });
+      }
+    }
+  }
+
+  bool _isWithinAllowedHours(int currentHour) {
+    if (_rules == null) return false;
+    
+    if (_rules!.allowedStartHour <= _rules!.allowedEndHour) {
+      // Normal case: 9h - 22h
+      return currentHour >= _rules!.allowedStartHour && 
+             currentHour <= _rules!.allowedEndHour;
+    } else {
+      // Crosses midnight: 22h - 2h
+      return currentHour >= _rules!.allowedStartHour || 
+             currentHour <= _rules!.allowedEndHour;
+    }
+  }
+
+  DateTime _getNextAllowedTime(DateTime now) {
+    if (_rules == null) return now;
+    
+    final currentHour = now.hour;
+    
+    if (_rules!.allowedStartHour <= _rules!.allowedEndHour) {
+      // Normal case
+      if (currentHour < _rules!.allowedStartHour) {
+        // Same day
+        return DateTime(now.year, now.month, now.day, _rules!.allowedStartHour);
+      } else {
+        // Next day
+        final tomorrow = now.add(const Duration(days: 1));
+        return DateTime(tomorrow.year, tomorrow.month, tomorrow.day, _rules!.allowedStartHour);
+      }
+    } else {
+      // Crosses midnight
+      if (currentHour <= _rules!.allowedEndHour) {
+        // We're in the early morning allowed period, next is tonight
+        return DateTime(now.year, now.month, now.day, _rules!.allowedStartHour);
+      } else if (currentHour < _rules!.allowedStartHour) {
+        // We're in the forbidden middle period, next is tonight
+        return DateTime(now.year, now.month, now.day, _rules!.allowedStartHour);
+      } else {
+        // We're in the late night allowed period, next is early morning
+        final tomorrow = now.add(const Duration(days: 1));
+        return DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 0);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final canSpin = _status?.canSpin ?? false;
-    final isLoading = _isLoading;
+    final isLoading = _state == RouletteWidgetState.loading;
+    final isReady = _state == RouletteWidgetState.ready;
     
     return Card(
       elevation: 0,
@@ -68,9 +217,14 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
         ),
       ),
       child: InkWell(
-        onTap: canSpin && !isLoading
+        onTap: isReady
             ? () {
-                context.push(AppRoutes.roulette);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RouletteScreen(userId: widget.userId),
+                  ),
+                );
               }
             : null,
         borderRadius: AppRadius.card,
@@ -84,7 +238,7 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
                 height: 80,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: canSpin && !isLoading
+                    colors: isReady
                         ? [
                             Colors.amber,
                             Colors.amber.shade700,
@@ -97,7 +251,7 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
                     end: Alignment.bottomRight,
                   ),
                   shape: BoxShape.circle,
-                  boxShadow: canSpin && !isLoading
+                  boxShadow: isReady
                       ? [
                           BoxShadow(
                             color: Colors.amber.withOpacity(0.3),
@@ -116,7 +270,7 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
                         ),
                       )
                     : Icon(
-                        canSpin ? Icons.casino : Icons.block,
+                        Icons.casino,
                         size: 40,
                         color: Colors.white,
                       ),
@@ -126,7 +280,7 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
               
               // Title
               Text(
-                widget.texts.playTitle,
+                'Roulette de la chance',
                 style: AppTextStyles.titleMedium.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -144,23 +298,23 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
                   ),
                   textAlign: TextAlign.center,
                 )
-              else if (!canSpin && _status?.reason != null)
+              else
                 Column(
                   children: [
                     Text(
-                      _status!.reason!,
+                      _statusMessage,
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.warning,
-                        fontWeight: FontWeight.w600,
+                        color: isReady ? AppColors.textSecondary : AppColors.warning,
+                        fontWeight: isReady ? FontWeight.normal : FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (_status!.nextEligibleAt != null) ...[
+                    if (_nextEligibleAt != null) ...[
                       SizedBox(height: AppSpacing.xs),
                       Text(
-                        _formatNextEligibleTime(_status!.nextEligibleAt!),
+                        _formatNextEligibleTime(_nextEligibleAt!),
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -168,16 +322,6 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
                       ),
                     ],
                   ],
-                )
-              else
-                Text(
-                  widget.texts.playDescription,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               
               SizedBox(height: AppSpacing.lg),
@@ -186,21 +330,26 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: canSpin && !isLoading
+                  onPressed: isReady && !isLoading
                       ? () {
-                          context.push(AppRoutes.roulette);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => RouletteScreen(userId: widget.userId),
+                            ),
+                          );
                         }
                       : null,
                   icon: Icon(
-                    canSpin ? Icons.casino : Icons.block,
+                    isReady ? Icons.casino : Icons.block,
                     size: 20,
                   ),
                   label: Text(
-                    canSpin ? widget.texts.playButton : 'Non disponible',
+                    isReady ? 'Tourner la roue' : 'Non disponible',
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: canSpin ? Colors.amber : AppColors.neutral300,
-                    foregroundColor: canSpin ? Colors.black87 : AppColors.neutral600,
+                    backgroundColor: isReady ? Colors.amber : AppColors.neutral300,
+                    foregroundColor: isReady ? Colors.black87 : AppColors.neutral600,
                     disabledBackgroundColor: AppColors.neutral300,
                     disabledForegroundColor: AppColors.neutral600,
                     padding: EdgeInsets.symmetric(
