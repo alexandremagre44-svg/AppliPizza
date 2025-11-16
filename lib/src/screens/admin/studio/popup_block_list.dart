@@ -4,9 +4,8 @@
 
 import 'package:flutter/material.dart';
 import '../../../models/popup_config.dart';
-import '../../../models/roulette_config.dart';
 import '../../../services/popup_service.dart';
-import '../../../services/roulette_service.dart';
+import '../../../services/roulette_rules_service.dart';
 import '../../../design_system/app_theme.dart';
 import 'popup_block_editor.dart';
 
@@ -21,10 +20,10 @@ class PopupBlockList extends StatefulWidget {
 
 class _PopupBlockListState extends State<PopupBlockList> {
   final PopupService _popupService = PopupService();
-  final RouletteService _rouletteService = RouletteService();
+  final RouletteRulesService _rouletteRulesService = RouletteRulesService();
 
   List<PopupConfig> _popups = [];
-  RouletteConfig? _rouletteConfig;
+  RouletteRules? _rouletteRules;
   bool _isLoading = true;
 
   @override
@@ -33,25 +32,26 @@ class _PopupBlockListState extends State<PopupBlockList> {
     _loadData();
   }
 
-  /// Charge les popups et la configuration de la roulette
+  /// Charge les popups et les règles de la roulette
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
 
     try {
       final popups = await _popupService.getAllPopups();
-      final roulette = await _rouletteService.getRouletteConfig();
+      final rules = await _rouletteRulesService.getRules();
 
-      if (roulette == null) {
-        await _rouletteService.initializeDefaultConfig();
-        final newRoulette = await _rouletteService.getRouletteConfig();
+      // Si aucune règle n'existe, créer les règles par défaut
+      if (rules == null) {
+        const defaultRules = RouletteRules();
+        await _rouletteRulesService.saveRules(defaultRules);
         setState(() {
           _popups = popups;
-          _rouletteConfig = newRoulette;
+          _rouletteRules = defaultRules;
         });
       } else {
         setState(() {
           _popups = popups;
-          _rouletteConfig = roulette;
+          _rouletteRules = rules;
         });
       }
     } catch (e) {
@@ -150,7 +150,7 @@ class _PopupBlockListState extends State<PopupBlockList> {
 
   /// Section de la roulette
   Widget _buildRouletteSection() {
-    final roulette = _rouletteConfig;
+    final rules = _rouletteRules;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -165,9 +165,9 @@ class _PopupBlockListState extends State<PopupBlockList> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            if (roulette != null)
+            if (rules != null)
               FilledButton.icon(
-                onPressed: () => _editRoulette(roulette),
+                onPressed: () => _editRoulette(rules),
                 icon: const Icon(Icons.edit, size: 20),
                 label: const Text('Modifier'),
                 style: FilledButton.styleFrom(
@@ -184,7 +184,7 @@ class _PopupBlockListState extends State<PopupBlockList> {
         SizedBox(height: AppSpacing.md),
 
         // Card de la roulette
-        if (roulette != null) _buildRouletteCard(roulette),
+        if (rules != null) _buildRouletteCard(rules),
       ],
     );
   }
@@ -315,14 +315,14 @@ class _PopupBlockListState extends State<PopupBlockList> {
   }
 
   /// Card de la roulette
-  Widget _buildRouletteCard(RouletteConfig roulette) {
+  Widget _buildRouletteCard(RouletteRules rules) {
     return Card(
       elevation: 0,
       color: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
         side: BorderSide(
-          color: roulette.isActive
+          color: rules.isEnabled
               ? AppColors.primary.withOpacity(0.2)
               : AppColors.outline,
           width: 1,
@@ -339,14 +339,14 @@ class _PopupBlockListState extends State<PopupBlockList> {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: roulette.isActive
+                    color: rules.isEnabled
                         ? AppColors.primaryContainer
                         : AppColors.surfaceContainer,
                     borderRadius: AppRadius.radiusSmall,
                   ),
                   child: Icon(
                     Icons.casino,
-                    color: roulette.isActive
+                    color: rules.isEnabled
                         ? AppColors.primary
                         : AppColors.onSurfaceVariant,
                     size: 24,
@@ -363,8 +363,8 @@ class _PopupBlockListState extends State<PopupBlockList> {
                   ),
                 ),
                 Switch(
-                  value: roulette.isActive,
-                  onChanged: (value) => _toggleRouletteVisibility(roulette, value),
+                  value: rules.isEnabled,
+                  onChanged: (value) => _toggleRouletteVisibility(rules, value),
                   activeColor: AppColors.primary,
                 ),
               ],
@@ -372,15 +372,15 @@ class _PopupBlockListState extends State<PopupBlockList> {
             SizedBox(height: AppSpacing.md),
 
             // Informations
-            _buildInfoRow('Segments', '${roulette.segments.length}'),
-            _buildInfoRow('Délai d\'affichage', '${roulette.delaySeconds}s'),
-            _buildInfoRow('Max utilisations/jour', '${roulette.maxUsesPerDay}'),
+            _buildInfoRow('Délai entre tirages', '${rules.cooldownHours}h'),
+            _buildInfoRow('Max utilisations/jour', '${rules.maxPlaysPerDay}'),
+            _buildInfoRow('Horaires autorisés', '${rules.allowedStartHour}h-${rules.allowedEndHour}h'),
             SizedBox(height: AppSpacing.sm),
 
             // Statut
             _buildChip(
-              label: roulette.isActive ? 'Active' : 'Inactive',
-              color: roulette.isActive
+              label: rules.isEnabled ? 'Active' : 'Inactive',
+              color: rules.isEnabled
                   ? AppColors.successContainer
                   : AppColors.surfaceContainer,
             ),
@@ -526,13 +526,13 @@ class _PopupBlockListState extends State<PopupBlockList> {
   }
 
   /// Éditer la roulette
-  Future<void> _editRoulette(RouletteConfig config) async {
+  Future<void> _editRoulette(RouletteRules rules) async {
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => PopupBlockEditor(
           isRouletteMode: true,
-          existingRoulette: config,
+          existingRouletteRules: rules,
         ),
       ),
     );
@@ -559,22 +559,19 @@ class _PopupBlockListState extends State<PopupBlockList> {
 
   /// Basculer la visibilité de la roulette
   Future<void> _toggleRouletteVisibility(
-    RouletteConfig roulette,
-    bool isActive,
+    RouletteRules rules,
+    bool isEnabled,
   ) async {
-    final updated = roulette.copyWith(
-      isActive: isActive,
-      updatedAt: DateTime.now(),
-    );
-    final success = await _rouletteService.saveRouletteConfig(updated);
-
-    if (success) {
+    try {
+      final updated = rules.copyWith(isEnabled: isEnabled);
+      await _rouletteRulesService.saveRules(updated);
+      
       _loadData();
       _showSnackBar(
-        'Roulette ${isActive ? 'activée' : 'désactivée'}',
+        'Roulette ${isEnabled ? 'activée' : 'désactivée'}',
       );
-    } else {
-      _showSnackBar('Erreur lors de la mise à jour', isError: true);
+    } catch (e) {
+      _showSnackBar('Erreur lors de la mise à jour: $e', isError: true);
     }
   }
 

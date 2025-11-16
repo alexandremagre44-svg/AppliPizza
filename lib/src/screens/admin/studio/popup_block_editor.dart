@@ -6,22 +6,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/popup_config.dart';
-import '../../../models/roulette_config.dart';
 import '../../../services/popup_service.dart';
-import '../../../services/roulette_service.dart';
+import '../../../services/roulette_rules_service.dart';
 import '../../../design_system/app_theme.dart';
 
 /// Éditeur de popup et roulette avec aperçu en temps réel
 /// Conforme Material 3 et Brand Guidelines Pizza Deli'Zza
 class PopupBlockEditor extends StatefulWidget {
   final PopupConfig? existingPopup;
-  final RouletteConfig? existingRoulette;
+  final RouletteRules? existingRouletteRules;
   final bool isRouletteMode;
 
   const PopupBlockEditor({
     super.key,
     this.existingPopup,
-    this.existingRoulette,
+    this.existingRouletteRules,
     this.isRouletteMode = false,
   });
 
@@ -32,7 +31,7 @@ class PopupBlockEditor extends StatefulWidget {
 class _PopupBlockEditorState extends State<PopupBlockEditor> {
   final _formKey = GlobalKey<FormState>();
   final PopupService _popupService = PopupService();
-  final RouletteService _rouletteService = RouletteService();
+  final RouletteRulesService _rouletteRulesService = RouletteRulesService();
 
   // Controllers
   late TextEditingController _titleController;
@@ -54,19 +53,19 @@ class _PopupBlockEditorState extends State<PopupBlockEditor> {
   }
 
   void _initializeControllers() {
-    if (widget.isRouletteMode && widget.existingRoulette != null) {
+    if (widget.isRouletteMode && widget.existingRouletteRules != null) {
       // Mode roulette
-      final roulette = widget.existingRoulette!;
+      final rules = widget.existingRouletteRules!;
       _titleController = TextEditingController(text: 'Roulette de la chance');
       _descriptionController = TextEditingController(
-        text: 'Configuration de la roulette avec ${roulette.segments.length} segments',
+        text: 'Configuration des règles de la roulette',
       );
       _imageController = TextEditingController();
-      _ctaTextController = TextEditingController(text: 'Tourner la roue');
+      _ctaTextController = TextEditingController(text: 'Voir les paramètres');
       _ctaActionController = TextEditingController();
-      _probabilityController = TextEditingController(text: '100');
+      _probabilityController = TextEditingController(text: '0');
       _selectedType = 'roulette';
-      _isVisible = roulette.isActive;
+      _isVisible = rules.isEnabled;
     } else if (widget.existingPopup != null) {
       // Mode édition popup
       final popup = widget.existingPopup!;
@@ -104,7 +103,7 @@ class _PopupBlockEditorState extends State<PopupBlockEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.existingPopup != null || widget.existingRoulette != null;
+    final isEditing = widget.existingPopup != null || widget.existingRouletteRules != null;
     final screenTitle = isEditing
         ? (_selectedType == 'roulette' ? 'Modifier la roulette' : 'Modifier la popup')
         : 'Créer une popup';
@@ -678,21 +677,14 @@ class _PopupBlockEditorState extends State<PopupBlockEditor> {
 
   /// Sauvegarder la configuration de roulette
   Future<void> _saveRoulette() async {
-    final roulette = widget.existingRoulette?.copyWith(
-          isActive: _isVisible,
-          updatedAt: DateTime.now(),
+    final rules = widget.existingRouletteRules?.copyWith(
+          isEnabled: _isVisible,
         ) ??
-        RouletteConfig(
-          id: 'main',
-          isActive: _isVisible,
-          updatedAt: DateTime.now(),
+        RouletteRules(
+          isEnabled: _isVisible,
         );
 
-    final success = await _rouletteService.saveRouletteConfig(roulette);
-
-    if (!success) {
-      throw Exception('Échec de la sauvegarde de la roulette');
-    }
+    await _rouletteRulesService.saveRules(rules);
   }
 
   /// Supprimer la popup
