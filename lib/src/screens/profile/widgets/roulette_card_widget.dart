@@ -98,7 +98,7 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
     if (!_rules!.isEnabled) {
       setState(() {
         _state = RouletteWidgetState.disabled;
-        _statusMessage = 'La roulette est désactivée';
+        _statusMessage = _rules!.messageDisabled;
       });
       return;
     }
@@ -107,7 +107,7 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
     if (_segments.isEmpty) {
       setState(() {
         _state = RouletteWidgetState.unavailable;
-        _statusMessage = 'La roulette n\'est pas disponible';
+        _statusMessage = _rules!.messageUnavailable;
       });
       return;
     }
