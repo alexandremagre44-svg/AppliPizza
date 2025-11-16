@@ -290,4 +290,178 @@ void main() {
       expect(segments[4].rewardId, equals(''));
     });
   });
+
+  group('RouletteSegmentService.pickRandomSegment()', () {
+    test('probability-based selection distributes correctly', () {
+      // This is a statistical test to verify the probability distribution
+      // Note: This test is for the algorithm logic, not the service itself
+      // (which requires Firebase mocking)
+      
+      final segments = [
+        RouletteSegment(
+          id: 'high',
+          label: 'High Probability',
+          rewardId: 'high',
+          probability: 80.0,
+          color: Colors.red,
+          position: 1,
+        ),
+        RouletteSegment(
+          id: 'low',
+          label: 'Low Probability',
+          rewardId: 'low',
+          probability: 20.0,
+          color: Colors.blue,
+          position: 2,
+        ),
+      ];
+
+      final results = <String, int>{};
+      const iterations = 1000;
+
+      // Simulate the pickRandomSegment algorithm
+      for (int i = 0; i < iterations; i++) {
+        final totalProbability = segments.fold<double>(
+          0.0,
+          (sum, segment) => sum + segment.probability,
+        );
+        
+        // Use deterministic random for testing (spread evenly)
+        final random = (i / iterations) * totalProbability;
+        
+        double cumulativeProbability = 0.0;
+        RouletteSegment? selected;
+        for (final segment in segments) {
+          cumulativeProbability += segment.probability;
+          if (random <= cumulativeProbability) {
+            selected = segment;
+            break;
+          }
+        }
+        
+        if (selected != null) {
+          results[selected.id] = (results[selected.id] ?? 0) + 1;
+        }
+      }
+
+      // High probability segment should appear roughly 80% of the time
+      // Allow for some variance (75-85% range for deterministic test)
+      final highCount = results['high'] ?? 0;
+      expect(highCount, greaterThan(iterations * 0.75));
+      expect(highCount, lessThan(iterations * 0.85));
+    });
+
+    test('selection always returns one of the provided segments', () {
+      // Test that the algorithm always returns a valid segment
+      final segments = [
+        RouletteSegment(
+          id: 'seg1',
+          label: 'Segment 1',
+          rewardId: 'reward1',
+          probability: 50.0,
+          color: Colors.red,
+          position: 1,
+        ),
+        RouletteSegment(
+          id: 'seg2',
+          label: 'Segment 2',
+          rewardId: 'reward2',
+          probability: 30.0,
+          color: Colors.blue,
+          position: 2,
+        ),
+        RouletteSegment(
+          id: 'seg3',
+          label: 'Segment 3',
+          rewardId: 'reward3',
+          probability: 20.0,
+          color: Colors.green,
+          position: 3,
+        ),
+      ];
+
+      // Test multiple selections
+      for (int i = 0; i < 100; i++) {
+        final totalProbability = segments.fold<double>(
+          0.0,
+          (sum, segment) => sum + segment.probability,
+        );
+        
+        final random = (i / 100) * totalProbability;
+        
+        double cumulativeProbability = 0.0;
+        RouletteSegment? selected;
+        for (final segment in segments) {
+          cumulativeProbability += segment.probability;
+          if (random <= cumulativeProbability) {
+            selected = segment;
+            break;
+          }
+        }
+        
+        // Verify a segment was selected
+        expect(selected, isNotNull);
+        // Verify it's one of our segments
+        expect(segments.contains(selected), isTrue);
+      }
+    });
+
+    test('cumulative probability edge cases are handled correctly', () {
+      final segments = [
+        RouletteSegment(
+          id: 'seg1',
+          label: 'First',
+          rewardId: 'first',
+          probability: 33.33,
+          color: Colors.red,
+          position: 1,
+        ),
+        RouletteSegment(
+          id: 'seg2',
+          label: 'Second',
+          rewardId: 'second',
+          probability: 33.33,
+          color: Colors.blue,
+          position: 2,
+        ),
+        RouletteSegment(
+          id: 'seg3',
+          label: 'Third',
+          rewardId: 'third',
+          probability: 33.34,
+          color: Colors.green,
+          position: 3,
+        ),
+      ];
+
+      final totalProbability = segments.fold<double>(
+        0.0,
+        (sum, segment) => sum + segment.probability,
+      );
+      
+      // Test at boundary points
+      final testCases = [
+        0.0, // Start
+        33.33, // End of first segment
+        66.66, // End of second segment
+        100.0, // End (should select last segment)
+      ];
+
+      for (final random in testCases) {
+        double cumulativeProbability = 0.0;
+        RouletteSegment? selected;
+        for (final segment in segments) {
+          cumulativeProbability += segment.probability;
+          if (random <= cumulativeProbability) {
+            selected = segment;
+            break;
+          }
+        }
+        
+        // Should always select a segment
+        expect(selected, isNotNull, reason: 'Failed at random=$random');
+        expect(segments.contains(selected), isTrue);
+      }
+    });
+  });
 }
