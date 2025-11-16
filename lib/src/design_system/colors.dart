@@ -79,6 +79,9 @@ class AppColors {
   /// Surface Container High #E6E6E6
   static const Color surfaceContainerHigh = Color(0xFFE6E6E6);
   
+  /// Surface Container Highest #DEDEDE
+  static const Color surfaceContainerHighest = Color(0xFFDEDEDE);
+  
   /// Texte sur surface #323232
   static const Color onSurface = Color(0xFF323232);
   
