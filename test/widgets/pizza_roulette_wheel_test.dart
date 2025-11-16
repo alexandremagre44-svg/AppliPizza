@@ -350,7 +350,7 @@ void main() {
 
     test('angle calculation correctly aligns segment center with cursor', () {
       // This test verifies the mathematical correctness of the angle calculation
-      // using the formula from the fixed implementation with visualOffset
+      // using the formula from the fixed implementation with visualOffset applied AFTER normalization
       
       const numSegments = 6;
       const anglePerSegment = 2 * 3.14159265359 / numSegments; // 2π/6 ≈ 1.047
@@ -360,8 +360,8 @@ void main() {
       // Test each segment
       for (int segmentIndex = 0; segmentIndex < numSegments; segmentIndex++) {
         // Calculate angles as per the NEW implementation
-        // Painter draws at: index * anglePerSegment - π/2 + visualOffset
-        final startAngle = segmentIndex * anglePerSegment - 3.14159265359 / 2 + visualOffset;
+        // Start angle WITHOUT visualOffset
+        final startAngle = segmentIndex * anglePerSegment - 3.14159265359 / 2;
         final centerAngle = startAngle + anglePerSegment / 2;
         
         // Calculate target rotation
@@ -373,9 +373,14 @@ void main() {
           targetAngle += 2 * 3.14159265359;
         }
         
-        // After rotation, the segment center should align with the cursor
-        // Final position = (centerAngle + targetAngle) mod 2π
-        double finalPosition = (centerAngle + targetAngle) % (2 * 3.14159265359);
+        // Apply visualOffset AFTER normalization
+        targetAngle = (targetAngle + visualOffset) % (2 * 3.14159265359);
+        
+        // After rotation, the segment center (including painter's visualOffset) should align with the cursor
+        // Painter draws segment at: startAngle + visualOffset
+        final painterStartAngle = segmentIndex * anglePerSegment - 3.14159265359 / 2 + visualOffset;
+        final painterCenterAngle = painterStartAngle + anglePerSegment / 2;
+        double finalPosition = (painterCenterAngle + targetAngle) % (2 * 3.14159265359);
         
         // Normalize cursorAngle to [0, 2π) for comparison
         double normalizedCursor = cursorAngle % (2 * 3.14159265359);

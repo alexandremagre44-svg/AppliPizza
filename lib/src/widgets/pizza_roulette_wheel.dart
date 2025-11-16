@@ -210,10 +210,11 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
   /// where visualOffset = -π/6
   /// 
   /// Algorithm:
-  /// 1. Calculate the segment's start angle (same as painter)
+  /// 1. Calculate the segment's start angle (without visualOffset)
   /// 2. Find the center of the segment
   /// 3. Calculate rotation needed to align center with cursor at -π/2
   /// 4. Normalize to [0, 2π)
+  /// 5. Apply visualOffset to compensate for painter's visual offset
   double _calculateTargetAngleFromIndex(int index) {
     final segments = widget.segments;
 
@@ -223,13 +224,9 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     }
 
     final anglePerSegment = 2 * math.pi / segments.length;
-    
-    // CRITICAL: Use the SAME visualOffset as _WheelPainter
-    const double visualOffset = -math.pi / 6; // Must match _WheelPainter._visualOffset
 
-    // Calculate start angle exactly as painter does
-    // startAngle = index * anglePerSegment - π/2 + visualOffset
-    final startAngle = index * anglePerSegment - math.pi / 2 + visualOffset;
+    // Calculate start angle WITHOUT visualOffset first
+    final startAngle = index * anglePerSegment - math.pi / 2;
     
     // Calculate center of the segment
     final centerAngle = startAngle + anglePerSegment / 2;
@@ -246,6 +243,10 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     if (targetAngle < 0) {
       targetAngle += 2 * math.pi;
     }
+
+    // Apply the same visualOffset used by _WheelPainter
+    const visualOffset = -math.pi / 6;
+    targetAngle = (targetAngle + visualOffset) % (2 * math.pi);
 
     // Debug logging
     print('[ANGLE DEBUG] index:$index, visualOffset:$visualOffset, startAngle:${startAngle.toStringAsFixed(4)}, centerAngle:${centerAngle.toStringAsFixed(4)}, cursorAngle:$cursorAngle, targetAngle:${targetAngle.toStringAsFixed(4)}');
