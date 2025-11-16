@@ -1,6 +1,7 @@
 // lib/src/services/roulette_segment_service.dart
 // Service for managing individual roulette segments in Firestore
 
+import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../models/roulette_config.dart';
@@ -464,5 +465,47 @@ class RouletteSegmentService {
   /// @deprecated Use ensureDefaultsIfNeeded() instead
   Future<bool> initializeDefaultSegments() async {
     return await ensureDefaultsIfNeeded();
+  }
+
+  /// Pick a random segment based on probability distribution
+  /// 
+  /// This is the single source of truth for segment selection.
+  /// The visual wheel must display exactly what this method returns.
+  /// 
+  /// Algorithm:
+  /// 1. Calculate total probability of all active segments
+  /// 2. Generate random number between 0 and total probability
+  /// 3. Find segment where cumulative probability >= random number
+  /// 
+  /// Returns the winning RouletteSegment
+  Future<RouletteSegment> pickRandomSegment() async {
+    final segments = await getActiveSegments();
+    
+    if (segments.isEmpty) {
+      throw Exception('No active segments available for selection');
+    }
+    
+    // Calculate total probability
+    final totalProbability = segments.fold<double>(
+      0.0,
+      (sum, segment) => sum + segment.probability,
+    );
+    
+    // Generate random number between 0 and total probability
+    final random = math.Random().nextDouble() * totalProbability;
+    
+    // Find the segment that matches the random value
+    double cumulativeProbability = 0.0;
+    for (final segment in segments) {
+      cumulativeProbability += segment.probability;
+      if (random <= cumulativeProbability) {
+        print('🎲 [SERVICE] Selected segment: ${segment.label} (index: ${segments.indexOf(segment)}, random: ${random.toStringAsFixed(2)}/$totalProbability)');
+        return segment;
+      }
+    }
+    
+    // Fallback to last segment (should not happen with valid probabilities)
+    print('⚠️ [SERVICE] Fallback to last segment');
+    return segments.last;
   }
 }

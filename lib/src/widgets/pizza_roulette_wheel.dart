@@ -9,22 +9,28 @@ import '../models/roulette_config.dart';
 /// 
 /// This widget draws a wheel divided into segments (triangular sections) based
 /// on the provided configuration. Each segment has its own color, label, and
-/// optional icon. The wheel can be spun with smooth animations and uses
-/// probability-based selection to determine the winning segment.
+/// optional icon. The wheel animates smoothly to display the pre-determined
+/// winning segment.
+/// 
+/// IMPORTANT: This widget does NOT select the winning segment.
+/// The parent MUST call the service to get the result and pass it to spinWithResult().
 /// 
 /// Usage:
 /// ```dart
 /// final GlobalKey<PizzaRouletteWheelState> wheelKey = GlobalKey();
+/// final RouletteSegmentService segmentService = RouletteSegmentService();
 /// 
 /// PizzaRouletteWheel(
+///   key: wheelKey,
 ///   segments: segments,
 ///   onResult: (segment) {
 ///     print('Winner: ${segment.label}');
 ///   },
 /// )
 /// 
-/// // To spin the wheel:
-/// wheelKey.currentState?.spin();
+/// // To spin the wheel (NEW ARCHITECTURE):
+/// final result = await segmentService.pickRandomSegment();
+/// wheelKey.currentState?.spinWithResult(result);
 /// ```
 class PizzaRouletteWheel extends StatefulWidget {
   /// List of active segments in display order
@@ -93,33 +99,38 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     super.dispose();
   }
 
-  /// Public method to trigger the wheel spin
-  /// This can be called from outside using a GlobalKey
-  void spin() {
+  /// Public method to trigger the wheel spin with a pre-determined result
+  /// This is the NEW single entry point - the widget NO LONGER selects the result
+  /// 
+  /// The parent (roulette_screen) must:
+  /// 1. Call the service to get the winning segment
+  /// 2. Pass it to this method
+  /// 
+  /// Example usage:
+  /// ```dart
+  /// final result = await rouletteSegmentService.pickRandomSegment();
+  /// wheelKey.currentState?.spinWithResult(result);
+  /// ```
+  void spinWithResult(RouletteSegment targetSegment) {
     if (_isSpinning || widget.segments.isEmpty) {
       return;
     }
     
     setState(() {
       _isSpinning = true;
+      _selectedSegment = targetSegment;
     });
     
-    // LOG: Verify segment order before selection
-    print('[ROULETTE ORDER] Spinning with segments: ${widget.segments.map((s) => s.label).toList()}');
-    
-    // Select winning segment based on probabilities
-    _selectedSegment = _selectWinningSegment();
-    
-    // DEBUG LOG: Winning segment selection
-    print('🎯 [ROULETTE] Selected winning segment:');
-    print('  - Index: ${widget.segments.indexOf(_selectedSegment!)}');
-    print('  - ID: ${_selectedSegment!.id}');
-    print('  - Label: ${_selectedSegment!.label}');
-    print('  - RewardType: ${_selectedSegment!.rewardType}');
-    print('  - RewardValue: ${_selectedSegment!.rewardValue}');
+    // DEBUG LOG: Winning segment received from parent
+    print('🎯 [WIDGET] Spinning to target segment:');
+    print('  - Index: ${widget.segments.indexOf(targetSegment)}');
+    print('  - ID: ${targetSegment.id}');
+    print('  - Label: ${targetSegment.label}');
+    print('  - RewardType: ${targetSegment.rewardType}');
+    print('  - RewardValue: ${targetSegment.rewardValue}');
     
     // Calculate target rotation angle for the winning segment
-    final targetAngle = _calculateTargetAngle(_selectedSegment!);
+    final targetAngle = _calculateTargetAngle(targetSegment);
     
     print('  - Target angle: ${targetAngle.toStringAsFixed(4)} rad (${(targetAngle * 180 / math.pi).toStringAsFixed(2)}°)');
     
@@ -140,71 +151,71 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     _controller.forward(from: 0);
   }
 
-  /// Selects a winning segment based on probability distribution
-  RouletteSegment _selectWinningSegment() {
-    final segments = widget.segments;
-    
-    // Calculate total probability
-    final totalProbability = segments.fold<double>(
-      0.0,
-      (sum, segment) => sum + segment.probability,
+  /// DEPRECATED: Use spinWithResult() instead
+  /// This method is kept for backward compatibility but should NOT be used
+  @Deprecated('Use spinWithResult(RouletteSegment) instead')
+  void spin() {
+    // This should never be called in the new architecture
+    // If it is called, throw an error to alert the developer
+    throw UnsupportedError(
+      'spin() is deprecated. Use spinWithResult(RouletteSegment) instead.\n'
+      'The widget should NOT select the winning segment.\n'
+      'Call rouletteSegmentService.pickRandomSegment() from the parent and pass the result to spinWithResult().'
     );
-    
-    // Generate random number between 0 and total probability
-    final random = math.Random().nextDouble() * totalProbability;
-    
-    // Find the segment that matches the random value
-    double cumulativeProbability = 0.0;
-    for (final segment in segments) {
-      cumulativeProbability += segment.probability;
-      if (random <= cumulativeProbability) {
-        return segment;
-      }
-    }
-    
-    // Fallback to last segment (should not happen with valid probabilities)
-    return segments.last;
   }
 
   /// Calculates the target angle to position the winning segment at the top
+  /// 
+  /// This calculation MUST match the drawing logic in _WheelPainter to ensure
+  /// pixel-perfect alignment between the visual segment and the cursor.
+  /// 
+  /// The _WheelPainter draws segments with:
+  ///   startAngle = index * anglePerSegment - π/2 + visualOffset
+  /// where visualOffset = -π/6
+  /// 
+  /// Algorithm:
+  /// 1. Calculate the segment's start angle (same as painter)
+  /// 2. Find the center of the segment
+  /// 3. Calculate rotation needed to align center with cursor at -π/2
+  /// 4. Normalize to [0, 2π)
   double _calculateTargetAngle(RouletteSegment winningSegment) {
-    const double correctionOffset = math.pi / 6; // 30°
-    
     final segments = widget.segments;
     final segmentIndex = segments.indexOf(winningSegment);
 
     if (segmentIndex == -1) {
+      print('⚠️ [ANGLE] Segment not found in list!');
       return 0.0;
     }
 
     final anglePerSegment = 2 * math.pi / segments.length;
-
-    // The painter draws segments starting at: (i * anglePerSegment - π/2) + anglePerSegment
-    // This simplifies to: (i + 1) * anglePerSegment - π/2
-    // So the start angle for segment i is:
-    final startAngle = (segmentIndex + 1) * anglePerSegment - math.pi / 2;
     
-    // The center of the segment is at:
+    // CRITICAL: Use the SAME visualOffset as _WheelPainter
+    const double visualOffset = -math.pi / 6; // Must match _WheelPainter._visualOffset
+
+    // Calculate start angle exactly as painter does
+    // startAngle = index * anglePerSegment - π/2 + visualOffset
+    final startAngle = segmentIndex * anglePerSegment - math.pi / 2 + visualOffset;
+    
+    // Calculate center of the segment
     final centerAngle = startAngle + anglePerSegment / 2;
 
-    // The cursor is fixed at -π/2 (top)
+    // The cursor is fixed at -π/2 (top of wheel)
     const cursorAngle = -math.pi / 2;
 
     // To align the segment center with the cursor, we need to rotate by:
-    // We want: (centerAngle + targetRotation) mod 2π = cursorAngle mod 2π
-    // Therefore: targetRotation = cursorAngle - centerAngle
+    // targetRotation = cursorAngle - centerAngle
     double targetAngle = cursorAngle - centerAngle;
 
-    // Normalize to 0 → 2π
+    // Normalize to [0, 2π)
     targetAngle = targetAngle % (2 * math.pi);
     if (targetAngle < 0) {
       targetAngle += 2 * math.pi;
     }
 
     // Debug logging
-    print('[ANGLE DEBUG] index:$segmentIndex, angleStart:${startAngle.toStringAsFixed(4)}, angleCenter:${centerAngle.toStringAsFixed(4)}, cursorAngle:${cursorAngle.toStringAsFixed(4)}, targetAngle:${targetAngle.toStringAsFixed(4)}');
+    print('[ANGLE DEBUG] index:$segmentIndex, visualOffset:$visualOffset, startAngle:${startAngle.toStringAsFixed(4)}, centerAngle:${centerAngle.toStringAsFixed(4)}, cursorAngle:$cursorAngle, targetAngle:${targetAngle.toStringAsFixed(4)}');
 
-    return (targetAngle + correctionOffset) % (2 * math.pi);
+    return targetAngle;
   }
 
   void _onSpinComplete() {
