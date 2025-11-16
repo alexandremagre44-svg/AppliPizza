@@ -292,4 +292,56 @@ class LoyaltyService {
     final rewards = loyaltyInfo['rewards'] as List<LoyaltyReward>;
     return rewards.where((r) => r.type == rewardType && !r.used).toList();
   }
+
+  /// Ajouter des points bonus (depuis la roulette ou autre source)
+  Future<void> addBonusPoints(String uid, int pointsToAdd) async {
+    final userDoc = await _usersCollection.doc(uid).get();
+    if (!userDoc.exists) {
+      await initializeLoyalty(uid);
+      return addBonusPoints(uid, pointsToAdd);
+    }
+
+    final data = userDoc.data() as Map<String, dynamic>;
+    final currentLoyaltyPoints = (data['loyaltyPoints'] as num? ?? 0).toInt();
+    final currentLifetimePoints = (data['lifetimePoints'] as num? ?? 0).toInt();
+    
+    final newLoyaltyPoints = currentLoyaltyPoints + pointsToAdd;
+    final newLifetimePoints = currentLifetimePoints + pointsToAdd;
+
+    // Calculer le nombre de pizzas gratuites à donner (chaque 1000 points)
+    final freePizzasToGive = newLoyaltyPoints ~/ 1000;
+    final pointsAfterFreePizzas = newLoyaltyPoints % 1000;
+
+    // Récupérer les récompenses existantes
+    final existingRewards = (data['rewards'] as List?)
+        ?.map((r) => LoyaltyReward.fromJson(r as Map<String, dynamic>))
+        .toList() ?? [];
+
+    // Ajouter les nouvelles pizzas gratuites
+    for (int i = 0; i < freePizzasToGive; i++) {
+      existingRewards.add(LoyaltyReward(
+        type: RewardType.freePizza,
+        createdAt: DateTime.now(),
+      ));
+    }
+
+    // Calculer les spins supplémentaires (tous les 500 points de lifetime)
+    final oldSpinThreshold = currentLifetimePoints ~/ 500;
+    final newSpinThreshold = newLifetimePoints ~/ 500;
+    final spinsToAdd = newSpinThreshold - oldSpinThreshold;
+    final currentSpins = (data['availableSpins'] as num? ?? 0).toInt();
+
+    // Recalculer le niveau VIP
+    final newVipTier = VipTier.getTierFromLifetimePoints(newLifetimePoints);
+
+    // Mettre à jour Firestore
+    await _usersCollection.doc(uid).update({
+      'loyaltyPoints': pointsAfterFreePizzas,
+      'lifetimePoints': newLifetimePoints,
+      'vipTier': newVipTier,
+      'rewards': existingRewards.map((r) => r.toJson()).toList(),
+      'availableSpins': currentSpins + spinsToAdd,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
 }

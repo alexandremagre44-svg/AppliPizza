@@ -125,6 +125,7 @@ class RouletteConfig {
 /// Reward type enum for roulette segments
 enum RewardType {
   none('none'),
+  bonusPoints('bonus_points'),
   percentageDiscount('percentage_discount'),
   fixedAmountDiscount('fixed_amount_discount'),
   freeProduct('free_product'),
