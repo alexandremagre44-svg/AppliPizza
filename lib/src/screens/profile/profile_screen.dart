@@ -14,8 +14,6 @@ import '../../providers/cart_provider.dart';
 import '../../services/loyalty_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
-import '../../services/roulette_settings_service.dart';
-import '../../models/roulette_settings.dart';
 import 'widgets/loyalty_section_widget.dart';
 import 'widgets/rewards_tickets_widget.dart';
 import 'widgets/roulette_card_widget.dart';
