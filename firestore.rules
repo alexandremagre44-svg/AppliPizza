@@ -84,6 +84,67 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
+    // Règles pour la configuration de la roulette
+    match /config/roulette_rules {
+      // Lecture: tous les utilisateurs authentifiés peuvent lire
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin
+      allow write: if isAdmin();
+    }
+    
+    // Règles pour les segments de la roulette
+    match /roulette_segments/{segmentId} {
+      // Lecture: tous les utilisateurs authentifiés peuvent lire
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin
+      allow write: if isAdmin();
+    }
+    
+    // Règles pour l'historique des tirages de roulette
+    match /user_roulette_spins/{spinId} {
+      // Lecture: admin peut tout lire
+      allow read: if isAdmin();
+      
+      // Création: utilisateur authentifié peut créer son propre tirage
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      
+      // Pas de mise à jour ou suppression
+      allow update, delete: if false;
+    }
+    
+    // Règles pour l'audit trail de la roulette
+    match /roulette_history/{userId}/{dateKey}/{entryId} {
+      // Lecture: utilisateur peut lire son propre historique, admin peut tout lire
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      
+      // Création: système seulement (via Cloud Functions)
+      allow create: if false;
+      
+      // Pas de mise à jour ou suppression
+      allow update, delete: if false;
+    }
+    
+    // Règles pour les tickets de récompenses
+    match /users/{userId}/rewardTickets/{ticketId} {
+      // Lecture: utilisateur peut lire ses propres tickets, admin peut tout lire
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      
+      // Création: système seulement (via services)
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Mise à jour: utilisateur peut marquer comme utilisé, admin peut tout
+      allow update: if isAuthenticated() && (
+        (request.auth.uid == userId && 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isUsed', 'usedAt'])) ||
+        isAdmin()
+      );
+      
+      // Suppression: seulement admin
+      allow delete: if isAdmin();
+    }
+    
     // Règles par défaut: refuser tout accès aux autres collections
     match /{document=**} {
       allow read, write: if false;
