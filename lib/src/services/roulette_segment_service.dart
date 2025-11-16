@@ -69,15 +69,18 @@ class RouletteSegmentService {
           .map((doc) => RouletteSegment.fromMap(doc.data()))
           .toList();
 
-      // Assign fallback position based on Firebase order (for position == 0)
+      // Assign fallback position based on Firebase order (for position == 0 or null)
       for (int i = 0; i < segments.length; i++) {
         if (segments[i].position == 0) {
           segments[i] = segments[i].copyWith(position: i + 1);
         }
       }
 
-      // Sort by position ASC -> this ensures wheel UI and reward logic use same order
+      // ALWAYS sort by position ASC -> this ensures wheel UI and reward logic use same order
       segments.sort((a, b) => a.position.compareTo(b.position));
+
+      // LOG: Verify segment order for debugging
+      print('[ROULETTE ORDER] ${segments.map((s) => s.label).toList()}');
 
       return segments;
     } catch (e) {

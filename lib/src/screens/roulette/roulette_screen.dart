@@ -104,6 +104,9 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         print('  [$i] ${segments[i].id}: "${segments[i].label}" (${segments[i].rewardType}, prob=${segments[i].probability}%)');
       }
       
+      // LOG: Verify segment order matches service output
+      print('[ROULETTE ORDER] ${segments.map((s) => s.label).toList()}');
+      
       setState(() {
         _segments = segments;
         _eligibilityStatus = status;
