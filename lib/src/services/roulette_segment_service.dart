@@ -467,20 +467,19 @@ class RouletteSegmentService {
     return await ensureDefaultsIfNeeded();
   }
 
-  /// Pick a random segment based on probability distribution
+  /// Pick a random segment index based on probability distribution
   /// 
+  /// NEW INDEX-BASED ARCHITECTURE
   /// This is the single source of truth for segment selection.
-  /// The visual wheel must display exactly what this method returns.
+  /// Returns the INDEX of the winning segment instead of the segment object.
   /// 
   /// Algorithm:
-  /// 1. Calculate total probability of all active segments
+  /// 1. Calculate total probability of all segments
   /// 2. Generate random number between 0 and total probability
-  /// 3. Find segment where cumulative probability >= random number
+  /// 3. Find segment index where cumulative probability >= random number
   /// 
-  /// Returns the winning RouletteSegment
-  Future<RouletteSegment> pickRandomSegment() async {
-    final segments = await getActiveSegments();
-    
+  /// Returns the winning segment index (0-based)
+  int pickIndex(List<RouletteSegment> segments) {
     if (segments.isEmpty) {
       throw Exception('No active segments available for selection');
     }
@@ -494,18 +493,31 @@ class RouletteSegmentService {
     // Generate random number between 0 and total probability
     final random = math.Random().nextDouble() * totalProbability;
     
-    // Find the segment that matches the random value
+    // Find the segment index that matches the random value
     double cumulativeProbability = 0.0;
-    for (final segment in segments) {
-      cumulativeProbability += segment.probability;
+    for (int i = 0; i < segments.length; i++) {
+      cumulativeProbability += segments[i].probability;
       if (random <= cumulativeProbability) {
-        print('🎲 [SERVICE] Selected segment: ${segment.label} (index: ${segments.indexOf(segment)}, random: ${random.toStringAsFixed(2)}/$totalProbability)');
-        return segment;
+        print('🎲 [SERVICE] Selected index: $i (${segments[i].label}, random: ${random.toStringAsFixed(2)}/$totalProbability)');
+        return i;
       }
     }
     
-    // Fallback to last segment (should not happen with valid probabilities)
-    print('⚠️ [SERVICE] Fallback to last segment');
-    return segments.last;
+    // Fallback to last segment index (should not happen with valid probabilities)
+    print('⚠️ [SERVICE] Fallback to last segment index');
+    return segments.length - 1;
+  }
+
+  /// Pick a random segment based on probability distribution
+  /// 
+  /// @deprecated Use pickIndex() instead for the new index-based architecture
+  /// This method is kept for backward compatibility but should NOT be used
+  /// 
+  /// Returns the winning RouletteSegment
+  @Deprecated('Use pickIndex(List<RouletteSegment>) instead')
+  Future<RouletteSegment> pickRandomSegment() async {
+    final segments = await getActiveSegments();
+    final index = pickIndex(segments);
+    return segments[index];
   }
 }
