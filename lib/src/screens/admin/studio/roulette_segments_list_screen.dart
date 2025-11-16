@@ -343,6 +343,10 @@ class _RouletteSegmentsListScreenState extends State<RouletteSegmentsListScreen>
         return 'Produit gratuit';
       case RewardType.freeDrink:
         return 'Boisson gratuite';
+      case RewardType.freePizza:
+        return 'Pizza offerte';
+      case RewardType.freeDessert:
+        return 'Dessert offert';
     }
   }
 
