@@ -57,9 +57,6 @@ void main() {
 
       // Verify widget builds without errors
       expect(find.byType(PizzaRouletteWheel), findsOneWidget);
-      
-      // Verify CustomPaint is present (the wheel)
-      expect(find.byType(CustomPaint), findsWidgets);
     });
 
     testWidgets('calls onResult when spinWithResult completes', (WidgetTester tester) async {
@@ -302,7 +299,7 @@ void main() {
     });
 
     testWidgets('winning segment aligns correctly with pointer after spin', (WidgetTester tester) async {
-      // Test that the angle calculation aligns the winning segment with the pointer
+      // Test that FortuneWheel correctly stops at the target segment
       RouletteSegment? result;
       final key = GlobalKey<PizzaRouletteWheelState>();
 
@@ -331,63 +328,19 @@ void main() {
         ),
       );
 
-      // NEW ARCHITECTURE: Test with specific target segment
-      final targetSegment = segments[3]; // Select segment at index 3
-      key.currentState?.spinWithResult(targetSegment);
+      // Test with specific target segment using spinToIndex
+      const targetIndex = 3;
+      key.currentState?.spinToIndex(targetIndex);
       
       // Wait for animation to complete
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
-      // Verify the exact result matches what we passed
+      // Verify the exact result matches the segment at the target index
       expect(result, isNotNull);
-      expect(result, equals(targetSegment));
+      expect(result, equals(segments[targetIndex]));
       
-      // The test validates that the segment passed to spinWithResult
-      // is the exact one returned via onResult callback
-      // The actual angle alignment is verified visually by the user
-      // as the pointer should point to the correct reward
-    });
-
-    test('angle calculation correctly aligns segment center with cursor', () {
-      // This test verifies the mathematical correctness of the angle calculation
-      // using the formula from the fixed implementation with visualOffset applied AFTER normalization
-      
-      const numSegments = 6;
-      const anglePerSegment = 2 * 3.14159265359 / numSegments; // 2π/6 ≈ 1.047
-      const cursorAngle = -3.14159265359 / 2; // -π/2
-      const visualOffset = 0.0; // must match _WheelPainter._visualOffset
-      
-      // Test each segment
-      for (int segmentIndex = 0; segmentIndex < numSegments; segmentIndex++) {
-        // Calculate angles as per the NEW implementation
-        // Start angle (without visualOffset since it's now 0)
-        final startAngle = segmentIndex * anglePerSegment - 3.14159265359 / 2;
-        final centerAngle = startAngle + anglePerSegment / 2;
-        
-        // Calculate target rotation
-        double targetAngle = cursorAngle - centerAngle;
-        
-        // Normalize to [0, 2π)
-        targetAngle = targetAngle % (2 * 3.14159265359);
-        if (targetAngle < 0) {
-          targetAngle += 2 * 3.14159265359;
-        }
-        
-        // After rotation, the segment center should align with the cursor
-        // Painter draws segment at: startAngle (no offset)
-        final painterCenterAngle = startAngle + anglePerSegment / 2;
-        double finalPosition = (painterCenterAngle + targetAngle) % (2 * 3.14159265359);
-        
-        // Normalize cursorAngle to [0, 2π) for comparison
-        double normalizedCursor = cursorAngle % (2 * 3.14159265359);
-        if (normalizedCursor < 0) {
-          normalizedCursor += 2 * 3.14159265359;
-        }
-        
-        // They should match (within floating point tolerance)
-        expect((finalPosition - normalizedCursor).abs(), lessThan(0.0001),
-            reason: 'Segment $segmentIndex should align with cursor after rotation');
-      }
+      // FortuneWheel handles the alignment automatically
+      // No custom angle calculation needed
     });
   });
 }
