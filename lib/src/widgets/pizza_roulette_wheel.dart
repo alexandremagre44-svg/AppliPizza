@@ -82,6 +82,9 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
         _onSpinComplete();
       }
     });
+    
+    // LOG: Verify segment order received by wheel widget
+    print('[ROULETTE ORDER] Wheel initialized with: ${widget.segments.map((s) => s.label).toList()}');
   }
 
   @override
@@ -100,6 +103,9 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     setState(() {
       _isSpinning = true;
     });
+    
+    // LOG: Verify segment order before selection
+    print('[ROULETTE ORDER] Spinning with segments: ${widget.segments.map((s) => s.label).toList()}');
     
     // Select winning segment based on probabilities
     _selectedSegment = _selectWinningSegment();

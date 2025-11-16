@@ -104,6 +104,9 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         print('  [$i] ${segments[i].id}: "${segments[i].label}" (${segments[i].rewardType}, prob=${segments[i].probability}%)');
       }
       
+      // LOG: Verify segment order matches service output
+      print('[ROULETTE ORDER] ${segments.map((s) => s.label).toList()}');
+      
       setState(() {
         _segments = segments;
         _eligibilityStatus = status;
@@ -131,6 +134,9 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   }
 
   Future<void> _onResult(RouletteSegment result) async {
+    // LOG: Verify segment order when applying reward
+    print('[ROULETTE ORDER] Applying reward with segments: ${_segments.map((s) => s.label).toList()}');
+    
     // DEBUG LOG: Result received from wheel
     print('🎁 [ROULETTE SCREEN] Received result from wheel:');
     print('  - Index in segments list: ${_segments.indexOf(result)}');
