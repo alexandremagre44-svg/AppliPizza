@@ -355,12 +355,12 @@ void main() {
       const numSegments = 6;
       const anglePerSegment = 2 * 3.14159265359 / numSegments; // 2π/6 ≈ 1.047
       const cursorAngle = -3.14159265359 / 2; // -π/2
-      const visualOffset = -3.14159265359 / 6; // -π/6 (must match _WheelPainter._visualOffset)
+      const visualOffset = 0.0; // must match _WheelPainter._visualOffset
       
       // Test each segment
       for (int segmentIndex = 0; segmentIndex < numSegments; segmentIndex++) {
         // Calculate angles as per the NEW implementation
-        // Start angle WITHOUT visualOffset
+        // Start angle (without visualOffset since it's now 0)
         final startAngle = segmentIndex * anglePerSegment - 3.14159265359 / 2;
         final centerAngle = startAngle + anglePerSegment / 2;
         
@@ -373,13 +373,9 @@ void main() {
           targetAngle += 2 * 3.14159265359;
         }
         
-        // Apply visualOffset AFTER normalization
-        targetAngle = (targetAngle + visualOffset) % (2 * 3.14159265359);
-        
-        // After rotation, the segment center (including painter's visualOffset) should align with the cursor
-        // Painter draws segment at: startAngle + visualOffset
-        final painterStartAngle = segmentIndex * anglePerSegment - 3.14159265359 / 2 + visualOffset;
-        final painterCenterAngle = painterStartAngle + anglePerSegment / 2;
+        // After rotation, the segment center should align with the cursor
+        // Painter draws segment at: startAngle (no offset)
+        final painterCenterAngle = startAngle + anglePerSegment / 2;
         double finalPosition = (painterCenterAngle + targetAngle) % (2 * 3.14159265359);
         
         // Normalize cursorAngle to [0, 2π) for comparison
