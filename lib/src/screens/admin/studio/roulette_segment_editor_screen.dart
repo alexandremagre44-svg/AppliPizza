@@ -203,14 +203,19 @@ class _RouletteSegmentEditorScreenState extends State<RouletteSegmentEditorScree
                     SizedBox(height: AppSpacing.md),
 
                     // Reward value field (conditional)
-                    if (_selectedRewardType == RewardType.percentageDiscount ||
+                    if (_selectedRewardType == RewardType.bonusPoints ||
+                        _selectedRewardType == RewardType.percentageDiscount ||
                         _selectedRewardType == RewardType.fixedAmountDiscount) ...[
                       _buildTextField(
                         controller: _rewardValueController,
-                        label: _selectedRewardType == RewardType.percentageDiscount
+                        label: _selectedRewardType == RewardType.bonusPoints
+                            ? 'Points'
+                            : _selectedRewardType == RewardType.percentageDiscount
                             ? 'Pourcentage (%)'
                             : 'Montant (€)',
-                        hint: _selectedRewardType == RewardType.percentageDiscount
+                        hint: _selectedRewardType == RewardType.bonusPoints
+                            ? 'Ex: 100'
+                            : _selectedRewardType == RewardType.percentageDiscount
                             ? 'Ex: 10'
                             : 'Ex: 5.00',
                         keyboardType: TextInputType.number,
@@ -668,6 +673,8 @@ class _RouletteSegmentEditorScreenState extends State<RouletteSegmentEditorScree
     switch (type) {
       case RewardType.none:
         return 'Aucun gain';
+      case RewardType.bonusPoints:
+        return 'Points bonus';
       case RewardType.percentageDiscount:
         return 'Réduction en %';
       case RewardType.fixedAmountDiscount:

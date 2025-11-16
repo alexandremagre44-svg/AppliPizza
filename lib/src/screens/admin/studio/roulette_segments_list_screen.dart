@@ -333,6 +333,8 @@ class _RouletteSegmentsListScreenState extends State<RouletteSegmentsListScreen>
     switch (type) {
       case RewardType.none:
         return 'Aucun gain';
+      case RewardType.bonusPoints:
+        return 'Points bonus';
       case RewardType.percentageDiscount:
         return 'Réduction en %';
       case RewardType.fixedAmountDiscount:
