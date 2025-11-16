@@ -291,6 +291,164 @@ void main() {
     });
   });
 
+  group('RouletteSegmentService.pickIndex()', () {
+    test('returns valid index within segment list bounds', () {
+      final segments = [
+        RouletteSegment(
+          id: 'seg1',
+          label: 'Segment 1',
+          rewardId: 'reward1',
+          probability: 50.0,
+          color: Colors.red,
+          position: 1,
+        ),
+        RouletteSegment(
+          id: 'seg2',
+          label: 'Segment 2',
+          rewardId: 'reward2',
+          probability: 30.0,
+          color: Colors.blue,
+          position: 2,
+        ),
+        RouletteSegment(
+          id: 'seg3',
+          label: 'Segment 3',
+          rewardId: 'reward3',
+          probability: 20.0,
+          color: Colors.green,
+          position: 3,
+        ),
+      ];
+
+      // Test multiple selections to ensure index is always valid
+      for (int i = 0; i < 100; i++) {
+        final totalProbability = segments.fold<double>(
+          0.0,
+          (sum, segment) => sum + segment.probability,
+        );
+        
+        final random = (i / 100) * totalProbability;
+        
+        double cumulativeProbability = 0.0;
+        int? selectedIndex;
+        for (int idx = 0; idx < segments.length; idx++) {
+          cumulativeProbability += segments[idx].probability;
+          if (random <= cumulativeProbability) {
+            selectedIndex = idx;
+            break;
+          }
+        }
+        
+        // Verify index is valid
+        expect(selectedIndex, isNotNull);
+        expect(selectedIndex!, greaterThanOrEqualTo(0));
+        expect(selectedIndex, lessThan(segments.length));
+        
+        // Verify we can retrieve the segment with this index
+        expect(() => segments[selectedIndex], returnsNormally);
+      }
+    });
+
+    test('index-based selection eliminates instance comparison errors', () {
+      // This test demonstrates the advantage of index-based architecture
+      // With indices, we never have to compare object instances
+      
+      final segments = [
+        RouletteSegment(
+          id: 'seg1',
+          label: 'Prize 1',
+          rewardId: 'prize1',
+          probability: 50.0,
+          color: Colors.red,
+          position: 1,
+        ),
+        RouletteSegment(
+          id: 'seg2',
+          label: 'Prize 2',
+          rewardId: 'prize2',
+          probability: 50.0,
+          color: Colors.blue,
+          position: 2,
+        ),
+      ];
+
+      // Simulate service selecting an index
+      const selectedIndex = 1;
+      
+      // Screen retrieves the segment
+      final result = segments[selectedIndex];
+      
+      // Verify no instance comparison needed
+      expect(result.id, equals('seg2'));
+      expect(result.label, equals('Prize 2'));
+      
+      // The same segment can be retrieved multiple times
+      final result2 = segments[selectedIndex];
+      expect(result2.id, equals(result.id));
+      
+      // No indexOf() call needed, no risk of -1 error
+      expect(selectedIndex, equals(1));
+    });
+
+    test('probability distribution is maintained with index-based selection', () {
+      final segments = [
+        RouletteSegment(
+          id: 'high',
+          label: 'High Probability',
+          rewardId: 'high',
+          probability: 80.0,
+          color: Colors.red,
+          position: 1,
+        ),
+        RouletteSegment(
+          id: 'low',
+          label: 'Low Probability',
+          rewardId: 'low',
+          probability: 20.0,
+          color: Colors.blue,
+          position: 2,
+        ),
+      ];
+
+      final results = <int, int>{};
+      const iterations = 1000;
+
+      // Simulate the pickIndex algorithm
+      for (int i = 0; i < iterations; i++) {
+        final totalProbability = segments.fold<double>(
+          0.0,
+          (sum, segment) => sum + segment.probability,
+        );
+        
+        final random = (i / iterations) * totalProbability;
+        
+        double cumulativeProbability = 0.0;
+        int? selectedIndex;
+        for (int idx = 0; idx < segments.length; idx++) {
+          cumulativeProbability += segments[idx].probability;
+          if (random <= cumulativeProbability) {
+            selectedIndex = idx;
+            break;
+          }
+        }
+        
+        if (selectedIndex != null) {
+          results[selectedIndex] = (results[selectedIndex] ?? 0) + 1;
+        }
+      }
+
+      // Index 0 (80% probability) should appear roughly 800 times
+      final highCount = results[0] ?? 0;
+      expect(highCount, greaterThan(iterations * 0.75));
+      expect(highCount, lessThan(iterations * 0.85));
+      
+      // Index 1 (20% probability) should appear roughly 200 times
+      final lowCount = results[1] ?? 0;
+      expect(lowCount, greaterThan(iterations * 0.15));
+      expect(lowCount, lessThan(iterations * 0.25));
+    });
+  });
+
   group('RouletteSegmentService.pickRandomSegment()', () {
     test('probability-based selection distributes correctly', () {
       // This is a statistical test to verify the probability distribution

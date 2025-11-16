@@ -210,6 +210,97 @@ void main() {
       expect(result, equals(segments[1]));
     });
 
+    testWidgets('spinToIndex method works with valid index', (WidgetTester tester) async {
+      RouletteSegment? result;
+      final key = GlobalKey<PizzaRouletteWheelState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PizzaRouletteWheel(
+              key: key,
+              segments: testSegments,
+              onResult: (segment) {
+                result = segment;
+              },
+            ),
+          ),
+        ),
+      );
+
+      // NEW INDEX-BASED ARCHITECTURE: Pass the index directly
+      const targetIndex = 1;
+      key.currentState?.spinToIndex(targetIndex);
+      
+      // Wait for animation to complete
+      await tester.pumpAndSettle(const Duration(seconds: 5));
+
+      // Verify the result matches the segment at that index
+      expect(result, isNotNull);
+      expect(result, equals(testSegments[targetIndex]));
+      expect(result?.id, equals('seg2'));
+    });
+
+    testWidgets('spinToIndex handles invalid index gracefully', (WidgetTester tester) async {
+      RouletteSegment? result;
+      final key = GlobalKey<PizzaRouletteWheelState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PizzaRouletteWheel(
+              key: key,
+              segments: testSegments,
+              onResult: (segment) {
+                result = segment;
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Try with invalid negative index
+      key.currentState?.spinToIndex(-1);
+      await tester.pump();
+      expect(result, isNull);
+
+      // Try with out-of-bounds index
+      key.currentState?.spinToIndex(testSegments.length);
+      await tester.pump();
+      expect(result, isNull);
+    });
+
+    testWidgets('spinToIndex works for all valid indices', (WidgetTester tester) async {
+      final key = GlobalKey<PizzaRouletteWheelState>();
+      final results = <int, RouletteSegment>{};
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PizzaRouletteWheel(
+              key: key,
+              segments: testSegments,
+              onResult: (segment) {
+                // Find which index this segment is
+                final idx = testSegments.indexOf(segment);
+                results[idx] = segment;
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Test each index
+      for (int i = 0; i < testSegments.length; i++) {
+        key.currentState?.spinToIndex(i);
+        await tester.pumpAndSettle(const Duration(seconds: 5));
+        
+        // Verify the correct segment was selected
+        expect(results[i], isNotNull);
+        expect(results[i], equals(testSegments[i]));
+      }
+    });
+
     testWidgets('winning segment aligns correctly with pointer after spin', (WidgetTester tester) async {
       // Test that the angle calculation aligns the winning segment with the pointer
       RouletteSegment? result;
