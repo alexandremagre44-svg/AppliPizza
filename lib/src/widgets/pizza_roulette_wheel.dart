@@ -177,20 +177,32 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
 
     final anglePerSegment = 2 * math.pi / segments.length;
 
-    // Centre réel du segment tel qu'il est dessiné
-    final sliceCenter =
-        (-math.pi / 2) + segmentIndex * anglePerSegment + anglePerSegment / 2;
+    // The painter draws segments starting at: (i * anglePerSegment - π/2) + anglePerSegment
+    // This simplifies to: (i + 1) * anglePerSegment - π/2
+    // So the start angle for segment i is:
+    final startAngle = (segmentIndex + 1) * anglePerSegment - math.pi / 2;
+    
+    // The center of the segment is at:
+    final centerAngle = startAngle + anglePerSegment / 2;
 
-    // Le curseur fixe pointe visuellement vers -π/2
-    const pointerAngle = -math.pi / 2;
+    // The cursor is fixed at -π/2 (top)
+    const cursorAngle = -math.pi / 2;
 
-    // ⚠︎ Flutter tourne dans le sens horaire, donc on utilise center - pointer
-    double neededRotation = sliceCenter - pointerAngle;
+    // To align the segment center with the cursor, we need to rotate by:
+    // We want: (centerAngle + targetRotation) mod 2π = cursorAngle mod 2π
+    // Therefore: targetRotation = cursorAngle - centerAngle
+    double targetAngle = cursorAngle - centerAngle;
 
-    // Normalisation 0 → 2π
-    neededRotation = neededRotation % (2 * math.pi);
+    // Normalize to 0 → 2π
+    targetAngle = targetAngle % (2 * math.pi);
+    if (targetAngle < 0) {
+      targetAngle += 2 * math.pi;
+    }
 
-    return neededRotation;
+    // Debug logging
+    print('[ANGLE DEBUG] index:$segmentIndex, angleStart:${startAngle.toStringAsFixed(4)}, angleCenter:${centerAngle.toStringAsFixed(4)}, cursorAngle:${cursorAngle.toStringAsFixed(4)}, targetAngle:${targetAngle.toStringAsFixed(4)}');
+
+    return targetAngle;
   }
 
   void _onSpinComplete() {
