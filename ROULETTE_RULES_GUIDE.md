@@ -56,15 +56,20 @@ class RouletteStatus {
 #### RouletteRules
 ```dart
 class RouletteRules {
-  final int minDelayHours;      // Délai minimum entre tirages
-  final int dailyLimit;         // Limite journalière (0 = illimité)
-  final int weeklyLimit;        // Limite hebdomadaire (0 = illimité)
-  final int monthlyLimit;       // Limite mensuelle (0 = illimité)
-  final int allowedStartHour;   // Heure de début (0-23)
-  final int allowedEndHour;     // Heure de fin (0-23)
-  final bool isEnabled;         // Activation globale
+  final int cooldownHours;         // Délai minimum entre tirages (anciennement minDelayHours)
+  final int maxPlaysPerDay;        // Limite journalière (anciennement dailyLimit, 0 = illimité)
+  final int weeklyLimit;           // Limite hebdomadaire (0 = illimité)
+  final int monthlyLimit;          // Limite mensuelle (0 = illimité)
+  final int allowedStartHour;      // Heure de début (0-23)
+  final int allowedEndHour;        // Heure de fin (0-23)
+  final bool isEnabled;            // Activation globale
+  final String messageDisabled;    // Message quand la roulette est désactivée
+  final String messageUnavailable; // Message quand la roulette n'est pas disponible
+  final String messageCooldown;    // Message quand l'utilisateur est en cooldown
 }
 ```
+
+**Note:** Les champs `minDelayHours` et `dailyLimit` sont toujours supportés pour la rétrocompatibilité mais sont automatiquement convertis en `cooldownHours` et `maxPlaysPerDay`.
 
 ---
 
@@ -80,11 +85,11 @@ Service principal pour la gestion des règles et de l'éligibilité.
 Vérifie l'éligibilité d'un utilisateur à tourner la roulette.
 
 **Vérifications effectuées:**
-1. ✅ Roulette globalement activée
+1. ✅ Roulette globalement activée (utilise `messageDisabled` si désactivée)
 2. ✅ Plage horaire autorisée
 3. ✅ Utilisateur non banni
-4. ✅ Cooldown respecté (minDelayHours)
-5. ✅ Limite journalière non atteinte
+4. ✅ Cooldown respecté (cooldownHours)
+5. ✅ Limite journalière non atteinte (maxPlaysPerDay)
 6. ✅ Limite hebdomadaire non atteinte
 7. ✅ Limite mensuelle non atteinte
 
@@ -141,13 +146,16 @@ Récupère et sauvegarde les règles depuis/vers Firestore.
 
 ```dart
 RouletteRules(
-  minDelayHours: 24,        // 1 fois par jour
-  dailyLimit: 1,            // 1 tirage/jour
-  weeklyLimit: 0,           // Illimité
-  monthlyLimit: 0,          // Illimité
-  allowedStartHour: 0,      // Toute la journée
+  cooldownHours: 24,                      // 1 fois par jour
+  maxPlaysPerDay: 1,                      // 1 tirage/jour
+  weeklyLimit: 0,                         // Illimité
+  monthlyLimit: 0,                        // Illimité
+  allowedStartHour: 0,                    // Toute la journée
   allowedEndHour: 23,
   isEnabled: true,
+  messageDisabled: 'La roulette est actuellement désactivée',
+  messageUnavailable: 'La roulette n\'est pas disponible',
+  messageCooldown: 'Revenez demain pour retenter votre chance',
 )
 ```
 
@@ -155,32 +163,41 @@ RouletteRules(
 
 #### Configuration standard (1 fois par jour)
 ```dart
-minDelayHours: 24
-dailyLimit: 1
+cooldownHours: 24
+maxPlaysPerDay: 1
 weeklyLimit: 0
 monthlyLimit: 0
 allowedStartHour: 0
 allowedEndHour: 23
+messageDisabled: 'La roulette est temporairement désactivée'
+messageUnavailable: 'La roulette n\'est pas encore disponible'
+messageCooldown: 'Revenez demain pour retenter votre chance'
 ```
 
 #### Configuration horaires restreints (11h-22h)
 ```dart
-minDelayHours: 24
-dailyLimit: 1
+cooldownHours: 24
+maxPlaysPerDay: 1
 weeklyLimit: 7
 monthlyLimit: 0
 allowedStartHour: 11
 allowedEndHour: 22
+messageDisabled: 'La roulette est désactivée pour maintenance'
+messageUnavailable: 'La roulette n\'est pas disponible actuellement'
+messageCooldown: 'Vous avez déjà joué aujourd\'hui'
 ```
 
 #### Configuration événement spécial
 ```dart
-minDelayHours: 4          // Tous les 4 heures
-dailyLimit: 3             // 3 fois par jour max
+cooldownHours: 4                        // Tous les 4 heures
+maxPlaysPerDay: 3                       // 3 fois par jour max
 weeklyLimit: 10
 monthlyLimit: 30
 allowedStartHour: 0
 allowedEndHour: 23
+messageDisabled: 'L\'événement est terminé'
+messageUnavailable: 'L\'événement n\'a pas encore commencé'
+messageCooldown: 'Revenez dans 4 heures'
 ```
 
 ---
