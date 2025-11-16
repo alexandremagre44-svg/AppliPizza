@@ -164,27 +164,23 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
   double _calculateTargetAngle(RouletteSegment winningSegment) {
     final segments = widget.segments;
     final segmentIndex = segments.indexOf(winningSegment);
-    
-    if (segmentIndex == -1) {
-      return 0.0;
-    }
-    
-    // Calculate angle per segment
+
+    if (segmentIndex == -1) return 0.0;
+
     final anglePerSegment = 2 * math.pi / segments.length;
-    
-    // Calculate the center angle of the winning segment
-    // NOTE: Segments are drawn starting at -π/2 (top position), so we need to account for this offset
-    // Drawing: startAngle = i * anglePerSegment - π/2
-    // Center of segment i: (i * anglePerSegment - π/2) + anglePerSegment/2 = i * anglePerSegment - π/2 + anglePerSegment/2
-    final segmentCenterAngle = segmentIndex * anglePerSegment - math.pi / 2 + anglePerSegment / 2;
-    
-    // We want the cursor at top (which corresponds to angle = -π/2 in our coordinate system) to point to this segment
-    // The cursor is drawn at the top, pointing down at angle -π/2
-    // So we need to rotate the wheel so that segmentCenterAngle aligns with -π/2
-    // Target rotation = -π/2 - segmentCenterAngle (but we want positive rotation, so add 2π if needed)
-    final targetAngle = (-math.pi / 2 - segmentCenterAngle) % (2 * math.pi);
-    
-    return targetAngle;
+
+    // center of slice i in drawing coordinates (-π/2 is top)
+    final sliceCenter =
+        (-math.pi / 2) + segmentIndex * anglePerSegment + anglePerSegment / 2;
+
+    const pointerAngle = -math.pi / 2;
+
+    double neededRotation = pointerAngle - sliceCenter;
+
+    // normalize rotation 0 → 2π
+    neededRotation %= (2 * math.pi);
+
+    return neededRotation;
   }
 
   void _onSpinComplete() {
