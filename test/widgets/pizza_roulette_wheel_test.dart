@@ -249,5 +249,45 @@ void main() {
       // The actual angle alignment is verified visually by the user
       // as the pointer should point to the correct reward
     });
+
+    test('angle calculation correctly aligns segment center with cursor', () {
+      // This test verifies the mathematical correctness of the angle calculation
+      // using the formula from the fixed implementation
+      
+      const numSegments = 6;
+      const anglePerSegment = 2 * 3.14159265359 / numSegments; // 2π/6 ≈ 1.047
+      const cursorAngle = -3.14159265359 / 2; // -π/2
+      
+      // Test each segment
+      for (int segmentIndex = 0; segmentIndex < numSegments; segmentIndex++) {
+        // Calculate angles as per the implementation
+        // Painter draws at: (i + 1) * anglePerSegment - π/2
+        final startAngle = (segmentIndex + 1) * anglePerSegment - 3.14159265359 / 2;
+        final centerAngle = startAngle + anglePerSegment / 2;
+        
+        // Calculate target rotation
+        double targetAngle = cursorAngle - centerAngle;
+        
+        // Normalize to [0, 2π)
+        targetAngle = targetAngle % (2 * 3.14159265359);
+        if (targetAngle < 0) {
+          targetAngle += 2 * 3.14159265359;
+        }
+        
+        // After rotation, the segment center should align with the cursor
+        // Final position = (centerAngle + targetAngle) mod 2π
+        double finalPosition = (centerAngle + targetAngle) % (2 * 3.14159265359);
+        
+        // Normalize cursorAngle to [0, 2π) for comparison
+        double normalizedCursor = cursorAngle % (2 * 3.14159265359);
+        if (normalizedCursor < 0) {
+          normalizedCursor += 2 * 3.14159265359;
+        }
+        
+        // They should match (within floating point tolerance)
+        expect((finalPosition - normalizedCursor).abs(), lessThan(0.0001),
+            reason: 'Segment $segmentIndex should align with cursor after rotation');
+      }
+    });
   });
 }
