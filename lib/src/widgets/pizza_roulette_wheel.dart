@@ -171,20 +171,24 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     final segments = widget.segments;
     final segmentIndex = segments.indexOf(winningSegment);
 
-    if (segmentIndex == -1) return 0.0;
+    if (segmentIndex == -1) {
+      return 0.0;
+    }
 
     final anglePerSegment = 2 * math.pi / segments.length;
 
-    // center of slice i in drawing coordinates (-π/2 is top)
+    // Centre réel du segment tel qu'il est dessiné
     final sliceCenter =
         (-math.pi / 2) + segmentIndex * anglePerSegment + anglePerSegment / 2;
 
+    // Le curseur fixe pointe visuellement vers -π/2
     const pointerAngle = -math.pi / 2;
 
-    double neededRotation = pointerAngle - sliceCenter;
+    // ⚠︎ Flutter tourne dans le sens horaire, donc on utilise center - pointer
+    double neededRotation = sliceCenter - pointerAngle;
 
-    // normalize rotation 0 → 2π
-    neededRotation %= (2 * math.pi);
+    // Normalisation 0 → 2π
+    neededRotation = neededRotation % (2 * math.pi);
 
     return neededRotation;
   }
