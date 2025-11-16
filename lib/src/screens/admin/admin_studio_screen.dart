@@ -10,8 +10,7 @@ import 'studio/banner_block_editor.dart';
 import 'studio/popup_block_list.dart';
 import 'studio/studio_texts_screen.dart';
 import 'studio/roulette_segments_list_screen.dart';
-import 'studio/roulette_settings_screen.dart';
-import 'roulette/roulette_rules_admin_screen.dart';
+import 'studio/roulette_admin_settings_screen.dart';
 import '../../features/content/presentation/admin/content_studio_screen.dart';
 import 'products_admin_screen.dart';
 import 'mailing_admin_screen.dart';
@@ -133,7 +132,7 @@ class AdminStudioScreen extends StatelessWidget {
             context,
             iconData: Icons.casino_rounded,
             title: 'Roue de la chance',
-            subtitle: 'Segments et configuration',
+            subtitle: 'Gérer les segments de la roulette',
             onTap: () {
               Navigator.push(
                 context,
@@ -146,24 +145,11 @@ class AdminStudioScreen extends StatelessWidget {
             context,
             iconData: Icons.settings_outlined,
             title: 'Paramètres de la roulette',
-            subtitle: 'Règles, limites et conditions d\'utilisation',
+            subtitle: 'Configuration, règles et limites d\'utilisation',
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const RouletteSettingsScreen()),
-              );
-            },
-          ),
-          SizedBox(height: AppSpacing.md),
-          _buildStudioBlock(
-            context,
-            iconData: Icons.rule_rounded,
-            title: 'Règles de la roulette',
-            subtitle: 'Cooldown, limites et plages horaires',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RouletteRulesAdminScreen()),
+                MaterialPageRoute(builder: (_) => const RouletteAdminSettingsScreen()),
               );
             },
           ),
