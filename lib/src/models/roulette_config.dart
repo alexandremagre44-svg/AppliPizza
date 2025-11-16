@@ -129,7 +129,9 @@ enum RewardType {
   percentageDiscount('percentage_discount'),
   fixedAmountDiscount('fixed_amount_discount'),
   freeProduct('free_product'),
-  freeDrink('free_drink');
+  freePizza('free_pizza'),
+  freeDrink('free_drink'),
+  freeDessert('free_dessert');
 
   const RewardType(this.value);
   final String value;
