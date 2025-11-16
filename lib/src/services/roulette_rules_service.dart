@@ -35,16 +35,16 @@ class RouletteStatus {
 
 /// Rules configuration for the roulette
 class RouletteRules {
-  /// Minimum delay in hours between spins
-  final int minDelayHours;
+  /// Minimum delay in hours between spins (cooldown)
+  final int cooldownHours;
   
   /// Maximum spins per day (0 = unlimited)
-  final int dailyLimit;
+  final int maxPlaysPerDay;
   
-  /// Maximum spins per week (0 = unlimited)
+  /// Maximum spins per week (0 = unlimited) - legacy field
   final int weeklyLimit;
   
-  /// Maximum spins per month (0 = unlimited)
+  /// Maximum spins per month (0 = unlimited) - legacy field
   final int monthlyLimit;
   
   /// Hour when roulette becomes available (0-23)
@@ -55,58 +55,82 @@ class RouletteRules {
   
   /// Global enable/disable flag
   final bool isEnabled;
+  
+  /// Message to display when roulette is disabled
+  final String messageDisabled;
+  
+  /// Message to display when roulette is unavailable (no segments, not configured)
+  final String messageUnavailable;
+  
+  /// Message to display when user is in cooldown period
+  final String messageCooldown;
 
   const RouletteRules({
-    this.minDelayHours = 24,
-    this.dailyLimit = 1,
+    this.cooldownHours = 24,
+    this.maxPlaysPerDay = 1,
     this.weeklyLimit = 0,
     this.monthlyLimit = 0,
     this.allowedStartHour = 0,
     this.allowedEndHour = 23,
     this.isEnabled = true,
+    this.messageDisabled = 'La roulette est actuellement désactivée',
+    this.messageUnavailable = 'La roulette n\'est pas disponible',
+    this.messageCooldown = 'Revenez demain pour retenter votre chance',
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'minDelayHours': minDelayHours,
-      'dailyLimit': dailyLimit,
+      'cooldownHours': cooldownHours,
+      'maxPlaysPerDay': maxPlaysPerDay,
       'weeklyLimit': weeklyLimit,
       'monthlyLimit': monthlyLimit,
       'allowedStartHour': allowedStartHour,
       'allowedEndHour': allowedEndHour,
       'isEnabled': isEnabled,
+      'messageDisabled': messageDisabled,
+      'messageUnavailable': messageUnavailable,
+      'messageCooldown': messageCooldown,
     };
   }
 
   factory RouletteRules.fromMap(Map<String, dynamic> map) {
     return RouletteRules(
-      minDelayHours: map['minDelayHours'] as int? ?? 24,
-      dailyLimit: map['dailyLimit'] as int? ?? 1,
+      cooldownHours: map['cooldownHours'] as int? ?? map['minDelayHours'] as int? ?? 24,
+      maxPlaysPerDay: map['maxPlaysPerDay'] as int? ?? map['dailyLimit'] as int? ?? 1,
       weeklyLimit: map['weeklyLimit'] as int? ?? 0,
       monthlyLimit: map['monthlyLimit'] as int? ?? 0,
       allowedStartHour: map['allowedStartHour'] as int? ?? 0,
       allowedEndHour: map['allowedEndHour'] as int? ?? 23,
       isEnabled: map['isEnabled'] as bool? ?? true,
+      messageDisabled: map['messageDisabled'] as String? ?? 'La roulette est actuellement désactivée',
+      messageUnavailable: map['messageUnavailable'] as String? ?? 'La roulette n\'est pas disponible',
+      messageCooldown: map['messageCooldown'] as String? ?? 'Revenez demain pour retenter votre chance',
     );
   }
 
   RouletteRules copyWith({
-    int? minDelayHours,
-    int? dailyLimit,
+    int? cooldownHours,
+    int? maxPlaysPerDay,
     int? weeklyLimit,
     int? monthlyLimit,
     int? allowedStartHour,
     int? allowedEndHour,
     bool? isEnabled,
+    String? messageDisabled,
+    String? messageUnavailable,
+    String? messageCooldown,
   }) {
     return RouletteRules(
-      minDelayHours: minDelayHours ?? this.minDelayHours,
-      dailyLimit: dailyLimit ?? this.dailyLimit,
+      cooldownHours: cooldownHours ?? this.cooldownHours,
+      maxPlaysPerDay: maxPlaysPerDay ?? this.maxPlaysPerDay,
       weeklyLimit: weeklyLimit ?? this.weeklyLimit,
       monthlyLimit: monthlyLimit ?? this.monthlyLimit,
       allowedStartHour: allowedStartHour ?? this.allowedStartHour,
       allowedEndHour: allowedEndHour ?? this.allowedEndHour,
       isEnabled: isEnabled ?? this.isEnabled,
+      messageDisabled: messageDisabled ?? this.messageDisabled,
+      messageUnavailable: messageUnavailable ?? this.messageUnavailable,
+      messageCooldown: messageCooldown ?? this.messageCooldown,
     );
   }
 }
@@ -162,7 +186,7 @@ class RouletteRulesService {
       
       // Check if roulette is globally enabled
       if (!rules.isEnabled) {
-        return RouletteStatus.denied('La roulette est actuellement désactivée');
+        return RouletteStatus.denied(rules.messageDisabled);
       }
       
       // Check time slot restrictions
@@ -198,9 +222,9 @@ class RouletteRulesService {
       final lastSpinAt = _parseDateTime(userData['lastSpinAt']);
       if (lastSpinAt != null) {
         final hoursSinceLastSpin = now.difference(lastSpinAt).inHours;
-        if (hoursSinceLastSpin < rules.minDelayHours) {
-          final nextAvailable = lastSpinAt.add(Duration(hours: rules.minDelayHours));
-          final hoursRemaining = rules.minDelayHours - hoursSinceLastSpin;
+        if (hoursSinceLastSpin < rules.cooldownHours) {
+          final nextAvailable = lastSpinAt.add(Duration(hours: rules.cooldownHours));
+          final hoursRemaining = rules.cooldownHours - hoursSinceLastSpin;
           return RouletteStatus.denied(
             'Prochain tirage disponible dans $hoursRemaining heure${hoursRemaining > 1 ? 's' : ''}',
             nextEligibleAt: nextAvailable,
@@ -209,9 +233,9 @@ class RouletteRulesService {
       }
       
       // Check daily limit
-      if (rules.dailyLimit > 0) {
+      if (rules.maxPlaysPerDay > 0) {
         final todayCount = await _getSpinCount(userId, _getStartOfDay(now));
-        if (todayCount >= rules.dailyLimit) {
+        if (todayCount >= rules.maxPlaysPerDay) {
           final tomorrow = now.add(const Duration(days: 1));
           final nextAvailable = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, rules.allowedStartHour);
           return RouletteStatus.denied(

@@ -63,9 +63,9 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
       
       setState(() {
         _isEnabled = effectiveRules.isEnabled;
-        // Convert hours to minutes for display (minDelayHours * 60)
-        _cooldownMinutes = effectiveRules.minDelayHours * 60;
-        _dailyLimit = effectiveRules.dailyLimit;
+        // Convert hours to minutes for display (cooldownHours * 60)
+        _cooldownMinutes = effectiveRules.cooldownHours * 60;
+        _dailyLimit = effectiveRules.maxPlaysPerDay;
         _weeklyLimit = effectiveRules.weeklyLimit;
         _monthlyLimit = effectiveRules.monthlyLimit;
         _allowedStartHour = effectiveRules.allowedStartHour;
@@ -104,8 +104,8 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
       
       final rules = RouletteRules(
         isEnabled: _isEnabled,
-        minDelayHours: cooldownHours,
-        dailyLimit: int.parse(_dailyLimitController.text),
+        cooldownHours: cooldownHours,
+        maxPlaysPerDay: int.parse(_dailyLimitController.text),
         weeklyLimit: int.parse(_weeklyLimitController.text),
         monthlyLimit: int.parse(_monthlyLimitController.text),
         allowedStartHour: int.parse(_startHourController.text),

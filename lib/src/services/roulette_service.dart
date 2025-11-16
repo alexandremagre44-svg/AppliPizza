@@ -1,152 +1,26 @@
 // lib/src/services/roulette_service.dart
-// Service for managing roulette (wheel) configuration in Firestore
+// Facade service that combines roulette rules and segments
+// Uses the unified Firestore structure: config/roulette_rules + roulette_segments
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import '../models/roulette_config.dart';
+import 'roulette_rules_service.dart';
+import 'roulette_segment_service.dart';
 import 'dart:math';
 
+/// Facade service for roulette functionality
+/// 
+/// This service combines RouletteRulesService and RouletteSegmentService
+/// to provide a unified interface for the roulette wheel.
+/// 
+/// DEPRECATED METHODS: getRouletteConfig(), saveRouletteConfig(), initializeDefaultConfig()
+/// Use RouletteRulesService and RouletteSegmentService directly instead.
 class RouletteService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const String _collection = 'app_roulette_config';
-  static const String _configDocId = 'main';
+  final RouletteRulesService _rulesService = RouletteRulesService();
+  final RouletteSegmentService _segmentService = RouletteSegmentService();
 
-  // Get roulette configuration
-  Future<RouletteConfig?> getRouletteConfig() async {
-    try {
-      final doc = await _firestore.collection(_collection).doc(_configDocId).get();
-      if (doc.exists && doc.data() != null) {
-        return RouletteConfig.fromMap(doc.data()!);
-      }
-      return null;
-    } catch (e) {
-      print('Error getting roulette config: $e');
-      return null;
-    }
-  }
-
-  // Save roulette configuration
-  Future<bool> saveRouletteConfig(RouletteConfig config) async {
-    try {
-      await _firestore.collection(_collection).doc(_configDocId).set(
-            config.toMap(),
-            SetOptions(merge: true),
-          );
-      return true;
-    } catch (e) {
-      print('Error saving roulette config: $e');
-      return false;
-    }
-  }
-
-  // Initialize with default config if doesn't exist
-  Future<bool> initializeDefaultConfig() async {
-    try {
-      final existing = await getRouletteConfig();
-      if (existing != null) return true;
-
-      final defaultConfig = RouletteConfig(
-        id: _configDocId,
-        isActive: false,
-        displayLocation: 'home',
-        delaySeconds: 5,
-        maxUsesPerDay: 1,
-        segments: _getDefaultSegments(),
-        updatedAt: DateTime.now(),
-      );
-
-      return await saveRouletteConfig(defaultConfig);
-    } catch (e) {
-      print('Error initializing default config: $e');
-      return false;
-    }
-  }
-
-  // Get default segments
-  List<RouletteSegment> _getDefaultSegments() {
-    return [
-      RouletteSegment(
-        id: '1',
-        label: '+100 points',
-        rewardId: 'bonus_points_100',
-        probability: 30.0,
-        color: const Color(0xFFFFD700), // Gold
-        type: 'bonus_points',
-        value: 100,
-        weight: 30.0,
-      ),
-      RouletteSegment(
-        id: '2',
-        label: 'Pizza offerte',
-        rewardId: 'free_pizza',
-        probability: 5.0,
-        color: const Color(0xFFFF6B6B), // Red
-        type: 'free_pizza',
-        weight: 5.0,
-      ),
-      RouletteSegment(
-        id: '3',
-        label: '+50 points',
-        rewardId: 'bonus_points_50',
-        probability: 25.0,
-        color: const Color(0xFF4ECDC4), // Teal
-        type: 'bonus_points',
-        value: 50,
-        weight: 25.0,
-      ),
-      RouletteSegment(
-        id: '4',
-        label: 'Raté !',
-        rewardId: 'nothing',
-        probability: 20.0,
-        color: const Color(0xFF95A5A6), // Gray
-        type: 'nothing',
-        weight: 20.0,
-      ),
-      RouletteSegment(
-        id: '5',
-        label: 'Boisson offerte',
-        rewardId: 'free_drink',
-        probability: 10.0,
-        color: const Color(0xFF3498DB), // Blue
-        type: 'free_drink',
-        weight: 10.0,
-      ),
-      RouletteSegment(
-        id: '6',
-        label: 'Dessert offert',
-        rewardId: 'free_dessert',
-        probability: 10.0,
-        color: const Color(0xFF9B59B6), // Purple
-        type: 'free_dessert',
-        weight: 10.0,
-      ),
-    ];
-  }
-
-  // Check if user can spin today
-  Future<bool> canUserSpinToday(String userId) async {
-    try {
-      final config = await getRouletteConfig();
-      if (config == null || !config.isCurrentlyActive) return false;
-
-      final today = DateTime.now();
-      final startOfDay = DateTime(today.year, today.month, today.day);
-
-      final snapshot = await _firestore
-          .collection('user_roulette_spins')
-          .where('userId', isEqualTo: userId)
-          .where('spunAt', isGreaterThanOrEqualTo: startOfDay.toIso8601String())
-          .get();
-
-      return snapshot.docs.length < config.maxUsesPerDay;
-    } catch (e) {
-      print('Error checking user spin availability: $e');
-      return false;
-    }
-  }
-
-  // Record a spin
+  // Record a spin (stores in user_roulette_spins for legacy tracking)
   Future<bool> recordSpin(
     String userId,
     RouletteSegment segment,
@@ -155,7 +29,7 @@ class RouletteService {
       await _firestore.collection('user_roulette_spins').add({
         'userId': userId,
         'segmentId': segment.id,
-        'segmentType': segment.type,
+        'segmentType': segment.type ?? segment.rewardId,
         'segmentLabel': segment.label,
         'value': segment.value,
         'spunAt': DateTime.now().toIso8601String(),
@@ -210,19 +84,5 @@ class RouletteService {
 
     // Fallback (shouldn't happen)
     return segments.last;
-  }
-
-  // Stream for real-time updates
-  Stream<RouletteConfig?> watchRouletteConfig() {
-    return _firestore
-        .collection(_collection)
-        .doc(_configDocId)
-        .snapshots()
-        .map((snapshot) {
-      if (snapshot.exists && snapshot.data() != null) {
-        return RouletteConfig.fromMap(snapshot.data()!);
-      }
-      return null;
-    });
   }
 }
