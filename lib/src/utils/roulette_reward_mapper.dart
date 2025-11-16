@@ -94,12 +94,16 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
   Duration? validity,
 }) async {
   try {
+    print('🔄 [MAPPER] Processing segment: ${segment.id} (${segment.label})');
+    print('  - RewardType: ${segment.rewardType}');
+    print('  - RewardValue: ${segment.rewardValue}');
+    
     // Record in audit trail first
     final rulesService = RouletteRulesService();
     
     // Handle "nothing" segments
     if (segment.rewardType == roulette.RewardType.none) {
-      print('Segment is "nothing", no ticket created');
+      print('  ➜ Segment is "nothing" type, no ticket/points created');
       
       await rulesService.recordSpinAudit(
         userId: userId,
@@ -113,7 +117,7 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
     // Handle bonus points separately - add directly to loyalty account
     if (segment.rewardType == roulette.RewardType.bonusPoints) {
       final points = segment.rewardValue?.toInt() ?? segment.value ?? 0;
-      print('Adding $points bonus points to user $userId');
+      print('  ➜ Bonus points: adding $points points to user $userId');
       
       final loyaltyService = LoyaltyService();
       await loyaltyService.addBonusPoints(userId, points);
@@ -125,7 +129,7 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
         deviceInfo: 'mobile_app',
       );
       
-      print('Added $points bonus points to user: $userId');
+      print('  ✓ Added $points bonus points to user: $userId');
       return null; // No ticket created for points
     }
     
@@ -133,6 +137,9 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
     final action = mapSegmentToRewardAction(segment).copyWith(
       source: 'roulette',
     );
+    
+    print('  ➜ Creating ticket for reward type: ${segment.rewardType}');
+    print('     RewardAction: type=${action.type}, label="${action.label}"');
     
     // Determine validity based on reward type
     final ticketValidity = validity ?? 
@@ -155,7 +162,7 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
       deviceInfo: 'mobile_app',
     );
     
-    print('Created reward ticket: ${ticket.id} for user: $userId');
+    print('  ✓ Created reward ticket: ${ticket.id} for user: $userId');
     return ticket;
   } catch (e) {
     print('Error creating ticket from roulette segment: $e');
