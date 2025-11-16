@@ -366,7 +366,7 @@ class RouletteSegmentService {
           break;
       }
     } else if (segment.type == 'nothing') {
-      normalizedRewardId = null; // null for nothing type
+      normalizedRewardId = ''; // empty string for nothing type
       normalizedRewardType = RewardType.none;
       normalizedType = 'nothing';
     } else {
