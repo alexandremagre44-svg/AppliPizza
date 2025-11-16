@@ -70,7 +70,7 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
       child: InkWell(
         onTap: canSpin && !isLoading
             ? () {
-                context.go(AppRoutes.roulette);
+                context.push(AppRoutes.roulette);
               }
             : null,
         borderRadius: AppRadius.card,
@@ -188,7 +188,7 @@ class _RouletteCardWidgetState extends State<RouletteCardWidget> {
                 child: ElevatedButton.icon(
                   onPressed: canSpin && !isLoading
                       ? () {
-                          context.go(AppRoutes.roulette);
+                          context.push(AppRoutes.roulette);
                         }
                       : null,
                   icon: Icon(

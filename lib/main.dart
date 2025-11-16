@@ -169,7 +169,7 @@ class MyApp extends ConsumerWidget {
           builder: (context, state) {
             // Get userId from auth state
             final authState = ref.read(authProvider);
-            final userId = authState.userEmail ?? 'guest';
+            final userId = authState.userId ?? 'guest';
             return RouletteScreen(userId: userId);
           },
         ),
