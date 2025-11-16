@@ -18,16 +18,33 @@ class RouletteSegmentService {
   static const String _collection = 'roulette_segments';
 
   /// Get all segments ordered by position
+  /// 
+  /// CRITICAL FIX: This method ensures segments are ALWAYS sorted by position
+  /// to prevent desync between wheel display and reward selection.
+  /// - Fetches all segments from Firestore
+  /// - Assigns fallback position based on Firebase order for documents without position
+  /// - Sorts by position ASCENDING to ensure consistent order
   Future<List<RouletteSegment>> getAllSegments() async {
     try {
       final snapshot = await _firestore
           .collection(_collection)
-          .orderBy('position')
           .get();
 
-      return snapshot.docs
+      final List<RouletteSegment> segments = snapshot.docs
           .map((doc) => RouletteSegment.fromMap(doc.data()))
           .toList();
+
+      // Assign fallback position based on Firebase order (for position == 0)
+      for (int i = 0; i < segments.length; i++) {
+        if (segments[i].position == 0) {
+          segments[i] = segments[i].copyWith(position: i + 1);
+        }
+      }
+
+      // Sort by position ASC -> this ensures consistent order
+      segments.sort((a, b) => a.position.compareTo(b.position));
+
+      return segments;
     } catch (e) {
       print('Error getting segments: $e');
       return [];
@@ -35,17 +52,34 @@ class RouletteSegmentService {
   }
 
   /// Get active segments only, ordered by position
+  /// 
+  /// CRITICAL FIX: This method ensures segments are ALWAYS sorted by position
+  /// to prevent desync between wheel display and reward selection.
+  /// - Fetches only active segments from Firestore
+  /// - Assigns fallback position based on Firebase order for documents without position
+  /// - Sorts by position ASCENDING to ensure consistent order
   Future<List<RouletteSegment>> getActiveSegments() async {
     try {
       final snapshot = await _firestore
           .collection(_collection)
           .where('isActive', isEqualTo: true)
-          .orderBy('position')
           .get();
 
-      return snapshot.docs
+      final List<RouletteSegment> segments = snapshot.docs
           .map((doc) => RouletteSegment.fromMap(doc.data()))
           .toList();
+
+      // Assign fallback position based on Firebase order (for position == 0)
+      for (int i = 0; i < segments.length; i++) {
+        if (segments[i].position == 0) {
+          segments[i] = segments[i].copyWith(position: i + 1);
+        }
+      }
+
+      // Sort by position ASC -> this ensures wheel UI and reward logic use same order
+      segments.sort((a, b) => a.position.compareTo(b.position));
+
+      return segments;
     } catch (e) {
       print('Error getting active segments: $e');
       return [];
@@ -145,15 +179,29 @@ class RouletteSegmentService {
   }
 
   /// Stream for real-time updates
+  /// 
+  /// CRITICAL FIX: This stream ensures segments are ALWAYS sorted by position
+  /// to prevent desync between wheel display and reward selection.
   Stream<List<RouletteSegment>> watchSegments() {
     return _firestore
         .collection(_collection)
-        .orderBy('position')
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
+      final List<RouletteSegment> segments = snapshot.docs
           .map((doc) => RouletteSegment.fromMap(doc.data()))
           .toList();
+
+      // Assign fallback position based on Firebase order (for position == 0)
+      for (int i = 0; i < segments.length; i++) {
+        if (segments[i].position == 0) {
+          segments[i] = segments[i].copyWith(position: i + 1);
+        }
+      }
+
+      // Sort by position ASC -> this ensures consistent order
+      segments.sort((a, b) => a.position.compareTo(b.position));
+
+      return segments;
     });
   }
 
