@@ -6,6 +6,9 @@
 /// This enum defines all possible reward types in the system.
 /// Used by roulette, loyalty, and promotional campaigns.
 enum RewardType {
+  /// Bonus loyalty points
+  bonusPoints('bonus_points'),
+  
   /// Percentage discount (e.g., 10% off)
   percentageDiscount('percentage_discount'),
   
@@ -48,9 +51,13 @@ enum RewardType {
 /// - 20% discount: RewardAction(type: percentageDiscount, percentage: 20)
 /// - Free pizza: RewardAction(type: freeAnyPizza, categoryId: 'Pizza')
 /// - 5€ off: RewardAction(type: fixedDiscount, amount: 5.0)
+/// - Bonus points: RewardAction(type: bonusPoints, points: 100)
 class RewardAction {
   /// Type of reward
   final RewardType type;
+  
+  /// Points value for bonus_points (e.g., 100 for +100 points)
+  final int? points;
   
   /// Percentage value for percentage_discount (e.g., 20 for 20%)
   final double? percentage;
@@ -75,6 +82,7 @@ class RewardAction {
 
   const RewardAction({
     required this.type,
+    this.points,
     this.percentage,
     this.amount,
     this.productId,
@@ -88,6 +96,7 @@ class RewardAction {
   Map<String, dynamic> toMap() {
     return {
       'type': type.value,
+      if (points != null) 'points': points,
       if (percentage != null) 'percentage': percentage,
       if (amount != null) 'amount': amount,
       if (productId != null) 'productId': productId,
@@ -102,6 +111,7 @@ class RewardAction {
   factory RewardAction.fromMap(Map<String, dynamic> map) {
     return RewardAction(
       type: RewardType.fromString(map['type'] as String? ?? 'custom'),
+      points: map['points'] as int?,
       percentage: (map['percentage'] as num?)?.toDouble(),
       amount: (map['amount'] as num?)?.toDouble(),
       productId: map['productId'] as String?,
@@ -115,6 +125,7 @@ class RewardAction {
   /// Create a copy with modified fields
   RewardAction copyWith({
     RewardType? type,
+    int? points,
     double? percentage,
     double? amount,
     String? productId,
@@ -125,6 +136,7 @@ class RewardAction {
   }) {
     return RewardAction(
       type: type ?? this.type,
+      points: points ?? this.points,
       percentage: percentage ?? this.percentage,
       amount: amount ?? this.amount,
       productId: productId ?? this.productId,

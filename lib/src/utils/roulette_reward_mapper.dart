@@ -6,6 +6,7 @@ import '../models/reward_action.dart';
 import '../models/reward_ticket.dart';
 import '../services/reward_service.dart';
 import '../services/roulette_rules_service.dart';
+import '../services/loyalty_service.dart';
 
 /// Map a RouletteSegment to a RewardAction
 /// 
@@ -16,6 +17,9 @@ RewardAction mapSegmentToRewardAction(roulette.RouletteSegment segment) {
   // Map roulette reward type to new reward type
   RewardType mappedType;
   switch (rewardType) {
+    case roulette.RewardType.bonusPoints:
+      mappedType = RewardType.bonusPoints;
+      break;
     case roulette.RewardType.percentageDiscount:
       mappedType = RewardType.percentageDiscount;
       break;
@@ -38,6 +42,9 @@ RewardAction mapSegmentToRewardAction(roulette.RouletteSegment segment) {
   
   return RewardAction(
     type: mappedType,
+    points: rewardType == roulette.RewardType.bonusPoints
+        ? segment.rewardValue?.toInt() ?? segment.value
+        : null,
     percentage: rewardType == roulette.RewardType.percentageDiscount 
         ? segment.rewardValue 
         : null,
@@ -71,12 +78,13 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
   Duration? validity,
 }) async {
   try {
-    // Don't create tickets for "nothing" segments
+    // Record in audit trail first
+    final rulesService = RouletteRulesService();
+    
+    // Handle "nothing" segments
     if (segment.rewardType == roulette.RewardType.none) {
       print('Segment is "nothing", no ticket created');
       
-      // Still record in audit trail
-      final rulesService = RouletteRulesService();
       await rulesService.recordSpinAudit(
         userId: userId,
         segmentId: segment.id,
@@ -86,10 +94,26 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
       return null;
     }
     
-    // Generate unique identifier: roulette_{segmentId}_{timestamp}
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    // Handle bonus points separately - add directly to loyalty account
+    if (segment.rewardType == roulette.RewardType.bonusPoints) {
+      final points = segment.rewardValue?.toInt() ?? segment.value ?? 0;
+      print('Adding $points bonus points to user $userId');
+      
+      final loyaltyService = LoyaltyService();
+      await loyaltyService.addBonusPoints(userId, points);
+      
+      await rulesService.recordSpinAudit(
+        userId: userId,
+        segmentId: segment.id,
+        resultType: 'bonus_points',
+        deviceInfo: 'mobile_app',
+      );
+      
+      print('Added $points bonus points to user: $userId');
+      return null; // No ticket created for points
+    }
     
-    // Map segment to reward action with source "roulette"
+    // For other reward types, create a ticket
     final action = mapSegmentToRewardAction(segment).copyWith(
       source: 'roulette',
     );
@@ -106,8 +130,6 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
       validity: ticketValidity,
     );
     
-    // Record in audit trail
-    final rulesService = RouletteRulesService();
     await rulesService.recordSpinAudit(
       userId: userId,
       segmentId: segment.id,
@@ -117,7 +139,7 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
       deviceInfo: 'mobile_app',
     );
     
-    print('Created reward ticket: ${ticket.id} for user: $userId (roulette_${segment.id}_$timestamp)');
+    print('Created reward ticket: ${ticket.id} for user: $userId');
     return ticket;
   } catch (e) {
     print('Error creating ticket from roulette segment: $e');

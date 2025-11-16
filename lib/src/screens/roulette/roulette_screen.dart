@@ -235,7 +235,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Fermer'),
           ),
-          if (isWin)
+          if (isWin && segment.rewardType != RewardType.bonusPoints)
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -248,6 +248,17 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
               ),
               child: const Text('Voir mes récompenses'),
             ),
+          if (isWin && segment.rewardType == RewardType.bonusPoints)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Super !'),
+            ),
         ],
       ),
     );
@@ -255,6 +266,9 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
 
   String _getRewardInstructions(RouletteSegment segment) {
     switch (segment.rewardType) {
+      case RewardType.bonusPoints:
+        final points = segment.rewardValue?.toInt() ?? segment.value ?? 0;
+        return '$points points ont été ajoutés à votre compte fidélité !';
       case RewardType.percentageDiscount:
         return 'Un ticket de réduction de ${segment.rewardValue?.toStringAsFixed(0)}% a été ajouté à vos récompenses.';
       case RewardType.fixedAmountDiscount:
