@@ -320,7 +320,7 @@ class _WheelPainter extends CustomPainter {
     // Draw each segment
     for (int i = 0; i < segments.length; i++) {
       final segment = segments[i];
-      final startAngle = i * anglePerSegment - math.pi / 2; // Start from top
+      final startAngle = (i * anglePerSegment - math.pi / 2) + anglePerSegment; // Start from top
       
       _drawSegment(
         canvas,
