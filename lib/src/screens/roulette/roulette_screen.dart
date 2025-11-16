@@ -1,19 +1,23 @@
 // lib/src/screens/roulette/roulette_screen.dart
 // Client-side roulette wheel screen using custom PizzaRouletteWheel widget
 //
-// ARCHITECTURE: Single source of truth for segment selection
-// ============================================================
+// ARCHITECTURE: Index-based selection for perfect synchronization
+// ================================================================
 // The roulette system ensures perfect alignment between visual display and rewards by:
 // 1. Loading ONE list of segments from Firestore (ordered by 'position')
-// 2. Selecting ONE winning index based on probability weights
-// 3. Using THIS SAME segment for:
+// 2. Service selects winning INDEX (not object) based on probability weights
+// 3. Wheel animates to that INDEX
+// 4. Screen retrieves segment via segments[INDEX]
+// 5. Using THIS SAME segment for:
 //    - Visual animation (wheel rotation to align segment under cursor)
 //    - Reward creation (mapping segment to RewardAction)
 //    - Firestore logging (recording the spin result)
 //
-// CRITICAL: The segment list is NEVER re-sorted or modified between selection and reward.
-// The winning segment is selected in PizzaRouletteWheel._selectWinningSegment() and
-// passed back via onResult callback to ensure consistency.
+// CRITICAL IMPROVEMENTS vs old architecture:
+// - NO MORE instance comparison errors (index = -1)
+// - NO MORE desynchronization between visual and reward
+// - ONE list, ONE index, PERFECT sync
+// - Clean separation: Service = logic, Widget = animation, Screen = coordination
 //
 // MANUAL TESTING CHECKLIST:
 // =========================
@@ -130,13 +134,19 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
     });
     
     try {
-      // NEW ARCHITECTURE: Service picks the winning segment (single source of truth)
-      final result = await _segmentService.pickRandomSegment();
+      // NEW INDEX-BASED ARCHITECTURE: Service picks the winning index
+      // 1. We have ONE list of segments (_segments)
+      // 2. Service returns the index
+      // 3. Wheel animates to that index
+      // 4. We retrieve the segment via _segments[index]
+      final int index = _segmentService.pickIndex(_segments);
       
-      // Pass the result to the wheel for visual animation
-      _wheelKey.currentState?.spinWithResult(result);
+      print('🎲 [SCREEN] Picked index: $index');
+      
+      // Pass the index to the wheel for visual animation
+      _wheelKey.currentState?.spinToIndex(index);
     } catch (e) {
-      print('❌ Error picking random segment: $e');
+      print('❌ Error picking random index: $e');
       setState(() {
         _isSpinning = false;
         _canSpin = true;

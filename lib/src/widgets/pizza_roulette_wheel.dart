@@ -9,16 +9,25 @@ import '../models/roulette_config.dart';
 /// 
 /// This widget draws a wheel divided into segments (triangular sections) based
 /// on the provided configuration. Each segment has its own color, label, and
-/// optional icon. The wheel animates smoothly to display the pre-determined
-/// winning segment.
+/// optional icon. The wheel animates smoothly to the specified index.
 /// 
-/// IMPORTANT: This widget does NOT select the winning segment.
-/// The parent MUST call the service to get the result and pass it to spinWithResult().
+/// IMPORTANT: This widget does NOT select the winning segment or index.
+/// The parent MUST call the service to get the winning INDEX and pass it to spinToIndex().
+/// 
+/// INDEX-BASED ARCHITECTURE:
+/// - Single list of segments shared between screen and widget
+/// - Service returns an index (not an object)
+/// - Widget animates to the index
+/// - Screen retrieves the segment via segments[index]
+/// - Perfect synchronization, no instance errors
 /// 
 /// Usage:
 /// ```dart
 /// final GlobalKey<PizzaRouletteWheelState> wheelKey = GlobalKey();
 /// final RouletteSegmentService segmentService = RouletteSegmentService();
+/// 
+/// // 1. Create ONE list
+/// final segments = await segmentService.getActiveSegments();
 /// 
 /// PizzaRouletteWheel(
 ///   key: wheelKey,
@@ -28,9 +37,14 @@ import '../models/roulette_config.dart';
 ///   },
 /// )
 /// 
-/// // To spin the wheel (NEW ARCHITECTURE):
-/// final result = await segmentService.pickRandomSegment();
-/// wheelKey.currentState?.spinWithResult(result);
+/// // 2. Get winning index from service
+/// final int index = segmentService.pickIndex(segments);
+/// 
+/// // 3. Animate to that index
+/// wheelKey.currentState?.spinToIndex(index);
+/// 
+/// // 4. Retrieve the segment
+/// final result = segments[index];
 /// ```
 class PizzaRouletteWheel extends StatefulWidget {
   /// List of active segments in display order
@@ -99,38 +113,48 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     super.dispose();
   }
 
-  /// Public method to trigger the wheel spin with a pre-determined result
-  /// This is the NEW single entry point - the widget NO LONGER selects the result
+  /// Public method to trigger the wheel spin to a specific segment index
+  /// This is the NEW INDEX-BASED entry point - the widget receives only an index
   /// 
   /// The parent (roulette_screen) must:
-  /// 1. Call the service to get the winning segment
-  /// 2. Pass it to this method
+  /// 1. Create ONE list of segments
+  /// 2. Call the service to get the winning index
+  /// 3. Pass the index to this method
+  /// 4. Retrieve the segment via segments[index] when done
   /// 
   /// Example usage:
   /// ```dart
-  /// final result = await rouletteSegmentService.pickRandomSegment();
-  /// wheelKey.currentState?.spinWithResult(result);
+  /// final segments = await segmentService.getActiveSegments();
+  /// final index = segmentService.pickIndex(segments);
+  /// wheelKey.currentState?.spinToIndex(index);
+  /// // Result will be segments[index]
   /// ```
-  void spinWithResult(RouletteSegment targetSegment) {
+  void spinToIndex(int index) {
     if (_isSpinning || widget.segments.isEmpty) {
       return;
     }
+    
+    if (index < 0 || index >= widget.segments.length) {
+      print('⚠️ [WIDGET] Invalid index: $index (segments length: ${widget.segments.length})');
+      return;
+    }
+    
+    final targetSegment = widget.segments[index];
     
     setState(() {
       _isSpinning = true;
       _selectedSegment = targetSegment;
     });
     
-    // DEBUG LOG: Winning segment received from parent
-    print('🎯 [WIDGET] Spinning to target segment:');
-    print('  - Index: ${widget.segments.indexOf(targetSegment)}');
-    print('  - ID: ${targetSegment.id}');
+    // DEBUG LOG: Winning index received from parent
+    print('🎯 [WIDGET] Spinning to index: $index');
+    print('  - Segment ID: ${targetSegment.id}');
     print('  - Label: ${targetSegment.label}');
     print('  - RewardType: ${targetSegment.rewardType}');
     print('  - RewardValue: ${targetSegment.rewardValue}');
     
-    // Calculate target rotation angle for the winning segment
-    final targetAngle = _calculateTargetAngle(targetSegment);
+    // Calculate target rotation angle for the winning segment index
+    final targetAngle = _calculateTargetAngleFromIndex(index);
     
     print('  - Target angle: ${targetAngle.toStringAsFixed(4)} rad (${(targetAngle * 180 / math.pi).toStringAsFixed(2)}°)');
     
@@ -151,6 +175,18 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     _controller.forward(from: 0);
   }
 
+  /// DEPRECATED: Use spinToIndex() instead
+  /// This method is kept for backward compatibility but should NOT be used
+  @Deprecated('Use spinToIndex(int) instead')
+  void spinWithResult(RouletteSegment targetSegment) {
+    final index = widget.segments.indexOf(targetSegment);
+    if (index == -1) {
+      print('⚠️ [WIDGET] Segment not found in list, cannot spin');
+      return;
+    }
+    spinToIndex(index);
+  }
+
   /// DEPRECATED: Use spinWithResult() instead
   /// This method is kept for backward compatibility but should NOT be used
   @Deprecated('Use spinWithResult(RouletteSegment) instead')
@@ -164,7 +200,7 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     );
   }
 
-  /// Calculates the target angle to position the winning segment at the top
+  /// Calculates the target angle to position the winning segment at the top (INDEX-BASED)
   /// 
   /// This calculation MUST match the drawing logic in _WheelPainter to ensure
   /// pixel-perfect alignment between the visual segment and the cursor.
@@ -178,12 +214,11 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
   /// 2. Find the center of the segment
   /// 3. Calculate rotation needed to align center with cursor at -π/2
   /// 4. Normalize to [0, 2π)
-  double _calculateTargetAngle(RouletteSegment winningSegment) {
+  double _calculateTargetAngleFromIndex(int index) {
     final segments = widget.segments;
-    final segmentIndex = segments.indexOf(winningSegment);
 
-    if (segmentIndex == -1) {
-      print('⚠️ [ANGLE] Segment not found in list!');
+    if (index < 0 || index >= segments.length) {
+      print('⚠️ [ANGLE] Invalid index: $index (segments length: ${segments.length})');
       return 0.0;
     }
 
@@ -194,7 +229,7 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
 
     // Calculate start angle exactly as painter does
     // startAngle = index * anglePerSegment - π/2 + visualOffset
-    final startAngle = segmentIndex * anglePerSegment - math.pi / 2 + visualOffset;
+    final startAngle = index * anglePerSegment - math.pi / 2 + visualOffset;
     
     // Calculate center of the segment
     final centerAngle = startAngle + anglePerSegment / 2;
@@ -213,7 +248,7 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     }
 
     // Debug logging
-    print('[ANGLE DEBUG] index:$segmentIndex, visualOffset:$visualOffset, startAngle:${startAngle.toStringAsFixed(4)}, centerAngle:${centerAngle.toStringAsFixed(4)}, cursorAngle:$cursorAngle, targetAngle:${targetAngle.toStringAsFixed(4)}');
+    print('[ANGLE DEBUG] index:$index, visualOffset:$visualOffset, startAngle:${startAngle.toStringAsFixed(4)}, centerAngle:${centerAngle.toStringAsFixed(4)}, cursorAngle:$cursorAngle, targetAngle:${targetAngle.toStringAsFixed(4)}');
 
     return targetAngle;
   }
