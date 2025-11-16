@@ -152,6 +152,8 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
 /// Different reward types may have different validity periods
 Duration getValidityForRewardType(RewardType type) {
   switch (type) {
+    case RewardType.bonusPoints:
+      return const Duration(days: 0); // Points are immediate, no expiration
     case RewardType.percentageDiscount:
     case RewardType.fixedDiscount:
       return const Duration(days: 15); // Discounts: 15 days
