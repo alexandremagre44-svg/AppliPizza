@@ -299,7 +299,12 @@ class _WheelPainter extends CustomPainter {
 
   // Visual offset to align the wheel correctly with the needle
   // This constant adjusts the initial drawing position of segments
-  static const double _visualOffset = -math.pi / 6;
+  // 
+  // TEST VALUES (uncomment the one that aligns segment 0 under the needle):
+  // static const double _visualOffset = math.pi / 6;      // +π/6 ≈ +30°
+  static const double _visualOffset = -math.pi / 6;     // -π/6 ≈ -30°
+  // static const double _visualOffset = math.pi / 3;      // +π/3 ≈ +60°
+  // static const double _visualOffset = -math.pi / 3;     // -π/3 ≈ -60°
 
   _WheelPainter({required this.segments});
 
