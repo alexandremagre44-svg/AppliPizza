@@ -72,8 +72,21 @@ class RouletteSegmentService {
   /// - bonus_points: requires value, sets rewardId="bonus_points_<value>"
   /// - free_pizza/drink/dessert: requires productId, sets rewardType="free_product"
   /// - nothing: sets rewardType="none", rewardId=null
+  /// 
+  /// NEVER overwrites an existing segment. Only creates if it doesn't exist.
   Future<bool> createSegment(RouletteSegment segment) async {
     try {
+      // Check if segment already exists
+      final docSnapshot = await _firestore
+          .collection(_collection)
+          .doc(segment.id)
+          .get();
+      
+      if (docSnapshot.exists) {
+        print('Segment ${segment.id} already exists, skipping creation');
+        return true; // Return true as the segment exists (not an error)
+      }
+      
       // Validate and normalize segment before saving
       final normalizedSegment = _normalizeSegment(segment);
       await _firestore
@@ -192,6 +205,13 @@ class RouletteSegmentService {
   /// Get default segments for initialization
   /// 
   /// Returns properly configured default segments following business rules
+  /// Segments are created with EXACT values as specified:
+  /// - seg_1: +100 points (30%)
+  /// - seg_2: Pizza offerte (5%)
+  /// - seg_3: +50 points (25%)
+  /// - seg_4: Raté (20%)
+  /// - seg_5: Boisson offerte (10%)
+  /// - seg_6: Dessert offert (10%)
   List<RouletteSegment> _getDefaultSegments() {
     return [
       // Segment 1: +100 points (30%)
@@ -212,9 +232,27 @@ class RouletteSegmentService {
         weight: 30.0,
         productId: null,
       ),
-      // Segment 2: +50 points (25%)
+      // Segment 2: Pizza offerte (5%)
       RouletteSegment(
         id: 'seg_2',
+        label: 'Pizza offerte',
+        rewardId: 'free_pizza',
+        probability: 5.0,
+        color: const Color(0xFFFF6B6B), // Red
+        description: 'Une pizza gratuite',
+        rewardType: RewardType.freePizza,
+        rewardValue: null,
+        iconName: 'local_pizza',
+        isActive: true,
+        position: 2,
+        type: 'free_product',
+        value: null,
+        weight: 5.0,
+        productId: null,
+      ),
+      // Segment 3: +50 points (25%)
+      RouletteSegment(
+        id: 'seg_3',
         label: '+50 points',
         rewardId: 'bonus_points_50',
         probability: 25.0,
@@ -224,71 +262,17 @@ class RouletteSegmentService {
         rewardValue: 50.0,
         iconName: 'stars',
         isActive: true,
-        position: 2,
+        position: 3,
         type: 'bonus_points',
         value: 50,
         weight: 25.0,
         productId: null,
       ),
-      // Segment 3: Pizza offerte (5%)
-      RouletteSegment(
-        id: 'seg_3',
-        label: 'Pizza offerte',
-        rewardId: 'free_pizza_pizza_default',
-        probability: 5.0,
-        color: const Color(0xFFFF6B6B), // Red
-        description: 'Une pizza gratuite',
-        rewardType: RewardType.freeProduct,
-        rewardValue: null,
-        iconName: 'local_pizza',
-        isActive: true,
-        position: 3,
-        type: 'free_pizza',
-        value: null,
-        weight: 5.0,
-        productId: 'pizza_default',
-      ),
-      // Segment 4: Boisson offerte (10%)
+      // Segment 4: Raté! (20%)
       RouletteSegment(
         id: 'seg_4',
-        label: 'Boisson offerte',
-        rewardId: 'free_drink_drink_default',
-        probability: 10.0,
-        color: const Color(0xFF3498DB), // Blue
-        description: 'Une boisson gratuite',
-        rewardType: RewardType.freeProduct,
-        rewardValue: null,
-        iconName: 'local_drink',
-        isActive: true,
-        position: 4,
-        type: 'free_drink',
-        value: null,
-        weight: 10.0,
-        productId: 'drink_default',
-      ),
-      // Segment 5: Dessert offert (10%)
-      RouletteSegment(
-        id: 'seg_5',
-        label: 'Dessert offert',
-        rewardId: 'free_dessert_dessert_default',
-        probability: 10.0,
-        color: const Color(0xFF9B59B6), // Purple
-        description: 'Un dessert gratuit',
-        rewardType: RewardType.freeProduct,
-        rewardValue: null,
-        iconName: 'cake',
-        isActive: true,
-        position: 5,
-        type: 'free_dessert',
-        value: null,
-        weight: 10.0,
-        productId: 'dessert_default',
-      ),
-      // Segment 6: Raté! (20%)
-      RouletteSegment(
-        id: 'seg_6',
         label: 'Raté !',
-        rewardId: '', // empty string for nothing type
+        rewardId: '',
         probability: 20.0,
         color: const Color(0xFF95A5A6), // Gray
         description: 'Dommage, réessayez demain',
@@ -296,10 +280,46 @@ class RouletteSegmentService {
         rewardValue: null,
         iconName: 'close',
         isActive: true,
-        position: 6,
+        position: 4,
         type: 'nothing',
         value: null,
         weight: 20.0,
+        productId: null,
+      ),
+      // Segment 5: Boisson offerte (10%)
+      RouletteSegment(
+        id: 'seg_5',
+        label: 'Boisson offerte',
+        rewardId: 'free_drink',
+        probability: 10.0,
+        color: const Color(0xFF3498DB), // Blue
+        description: 'Une boisson gratuite',
+        rewardType: RewardType.freeDrink,
+        rewardValue: null,
+        iconName: 'local_drink',
+        isActive: true,
+        position: 5,
+        type: 'free_product',
+        value: null,
+        weight: 10.0,
+        productId: null,
+      ),
+      // Segment 6: Dessert offert (10%)
+      RouletteSegment(
+        id: 'seg_6',
+        label: 'Dessert offert',
+        rewardId: 'free_dessert',
+        probability: 10.0,
+        color: const Color(0xFF9B59B6), // Purple
+        description: 'Un dessert gratuit',
+        rewardType: RewardType.freeDessert,
+        rewardValue: null,
+        iconName: 'cake',
+        isActive: true,
+        position: 6,
+        type: 'free_product',
+        value: null,
+        weight: 10.0,
         productId: null,
       ),
     ];
@@ -309,51 +329,51 @@ class RouletteSegmentService {
   /// 
   /// Ensures rewardId, rewardType, and other fields are consistent:
   /// - bonus_points: rewardId="bonus_points_<value>", rewardType=bonusPoints
-  /// - free_pizza: rewardId="free_pizza_<productId>", rewardType=freeProduct
-  /// - free_drink: rewardId="free_drink_<productId>", rewardType=freeProduct
-  /// - free_dessert: rewardId="free_dessert_<productId>", rewardType=freeProduct
+  /// - free_product with rewardType=freePizza: rewardId="free_pizza"
+  /// - free_product with rewardType=freeDrink: rewardId="free_drink"
+  /// - free_product with rewardType=freeDessert: rewardId="free_dessert"
   /// - nothing: rewardId=null, rewardType=none
   RouletteSegment _normalizeSegment(RouletteSegment segment) {
     String? normalizedRewardId;
     RewardType normalizedRewardType = segment.rewardType;
     String normalizedType = segment.type ?? 'nothing';
 
-    // Normalize based on type
-    switch (segment.type?.toLowerCase()) {
-      case 'bonus_points':
-        final points = segment.value ?? segment.rewardValue?.toInt() ?? 0;
-        normalizedRewardId = 'bonus_points_$points';
-        normalizedRewardType = RewardType.bonusPoints;
-        normalizedType = 'bonus_points';
-        break;
-
-      case 'free_pizza':
-        final productId = segment.productId ?? 'pizza_default';
-        normalizedRewardId = 'free_pizza_$productId';
-        normalizedRewardType = RewardType.freeProduct;
-        normalizedType = 'free_pizza';
-        break;
-
-      case 'free_drink':
-        final productId = segment.productId ?? 'drink_default';
-        normalizedRewardId = 'free_drink_$productId';
-        normalizedRewardType = RewardType.freeProduct;
-        normalizedType = 'free_drink';
-        break;
-
-      case 'free_dessert':
-        final productId = segment.productId ?? 'dessert_default';
-        normalizedRewardId = 'free_dessert_$productId';
-        normalizedRewardType = RewardType.freeProduct;
-        normalizedType = 'free_dessert';
-        break;
-
-      case 'nothing':
-      default:
-        normalizedRewardId = null; // null for nothing type
-        normalizedRewardType = RewardType.none;
-        normalizedType = 'nothing';
-        break;
+    // Normalize based on type or rewardType
+    if (segment.type == 'bonus_points') {
+      final points = segment.value ?? segment.rewardValue?.toInt() ?? 0;
+      normalizedRewardId = 'bonus_points_$points';
+      normalizedRewardType = RewardType.bonusPoints;
+      normalizedType = 'bonus_points';
+    } else if (segment.type == 'free_product') {
+      // For free_product, use specific rewardType
+      normalizedType = 'free_product';
+      switch (segment.rewardType) {
+        case RewardType.freePizza:
+          normalizedRewardId = 'free_pizza';
+          normalizedRewardType = RewardType.freePizza;
+          break;
+        case RewardType.freeDrink:
+          normalizedRewardId = 'free_drink';
+          normalizedRewardType = RewardType.freeDrink;
+          break;
+        case RewardType.freeDessert:
+          normalizedRewardId = 'free_dessert';
+          normalizedRewardType = RewardType.freeDessert;
+          break;
+        default:
+          // Keep existing rewardId if already set correctly
+          normalizedRewardId = segment.rewardId;
+          break;
+      }
+    } else if (segment.type == 'nothing') {
+      normalizedRewardId = ''; // empty string for nothing type
+      normalizedRewardType = RewardType.none;
+      normalizedType = 'nothing';
+    } else {
+      // Keep existing values if type is not recognized
+      normalizedRewardId = segment.rewardId;
+      normalizedRewardType = segment.rewardType;
+      normalizedType = segment.type ?? 'nothing';
     }
 
     // Return normalized segment
