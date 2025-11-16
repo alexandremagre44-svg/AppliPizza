@@ -29,8 +29,14 @@ RewardAction mapSegmentToRewardAction(roulette.RouletteSegment segment) {
     case roulette.RewardType.freeProduct:
       mappedType = RewardType.freeProduct;
       break;
+    case roulette.RewardType.freePizza:
+      mappedType = RewardType.freeProduct; // Map to freeProduct for compatibility
+      break;
     case roulette.RewardType.freeDrink:
       mappedType = RewardType.freeDrink;
+      break;
+    case roulette.RewardType.freeDessert:
+      mappedType = RewardType.freeProduct; // Map to freeProduct for compatibility
       break;
     case roulette.RewardType.none:
     default:
@@ -38,6 +44,18 @@ RewardAction mapSegmentToRewardAction(roulette.RouletteSegment segment) {
       // This allows tracking all spins, even unsuccessful ones
       mappedType = RewardType.custom;
       break;
+  }
+  
+  // Determine categoryId based on reward type
+  String? categoryId;
+  if (rewardType == roulette.RewardType.freePizza) {
+    categoryId = 'Pizza';
+  } else if (rewardType == roulette.RewardType.freeDessert) {
+    categoryId = 'Dessert';
+  } else if (rewardType == roulette.RewardType.freeDrink) {
+    categoryId = 'Drink';
+  } else if (rewardType == roulette.RewardType.freeProduct) {
+    categoryId = 'Pizza'; // Default to pizza category for generic free products
   }
   
   return RewardAction(
@@ -52,9 +70,7 @@ RewardAction mapSegmentToRewardAction(roulette.RouletteSegment segment) {
         ? segment.rewardValue 
         : null,
     productId: segment.productId,
-    categoryId: rewardType == roulette.RewardType.freeProduct 
-        ? 'Pizza' // Default to pizza category for free products
-        : null,
+    categoryId: categoryId,
     source: 'roulette',
     label: segment.label,
     description: segment.description ?? segment.label,

@@ -233,11 +233,15 @@ class _RouletteSegmentEditorScreenState extends State<RouletteSegmentEditorScree
                     ],
 
                     // Product selector (conditional)
-                    if (_selectedRewardType == RewardType.freeProduct)
+                    if (_selectedRewardType == RewardType.freeProduct ||
+                        _selectedRewardType == RewardType.freePizza ||
+                        _selectedRewardType == RewardType.freeDessert)
                       _buildProductSelector(),
                     if (_selectedRewardType == RewardType.freeDrink)
                       _buildDrinkSelector(),
                     if (_selectedRewardType == RewardType.freeProduct ||
+                        _selectedRewardType == RewardType.freePizza ||
+                        _selectedRewardType == RewardType.freeDessert ||
                         _selectedRewardType == RewardType.freeDrink)
                       SizedBox(height: AppSpacing.md),
 
@@ -681,8 +685,12 @@ class _RouletteSegmentEditorScreenState extends State<RouletteSegmentEditorScree
         return 'Réduction fixe (€)';
       case RewardType.freeProduct:
         return 'Produit gratuit';
+      case RewardType.freePizza:
+        return 'Pizza gratuite';
       case RewardType.freeDrink:
         return 'Boisson gratuite';
+      case RewardType.freeDessert:
+        return 'Dessert gratuit';
     }
   }
 
