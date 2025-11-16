@@ -104,8 +104,18 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     // Select winning segment based on probabilities
     _selectedSegment = _selectWinningSegment();
     
+    // DEBUG LOG: Winning segment selection
+    print('🎯 [ROULETTE] Selected winning segment:');
+    print('  - Index: ${widget.segments.indexOf(_selectedSegment!)}');
+    print('  - ID: ${_selectedSegment!.id}');
+    print('  - Label: ${_selectedSegment!.label}');
+    print('  - RewardType: ${_selectedSegment!.rewardType}');
+    print('  - RewardValue: ${_selectedSegment!.rewardValue}');
+    
     // Calculate target rotation angle for the winning segment
     final targetAngle = _calculateTargetAngle(_selectedSegment!);
+    
+    print('  - Target angle: ${targetAngle.toStringAsFixed(4)} rad (${(targetAngle * 180 / math.pi).toStringAsFixed(2)}°)');
     
     // Add multiple full rotations for visual effect (3-5 full spins)
     final fullRotations = 3 + math.Random().nextDouble() * 2;
@@ -163,11 +173,16 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel>
     final anglePerSegment = 2 * math.pi / segments.length;
     
     // Calculate the center angle of the winning segment
-    final segmentCenterAngle = segmentIndex * anglePerSegment + anglePerSegment / 2;
+    // NOTE: Segments are drawn starting at -π/2 (top position), so we need to account for this offset
+    // Drawing: startAngle = i * anglePerSegment - π/2
+    // Center of segment i: (i * anglePerSegment - π/2) + anglePerSegment/2 = i * anglePerSegment - π/2 + anglePerSegment/2
+    final segmentCenterAngle = segmentIndex * anglePerSegment - math.pi / 2 + anglePerSegment / 2;
     
-    // We want the cursor at top (0 degrees) to point to this segment
-    // So we need to rotate by (2*pi - segmentCenterAngle) to align it
-    final targetAngle = (2 * math.pi - segmentCenterAngle) % (2 * math.pi);
+    // We want the cursor at top (which corresponds to angle = -π/2 in our coordinate system) to point to this segment
+    // The cursor is drawn at the top, pointing down at angle -π/2
+    // So we need to rotate the wheel so that segmentCenterAngle aligns with -π/2
+    // Target rotation = -π/2 - segmentCenterAngle (but we want positive rotation, so add 2π if needed)
+    final targetAngle = (-math.pi / 2 - segmentCenterAngle) % (2 * math.pi);
     
     return targetAngle;
   }

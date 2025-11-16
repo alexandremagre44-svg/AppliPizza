@@ -1,5 +1,54 @@
 // lib/src/screens/roulette/roulette_screen.dart
 // Client-side roulette wheel screen using custom PizzaRouletteWheel widget
+//
+// ARCHITECTURE: Single source of truth for segment selection
+// ============================================================
+// The roulette system ensures perfect alignment between visual display and rewards by:
+// 1. Loading ONE list of segments from Firestore (ordered by 'position')
+// 2. Selecting ONE winning index based on probability weights
+// 3. Using THIS SAME segment for:
+//    - Visual animation (wheel rotation to align segment under cursor)
+//    - Reward creation (mapping segment to RewardAction)
+//    - Firestore logging (recording the spin result)
+//
+// CRITICAL: The segment list is NEVER re-sorted or modified between selection and reward.
+// The winning segment is selected in PizzaRouletteWheel._selectWinningSegment() and
+// passed back via onResult callback to ensure consistency.
+//
+// MANUAL TESTING CHECKLIST:
+// =========================
+// Test Case 1: Normal probability distribution
+//   - Configure segments with typical probabilities (e.g., 30%, 25%, 20%, etc.)
+//   - Spin the wheel multiple times (at least 10 spins)
+//   - Verify: Visual segment under cursor ALWAYS matches the reward popup
+//   - Verify: If wheel stops on "Raté!", popup shows "Dommage" with no points/tickets
+//   - Verify: If wheel stops on "+50 points", popup shows "+50 points" and loyalty balance increases by 50
+//   - Verify: If wheel stops on "Pizza offerte", popup shows pizza reward and ticket is created
+//
+// Test Case 2: Force 100% probability on one segment
+//   - In Firestore, set one segment to probability=100, all others to 0
+//   - Spin the wheel multiple times
+//   - Verify: Wheel ALWAYS stops visually on the 100% segment
+//   - Verify: Reward applied ALWAYS matches this segment
+//
+// Test Case 3: Disable a segment
+//   - In Firestore, set a segment's isActive=false
+//   - Reload the roulette screen
+//   - Verify: Disabled segment does NOT appear on the wheel
+//   - Verify: Wheel can still be spun and rewards work correctly
+//   - Verify: Disabled segment is never selected as a winner
+//
+// Test Case 4: Segment type mapping validation
+//   - Create segments of each type: bonus_points, freePizza, freeDrink, freeDessert, nothing
+//   - Verify "nothing" segments: rewardType=none, no points or tickets created
+//   - Verify "bonus_points" segments: points added to loyalty account immediately
+//   - Verify "freePizza/Drink/Dessert": tickets created with correct type
+//
+// DEBUG LOGS: Check console for alignment verification
+//   - 🎯 [ROULETTE] logs show the selected segment BEFORE animation
+//   - 🎁 [ROULETTE SCREEN] logs show the segment AFTER animation completes
+//   - 💰 [REWARD] logs show the reward being created
+//   - All three should show THE SAME segment ID and label
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,6 +98,12 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       final segments = await _segmentService.getActiveSegments();
       final status = await _rulesService.checkEligibility(widget.userId);
       
+      // DEBUG LOG: Segments loaded
+      print('📋 [ROULETTE SCREEN] Loaded ${segments.length} active segments:');
+      for (int i = 0; i < segments.length; i++) {
+        print('  [$i] ${segments[i].id}: "${segments[i].label}" (${segments[i].rewardType}, prob=${segments[i].probability}%)');
+      }
+      
       setState(() {
         _segments = segments;
         _eligibilityStatus = status;
@@ -56,7 +111,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading segments: $e');
+      print('❌ Error loading segments: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -76,6 +131,14 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   }
 
   Future<void> _onResult(RouletteSegment result) async {
+    // DEBUG LOG: Result received from wheel
+    print('🎁 [ROULETTE SCREEN] Received result from wheel:');
+    print('  - Index in segments list: ${_segments.indexOf(result)}');
+    print('  - ID: ${result.id}');
+    print('  - Label: ${result.label}');
+    print('  - RewardType: ${result.rewardType}');
+    print('  - RewardValue: ${result.rewardValue}');
+    
     // Record the spin in Firestore
     await _rouletteService.recordSpin(widget.userId, result);
     
@@ -98,8 +161,11 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   /// Create a reward ticket from the roulette segment
   Future<void> _createRewardTicket(RouletteSegment segment) async {
     try {
+      print('💰 [REWARD] Creating reward for segment: ${segment.label} (${segment.rewardType})');
+      
       // Don't create tickets for "nothing" segments
       if (segment.rewardType == RewardType.none) {
+        print('  ➜ No reward (segment type is "none")');
         return;
       }
 
@@ -109,9 +175,9 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         segment: segment,
       );
       
-      print('Reward ticket created for segment: ${segment.label}');
+      print('  ➜ Reward ticket created successfully for: ${segment.label}');
     } catch (e) {
-      print('Error creating reward ticket: $e');
+      print('  ❌ Error creating reward ticket: $e');
     }
   }
 
