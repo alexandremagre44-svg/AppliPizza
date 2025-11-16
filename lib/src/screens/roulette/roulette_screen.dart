@@ -134,6 +134,9 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   }
 
   Future<void> _onResult(RouletteSegment result) async {
+    // LOG: Verify segment order when applying reward
+    print('[ROULETTE ORDER] Applying reward with segments: ${_segments.map((s) => s.label).toList()}');
+    
     // DEBUG LOG: Result received from wheel
     print('🎁 [ROULETTE SCREEN] Received result from wheel:');
     print('  - Index in segments list: ${_segments.indexOf(result)}');
