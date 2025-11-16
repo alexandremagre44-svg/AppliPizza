@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../models/product.dart';
 import '../../data/mock_data.dart';
 import '../../providers/cart_provider.dart';
+import '../../design_system/app_theme.dart';
 
 const _uuid = Uuid();
 
@@ -139,25 +140,24 @@ class _PizzaCustomizationModalState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    const primaryRed = Color(0xFFC62828);
-    
     return Container(
       height: MediaQuery.of(context).size.height * 0.90,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.background,
+        borderRadius: BorderRadius.vertical(top: AppRadius.bottomSheet.topLeft),
       ),
       child: Column(
         children: [
-          // Handle bar
-          Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 16),
-            width: 50,
-            height: 5,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(3),
+          // Drag handle Material 3
+          Padding(
+            padding: AppSpacing.paddingVerticalSM,
+            child: Container(
+              height: 4,
+              width: 40,
+              decoration: BoxDecoration(
+                color: AppColors.outlineVariant,
+                borderRadius: AppRadius.radiusFull,
+              ),
             ),
           ),
           
@@ -169,41 +169,38 @@ class _PizzaCustomizationModalState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Visuel de la pizza en haut
-                  _buildPizzaPreview(theme, primaryRed),
+                  _buildPizzaPreview(context),
                   
-                  const SizedBox(height: 24),
+                  AppSpacing.verticalSpaceLG,
                   
-                  // Section Base (Taille)
+                  // Section Taille avec SegmentedButton
                   _buildCategorySection(
                     title: 'Taille',
-                    icon: Icons.straighten,
-                    primaryRed: primaryRed,
-                    child: _buildSizeOptions(primaryRed),
+                    icon: Icons.straighten_rounded,
+                    child: _buildSizeOptions(),
                   ),
                   
-                  const SizedBox(height: 24),
+                  AppSpacing.verticalSpaceLG,
                   
                   // Section Ingrédients de base
                   _buildCategorySection(
                     title: 'Ingrédients de base',
                     subtitle: 'Retirez ce que vous ne souhaitez pas',
-                    icon: Icons.inventory_2,
-                    primaryRed: primaryRed,
-                    child: _buildBaseIngredientsOptions(primaryRed),
+                    icon: Icons.inventory_2_rounded,
+                    child: _buildBaseIngredientsOptions(),
                   ),
                   
-                  const SizedBox(height: 24),
+                  AppSpacing.verticalSpaceLG,
                   
                   // Section Fromages
                   if (_fromageIngredients.isNotEmpty) ...[
                     _buildCategorySection(
                       title: 'Fromages',
                       subtitle: 'Ajoutez des fromages supplémentaires',
-                      icon: Icons.add_circle_outline,
-                      primaryRed: primaryRed,
-                      child: _buildSupplementOptions(_fromageIngredients, primaryRed),
+                      icon: Icons.add_circle_outline_rounded,
+                      child: _buildSupplementOptions(_fromageIngredients),
                     ),
-                    const SizedBox(height: 24),
+                    AppSpacing.verticalSpaceLG,
                   ],
                   
                   // Section Garnitures principales
@@ -211,11 +208,10 @@ class _PizzaCustomizationModalState
                     _buildCategorySection(
                       title: 'Garnitures principales',
                       subtitle: 'Viandes et protéines',
-                      icon: Icons.restaurant,
-                      primaryRed: primaryRed,
-                      child: _buildSupplementOptions(_garnituresIngredients, primaryRed),
+                      icon: Icons.restaurant_rounded,
+                      child: _buildSupplementOptions(_garnituresIngredients),
                     ),
-                    const SizedBox(height: 24),
+                    AppSpacing.verticalSpaceLG,
                   ],
                   
                   // Section Suppléments / Extras
@@ -223,137 +219,119 @@ class _PizzaCustomizationModalState
                     _buildCategorySection(
                       title: 'Suppléments / Extras',
                       subtitle: 'Légumes et accompagnements',
-                      icon: Icons.add_shopping_cart,
-                      primaryRed: primaryRed,
-                      child: _buildSupplementOptions(_supplementsIngredients, primaryRed),
+                      icon: Icons.add_shopping_cart_rounded,
+                      child: _buildSupplementOptions(_supplementsIngredients),
                     ),
-                    const SizedBox(height: 24),
+                    AppSpacing.verticalSpaceLG,
                   ],
                   
                   // Section Instructions spéciales
                   _buildCategorySection(
                     title: 'Instructions spéciales',
                     subtitle: 'Notes pour votre commande',
-                    icon: Icons.edit_note,
-                    primaryRed: primaryRed,
-                    child: _buildNotesField(primaryRed),
+                    icon: Icons.edit_note_rounded,
+                    child: _buildNotesField(),
                   ),
                   
-                  const SizedBox(height: 100), // Espace pour la barre fixe
+                  SizedBox(height: 100 + AppSpacing.lg), // Espace pour la barre fixe
                 ],
               ),
             ),
           ),
           
           // Barre de résumé fixe en bas
-          _buildFixedSummaryBar(theme, primaryRed),
+          _buildFixedSummaryBar(context),
         ],
       ),
     );
   }
 
-  Widget _buildPizzaPreview(ThemeData theme, Color primaryRed) {
+  Widget _buildPizzaPreview(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Image de la pizza
-          Container(
-            width: double.infinity,
-            height: 180,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: primaryRed.withOpacity(0.15),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
+      margin: AppSpacing.paddingHorizontalMD,
+      child: Card(
+        elevation: 0,
+        color: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.card,
+          side: BorderSide(color: AppColors.outlineVariant),
+        ),
+        child: Padding(
+          padding: AppSpacing.paddingMD,
+          child: Column(
+            children: [
+              // Image de la pizza
+              ClipRRect(
+                borderRadius: AppRadius.radiusMedium,
+                child: Image.network(
+                  widget.pizza.imageUrl,
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainer,
+                        borderRadius: AppRadius.radiusMedium,
+                      ),
+                      child: Icon(
+                        Icons.local_pizza_rounded,
+                        size: 80,
+                        color: AppColors.primary.withOpacity(0.3),
+                      ),
+                    );
+                  },
                 ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                widget.pizza.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.local_pizza,
-                      size: 80,
-                      color: primaryRed.withOpacity(0.3),
-                    ),
-                  );
-                },
               ),
-            ),
-          ),
-          
-          const SizedBox(height: 20),
-          
-          // Nom de la pizza
-          Text(
-            widget.pizza.name,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF212121),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          
-          const SizedBox(height: 8),
-          
-          // Description
-          Text(
-            widget.pizza.description,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Prix de base
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: primaryRed.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: primaryRed.withOpacity(0.3), width: 1),
-            ),
-            child: Text(
-              'Prix de base : ${widget.pizza.price.toStringAsFixed(2)}€',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: primaryRed,
+              
+              AppSpacing.verticalSpaceMD,
+              
+              // Nom de la pizza
+              Text(
+                widget.pizza.name,
+                style: AppTextStyles.headlineMedium.copyWith(
+                  color: AppColors.primary,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
+              
+              AppSpacing.verticalSpaceXS,
+              
+              // Description
+              Text(
+                widget.pizza.description,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              
+              AppSpacing.verticalSpaceSM,
+              
+              // Prix de base badge
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryContainer,
+                  borderRadius: AppRadius.badge,
+                ),
+                child: Text(
+                  'Prix de base : ${widget.pizza.price.toStringAsFixed(2)}€',
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -362,57 +340,46 @@ class _PizzaCustomizationModalState
     required String title,
     String? subtitle,
     required IconData icon,
-    required Color primaryRed,
     required Widget child,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: AppSpacing.paddingHorizontalMD,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // En-tête de section
+          // En-tête de section Material 3
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.paddingMD,
             decoration: BoxDecoration(
-              color: primaryRed.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: primaryRed.withOpacity(0.2),
-                width: 1.5,
-              ),
+              color: AppColors.surfaceContainer,
+              borderRadius: AppRadius.card,
+              border: Border.all(color: AppColors.outlineVariant),
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: primaryRed,
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.primary,
+                    borderRadius: AppRadius.radiusMedium,
                   ),
-                  child: Icon(icon, color: Colors.white, size: 24),
+                  child: Icon(icon, color: AppColors.onPrimary, size: 24),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF212121),
-                          letterSpacing: 0.3,
-                        ),
+                        style: AppTextStyles.titleMedium,
                       ),
                       if (subtitle != null) ...[
-                        const SizedBox(height: 4),
+                        SizedBox(height: AppSpacing.xxs),
                         Text(
                           subtitle,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                            height: 1.3,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -422,135 +389,95 @@ class _PizzaCustomizationModalState
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppSpacing.md),
           child,
         ],
       ),
     );
   }
 
-  Widget _buildSizeOptions(Color primaryRed) {
-    final sizes = [
-      {'name': 'Moyenne', 'size': '30 cm', 'price': 0.0},
-      {'name': 'Grande', 'size': '40 cm', 'price': 3.0},
-    ];
-    
-    return Row(
-      children: sizes.map((size) {
-        final isSelected = _selectedSize == size['name'];
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: InkWell(
-              onTap: () => setState(() => _selectedSize = size['name'] as String),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: isSelected ? primaryRed.withOpacity(0.15) : Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected ? primaryRed : Colors.grey[300]!,
-                    width: isSelected ? 2.5 : 1.5,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.local_pizza,
-                      size: size['name'] == 'Grande' ? 40 : 32,
-                      color: isSelected ? primaryRed : Colors.grey[600],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      size['name'] as String,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: isSelected ? primaryRed : const Color(0xFF212121),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      size['size'] as String,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    if ((size['price'] as double) > 0) ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isSelected ? primaryRed : Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '+${(size['price'] as double).toStringAsFixed(2)}€',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : Colors.grey[700],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
+  Widget _buildSizeOptions() {
+    return SegmentedButton<String>(
+      segments: const [
+        ButtonSegment<String>(
+          value: 'Moyenne',
+          label: Text('Moyenne'),
+          icon: Icon(Icons.local_pizza_rounded, size: 20),
+        ),
+        ButtonSegment<String>(
+          value: 'Grande',
+          label: Text('Grande'),
+          icon: Icon(Icons.local_pizza_rounded, size: 24),
+        ),
+      ],
+      selected: {_selectedSize},
+      onSelectionChanged: (Set<String> newSelection) {
+        setState(() {
+          _selectedSize = newSelection.first;
+        });
+      },
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+          (Set<MaterialState> states) {
+            if (states.contains(MaterialState.selected)) {
+              return AppColors.primaryContainer;
+            }
+            return AppColors.surface;
+          },
+        ),
+        foregroundColor: MaterialStateProperty.resolveWith<Color>(
+          (Set<MaterialState> states) {
+            if (states.contains(MaterialState.selected)) {
+              return AppColors.primary;
+            }
+            return AppColors.onSurfaceVariant;
+          },
+        ),
+        side: MaterialStateProperty.all(
+          BorderSide(color: AppColors.outline),
+        ),
+        textStyle: MaterialStateProperty.all(AppTextStyles.labelLarge),
+      ),
     );
   }
 
-  Widget _buildBaseIngredientsOptions(Color primaryRed) {
+  Widget _buildBaseIngredientsOptions() {
     return Wrap(
-      spacing: 10,
-      runSpacing: 10,
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
       children: widget.pizza.baseIngredients.map((ingredient) {
         final isSelected = _baseIngredients.contains(ingredient);
-        return InkWell(
-          onTap: () {
-            setState(() {
-              if (isSelected) {
-                _baseIngredients.remove(ingredient);
-              } else {
-                _baseIngredients.add(ingredient);
-              }
-            });
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            decoration: BoxDecoration(
-              color: isSelected ? primaryRed.withOpacity(0.15) : Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isSelected ? primaryRed : Colors.grey[300]!,
-                width: isSelected ? 2 : 1.5,
-              ),
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          child: FilterChip(
+            selected: isSelected,
+            label: Text(ingredient),
+            avatar: Icon(
+              isSelected ? Icons.check_circle_rounded : Icons.cancel_rounded,
+              size: 18,
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  isSelected ? Icons.check_circle : Icons.cancel,
-                  size: 18,
-                  color: isSelected ? primaryRed : Colors.grey[500],
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  ingredient,
-                  style: TextStyle(
-                    color: isSelected ? primaryRed : const Color(0xFF212121),
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+            onSelected: (bool selected) {
+              setState(() {
+                if (selected) {
+                  _baseIngredients.add(ingredient);
+                } else {
+                  _baseIngredients.remove(ingredient);
+                }
+              });
+            },
+            selectedColor: AppColors.primaryContainer,
+            backgroundColor: AppColors.surface,
+            side: BorderSide(
+              color: isSelected ? AppColors.primary : AppColors.outline,
+              width: isSelected ? 1.5 : 1,
+            ),
+            labelStyle: AppTextStyles.bodySmall.copyWith(
+              color: isSelected ? AppColors.primary : AppColors.textPrimary,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
             ),
           ),
         );
@@ -558,19 +485,21 @@ class _PizzaCustomizationModalState
     );
   }
 
-  Widget _buildSupplementOptions(List<Ingredient> ingredients, Color primaryRed) {
+  Widget _buildSupplementOptions(List<Ingredient> ingredients) {
     return Column(
       children: ingredients.map((ingredient) {
         final isSelected = _extraIngredients.contains(ingredient.name);
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          margin: EdgeInsets.only(bottom: AppSpacing.sm),
           decoration: BoxDecoration(
-            color: isSelected ? primaryRed.withOpacity(0.08) : Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            color: isSelected ? AppColors.primaryContainer : AppColors.surface,
+            borderRadius: AppRadius.card,
             border: Border.all(
-              color: isSelected ? primaryRed : Colors.grey[200]!,
-              width: isSelected ? 2 : 1.5,
+              color: isSelected ? AppColors.primary : AppColors.outlineVariant,
+              width: isSelected ? 2 : 1,
             ),
+            boxShadow: isSelected ? AppShadows.soft : [],
           ),
           child: ListTile(
             onTap: () {
@@ -582,40 +511,42 @@ class _PizzaCustomizationModalState
                 }
               });
             },
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            leading: Container(
+            contentPadding: AppSpacing.paddingMD,
+            leading: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: isSelected ? primaryRed : Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
+                color: isSelected ? AppColors.primary : AppColors.surfaceContainer,
+                borderRadius: AppRadius.radiusMedium,
               ),
               child: Icon(
-                isSelected ? Icons.check : Icons.add,
-                color: isSelected ? Colors.white : Colors.grey[600],
+                isSelected ? Icons.check_rounded : Icons.add_rounded,
+                color: isSelected ? AppColors.onPrimary : AppColors.onSurfaceVariant,
                 size: 24,
               ),
             ),
             title: Text(
               ingredient.name,
-              style: TextStyle(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                fontSize: 15,
-                color: isSelected ? primaryRed : const Color(0xFF212121),
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected ? AppColors.primary : AppColors.textPrimary,
               ),
             ),
             trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xxs,
+              ),
               decoration: BoxDecoration(
-                color: isSelected ? primaryRed : Colors.grey[200],
-                borderRadius: BorderRadius.circular(10),
+                color: isSelected ? AppColors.primary : AppColors.surfaceContainer,
+                borderRadius: AppRadius.badge,
               ),
               child: Text(
                 '+${ingredient.extraCost.toStringAsFixed(2)}€',
-                style: TextStyle(
+                style: AppTextStyles.labelMedium.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: isSelected ? Colors.white : Colors.grey[700],
+                  color: isSelected ? AppColors.onPrimary : AppColors.textSecondary,
                 ),
               ),
             ),
@@ -625,135 +556,115 @@ class _PizzaCustomizationModalState
     );
   }
 
-  Widget _buildNotesField(Color primaryRed) {
+  Widget _buildNotesField() {
     return TextField(
       controller: _notesController,
       maxLines: 4,
       decoration: InputDecoration(
         hintText: 'Ex: Bien cuite, peu d\'ail, sans sel...',
-        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+        hintStyle: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.textTertiary,
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey[300]!, width: 1.5),
+          borderRadius: AppRadius.input,
+          borderSide: BorderSide(color: AppColors.outline),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey[300]!, width: 1.5),
+          borderRadius: AppRadius.input,
+          borderSide: BorderSide(color: AppColors.outline),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: primaryRed, width: 2),
+          borderRadius: AppRadius.input,
+          borderSide: BorderSide(color: AppColors.primary, width: 2),
         ),
         filled: true,
-        fillColor: Colors.grey[50],
-        contentPadding: const EdgeInsets.all(16),
+        fillColor: AppColors.surface,
+        contentPadding: AppSpacing.paddingMD,
       ),
+      style: AppTextStyles.bodyMedium,
     );
   }
 
-  Widget _buildFixedSummaryBar(ThemeData theme, Color primaryRed) {
+  Widget _buildFixedSummaryBar(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: AppSpacing.paddingMD,
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.surface,
+        boxShadow: AppShadows.navBar,
+        borderRadius: BorderRadius.vertical(top: AppRadius.card.topLeft),
       ),
       child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Récapitulatif du prix
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: primaryRed.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: primaryRed.withOpacity(0.2),
-                  width: 1.5,
-                ),
+            Card(
+              elevation: 0,
+              color: AppColors.primaryContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: AppRadius.card,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Prix total',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${_totalPrice.toStringAsFixed(2)}€',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: primaryRed,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: primaryRed,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.euro,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Bouton Ajouter au panier
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _addToCart,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryRed,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 3,
-                  shadowColor: primaryRed.withOpacity(0.4),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              child: Padding(
+                padding: AppSpacing.paddingMD,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.shopping_cart_outlined, size: 24),
-                    SizedBox(width: 12),
-                    Text(
-                      'Ajouter au panier',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.3,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Prix total',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          '${_totalPrice.toStringAsFixed(2)}€',
+                          style: AppTextStyles.priceXL,
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(AppSpacing.sm),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: AppRadius.radiusMedium,
+                      ),
+                      child: Icon(
+                        Icons.euro_rounded,
+                        color: AppColors.onPrimary,
+                        size: 28,
                       ),
                     ),
                   ],
                 ),
+              ),
+            ),
+            
+            AppSpacing.verticalSpaceMD,
+            
+            // Bouton Ajouter au panier
+            FilledButton(
+              onPressed: _addToCart,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                minimumSize: const Size.fromHeight(56),
+                padding: AppSpacing.buttonPadding,
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppRadius.button,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.shopping_cart_rounded, size: 24),
+                  SizedBox(width: AppSpacing.sm),
+                  Text(
+                    'Ajouter au panier',
+                    style: AppTextStyles.buttonLarge,
+                  ),
+                ],
               ),
             ),
           ],

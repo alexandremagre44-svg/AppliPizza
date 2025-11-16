@@ -1,4 +1,4 @@
-﻿// lib/src/screens/menu/menu_customization_modal.dart
+// lib/src/screens/menu/menu_customization_modal.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../models/product.dart';
-import '../../theme/app_theme.dart';
+import '../../design_system/app_theme.dart';
 
 const _uuid = Uuid();
 
@@ -110,88 +110,67 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
 
   Widget _buildSelectionTile(String title, Product? selected, VoidCallback onTap) {
     final isSelected = selected != null;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+      margin: EdgeInsets.only(bottom: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primaryRedLight.withOpacity(0.1) : Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        color: isSelected ? AppColors.primaryContainer : AppColors.surface,
+        borderRadius: AppRadius.card,
         border: Border.all(
-          color: isSelected ? AppColors.primaryRed : Colors.grey.shade300,
-          width: isSelected ? 2.5 : 1.5,
+          color: isSelected ? AppColors.primary : AppColors.outlineVariant,
+          width: isSelected ? 2 : 1,
         ),
-        boxShadow: [
-          if (isSelected)
-            BoxShadow(
-              color: Colors.blue.withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 4),
-            )
-          else
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-        ],
+        boxShadow: isSelected ? AppShadows.card : AppShadows.soft,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: AppRadius.card,
           child: Padding(
-            padding: const EdgeInsets.all(18),
+            padding: AppSpacing.paddingMD,
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primaryRed : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      if (isSelected)
-                        BoxShadow(
-                          color: AppColors.primaryRed.withOpacity(0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                    ],
+                    color: isSelected ? AppColors.primary : AppColors.surfaceContainer,
+                    borderRadius: AppRadius.radiusMedium,
                   ),
                   child: Icon(
-                    isSelected ? Icons.check_circle : Icons.add_circle_outline,
-                    color: isSelected ? Colors.white : Colors.grey.shade600,
+                    isSelected ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
+                    color: isSelected ? AppColors.onPrimary : AppColors.onSurfaceVariant,
                     size: 24,
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                          color: Colors.grey.shade800,
+                        style: AppTextStyles.bodyMediumSemiBold.copyWith(
+                          color: AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: AppSpacing.xxs),
                       Text(
                         selected?.name ?? 'Cliquez pour sélectionner',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected ? Colors.blue.shade700 : Colors.red.shade600,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                         ),
                       ),
                     ],
                   ),
                 ),
                 Icon(
-                  Icons.arrow_forward_ios,
+                  Icons.arrow_forward_ios_rounded,
                   size: 18,
-                  color: isSelected ? Colors.blue.shade600 : Colors.grey.shade400,
+                  color: isSelected ? AppColors.primary : AppColors.onSurfaceVariant,
                 ),
               ],
             ),
@@ -276,283 +255,305 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
       builder: (_, controller) {
         return Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            color: AppColors.background,
+            borderRadius: BorderRadius.vertical(top: AppRadius.bottomSheet.topLeft),
           ),
           child: Column(
             children: [
-              // Poignée de glissement et titre avec gradient
+              // Drag handle Material 3
               Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 5,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryRed,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.4),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryRed,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.blue.shade200,
-                          width: 2,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.restaurant_menu,
-                            color: Colors.blue.shade700,
-                            size: 24,
-                          ),
-                          const SizedBox(width: 12),
-                          Flexible(
-                            child: Text(
-                              'PERSONNALISATION DU ${widget.menu.name.toUpperCase()}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.blue.shade800,
-                                letterSpacing: 0.5,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                padding: AppSpacing.paddingVerticalSM,
+                child: Container(
+                  height: 4,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.outlineVariant,
+                    borderRadius: AppRadius.radiusFull,
+                  ),
                 ),
               ),
 
+              // Header avec titre
+              _buildHeader(context),
+
+              // Contenu scrollable
               Expanded(
                 child: ListView(
                   controller: controller,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: AppSpacing.paddingHorizontalMD,
                   children: [
-                    const SizedBox(height: 8),
-                    // --- Sélections de Pizzas ---
-                    if (widget.menu.pizzaCount > 0)
-                      Container(
-                        margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryRed,
-                          border: Border.all(
-                            color: Colors.orange.shade300,
-                            width: 2,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryRed,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.orange.withOpacity(0.4),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.local_pizza,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Sélectionnez vos Pizzas (${widget.menu.pizzaCount} requises)',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.orange.shade900,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                    AppSpacing.verticalSpaceSM,
+                    
+                    // Menu info card
+                    _buildMenuInfoCard(context),
+                    
+                    AppSpacing.verticalSpaceLG,
+                    
+                    // --- Section Pizzas ---
+                    if (widget.menu.pizzaCount > 0) ...[
+                      _buildSectionHeader(
+                        icon: Icons.local_pizza_rounded,
+                        title: 'Vos Pizzas',
+                        subtitle: '${widget.menu.pizzaCount} requises',
+                        badgeCount: widget.menu.pizzaCount,
                       ),
-                    ...List.generate(widget.menu.pizzaCount, (index) {
-                      return _buildSelectionTile(
-                        'Pizza n°${index + 1}',
-                        _selectedPizzas[index],
-                        () => _showSelectionModal(
-                          title: 'Choisir la Pizza n°${index + 1}',
-                          options: pizzaOptions,
-                          index: index,
-                          isPizza: true,
-                        ),
-                      );
-                    }),
+                      AppSpacing.verticalSpaceMD,
+                      ...List.generate(widget.menu.pizzaCount, (index) {
+                        return _buildSelectionTile(
+                          'Pizza n°${index + 1}',
+                          _selectedPizzas[index],
+                          () => _showSelectionModal(
+                            title: 'Choisir la Pizza n°${index + 1}',
+                            options: pizzaOptions,
+                            index: index,
+                            isPizza: true,
+                          ),
+                        );
+                      }),
+                      AppSpacing.verticalSpaceLG,
+                    ],
 
-                    // --- Sélections de Boissons ---
-                    if (widget.menu.drinkCount > 0)
-                      Container(
-                        margin: const EdgeInsets.only(top: 16.0, bottom: 16.0),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryRed,
-                          border: Border.all(
-                            color: Colors.cyan.shade300,
-                            width: 2,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryRed,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.cyan.withOpacity(0.4),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.local_drink,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Sélectionnez vos Boissons (${widget.menu.drinkCount} requises)',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.blue.shade900,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                    // --- Section Boissons ---
+                    if (widget.menu.drinkCount > 0) ...[
+                      _buildSectionHeader(
+                        icon: Icons.local_drink_rounded,
+                        title: 'Vos Boissons',
+                        subtitle: '${widget.menu.drinkCount} requises',
+                        badgeCount: widget.menu.drinkCount,
                       ),
-                    ...List.generate(widget.menu.drinkCount, (index) {
-                      return _buildSelectionTile(
-                        'Boisson n°${index + 1}',
-                        _selectedDrinks[index],
-                        () => _showSelectionModal(
-                          title: 'Choisir la Boisson n°${index + 1}',
-                          options: drinkOptions,
-                          index: index,
-                          isPizza: false,
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 100), // Espace pour le bouton en bas
+                      AppSpacing.verticalSpaceMD,
+                      ...List.generate(widget.menu.drinkCount, (index) {
+                        return _buildSelectionTile(
+                          'Boisson n°${index + 1}',
+                          _selectedDrinks[index],
+                          () => _showSelectionModal(
+                            title: 'Choisir la Boisson n°${index + 1}',
+                            options: drinkOptions,
+                            index: index,
+                            isPizza: false,
+                          ),
+                        );
+                      }),
+                    ],
+                    
+                    SizedBox(height: 100 + AppSpacing.lg), // Espace pour bouton fixe
                   ],
                 ),
               ),
 
-              // Bouton Ajouter au Panier
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, -5),
-                    ),
-                  ],
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: _isSelectionComplete ? AppColors.primaryRed : Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: _isSelectionComplete
-                        ? [
-                            BoxShadow(
-                              color: AppColors.primaryRed.withOpacity(0.5),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _isSelectionComplete ? _addToCart : null,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(58),
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.shopping_cart,
-                          size: 24,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'AJOUTER AU PANIER',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.25),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${widget.menu.price.toStringAsFixed(2)} €',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              // CTA fixe en bas
+              _buildFixedCTA(context),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: AppSpacing.paddingHorizontalMD,
+      child: Column(
+        children: [
+          Text(
+            widget.menu.name,
+            style: AppTextStyles.headlineMedium.copyWith(
+              color: AppColors.primary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: AppSpacing.xxs),
+          Text(
+            'Personnalisez votre menu',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.sm),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuInfoCard(BuildContext context) {
+    return Card(
+      elevation: 0,
+      color: AppColors.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.card,
+        side: BorderSide(color: AppColors.outlineVariant, width: 1),
+      ),
+      child: Padding(
+        padding: AppSpacing.paddingMD,
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.primaryContainer,
+                borderRadius: AppRadius.radiusMedium,
+              ),
+              child: Icon(
+                Icons.restaurant_menu_rounded,
+                color: AppColors.primary,
+                size: 28,
+              ),
+            ),
+            SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Prix du menu',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    '${widget.menu.price.toStringAsFixed(2)} €',
+                    style: AppTextStyles.priceLarge,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required int badgeCount,
+  }) {
+    return Container(
+      padding: AppSpacing.paddingMD,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainer,
+        borderRadius: AppRadius.card,
+        border: Border.all(color: AppColors.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: AppRadius.radiusMedium,
+            ),
+            child: Icon(
+              icon,
+              color: AppColors.onPrimary,
+              size: 24,
+            ),
+          ),
+          SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyles.titleMedium,
+                ),
+                SizedBox(height: AppSpacing.xxs),
+                Text(
+                  subtitle,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xxs,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.primaryContainer,
+              borderRadius: AppRadius.badge,
+            ),
+            child: Text(
+              '$badgeCount',
+              style: AppTextStyles.labelMedium.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFixedCTA(BuildContext context) {
+    return Container(
+      padding: AppSpacing.paddingMD,
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        boxShadow: AppShadows.navBar,
+        borderRadius: BorderRadius.vertical(top: AppRadius.card.topLeft),
+      ),
+      child: SafeArea(
+        child: AnimatedScale(
+          scale: _isSelectionComplete ? 1.0 : 0.95,
+          duration: const Duration(milliseconds: 200),
+          child: FilledButton(
+            onPressed: _isSelectionComplete ? _addToCart : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: _isSelectionComplete ? AppColors.primary : AppColors.neutral300,
+              minimumSize: const Size.fromHeight(56),
+              padding: AppSpacing.buttonPadding,
+              shape: RoundedRectangleBorder(
+                borderRadius: AppRadius.button,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.shopping_cart_rounded,
+                  size: 24,
+                  color: _isSelectionComplete ? AppColors.onPrimary : AppColors.neutral500,
+                ),
+                SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Ajouter au panier',
+                  style: AppTextStyles.buttonLarge.copyWith(
+                    color: _isSelectionComplete ? AppColors.onPrimary : AppColors.neutral500,
+                  ),
+                ),
+                SizedBox(width: AppSpacing.sm),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xxs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _isSelectionComplete 
+                        ? AppColors.onPrimary.withOpacity(0.2)
+                        : AppColors.neutral400,
+                    borderRadius: AppRadius.badge,
+                  ),
+                  child: Text(
+                    '${widget.menu.price.toStringAsFixed(2)} €',
+                    style: AppTextStyles.labelLarge.copyWith(
+                      color: _isSelectionComplete ? AppColors.onPrimary : AppColors.neutral600,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -572,191 +573,144 @@ class _SelectionOptionsModal extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
+        color: AppColors.background,
+        borderRadius: BorderRadius.vertical(top: AppRadius.bottomSheet.topLeft),
       ),
       child: Column(
         children: [
-          // Handle bar
-          Container(
-            margin: const EdgeInsets.only(top: 12),
-            height: 5,
-            width: 50,
-            decoration: BoxDecoration(
-              color: AppColors.primaryRed,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.4),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+          // Drag handle Material 3
+          Padding(
+            padding: AppSpacing.paddingVerticalSM,
+            child: Container(
+              height: 4,
+              width: 40,
+              decoration: BoxDecoration(
+                color: AppColors.outlineVariant,
+                borderRadius: AppRadius.radiusFull,
+              ),
             ),
           ),
-          // Title
-          Container(
-            margin: const EdgeInsets.all(16.0),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: BoxDecoration(
-              color: AppColors.primaryRed,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.blue.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+          
+          // Header
+          Padding(
+            padding: AppSpacing.paddingHorizontalMD,
+            child: Column(
               children: [
-                const Icon(Icons.shopping_basket, color: Colors.white, size: 24),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
-                    textAlign: TextAlign.center,
+                Text(
+                  title,
+                  style: AppTextStyles.headlineSmall.copyWith(
+                    color: AppColors.primary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Sélectionnez une option',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
+          
+          SizedBox(height: AppSpacing.md),
+          
           // Product list
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: AppSpacing.paddingHorizontalMD,
               itemCount: options.length,
               itemBuilder: (context, index) {
                 final option = options[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.blue.shade200,
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                return Card(
+                  margin: EdgeInsets.only(bottom: AppSpacing.sm),
+                  elevation: 0,
+                  color: AppColors.surface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppRadius.card,
+                    side: BorderSide(color: AppColors.outlineVariant),
                   ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => Navigator.of(context).pop(option),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Padding(
-                        padding: const EdgeInsets.all(14),
-                        child: Row(
-                          children: [
-                            if (option.imageUrl.isNotEmpty)
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.blue.shade300,
-                                    width: 2,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.blue.withOpacity(0.2),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
+                  child: InkWell(
+                    onTap: () => Navigator.of(context).pop(option),
+                    borderRadius: AppRadius.card,
+                    child: Padding(
+                      padding: AppSpacing.paddingMD,
+                      child: Row(
+                        children: [
+                          // Image
+                          if (option.imageUrl.isNotEmpty)
+                            ClipRRect(
+                              borderRadius: AppRadius.radiusSmall,
+                              child: Image.network(
+                                option.imageUrl,
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 64,
+                                    height: 64,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.surfaceContainer,
+                                      borderRadius: AppRadius.radiusSmall,
                                     ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.network(
-                                    option.imageUrl,
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        width: 60,
-                                        height: 60,
-                                        color: Colors.grey.shade200,
-                                        child: Icon(Icons.image_not_supported, color: Colors.grey.shade400),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    option.name,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.grey.shade800,
+                                    child: Icon(
+                                      Icons.image_not_supported_rounded,
+                                      color: AppColors.onSurfaceVariant,
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    option.description.length > 50
-                                        ? '${option.description.substring(0, 50)}...'
-                                        : option.description,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                                  );
+                                },
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryRed,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.blue.withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Text(
-                                '${option.price.toStringAsFixed(2)} €',
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
+                          
+                          SizedBox(width: AppSpacing.md),
+                          
+                          // Info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  option.name,
+                                  style: AppTextStyles.bodyMediumSemiBold,
                                 ),
+                                SizedBox(height: AppSpacing.xxs),
+                                Text(
+                                  option.description.length > 50
+                                      ? '${option.description.substring(0, 50)}...'
+                                      : option.description,
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          SizedBox(width: AppSpacing.sm),
+                          
+                          // Prix badge
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryContainer,
+                              borderRadius: AppRadius.badge,
+                            ),
+                            child: Text(
+                              '${option.price.toStringAsFixed(2)} €',
+                              style: AppTextStyles.labelLarge.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
