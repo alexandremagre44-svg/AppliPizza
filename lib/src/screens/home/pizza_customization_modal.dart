@@ -78,7 +78,7 @@ class _PizzaCustomizationModalState
     details.add('Taille: $_selectedSize');
     
     // Get ingredient names from IDs
-    final ingredientsAsync = ref.read(activeIngredientListProvider);
+    final ingredientsAsync = ref.read(ingredientStreamProvider);
     Map<String, String> ingredientNames = {};
     ingredientsAsync.whenData((allIngredients) {
       for (final ing in allIngredients) {
@@ -136,7 +136,7 @@ class _PizzaCustomizationModalState
 
   @override
   Widget build(BuildContext context) {
-    final ingredientsAsync = ref.watch(activeIngredientListProvider);
+    final ingredientsAsync = ref.watch(ingredientStreamProvider);
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.90,
@@ -484,7 +484,7 @@ class _PizzaCustomizationModalState
   }
 
   Widget _buildBaseIngredientsOptions() {
-    final ingredientsAsync = ref.watch(activeIngredientListProvider);
+    final ingredientsAsync = ref.watch(ingredientStreamProvider);
     
     return ingredientsAsync.when(
       data: (allIngredients) {
