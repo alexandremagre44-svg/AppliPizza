@@ -180,6 +180,7 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
         
         // Assurer que les champs requis ont des valeurs par défaut si manquants
         data['baseIngredients'] = data['baseIngredients'] ?? [];
+        data['allowedSupplements'] = data['allowedSupplements'] ?? [];
         data['isActive'] = data['isActive'] ?? true;
         data['isMenu'] = data['isMenu'] ?? false;
         data['isFeatured'] = data['isFeatured'] ?? false;
@@ -218,6 +219,7 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
         
         // Assurer valeurs par défaut
         data['baseIngredients'] = data['baseIngredients'] ?? [];
+        data['allowedSupplements'] = data['allowedSupplements'] ?? [];
         data['isActive'] = data['isActive'] ?? true;
         data['isMenu'] = data['isMenu'] ?? false;
         data['isFeatured'] = data['isFeatured'] ?? false;

@@ -55,6 +55,7 @@ class Product {
   final ProductCategory category;
   final bool isMenu;
   final List<String> baseIngredients; 
+  final List<String> allowedSupplements; // IDs des ingrédients autorisés en supplément 
   // NOUVEAU: Propriétés spécifiques aux menus
   final int pizzaCount;
   final int drinkCount;
@@ -79,6 +80,7 @@ class Product {
     required this.category,
     this.isMenu = false,
     this.baseIngredients = const [], 
+    this.allowedSupplements = const [], // Par défaut aucun supplément autorisé
     this.pizzaCount = 1, // Par défaut à 1
     this.drinkCount = 0, // Par défaut à 0
     this.isFeatured = false, // Par défaut non mis en avant
@@ -101,6 +103,7 @@ class Product {
     ProductCategory? category,
     bool? isMenu,
     List<String>? baseIngredients,
+    List<String>? allowedSupplements,
     int? pizzaCount,
     int? drinkCount,
     bool? isFeatured,
@@ -121,6 +124,7 @@ class Product {
       category: category ?? this.category,
       isMenu: isMenu ?? this.isMenu,
       baseIngredients: baseIngredients ?? this.baseIngredients,
+      allowedSupplements: allowedSupplements ?? this.allowedSupplements,
       pizzaCount: pizzaCount ?? this.pizzaCount,
       drinkCount: drinkCount ?? this.drinkCount,
       isFeatured: isFeatured ?? this.isFeatured,
@@ -145,6 +149,7 @@ class Product {
       'category': category.value,
       'isMenu': isMenu,
       'baseIngredients': baseIngredients,
+      'allowedSupplements': allowedSupplements,
       'pizzaCount': pizzaCount,
       'drinkCount': drinkCount,
       'isFeatured': isFeatured,
@@ -169,6 +174,10 @@ class Product {
       category: ProductCategory.fromString(json['category'] as String),
       isMenu: json['isMenu'] as bool? ?? false,
       baseIngredients: (json['baseIngredients'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      allowedSupplements: (json['allowedSupplements'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],

@@ -3,13 +3,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../design_system/app_theme.dart';
 import '../../models/product.dart';
 import '../../services/firestore_product_service.dart';
+import '../../providers/ingredient_provider.dart';
 
 /// Écran de formulaire pour créer ou modifier un produit
-class ProductFormScreen extends StatefulWidget {
+class ProductFormScreen extends ConsumerStatefulWidget {
   final Product? product; // null si création, non-null si modification
   final ProductCategory initialCategory;
 
@@ -20,10 +22,10 @@ class ProductFormScreen extends StatefulWidget {
   });
 
   @override
-  State<ProductFormScreen> createState() => _ProductFormScreenState();
+  ConsumerState<ProductFormScreen> createState() => _ProductFormScreenState();
 }
 
-class _ProductFormScreenState extends State<ProductFormScreen> {
+class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -46,6 +48,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   int _pizzaCount = 1;
   int _drinkCount = 0;
   bool _isSaving = false;
+  
+  // Nouveaux champs pour la gestion des ingrédients
+  Set<String> _selectedBaseIngredients = {};
+  Set<String> _selectedAllowedSupplements = {};
 
   @override
   void initState() {
@@ -71,6 +77,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       _isMenu = product.isMenu;
       _pizzaCount = product.pizzaCount;
       _drinkCount = product.drinkCount;
+      _selectedBaseIngredients = Set<String>.from(product.baseIngredients);
+      _selectedAllowedSupplements = Set<String>.from(product.allowedSupplements);
     } else {
       // Mode création - valeurs par défaut
       _selectedDisplaySpot = DisplaySpot.all;
@@ -226,6 +234,16 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   onChanged: (value) => setState(() => _drinkCount = value),
                 ),
               ],
+            ],
+            
+            // Gestion des ingrédients (uniquement pour les pizzas)
+            if (_selectedCategory == ProductCategory.pizza) ...[
+              SizedBox(height: AppSpacing.lg),
+              _buildSectionTitle('Ingrédients de base (retirables par le client)'),
+              _buildIngredientSelector(isBaseIngredient: true),
+              SizedBox(height: AppSpacing.lg),
+              _buildSectionTitle('Suppléments autorisés'),
+              _buildIngredientSelector(isBaseIngredient: false),
             ],
             
             SizedBox(height: AppSpacing.xl),
@@ -409,6 +427,117 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     );
   }
 
+  Widget _buildIngredientSelector({required bool isBaseIngredient}) {
+    final ingredientsAsync = ref.watch(activeIngredientListProvider);
+    
+    return ingredientsAsync.when(
+      data: (ingredients) {
+        if (ingredients.isEmpty) {
+          return Card(
+            elevation: 0,
+            color: AppColors.surface,
+            child: Padding(
+              padding: EdgeInsets.all(AppSpacing.md),
+              child: Text(
+                'Aucun ingrédient disponible. Créez d\'abord des ingrédients dans la section "Ingrédients".',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          );
+        }
+        
+        return Card(
+          elevation: 0,
+          color: AppColors.surface,
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isBaseIngredient && _selectedBaseIngredients.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: Text(
+                      'Sélectionnez les ingrédients inclus par défaut',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                if (!isBaseIngredient && _selectedAllowedSupplements.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: Text(
+                      'Sélectionnez les ingrédients autorisés en supplément',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: ingredients.map((ingredient) {
+                    final isSelected = isBaseIngredient
+                        ? _selectedBaseIngredients.contains(ingredient.id)
+                        : _selectedAllowedSupplements.contains(ingredient.id);
+                    
+                    return FilterChip(
+                      label: Text(
+                        '${ingredient.name}${ingredient.extraCost > 0 ? ' (+${ingredient.extraCost.toStringAsFixed(2)}€)' : ''}',
+                      ),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (isBaseIngredient) {
+                            if (selected) {
+                              _selectedBaseIngredients.add(ingredient.id);
+                            } else {
+                              _selectedBaseIngredients.remove(ingredient.id);
+                            }
+                          } else {
+                            if (selected) {
+                              _selectedAllowedSupplements.add(ingredient.id);
+                            } else {
+                              _selectedAllowedSupplements.remove(ingredient.id);
+                            }
+                          }
+                        });
+                      },
+                      selectedColor: AppColors.primaryContainer,
+                      checkmarkColor: AppColors.primary,
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (error, stack) => Card(
+        elevation: 0,
+        color: AppColors.errorContainer,
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.md),
+          child: Text(
+            'Erreur lors du chargement des ingrédients: $error',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.onErrorContainer,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _saveProduct() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -435,6 +564,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         isMenu: _isMenu,
         pizzaCount: _pizzaCount,
         drinkCount: _drinkCount,
+        baseIngredients: _selectedBaseIngredients.toList(),
+        allowedSupplements: _selectedAllowedSupplements.toList(),
       );
 
       bool success = false;
