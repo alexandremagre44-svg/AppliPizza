@@ -113,6 +113,15 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
   }
 
   @override
+  Stream<List<Ingredient>> getAllIngredients() => watchIngredients();
+
+  @override
+  Future<bool> addIngredient(Ingredient ingredient) => saveIngredient(ingredient.copyWith(id: ''));
+
+  @override
+  Future<bool> updateIngredient(Ingredient ingredient) => saveIngredient(ingredient);
+
+  @override
   Future<bool> saveIngredient(Ingredient ingredient) async {
     try {
       final data = ingredient.toJson();
@@ -172,6 +181,15 @@ class MockFirestoreIngredientService implements FirestoreIngredientService {
     developer.log('MockFirestoreIngredientService: Firebase non configuré');
     return Stream.value([]);
   }
+
+  @override
+  Stream<List<Ingredient>> getAllIngredients() => watchIngredients();
+
+  @override
+  Future<bool> addIngredient(Ingredient ingredient) => saveIngredient(ingredient.copyWith(id: ''));
+
+  @override
+  Future<bool> updateIngredient(Ingredient ingredient) => saveIngredient(ingredient);
 
   @override
   Future<bool> saveIngredient(Ingredient ingredient) async {
