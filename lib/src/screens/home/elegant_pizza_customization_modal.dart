@@ -104,7 +104,7 @@ class _ElegantPizzaCustomizationModalState
     }
     
     // Coût des suppléments sélectionnés
-    final ingredientsAsync = ref.read(activeIngredientListProvider);
+    final ingredientsAsync = ref.read(ingredientStreamProvider);
     ingredientsAsync.whenData((allIngredients) {
       for (final entry in _supplementIngredients.entries) {
         if (entry.value) {
@@ -127,7 +127,7 @@ class _ElegantPizzaCustomizationModalState
     details.add('Taille: $_selectedSize');
     
     // Get ingredient names from IDs
-    final ingredientsAsync = ref.read(activeIngredientListProvider);
+    final ingredientsAsync = ref.read(ingredientStreamProvider);
     Map<String, String> ingredientNames = {};
     ingredientsAsync.whenData((allIngredients) {
       for (final ing in allIngredients) {
@@ -490,7 +490,7 @@ class _ElegantPizzaCustomizationModalState
   }
 
   Widget _buildIngredientsTab() {
-    final ingredientsAsync = ref.watch(activeIngredientListProvider);
+    final ingredientsAsync = ref.watch(ingredientStreamProvider);
     
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -659,7 +659,7 @@ class _ElegantPizzaCustomizationModalState
   }
 
   Widget _buildSupplementsList() {
-    final ingredientsAsync = ref.watch(activeIngredientListProvider);
+    final ingredientsAsync = ref.watch(ingredientStreamProvider);
     
     return ingredientsAsync.when(
       data: (allIngredients) {

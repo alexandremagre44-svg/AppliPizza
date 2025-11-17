@@ -428,7 +428,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   }
 
   Widget _buildIngredientSelector({required bool isBaseIngredient}) {
-    final ingredientsAsync = ref.watch(activeIngredientListProvider);
+    final ingredientsAsync = ref.watch(ingredientStreamProvider);
     
     return ingredientsAsync.when(
       data: (ingredients) {

@@ -16,10 +16,19 @@ abstract class FirestoreIngredientService {
   /// Charger les ingrédients par catégorie
   Future<List<Ingredient>> loadIngredientsByCategory(IngredientCategory category);
   
-  /// Écoute en temps réel des ingrédients
+  /// Écoute en temps réel des ingrédients (RECOMMANDÉ pour UI réactive)
   Stream<List<Ingredient>> watchIngredients();
   
-  /// Sauvegarder un ingrédient
+  /// Récupérer tous les ingrédients sous forme de Stream (alias pour watchIngredients)
+  Stream<List<Ingredient>> getAllIngredients() => watchIngredients();
+  
+  /// Ajouter un nouvel ingrédient
+  Future<bool> addIngredient(Ingredient ingredient) => saveIngredient(ingredient.copyWith(id: ''));
+  
+  /// Mettre à jour un ingrédient existant
+  Future<bool> updateIngredient(Ingredient ingredient) => saveIngredient(ingredient);
+  
+  /// Sauvegarder un ingrédient (création ou mise à jour)
   Future<bool> saveIngredient(Ingredient ingredient);
   
   /// Supprimer un ingrédient
@@ -90,6 +99,9 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
 
   @override
   Stream<List<Ingredient>> watchIngredients() {
+    // Stream en temps réel des ingrédients
+    // Toute modification dans Firestore sera automatiquement reflétée
+    // dans tous les widgets qui écoutent ce stream
     return _firestore
         .collection(_collectionName)
         .orderBy('order')

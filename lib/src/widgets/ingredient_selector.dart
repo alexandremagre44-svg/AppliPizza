@@ -1,13 +1,23 @@
 // lib/src/widgets/ingredient_selector.dart
 // Widget réutilisable pour la gestion dynamique des ingrédients
+// ⚠️ DÉPRÉCIÉ: Ce widget utilise une liste statique d'ingrédients
+// Utilisez plutôt les providers Firestore (ingredientStreamProvider) pour une gestion dynamique
 
 import 'package:flutter/material.dart';
 
 /// Widget pour gérer dynamiquement les ingrédients d'une pizza
+/// 
+/// ⚠️ DÉPRÉCIÉ: Ce widget contient une liste statique d'ingrédients en dur.
+/// Pour une gestion dynamique depuis Firestore, utilisez:
+/// - `ingredientStreamProvider` pour écouter les changements en temps réel
+/// - Les écrans product_form_screen.dart et pizza_customization_modal.dart
+///   montrent comment implémenter correctement la gestion dynamique
+/// 
 /// Permet de:
 /// - Afficher et cocher/décocher des ingrédients existants
 /// - Ajouter de nouveaux ingrédients manuellement
 /// - Retirer des ingrédients de la liste
+@Deprecated('Utilisez ingredientStreamProvider avec Firestore pour une gestion dynamique')
 class IngredientSelector extends StatefulWidget {
   /// Liste initiale des ingrédients sélectionnés
   final List<String> selectedIngredients;

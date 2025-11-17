@@ -79,7 +79,7 @@ class ProductDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         Consumer(
                           builder: (context, ref, child) {
-                            final ingredientsAsync = ref.watch(activeIngredientListProvider);
+                            final ingredientsAsync = ref.watch(ingredientStreamProvider);
                             return ingredientsAsync.when(
                               data: (allIngredients) {
                                 // Create a map of ingredient IDs to names
