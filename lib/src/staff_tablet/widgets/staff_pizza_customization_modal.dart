@@ -60,9 +60,9 @@ class _StaffPizzaCustomizationModalState
     }
     
     // Coût des suppléments
-    for (final ingredientName in _extraIngredients) {
+    for (final ingredientId in _extraIngredients) {
       final ingredient = allIngredients.firstWhere(
-        (ing) => ing.name == ingredientName,
+        (ing) => ing.id == ingredientId,
         orElse: () => Ingredient(id: '', name: '', extraCost: 1.0),
       );
       price += ingredient.extraCost;
@@ -77,9 +77,19 @@ class _StaffPizzaCustomizationModalState
     // Taille
     details.add('Taille: $_selectedSize');
     
+    // Get ingredient names from IDs
+    final ingredientsAsync = ref.read(activeIngredientListProvider);
+    Map<String, String> ingredientNames = {};
+    ingredientsAsync.whenData((allIngredients) {
+      for (final ing in allIngredients) {
+        ingredientNames[ing.id] = ing.name;
+      }
+    });
+    
     // Ingrédients retirés
     final removed = widget.pizza.baseIngredients
-        .where((ing) => !_baseIngredients.contains(ing))
+        .where((ingId) => !_baseIngredients.contains(ingId))
+        .map((ingId) => ingredientNames[ingId] ?? ingId)
         .toList();
     if (removed.isNotEmpty) {
       details.add('Sans: ${removed.join(', ')}');
@@ -87,7 +97,10 @@ class _StaffPizzaCustomizationModalState
     
     // Ingrédients ajoutés
     if (_extraIngredients.isNotEmpty) {
-      details.add('Avec: ${_extraIngredients.join(', ')}');
+      final addedNames = _extraIngredients
+          .map((ingId) => ingredientNames[ingId] ?? ingId)
+          .toList();
+      details.add('Avec: ${addedNames.join(', ')}');
     }
     
     // Note
@@ -170,10 +183,15 @@ class _StaffPizzaCustomizationModalState
   Widget _buildContent(BuildContext context, List<Ingredient> ingredients) {
     const primaryColor = AppColors.primary;
     
+    // Filter ingredients to only show those allowed for this pizza
+    final allowedIngredients = ingredients.where((ingredient) {
+      return widget.pizza.allowedSupplements.contains(ingredient.id);
+    }).toList();
+    
     // Catégoriser les ingrédients
-    final fromageIngredients = _getIngredientsByCategory(ingredients, IngredientCategory.fromage);
-    final viandeIngredients = _getIngredientsByCategory(ingredients, IngredientCategory.viande);
-    final legumeIngredients = _getIngredientsByCategory(ingredients, IngredientCategory.legume);
+    final fromageIngredients = _getIngredientsByCategory(allowedIngredients, IngredientCategory.fromage);
+    final viandeIngredients = _getIngredientsByCategory(allowedIngredients, IngredientCategory.viande);
+    final legumeIngredients = _getIngredientsByCategory(allowedIngredients, IngredientCategory.legume);
 
     return Column(
       children: [
@@ -533,61 +551,80 @@ class _StaffPizzaCustomizationModalState
   }
 
   Widget _buildBaseIngredientsOptions(Color primaryColor) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: widget.pizza.baseIngredients.map((ingredient) {
-        final isSelected = _baseIngredients.contains(ingredient);
-        return InkWell(
-          onTap: () {
-            setState(() {
-              if (isSelected) {
-                _baseIngredients.remove(ingredient);
-              } else {
-                _baseIngredients.add(ingredient);
-              }
-            });
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            decoration: BoxDecoration(
-              color: isSelected ? primaryColor.withOpacity(0.15) : Colors.white,
+    final ingredientsAsync = ref.watch(activeIngredientListProvider);
+    
+    return ingredientsAsync.when(
+      data: (allIngredients) {
+        // Create a map of ingredient IDs to names
+        Map<String, String> ingredientNames = {};
+        for (final ing in allIngredients) {
+          ingredientNames[ing.id] = ing.name;
+        }
+        
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: widget.pizza.baseIngredients.map((ingredientId) {
+            final isSelected = _baseIngredients.contains(ingredientId);
+            final ingredientName = ingredientNames[ingredientId] ?? ingredientId;
+            
+            return InkWell(
+              onTap: () {
+                setState(() {
+                  if (isSelected) {
+                    _baseIngredients.remove(ingredientId);
+                  } else {
+                    _baseIngredients.add(ingredientId);
+                  }
+                });
+              },
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isSelected ? primaryColor : Colors.grey[300]!,
-                width: isSelected ? 2 : 1.5,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  isSelected ? Icons.check_circle : Icons.cancel,
-                  size: 18,
-                  color: isSelected ? primaryColor : Colors.grey[500],
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  ingredient,
-                  style: TextStyle(
-                    color: isSelected ? primaryColor : AppColors.textPrimary,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    fontSize: 14,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isSelected ? primaryColor.withOpacity(0.15) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isSelected ? primaryColor : Colors.grey[300]!,
+                    width: isSelected ? 2 : 1.5,
                   ),
                 ),
-              ],
-            ),
-          ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isSelected ? Icons.check_circle : Icons.cancel,
+                      size: 18,
+                      color: isSelected ? primaryColor : Colors.grey[500],
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      ingredientName,
+                      style: TextStyle(
+                        color: isSelected ? primaryColor : AppColors.textPrimary,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Text(
+        'Erreur lors du chargement des ingrédients',
+        style: TextStyle(color: Colors.red),
+      ),
     );
   }
 
   Widget _buildSupplementOptions(List<Ingredient> ingredients, Color primaryColor) {
     return Column(
       children: ingredients.map((ingredient) {
-        final isSelected = _extraIngredients.contains(ingredient.name);
+        final isSelected = _extraIngredients.contains(ingredient.id);
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
@@ -602,9 +639,9 @@ class _StaffPizzaCustomizationModalState
             onTap: () {
               setState(() {
                 if (isSelected) {
-                  _extraIngredients.remove(ingredient.name);
+                  _extraIngredients.remove(ingredient.id);
                 } else {
-                  _extraIngredients.add(ingredient.name);
+                  _extraIngredients.add(ingredient.id);
                 }
               });
             },
