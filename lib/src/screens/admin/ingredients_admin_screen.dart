@@ -37,7 +37,8 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
 
   @override
   Widget build(BuildContext context) {
-    final ingredientsAsync = ref.watch(ingredientListProvider);
+    // Utilisation du stream provider pour les mises à jour en temps réel
+    final ingredientsAsync = ref.watch(ingredientStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLow,
@@ -311,7 +312,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
     final success = await _firestoreService.saveIngredient(updatedIngredient);
 
     if (success && mounted) {
-      ref.invalidate(ingredientListProvider);
+      // Pas besoin de ref.invalidate avec StreamProvider - mise à jour automatique en temps réel
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -352,7 +353,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
     final success = await _firestoreService.deleteIngredient(ingredient.id);
 
     if (success && mounted) {
-      ref.invalidate(ingredientListProvider);
+      // Pas besoin de ref.invalidate avec StreamProvider - mise à jour automatique en temps réel
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Ingrédient supprimé')),
       );
@@ -364,16 +365,13 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
   }
 
   void _navigateToIngredientForm(Ingredient? ingredient) async {
-    final result = await Navigator.push<bool>(
+    await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (context) => IngredientFormScreen(ingredient: ingredient),
       ),
     );
-
-    if (result == true && mounted) {
-      ref.invalidate(ingredientListProvider);
-    }
+    // Pas besoin de ref.invalidate avec StreamProvider - mise à jour automatique en temps réel
   }
 
   IconData _getCategoryIcon(IngredientCategory category) {
