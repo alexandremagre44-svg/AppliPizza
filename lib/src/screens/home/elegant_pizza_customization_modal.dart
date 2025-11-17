@@ -78,15 +78,13 @@ class _ElegantPizzaCustomizationModalState
     
     // Initialize base ingredients (all selected by default - pre-filled)
     _baseIngredients = {};
-    for (final ingredient in widget.pizza.baseIngredients) {
-      _baseIngredients[ingredient] = true;
+    for (final ingredientId in widget.pizza.baseIngredients) {
+      _baseIngredients[ingredientId] = true;
     }
     
     // Initialize supplements (all unselected by default)
+    // Supplements will be loaded from Firestore based on allowedSupplements
     _supplementIngredients = {};
-    for (final ingredient in mockIngredients) {
-      _supplementIngredients[ingredient.name] = false;
-    }
   }
 
   @override
@@ -106,15 +104,18 @@ class _ElegantPizzaCustomizationModalState
     }
     
     // Coût des suppléments sélectionnés
-    for (final entry in _supplementIngredients.entries) {
-      if (entry.value) {
-        final ingredient = mockIngredients.firstWhere(
-          (ing) => ing.name == entry.key,
-          orElse: () => Ingredient(id: '', name: '', extraCost: 0.0),
-        );
-        price += ingredient.extraCost;
+    final ingredientsAsync = ref.read(activeIngredientListProvider);
+    ingredientsAsync.whenData((allIngredients) {
+      for (final entry in _supplementIngredients.entries) {
+        if (entry.value) {
+          final ingredient = allIngredients.firstWhere(
+            (ing) => ing.id == entry.key,
+            orElse: () => Ingredient(id: '', name: '', extraCost: 0.0),
+          );
+          price += ingredient.extraCost;
+        }
       }
-    }
+    });
     
     return price;
   }
@@ -125,10 +126,19 @@ class _ElegantPizzaCustomizationModalState
     // Taille
     details.add('Taille: $_selectedSize');
     
+    // Get ingredient names from IDs
+    final ingredientsAsync = ref.read(activeIngredientListProvider);
+    Map<String, String> ingredientNames = {};
+    ingredientsAsync.whenData((allIngredients) {
+      for (final ing in allIngredients) {
+        ingredientNames[ing.id] = ing.name;
+      }
+    });
+    
     // Ingrédients retirés
     final removed = _baseIngredients.entries
         .where((entry) => !entry.value)
-        .map((entry) => entry.key)
+        .map((entry) => ingredientNames[entry.key] ?? entry.key)
         .toList();
     if (removed.isNotEmpty) {
       details.add('Sans: ${removed.join(', ')}');
@@ -137,7 +147,7 @@ class _ElegantPizzaCustomizationModalState
     // Suppléments ajoutés
     final added = _supplementIngredients.entries
         .where((entry) => entry.value)
-        .map((entry) => entry.key)
+        .map((entry) => ingredientNames[entry.key] ?? entry.key)
         .toList();
     if (added.isNotEmpty) {
       details.add('Avec: ${added.join(', ')}');
@@ -480,6 +490,8 @@ class _ElegantPizzaCustomizationModalState
   }
 
   Widget _buildIngredientsTab() {
+    final ingredientsAsync = ref.watch(activeIngredientListProvider);
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -493,23 +505,44 @@ class _ElegantPizzaCustomizationModalState
           ),
           const SizedBox(height: 16),
           
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: _baseIngredients.entries.map((entry) {
-                return _buildAnimatedIngredientChip(
-                  entry.key,
-                  isSelected: entry.value,
-                  isBase: true,
-                  onTap: () {
-                    setState(() {
-                      _baseIngredients[entry.key] = !entry.value;
-                    });
-                  },
-                );
-              }).toList(),
+          ingredientsAsync.when(
+            data: (allIngredients) {
+              // Create a map of ingredient IDs to names
+              Map<String, String> ingredientNames = {};
+              for (final ing in allIngredients) {
+                ingredientNames[ing.id] = ing.name;
+              }
+              
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: _baseIngredients.entries.map((entry) {
+                    final ingredientName = ingredientNames[entry.key] ?? entry.key;
+                    return _buildAnimatedIngredientChip(
+                      ingredientName,
+                      isSelected: entry.value,
+                      isBase: true,
+                      onTap: () {
+                        setState(() {
+                          _baseIngredients[entry.key] = !entry.value;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              );
+            },
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (error, stack) => Text(
+              'Erreur lors du chargement des ingrédients',
+              style: TextStyle(color: Colors.red),
             ),
           ),
           
@@ -525,25 +558,7 @@ class _ElegantPizzaCustomizationModalState
           ),
           const SizedBox(height: 16),
           
-          ...mockIngredients.asMap().entries.map((entry) {
-            final index = entry.key;
-            final ingredient = entry.value;
-            return TweenAnimationBuilder<double>(
-              duration: Duration(milliseconds: 300 + (index * 50)),
-              tween: Tween(begin: 0.0, end: 1.0),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, child) {
-                return Transform.translate(
-                  offset: Offset(0, 20 * (1 - value)),
-                  child: Opacity(
-                    opacity: value,
-                    child: child,
-                  ),
-                );
-              },
-              child: _buildElegantSupplementTile(ingredient),
-            );
-          }),
+          _buildSupplementsList(),
         ],
       ),
     );
@@ -643,6 +658,77 @@ class _ElegantPizzaCustomizationModalState
     );
   }
 
+  Widget _buildSupplementsList() {
+    final ingredientsAsync = ref.watch(activeIngredientListProvider);
+    
+    return ingredientsAsync.when(
+      data: (allIngredients) {
+        // Filter ingredients to only show those allowed for this pizza
+        final allowedIngredients = allIngredients.where((ingredient) {
+          return widget.pizza.allowedSupplements.contains(ingredient.id);
+        }).toList();
+        
+        if (allowedIngredients.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Aucun supplément disponible pour cette pizza',
+              style: TextStyle(
+                color: AppTheme.textMedium,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+        
+        // Initialize supplement ingredients if not already done
+        for (final ingredient in allowedIngredients) {
+          _supplementIngredients[ingredient.id] ??= false;
+        }
+        
+        return Column(
+          children: allowedIngredients.asMap().entries.map((entry) {
+            final index = entry.key;
+            final ingredient = entry.value;
+            return TweenAnimationBuilder<double>(
+              duration: Duration(milliseconds: 300 + (index * 50)),
+              tween: Tween(begin: 0.0, end: 1.0),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) {
+                return Transform.translate(
+                  offset: Offset(0, 20 * (1 - value)),
+                  child: Opacity(
+                    opacity: value,
+                    child: child,
+                  ),
+                );
+              },
+              child: _buildElegantSupplementTile(ingredient),
+            );
+          }).toList(),
+        );
+      },
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (error, stack) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          'Erreur lors du chargement des suppléments',
+          style: TextStyle(
+            color: Colors.red,
+            fontSize: 14,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
   Widget _buildAnimatedIngredientChip(
     String ingredient, {
     required bool isSelected,
@@ -721,7 +807,7 @@ class _ElegantPizzaCustomizationModalState
   }
 
   Widget _buildElegantSupplementTile(Ingredient ingredient) {
-    final isSelected = _supplementIngredients[ingredient.name] ?? false;
+    final isSelected = _supplementIngredients[ingredient.id] ?? false;
     
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -749,7 +835,7 @@ class _ElegantPizzaCustomizationModalState
       child: InkWell(
         onTap: () {
           setState(() {
-            _supplementIngredients[ingredient.name] = !isSelected;
+            _supplementIngredients[ingredient.id] = !isSelected;
           });
         },
         borderRadius: BorderRadius.circular(18),

@@ -88,6 +88,7 @@ class FirestoreUnifiedService {
         
         // Assurer les valeurs par défaut
         data['baseIngredients'] = data['baseIngredients'] ?? [];
+        data['allowedSupplements'] = data['allowedSupplements'] ?? [];
         data['isActive'] = data['isActive'] ?? true;
         data['isMenu'] = data['isMenu'] ?? (category == ProductCategory.menus);
         data['isFeatured'] = data['isFeatured'] ?? false;
@@ -123,6 +124,7 @@ class FirestoreUnifiedService {
         
         // Assurer valeurs par défaut
         data['baseIngredients'] = data['baseIngredients'] ?? [];
+        data['allowedSupplements'] = data['allowedSupplements'] ?? [];
         data['isActive'] = data['isActive'] ?? true;
         data['isMenu'] = data['isMenu'] ?? (category == ProductCategory.menus);
         data['isFeatured'] = data['isFeatured'] ?? false;
@@ -159,6 +161,7 @@ class FirestoreUnifiedService {
       
       // Assurer valeurs par défaut
       data['baseIngredients'] = data['baseIngredients'] ?? [];
+      data['allowedSupplements'] = data['allowedSupplements'] ?? [];
       data['isActive'] = data['isActive'] ?? true;
       data['isMenu'] = data['isMenu'] ?? (category == ProductCategory.menus);
       data['isFeatured'] = data['isFeatured'] ?? false;
