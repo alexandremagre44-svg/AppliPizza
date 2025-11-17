@@ -3,18 +3,81 @@
 import '../models/product.dart';
 
 // ===============================================
-// INGRÉDIENTS (pour la personnalisation future)
+// INGRÉDIENTS (pour la personnalisation)
 // ===============================================
+// Note: Ces ingrédients sont maintenant gérés via Firestore
+// Cette liste sert uniquement de fallback si Firebase n'est pas configuré
 
 final List<Ingredient> mockIngredients = [
-  Ingredient(id: 'ing_mozza', name: 'Mozzarella Fraîche', extraCost: 1.50),
-  Ingredient(id: 'ing_cheddar', name: 'Cheddar', extraCost: 1.00),
-  Ingredient(id: 'ing_oignon', name: 'Oignons Rouges', extraCost: 0.50),
-  Ingredient(id: 'ing_champignons', name: 'Champignons', extraCost: 0.75),
-  Ingredient(id: 'ing_jambon', name: 'Jambon Supérieur', extraCost: 1.25),
-  Ingredient(id: 'ing_poulet', name: 'Poulet Rôti', extraCost: 2.00),
-  Ingredient(id: 'ing_chorizo', name: 'Chorizo Piquant', extraCost: 1.75),
-  Ingredient(id: 'ing_olives', name: 'Olives Noires', extraCost: 0.50),
+  // Fromages
+  Ingredient(
+    id: 'ing_mozza', 
+    name: 'Mozzarella Fraîche', 
+    extraCost: 1.50,
+    category: IngredientCategory.fromage,
+    isActive: true,
+    order: 1,
+  ),
+  Ingredient(
+    id: 'ing_cheddar', 
+    name: 'Cheddar', 
+    extraCost: 1.00,
+    category: IngredientCategory.fromage,
+    isActive: true,
+    order: 2,
+  ),
+  
+  // Viandes
+  Ingredient(
+    id: 'ing_jambon', 
+    name: 'Jambon Supérieur', 
+    extraCost: 1.25,
+    category: IngredientCategory.viande,
+    isActive: true,
+    order: 1,
+  ),
+  Ingredient(
+    id: 'ing_poulet', 
+    name: 'Poulet Rôti', 
+    extraCost: 2.00,
+    category: IngredientCategory.viande,
+    isActive: true,
+    order: 2,
+  ),
+  Ingredient(
+    id: 'ing_chorizo', 
+    name: 'Chorizo Piquant', 
+    extraCost: 1.75,
+    category: IngredientCategory.viande,
+    isActive: true,
+    order: 3,
+  ),
+  
+  // Légumes
+  Ingredient(
+    id: 'ing_oignon', 
+    name: 'Oignons Rouges', 
+    extraCost: 0.50,
+    category: IngredientCategory.legume,
+    isActive: true,
+    order: 1,
+  ),
+  Ingredient(
+    id: 'ing_champignons', 
+    name: 'Champignons', 
+    extraCost: 0.75,
+    category: IngredientCategory.legume,
+    isActive: true,
+    order: 2,
+  ),
+  Ingredient(
+    id: 'ing_olives', 
+    name: 'Olives Noires', 
+    extraCost: 0.50,
+    category: IngredientCategory.legume,
+    isActive: true,
+    order: 3,
+  ),
 ];
 
 // ===============================================

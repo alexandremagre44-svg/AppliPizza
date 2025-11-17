@@ -13,6 +13,7 @@ import 'studio/roulette_segments_list_screen.dart';
 import 'studio/roulette_admin_settings_screen.dart';
 import '../../features/content/presentation/admin/content_studio_screen.dart';
 import 'products_admin_screen.dart';
+import 'ingredients_admin_screen.dart';
 import 'mailing_admin_screen.dart';
 import 'promotions_admin_screen.dart';
 
@@ -59,6 +60,19 @@ class AdminStudioScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ProductsAdminScreen()),
+              );
+            },
+          ),
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.restaurant_rounded,
+            title: 'Ingrédients Universels',
+            subtitle: 'Gérer les ingrédients pour toutes les pizzas',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const IngredientsAdminScreen()),
               );
             },
           ),
