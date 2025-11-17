@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/ingredient_provider.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   final Product product;
@@ -76,15 +77,41 @@ class ProductDetailScreen extends ConsumerWidget {
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8.0,
-                          children: product.baseIngredients!
-                              .map((ing) => Chip(
-                                    label: Text(ing),
-                                    backgroundColor: Colors.grey[200],
-                                    labelStyle: const TextStyle(fontSize: 14),
-                                  ))
-                              .toList(),
+                        Consumer(
+                          builder: (context, ref, child) {
+                            final ingredientsAsync = ref.watch(activeIngredientListProvider);
+                            return ingredientsAsync.when(
+                              data: (allIngredients) {
+                                // Create a map of ingredient IDs to names
+                                Map<String, String> ingredientNames = {};
+                                for (final ing in allIngredients) {
+                                  ingredientNames[ing.id] = ing.name;
+                                }
+                                
+                                return Wrap(
+                                  spacing: 8.0,
+                                  children: product.baseIngredients!
+                                      .map((ingId) {
+                                        final ingredientName = ingredientNames[ingId] ?? ingId;
+                                        return Chip(
+                                          label: Text(ingredientName),
+                                          backgroundColor: Colors.grey[200],
+                                          labelStyle: const TextStyle(fontSize: 14),
+                                        );
+                                      })
+                                      .toList(),
+                                );
+                              },
+                              loading: () => const SizedBox(
+                                height: 20,
+                                child: Center(child: CircularProgressIndicator()),
+                              ),
+                              error: (error, stack) => Text(
+                                'Erreur lors du chargement des ingrédients',
+                                style: TextStyle(color: Colors.red, fontSize: 12),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
