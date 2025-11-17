@@ -5,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../models/product.dart';
-import '../../data/mock_data.dart';
 import '../../design_system/app_theme.dart';
 import '../providers/staff_tablet_cart_provider.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/ingredient_provider.dart';
 
 const _uuid = Uuid();
 
@@ -51,7 +51,7 @@ class _StaffPizzaCustomizationModalState
     super.dispose();
   }
 
-  double get _totalPrice {
+  double _getTotalPrice(List<Ingredient> allIngredients) {
     double price = widget.pizza.price;
     
     // Ajustement selon la taille
@@ -61,7 +61,7 @@ class _StaffPizzaCustomizationModalState
     
     // Coût des suppléments
     for (final ingredientName in _extraIngredients) {
-      final ingredient = mockIngredients.firstWhere(
+      final ingredient = allIngredients.firstWhere(
         (ing) => ing.name == ingredientName,
         orElse: () => Ingredient(id: '', name: '', extraCost: 1.0),
       );
@@ -98,14 +98,14 @@ class _StaffPizzaCustomizationModalState
     return details.join(' • ');
   }
 
-  void _addToCart() {
+  void _addToCart(List<Ingredient> allIngredients) {
     final cartNotifier = ref.read(staffTabletCartProvider.notifier);
     
     final newCartItem = CartItem(
       id: _uuid.v4(),
       productId: widget.pizza.id,
       productName: widget.pizza.name,
-      price: _totalPrice,
+      price: _getTotalPrice(allIngredients),
       quantity: 1,
       imageUrl: widget.pizza.imageUrl,
       customDescription: _buildCustomDescription(),
@@ -142,142 +142,139 @@ class _StaffPizzaCustomizationModalState
     }
   }
 
-  // Catégorisation des ingrédients
-  List<Ingredient> get _fromageIngredients {
-    return mockIngredients.where((ing) => 
-      ing.name.toLowerCase().contains('mozza') ||
-      ing.name.toLowerCase().contains('cheddar') ||
-      ing.name.toLowerCase().contains('fromage')
-    ).toList();
-  }
-
-  List<Ingredient> get _garnituresIngredients {
-    return mockIngredients.where((ing) => 
-      ing.name.toLowerCase().contains('jambon') ||
-      ing.name.toLowerCase().contains('poulet') ||
-      ing.name.toLowerCase().contains('chorizo')
-    ).toList();
-  }
-
-  List<Ingredient> get _supplementsIngredients {
-    return mockIngredients.where((ing) => 
-      ing.name.toLowerCase().contains('oignon') ||
-      ing.name.toLowerCase().contains('champignon') ||
-      ing.name.toLowerCase().contains('olive')
-    ).toList();
+  // Catégorisation des ingrédients par catégorie
+  List<Ingredient> _getIngredientsByCategory(List<Ingredient> ingredients, IngredientCategory category) {
+    return ingredients.where((ing) => ing.category == category && ing.isActive).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = AppColors.primary;
-    
+    final ingredientsAsync = ref.watch(activeIngredientListProvider);
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.90,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(
-        children: [
-          // Handle bar
-          Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 16),
-            width: 50,
-            height: 5,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(3),
-            ),
-          ),
-          
-          // Contenu avec scroll unique
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Visuel de la pizza en haut
-                  _buildPizzaPreview(primaryColor),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Section Base (Taille)
-                  _buildCategorySection(
-                    title: 'Taille',
-                    icon: Icons.straighten,
-                    primaryColor: primaryColor,
-                    child: _buildSizeOptions(primaryColor),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Section Ingrédients de base
-                  _buildCategorySection(
-                    title: 'Ingrédients de base',
-                    subtitle: 'Retirez ce que vous ne souhaitez pas',
-                    icon: Icons.inventory_2,
-                    primaryColor: primaryColor,
-                    child: _buildBaseIngredientsOptions(primaryColor),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Section Fromages
-                  if (_fromageIngredients.isNotEmpty) ...[
-                    _buildCategorySection(
-                      title: 'Fromages',
-                      subtitle: 'Ajoutez des fromages supplémentaires',
-                      icon: Icons.add_circle_outline,
-                      primaryColor: primaryColor,
-                      child: _buildSupplementOptions(_fromageIngredients, primaryColor),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                  
-                  // Section Garnitures principales
-                  if (_garnituresIngredients.isNotEmpty) ...[
-                    _buildCategorySection(
-                      title: 'Garnitures principales',
-                      subtitle: 'Viandes et protéines',
-                      icon: Icons.restaurant,
-                      primaryColor: primaryColor,
-                      child: _buildSupplementOptions(_garnituresIngredients, primaryColor),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                  
-                  // Section Suppléments / Extras
-                  if (_supplementsIngredients.isNotEmpty) ...[
-                    _buildCategorySection(
-                      title: 'Suppléments / Extras',
-                      subtitle: 'Légumes et accompagnements',
-                      icon: Icons.add_shopping_cart,
-                      primaryColor: primaryColor,
-                      child: _buildSupplementOptions(_supplementsIngredients, primaryColor),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                  
-                  // Section Instructions spéciales
-                  _buildCategorySection(
-                    title: 'Instructions spéciales',
-                    subtitle: 'Notes pour votre commande',
-                    icon: Icons.edit_note,
-                    primaryColor: primaryColor,
-                    child: _buildNotesField(primaryColor),
-                  ),
-                  
-                  const SizedBox(height: 100), // Espace pour la barre fixe
-                ],
-              ),
-            ),
-          ),
-          
-          // Barre de résumé fixe en bas
-          _buildFixedSummaryBar(primaryColor),
-        ],
+      child: ingredientsAsync.when(
+        data: (ingredients) => _buildContent(context, ingredients),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('Erreur de chargement des ingrédients: $error'),
+        ),
       ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, List<Ingredient> ingredients) {
+    const primaryColor = AppColors.primary;
+    
+    // Catégoriser les ingrédients
+    final fromageIngredients = _getIngredientsByCategory(ingredients, IngredientCategory.fromage);
+    final viandeIngredients = _getIngredientsByCategory(ingredients, IngredientCategory.viande);
+    final legumeIngredients = _getIngredientsByCategory(ingredients, IngredientCategory.legume);
+
+    return Column(
+      children: [
+        // Handle bar
+        Container(
+          margin: const EdgeInsets.only(top: 12, bottom: 16),
+          width: 50,
+          height: 5,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+        
+        // Contenu avec scroll unique
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Visuel de la pizza en haut
+                _buildPizzaPreview(primaryColor),
+                
+                const SizedBox(height: 24),
+                
+                // Section Base (Taille)
+                _buildCategorySection(
+                  title: 'Taille',
+                  icon: Icons.straighten,
+                  primaryColor: primaryColor,
+                  child: _buildSizeOptions(primaryColor),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Section Ingrédients de base
+                _buildCategorySection(
+                  title: 'Ingrédients de base',
+                  subtitle: 'Retirez ce que vous ne souhaitez pas',
+                  icon: Icons.inventory_2,
+                  primaryColor: primaryColor,
+                  child: _buildBaseIngredientsOptions(primaryColor),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Section Fromages
+                if (fromageIngredients.isNotEmpty) ...[
+                  _buildCategorySection(
+                    title: 'Fromages',
+                    subtitle: 'Ajoutez des fromages supplémentaires',
+                    icon: Icons.restaurant,
+                    primaryColor: primaryColor,
+                    child: _buildSupplementOptions(fromageIngredients, primaryColor),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+                
+                // Section Viandes
+                if (viandeIngredients.isNotEmpty) ...[
+                  _buildCategorySection(
+                    title: 'Viandes',
+                    subtitle: 'Protéines et charcuterie',
+                    icon: Icons.food_bank,
+                    primaryColor: primaryColor,
+                    child: _buildSupplementOptions(viandeIngredients, primaryColor),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+                
+                // Section Légumes
+                if (legumeIngredients.isNotEmpty) ...[
+                  _buildCategorySection(
+                    title: 'Légumes',
+                    subtitle: 'Légumes frais',
+                    icon: Icons.eco,
+                    primaryColor: primaryColor,
+                    child: _buildSupplementOptions(legumeIngredients, primaryColor),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+                
+                // Section Instructions spéciales
+                _buildCategorySection(
+                  title: 'Instructions spéciales',
+                  subtitle: 'Notes pour votre commande',
+                  icon: Icons.edit_note,
+                  primaryColor: primaryColor,
+                  child: _buildNotesField(primaryColor),
+                ),
+                
+                const SizedBox(height: 100), // Espace pour la barre fixe
+              ],
+            ),
+          ),
+        ),
+        
+        // Barre de résumé fixe en bas
+        _buildFixedSummaryBar(primaryColor, ingredients),
+      ],
     );
   }
 
@@ -680,7 +677,9 @@ class _StaffPizzaCustomizationModalState
     );
   }
 
-  Widget _buildFixedSummaryBar(Color primaryColor) {
+  Widget _buildFixedSummaryBar(Color primaryColor, List<Ingredient> ingredients) {
+    final totalPrice = _getTotalPrice(ingredients);
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
@@ -725,7 +724,7 @@ class _StaffPizzaCustomizationModalState
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${_totalPrice.toStringAsFixed(2)}€',
+                        '${totalPrice.toStringAsFixed(2)}€',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -757,7 +756,7 @@ class _StaffPizzaCustomizationModalState
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _addToCart,
+                onPressed: () => _addToCart(ingredients),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                   foregroundColor: Colors.white,

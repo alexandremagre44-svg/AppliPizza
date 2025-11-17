@@ -145,6 +145,36 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
+    // Règles pour les ingrédients universels
+    match /ingredients/{ingredientId} {
+      // Lecture: tous les utilisateurs authentifiés peuvent lire les ingrédients actifs
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin peut créer, modifier et supprimer des ingrédients
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Règles pour les produits (pizzas, menus, boissons, desserts)
+    match /pizzas/{pizzaId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /menus/{menuId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /drinks/{drinkId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /desserts/{dessertId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
     // Règles par défaut: refuser tout accès aux autres collections
     match /{document=**} {
       allow read, write: if false;
