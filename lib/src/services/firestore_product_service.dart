@@ -28,6 +28,9 @@ abstract class FirestoreProductService {
   // Stream pour écoute en temps réel
   Stream<List<Product>> watchProductsByCategory(String category);
   
+  // Stream all products from all categories
+  Stream<List<Product>> watchAllProducts();
+  
   Future<bool> savePizza(Product pizza);
   Future<bool> saveMenu(Product menu);
   Future<bool> saveDrink(Product drink);
@@ -86,6 +89,12 @@ class MockFirestoreProductService implements FirestoreProductService {
   @override
   Stream<List<Product>> watchProductsByCategory(String category) {
     developer.log('MockFirestoreProductService: Firebase non configuré, retourne stream vide pour $category');
+    return Stream.value([]);
+  }
+
+  @override
+  Stream<List<Product>> watchAllProducts() {
+    developer.log('MockFirestoreProductService: Firebase non configuré, retourne stream vide');
     return Stream.value([]);
   }
 
@@ -291,6 +300,33 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
   @override
   Future<List<Product>> getAllProducts() async {
     return loadAllProducts();
+  }
+
+  // ===============================================
+  // OPTIMIZATION: Stream all products from all categories
+  // This is more efficient than watching each category separately
+  // ===============================================
+  Stream<List<Product>> watchAllProducts() {
+    developer.log('🔄 FirestoreProductService: Écoute en temps réel de TOUS les produits...');
+    
+    // Combine streams from all categories
+    final pizzasStream = watchProductsByCategory('Pizza');
+    final menusStream = watchProductsByCategory('Menus');
+    final drinksStream = watchProductsByCategory('Boissons');
+    final dessertsStream = watchProductsByCategory('Desserts');
+    
+    // Combine all streams and merge results
+    return pizzasStream.asyncMap((pizzas) async {
+      // For each pizza update, fetch current state of other categories
+      // This ensures we always have complete data
+      final menus = await loadProductsByCategory('Menus');
+      final drinks = await loadProductsByCategory('Boissons');
+      final desserts = await loadProductsByCategory('Desserts');
+      return [...pizzas, ...menus, ...drinks, ...desserts];
+    }).handleError((error) {
+      developer.log('❌ Erreur stream watchAllProducts: $error');
+      return <Product>[];
+    });
   }
 
   // ===============================================

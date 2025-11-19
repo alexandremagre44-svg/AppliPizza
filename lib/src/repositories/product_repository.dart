@@ -26,36 +26,35 @@ class CombinedProductRepository implements ProductRepository {
 
   @override
   Future<List<Product>> fetchAllProducts() async {
-    developer.log('📦 Repository: Début du chargement des produits...');
+    developer.log('📦 Repository: Début du chargement des produits (OPTIMIZED)...');
     
     // ===============================================
-    // ÉTAPE 1: Charger depuis SharedPreferences (Admin local)
+    // OPTIMIZATION: Load from all sources in parallel
     // ===============================================
-    final adminPizzas = await _crudService.loadPizzas();
-    final adminMenus = await _crudService.loadMenus();
-    final adminDrinks = await _crudService.loadDrinks();
-    final adminDesserts = await _crudService.loadDesserts();
+    final results = await Future.wait([
+      // SharedPreferences (Admin local) - load all categories in parallel
+      _crudService.loadPizzas(),
+      _crudService.loadMenus(),
+      _crudService.loadDrinks(),
+      _crudService.loadDesserts(),
+      // Firestore - use optimized single call
+      _firestoreService.loadAllProducts(),
+    ]);
+    
+    final adminPizzas = results[0];
+    final adminMenus = results[1];
+    final adminDrinks = results[2];
+    final adminDesserts = results[3];
+    final firestoreProducts = results[4];
     
     developer.log('📱 Repository: ${adminPizzas.length} pizzas depuis SharedPreferences');
     developer.log('📱 Repository: ${adminMenus.length} menus depuis SharedPreferences');
     developer.log('📱 Repository: ${adminDrinks.length} boissons depuis SharedPreferences');
     developer.log('📱 Repository: ${adminDesserts.length} desserts depuis SharedPreferences');
+    developer.log('🔥 Repository: ${firestoreProducts.length} produits depuis Firestore (bulk load)');
     
     // ===============================================
-    // ÉTAPE 2: Charger depuis Firestore (toutes catégories)
-    // ===============================================
-    final firestorePizzas = await _firestoreService.loadPizzas();
-    final firestoreMenus = await _firestoreService.loadMenus();
-    final firestoreDrinks = await _firestoreService.loadDrinks();
-    final firestoreDesserts = await _firestoreService.loadDesserts();
-    
-    developer.log('🔥 Repository: ${firestorePizzas.length} pizzas depuis Firestore');
-    developer.log('🔥 Repository: ${firestoreMenus.length} menus depuis Firestore');
-    developer.log('🔥 Repository: ${firestoreDrinks.length} boissons depuis Firestore');
-    developer.log('🔥 Repository: ${firestoreDesserts.length} desserts depuis Firestore');
-    
-    // ===============================================
-    // ÉTAPE 3: Fusionner avec ordre de priorité
+    // ÉTAPE 2: Fusionner avec ordre de priorité (OPTIMIZED)
     // Ordre: Mock Data → SharedPreferences → Firestore
     // ===============================================
     final allProducts = <String, Product>{};
@@ -67,50 +66,24 @@ class CombinedProductRepository implements ProductRepository {
     developer.log('💾 Repository: ${mockProducts.length} produits depuis mock_data');
     
     // Puis on ajoute/écrase avec les produits admin (SharedPreferences)
-    for (var pizza in adminPizzas) {
-      allProducts[pizza.id] = pizza;
-      developer.log('  ➕ Ajout pizza admin: ${pizza.name} (ID: ${pizza.id})');
+    final adminProducts = [...adminPizzas, ...adminMenus, ...adminDrinks, ...adminDesserts];
+    for (var product in adminProducts) {
+      allProducts[product.id] = product;
     }
-    
-    for (var menu in adminMenus) {
-      allProducts[menu.id] = menu;
-      developer.log('  ➕ Ajout menu admin: ${menu.name} (ID: ${menu.id})');
-    }
-    
-    for (var drink in adminDrinks) {
-      allProducts[drink.id] = drink;
-      developer.log('  ➕ Ajout boisson admin: ${drink.name} (ID: ${drink.id})');
-    }
-    
-    for (var dessert in adminDesserts) {
-      allProducts[dessert.id] = dessert;
-      developer.log('  ➕ Ajout dessert admin: ${dessert.name} (ID: ${dessert.id})');
-    }
+    developer.log('📱 Repository: ${adminProducts.length} produits admin ajoutés');
     
     // Enfin, on ajoute/écrase avec les produits Firestore (priorité maximale)
-    for (var pizza in firestorePizzas) {
-      final wasPresent = allProducts.containsKey(pizza.id);
-      allProducts[pizza.id] = pizza;
-      developer.log('  ⭐ ${wasPresent ? "Écrasement" : "Ajout"} pizza Firestore: ${pizza.name} (ID: ${pizza.id})');
+    int firestoreOverrides = 0;
+    int firestoreNew = 0;
+    for (var product in firestoreProducts) {
+      if (allProducts.containsKey(product.id)) {
+        firestoreOverrides++;
+      } else {
+        firestoreNew++;
+      }
+      allProducts[product.id] = product;
     }
-    
-    for (var menu in firestoreMenus) {
-      final wasPresent = allProducts.containsKey(menu.id);
-      allProducts[menu.id] = menu;
-      developer.log('  ⭐ ${wasPresent ? "Écrasement" : "Ajout"} menu Firestore: ${menu.name} (ID: ${menu.id})');
-    }
-    
-    for (var drink in firestoreDrinks) {
-      final wasPresent = allProducts.containsKey(drink.id);
-      allProducts[drink.id] = drink;
-      developer.log('  ⭐ ${wasPresent ? "Écrasement" : "Ajout"} boisson Firestore: ${drink.name} (ID: ${drink.id})');
-    }
-    
-    for (var dessert in firestoreDesserts) {
-      final wasPresent = allProducts.containsKey(dessert.id);
-      allProducts[dessert.id] = dessert;
-      developer.log('  ⭐ ${wasPresent ? "Écrasement" : "Ajout"} dessert Firestore: ${dessert.name} (ID: ${dessert.id})');
-    }
+    developer.log('🔥 Repository: Firestore - $firestoreNew nouveaux, $firestoreOverrides écrasés');
     
     developer.log('✅ Repository: Total de ${allProducts.length} produits fusionnés');
     developer.log('📊 Repository: Catégories présentes: ${allProducts.values.map((p) => p.category.value).toSet().join(", ")}');
@@ -126,81 +99,20 @@ class CombinedProductRepository implements ProductRepository {
 
   @override
   Future<Product?> getProductById(String id) async {
-    developer.log('🔍 Repository: Recherche du produit ID: $id');
+    developer.log('🔍 Repository: Recherche du produit ID: $id (OPTIMIZED)');
     
-    // OPTIMISATION: Rechercher dans l'ordre de priorité et s'arrêter dès qu'on trouve
-    // Ordre: Firestore (priorité max) → SharedPreferences → Mock Data
+    // OPTIMIZATION: Use fetchAllProducts which has the merge logic
+    // This reuses the same loading pattern and benefits from any caching
+    final allProducts = await fetchAllProducts();
     
-    // 1. D'abord chercher dans Firestore (priorité maximale)
-    developer.log('  → Recherche dans Firestore...');
-    final firestorePizzas = await _firestoreService.loadPizzas();
-    var product = firestorePizzas.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
-    if (product != null) {
-      developer.log('  ✅ Produit trouvé dans Firestore (pizzas)');
+    try {
+      final product = allProducts.firstWhere((p) => p.id == id);
+      developer.log('  ✅ Produit trouvé: ${product.name}');
       return product;
+    } catch (_) {
+      developer.log('  ❌ Produit non trouvé');
+      return null;
     }
-    
-    final firestoreMenus = await _firestoreService.loadMenus();
-    product = firestoreMenus.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
-    if (product != null) {
-      developer.log('  ✅ Produit trouvé dans Firestore (menus)');
-      return product;
-    }
-    
-    final firestoreDrinks = await _firestoreService.loadDrinks();
-    product = firestoreDrinks.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
-    if (product != null) {
-      developer.log('  ✅ Produit trouvé dans Firestore (boissons)');
-      return product;
-    }
-    
-    final firestoreDesserts = await _firestoreService.loadDesserts();
-    product = firestoreDesserts.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
-    if (product != null) {
-      developer.log('  ✅ Produit trouvé dans Firestore (desserts)');
-      return product;
-    }
-    
-    // 2. Ensuite chercher dans SharedPreferences (admin local)
-    developer.log('  → Recherche dans SharedPreferences...');
-    final adminPizzas = await _crudService.loadPizzas();
-    product = adminPizzas.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
-    if (product != null) {
-      developer.log('  ✅ Produit trouvé dans SharedPreferences (pizzas)');
-      return product;
-    }
-    
-    final adminMenus = await _crudService.loadMenus();
-    product = adminMenus.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
-    if (product != null) {
-      developer.log('  ✅ Produit trouvé dans SharedPreferences (menus)');
-      return product;
-    }
-    
-    final adminDrinks = await _crudService.loadDrinks();
-    product = adminDrinks.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
-    if (product != null) {
-      developer.log('  ✅ Produit trouvé dans SharedPreferences (boissons)');
-      return product;
-    }
-    
-    final adminDesserts = await _crudService.loadDesserts();
-    product = adminDesserts.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
-    if (product != null) {
-      developer.log('  ✅ Produit trouvé dans SharedPreferences (desserts)');
-      return product;
-    }
-    
-    // 3. Enfin chercher dans les mock data
-    developer.log('  → Recherche dans mock data...');
-    product = mockProducts.cast<Product?>().firstWhere((p) => p?.id == id, orElse: () => null);
-    if (product != null) {
-      developer.log('  ✅ Produit trouvé dans mock data');
-      return product;
-    }
-    
-    developer.log('  ❌ Produit non trouvé');
-    return null;
   }
 }
 
