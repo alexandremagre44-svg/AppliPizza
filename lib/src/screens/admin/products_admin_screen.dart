@@ -321,7 +321,7 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
     }
 
     if (success && mounted) {
-      ref.invalidate(productListProvider);
+      ref.invalidate(productStreamProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -374,7 +374,7 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
     }
 
     if (success && mounted) {
-      ref.invalidate(productListProvider);
+      ref.invalidate(productStreamProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produit supprimé')),
       );
@@ -399,7 +399,7 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
 
     // Si un produit a été créé/modifié, rafraîchir la liste
     if (result == true && mounted) {
-      ref.invalidate(productListProvider);
+      ref.invalidate(productStreamProvider);
     }
   }
 }

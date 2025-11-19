@@ -146,8 +146,8 @@ class HomeScreen extends ConsumerWidget {
 
     return RefreshIndicator(
       onRefresh: () async {
-        ref.invalidate(productListProvider);
-        await ref.read(productListProvider.future);
+        ref.invalidate(productStreamProvider);
+        await ref.read(productStreamProvider.future);
       },
       color: AppColors.primaryRed,
       child: SingleChildScrollView(
@@ -267,7 +267,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           SizedBox(height: AppSpacing.lg),
           ElevatedButton(
-            onPressed: () => ref.refresh(productListProvider),
+            onPressed: () => ref.refresh(productStreamProvider),
             child: Text(homeTexts?.retryButton ?? 'Réessayer'),
           ),
         ],

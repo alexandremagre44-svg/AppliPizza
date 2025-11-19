@@ -38,7 +38,7 @@ class _RewardProductSelectorScreenState
 
   @override
   Widget build(BuildContext context) {
-    final productsAsync = ref.watch(productListProvider);
+    final productsAsync = ref.watch(productStreamProvider);
 
     return Scaffold(
       appBar: AppBar(

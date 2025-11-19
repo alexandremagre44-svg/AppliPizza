@@ -183,7 +183,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
   @override
   Widget build(BuildContext context) {
     // Charger les produits depuis le provider (inclut mock + admin + Firestore)
-    final productsAsync = ref.watch(productListProvider);
+    final productsAsync = ref.watch(productStreamProvider);
     
     return productsAsync.when(
       data: (allProducts) {
