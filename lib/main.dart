@@ -1,9 +1,12 @@
 // lib/main.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
 
 // Importez vos écrans
@@ -42,6 +45,40 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // ========================================================================
+  // FIREBASE APP CHECK - Protection contre abus et bots
+  // ========================================================================
+  // Active App Check pour protéger les ressources backend Firebase
+  // Mode debug: utilise un debug token pour le développement
+  // Mode prod: utilise Play Integrity API sur Android / DeviceCheck sur iOS
+  await FirebaseAppCheck.instance.activate(
+    // WebProvider pour le web (si supporté)
+    webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
+    // Android: Play Integrity API en production, debug token en dev
+    androidProvider: kDebugMode 
+        ? AndroidProvider.debug 
+        : AndroidProvider.playIntegrity,
+    // iOS: DeviceCheck en production, debug token en dev
+    appleProvider: kDebugMode 
+        ? AppleProvider.debug 
+        : AppleProvider.deviceCheck,
+  );
+  
+  // ========================================================================
+  // FIREBASE CRASHLYTICS - Monitoring des erreurs
+  // ========================================================================
+  // Configure Crashlytics pour capturer les erreurs Flutter
+  FlutterError.onError = (errorDetails) {
+    // Log l'erreur dans Crashlytics
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  
+  // Capture les erreurs asynchrones non gérées
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
   
   runApp(
     const ProviderScope(

@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
     // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -35,6 +36,18 @@ android {
 
     buildTypes {
         release {
+            // ================================================================
+            // SÉCURITÉ BUILD RELEASE
+            // ================================================================
+            // Activer l'obfuscation du code avec Proguard/R8
+            isMinifyEnabled = true
+            // Activer la réduction des ressources inutilisées
+            isShrinkResources = true
+            // Fichier de règles Proguard personnalisées
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
