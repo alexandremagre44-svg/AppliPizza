@@ -31,7 +31,8 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
       return _buildUnauthorizedScreen(context);
     }
     
-    final productsAsync = ref.watch(productListProvider);
+    // OPTIMIZED: Use StreamProvider for better performance
+    final productsAsync = ref.watch(productStreamProvider);
     final cart = ref.watch(staffTabletCartProvider);
 
     return Scaffold(

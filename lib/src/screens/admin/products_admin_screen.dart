@@ -37,7 +37,8 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
 
   @override
   Widget build(BuildContext context) {
-    final productsAsync = ref.watch(productListProvider);
+    // OPTIMIZED: Use StreamProvider for better performance
+    final productsAsync = ref.watch(productStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLow,
