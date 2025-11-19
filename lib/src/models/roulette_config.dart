@@ -1,0 +1,296 @@
+// lib/src/models/roulette_config.dart
+// Configuration model for the promotional wheel (roulette)
+
+import 'package:flutter/material.dart';
+
+class RouletteConfig {
+  final String id;
+  final bool isActive;
+  final String displayLocation; // 'home', 'profile', etc.
+  final int delaySeconds; // Delay before showing
+  final int maxUsesPerDay; // Max spins per user per day
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final List<RouletteSegment> segments;
+  final DateTime updatedAt;
+
+  RouletteConfig({
+    required this.id,
+    this.isActive = false,
+    this.displayLocation = 'home',
+    this.delaySeconds = 5,
+    this.maxUsesPerDay = 1,
+    this.startDate,
+    this.endDate,
+    this.segments = const [],
+    required this.updatedAt,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'isActive': isActive,
+      'displayLocation': displayLocation,
+      'delaySeconds': delaySeconds,
+      'maxUsesPerDay': maxUsesPerDay,
+      'startDate': startDate?.toIso8601String(),
+      'endDate': endDate?.toIso8601String(),
+      'segments': segments.map((s) => s.toMap()).toList(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+  
+  // Alias for backward compatibility
+  Map<String, dynamic> toJson() => toMap();
+
+  factory RouletteConfig.fromMap(Map<String, dynamic> data) {
+    return RouletteConfig(
+      id: data['id'] as String,
+      isActive: data['isActive'] as bool? ?? false,
+      displayLocation: data['displayLocation'] as String? ?? 'home',
+      delaySeconds: data['delaySeconds'] as int? ?? 5,
+      maxUsesPerDay: data['maxUsesPerDay'] as int? ?? 1,
+      startDate: _parseDateTime(data['startDate']),
+      endDate: _parseDateTime(data['endDate']),
+      segments: (data['segments'] as List<dynamic>?)
+              ?.map((s) => RouletteSegment.fromMap(s as Map<String, dynamic>))
+              .toList() ??
+          [],
+      updatedAt: _parseDateTime(data['updatedAt']) ?? DateTime.now(),
+    );
+  }
+  
+  // Parse DateTime from either String (ISO8601) or Firestore Timestamp
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is String) {
+      try {
+        return DateTime.parse(value);
+      } catch (e) {
+        print('Error parsing date string: $e');
+        return null;
+      }
+    }
+    // Handle Firestore Timestamp (has toDate() method)
+    if (value is Map && value.containsKey('_seconds')) {
+      final seconds = value['_seconds'] as int;
+      return DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+    }
+    // Try dynamic method call for Timestamp object
+    try {
+      return (value as dynamic).toDate() as DateTime;
+    } catch (e) {
+      print('Error converting Timestamp to DateTime: $e');
+      return null;
+    }
+  }
+  
+  // Alias for backward compatibility
+  factory RouletteConfig.fromJson(Map<String, dynamic> json) => 
+      RouletteConfig.fromMap(json);
+
+  RouletteConfig copyWith({
+    String? id,
+    bool? isActive,
+    String? displayLocation,
+    int? delaySeconds,
+    int? maxUsesPerDay,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<RouletteSegment>? segments,
+    DateTime? updatedAt,
+  }) {
+    return RouletteConfig(
+      id: id ?? this.id,
+      isActive: isActive ?? this.isActive,
+      displayLocation: displayLocation ?? this.displayLocation,
+      delaySeconds: delaySeconds ?? this.delaySeconds,
+      maxUsesPerDay: maxUsesPerDay ?? this.maxUsesPerDay,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      segments: segments ?? this.segments,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  bool get isCurrentlyActive {
+    if (!isActive) return false;
+    final now = DateTime.now();
+    if (startDate != null && now.isBefore(startDate!)) return false;
+    if (endDate != null && now.isAfter(endDate!)) return false;
+    return true;
+  }
+}
+
+/// Reward type enum for roulette segments
+enum RewardType {
+  none('none'),
+  bonusPoints('bonus_points'),
+  percentageDiscount('percentage_discount'),
+  fixedAmountDiscount('fixed_amount_discount'),
+  freeProduct('free_product'),
+  freePizza('free_pizza'),
+  freeDrink('free_drink'),
+  freeDessert('free_dessert');
+
+  const RewardType(this.value);
+  final String value;
+
+  static RewardType fromString(String value) {
+    return RewardType.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => RewardType.none,
+    );
+  }
+}
+
+// Individual segment on the wheel
+class RouletteSegment {
+  final String id;
+  final String label; // Text displayed on wheel
+  final String rewardId; // What the player wins (for backward compatibility)
+  final double probability; // Probability percentage (0-100)
+  final Color color; // Segment color
+  
+  // New fields for enhanced segment configuration
+  final String? description; // Optional description
+  final RewardType rewardType; // Type of reward
+  final double? rewardValue; // Numeric value (percentage or amount)
+  final String? productId; // Product ID for free_product/free_drink
+  final String? iconName; // Material icon name (e.g., "local_pizza")
+  final bool isActive; // Whether segment is active
+  final int position; // Display order on wheel
+  
+  // Legacy fields for backward compatibility
+  final String? type;
+  final int? value;
+  final double? weight;
+
+  RouletteSegment({
+    required this.id,
+    required this.label,
+    required this.rewardId,
+    required this.probability,
+    required this.color,
+    // New fields
+    this.description,
+    this.rewardType = RewardType.none,
+    this.rewardValue,
+    this.productId,
+    this.iconName,
+    this.isActive = true,
+    this.position = 0,
+    // Legacy fields
+    this.type,
+    this.value,
+    this.weight,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'label': label,
+      'rewardId': rewardId,
+      'probability': probability,
+      'colorHex': _colorToHex(color),
+      // New fields
+      'description': description,
+      'rewardType': rewardType.value,
+      'rewardValue': rewardValue,
+      'productId': productId,
+      'iconName': iconName,
+      'isActive': isActive,
+      'position': position,
+      // Legacy fields
+      'type': type ?? rewardId,
+      'value': value,
+      'weight': weight ?? probability,
+    };
+  }
+  
+  // Alias for backward compatibility
+  Map<String, dynamic> toJson() => toMap();
+  
+  // Convert Color to hex string
+  static String _colorToHex(Color color) {
+    return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+  }
+  
+  // Convert hex string to Color
+  static Color _hexToColor(String? hexString) {
+    if (hexString == null || hexString.isEmpty) {
+      return Colors.blue; // Default color
+    }
+    final buffer = StringBuffer();
+    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+    buffer.write(hexString.replaceFirst('#', ''));
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
+
+  factory RouletteSegment.fromMap(Map<String, dynamic> data) {
+    return RouletteSegment(
+      id: data['id'] as String,
+      label: data['label'] as String,
+      rewardId: data['rewardId'] as String? ?? data['type'] as String? ?? '',
+      probability: (data['probability'] as num?)?.toDouble() ?? 
+                   (data['weight'] as num?)?.toDouble() ?? 0.0,
+      color: _hexToColor(data['colorHex'] as String?),
+      // New fields
+      description: data['description'] as String?,
+      rewardType: RewardType.fromString(data['rewardType'] as String? ?? 'none'),
+      rewardValue: (data['rewardValue'] as num?)?.toDouble(),
+      productId: data['productId'] as String?,
+      iconName: data['iconName'] as String?,
+      isActive: data['isActive'] as bool? ?? true,
+      position: data['position'] as int? ?? 0,
+      // Legacy fields
+      type: data['type'] as String?,
+      value: data['value'] as int?,
+      weight: (data['weight'] as num?)?.toDouble(),
+    );
+  }
+  
+  // Alias for backward compatibility
+  factory RouletteSegment.fromJson(Map<String, dynamic> json) => 
+      RouletteSegment.fromMap(json);
+
+  RouletteSegment copyWith({
+    String? id,
+    String? label,
+    String? rewardId,
+    double? probability,
+    Color? color,
+    // New fields
+    String? description,
+    RewardType? rewardType,
+    double? rewardValue,
+    String? productId,
+    String? iconName,
+    bool? isActive,
+    int? position,
+    // Legacy fields
+    String? type,
+    int? value,
+    double? weight,
+  }) {
+    return RouletteSegment(
+      id: id ?? this.id,
+      label: label ?? this.label,
+      rewardId: rewardId ?? this.rewardId,
+      probability: probability ?? this.probability,
+      color: color ?? this.color,
+      // New fields
+      description: description ?? this.description,
+      rewardType: rewardType ?? this.rewardType,
+      rewardValue: rewardValue ?? this.rewardValue,
+      productId: productId ?? this.productId,
+      iconName: iconName ?? this.iconName,
+      isActive: isActive ?? this.isActive,
+      position: position ?? this.position,
+      // Legacy fields
+      type: type ?? this.type,
+      value: value ?? this.value,
+      weight: weight ?? this.weight,
+    );
+  }
+}

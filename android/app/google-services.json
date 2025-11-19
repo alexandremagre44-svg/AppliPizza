@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "739748566859",
+    "project_id": "pizza-delizza-prod",
+    "storage_bucket": "pizza-delizza-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:739748566859:android:fe25933be4d105b3b37ace",
+        "android_client_info": {
+          "package_name": "com.pizzadelizza"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5FY2HBjdv6b_CcRVwwh7xwr5RBap9TZ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:739748566859:android:16170e47a1680534b37ace",
+        "android_client_info": {
+          "package_name": "com.pizzadelizza.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5FY2HBjdv6b_CcRVwwh7xwr5RBap9TZ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
