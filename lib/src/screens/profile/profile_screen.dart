@@ -46,7 +46,8 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -352,11 +353,10 @@ class ProfileScreen extends ConsumerWidget {
             SizedBox(height: AppSpacing.xxl),
           ],
         ),
+        ),
       ),
     );
   }
-
-
 
   Widget _buildOrderHistory(BuildContext context, List<Order> history) {
     if (history.isEmpty) {

@@ -192,11 +192,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Finaliser la commande',
           style: TextStyle(
             fontWeight: FontWeight.w900,
-            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         leading: IconButton(
@@ -206,7 +205,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(VisualConstants.paddingMedium),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,6 +265,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

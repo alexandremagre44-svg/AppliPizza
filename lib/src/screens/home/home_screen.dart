@@ -32,7 +32,8 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final productsAsync = ref.watch(productListProvider);
+    // OPTIMIZED: Use StreamProvider for better performance
+    final productsAsync = ref.watch(productStreamProvider);
     final homeConfigAsync = ref.watch(homeConfigProvider);
     final appTextsAsync = ref.watch(appTextsConfigProvider);
 
@@ -42,7 +43,8 @@ class HomeScreen extends ConsumerWidget {
         loading: () => _buildAppBar(context, null),
         error: (_, __) => _buildAppBar(context, null),
       ),
-      body: productsAsync.when(
+      body: SafeArea(
+        child: productsAsync.when(
         data: (products) => homeConfigAsync.when(
           data: (homeConfig) => appTextsAsync.when(
             data: (appTexts) => _buildContentWithAnimation(context, ref, products, homeConfig, appTexts.home),
@@ -61,6 +63,7 @@ class HomeScreen extends ConsumerWidget {
           data: (appTexts) => _buildErrorState(context, ref, error, appTexts.home),
           loading: () => _buildErrorState(context, ref, error, null),
           error: (_, __) => _buildErrorState(context, ref, error, null),
+        ),
         ),
       ),
     );
