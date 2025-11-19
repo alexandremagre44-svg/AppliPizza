@@ -1,0 +1,174 @@
+rules_version = '2';
+
+/**
+ * ============================================================================
+ * FIREBASE STORAGE SECURITY RULES - PIZZA DELI'ZZA
+ * ============================================================================
+ * 
+ * OBJECTIF:
+ * Sécuriser l'upload et le download des images produits, ingrédients, et bannières
+ * 
+ * STRUCTURE DES CHEMINS:
+ * - /products/{productId}/{filename} - Images des produits (pizzas, menus, etc.)
+ * - /ingredients/{ingredientId}/{filename} - Images des ingrédients
+ * - /promo_banners/{bannerId}/{filename} - Bannières promotionnelles
+ * - /home_blocks/{blockId}/{filename} - Images pour les blocs home page
+ * - /popups/{popupId}/{filename} - Images pour les popups
+ * 
+ * CONVENTION DE RÔLES:
+ * - Le rôle est stocké dans Firestore: users/{uid}.role
+ * - Seuls les admins peuvent uploader des fichiers
+ * - Les images sont publiquement lisibles (pour affichage app client)
+ */
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // ========================================================================
+    // FONCTIONS HELPER RÉUTILISABLES
+    // ========================================================================
+    
+    /**
+     * Vérifie si l'utilisateur est authentifié
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /**
+     * Récupère le rôle de l'utilisateur depuis Firestore
+     */
+    function getUserRole() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    /**
+     * Vérifie si l'utilisateur est admin
+     */
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+    
+    /**
+     * Vérifie que le fichier est une image valide
+     */
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*') &&
+             request.resource.contentType in [
+               'image/jpeg', 
+               'image/jpg', 
+               'image/png', 
+               'image/gif',
+               'image/webp'
+             ];
+    }
+    
+    /**
+     * Vérifie que la taille du fichier est raisonnable (< 5MB)
+     */
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024; // 5MB max
+    }
+    
+    /**
+     * Validation complète pour les uploads
+     */
+    function isValidUpload() {
+      return isValidImage() && isValidSize();
+    }
+    
+    // ========================================================================
+    // IMAGES PRODUITS (pizzas, menus, drinks, desserts)
+    // ========================================================================
+    match /products/{productId}/{filename} {
+      // Lecture: PUBLIC - accessible à tous pour affichage dans l'app
+      // Note: Les images produits doivent être visibles par tous les utilisateurs
+      allow read: if true;
+      
+      // Écriture (upload): ADMIN UNIQUEMENT
+      // Validation: fichier image valide, taille raisonnable
+      allow create, update: if isAdmin() && isValidUpload();
+      
+      // Suppression: ADMIN UNIQUEMENT
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // IMAGES INGRÉDIENTS
+    // ========================================================================
+    match /ingredients/{ingredientId}/{filename} {
+      // Lecture: PUBLIC - accessible à tous
+      allow read: if true;
+      
+      // Écriture: ADMIN UNIQUEMENT
+      allow create, update: if isAdmin() && isValidUpload();
+      
+      // Suppression: ADMIN UNIQUEMENT
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // BANNIÈRES PROMOTIONNELLES
+    // ========================================================================
+    match /promo_banners/{bannerId}/{filename} {
+      // Lecture: PUBLIC - accessible à tous
+      allow read: if true;
+      
+      // Écriture: ADMIN UNIQUEMENT
+      allow create, update: if isAdmin() && isValidUpload();
+      
+      // Suppression: ADMIN UNIQUEMENT
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // IMAGES POUR BLOCS HOME PAGE
+    // ========================================================================
+    match /home_blocks/{blockId}/{filename} {
+      // Lecture: PUBLIC - accessible à tous
+      allow read: if true;
+      
+      // Écriture: ADMIN UNIQUEMENT
+      allow create, update: if isAdmin() && isValidUpload();
+      
+      // Suppression: ADMIN UNIQUEMENT
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // IMAGES POUR POPUPS
+    // ========================================================================
+    match /popups/{popupId}/{filename} {
+      // Lecture: PUBLIC - accessible à tous
+      allow read: if true;
+      
+      // Écriture: ADMIN UNIQUEMENT
+      allow create, update: if isAdmin() && isValidUpload();
+      
+      // Suppression: ADMIN UNIQUEMENT
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // IMAGES POUR CARROUSEL
+    // ========================================================================
+    match /carousel/{imageId}/{filename} {
+      // Lecture: PUBLIC - accessible à tous
+      allow read: if true;
+      
+      // Écriture: ADMIN UNIQUEMENT
+      allow create, update: if isAdmin() && isValidUpload();
+      
+      // Suppression: ADMIN UNIQUEMENT
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // RÈGLE PAR DÉFAUT: DENY ALL
+    // ========================================================================
+    // Tout autre chemin est interdit
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

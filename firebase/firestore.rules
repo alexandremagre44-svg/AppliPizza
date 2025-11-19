@@ -1,0 +1,379 @@
+rules_version = '2';
+
+/**
+ * ============================================================================
+ * FIRESTORE SECURITY RULES - PIZZA DELI'ZZA
+ * ============================================================================
+ * 
+ * CONVENTION DE RÔLES:
+ * - Le rôle est stocké dans Firestore: users/{uid}.role
+ * - Valeurs possibles: 'admin', 'client', 'kitchen'
+ * - Custom claims Firebase Auth: NON UTILISÉS actuellement
+ * 
+ * PRINCIPES DE SÉCURITÉ:
+ * 1. Deny by default (règle finale catch-all)
+ * 2. Authentification requise pour toute opération
+ * 3. Admin vérifié via Firestore users collection
+ * 4. Validation stricte des données sensibles
+ * 5. Séparation claire client/admin/kitchen
+ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ========================================================================
+    // FONCTIONS HELPER RÉUTILISABLES
+    // ========================================================================
+    
+    /**
+     * Vérifie si l'utilisateur est authentifié
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /**
+     * Récupère le rôle de l'utilisateur depuis Firestore
+     * Note: Ceci coûte une lecture supplémentaire, mais est nécessaire
+     * tant que les custom claims ne sont pas utilisés
+     */
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    /**
+     * Vérifie si l'utilisateur est admin
+     */
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+    
+    /**
+     * Vérifie si l'utilisateur est kitchen
+     */
+    function isKitchen() {
+      return isAuthenticated() && getUserRole() == 'kitchen';
+    }
+    
+    /**
+     * Vérifie si l'utilisateur est admin OU kitchen
+     */
+    function isAdminOrKitchen() {
+      return isAdmin() || isKitchen();
+    }
+    
+    /**
+     * Vérifie si l'utilisateur est le propriétaire de la ressource
+     */
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    /**
+     * Valide qu'un prix est positif
+     */
+    function isValidPrice(price) {
+      return price is int && price >= 0;
+    }
+    
+    /**
+     * Valide qu'une quantité est positive
+     */
+    function isValidQuantity(qty) {
+      return qty is int && qty > 0;
+    }
+    
+    /**
+     * Valide qu'un statut de commande est valide
+     */
+    function isValidOrderStatus(status) {
+      return status in ['En attente', 'En préparation', 'Au four', 'Prête', 'Livrée', 'Annulée'];
+    }
+    
+    // ========================================================================
+    // COLLECTION: users (Profils utilisateurs avec rôle)
+    // ========================================================================
+    match /users/{userId} {
+      // Lecture: utilisateur peut lire son propre profil, admin peut tout lire
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // Création: seulement lors de l'inscription
+      // Le userId doit correspondre à l'utilisateur authentifié
+      allow create: if isAuthenticated() && 
+                      isOwner(userId) &&
+                      request.resource.data.email is string &&
+                      request.resource.data.role is string &&
+                      // Le rôle par défaut doit être 'client'
+                      request.resource.data.role == 'client';
+      
+      // Mise à jour: 
+      // - Utilisateur peut mettre à jour son profil (SAUF le rôle)
+      // - Admin peut tout modifier
+      allow update: if isAuthenticated() && (
+        // Utilisateur modifie son propre profil sans toucher au rôle
+        (isOwner(userId) && 
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])) ||
+        // Admin peut tout modifier
+        isAdmin()
+      );
+      
+      // Suppression: seulement admin
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // COLLECTION: user_profiles (Profils détaillés)
+    // ========================================================================
+    match /user_profiles/{userId} {
+      // Lecture: utilisateur peut lire son propre profil, admin peut tout
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // Création: l'utilisateur peut créer son propre profil
+      allow create: if isAuthenticated() && isOwner(userId);
+      
+      // Mise à jour: l'utilisateur peut mettre à jour son propre profil
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // Suppression: seulement admin
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // COLLECTION: orders (Commandes)
+    // ========================================================================
+    match /orders/{orderId} {
+      // Lecture:
+      // - Client peut lire SES propres commandes
+      // - Admin et Kitchen peuvent lire TOUTES les commandes
+      allow read: if isAuthenticated() && (
+        resource.data.uid == request.auth.uid ||
+        isAdminOrKitchen()
+      );
+      
+      // Création: n'importe quel utilisateur authentifié peut créer une commande
+      // VALIDATION STRICTE:
+      allow create: if isAuthenticated() &&
+        // Le uid doit correspondre à l'utilisateur connecté
+        request.resource.data.uid == request.auth.uid &&
+        // Statut initial obligatoire
+        request.resource.data.status == 'En attente' &&
+        // Total en centimes obligatoire et positif
+        isValidPrice(request.resource.data.total_cents) &&
+        request.resource.data.total_cents > 0 &&
+        // Items obligatoires et non vides
+        request.resource.data.items is list &&
+        request.resource.data.items.size() > 0 &&
+        // Email obligatoire
+        request.resource.data.email is string;
+      
+      // Mise à jour:
+      // - Client NE PEUT PAS modifier sa commande après création
+      // - Admin et Kitchen peuvent mettre à jour le statut et champs de vue
+      // - Les champs critiques NE PEUVENT JAMAIS être modifiés
+      allow update: if isAuthenticated() && 
+        isAdminOrKitchen() &&
+        // Interdire modification des champs critiques
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['uid', 'total_cents', 'items', 'email', 'createdAt']) &&
+        // Vérifier que le statut reste valide
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['status']) ||
+         isValidOrderStatus(request.resource.data.status));
+      
+      // Suppression: seulement admin
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // COLLECTIONS PRODUITS (pizzas, menus, drinks, desserts)
+    // ========================================================================
+    
+    // Règle générique pour tous les produits
+    match /{productCollection}/{productId} {
+      // Lecture: tous les utilisateurs authentifiés peuvent lire les produits
+      allow read: if isAuthenticated() && 
+                    productCollection in ['pizzas', 'menus', 'drinks', 'desserts'];
+      
+      // Écriture: SEULEMENT admin peut créer/modifier/supprimer des produits
+      allow create, update, delete: if isAdmin() && 
+                                      productCollection in ['pizzas', 'menus', 'drinks', 'desserts'];
+    }
+    
+    // ========================================================================
+    // COLLECTION: ingredients (Ingrédients universels)
+    // ========================================================================
+    match /ingredients/{ingredientId} {
+      // Lecture: tous les utilisateurs authentifiés
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin
+      // Validation: prix >= 0, nom non vide
+      allow create, update: if isAdmin() &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 &&
+        isValidPrice(request.resource.data.price);
+      
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // COLLECTION: promotions
+    // ========================================================================
+    match /promotions/{promoId} {
+      // Lecture: tous les utilisateurs authentifiés
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin
+      allow write: if isAdmin();
+    }
+    
+    // ========================================================================
+    // ROULETTE & REWARDS
+    // ========================================================================
+    
+    // Configuration de la roulette (document unique)
+    match /config/roulette_rules {
+      // Lecture: tous les utilisateurs authentifiés
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin
+      allow write: if isAdmin();
+    }
+    
+    // Segments de la roulette
+    match /roulette_segments/{segmentId} {
+      // Lecture: tous les utilisateurs authentifiés
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin
+      allow write: if isAdmin();
+    }
+    
+    // Historique des tirages de roulette (anti-triche)
+    match /user_roulette_spins/{spinId} {
+      // Lecture: admin peut tout lire
+      allow read: if isAdmin();
+      
+      // Création: utilisateur authentifié peut créer SON propre tirage
+      // VALIDATION: userId doit correspondre
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.spinDate is timestamp &&
+        request.resource.data.result is string;
+      
+      // Pas de mise à jour ou suppression (audit trail)
+      allow update, delete: if false;
+    }
+    
+    // Audit trail de la roulette (structure hiérarchique)
+    match /roulette_history/{userId}/{dateKey}/{entryId} {
+      // Lecture: utilisateur peut lire SON historique, admin peut tout
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // Création: système seulement (via Cloud Functions)
+      // Empêche les utilisateurs de créer des entrées d'audit
+      allow create: if false;
+      
+      // Pas de mise à jour ou suppression (audit trail immuable)
+      allow update, delete: if false;
+    }
+    
+    // Tickets de récompenses (sous-collection)
+    match /users/{userId}/rewardTickets/{ticketId} {
+      // Lecture: utilisateur peut lire SES tickets, admin peut tout
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      
+      // Création: utilisateur peut créer ses propres tickets
+      // (généralement via un service backend)
+      allow create: if isAuthenticated() && 
+        isOwner(userId) &&
+        request.resource.data.userId == request.auth.uid;
+      
+      // Mise à jour:
+      // - Utilisateur peut marquer comme utilisé (champs limités)
+      // - Admin peut tout modifier
+      allow update: if isAuthenticated() && (
+        (isOwner(userId) && 
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['isUsed', 'usedAt'])) ||
+        isAdmin()
+      );
+      
+      // Suppression: seulement admin
+      allow delete: if isAdmin();
+    }
+    
+    // ========================================================================
+    // COLLECTIONS DE CONFIGURATION (Admin Only)
+    // ========================================================================
+    
+    // Configuration de la page d'accueil
+    match /app_home_config/{docId} {
+      // Lecture: tous les utilisateurs authentifiés
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin
+      allow write: if isAdmin();
+    }
+    
+    // Configuration des textes de l'application
+    match /app_texts_config/{docId} {
+      // Lecture: tous les utilisateurs authentifiés
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin
+      allow write: if isAdmin();
+    }
+    
+    // Configuration des popups
+    match /app_popups/{popupId} {
+      // Lecture: tous les utilisateurs authentifiés
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin
+      allow write: if isAdmin();
+    }
+    
+    // Vues des popups par utilisateur
+    match /user_popup_views/{viewId} {
+      // Lecture: utilisateur peut lire ses propres vues, admin peut tout
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      
+      // Création: utilisateur peut créer ses propres vues
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // Pas de mise à jour ou suppression
+      allow update, delete: if false;
+    }
+    
+    // Paramètres de fidélité
+    match /loyalty_settings/{docId} {
+      // Lecture: tous les utilisateurs authentifiés
+      allow read: if isAuthenticated();
+      
+      // Écriture: seulement admin
+      allow write: if isAdmin();
+    }
+    
+    // ========================================================================
+    // COLLECTION: _count (Compteurs - système uniquement)
+    // ========================================================================
+    match /_count/{counterId} {
+      // Lecture: admin uniquement
+      allow read: if isAdmin();
+      
+      // Écriture: interdite côté client (géré par Cloud Functions)
+      allow write: if false;
+    }
+    
+    // ========================================================================
+    // RÈGLE PAR DÉFAUT: DENY ALL
+    // ========================================================================
+    // Toute collection non explicitement autorisée ci-dessus est interdite
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
