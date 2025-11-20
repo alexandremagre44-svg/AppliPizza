@@ -59,6 +59,15 @@ class AppColors {
   
   /// Tertiaire #7D5260
   static const Color tertiary = Color(0xFF7D5260);
+  
+  /// Blanc sur tertiaire #FFFFFF
+  static const Color onTertiary = Color(0xFFFFFFFF);
+  
+  /// Container tertiaire #F3E0E6
+  static const Color tertiaryContainer = Color(0xFFF3E0E6);
+  
+  /// Texte sur container tertiaire #3E1F2B
+  static const Color onTertiaryContainer = Color(0xFF3E1F2B);
 
   // ═══════════════════════════════════════════════════════════════
   // SURFACE & BACKGROUND - Material 3
