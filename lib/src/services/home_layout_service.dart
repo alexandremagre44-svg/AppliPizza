@@ -113,4 +113,32 @@ class HomeLayoutService {
       return false;
     }
   }
+
+  /// Initialize home layout if missing
+  /// Reads config/home_layout from Firestore
+  /// If missing, creates document with default values
+  /// This ensures backward compatibility with existing installations
+  Future<void> initIfMissing() async {
+    try {
+      final existing = await getHomeLayout();
+      if (existing == null) {
+        final defaultConfig = HomeLayoutConfig(
+          id: 'home_layout',
+          studioEnabled: true,
+          sectionsOrder: ['hero', 'banner', 'popups', 'texts'],
+          enabledSections: {
+            'hero': true,
+            'banner': true,
+            'popups': true,
+            'texts': true,
+          },
+          updatedAt: DateTime.now(),
+        );
+        await saveHomeLayout(defaultConfig);
+        print('Home layout initialized with default values');
+      }
+    } catch (e) {
+      print('Error in initIfMissing: $e');
+    }
+  }
 }

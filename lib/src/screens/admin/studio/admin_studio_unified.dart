@@ -71,7 +71,15 @@ class _AdminStudioUnifiedState extends ConsumerState<AdminStudioUnified> {
   @override
   void initState() {
     super.initState();
-    _loadAllConfigurations();
+    _initializeAndLoad();
+  }
+
+  /// Initialize home layout if missing, then load all configurations
+  Future<void> _initializeAndLoad() async {
+    // First, ensure home_layout document exists
+    await _homeLayoutService.initIfMissing();
+    // Then load all configurations
+    await _loadAllConfigurations();
   }
 
   /// Load all configurations from Firestore
