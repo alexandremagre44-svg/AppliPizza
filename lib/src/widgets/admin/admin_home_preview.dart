@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../models/home_config.dart';
 import '../../models/app_texts_config.dart';
 import '../../models/popup_config.dart';
+import '../../models/banner_config.dart';
 import '../../design_system/app_theme.dart';
 import '../home/hero_banner.dart';
 import '../home/info_banner.dart';
@@ -15,6 +16,7 @@ class AdminHomePreview extends StatelessWidget {
   final HomeConfig? homeConfig;
   final HomeTexts? homeTexts;
   final List<PopupConfig>? popups;
+  final List<BannerConfig>? banners;
   final List<String>? sectionsOrder;
   final Map<String, bool>? enabledSections;
   final bool? studioEnabled;
@@ -24,6 +26,7 @@ class AdminHomePreview extends StatelessWidget {
     this.homeConfig,
     this.homeTexts,
     this.popups,
+    this.banners,
     this.sectionsOrder,
     this.enabledSections,
     this.studioEnabled,
@@ -292,6 +295,57 @@ class AdminHomePreview extends StatelessWidget {
   }
 
   Widget _buildBannerPreview() {
+    // Show multiple banners if available
+    if (banners != null && banners!.isNotEmpty) {
+      final activeBanners = banners!.where((b) => b.isCurrentlyActive).toList();
+      if (activeBanners.isEmpty) return const SizedBox.shrink();
+      
+      return Column(
+        children: activeBanners.map((banner) {
+          Color bgColor = AppColors.primaryRed;
+          Color textColor = Colors.white;
+
+          final bgColorValue = ColorConverter.hexToColor(banner.backgroundColor);
+          if (bgColorValue != null) {
+            bgColor = Color(bgColorValue);
+          }
+
+          final textColorValue = ColorConverter.hexToColor(banner.textColor);
+          if (textColorValue != null) {
+            textColor = Color(textColorValue);
+          }
+
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(banner.iconData ?? Icons.campaign, color: textColor, size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    banner.text,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      );
+    }
+
+    // Fallback to old PromoBanner if no new banners
     if (homeConfig?.promoBanner == null || !homeConfig!.promoBanner!.isCurrentlyActive) {
       return const SizedBox.shrink();
     }
