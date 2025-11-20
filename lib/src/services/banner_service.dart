@@ -145,4 +145,35 @@ class BannerService {
       return false;
     }
   }
+
+  /// Save all banners (batch operation for Studio V2)
+  Future<void> saveAllBanners(List<BannerConfig> banners) async {
+    try {
+      final batch = _firestore.batch();
+      
+      // Get existing banners to delete removed ones
+      final existing = await getAllBanners();
+      final existingIds = existing.map((b) => b.id).toSet();
+      final newIds = banners.map((b) => b.id).toSet();
+      
+      // Delete removed banners
+      for (final id in existingIds) {
+        if (!newIds.contains(id)) {
+          final docRef = _firestore.collection(_collection).doc(id);
+          batch.delete(docRef);
+        }
+      }
+      
+      // Create or update all banners
+      for (final banner in banners) {
+        final docRef = _firestore.collection(_collection).doc(banner.id);
+        batch.set(docRef, banner.toJson());
+      }
+      
+      await batch.commit();
+    } catch (e) {
+      print('Error saving all banners: $e');
+      rethrow;
+    }
+  }
 }

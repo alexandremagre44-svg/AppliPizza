@@ -39,16 +39,29 @@ class AdminStudioScreen extends StatelessWidget {
         children: [
           SizedBox(height: AppSpacing.md),
           
-          // Studio unifié - PRINCIPAL
+          // Studio V2 PRO - PRINCIPAL
           _buildHighlightedBlock(
             context,
             iconData: Icons.auto_awesome,
-            title: '🎨 Studio Unifié',
-            subtitle: 'Gestion complète : Hero, Bandeau, Popups, Textes\nPrévisualisation live • Mode brouillon • Drag & drop',
+            title: '🎨 Studio PRO (V2)',
+            subtitle: 'Interface professionnelle • Textes dynamiques illimités • Popups Ultimate\nPrévisualisation temps réel • Mode brouillon • Architecture modulaire',
+            onTap: () {
+              context.push(AppRoutes.adminStudioV2);
+            },
+            isNew: true,
+          ),
+          
+          SizedBox(height: AppSpacing.md),
+          
+          // Studio V1 (legacy)
+          _buildStudioBlock(
+            context,
+            iconData: Icons.edit_note_rounded,
+            title: '📝 Studio Unifié (legacy)',
+            subtitle: 'Version précédente du studio',
             onTap: () {
               context.push(AppRoutes.adminStudioNew);
             },
-            isNew: true,
           ),
           
           SizedBox(height: AppSpacing.lg),
