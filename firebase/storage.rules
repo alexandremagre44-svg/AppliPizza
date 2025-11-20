@@ -1,9 +1,117 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // TEMP RULES
+    
+    // =========================================================================
+    // HELPER FUNCTIONS
+    // =========================================================================
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user is admin (using custom claims OR fallback to Firestore)
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.admin == true ||
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+    
+    // Validate image file (type and size)
+    function isValidImage() {
+      return request.resource.size < 10 * 1024 * 1024 && // Max 10MB
+             request.resource.contentType.matches('image/.*');
+    }
+    
+    // Validate specific image types only
+    function isValidImageType() {
+      return request.resource.contentType in [
+        'image/jpeg', 
+        'image/jpg', 
+        'image/png', 
+        'image/webp', 
+        'image/gif'
+      ];
+    }
+    
+    // =========================================================================
+    // ADMIN-ONLY FOLDERS
+    // =========================================================================
+    
+    // Home page assets (hero images, banners, etc.) - Admin only
+    match /home/{imageId} {
+      allow read: if true; // Public read
+      allow write: if isAdmin() && isValidImage() && isValidImageType();
+    }
+    
+    // Product images - Admin only upload
+    match /products/{imageId} {
+      allow read: if true; // Public read
+      allow write: if isAdmin() && isValidImage() && isValidImageType();
+    }
+    
+    // Promotion/banner images - Admin only
+    match /promotions/{imageId} {
+      allow read: if true; // Public read
+      allow write: if isAdmin() && isValidImage() && isValidImageType();
+    }
+    
+    // Ingredient images - Admin only
+    match /ingredients/{imageId} {
+      allow read: if true; // Public read
+      allow write: if isAdmin() && isValidImage() && isValidImageType();
+    }
+    
+    // Configuration images (logos, etc.) - Admin only
+    match /config/{imageId} {
+      allow read: if true; // Public read
+      allow write: if isAdmin() && isValidImage() && isValidImageType();
+    }
+    
+    // =========================================================================
+    // USER-SPECIFIC FOLDERS
+    // =========================================================================
+    
+    // User profile images - Users can upload their own
+    match /users/{userId}/{imageId} {
+      allow read: if true; // Public read (profile pictures)
+      
+      // Users can upload to their own folder only
+      allow write: if isAuthenticated() && 
+                      request.auth.uid == userId && 
+                      isValidImage() && 
+                      isValidImageType();
+    }
+    
+    // User-generated content (if any) - Users own their uploads
+    match /user_content/{userId}/{imageId} {
+      allow read: if isAuthenticated();
+      
+      allow write: if isAuthenticated() && 
+                      request.auth.uid == userId && 
+                      isValidImage() && 
+                      isValidImageType();
+    }
+    
+    // =========================================================================
+    // ADMIN-ONLY ROOT FILES
+    // =========================================================================
+    
+    // Admin documents/files
+    match /admin/{allPaths=**} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // =========================================================================
+    // DENY ALL OTHER PATHS
+    // =========================================================================
+    
+    // Explicitly deny access to any paths not matched above
     match /{allPaths=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

@@ -21,13 +21,23 @@ class UserProfileService {
   /// Créer ou mettre à jour un profil utilisateur complet
   Future<bool> saveUserProfile(UserProfile profile) async {
     try {
+      // INPUT SANITIZATION: Truncate strings to reasonable lengths
+      final sanitizedName = profile.name.trim().substring(
+        0, 
+        profile.name.length > 100 ? 100 : profile.name.length
+      );
+      final sanitizedAddress = profile.address.trim().substring(
+        0, 
+        profile.address.length > 200 ? 200 : profile.address.length
+      );
+      
       final data = {
         'id': profile.id,
-        'name': profile.name,
+        'name': sanitizedName,
         'email': profile.email,
         'imageUrl': profile.imageUrl,
-        'address': profile.address,
-        'favoriteProducts': profile.favoriteProducts,
+        'address': sanitizedAddress,
+        'favoriteProducts': profile.favoriteProducts.take(50).toList(), // Max 50 favorites
         'loyaltyPoints': profile.loyaltyPoints,
         'loyaltyLevel': profile.loyaltyLevel,
         'updatedAt': FieldValue.serverTimestamp(),
@@ -35,7 +45,7 @@ class UserProfileService {
 
       await _profilesCollection.doc(profile.id).set(data, SetOptions(merge: true));
       
-      developer.log('✅ Profil utilisateur "${profile.name}" sauvegardé dans Firestore');
+      developer.log('✅ Profil utilisateur "$sanitizedName" sauvegardé dans Firestore');
       return true;
     } catch (e) {
       developer.log('❌ Erreur lors de la sauvegarde du profil utilisateur: $e');

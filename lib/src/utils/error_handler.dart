@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'logger.dart';
 
 /// Custom exception for application-specific errors
@@ -44,6 +45,7 @@ class ErrorHandler {
     StackTrace? stackTrace, {
     String context = 'Operation',
     bool logError = true,
+    bool reportToCrashlytics = true,
   }) {
     if (logError) {
       AppLogger.error(
@@ -51,6 +53,16 @@ class ErrorHandler {
         error: error,
         stackTrace: stackTrace,
         tag: 'ErrorHandler',
+      );
+    }
+
+    // Report non-fatal errors to Crashlytics for monitoring
+    if (reportToCrashlytics) {
+      FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: context,
+        fatal: false,
       );
     }
 
