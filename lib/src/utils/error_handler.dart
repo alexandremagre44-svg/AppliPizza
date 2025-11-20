@@ -5,6 +5,7 @@
 /// throughout the application.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'logger.dart';
@@ -57,7 +58,8 @@ class ErrorHandler {
     }
 
     // Report non-fatal errors to Crashlytics for monitoring
-    if (reportToCrashlytics) {
+    // Only report on non-web platforms (Crashlytics not supported on Web)
+    if (reportToCrashlytics && !kIsWeb) {
       FirebaseCrashlytics.instance.recordError(
         error,
         stackTrace,

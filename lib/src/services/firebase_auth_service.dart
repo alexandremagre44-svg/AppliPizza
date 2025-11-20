@@ -1,6 +1,7 @@
 // lib/src/services/firebase_auth_service.dart
 // Service d'authentification Firebase avec gestion des rôles
 
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -64,7 +65,10 @@ class FirebaseAuthService {
       await LoyaltyService().initializeLoyalty(credential.user!.uid);
 
       // Set user identifier for Crashlytics (for better crash tracking)
-      await FirebaseCrashlytics.instance.setUserIdentifier(credential.user!.uid);
+      // Only on non-web platforms (Crashlytics not supported on Web)
+      if (!kIsWeb) {
+        await FirebaseCrashlytics.instance.setUserIdentifier(credential.user!.uid);
+      }
 
       return {
         'success': true,
@@ -100,12 +104,15 @@ class FirebaseAuthService {
       };
     } catch (e, stackTrace) {
       // Report unexpected errors to Crashlytics
-      FirebaseCrashlytics.instance.recordError(
-        e,
-        stackTrace,
-        reason: 'signIn failed',
-        fatal: false,
-      );
+      // Only on non-web platforms (Crashlytics not supported on Web)
+      if (!kIsWeb) {
+        FirebaseCrashlytics.instance.recordError(
+          e,
+          stackTrace,
+          reason: 'signIn failed',
+          fatal: false,
+        );
+      }
       
       return {
         'success': false,
@@ -153,7 +160,10 @@ class FirebaseAuthService {
       await LoyaltyService().initializeLoyalty(credential.user!.uid);
 
       // Set user identifier for Crashlytics (for better crash tracking)
-      await FirebaseCrashlytics.instance.setUserIdentifier(credential.user!.uid);
+      // Only on non-web platforms (Crashlytics not supported on Web)
+      if (!kIsWeb) {
+        await FirebaseCrashlytics.instance.setUserIdentifier(credential.user!.uid);
+      }
 
       return {
         'success': true,
@@ -183,12 +193,15 @@ class FirebaseAuthService {
       };
     } catch (e, stackTrace) {
       // Report unexpected errors to Crashlytics
-      FirebaseCrashlytics.instance.recordError(
-        e,
-        stackTrace,
-        reason: 'signUp failed',
-        fatal: false,
-      );
+      // Only on non-web platforms (Crashlytics not supported on Web)
+      if (!kIsWeb) {
+        FirebaseCrashlytics.instance.recordError(
+          e,
+          stackTrace,
+          reason: 'signUp failed',
+          fatal: false,
+        );
+      }
       
       return {
         'success': false,

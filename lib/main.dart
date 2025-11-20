@@ -47,32 +47,38 @@ void main() async {
   );
   
   // Initialize Firebase App Check
-  // In production, this uses platform-specific attestation (Play Integrity, App Attest, reCAPTCHA)
-  // In debug/emulator, this uses a debug provider
-  await FirebaseAppCheck.instance.activate(
-    // For Android: Use Play Integrity API in production
-    androidProvider: kDebugMode 
-      ? AndroidProvider.debug 
-      : AndroidProvider.playIntegrity,
-    // For iOS: Use App Attest in production  
-    appleProvider: kDebugMode
-      ? AppleProvider.debug
-      : AppleProvider.appAttest,
-    // For Web: Use reCAPTCHA
-    webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
-  );
+  // DISABLED on Web in debug mode to prevent errors during development
+  // ENABLED on Android/iOS for production security
+  if (!(kIsWeb && kDebugMode)) {
+    await FirebaseAppCheck.instance.activate(
+      // For Android: Use Play Integrity API in production
+      androidProvider: kDebugMode 
+        ? AndroidProvider.debug 
+        : AndroidProvider.playIntegrity,
+      // For iOS: Use App Attest in production  
+      appleProvider: kDebugMode
+        ? AppleProvider.debug
+        : AppleProvider.appAttest,
+      // For Web: Use reCAPTCHA (only in production)
+      webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
+    );
+  }
   
   // Initialize Firebase Crashlytics
-  // Pass all uncaught errors from the framework to Crashlytics
-  FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  };
-  
-  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+  // DISABLED on Web platform (Crashlytics not supported on Web)
+  if (!kIsWeb) {
+    // Enable/disable collection based on debug mode
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
+    
+    // Pass all uncaught errors from the framework to Crashlytics
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    
+    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
   
   runApp(
     const ProviderScope(
