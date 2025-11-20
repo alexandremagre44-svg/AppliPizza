@@ -113,9 +113,9 @@ service cloud.firestore {
                        request.resource.data.items.size() <= 50 && // Max 50 items per order
                        isValidPrice(request.resource.data.total) &&
                        request.resource.data.total > 0 &&
-                       // Rate limit: max 1 order per minute per user (for client orders)
+                       // Rate limit: max 1 order per 5 seconds per user (for client orders)
                        (request.resource.data.source == 'caisse' || 
-                        timeSinceLastAction('order_rate_limit', request.auth.uid, 60));
+                        timeSinceLastAction('order_rate_limit', request.auth.uid, 5));
       
       // Only admins can update order status
       allow update: if isAdmin() && 
@@ -222,8 +222,8 @@ service cloud.firestore {
       allow create: if isAuthenticated() && 
                        request.resource.data.userId == request.auth.uid &&
                        request.resource.data.keys().hasAll(['userId', 'segmentId', 'spunAt']) &&
-                       // Rate limit: max 1 spin per 30 seconds
-                       timeSinceLastAction('roulette_rate_limit', request.auth.uid, 30);
+                       // Rate limit: max 1 spin per 10 seconds
+                       timeSinceLastAction('roulette_rate_limit', request.auth.uid, 10);
       
       // No updates or deletes
       allow update, delete: if false;

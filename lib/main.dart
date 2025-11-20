@@ -160,7 +160,20 @@ class MyApp extends ConsumerWidget {
             // Studio Builder route - main admin entry point
             GoRoute(
               path: AppRoutes.adminStudio,
-              builder: (context, state) => const AdminStudioScreen(),
+              builder: (context, state) {
+                // PROTECTION: Admin Studio is reserved for admins
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  // Redirect to home if not admin
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const AdminStudioScreen();
+              },
             ),
           ],
         ),
