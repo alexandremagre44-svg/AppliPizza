@@ -43,16 +43,85 @@ class HomeConfig {
     );
   }
 
+  /// Convenience getter for hero enabled state.
+  /// Returns false if hero is null, otherwise returns hero.isActive.
+  bool get heroEnabled => hero?.isActive ?? false;
+  
+  /// Convenience getter for hero image URL.
+  /// Returns null if hero is null or has no image URL.
+  String? get heroImageUrl => hero?.imageUrl;
+  
+  /// Convenience getter for hero title.
+  /// Returns empty string if hero is null, otherwise returns hero.title.
+  String get heroTitle => hero?.title ?? '';
+  
+  /// Convenience getter for hero subtitle.
+  /// Returns empty string if hero is null, otherwise returns hero.subtitle.
+  String get heroSubtitle => hero?.subtitle ?? '';
+  
+  /// Convenience getter for hero CTA button text.
+  /// Returns empty string if hero is null, otherwise returns hero.ctaText.
+  String get heroCtaText => hero?.ctaText ?? '';
+  
+  /// Convenience getter for hero CTA action/route.
+  /// Returns empty string if hero is null, otherwise returns hero.ctaAction.
+  String get heroCtaAction => hero?.ctaAction ?? '';
+
+  /// Helper method to check if any hero convenience parameters are provided
+  bool _hasHeroUpdates({
+    bool? heroEnabled,
+    String? heroImageUrl,
+    String? heroTitle,
+    String? heroSubtitle,
+    String? heroCtaText,
+    String? heroCtaAction,
+  }) {
+    return heroEnabled != null || 
+           heroImageUrl != null || 
+           heroTitle != null || 
+           heroSubtitle != null || 
+           heroCtaText != null || 
+           heroCtaAction != null;
+  }
+
   HomeConfig copyWith({
     String? id,
     HeroConfig? hero,
     PromoBannerConfig? promoBanner,
     List<ContentBlock>? blocks,
     DateTime? updatedAt,
+    // Convenience parameters for hero properties
+    bool? heroEnabled,
+    String? heroImageUrl,
+    String? heroTitle,
+    String? heroSubtitle,
+    String? heroCtaText,
+    String? heroCtaAction,
   }) {
+    // If any hero convenience parameters are provided, update the hero config
+    HeroConfig? updatedHero = hero;
+    if (_hasHeroUpdates(
+      heroEnabled: heroEnabled,
+      heroImageUrl: heroImageUrl,
+      heroTitle: heroTitle,
+      heroSubtitle: heroSubtitle,
+      heroCtaText: heroCtaText,
+      heroCtaAction: heroCtaAction,
+    )) {
+      final currentHero = this.hero ?? HeroConfig.empty();
+      updatedHero = currentHero.copyWith(
+        isActive: heroEnabled,
+        imageUrl: heroImageUrl,
+        title: heroTitle,
+        subtitle: heroSubtitle,
+        ctaText: heroCtaText,
+        ctaAction: heroCtaAction,
+      );
+    }
+    
     return HomeConfig(
       id: id ?? this.id,
-      hero: hero ?? this.hero,
+      hero: updatedHero ?? this.hero,
       promoBanner: promoBanner ?? this.promoBanner,
       blocks: blocks ?? this.blocks,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -100,6 +169,19 @@ class HeroConfig {
     required this.ctaText,
     required this.ctaAction,
   });
+
+  /// Create an empty HeroConfig with default values.
+  /// Used as a fallback when creating or updating hero configurations.
+  factory HeroConfig.empty() {
+    return HeroConfig(
+      isActive: true,
+      imageUrl: '',
+      title: '',
+      subtitle: '',
+      ctaText: '',
+      ctaAction: '',
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
