@@ -43,16 +43,53 @@ class HomeConfig {
     );
   }
 
+  // Convenience getters for hero properties
+  bool get heroEnabled => hero?.isActive ?? false;
+  String? get heroImageUrl => hero?.imageUrl;
+  String get heroTitle => hero?.title ?? '';
+  String get heroSubtitle => hero?.subtitle ?? '';
+  String get heroCtaText => hero?.ctaText ?? '';
+  String get heroCtaAction => hero?.ctaAction ?? '';
+
   HomeConfig copyWith({
     String? id,
     HeroConfig? hero,
     PromoBannerConfig? promoBanner,
     List<ContentBlock>? blocks,
     DateTime? updatedAt,
+    // Convenience parameters for hero properties
+    bool? heroEnabled,
+    String? heroImageUrl,
+    String? heroTitle,
+    String? heroSubtitle,
+    String? heroCtaText,
+    String? heroCtaAction,
   }) {
+    // If any hero convenience parameters are provided, update the hero config
+    HeroConfig? updatedHero = hero;
+    if (heroEnabled != null || heroImageUrl != null || heroTitle != null || 
+        heroSubtitle != null || heroCtaText != null || heroCtaAction != null) {
+      final currentHero = this.hero ?? HeroConfig(
+        isActive: true,
+        imageUrl: '',
+        title: '',
+        subtitle: '',
+        ctaText: '',
+        ctaAction: '',
+      );
+      updatedHero = currentHero.copyWith(
+        isActive: heroEnabled,
+        imageUrl: heroImageUrl,
+        title: heroTitle,
+        subtitle: heroSubtitle,
+        ctaText: heroCtaText,
+        ctaAction: heroCtaAction,
+      );
+    }
+    
     return HomeConfig(
       id: id ?? this.id,
-      hero: hero ?? this.hero,
+      hero: updatedHero ?? this.hero,
       promoBanner: promoBanner ?? this.promoBanner,
       blocks: blocks ?? this.blocks,
       updatedAt: updatedAt ?? this.updatedAt,
