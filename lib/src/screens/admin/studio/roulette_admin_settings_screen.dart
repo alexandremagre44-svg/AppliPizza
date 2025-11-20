@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../design_system/app_theme.dart';
 import '../../../services/roulette_rules_service.dart';
+import '../../../services/roulette_settings_service.dart';
 
 /// Unified screen for managing all roulette configuration (settings + rules)
 /// 
@@ -24,6 +25,7 @@ class RouletteAdminSettingsScreen extends StatefulWidget {
 
 class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScreen> {
   final RouletteRulesService _service = RouletteRulesService();
+  final RouletteSettingsService _settingsService = RouletteSettingsService();
   final _formKey = GlobalKey<FormState>();
   
   bool _isLoading = true;
@@ -37,6 +39,7 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
   late int _monthlyLimit;
   late int _allowedStartHour;
   late int _allowedEndHour;
+  late int _rateLimitSeconds; // NEW: Rate limit in seconds (for Firestore rules)
   
   // Controllers
   late TextEditingController _cooldownController;
@@ -45,6 +48,7 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
   late TextEditingController _monthlyLimitController;
   late TextEditingController _startHourController;
   late TextEditingController _endHourController;
+  late TextEditingController _rateLimitController; // NEW: Rate limit controller
 
   @override
   void initState() {
@@ -57,6 +61,7 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
     
     try {
       final rules = await _service.getRules();
+      final rateLimitSeconds = await _settingsService.getLimitSeconds();
       
       // If rules don't exist, use defaults
       final effectiveRules = rules ?? const RouletteRules();
@@ -70,6 +75,7 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
         _monthlyLimit = effectiveRules.monthlyLimit;
         _allowedStartHour = effectiveRules.allowedStartHour;
         _allowedEndHour = effectiveRules.allowedEndHour;
+        _rateLimitSeconds = rateLimitSeconds;
         
         _cooldownController = TextEditingController(text: _cooldownMinutes.toString());
         _dailyLimitController = TextEditingController(text: _dailyLimit.toString());
@@ -77,6 +83,7 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
         _monthlyLimitController = TextEditingController(text: _monthlyLimit.toString());
         _startHourController = TextEditingController(text: _allowedStartHour.toString());
         _endHourController = TextEditingController(text: _allowedEndHour.toString());
+        _rateLimitController = TextEditingController(text: _rateLimitSeconds.toString());
         
         _isLoading = false;
       });
@@ -112,7 +119,9 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
         allowedEndHour: int.parse(_endHourController.text),
       );
       
+      // Save both rules and rate limit settings
       await _service.saveRules(rules);
+      await _settingsService.updateLimitSeconds(int.parse(_rateLimitController.text));
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -144,6 +153,7 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
     _monthlyLimitController.dispose();
     _startHourController.dispose();
     _endHourController.dispose();
+    _rateLimitController.dispose();
     super.dispose();
   }
 
@@ -165,6 +175,8 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
                 padding: EdgeInsets.all(AppSpacing.md),
                 children: [
                   _buildActivationSection(),
+                  SizedBox(height: AppSpacing.md),
+                  _buildRateLimitSection(),
                   SizedBox(height: AppSpacing.md),
                   _buildCooldownSection(),
                   SizedBox(height: AppSpacing.md),
@@ -230,7 +242,92 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
     );
   }
 
-  /// Section 2 - Cooldown
+  /// Section 2 - Rate Limit (Server-side security)
+  Widget _buildRateLimitSection() {
+    return Card(
+      elevation: 0,
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.security, color: AppColors.primary, size: 24),
+                SizedBox(width: AppSpacing.sm),
+                Text('Limite de Rate Limit (Sécurité)', style: AppTextStyles.titleMedium),
+              ],
+            ),
+            SizedBox(height: AppSpacing.sm),
+            Text(
+              'Délai minimum (en secondes) entre deux tours. Appliqué côté serveur (Firestore) pour la sécurité.',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+            SizedBox(height: AppSpacing.md),
+            TextFormField(
+              controller: _rateLimitController,
+              decoration: InputDecoration(
+                labelText: 'Rate Limit (secondes)',
+                border: OutlineInputBorder(borderRadius: AppRadius.input),
+                filled: true,
+                fillColor: AppColors.surfaceContainerLow,
+                helperText: 'Recommandé: 10-30 secondes. Maximum: 3600 (1h)',
+                suffixText: 'sec',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Requis';
+                }
+                final num = int.tryParse(value);
+                if (num == null || num < 1 || num > 3600) {
+                  return 'Valeur invalide (1-3600)';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: AppSpacing.md),
+            Container(
+              padding: EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: AppColors.info.withOpacity(0.1),
+                borderRadius: AppRadius.card,
+                border: Border.all(
+                  color: AppColors.info.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppColors.info,
+                    size: 20,
+                  ),
+                  SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      'Cette limite est appliquée par les règles de sécurité Firestore et ne peut pas être contournée côté client.',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Section 3 - Cooldown
   Widget _buildCooldownSection() {
     return Card(
       elevation: 0,
@@ -285,7 +382,7 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
     );
   }
 
-  /// Section 3 - Usage limits
+  /// Section 4 - Usage limits
   Widget _buildLimitsSection() {
     return Card(
       elevation: 0,
@@ -388,7 +485,7 @@ class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScree
     );
   }
 
-  /// Section 4 - Time range
+  /// Section 5 - Time range
   Widget _buildTimeRangeSection() {
     return Card(
       elevation: 0,
