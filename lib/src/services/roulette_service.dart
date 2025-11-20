@@ -27,13 +27,9 @@ class RouletteService {
     RouletteSegment segment,
   ) async {
     try {
-      // Update rate limit tracker (used by Firestore rules)
-      final rateLimitDoc = _firestore.collection('roulette_rate_limit').doc(userId);
-      await rateLimitDoc.set({
-        'lastActionAt': FieldValue.serverTimestamp(),
-      });
-      
-      // Record the spin (this will be validated by Firestore security rules)
+      // IMPORTANT: Create the spin document FIRST
+      // The Firestore security rule checks the OLD timestamp in roulette_rate_limit
+      // If we update rate limit first, the rule would see the new timestamp and reject
       await _firestore.collection('user_roulette_spins').add({
         'userId': userId,
         'segmentId': segment.id,
@@ -42,6 +38,14 @@ class RouletteService {
         'value': segment.value,
         'spunAt': DateTime.now().toIso8601String(),
       });
+      
+      // Update rate limit tracker AFTER successful spin creation
+      // This timestamp will be checked on the NEXT spin attempt
+      final rateLimitDoc = _firestore.collection('roulette_rate_limit').doc(userId);
+      await rateLimitDoc.set({
+        'lastActionAt': FieldValue.serverTimestamp(),
+      });
+      
       return true;
     } catch (e) {
       print('Error recording spin: $e');

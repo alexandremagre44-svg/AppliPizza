@@ -226,8 +226,12 @@ service cloud.firestore {
       allow read: if isAuthenticated() && 
                      (isAdmin() || resource.data.userId == request.auth.uid);
       
-      // Users can record their own spins (with rate limiting)
-      // Rate limit is configurable from admin via config/roulette_settings
+      // Roulette dynamic rate-limit enforced from admin settings
+      // Users can record their own spins with dynamic rate limiting.
+      // The limit is configured by admins in /config/roulette_settings (fallback: 10 seconds)
+      // This check reads the CURRENT roulette_rate_limit timestamp (from the previous spin)
+      // and validates enough time has passed before allowing the new spin.
+      // After the spin is created, the client updates roulette_rate_limit for the next check.
       allow create: if isAuthenticated() && 
                        request.resource.data.userId == request.auth.uid &&
                        request.resource.data.keys().hasAll(['userId', 'segmentId', 'spunAt']) &&
