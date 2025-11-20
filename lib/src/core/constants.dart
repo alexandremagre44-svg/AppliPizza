@@ -17,6 +17,7 @@ class AppRoutes {
   // Studio Builder - Admin entry point
   static const String adminStudio = '/admin/studio';
   static const String adminStudioNew = '/admin/studio/new';
+  static const String adminStudioV2 = '/admin/studio/v2';
   
   // Deprecated routes (redirect to new studio)
   @deprecated
