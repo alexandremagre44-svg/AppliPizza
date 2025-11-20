@@ -125,10 +125,10 @@ class HomeLayoutService {
         final defaultConfig = HomeLayoutConfig(
           id: 'home_layout',
           studioEnabled: true,
-          sectionsOrder: ['hero', 'banners', 'popups', 'texts'],
+          sectionsOrder: ['hero', 'banner', 'popups', 'texts'],
           enabledSections: {
             'hero': true,
-            'banners': true,
+            'banner': true,
             'popups': true,
             'texts': true,
           },
