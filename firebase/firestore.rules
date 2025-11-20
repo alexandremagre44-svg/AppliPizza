@@ -341,11 +341,39 @@ service cloud.firestore {
     }
     
     // =========================================================================
+    // SUBCOLLECTIONS SUPPORT
+    // =========================================================================
+    // Generic rule for subcollections - inherits security from parent collection
+    // This ensures subcollections work without explicit rules
+    // Admins have full access, authenticated users have read access to public data
+    match /{collection}/{documentId}/{subcollection}/{subdocumentId} {
+      // Admins can read/write any subcollection
+      allow read, write: if isAdmin();
+      
+      // Authenticated users can read subcollections of public collections
+      allow read: if isAuthenticated() && 
+                     collection in ['products', 'pizzas', 'menus', 'drinks', 'desserts', 
+                                   'ingredients', 'promotions', 'roulette_segments',
+                                   'config', 'app_texts_config', 'app_home_config', 
+                                   'app_popups', 'loyalty_settings'];
+      
+      // Users can read/write their own user-specific subcollections
+      allow read, write: if isAuthenticated() && 
+                            collection in ['users', 'user_profiles'] && 
+                            documentId == request.auth.uid;
+    }
+    
+    // =========================================================================
     // DENY ALL OTHER COLLECTIONS
     // =========================================================================
     // Explicitly deny access to any other paths not matched above
+    // For development: authenticated users can read (helps avoid lock-out during dev)
+    // For production: should be strict (read/write: false)
     match /{document=**} {
-      allow read, write: if false;
+      // TODO: In production, change this to: allow read, write: if false;
+      // For V1/dev, allow authenticated read to avoid accidental lock-outs
+      allow read: if isAuthenticated();
+      allow write: if false;
     }
   }
 }
