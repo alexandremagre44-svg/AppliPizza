@@ -480,7 +480,7 @@ class _TextBlockEditDialogState extends State<_TextBlockEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final isNameTaken = !widget.isNew && widget.existingNames.contains(_nameController.text);
+    final isNameTaken = widget.existingNames.contains(_nameController.text);
     
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
