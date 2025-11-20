@@ -20,32 +20,20 @@ class RouletteService {
   final RouletteRulesService _rulesService = RouletteRulesService();
   final RouletteSegmentService _segmentService = RouletteSegmentService();
 
-  // Record a spin (stores in user_roulette_spins for legacy tracking)
+  // Record a spin (stores in user_roulette_spins)
+  // Rate limiting is enforced server-side by Firestore security rules
   Future<bool> recordSpin(
     String userId,
     RouletteSegment segment,
   ) async {
     try {
-      // CLIENT-SIDE RATE LIMITING: Prevent roulette spam (30 seconds between spins)
+      // Update rate limit tracker (used by Firestore rules)
       final rateLimitDoc = _firestore.collection('roulette_rate_limit').doc(userId);
-      final rateLimitData = await rateLimitDoc.get();
-      
-      if (rateLimitData.exists) {
-        final lastActionAt = (rateLimitData.data()?['lastActionAt'] as Timestamp?)?.toDate();
-        if (lastActionAt != null) {
-          final timeSinceLastSpin = DateTime.now().difference(lastActionAt);
-          if (timeSinceLastSpin.inSeconds < 30) {
-            throw Exception('Veuillez attendre avant de faire tourner à nouveau la roulette (limite: 1 tour par 30 secondes)');
-          }
-        }
-      }
-      
-      // Update rate limit tracker
       await rateLimitDoc.set({
         'lastActionAt': FieldValue.serverTimestamp(),
       });
       
-      // Record the spin
+      // Record the spin (this will be validated by Firestore security rules)
       await _firestore.collection('user_roulette_spins').add({
         'userId': userId,
         'segmentId': segment.id,
@@ -57,7 +45,7 @@ class RouletteService {
       return true;
     } catch (e) {
       print('Error recording spin: $e');
-      rethrow; // Rethrow to propagate rate limit errors
+      rethrow; // Rethrow to propagate Firestore errors (including rate limit violations)
     }
   }
 

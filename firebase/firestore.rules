@@ -46,6 +46,14 @@ service cloud.firestore {
              (request.time.toMillis() - lastDoc.data.lastActionAt.toMillis()) > (seconds * 1000);
     }
     
+    // Get configurable roulette rate limit from config document
+    // Returns the configured limit in seconds, with fallback to 10 seconds if not set
+    function getRouletteLimit() {
+      return exists(/databases/$(database)/documents/config/roulette_settings)
+        ? get(/databases/$(database)/documents/config/roulette_settings).data.limitSeconds
+        : 10; // fallback default: 10 seconds
+    }
+    
     // =========================================================================
     // USERS COLLECTION - User profiles and roles
     // =========================================================================
@@ -219,11 +227,11 @@ service cloud.firestore {
                      (isAdmin() || resource.data.userId == request.auth.uid);
       
       // Users can record their own spins (with rate limiting)
+      // Rate limit is configurable from admin via config/roulette_settings
       allow create: if isAuthenticated() && 
                        request.resource.data.userId == request.auth.uid &&
                        request.resource.data.keys().hasAll(['userId', 'segmentId', 'spunAt']) &&
-                       // Rate limit: max 1 spin per 10 seconds
-                       timeSinceLastAction('roulette_rate_limit', request.auth.uid, 10);
+                       timeSinceLastAction('roulette_rate_limit', request.auth.uid, getRouletteLimit());
       
       // No updates or deletes
       allow update, delete: if false;
