@@ -18,10 +18,10 @@ import '../../services/home_layout_service.dart';
 import '../../services/popup_service.dart';
 import '../../services/app_texts_service.dart';
 import '../../widgets/admin/admin_home_preview.dart';
-import 'studio/hero_block_editor.dart';
-import 'studio/banner_block_editor.dart';
-import 'studio/popup_block_list.dart';
-import 'studio/studio_texts_screen.dart';
+import '_deprecated/hero_block_editor.dart';
+import '_deprecated/banner_block_editor.dart';
+import '_deprecated/popup_block_list.dart';
+import '_deprecated/studio_texts_screen.dart';
 
 /// NOUVEAU Studio Builder - Interface unifiée REFACTORED
 /// 
@@ -86,7 +86,7 @@ class _AdminStudioScreenRefactoredState extends ConsumerState<AdminStudioScreenR
       _draftLayoutConfig = _publishedLayoutConfig?.copyWith();
 
       // Load texts config
-      final textsConfig = await _appTextsService.getTextsConfig();
+      final textsConfig = await _appTextsService.getAppTextsConfig();
       _publishedTextsConfig = textsConfig ?? AppTextsConfig.defaultConfig();
       _draftTextsConfig = _publishedTextsConfig?.copyWith();
 
@@ -118,7 +118,7 @@ class _AdminStudioScreenRefactoredState extends ConsumerState<AdminStudioScreenR
 
       // Save texts config
       if (_draftTextsConfig != null) {
-        await _appTextsService.saveTextsConfig(_draftTextsConfig!);
+        await _appTextsService.saveAppTextsConfig(_draftTextsConfig!);
       }
 
       // Update published state
@@ -554,7 +554,7 @@ class _AdminStudioScreenRefactoredState extends ConsumerState<AdminStudioScreenR
                     onPressed: () async {
                       await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const PopupBlockList()),
+                        MaterialPageRoute(builder: (_) => PopupBlockList()),
                       );
                       _loadAllConfigurations();
                     },
@@ -589,7 +589,7 @@ class _AdminStudioScreenRefactoredState extends ConsumerState<AdminStudioScreenR
                     onPressed: () async {
                       await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const StudioTextsScreen()),
+                        MaterialPageRoute(builder: (_) => StudioTextsScreen()),
                       );
                       _loadAllConfigurations();
                     },
