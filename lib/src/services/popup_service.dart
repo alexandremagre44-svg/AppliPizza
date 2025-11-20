@@ -32,13 +32,17 @@ class PopupService {
       final snapshot = await _firestore
           .collection(_collection)
           .where('isEnabled', isEqualTo: true)
-          .orderBy('priority', descending: true)
           .get();
 
-      return snapshot.docs
+      final popups = snapshot.docs
           .map((doc) => PopupConfig.fromFirestore(doc.data()))
           .where((popup) => popup.isCurrentlyActive)
           .toList();
+      
+      // Sort in Dart to avoid composite index requirement
+      popups.sort((a, b) => b.priority.compareTo(a.priority));
+      
+      return popups;
     } catch (e) {
       print('Error getting active popups: $e');
       return [];

@@ -45,13 +45,20 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
     try {
       final snapshot = await _firestore
           .collection(_collectionName)
-          .orderBy('order')
-          .orderBy('name')
           .get();
 
-      return snapshot.docs
+      final ingredients = snapshot.docs
           .map((doc) => Ingredient.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
+      
+      // Sort in Dart to avoid composite index requirement
+      ingredients.sort((a, b) {
+        final orderCompare = a.order.compareTo(b.order);
+        if (orderCompare != 0) return orderCompare;
+        return a.name.compareTo(b.name);
+      });
+      
+      return ingredients;
     } catch (e) {
       developer.log('Erreur lors du chargement des ingrédients: $e');
       return [];
@@ -64,13 +71,20 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
       final snapshot = await _firestore
           .collection(_collectionName)
           .where('isActive', isEqualTo: true)
-          .orderBy('order')
-          .orderBy('name')
           .get();
 
-      return snapshot.docs
+      final ingredients = snapshot.docs
           .map((doc) => Ingredient.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
+      
+      // Sort in Dart to avoid composite index requirement
+      ingredients.sort((a, b) {
+        final orderCompare = a.order.compareTo(b.order);
+        if (orderCompare != 0) return orderCompare;
+        return a.name.compareTo(b.name);
+      });
+      
+      return ingredients;
     } catch (e) {
       developer.log('Erreur lors du chargement des ingrédients actifs: $e');
       return [];
@@ -84,13 +98,20 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
           .collection(_collectionName)
           .where('category', isEqualTo: category.name)
           .where('isActive', isEqualTo: true)
-          .orderBy('order')
-          .orderBy('name')
           .get();
 
-      return snapshot.docs
+      final ingredients = snapshot.docs
           .map((doc) => Ingredient.fromJson({...doc.data(), 'id': doc.id}))
           .toList();
+      
+      // Sort in Dart to avoid composite index requirement
+      ingredients.sort((a, b) {
+        final orderCompare = a.order.compareTo(b.order);
+        if (orderCompare != 0) return orderCompare;
+        return a.name.compareTo(b.name);
+      });
+      
+      return ingredients;
     } catch (e) {
       developer.log('Erreur lors du chargement des ingrédients par catégorie: $e');
       return [];
@@ -104,12 +125,21 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
     // dans tous les widgets qui écoutent ce stream
     return _firestore
         .collection(_collectionName)
-        .orderBy('order')
-        .orderBy('name')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => Ingredient.fromJson({...doc.data(), 'id': doc.id}))
-            .toList());
+        .map((snapshot) {
+          final ingredients = snapshot.docs
+              .map((doc) => Ingredient.fromJson({...doc.data(), 'id': doc.id}))
+              .toList();
+          
+          // Sort in Dart to avoid composite index requirement
+          ingredients.sort((a, b) {
+            final orderCompare = a.order.compareTo(b.order);
+            if (orderCompare != 0) return orderCompare;
+            return a.name.compareTo(b.name);
+          });
+          
+          return ingredients;
+        });
   }
 
   @override

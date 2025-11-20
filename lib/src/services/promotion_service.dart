@@ -31,13 +31,17 @@ class PromotionService {
       final snapshot = await _firestore
           .collection(_collection)
           .where('isActive', isEqualTo: true)
-          .orderBy('createdAt', descending: true)
           .get();
 
-      return snapshot.docs
+      final promotions = snapshot.docs
           .map((doc) => Promotion.fromJson(doc.data()))
           .where((promo) => promo.isCurrentlyActive)
           .toList();
+      
+      // Sort in Dart to avoid composite index requirement
+      promotions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      
+      return promotions;
     } catch (e) {
       print('Error getting active promotions: $e');
       return [];
