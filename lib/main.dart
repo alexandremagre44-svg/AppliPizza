@@ -20,6 +20,7 @@ import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
 import 'src/screens/product_detail/product_detail_screen.dart';
 import 'src/screens/admin/admin_studio_screen.dart';
+import 'src/screens/admin/admin_studio_screen_refactored.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
@@ -180,6 +181,40 @@ class MyApp extends ConsumerWidget {
                 }
                 return const AdminStudioScreen();
               },
+            ),
+            // New unified Studio route
+            GoRoute(
+              path: AppRoutes.adminStudioNew,
+              builder: (context, state) {
+                // PROTECTION: Admin only
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const AdminStudioScreenRefactored();
+              },
+            ),
+            // Deprecated routes - redirect to new unified studio
+            GoRoute(
+              path: AppRoutes.adminHero,
+              redirect: (context, state) => AppRoutes.adminStudioNew,
+            ),
+            GoRoute(
+              path: AppRoutes.adminBanner,
+              redirect: (context, state) => AppRoutes.adminStudioNew,
+            ),
+            GoRoute(
+              path: AppRoutes.adminPopups,
+              redirect: (context, state) => AppRoutes.adminStudioNew,
+            ),
+            GoRoute(
+              path: AppRoutes.adminTexts,
+              redirect: (context, state) => AppRoutes.adminStudioNew,
             ),
           ],
         ),

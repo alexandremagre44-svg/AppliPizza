@@ -7,10 +7,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/product.dart';
 import '../../models/home_config.dart';
+import '../../models/home_layout_config.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/home_config_provider.dart';
 import '../../providers/app_texts_provider.dart';
+import '../../providers/home_layout_provider.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/home/hero_banner.dart';
 import '../../widgets/home/section_header.dart';
@@ -35,6 +37,7 @@ class HomeScreen extends ConsumerWidget {
     final productsAsync = ref.watch(productListProvider);
     final homeConfigAsync = ref.watch(homeConfigProvider);
     final appTextsAsync = ref.watch(appTextsConfigProvider);
+    final homeLayoutAsync = ref.watch(homeLayoutProvider);
 
     return Scaffold(
       appBar: appTextsAsync.when(
@@ -45,15 +48,19 @@ class HomeScreen extends ConsumerWidget {
       body: productsAsync.when(
         data: (products) => homeConfigAsync.when(
           data: (homeConfig) => appTextsAsync.when(
-            data: (appTexts) => _buildContentWithAnimation(context, ref, products, homeConfig, appTexts.home),
+            data: (appTexts) => homeLayoutAsync.when(
+              data: (homeLayout) => _buildContentWithAnimation(context, ref, products, homeConfig, appTexts.home, homeLayout),
+              loading: () => _buildContentWithAnimation(context, ref, products, homeConfig, appTexts.home, null),
+              error: (_, __) => _buildContentWithAnimation(context, ref, products, homeConfig, appTexts.home, null),
+            ),
             loading: () => const HomeShimmerLoading(),
-            error: (error, stack) => _buildContentWithAnimation(context, ref, products, homeConfig, null),
+            error: (error, stack) => _buildContentWithAnimation(context, ref, products, homeConfig, null, null),
           ),
           loading: () => const HomeShimmerLoading(),
           error: (error, stack) => appTextsAsync.when(
-            data: (appTexts) => _buildContentWithAnimation(context, ref, products, null, appTexts.home),
+            data: (appTexts) => _buildContentWithAnimation(context, ref, products, null, appTexts.home, null),
             loading: () => const HomeShimmerLoading(),
-            error: (_, __) => _buildContentWithAnimation(context, ref, products, null, null),
+            error: (_, __) => _buildContentWithAnimation(context, ref, products, null, null, null),
           ),
         ),
         loading: () => const HomeShimmerLoading(),
@@ -108,7 +115,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Wrapper with fade-in animation
-  Widget _buildContentWithAnimation(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts) {
+  Widget _buildContentWithAnimation(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts, HomeLayoutConfig? homeLayout) {
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 500),
       tween: Tween(begin: 0.0, end: 1.0),
@@ -121,11 +128,11 @@ class HomeScreen extends ConsumerWidget {
           ),
         );
       },
-      child: _buildContent(context, ref, allProducts, homeConfig, homeTexts),
+      child: _buildContent(context, ref, allProducts, homeConfig, homeTexts, homeLayout),
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts) {
+  Widget _buildContent(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts, HomeLayoutConfig? homeLayout) {
     // Filter active products
     final activeProducts = allProducts.where((p) => p.isActive).toList();
     
@@ -153,41 +160,9 @@ class HomeScreen extends ConsumerWidget {
           children: [
             SizedBox(height: AppSpacing.lg),
             
-            // 1. Hero Banner (from home config or default texts)
-            if (homeConfig?.hero?.isActive ?? true)
-              HeroBanner(
-                title: homeConfig?.hero?.title ?? homeTexts?.title ?? 'Bienvenue chez\nPizza Deli\'Zza',
-                subtitle: homeConfig?.hero?.subtitle ?? homeTexts?.subtitle ?? 'Découvrez nos pizzas artisanales et nos menus gourmands',
-                buttonText: homeConfig?.hero?.ctaText ?? homeTexts?.ctaViewMenu ?? 'Voir le menu',
-                imageUrl: homeConfig?.hero?.imageUrl,
-                onPressed: () {
-                  final action = homeConfig?.hero?.ctaAction ?? AppRoutes.menu;
-                  if (action.startsWith('/')) {
-                    context.push(action);
-                  } else {
-                    context.push(AppRoutes.menu);
-                  }
-                },
-              ),
-            
-            // Promo banner (if active)
-            if (homeConfig?.promoBanner?.isCurrentlyActive ?? false)
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-                child: InfoBanner(
-                  text: homeConfig!.promoBanner!.text,
-                  icon: Icons.local_offer,
-                  backgroundColor: homeConfig.promoBanner!.backgroundColor != null
-                      ? Color(ColorConverter.hexToColor(homeConfig.promoBanner!.backgroundColor) ?? 0xFFD32F2F)
-                      : AppColors.primaryRed,
-                  textColor: homeConfig.promoBanner!.textColor != null
-                      ? Color(ColorConverter.hexToColor(homeConfig.promoBanner!.textColor) ?? 0xFFFFFFFF)
-                      : Colors.white,
-                ),
-              ),
+            // REFONTE: Dynamic sections based on layout configuration
+            // If studioEnabled is false or layout is null, fall back to default behavior
+            ...(_buildDynamicSections(context, ref, homeConfig, homeTexts, homeLayout)),
             
             // Roulette promotional banner (conditionally displayed)
             _buildRouletteBanner(context, ref),
@@ -268,6 +243,93 @@ class HomeScreen extends ConsumerWidget {
             child: Text(homeTexts?.retryButton ?? 'Réessayer'),
           ),
         ],
+      ),
+    );
+  }
+
+  /// REFONTE: Build dynamic sections based on layout configuration
+  /// This method controls the order and visibility of Hero, Banner, and Popups
+  /// based on the HomeLayoutConfig from Firestore
+  List<Widget> _buildDynamicSections(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic homeConfig,
+    dynamic homeTexts,
+    HomeLayoutConfig? homeLayout,
+  ) {
+    final widgets = <Widget>[];
+
+    // If homeLayout is null or studioEnabled is false globally, use fallback behavior
+    if (homeLayout == null || !homeLayout.studioEnabled) {
+      // Fallback: Show Hero and Banner if they are individually active (backward compatibility)
+      if (homeConfig?.hero?.isActive ?? true) {
+        widgets.add(_buildHeroSection(context, homeConfig, homeTexts));
+      }
+      if (homeConfig?.promoBanner?.isCurrentlyActive ?? false) {
+        widgets.add(_buildBannerSection(context, homeConfig));
+      }
+      return widgets;
+    }
+
+    // Use layout configuration to determine order and visibility
+    final orderedSections = homeLayout.getOrderedEnabledSections();
+    
+    for (final sectionKey in orderedSections) {
+      switch (sectionKey) {
+        case 'hero':
+          if (homeConfig?.hero?.isActive ?? false) {
+            widgets.add(_buildHeroSection(context, homeConfig, homeTexts));
+          }
+          break;
+        case 'banner':
+          if (homeConfig?.promoBanner?.isCurrentlyActive ?? false) {
+            widgets.add(_buildBannerSection(context, homeConfig));
+          }
+          break;
+        case 'popups':
+          // Popups are handled separately via popup system
+          // This section is just a placeholder for ordering purposes
+          break;
+      }
+    }
+
+    return widgets;
+  }
+
+  /// Build Hero section widget
+  Widget _buildHeroSection(BuildContext context, dynamic homeConfig, dynamic homeTexts) {
+    return HeroBanner(
+      title: homeConfig?.hero?.title ?? homeTexts?.title ?? 'Bienvenue chez\nPizza Deli\'Zza',
+      subtitle: homeConfig?.hero?.subtitle ?? homeTexts?.subtitle ?? 'Découvrez nos pizzas artisanales et nos menus gourmands',
+      buttonText: homeConfig?.hero?.ctaText ?? homeTexts?.ctaViewMenu ?? 'Voir le menu',
+      imageUrl: homeConfig?.hero?.imageUrl,
+      onPressed: () {
+        final action = homeConfig?.hero?.ctaAction ?? AppRoutes.menu;
+        if (action.startsWith('/')) {
+          context.push(action);
+        } else {
+          context.push(AppRoutes.menu);
+        }
+      },
+    );
+  }
+
+  /// Build Banner section widget
+  Widget _buildBannerSection(BuildContext context, dynamic homeConfig) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      child: InfoBanner(
+        text: homeConfig!.promoBanner!.text,
+        icon: Icons.local_offer,
+        backgroundColor: homeConfig.promoBanner!.backgroundColor != null
+            ? Color(ColorConverter.hexToColor(homeConfig.promoBanner!.backgroundColor) ?? 0xFFD32F2F)
+            : AppColors.primaryRed,
+        textColor: homeConfig.promoBanner!.textColor != null
+            ? Color(ColorConverter.hexToColor(homeConfig.promoBanner!.textColor) ?? 0xFFFFFFFF)
+            : Colors.white,
       ),
     );
   }

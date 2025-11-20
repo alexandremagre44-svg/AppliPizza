@@ -1,4 +1,8 @@
-// lib/src/screens/admin/studio/studio_texts_screen.dart
+// lib/src/screens/admin/_deprecated/studio_texts_screen.dart
+// ⚠️ DEPRECATED - Migrated to unified Studio (admin_studio_screen_refactored.dart)
+// Preserved ONLY for rollback and reference.
+// Do not import or use in new code.
+//
 // PROMPT 3F - Complete modular text editor with sections, search, and preview
 // Material 3 + Design System Pizza Deli'Zza
 

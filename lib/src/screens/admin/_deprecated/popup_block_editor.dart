@@ -1,4 +1,8 @@
-// lib/src/screens/admin/studio/popup_block_editor.dart
+// lib/src/screens/admin/_deprecated/popup_block_editor.dart
+// ⚠️ DEPRECATED - Migrated to unified Studio (admin_studio_screen_refactored.dart)
+// Preserved ONLY for rollback and reference.
+// Do not import or use in new code.
+//
 // PopupBlockEditor - Éditeur complet de popups et roulette pour Studio Builder
 // Material 3 + Pizza Deli'Zza Brand Guidelines
 
