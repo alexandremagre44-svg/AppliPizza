@@ -277,7 +277,24 @@ service cloud.firestore {
     // CONFIGURATION COLLECTIONS (Admin only)
     // =========================================================================
     
-    // Main config document
+    // Home layout configuration - PUBLIC READ (needed by HomeScreen), ADMIN WRITE
+    // This document controls the ordering and visibility of Hero, Banner, and Popups sections
+    match /config/home_layout {
+      // Public read access - HomeScreen needs this even for non-authenticated users
+      allow read: if true;
+      
+      // Only admins can write (create/update/delete)
+      allow write: if isAdmin();
+      
+      // Validate structure when writing (optional but recommended)
+      allow update, create: if isAdmin() && 
+                               request.resource.data.keys().hasAll(['id', 'studioEnabled', 'sectionsOrder', 'enabledSections', 'updatedAt']) &&
+                               request.resource.data.studioEnabled is bool &&
+                               request.resource.data.sectionsOrder is list &&
+                               request.resource.data.enabledSections is map;
+    }
+    
+    // Main config document (other config docs)
     match /config/{configId} {
       // Everyone can read configuration
       allow read: if true;
