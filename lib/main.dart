@@ -21,6 +21,7 @@ import 'src/screens/profile/profile_screen.dart';
 import 'src/screens/product_detail/product_detail_screen.dart';
 import 'src/screens/admin/admin_studio_screen.dart';
 import 'src/screens/admin/admin_studio_screen_refactored.dart';
+import 'src/screens/admin/studio/admin_studio_unified.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
@@ -196,7 +197,7 @@ class MyApp extends ConsumerWidget {
                     body: Center(child: CircularProgressIndicator()),
                   );
                 }
-                return const AdminStudioScreenRefactored();
+                return const AdminStudioUnified();
               },
             ),
             // Deprecated routes - redirect to new unified studio
