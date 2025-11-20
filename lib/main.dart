@@ -1,9 +1,12 @@
 // lib/main.dart
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
 
 // Importez vos écrans
@@ -42,6 +45,34 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  // Initialize Firebase App Check
+  // In production, this uses platform-specific attestation (Play Integrity, App Attest, reCAPTCHA)
+  // In debug/emulator, this uses a debug provider
+  await FirebaseAppCheck.instance.activate(
+    // For Android: Use Play Integrity API in production
+    androidProvider: kDebugMode 
+      ? AndroidProvider.debug 
+      : AndroidProvider.playIntegrity,
+    // For iOS: Use App Attest in production  
+    appleProvider: kDebugMode
+      ? AppleProvider.debug
+      : AppleProvider.appAttest,
+    // For Web: Use reCAPTCHA
+    webProvider: ReCaptchaV3Provider('recaptcha-v3-site-key'),
+  );
+  
+  // Initialize Firebase Crashlytics
+  // Pass all uncaught errors from the framework to Crashlytics
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  
+  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
   
   runApp(
     const ProviderScope(

@@ -1,9 +1,325 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // TEMP RULES - open for index deploy only
+    
+    // =========================================================================
+    // HELPER FUNCTIONS
+    // =========================================================================
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user is admin (using custom claims OR fallback to users collection)
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.admin == true ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+    
+    // Check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Validate string field (not empty, max length)
+    function isValidString(value, maxLength) {
+      return value is string && value.size() > 0 && value.size() <= maxLength;
+    }
+    
+    // Validate email format (basic)
+    function isValidEmail(email) {
+      return email is string && email.matches('.*@.*\\..*');
+    }
+    
+    // Validate price (positive number, reasonable max)
+    function isValidPrice(price) {
+      return price is number && price >= 0 && price <= 10000;
+    }
+    
+    // Rate limiting helper - check if enough time has passed since last action
+    function timeSinceLastAction(collection, userId, seconds) {
+      let lastDoc = get(/databases/$(database)/documents/$(collection)/$(userId));
+      return !exists(/databases/$(database)/documents/$(collection)/$(userId)) ||
+             (request.time.toMillis() - lastDoc.data.lastActionAt.toMillis()) > (seconds * 1000);
+    }
+    
+    // =========================================================================
+    // USERS COLLECTION - User profiles and roles
+    // =========================================================================
+    match /users/{userId} {
+      // Users can read their own profile, admins can read all
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Only the user can create their own profile (during signup)
+      allow create: if isOwner(userId) && 
+                       isValidEmail(request.resource.data.email) &&
+                       request.resource.data.role == 'client' && // New users are always clients
+                       request.resource.data.keys().hasAll(['email', 'role', 'createdAt', 'updatedAt']);
+      
+      // Only the user can update their own profile (but not role)
+      allow update: if isOwner(userId) && 
+                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'email', 'uid']);
+      
+      // Only admins can update roles
+      allow update: if isAdmin() && 
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role', 'updatedAt']);
+      
+      // No deletion allowed (soft delete only via update)
+      allow delete: if false;
+    }
+    
+    // =========================================================================
+    // USER PROFILES - Extended user information
+    // =========================================================================
+    match /user_profiles/{userId} {
+      // Users can read their own profile, admins can read all
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Users can create their own profile
+      allow create: if isOwner(userId) && 
+                       request.resource.data.email == request.auth.token.email &&
+                       request.resource.data.keys().hasAll(['email', 'createdAt', 'loyaltyPoints']);
+      
+      // Users can update their own profile (except points and email)
+      allow update: if isOwner(userId) && 
+                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['email', 'loyaltyPoints', 'createdAt']);
+      
+      // Admins can update loyalty points
+      allow update: if isAdmin();
+      
+      // No deletion
+      allow delete: if false;
+    }
+    
+    // =========================================================================
+    // ORDERS COLLECTION - Customer orders
+    // =========================================================================
+    match /orders/{orderId} {
+      // Admins and kitchen can read all orders
+      // Customers can only read their own orders
+      allow read: if isAdmin() || isOwner(resource.data.uid);
+      
+      // Only authenticated users can create orders
+      // Validate order data structure and prevent abuse
+      allow create: if isAuthenticated() && 
+                       request.resource.data.uid == request.auth.uid &&
+                       request.resource.data.status == 'pending' &&
+                       request.resource.data.keys().hasAll(['uid', 'status', 'items', 'total', 'createdAt']) &&
+                       request.resource.data.items is list &&
+                       request.resource.data.items.size() > 0 &&
+                       request.resource.data.items.size() <= 50 && // Max 50 items per order
+                       isValidPrice(request.resource.data.total) &&
+                       request.resource.data.total > 0 &&
+                       // Rate limit: max 1 order per minute per user (for client orders)
+                       (request.resource.data.source == 'caisse' || 
+                        timeSinceLastAction('order_rate_limit', request.auth.uid, 60));
+      
+      // Only admins can update order status
+      allow update: if isAdmin() && 
+                       request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['status', 'statusChangedAt', 'isViewed', 'seenByKitchen', 'statusHistory']);
+      
+      // Only admins can delete orders
+      allow delete: if isAdmin();
+    }
+    
+    // =========================================================================
+    // ORDER RATE LIMIT TRACKING (internal use only)
+    // =========================================================================
+    match /order_rate_limit/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+    
+    // =========================================================================
+    // PRODUCTS COLLECTION - Menu items
+    // =========================================================================
+    match /products/{productId} {
+      // Everyone can read products (public catalog)
+      allow read: if true;
+      
+      // Only admins can create/update/delete products
+      allow create: if isAdmin() && 
+                       isValidString(request.resource.data.name, 100) &&
+                       isValidPrice(request.resource.data.price) &&
+                       request.resource.data.keys().hasAll(['name', 'price', 'category', 'available']);
+      
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // =========================================================================
+    // INGREDIENTS COLLECTION
+    // =========================================================================
+    match /ingredients/{ingredientId} {
+      // Everyone can read ingredients
+      allow read: if true;
+      
+      // Only admins can modify ingredients
+      allow write: if isAdmin();
+    }
+    
+    // =========================================================================
+    // PROMOTIONS COLLECTION
+    // =========================================================================
+    match /promotions/{promotionId} {
+      // Everyone can read active promotions
+      allow read: if true;
+      
+      // Only admins can create/update/delete promotions
+      allow write: if isAdmin();
+    }
+    
+    // =========================================================================
+    // ROULETTE SYSTEM
+    // =========================================================================
+    
+    // Roulette segments configuration
+    match /roulette_segments/{segmentId} {
+      // Everyone can read roulette segments
+      allow read: if true;
+      
+      // Only admins can modify
+      allow write: if isAdmin();
+    }
+    
+    // User roulette spins history
+    match /user_roulette_spins/{spinId} {
+      // Users can read their own spins, admins can read all
+      allow read: if isAuthenticated() && 
+                     (isAdmin() || resource.data.userId == request.auth.uid);
+      
+      // Users can record their own spins (with rate limiting)
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.keys().hasAll(['userId', 'segmentId', 'spunAt']) &&
+                       // Rate limit: max 1 spin per 30 seconds
+                       timeSinceLastAction('roulette_rate_limit', request.auth.uid, 30);
+      
+      // No updates or deletes
+      allow update, delete: if false;
+    }
+    
+    // Roulette rate limit tracking
+    match /roulette_rate_limit/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+    
+    // Roulette history (legacy)
+    match /roulette_history/{historyId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Deprecated
+    }
+    
+    // =========================================================================
+    // REWARD TICKETS - Loyalty rewards
+    // =========================================================================
+    match /rewardTickets/{ticketId} {
+      // Users can read their own tickets, admins can read all
+      allow read: if isAuthenticated() && 
+                     (isAdmin() || resource.data.userId == request.auth.uid);
+      
+      // System creates tickets (from server/admin)
+      allow create: if isAdmin();
+      
+      // Users can mark as used, admins can do anything
+      allow update: if isAdmin() || 
+                       (isOwner(resource.data.userId) && 
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used', 'usedAt']));
+      
+      // Only admins can delete
+      allow delete: if isAdmin();
+    }
+    
+    // =========================================================================
+    // CONFIGURATION COLLECTIONS (Admin only)
+    // =========================================================================
+    
+    // Main config document
+    match /config/{configId} {
+      // Everyone can read configuration
+      allow read: if true;
+      
+      // Only admins can modify
+      allow write: if isAdmin();
+    }
+    
+    // App texts configuration
+    match /app_texts_config/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Home configuration
+    match /app_home_config/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Popup configuration
+    match /app_popups/{popupId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // User popup views (tracking which popups user has seen)
+    match /user_popup_views/{viewId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+    
+    // Loyalty settings
+    match /loyalty_settings/{settingsId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Email templates (admin only)
+    match /email_templates/{templateId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // Mailing list subscribers
+    match /subscribers/{subscriberId} {
+      // Anyone can subscribe (create)
+      allow create: if isValidEmail(request.resource.data.email) &&
+                       request.resource.data.keys().hasAll(['email', 'subscribedAt']);
+      
+      // Admins can read all
+      allow read: if isAdmin();
+      
+      // No updates or deletes from client
+      allow update, delete: if false;
+    }
+    
+    // =========================================================================
+    // CAMPAIGNS (Marketing)
+    // =========================================================================
+    match /campaigns/{campaignId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // =========================================================================
+    // METRICS AND ANALYTICS (Read-only for clients)
+    // =========================================================================
+    match /_count/{countId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // =========================================================================
+    // DENY ALL OTHER COLLECTIONS
+    // =========================================================================
+    // Explicitly deny access to any other paths not matched above
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

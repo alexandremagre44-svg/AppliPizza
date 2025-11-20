@@ -37,12 +37,48 @@ class FirebaseOrderService {
       throw Exception('Utilisateur non connecté');
     }
 
+    // CLIENT-SIDE RATE LIMITING: Prevent order spam (only for client orders, not caisse)
+    if (source == 'client') {
+      final rateLimitDoc = _firestore.collection('order_rate_limit').doc(user.uid);
+      final rateLimitData = await rateLimitDoc.get();
+      
+      if (rateLimitData.exists) {
+        final lastActionAt = (rateLimitData.data()?['lastActionAt'] as Timestamp?)?.toDate();
+        if (lastActionAt != null) {
+          final timeSinceLastOrder = DateTime.now().difference(lastActionAt);
+          if (timeSinceLastOrder.inSeconds < 60) {
+            throw Exception('Veuillez attendre avant de créer une nouvelle commande (limite: 1 commande par minute)');
+          }
+        }
+      }
+      
+      // Update rate limit tracker
+      await rateLimitDoc.set({
+        'lastActionAt': FieldValue.serverTimestamp(),
+      });
+    }
+
+    // VALIDATION: Sanitize inputs
+    final sanitizedCustomerName = customerName?.trim().substring(0, customerName.length > 100 ? 100 : customerName.length);
+    final sanitizedCustomerPhone = customerPhone?.trim().substring(0, customerPhone.length > 20 ? 20 : customerPhone.length);
+    final sanitizedComment = comment?.trim().substring(0, comment.length > 500 ? 500 : comment.length);
+
+    // VALIDATION: Check item count
+    if (items.isEmpty || items.length > 50) {
+      throw Exception('Nombre d\'articles invalide (max: 50)');
+    }
+
+    // VALIDATION: Check total is reasonable
+    if (total <= 0 || total > 10000) {
+      throw Exception('Montant de commande invalide');
+    }
+
     final now = DateTime.now();
     final orderData = {
       'uid': user.uid,
       'customerEmail': customerEmail ?? user.email,
-      'customerName': customerName,
-      'customerPhone': customerPhone,
+      'customerName': sanitizedCustomerName,
+      'customerPhone': sanitizedCustomerPhone,
       'status': app_models.OrderStatus.pending,
       'items': items.map((item) => {
         'id': item.id,
@@ -63,7 +99,7 @@ class FirebaseOrderService {
           : null,
       'pickupDate': pickupDate,
       'pickupTimeSlot': pickupTimeSlot,
-      'comment': comment,
+      'comment': sanitizedComment,
       'seenByKitchen': false,
       'isViewed': false,
       'source': source,
