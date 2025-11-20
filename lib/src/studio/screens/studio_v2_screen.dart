@@ -58,11 +58,14 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
   @override
   void initState() {
     super.initState();
-    _loadAllData();
+    // FIX: Riverpod provider updates must be deferred using Future.microtask
+    // to avoid "Modifying a provider inside widget lifecycle" error
+    Future.microtask(() => _loadAllData());
   }
 
   /// Load all configurations from Firestore
   Future<void> _loadAllData() async {
+    // FIX: Riverpod provider updated safely using Future.microtask in initState
     ref.read(studioLoadingProvider.notifier).state = true;
 
     try {
@@ -85,6 +88,7 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
       _publishedPopupsV2 = popupsV2;
 
       // Initialize draft state
+      // FIX: This provider update is safe because it's called via Future.microtask
       ref.read(studioDraftStateProvider.notifier).loadInitialState(
             homeConfig: _publishedHomeConfig,
             layoutConfig: _publishedLayoutConfig,
@@ -95,6 +99,7 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
     } catch (e) {
       _showError('Erreur lors du chargement: $e');
     } finally {
+      // FIX: This provider update is safe because it's called via Future.microtask
       ref.read(studioLoadingProvider.notifier).state = false;
     }
   }
