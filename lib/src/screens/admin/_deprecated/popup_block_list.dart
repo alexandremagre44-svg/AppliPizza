@@ -1,4 +1,8 @@
-// lib/src/screens/admin/studio/popup_block_list.dart
+// lib/src/screens/admin/_deprecated/popup_block_list.dart
+// ⚠️ DEPRECATED - Migrated to unified Studio (admin_studio_screen_refactored.dart)
+// Preserved ONLY for rollback and reference.
+// Do not import or use in new code.
+//
 // PopupBlockList - Liste complète des popups et roulette pour Studio Builder
 // Material 3 + Pizza Deli'Zza Brand Guidelines
 

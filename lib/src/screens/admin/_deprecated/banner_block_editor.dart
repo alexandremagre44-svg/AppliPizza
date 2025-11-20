@@ -1,4 +1,8 @@
-// lib/src/screens/admin/studio/banner_block_editor.dart
+// lib/src/screens/admin/_deprecated/banner_block_editor.dart
+// ⚠️ DEPRECATED - Migrated to unified Studio (admin_studio_screen_refactored.dart)
+// Preserved ONLY for rollback and reference.
+// Do not import or use in new code.
+//
 // Screen for editing Promotional Banner configuration with Material 3 design
 
 import 'package:flutter/material.dart';

@@ -1,4 +1,8 @@
-// lib/src/screens/admin/studio/hero_block_editor.dart
+// lib/src/screens/admin/_deprecated/hero_block_editor.dart
+// ⚠️ DEPRECATED - Migrated to unified Studio (admin_studio_screen_refactored.dart)
+// Preserved ONLY for rollback and reference.
+// Do not import or use in new code.
+//
 // Screen for editing Hero banner configuration with Material 3 design
 
 import 'package:flutter/material.dart';

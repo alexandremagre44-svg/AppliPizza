@@ -6,10 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart';
 import '../../core/constants.dart';
 import 'admin_studio_screen_refactored.dart';
-import 'studio/hero_block_editor.dart';
-import 'studio/banner_block_editor.dart';
-import 'studio/popup_block_list.dart';
-import 'studio/studio_texts_screen.dart';
 import 'studio/roulette_segments_list_screen.dart';
 import 'studio/roulette_admin_settings_screen.dart';
 import '../../features/content/presentation/admin/content_studio_screen.dart';
@@ -19,7 +15,8 @@ import 'mailing_admin_screen.dart';
 import 'promotions_admin_screen.dart';
 
 /// Studio Builder - Point d'entrée principal
-/// Offre accès au NOUVEAU studio unifié ET aux écrans individuels existants
+/// PHASE 4 MIGRATION: Redirects to unified AdminStudioScreenRefactored
+/// Old screens (Hero, Banner, Popups, Textes) moved to _deprecated/
 class AdminStudioScreen extends StatelessWidget {
   const AdminStudioScreen({super.key});
 
@@ -28,7 +25,7 @@ class AdminStudioScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.surfaceContainerLow,
       appBar: AppBar(
-        title: const Text('Studio'),
+        title: const Text('Studio Admin'),
         centerTitle: true,
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -42,17 +39,14 @@ class AdminStudioScreen extends StatelessWidget {
         children: [
           SizedBox(height: AppSpacing.md),
           
-          // NOUVEAU: Studio unifié refactoré
+          // Studio unifié - PRINCIPAL
           _buildHighlightedBlock(
             context,
             iconData: Icons.auto_awesome,
-            title: '✨ NOUVEAU Studio Unifié',
-            subtitle: 'Gestion complète avec prévisualisation live, mode brouillon et drag & drop',
+            title: '🎨 Studio Unifié',
+            subtitle: 'Gestion complète : Hero, Bandeau, Popups, Textes\nPrévisualisation live • Mode brouillon • Drag & drop',
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AdminStudioScreenRefactored()),
-              );
+              context.push(AppRoutes.adminStudioNew);
             },
             isNew: true,
           ),
@@ -127,7 +121,7 @@ class AdminStudioScreen extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
             child: Text(
-              'Configuration apparence (Accès individuel)',
+              'Autres modules',
               style: AppTextStyles.labelLarge.copyWith(
                 color: AppColors.onSurfaceVariant,
               ),
@@ -135,45 +129,6 @@ class AdminStudioScreen extends StatelessWidget {
           ),
           SizedBox(height: AppSpacing.md),
           
-          _buildStudioBlock(
-            context,
-            iconData: Icons.image_rounded,
-            title: 'Hero',
-            subtitle: 'Modifier la bannière principale',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const HeroBlockEditor()),
-              );
-            },
-          ),
-          SizedBox(height: AppSpacing.md),
-          _buildStudioBlock(
-            context,
-            iconData: Icons.flag_rounded,
-            title: 'Bandeau',
-            subtitle: 'Gérer le bandeau promotionnel',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BannerBlockEditor()),
-              );
-            },
-          ),
-          SizedBox(height: AppSpacing.md),
-          _buildStudioBlock(
-            context,
-            iconData: Icons.campaign_rounded,
-            title: 'Popups',
-            subtitle: 'Popups, messages, roulette',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PopupBlockList()),
-              );
-            },
-          ),
-          SizedBox(height: AppSpacing.md),
           _buildStudioBlock(
             context,
             iconData: Icons.casino_rounded,
@@ -196,19 +151,6 @@ class AdminStudioScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const RouletteAdminSettingsScreen()),
-              );
-            },
-          ),
-          SizedBox(height: AppSpacing.md),
-          _buildStudioBlock(
-            context,
-            iconData: Icons.notes_rounded,
-            title: 'Textes',
-            subtitle: 'Textes et messages de l\'application',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const StudioTextsScreen()),
               );
             },
           ),
