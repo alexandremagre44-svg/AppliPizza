@@ -3,6 +3,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../core/constants.dart';
 import 'loyalty_service.dart';
 import 'user_profile_service.dart';
@@ -62,6 +63,9 @@ class FirebaseAuthService {
       // Initialiser le système de fidélité
       await LoyaltyService().initializeLoyalty(credential.user!.uid);
 
+      // Set user identifier for Crashlytics (for better crash tracking)
+      await FirebaseCrashlytics.instance.setUserIdentifier(credential.user!.uid);
+
       return {
         'success': true,
         'user': credential.user,
@@ -94,7 +98,15 @@ class FirebaseAuthService {
         'success': false,
         'error': errorMessage,
       };
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Report unexpected errors to Crashlytics
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: 'signIn failed',
+        fatal: false,
+      );
+      
       return {
         'success': false,
         'error': 'Erreur de connexion: $e',
@@ -140,6 +152,9 @@ class FirebaseAuthService {
       // Initialiser le système de fidélité
       await LoyaltyService().initializeLoyalty(credential.user!.uid);
 
+      // Set user identifier for Crashlytics (for better crash tracking)
+      await FirebaseCrashlytics.instance.setUserIdentifier(credential.user!.uid);
+
       return {
         'success': true,
         'user': credential.user,
@@ -166,7 +181,15 @@ class FirebaseAuthService {
         'success': false,
         'error': errorMessage,
       };
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Report unexpected errors to Crashlytics
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: 'signUp failed',
+        fatal: false,
+      );
+      
       return {
         'success': false,
         'error': 'Erreur: $e',

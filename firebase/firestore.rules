@@ -135,8 +135,10 @@ service cloud.firestore {
     }
     
     // =========================================================================
-    // PRODUCTS COLLECTION - Menu items
+    // PRODUCTS COLLECTIONS - Menu items (multiple collections by category)
     // =========================================================================
+    
+    // Generic products collection
     match /products/{productId} {
       // Everyone can read products (public catalog)
       allow read: if true;
@@ -145,10 +147,34 @@ service cloud.firestore {
       allow create: if isAdmin() && 
                        isValidString(request.resource.data.name, 100) &&
                        isValidPrice(request.resource.data.price) &&
-                       request.resource.data.keys().hasAll(['name', 'price', 'category', 'available']);
+                       request.resource.data.keys().hasAll(['name', 'price', 'category']);
       
       allow update: if isAdmin();
       allow delete: if isAdmin();
+    }
+    
+    // Pizzas collection
+    match /pizzas/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Menus collection
+    match /menus/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Drinks collection
+    match /drinks/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Desserts collection
+    match /desserts/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
     
     // =========================================================================
