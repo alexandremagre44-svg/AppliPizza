@@ -31,76 +31,81 @@ class AdminHomePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.outline, width: 2),
-        borderRadius: BorderRadius.circular(16),
-        color: AppColors.surfaceContainerLow,
-      ),
-      child: Column(
-        children: [
-          // Preview Header
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(14),
-                topRight: Radius.circular(14),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.phone_iphone, size: 20, color: AppColors.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Prévisualisation',
-                  style: AppTextStyles.titleSmall.copyWith(
-                    color: AppColors.onSurface,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Container(
+          height: constraints.maxHeight,
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.outline, width: 2),
+            borderRadius: BorderRadius.circular(16),
+            color: AppColors.surfaceContainerLow,
+          ),
+          child: Column(
+            children: [
+              // Preview Header
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(14),
+                    topRight: Radius.circular(14),
                   ),
                 ),
-                const Spacer(),
-                if (studioEnabled == false)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.errorContainer,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'Studio désactivé',
-                      style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.onErrorContainer,
+                child: Row(
+                  children: [
+                    const Icon(Icons.phone_iphone, size: 20, color: AppColors.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Prévisualisation',
+                      style: AppTextStyles.titleSmall.copyWith(
+                        color: AppColors.onSurface,
                       ),
                     ),
-                  ),
-              ],
-            ),
-          ),
-          
-          // Preview Content
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                    const Spacer(),
+                    if (studioEnabled == false)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.errorContainer,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'Studio désactivé',
+                          style: AppTextStyles.labelSmall.copyWith(
+                            color: AppColors.onErrorContainer,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: _buildPreviewContent(),
+              
+              // Preview Content
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: _buildPreviewContent(),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

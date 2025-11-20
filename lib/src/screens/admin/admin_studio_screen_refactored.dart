@@ -261,32 +261,60 @@ class _AdminStudioScreenRefactoredState extends ConsumerState<AdminStudioScreenR
       {'id': 'settings', 'icon': Icons.settings, 'title': 'Paramètres'},
     ];
 
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
     return Container(
       color: AppColors.surface,
-      child: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        children: sections.map((section) {
-          final isSelected = _selectedSection == section['id'];
-          return ListTile(
-            leading: Icon(
-              section['icon'] as IconData,
-              color: isSelected ? AppColors.primary : AppColors.onSurfaceVariant,
-            ),
-            title: Text(
-              section['title'] as String,
-              style: TextStyle(
-                color: isSelected ? AppColors.primary : AppColors.onSurface,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+      height: isDesktop ? null : 60,
+      child: isDesktop
+          ? ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: sections.map((section) {
+                final isSelected = _selectedSection == section['id'];
+                return ListTile(
+                  leading: Icon(
+                    section['icon'] as IconData,
+                    color: isSelected ? AppColors.primary : AppColors.onSurfaceVariant,
+                  ),
+                  title: Text(
+                    section['title'] as String,
+                    style: TextStyle(
+                      color: isSelected ? AppColors.primary : AppColors.onSurface,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                  selected: isSelected,
+                  selectedTileColor: AppColors.primaryContainer,
+                  onTap: () {
+                    setState(() => _selectedSection = section['id'] as String);
+                  },
+                );
+              }).toList(),
+            )
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                children: sections.map((section) {
+                  final isSelected = _selectedSection == section['id'];
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      avatar: Icon(
+                        section['icon'] as IconData,
+                        size: 18,
+                        color: isSelected ? AppColors.onPrimary : AppColors.onSurfaceVariant,
+                      ),
+                      label: Text(section['title'] as String),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() => _selectedSection = section['id'] as String);
+                      },
+                    ),
+                  );
+                }).toList(),
               ),
             ),
-            selected: isSelected,
-            selectedTileColor: AppColors.primaryContainer,
-            onTap: () {
-              setState(() => _selectedSection = section['id'] as String);
-            },
-          );
-        }).toList(),
-      ),
     );
   }
 
@@ -315,13 +343,20 @@ class _AdminStudioScreenRefactoredState extends ConsumerState<AdminStudioScreenR
     return Container(
       color: AppColors.surface,
       padding: const EdgeInsets.all(16),
-      child: AdminHomePreview(
-        homeConfig: _draftHomeConfig,
-        homeTexts: _draftTextsConfig?.home,
-        popups: _draftPopups,
-        sectionsOrder: _draftLayoutConfig?.sectionsOrder,
-        enabledSections: _draftLayoutConfig?.enabledSections,
-        studioEnabled: _draftLayoutConfig?.studioEnabled,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SizedBox(
+            height: constraints.maxHeight,
+            child: AdminHomePreview(
+              homeConfig: _draftHomeConfig,
+              homeTexts: _draftTextsConfig?.home,
+              popups: _draftPopups,
+              sectionsOrder: _draftLayoutConfig?.sectionsOrder,
+              enabledSections: _draftLayoutConfig?.enabledSections,
+              studioEnabled: _draftLayoutConfig?.studioEnabled,
+            ),
+          );
+        },
       ),
     );
   }
