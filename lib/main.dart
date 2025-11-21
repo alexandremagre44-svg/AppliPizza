@@ -35,6 +35,8 @@ import 'src/screens/admin/promotions_admin_screen.dart';
 import 'src/screens/admin/promotion_form_screen.dart';
 import 'src/screens/admin/ingredients_admin_screen.dart';
 import 'src/screens/admin/ingredient_form_screen.dart';
+import 'src/screens/admin/studio/roulette_admin_settings_screen.dart';
+import 'src/screens/admin/studio/roulette_segments_list_screen.dart';
 
 // Staff Tablet imports
 import 'src/staff_tablet/screens/staff_tablet_pin_screen.dart';
@@ -316,6 +318,39 @@ class MyApp extends ConsumerWidget {
                   );
                 }
                 return const IngredientsAdminScreen();
+              },
+            ),
+            // Roulette Admin Routes
+            GoRoute(
+              path: AppRoutes.adminRouletteSettings,
+              builder: (context, state) {
+                // PROTECTION: Admin only
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const RouletteAdminSettingsScreen();
+              },
+            ),
+            GoRoute(
+              path: AppRoutes.adminRouletteSegments,
+              builder: (context, state) {
+                // PROTECTION: Admin only
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const RouletteSegmentsListScreen();
               },
             ),
           ],

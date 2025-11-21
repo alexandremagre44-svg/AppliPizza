@@ -371,6 +371,57 @@ class ProfileScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              SizedBox(height: AppSpacing.sm),
+              Padding(
+                padding: AppSpacing.paddingHorizontalLG,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => context.go(AppRoutes.adminRouletteSettings),
+                        icon: const Icon(Icons.settings, size: 20),
+                        label: const Text(
+                          'Roulette Config',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal[700],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => context.go(AppRoutes.adminRouletteSegments),
+                        icon: const Icon(Icons.pie_chart, size: 20),
+                        label: const Text(
+                          'Segments',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.indigo[700],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               SizedBox(height: AppSpacing.xxl),
             ],
 
