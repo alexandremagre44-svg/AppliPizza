@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../design_system/app_theme.dart';
 import '../controllers/studio_state_controller.dart';
 import '../widgets/studio_navigation.dart';
-import '../widgets/studio_preview_panel.dart';
+import '../widgets/studio_preview_panel_v2.dart';
 import '../widgets/modules/studio_overview_v2.dart';
 import '../widgets/modules/studio_hero_v2.dart';
 import '../widgets/modules/studio_banners_v2.dart';
@@ -74,18 +74,46 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
     // FIX: Riverpod provider updated safely using Future.microtask in initState
     ref.read(studioLoadingProvider.notifier).state = true;
 
+    debugPrint('═══════════════════════════════════════════════════════');
+    debugPrint('STUDIO V2 LOAD → Loading published data from Firestore...');
+    debugPrint('═══════════════════════════════════════════════════════');
+
     try {
       // Initialize services if needed
       await _homeLayoutService.initIfMissing();
       await _textBlockService.initializeDefaultBlocks();
 
       // Load all data
+      debugPrint('STUDIO V2 LOAD → Reading app_home_config/main...');
       final homeConfig = await _homeConfigService.getHomeConfig();
+      if (homeConfig != null) {
+        debugPrint('  Hero Title: "${homeConfig.heroTitle}"');
+        debugPrint('  Hero Subtitle: "${homeConfig.heroSubtitle}"');
+        debugPrint('  Hero Enabled: ${homeConfig.heroEnabled}');
+      } else {
+        debugPrint('  ⚠ No homeConfig found, using default');
+      }
+
+      debugPrint('STUDIO V2 LOAD → Reading config/home_layout...');
       final layoutConfig = await _homeLayoutService.getHomeLayout();
+      if (layoutConfig != null) {
+        debugPrint('  Studio Enabled: ${layoutConfig.studioEnabled}');
+        debugPrint('  Sections Order: ${layoutConfig.sectionsOrder}');
+      } else {
+        debugPrint('  ⚠ No layoutConfig found, using default');
+      }
+
       final banners = await _bannerService.getAllBanners();
+      debugPrint('STUDIO V2 LOAD → Loaded ${banners.length} banners');
+
       final textBlocks = await _textBlockService.getAllTextBlocks();
+      debugPrint('STUDIO V2 LOAD → Loaded ${textBlocks.length} text blocks');
+
       final popupsV2 = await _popupV2Service.getAllPopups();
+      debugPrint('STUDIO V2 LOAD → Loaded ${popupsV2.length} popups');
+
       final dynamicSections = await _dynamicSectionService.getAllSections();
+      debugPrint('STUDIO V2 LOAD → Loaded ${dynamicSections.length} dynamic sections');
 
       // Store published state
       _publishedHomeConfig = homeConfig ?? HomeConfig.initial();
@@ -105,7 +133,14 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
             textBlocks: List.from(_publishedTextBlocks),
             dynamicSections: List.from(_publishedDynamicSections),
           );
+
+      debugPrint('═══════════════════════════════════════════════════════');
+      debugPrint('STUDIO V2 LOAD → ✓ All data loaded successfully!');
+      debugPrint('═══════════════════════════════════════════════════════');
     } catch (e) {
+      debugPrint('═══════════════════════════════════════════════════════');
+      debugPrint('STUDIO V2 LOAD → ✗ ERROR during loading: $e');
+      debugPrint('═══════════════════════════════════════════════════════');
       _showError('Erreur lors du chargement: $e');
     } finally {
       // FIX: This provider update is safe because it's called via Future.microtask
@@ -122,30 +157,54 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
       return;
     }
 
+    debugPrint('═══════════════════════════════════════════════════════');
+    debugPrint('STUDIO V2 PUBLISH → Starting publication process...');
+    debugPrint('═══════════════════════════════════════════════════════');
+
     ref.read(studioSavingProvider.notifier).state = true;
 
     try {
       // Save home config
       if (draftState.homeConfig != null) {
+        debugPrint('STUDIO V2 PUBLISH → Saving homeConfig to app_home_config/main');
+        debugPrint('  Hero Title: "${draftState.homeConfig?.heroTitle}"');
+        debugPrint('  Hero Subtitle: "${draftState.homeConfig?.heroSubtitle}"');
+        debugPrint('  Hero CTA Text: "${draftState.homeConfig?.heroCtaText}"');
+        debugPrint('  Hero Image URL: "${draftState.homeConfig?.heroImageUrl}"');
+        debugPrint('  Hero Enabled: ${draftState.homeConfig?.heroEnabled}');
         await _homeConfigService.saveHomeConfig(draftState.homeConfig!);
+        debugPrint('  ✓ HomeConfig saved successfully');
       }
 
       // Save layout config
       if (draftState.layoutConfig != null) {
+        debugPrint('STUDIO V2 PUBLISH → Saving layoutConfig to config/home_layout');
+        debugPrint('  Studio Enabled: ${draftState.layoutConfig?.studioEnabled}');
+        debugPrint('  Sections Order: ${draftState.layoutConfig?.sectionsOrder}');
+        debugPrint('  Sections Enabled: ${draftState.layoutConfig?.sectionsEnabled}');
         await _homeLayoutService.saveHomeLayout(draftState.layoutConfig!);
+        debugPrint('  ✓ LayoutConfig saved successfully');
       }
 
       // Save banners
+      debugPrint('STUDIO V2 PUBLISH → Saving ${draftState.banners.length} banners to app_banners');
       await _bannerService.saveAllBanners(draftState.banners);
+      debugPrint('  ✓ Banners saved successfully');
 
       // Save text blocks
+      debugPrint('STUDIO V2 PUBLISH → Saving ${draftState.textBlocks.length} text blocks to config/text_blocks');
       await _textBlockService.saveAllTextBlocks(draftState.textBlocks);
+      debugPrint('  ✓ Text blocks saved successfully');
 
       // Save popups V2
+      debugPrint('STUDIO V2 PUBLISH → Saving ${draftState.popupsV2.length} popups to config/popups_v2');
       await _popupV2Service.saveAllPopups(draftState.popupsV2);
+      debugPrint('  ✓ Popups saved successfully');
 
       // Save dynamic sections
+      debugPrint('STUDIO V2 PUBLISH → Saving ${draftState.dynamicSections.length} dynamic sections');
       await _dynamicSectionService.saveAllSections(draftState.dynamicSections);
+      debugPrint('  ✓ Dynamic sections saved successfully');
 
       // Update published state
       _publishedHomeConfig = draftState.homeConfig;
@@ -158,8 +217,14 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
       // Mark as saved
       ref.read(studioDraftStateProvider.notifier).markSaved();
 
+      debugPrint('═══════════════════════════════════════════════════════');
+      debugPrint('STUDIO V2 PUBLISH → ✓ All changes published successfully!');
+      debugPrint('═══════════════════════════════════════════════════════');
       _showSuccess('✓ Modifications publiées avec succès');
     } catch (e) {
+      debugPrint('═══════════════════════════════════════════════════════');
+      debugPrint('STUDIO V2 PUBLISH → ✗ ERROR during publication: $e');
+      debugPrint('═══════════════════════════════════════════════════════');
       _showError('Erreur lors de la publication: $e');
     } finally {
       ref.read(studioSavingProvider.notifier).state = false;
@@ -280,7 +345,7 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
                 left: BorderSide(color: Color(0xFFE0E0E0), width: 1),
               ),
             ),
-            child: StudioPreviewPanel(
+            child: StudioPreviewPanelV2(
               homeConfig: draftState.homeConfig,
               layoutConfig: draftState.layoutConfig,
               banners: draftState.banners,
