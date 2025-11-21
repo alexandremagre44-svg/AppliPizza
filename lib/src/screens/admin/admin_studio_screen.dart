@@ -1,14 +1,10 @@
 // lib/src/screens/admin/admin_studio_screen.dart
-// ⚠️ DEPRECATED - This screen is NO LONGER ROUTABLE
-// Route /admin/studio now points directly to StudioV2Screen
-// This file is kept for reference but should not be used
-// See STUDIO_V2_CLEANUP_NOTES.md for details
+// Admin Menu - Point d'entrée principal pour tous les outils d'administration
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart';
 import '../../core/constants.dart';
-import 'admin_studio_screen_refactored.dart';
 import 'studio/roulette_segments_list_screen.dart';
 import 'studio/roulette_admin_settings_screen.dart';
 import '../../features/content/presentation/admin/content_studio_screen.dart';
@@ -17,9 +13,16 @@ import 'ingredients_admin_screen.dart';
 import 'mailing_admin_screen.dart';
 import 'promotions_admin_screen.dart';
 
-/// Studio Builder - Point d'entrée principal
-/// PHASE 4 MIGRATION: Redirects to unified AdminStudioScreenRefactored
-/// Old screens (Hero, Banner, Popups, Textes) moved to _deprecated/
+/// Admin Menu - Point d'entrée principal pour tous les outils d'administration
+/// 
+/// Ce menu centralise l'accès à tous les outils admin:
+/// - Studio V2 (éditeur de contenu professionnel)
+/// - Gestion des produits (pizzas, menus, boissons, desserts)
+/// - Gestion des ingrédients
+/// - Gestion des promotions
+/// - Mailing
+/// - Configuration de la roulette
+/// - Contenu dynamique
 class AdminStudioScreen extends StatelessWidget {
   const AdminStudioScreen({super.key});
 
@@ -45,26 +48,13 @@ class AdminStudioScreen extends StatelessWidget {
           // Studio V2 PRO - PRINCIPAL
           _buildHighlightedBlock(
             context,
-            iconData: Icons.auto_awesome,
-            title: '🎨 Studio PRO (V2)',
-            subtitle: 'Interface professionnelle • Textes dynamiques illimités • Popups Ultimate\nPrévisualisation temps réel • Mode brouillon • Architecture modulaire',
+            iconData: Icons.dashboard_customize,
+            title: '🎨 Studio - Éditeur de Contenu',
+            subtitle: 'Interface professionnelle • Textes dynamiques illimités • Popups Ultimate\nPrévisualisation temps réel • Mode brouillon • Architecture modulaire\n\n8 modules: Hero, Bannières, Popups, Textes, Contenu, Sections, Thème, Médias',
             onTap: () {
-              context.push(AppRoutes.adminStudioV2);
+              context.go(AppRoutes.adminStudioV2);
             },
             isNew: true,
-          ),
-          
-          SizedBox(height: AppSpacing.md),
-          
-          // Studio V1 (legacy)
-          _buildStudioBlock(
-            context,
-            iconData: Icons.edit_note_rounded,
-            title: '📝 Studio Unifié (legacy)',
-            subtitle: 'Version précédente du studio',
-            onTap: () {
-              context.push(AppRoutes.adminStudioNew);
-            },
           ),
           
           SizedBox(height: AppSpacing.lg),

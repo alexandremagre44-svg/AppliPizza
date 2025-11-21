@@ -270,6 +270,34 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
               SizedBox(height: AppSpacing.md),
+              // Studio V2 - Main admin tool (prominent position)
+              Padding(
+                padding: AppSpacing.paddingHorizontalLG,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => context.go(AppRoutes.adminStudio),
+                    icon: const Icon(Icons.dashboard_customize, size: 24),
+                    label: const Text(
+                      'STUDIO - ÉDITEUR DE CONTENU',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple[700],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: AppSpacing.md),
               Padding(
                 padding: AppSpacing.paddingHorizontalLG,
                 child: Row(
