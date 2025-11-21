@@ -54,15 +54,7 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
     _imageUrlController = TextEditingController(text: config.heroImageUrl ?? '');
     _ctaActionController = TextEditingController(text: config.heroCtaAction);
     
-    // Determine CTA link type based on current action
-    final action = config.heroCtaAction;
-    if (action.contains('/menu')) {
-      _ctaLinkType = 'menu';
-    } else if (action.contains('/promotions')) {
-      _ctaLinkType = 'promotions';
-    } else {
-      _ctaLinkType = 'customUrl';
-    }
+    _ctaLinkType = _determineLinkType(config.heroCtaAction);
   }
 
   void _updateControllers() {
@@ -73,17 +65,20 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
     _imageUrlController.text = config.heroImageUrl ?? '';
     _ctaActionController.text = config.heroCtaAction;
     
-    // Determine CTA link type based on current action
-    final action = config.heroCtaAction;
     setState(() {
-      if (action.contains('/menu')) {
-        _ctaLinkType = 'menu';
-      } else if (action.contains('/promotions')) {
-        _ctaLinkType = 'promotions';
-      } else {
-        _ctaLinkType = 'customUrl';
-      }
+      _ctaLinkType = _determineLinkType(config.heroCtaAction);
     });
+  }
+
+  /// Determine CTA link type based on action string
+  String _determineLinkType(String action) {
+    if (action.contains('/menu')) {
+      return 'menu';
+    } else if (action.contains('/promotions')) {
+      return 'promotions';
+    } else {
+      return 'customUrl';
+    }
   }
 
   @override
