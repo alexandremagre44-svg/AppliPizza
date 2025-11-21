@@ -166,6 +166,13 @@ class StudioNavigation extends StatelessWidget {
                     id: 'theme',
                     icon: Icons.palette_outlined,
                     label: 'Theme Manager PRO',
+                    isExternal: true,
+                  ),
+                  _NavItem(
+                    id: 'media',
+                    icon: Icons.photo_library_outlined,
+                    label: 'Media Manager PRO',
+                    isExternal: true, // Opens in new route
                   ),
                   _NavItem(
                     id: 'settings',
@@ -276,6 +283,8 @@ class StudioNavigation extends StatelessWidget {
             onSelected: (value) {
               if (value == 'theme') {
                 context.go(AppRoutes.adminStudioV3Theme);
+              } else if (value == 'media') {
+                context.go(AppRoutes.adminStudioV3Media);
               } else {
                 onSectionChanged(value);
               }
@@ -338,6 +347,14 @@ class StudioNavigation extends StatelessWidget {
                 ),
               ),
               const PopupMenuItem(
+                value: 'media',
+                child: ListTile(
+                  leading: Icon(Icons.photo_library_outlined),
+                  title: Text('Media Manager PRO'),
+                  dense: true,
+                ),
+              ),
+              const PopupMenuItem(
                 value: 'settings',
                 child: ListTile(
                   leading: Icon(Icons.settings_outlined),
@@ -389,9 +406,13 @@ class StudioNavigation extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: () {
-            // Handle theme navigation specially - it's a separate route
-            if (item.id == 'theme') {
-              context.go(AppRoutes.adminStudioV3Theme);
+            // Handle external navigation - separate routes
+            if (item.isExternal) {
+              if (item.id == 'theme') {
+                context.go(AppRoutes.adminStudioV3Theme);
+              } else if (item.id == 'media') {
+                context.go(AppRoutes.adminStudioV3Media);
+              }
             } else {
               onSectionChanged(item.id);
             }
@@ -439,10 +460,12 @@ class _NavItem {
   final String id;
   final IconData icon;
   final String label;
+  final bool isExternal;
 
   _NavItem({
     required this.id,
     required this.icon,
     required this.label,
+    this.isExternal = false,
   });
 }

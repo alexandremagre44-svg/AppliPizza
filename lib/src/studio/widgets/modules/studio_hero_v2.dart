@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../design_system/app_theme.dart';
 import '../../../models/home_config.dart';
+import '../../models/media_asset_model.dart';
+import '../media/image_selector_widget.dart';
 
 class StudioHeroV2 extends StatefulWidget {
   final HomeConfig? homeConfig;
@@ -193,6 +195,26 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
             title: 'Image',
             icon: Icons.image_outlined,
             children: [
+              // Media Manager selector
+              ImageSelectorWidget(
+                filterFolder: MediaFolder.hero,
+                currentUrl: _imageUrlController.text.isNotEmpty ? _imageUrlController.text : null,
+                onImageSelected: (url, size) {
+                  setState(() {
+                    _imageUrlController.text = url;
+                    _updateConfig();
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('✓ Image sélectionnée (${size.name})'),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -202,7 +224,7 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
                       decoration: InputDecoration(
                         labelText: 'URL de l\'image',
                         hintText: 'https://example.com/image.jpg',
-                        helperText: 'Entrez l\'URL complète de votre image',
+                        helperText: 'Ou entrez l\'URL complète manuellement',
                         border: const OutlineInputBorder(),
                         filled: true,
                         fillColor: Colors.grey[50],
