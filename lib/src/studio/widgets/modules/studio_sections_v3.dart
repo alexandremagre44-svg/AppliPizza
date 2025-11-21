@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../../../design_system/app_theme.dart';
 import '../../models/dynamic_section_model.dart';
+import 'section_editor_dialog.dart';
 
 class StudioSectionsV3 extends StatefulWidget {
   final List<DynamicSection> sections;
@@ -381,21 +382,48 @@ class _StudioSectionsV3State extends State<StudioSectionsV3> {
   }
 
   void _editSection(DynamicSection section) {
-    // TODO: Implement edit dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Éditeur de section - En cours de développement'),
-        behavior: SnackBarBehavior.floating,
+    showDialog(
+      context: context,
+      builder: (context) => SectionEditorDialog(
+        section: section,
+        onSave: (updatedSection) {
+          final updatedSections = widget.sections.map((s) {
+            if (s.id == section.id) {
+              return updatedSection;
+            }
+            return s;
+          }).toList();
+          
+          widget.onUpdate(updatedSections);
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Section mise à jour'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
       ),
     );
   }
 
   void _showCreateSectionDialog() {
-    // TODO: Implement create dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Création de section - En cours de développement'),
-        behavior: SnackBarBehavior.floating,
+    showDialog(
+      context: context,
+      builder: (context) => SectionEditorDialog(
+        onSave: (newSection) {
+          final updatedSections = List<DynamicSection>.from(widget.sections)
+            ..add(newSection);
+          
+          widget.onUpdate(updatedSections);
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Section créée'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
       ),
     );
   }
