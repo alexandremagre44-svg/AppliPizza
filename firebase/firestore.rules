@@ -294,6 +294,25 @@ service cloud.firestore {
                                request.resource.data.enabledSections is map;
     }
     
+    // Theme configuration - PUBLIC READ (needed by all users), ADMIN WRITE
+    match /config/theme {
+      // Public read access - all users need to see the theme
+      allow read: if true;
+      
+      // Only admins can write (create/update/delete)
+      allow write: if isAdmin();
+      
+      // Validate structure when writing
+      allow update, create: if isAdmin() && 
+                               request.resource.data.keys().hasAll(['colors', 'typography', 'radius', 'shadows', 'spacing', 'darkMode', 'updatedAt']) &&
+                               request.resource.data.colors is map &&
+                               request.resource.data.typography is map &&
+                               request.resource.data.radius is map &&
+                               request.resource.data.shadows is map &&
+                               request.resource.data.spacing is map &&
+                               request.resource.data.darkMode is bool;
+    }
+    
     // Main config document (other config docs)
     match /config/{configId} {
       // Everyone can read configuration
@@ -311,6 +330,12 @@ service cloud.firestore {
     
     // Home configuration
     match /app_home_config/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Banner configuration
+    match /app_banners/{bannerId} {
       allow read: if true;
       allow write: if isAdmin();
     }
