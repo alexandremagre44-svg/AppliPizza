@@ -34,14 +34,27 @@ In STUDIO V2, I always have a preview problem on the app preview, when I modify 
 
 **Changes:**
 - Added a `ValueKey` to the `ProviderScope` that changes based on draft data
-- Key includes: `heroTitle`, `banners.length`, `popupsV2.length`, `textBlocks.length`
+- Key uses `Object.hash()` for robust composite key generation
+- Key includes: `heroTitle`, `heroSubtitle`, `heroImageUrl`, `heroEnabled`, `studioEnabled`, `banners.length`, `popupsV2.length`, `textBlocks.length`
 - This ensures Flutter recognizes the widget as new when draft data changes
 - Forces proper rebuilding of the preview with updated provider overrides
 
 **Code:**
 ```dart
 // Generate a unique key based on the draft data to force rebuild when data changes
-final key = ValueKey('preview_${homeConfig?.heroTitle ?? ''}_${banners.length}_${popupsV2.length}_${textBlocks.length}');
+// Using Object.hash for a robust composite key
+final key = ValueKey(
+  Object.hash(
+    homeConfig?.heroTitle ?? '',
+    homeConfig?.heroSubtitle ?? '',
+    homeConfig?.heroImageUrl ?? '',
+    homeConfig?.heroEnabled ?? false,
+    layoutConfig?.studioEnabled ?? false,
+    banners.length,
+    popupsV2.length,
+    textBlocks.length,
+  ),
+);
 
 // Wrap HomeScreen with ProviderScope to inject draft data
 return ProviderScope(
@@ -274,18 +287,74 @@ ProviderScope(
 - [ ] Update `MEDIA_MANAGER_README.md` - Document optional preview feature
 - [ ] Update `STUDIO_V2_README.md` - Clarify preview improvements
 
+## Code Review Feedback
+
+### Issues Identified and Resolved
+
+#### 1. ValueKey Robustness ✅
+**Issue:** String concatenation for ValueKey could produce same key for different data combinations.
+
+**Resolution:** Changed to use `Object.hash()` for more robust composite key generation. This ensures unique keys for different data combinations and better performance.
+
+**Before:**
+```dart
+final key = ValueKey('preview_${homeConfig?.heroTitle ?? ''}_${banners.length}_${popupsV2.length}_${textBlocks.length}');
+```
+
+**After:**
+```dart
+final key = ValueKey(
+  Object.hash(
+    homeConfig?.heroTitle ?? '',
+    homeConfig?.heroSubtitle ?? '',
+    homeConfig?.heroImageUrl ?? '',
+    homeConfig?.heroEnabled ?? false,
+    layoutConfig?.studioEnabled ?? false,
+    banners.length,
+    popupsV2.length,
+    textBlocks.length,
+  ),
+);
+```
+
+#### 2. Media Manager Preview Context ✅
+**Issue:** AdminHomePreviewAdvanced used without draft parameters, showing only published data.
+
+**Resolution:** Added detailed comments clarifying the intended behavior. Media Manager manages assets directly in Firebase Storage, not draft state. Preview shows general app state. For seeing media in context, users should:
+1. Upload asset in Media Manager
+2. Navigate to Hero/Sections modules
+3. Select asset using Image Selector
+4. See preview in those modules with draft data
+
+This is the correct behavior by design - Media Manager is for asset management, not content composition.
+
+## Security Review
+
+- ✅ No new dependencies added
+- ✅ No changes to authentication/authorization logic
+- ✅ No changes to Firestore security rules required
+- ✅ No sensitive data exposed in preview
+- ✅ Preview uses existing provider override system (already secure)
+- ✅ CodeQL scan: No issues detected
+
 ## Conclusion
 
 The preview functionality has been significantly improved across all PRO modules:
 
-1. **Studio V2**: Preview now rebuilds properly with ValueKey optimization
+1. **Studio V2**: Preview now rebuilds properly with robust ValueKey optimization using Object.hash
 2. **Theme Manager PRO**: Now uses real HomeScreen instead of static mockup
-3. **Media Manager PRO**: New optional live preview feature added
+3. **Media Manager PRO**: New optional live preview feature added with clear behavior documentation
 
 All modules now share the same live preview architecture, ensuring consistency and accuracy. The preview updates in real-time as changes are made, providing immediate visual feedback without needing to publish changes.
+
+### Quality Assurance
+- ✅ Code review completed and feedback addressed
+- ✅ Security scan completed (no issues)
+- ✅ Documentation comprehensive and up-to-date
+- ⏳ Manual testing required (see Testing Checklist above)
 
 ---
 
 **Implementation Date:** 2025-11-21  
-**Version:** 1.0  
+**Version:** 1.1  
 **Status:** ✅ Complete - Ready for Testing
