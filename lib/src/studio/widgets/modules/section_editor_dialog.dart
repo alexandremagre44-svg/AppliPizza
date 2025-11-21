@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../../../design_system/app_theme.dart';
 import '../../models/dynamic_section_model.dart';
+import 'custom_field_builder.dart';
 
 class SectionEditorDialog extends StatefulWidget {
   final DynamicSection? section;
@@ -43,6 +44,9 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
   final _ctaTextController = TextEditingController();
   final _ctaUrlController = TextEditingController();
 
+  // Custom fields for free-layout sections
+  List<CustomField> _customFields = [];
+
   int _currentStep = 0;
 
   @override
@@ -80,6 +84,13 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
       _imageUrlController.text = _content['imageUrl'] ?? '';
       _ctaTextController.text = _content['ctaText'] ?? '';
       _ctaUrlController.text = _content['ctaUrl'] ?? '';
+      
+      // Initialize custom fields if it's a free-layout section
+      if (_selectedType == DynamicSectionType.freeLayout && _content['customFields'] != null) {
+        _customFields = (_content['customFields'] as List<dynamic>)
+            .map((e) => CustomField.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
     } else {
       // Create mode
       _selectedType = DynamicSectionType.text;
@@ -305,6 +316,20 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
                   controller: _ctaUrlController,
                   label: 'URL de destination',
                   hint: 'Ex: /menu',
+                ),
+              ],
+            ),
+          
+          // Custom fields for free-layout sections
+          if (_selectedType == DynamicSectionType.freeLayout)
+            Column(
+              children: [
+                const Divider(height: 32),
+                CustomFieldBuilder(
+                  fields: _customFields,
+                  onUpdate: (fields) {
+                    setState(() => _customFields = fields);
+                  },
                 ),
               ],
             ),
@@ -543,6 +568,11 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
       if (_ctaTextController.text.isNotEmpty) 'ctaText': _ctaTextController.text,
       if (_ctaUrlController.text.isNotEmpty) 'ctaUrl': _ctaUrlController.text,
     };
+
+    // Add custom fields for free-layout sections
+    if (_selectedType == DynamicSectionType.freeLayout && _customFields.isNotEmpty) {
+      _content['customFields'] = _customFields.map((f) => f.toJson()).toList();
+    }
 
     // Build conditions
     _conditions = SectionConditions(
