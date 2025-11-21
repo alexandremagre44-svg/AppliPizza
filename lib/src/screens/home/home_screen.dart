@@ -13,6 +13,8 @@ import '../../providers/product_provider.dart';
 import '../../providers/home_config_provider.dart';
 import '../../providers/app_texts_provider.dart';
 import '../../providers/home_layout_provider.dart';
+import '../../studio/content/providers/content_providers.dart';
+import '../../studio/content/models/featured_products_model.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/home/hero_banner.dart';
 import '../../widgets/home/section_header.dart';
@@ -22,6 +24,7 @@ import '../../widgets/home/info_banner.dart';
 import '../../widgets/home/home_shimmer_loading.dart';
 import '../menu/menu_customization_modal.dart';
 import 'pizza_customization_modal.dart';
+import 'home_content_helper.dart';
 import '../../theme/app_theme.dart';
 import '../../core/constants.dart';
 import '../../services/roulette_rules_service.dart';
@@ -148,9 +151,17 @@ class HomeScreen extends ConsumerWidget {
         ? activeProducts.where((p) => p.category == ProductCategory.pizza).take(4).toList()
         : bestSellers.take(4).toList();
 
+    // Watch new content providers
+    final featuredConfigAsync = ref.watch(featuredProductsProvider);
+    final customSectionsAsync = ref.watch(customSectionsProvider);
+    final categoryOverridesAsync = ref.watch(categoryOverridesProvider);
+
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(productListProvider);
+        ref.invalidate(featuredProductsProvider);
+        ref.invalidate(customSectionsProvider);
+        ref.invalidate(categoryOverridesProvider);
         await ref.read(productListProvider.future);
       },
       color: AppColors.primaryRed,
@@ -169,7 +180,44 @@ class HomeScreen extends ConsumerWidget {
             
             SizedBox(height: AppSpacing.xxxl),
             
-            // 2. Dynamic blocks from configuration
+            // NEW: Featured products section (before or after categories based on config)
+            ...featuredConfigAsync.when(
+              data: (config) {
+                if (config.position == FeaturedPosition.beforeCategories) {
+                  return HomeContentHelper.buildFeaturedSection(
+                    context: context,
+                    ref: ref,
+                    config: config,
+                    allProducts: activeProducts,
+                  );
+                }
+                return [];
+              },
+              loading: () => [],
+              error: (_, __) => [],
+            ),
+            
+            // NEW: Custom sections (active only)
+            ...customSectionsAsync.when(
+              data: (sections) {
+                final widgets = <Widget>[];
+                for (final section in sections.where((s) => s.isActive)) {
+                  widgets.addAll(
+                    HomeContentHelper.buildCustomSection(
+                      context: context,
+                      ref: ref,
+                      section: section,
+                      allProducts: activeProducts,
+                    ),
+                  );
+                }
+                return widgets;
+              },
+              loading: () => [],
+              error: (_, __) => [],
+            ),
+            
+            // 2. Dynamic blocks from configuration (fallback)
             if (homeConfig?.blocks != null && homeConfig!.blocks.isNotEmpty)
               ..._buildDynamicBlocks(context, ref, homeConfig.blocks, activeProducts, homeTexts)
             else
@@ -186,6 +234,23 @@ class HomeScreen extends ConsumerWidget {
             const CategoryShortcuts(),
             
             SizedBox(height: AppSpacing.xxxl),
+            
+            // NEW: Featured products section (after categories if configured)
+            ...featuredConfigAsync.when(
+              data: (config) {
+                if (config.position == FeaturedPosition.afterCategories) {
+                  return HomeContentHelper.buildFeaturedSection(
+                    context: context,
+                    ref: ref,
+                    config: config,
+                    allProducts: activeProducts,
+                  );
+                }
+                return [];
+              },
+              loading: () => [],
+              error: (_, __) => [],
+            ),
             
             // 5. Info banner
             const InfoBanner(
