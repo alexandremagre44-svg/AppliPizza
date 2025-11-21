@@ -28,6 +28,7 @@ import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
 
 // Admin screens imports
+import 'src/screens/admin/admin_studio_screen.dart';
 import 'src/screens/admin/products_admin_screen.dart';
 import 'src/screens/admin/product_form_screen.dart';
 import 'src/screens/admin/mailing_admin_screen.dart';
@@ -177,11 +178,29 @@ class MyApp extends ConsumerWidget {
               path: AppRoutes.profile,
               builder: (context, state) => const ProfileScreen(),
             ),
-            // Studio V2 route - Official professional studio (main admin entry point)
+            // Admin Menu - Main entry point for all admin tools
             GoRoute(
               path: AppRoutes.adminStudio,
               builder: (context, state) {
-                // PROTECTION: Admin Studio is reserved for admins
+                // PROTECTION: Admin menu is reserved for admins
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  // Redirect to home if not admin
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const AdminStudioScreen();
+              },
+            ),
+            // Studio V2 Editor - Direct access to content editor
+            GoRoute(
+              path: AppRoutes.adminStudioV2,
+              builder: (context, state) {
+                // PROTECTION: Studio V2 is reserved for admins
                 final authState = ref.read(authProvider);
                 if (!authState.isAdmin) {
                   // Redirect to home if not admin
@@ -195,13 +214,9 @@ class MyApp extends ConsumerWidget {
                 return const StudioV2Screen();
               },
             ),
-            // Deprecated routes - redirect to Studio V2
+            // Deprecated routes - redirect to admin menu
             GoRoute(
               path: AppRoutes.adminStudioNew,
-              redirect: (context, state) => AppRoutes.adminStudio,
-            ),
-            GoRoute(
-              path: AppRoutes.adminStudioV2,
               redirect: (context, state) => AppRoutes.adminStudio,
             ),
             // Theme Manager V3 route
