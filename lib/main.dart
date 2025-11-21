@@ -19,9 +19,7 @@ import 'src/screens/cart/cart_screen.dart';
 import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
 import 'src/screens/product_detail/product_detail_screen.dart';
-import 'src/screens/admin/admin_studio_screen.dart';
-import 'src/screens/admin/admin_studio_screen_refactored.dart';
-import 'src/screens/admin/studio/admin_studio_unified.dart';
+// Studio V2 - Official professional studio (only version exposed via routes)
 import 'src/studio/screens/studio_v2_screen.dart';
 import 'src/studio/screens/theme_manager_screen.dart';
 import 'src/studio/screens/media_manager_screen.dart';
@@ -168,7 +166,7 @@ class MyApp extends ConsumerWidget {
               path: AppRoutes.profile,
               builder: (context, state) => const ProfileScreen(),
             ),
-            // Studio Builder route - main admin entry point
+            // Studio V2 route - OFFICIAL Professional Studio (main admin entry point)
             GoRoute(
               path: AppRoutes.adminStudio,
               builder: (context, state) {
@@ -183,42 +181,17 @@ class MyApp extends ConsumerWidget {
                     body: Center(child: CircularProgressIndicator()),
                   );
                 }
-                return const AdminStudioScreen();
-              },
-            ),
-            // New unified Studio route
-            GoRoute(
-              path: AppRoutes.adminStudioNew,
-              builder: (context, state) {
-                // PROTECTION: Admin only
-                final authState = ref.read(authProvider);
-                if (!authState.isAdmin) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
-                  });
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                return const AdminStudioUnified();
-              },
-            ),
-            // Studio V2 route - Professional refactored version
-            GoRoute(
-              path: AppRoutes.adminStudioV2,
-              builder: (context, state) {
-                // PROTECTION: Admin only
-                final authState = ref.read(authProvider);
-                if (!authState.isAdmin) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
-                  });
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
                 return const StudioV2Screen();
               },
+            ),
+            // Deprecated routes - redirect to Studio V2
+            GoRoute(
+              path: AppRoutes.adminStudioNew,
+              redirect: (context, state) => AppRoutes.adminStudio,
+            ),
+            GoRoute(
+              path: AppRoutes.adminStudioV2,
+              redirect: (context, state) => AppRoutes.adminStudio,
             ),
             // Theme Manager V3 route
             GoRoute(
@@ -254,22 +227,22 @@ class MyApp extends ConsumerWidget {
                 return const MediaManagerScreen();
               },
             ),
-            // Deprecated routes - redirect to new unified studio
+            // Deprecated routes - redirect to Studio V2
             GoRoute(
               path: AppRoutes.adminHero,
-              redirect: (context, state) => AppRoutes.adminStudioNew,
+              redirect: (context, state) => AppRoutes.adminStudio,
             ),
             GoRoute(
               path: AppRoutes.adminBanner,
-              redirect: (context, state) => AppRoutes.adminStudioNew,
+              redirect: (context, state) => AppRoutes.adminStudio,
             ),
             GoRoute(
               path: AppRoutes.adminPopups,
-              redirect: (context, state) => AppRoutes.adminStudioNew,
+              redirect: (context, state) => AppRoutes.adminStudio,
             ),
             GoRoute(
               path: AppRoutes.adminTexts,
-              redirect: (context, state) => AppRoutes.adminStudioNew,
+              redirect: (context, state) => AppRoutes.adminStudio,
             ),
           ],
         ),
