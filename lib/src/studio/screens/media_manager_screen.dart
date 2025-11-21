@@ -9,7 +9,7 @@ import '../services/media_manager_service.dart';
 import '../widgets/media/media_upload_widget.dart';
 import '../widgets/media/media_gallery_widget.dart';
 import '../../providers/auth_provider.dart';
-import '../preview/admin_home_preview_advanced.dart';
+import '../preview/simple_home_preview.dart';
 
 /// Media Manager Screen
 /// Professional media management with upload, gallery, and organization
@@ -116,7 +116,7 @@ class _MediaManagerScreenState extends ConsumerState<MediaManagerScreen> {
                       // 2. Navigate to Hero/Sections modules
                       // 3. Select the asset using the Image Selector
                       // 4. See the preview in those modules with the draft data
-                      child: const AdminHomePreviewAdvanced(),
+                      child: const SimpleHomePreview(),
                     ),
                   ),
                 ],
