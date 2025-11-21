@@ -185,8 +185,12 @@ class StudioPreviewPanelV2 extends StatelessWidget {
       }),
     );
 
+    // Generate a unique key based on the draft data to force rebuild when data changes
+    final key = ValueKey('preview_${homeConfig?.heroTitle ?? ''}_${banners.length}_${popupsV2.length}_${textBlocks.length}');
+
     // Wrap HomeScreen with ProviderScope to inject draft data
     return ProviderScope(
+      key: key,
       overrides: overrides,
       child: const HomeScreen(),
     );
