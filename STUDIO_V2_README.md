@@ -1,5 +1,18 @@
 # Studio Admin V2 - Guide de Démarrage Rapide
 
+## 🎉 NOUVEAU: Corrections 2025-01-21
+
+**✅ Preview Améliorée** - Utilise maintenant le vrai widget HomeScreen (rendu 1:1)  
+**✅ Logs Détaillés** - Debugging facile avec logs structurés  
+**✅ Pipeline Vérifié** - Studio V2 → Firestore → HomeScreen confirmé fonctionnel
+
+**📚 Documentation des corrections:**
+- **`STUDIO_V2_FIX_SUMMARY.md`** - Résumé des corrections apportées
+- **`STUDIO_V2_DEBUG_NOTES.md`** - Audit technique complet du pipeline
+- **`STUDIO_V2_TEST_GUIDE.md`** - Guide de test avec 5 cas détaillés
+
+---
+
 ## 🚀 Accès Rapide
 
 **URL**: `/admin/studio/v2`  
