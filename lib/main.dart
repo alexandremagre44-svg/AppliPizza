@@ -24,6 +24,7 @@ import 'src/screens/admin/admin_studio_screen_refactored.dart';
 import 'src/screens/admin/studio/admin_studio_unified.dart';
 import 'src/studio/screens/studio_v2_screen.dart';
 import 'src/studio/screens/theme_manager_screen.dart';
+import 'src/studio/screens/media_manager_screen.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
@@ -234,6 +235,23 @@ class MyApp extends ConsumerWidget {
                   );
                 }
                 return const ThemeManagerScreen();
+              },
+            ),
+            // Media Manager V3 route
+            GoRoute(
+              path: AppRoutes.adminStudioV3Media,
+              builder: (context, state) {
+                // PROTECTION: Admin only
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const MediaManagerScreen();
               },
             ),
             // Deprecated routes - redirect to new unified studio

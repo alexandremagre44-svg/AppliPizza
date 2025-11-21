@@ -4,6 +4,8 @@
 import 'package:flutter/material.dart';
 import '../../../design_system/app_theme.dart';
 import '../../models/dynamic_section_model.dart';
+import '../../models/media_asset_model.dart';
+import '../media/image_selector_widget.dart';
 import 'custom_field_builder.dart';
 
 class SectionEditorDialog extends StatefulWidget {
@@ -319,10 +321,26 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
             ),
           
           if (_shouldShowField('image'))
-            _buildTextField(
-              controller: _imageUrlController,
-              label: 'URL de l\'image',
-              hint: 'https://...',
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+                ImageSelectorWidget(
+                  filterFolder: MediaFolder.promos,
+                  currentUrl: _imageUrlController.text.isNotEmpty ? _imageUrlController.text : null,
+                  onImageSelected: (url, size) {
+                    setState(() {
+                      _imageUrlController.text = url;
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildTextField(
+                  controller: _imageUrlController,
+                  label: 'URL de l\'image',
+                  hint: 'Ou entrez l\'URL manuellement',
+                ),
+              ],
             ),
           
           if (_shouldShowField('cta'))
