@@ -189,6 +189,7 @@ class HomeScreen extends ConsumerWidget {
                     ref: ref,
                     config: config,
                     allProducts: activeProducts,
+                    onProductTap: (product) => _handleProductTap(context, ref, product),
                   );
                 }
                 return [];
@@ -208,6 +209,7 @@ class HomeScreen extends ConsumerWidget {
                       ref: ref,
                       section: section,
                       allProducts: activeProducts,
+                      onProductTap: (product) => _handleProductTap(context, ref, product),
                     ),
                   );
                 }
@@ -244,6 +246,7 @@ class HomeScreen extends ConsumerWidget {
                     ref: ref,
                     config: config,
                     allProducts: activeProducts,
+                    onProductTap: (product) => _handleProductTap(context, ref, product),
                   );
                 }
                 return [];

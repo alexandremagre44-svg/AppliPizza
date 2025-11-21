@@ -39,6 +39,7 @@ class HomeContentHelper {
     required WidgetRef ref,
     required FeaturedProductsConfig? config,
     required List<Product> allProducts,
+    required void Function(Product) onProductTap,
   }) {
     if (config == null || !config.isActive) {
       return [];
@@ -76,13 +77,13 @@ class HomeContentHelper {
 
     switch (config.displayType) {
       case FeaturedDisplayType.carousel:
-        widgets.add(_buildCarousel(context, ref, featured));
+        widgets.add(_buildCarousel(context, ref, featured, onProductTap));
         break;
       case FeaturedDisplayType.hero:
-        widgets.add(_buildHeroDisplay(context, ref, featured));
+        widgets.add(_buildHeroDisplay(context, ref, featured, onProductTap));
         break;
       case FeaturedDisplayType.horizontalCards:
-        widgets.add(_buildHorizontalCards(context, ref, featured));
+        widgets.add(_buildHorizontalCards(context, ref, featured, onProductTap));
         break;
     }
 
@@ -97,6 +98,7 @@ class HomeContentHelper {
     required WidgetRef ref,
     required ContentSection section,
     required List<Product> allProducts,
+    required void Function(Product) onProductTap,
   }) {
     if (!section.isActive) {
       return [];
@@ -136,13 +138,13 @@ class HomeContentHelper {
     // Section content based on display type
     switch (section.displayType) {
       case SectionDisplayType.carousel:
-        widgets.add(_buildCarousel(context, ref, products));
+        widgets.add(_buildCarousel(context, ref, products, onProductTap));
         break;
       case SectionDisplayType.grid:
-        widgets.add(_buildProductGrid(context, ref, products));
+        widgets.add(_buildProductGrid(context, ref, products, onProductTap));
         break;
       case SectionDisplayType.largeBanner:
-        widgets.add(_buildLargeBanner(context, ref, products.first));
+        widgets.add(_buildLargeBanner(context, ref, products.first, onProductTap));
         break;
     }
 
@@ -173,7 +175,7 @@ class HomeContentHelper {
   }
 
   /// Build carousel display
-  static Widget _buildCarousel(BuildContext context, WidgetRef ref, List<Product> products) {
+  static Widget _buildCarousel(BuildContext context, WidgetRef ref, List<Product> products, void Function(Product) onProductTap) {
     return SizedBox(
       height: 280,
       child: ListView.builder(
@@ -181,10 +183,14 @@ class HomeContentHelper {
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         itemCount: products.length,
         itemBuilder: (context, index) {
+          final product = products[index];
           return Container(
             width: 200,
             margin: EdgeInsets.only(right: AppSpacing.md),
-            child: ProductCard(product: products[index]),
+            child: ProductCard(
+              product: product,
+              onAddToCart: () => onProductTap(product),
+            ),
           );
         },
       ),
@@ -192,7 +198,7 @@ class HomeContentHelper {
   }
 
   /// Build product grid
-  static Widget _buildProductGrid(BuildContext context, WidgetRef ref, List<Product> products) {
+  static Widget _buildProductGrid(BuildContext context, WidgetRef ref, List<Product> products, void Function(Product) onProductTap) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: GridView.builder(
@@ -206,21 +212,23 @@ class HomeContentHelper {
         ),
         itemCount: products.length,
         itemBuilder: (context, index) {
-          return ProductCard(product: products[index]);
+          final product = products[index];
+          return ProductCard(
+            product: product,
+            onAddToCart: () => onProductTap(product),
+          );
         },
       ),
     );
   }
 
   /// Build hero display (large featured product)
-  static Widget _buildHeroDisplay(BuildContext context, WidgetRef ref, List<Product> products) {
+  static Widget _buildHeroDisplay(BuildContext context, WidgetRef ref, List<Product> products, void Function(Product) onProductTap) {
     final product = products.first;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: GestureDetector(
-        onTap: () {
-          // TODO: Open product detail
-        },
+        onTap: () => onProductTap(product),
         child: Container(
           height: 200,
           decoration: BoxDecoration(
@@ -275,7 +283,7 @@ class HomeContentHelper {
   }
 
   /// Build horizontal cards
-  static Widget _buildHorizontalCards(BuildContext context, WidgetRef ref, List<Product> products) {
+  static Widget _buildHorizontalCards(BuildContext context, WidgetRef ref, List<Product> products, void Function(Product) onProductTap) {
     return Column(
       children: products.map((product) {
         return Padding(
@@ -289,6 +297,7 @@ class HomeContentHelper {
               borderRadius: BorderRadius.circular(12),
             ),
             child: ListTile(
+              onTap: () => onProductTap(product),
               contentPadding: const EdgeInsets.all(12),
               leading: Container(
                 width: 60,
@@ -325,13 +334,11 @@ class HomeContentHelper {
   }
 
   /// Build large banner (single product showcase)
-  static Widget _buildLargeBanner(BuildContext context, WidgetRef ref, Product product) {
+  static Widget _buildLargeBanner(BuildContext context, WidgetRef ref, Product product, void Function(Product) onProductTap) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: GestureDetector(
-        onTap: () {
-          // TODO: Open product detail
-        },
+        onTap: () => onProductTap(product),
         child: Container(
           height: 300,
           decoration: BoxDecoration(

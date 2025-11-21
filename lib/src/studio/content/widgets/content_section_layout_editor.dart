@@ -49,7 +49,7 @@ class _ContentSectionLayoutEditorState extends ConsumerState<ContentSectionLayou
         updatedAt: DateTime.now(),
       );
 
-      await _homeLayoutService.updateHomeLayout(updatedLayout);
+      await _homeLayoutService.saveHomeLayout(updatedLayout);
       ref.invalidate(homeLayoutProvider);
 
       if (mounted) {
