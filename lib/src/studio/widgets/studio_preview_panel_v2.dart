@@ -186,7 +186,19 @@ class StudioPreviewPanelV2 extends StatelessWidget {
     );
 
     // Generate a unique key based on the draft data to force rebuild when data changes
-    final key = ValueKey('preview_${homeConfig?.heroTitle ?? ''}_${banners.length}_${popupsV2.length}_${textBlocks.length}');
+    // Using Object.hash for a robust composite key
+    final key = ValueKey(
+      Object.hash(
+        homeConfig?.heroTitle ?? '',
+        homeConfig?.heroSubtitle ?? '',
+        homeConfig?.heroImageUrl ?? '',
+        homeConfig?.heroEnabled ?? false,
+        layoutConfig?.studioEnabled ?? false,
+        banners.length,
+        popupsV2.length,
+        textBlocks.length,
+      ),
+    );
 
     // Wrap HomeScreen with ProviderScope to inject draft data
     return ProviderScope(

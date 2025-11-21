@@ -109,6 +109,13 @@ class _MediaManagerScreenState extends ConsumerState<MediaManagerScreen> {
                     flex: 1,
                     child: Container(
                       color: Colors.grey.shade50,
+                      // Note: Preview shows published HomeScreen state, not draft media changes.
+                      // Media assets are directly uploaded to Firebase Storage and referenced by URL.
+                      // To see how a new media asset looks, users should:
+                      // 1. Upload the asset here
+                      // 2. Navigate to Hero/Sections modules
+                      // 3. Select the asset using the Image Selector
+                      // 4. See the preview in those modules with the draft data
                       child: const AdminHomePreviewAdvanced(),
                     ),
                   ),
