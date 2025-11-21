@@ -4,8 +4,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/text_block_model.dart';
 import '../models/popup_v2_model.dart';
+import '../models/dynamic_section_model.dart';
 import '../services/text_block_service.dart';
 import '../services/popup_v2_service.dart';
+import '../services/dynamic_section_service.dart';
 import '../../models/home_config.dart';
 import '../../models/home_layout_config.dart';
 import '../../models/banner_config.dart';
@@ -35,6 +37,10 @@ final bannerServiceProvider = Provider<BannerService>((ref) {
   return BannerService();
 });
 
+final dynamicSectionServiceProvider = Provider<DynamicSectionService>((ref) {
+  return DynamicSectionService();
+});
+
 // ===== Data Stream Providers =====
 
 /// Watch text blocks in real-time
@@ -55,6 +61,12 @@ final homeLayoutStreamProvider = StreamProvider<HomeLayoutConfig?>((ref) {
   return service.watchHomeLayout();
 });
 
+/// Watch dynamic sections in real-time
+final dynamicSectionsStreamProvider = StreamProvider<List<DynamicSection>>((ref) {
+  final service = ref.watch(dynamicSectionServiceProvider);
+  return service.watchSections();
+});
+
 // ===== Draft State Providers =====
 
 /// Studio draft state - holds all local changes before publishing
@@ -64,6 +76,7 @@ class StudioDraftState {
   final List<BannerConfig> banners;
   final List<PopupV2Model> popupsV2;
   final List<TextBlockModel> textBlocks;
+  final List<DynamicSection> dynamicSections;
   final bool hasUnsavedChanges;
 
   StudioDraftState({
@@ -72,6 +85,7 @@ class StudioDraftState {
     this.banners = const [],
     this.popupsV2 = const [],
     this.textBlocks = const [],
+    this.dynamicSections = const [],
     this.hasUnsavedChanges = false,
   });
 
@@ -81,6 +95,7 @@ class StudioDraftState {
     List<BannerConfig>? banners,
     List<PopupV2Model>? popupsV2,
     List<TextBlockModel>? textBlocks,
+    List<DynamicSection>? dynamicSections,
     bool? hasUnsavedChanges,
   }) {
     return StudioDraftState(
@@ -89,6 +104,7 @@ class StudioDraftState {
       banners: banners ?? this.banners,
       popupsV2: popupsV2 ?? this.popupsV2,
       textBlocks: textBlocks ?? this.textBlocks,
+      dynamicSections: dynamicSections ?? this.dynamicSections,
       hasUnsavedChanges: hasUnsavedChanges ?? this.hasUnsavedChanges,
     );
   }
@@ -133,6 +149,13 @@ class StudioDraftStateNotifier extends StateNotifier<StudioDraftState> {
     );
   }
 
+  void setDynamicSections(List<DynamicSection> sections) {
+    state = state.copyWith(
+      dynamicSections: sections,
+      hasUnsavedChanges: true,
+    );
+  }
+
   void markSaved() {
     state = state.copyWith(hasUnsavedChanges: false);
   }
@@ -147,6 +170,7 @@ class StudioDraftStateNotifier extends StateNotifier<StudioDraftState> {
     List<BannerConfig>? banners,
     List<PopupV2Model>? popupsV2,
     List<TextBlockModel>? textBlocks,
+    List<DynamicSection>? dynamicSections,
   }) {
     state = StudioDraftState(
       homeConfig: homeConfig,
@@ -154,6 +178,7 @@ class StudioDraftStateNotifier extends StateNotifier<StudioDraftState> {
       banners: banners ?? [],
       popupsV2: popupsV2 ?? [],
       textBlocks: textBlocks ?? [],
+      dynamicSections: dynamicSections ?? [],
       hasUnsavedChanges: false,
     );
   }

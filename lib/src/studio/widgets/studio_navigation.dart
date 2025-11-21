@@ -152,6 +152,11 @@ class StudioNavigation extends StatelessWidget {
                     icon: Icons.home_outlined,
                     label: 'Contenu d\'accueil',
                   ),
+                  _NavItem(
+                    id: 'sections',
+                    icon: Icons.view_module_outlined,
+                    label: 'Sections V3',
+                  ),
                 ]),
                 const SizedBox(height: 16),
                 _buildNavSection(context, 'CONFIGURATION', [
@@ -300,6 +305,14 @@ class StudioNavigation extends StatelessWidget {
                 child: ListTile(
                   leading: Icon(Icons.text_fields_outlined),
                   title: Text('Textes dynamiques'),
+                  dense: true,
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'sections',
+                child: ListTile(
+                  leading: Icon(Icons.view_module_outlined),
+                  title: Text('Sections V3'),
                   dense: true,
                 ),
               ),

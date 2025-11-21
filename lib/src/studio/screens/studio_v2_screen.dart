@@ -19,11 +19,14 @@ import '../../services/home_layout_service.dart';
 import '../../services/banner_service.dart';
 import '../services/text_block_service.dart';
 import '../services/popup_v2_service.dart';
+import '../services/dynamic_section_service.dart';
 import '../../models/home_config.dart';
 import '../../models/home_layout_config.dart';
 import '../../models/banner_config.dart';
 import '../models/text_block_model.dart';
 import '../models/popup_v2_model.dart';
+import '../models/dynamic_section_model.dart';
+import '../widgets/modules/studio_sections_v3.dart';
 
 /// Studio Admin V2 - Complete Professional Implementation
 /// 
@@ -48,6 +51,7 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
   final _bannerService = BannerService();
   final _textBlockService = TextBlockService();
   final _popupV2Service = PopupV2Service();
+  final _dynamicSectionService = DynamicSectionService();
 
   // Published state (from Firestore)
   HomeConfig? _publishedHomeConfig;
@@ -55,6 +59,7 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
   List<BannerConfig> _publishedBanners = [];
   List<TextBlockModel> _publishedTextBlocks = [];
   List<PopupV2Model> _publishedPopupsV2 = [];
+  List<DynamicSection> _publishedDynamicSections = [];
 
   @override
   void initState() {
@@ -80,6 +85,7 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
       final banners = await _bannerService.getAllBanners();
       final textBlocks = await _textBlockService.getAllTextBlocks();
       final popupsV2 = await _popupV2Service.getAllPopups();
+      final dynamicSections = await _dynamicSectionService.getAllSections();
 
       // Store published state
       _publishedHomeConfig = homeConfig ?? HomeConfig.initial();
@@ -87,6 +93,7 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
       _publishedBanners = banners;
       _publishedTextBlocks = textBlocks;
       _publishedPopupsV2 = popupsV2;
+      _publishedDynamicSections = dynamicSections;
 
       // Initialize draft state
       // FIX: This provider update is safe because it's called via Future.microtask
@@ -96,6 +103,7 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
             banners: List.from(_publishedBanners),
             popupsV2: List.from(_publishedPopupsV2),
             textBlocks: List.from(_publishedTextBlocks),
+            dynamicSections: List.from(_publishedDynamicSections),
           );
     } catch (e) {
       _showError('Erreur lors du chargement: $e');
@@ -136,12 +144,16 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
       // Save popups V2
       await _popupV2Service.saveAllPopups(draftState.popupsV2);
 
+      // Save dynamic sections
+      await _dynamicSectionService.saveAllSections(draftState.dynamicSections);
+
       // Update published state
       _publishedHomeConfig = draftState.homeConfig;
       _publishedLayoutConfig = draftState.layoutConfig;
       _publishedBanners = List.from(draftState.banners);
       _publishedTextBlocks = List.from(draftState.textBlocks);
       _publishedPopupsV2 = List.from(draftState.popupsV2);
+      _publishedDynamicSections = List.from(draftState.dynamicSections);
 
       // Mark as saved
       ref.read(studioDraftStateProvider.notifier).markSaved();
@@ -186,6 +198,7 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
         layoutConfig: _publishedLayoutConfig,
         banners: List.from(_publishedBanners),
         popupsV2: List.from(_publishedPopupsV2),
+        dynamicSections: List.from(_publishedDynamicSections),
         textBlocks: List.from(_publishedTextBlocks),
       );
       
@@ -347,6 +360,13 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
         );
       case 'content':
         return const StudioContentScreen();
+      case 'sections':
+        return StudioSectionsV3(
+          sections: draftState.dynamicSections,
+          onUpdate: (sections) {
+            ref.read(studioDraftStateProvider.notifier).setDynamicSections(sections);
+          },
+        );
       case 'settings':
         return StudioSettingsV2(
           layoutConfig: draftState.layoutConfig,
