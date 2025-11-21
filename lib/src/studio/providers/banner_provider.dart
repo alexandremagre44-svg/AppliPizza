@@ -29,9 +29,9 @@ final activeBannersProvider = StreamProvider<List<BannerConfig>>((ref) {
 });
 
 /// Future provider for one-time fetch
-final bannersFutureProvider = FutureProvider<List<BannerConfig>>((ref) async {
+final bannersFutureProvider = FutureProvider<List<BannerConfig>>((ref) {
   final service = ref.watch(bannerServiceProvider);
-  return await service.getAllBanners();
+  return service.getAllBanners();
 });
 
 /// State provider for draft banners (local changes before publish)

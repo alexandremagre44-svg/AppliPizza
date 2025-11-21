@@ -126,7 +126,7 @@ class SimulationPanel extends StatelessWidget {
       case SimulatedUserType.frequentBuyer:
         return 'Client 5 commandes';
       case SimulatedUserType.vipLoyalty:
-        return 'Client VIP fid\'';
+        return 'Client VIP Fidélité';
     }
   }
 

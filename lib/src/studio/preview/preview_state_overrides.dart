@@ -133,9 +133,11 @@ class PreviewStateOverrides {
   }) {
     final overrides = <Override>[];
 
-    // User provider override
+    // User provider override - wrap in StateNotifierProvider
     overrides.add(
-      userProvider.overrideWith((ref) => FakeUserNotifier(simulation)),
+      userProvider.overrideWith((ref) {
+        return FakeUserNotifier(simulation);
+      }),
     );
 
     // Cart provider override
@@ -224,48 +226,41 @@ class PreviewStateOverrides {
 }
 
 /// Fake user notifier for preview
-class FakeUserNotifier extends UserProfileNotifier {
+class FakeUserNotifier extends StateNotifier<UserProfile> {
   final SimulationState simulation;
 
-  FakeUserNotifier(this.simulation) : super(null as Ref) {
-    state = PreviewStateOverrides.createFakeUser(simulation);
-  }
+  FakeUserNotifier(this.simulation) : super(PreviewStateOverrides.createFakeUser(simulation));
 
-  @override
-  Future<void> loadProfile(String userId) async {
+  // Preview mode: all methods are no-ops
+  void loadProfile(String userId) {
     // Do nothing in preview mode
   }
 
-  @override
-  Future<bool> saveProfile() async {
+  bool saveProfile() {
     // Do nothing in preview mode
     return true;
   }
 
-  @override
-  Future<void> toggleFavorite(String productId) async {
+  void toggleFavorite(String productId) {
     // Do nothing in preview mode
   }
 
-  @override
-  Future<void> updateAddress(String address) async {
+  void updateAddress(String address) {
     // Do nothing in preview mode
   }
 
-  @override
-  Future<void> updateProfileImage(String imageUrl) async {
+  void updateProfileImage(String imageUrl) {
     // Do nothing in preview mode
   }
 
-  @override
-  Future<void> addOrder({
+  void addOrder({
     String? customerName,
     String? customerPhone,
     String? customerEmail,
     String? comment,
     String? pickupDate,
     String? pickupTimeSlot,
-  }) async {
+  }) {
     // Do nothing in preview mode
   }
 }
@@ -280,7 +275,7 @@ class FakeCartNotifier extends CartNotifier {
 
   // All methods do nothing in preview mode
   @override
-  void addItem(product, {String? customDescription}) {
+  void addItem(dynamic product, {String? customDescription}) {
     // Do nothing in preview mode
   }
 

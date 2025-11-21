@@ -32,9 +32,9 @@ final activePopupsV2Provider = StreamProvider<List<PopupV2Model>>((ref) {
 });
 
 /// Future provider for one-time fetch
-final popupsV2FutureProvider = FutureProvider<List<PopupV2Model>>((ref) async {
+final popupsV2FutureProvider = FutureProvider<List<PopupV2Model>>((ref) {
   final service = ref.watch(popupV2ServiceProvider);
-  return await service.getAllPopups();
+  return service.getAllPopups();
 });
 
 /// State provider for draft popups (local changes before publish)

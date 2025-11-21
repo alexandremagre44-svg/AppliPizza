@@ -8,6 +8,7 @@ import '../../models/home_layout_config.dart';
 import '../../models/banner_config.dart';
 import '../../models/theme_config.dart';
 import '../models/popup_v2_model.dart';
+import '../models/text_block_model.dart';
 import 'simulation_state.dart';
 import 'simulation_panel.dart';
 import 'preview_phone_frame.dart';
@@ -26,7 +27,7 @@ class AdminHomePreviewAdvanced extends StatefulWidget {
   final List<PopupV2Model>? draftPopups;
   
   /// Draft text blocks (if being edited)
-  final List? draftTextBlocks;
+  final List<TextBlockModel>? draftTextBlocks;
   
   /// Draft theme (if being edited)
   final ThemeConfig? draftTheme;

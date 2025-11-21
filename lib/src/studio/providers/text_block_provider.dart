@@ -29,9 +29,9 @@ final enabledTextBlocksProvider = StreamProvider<List<TextBlockModel>>((ref) {
 });
 
 /// Future provider for one-time fetch
-final textBlocksFutureProvider = FutureProvider<List<TextBlockModel>>((ref) async {
+final textBlocksFutureProvider = FutureProvider<List<TextBlockModel>>((ref) {
   final service = ref.watch(textBlockServiceProvider);
-  return await service.getAllTextBlocks();
+  return service.getAllTextBlocks();
 });
 
 /// Future provider for text blocks by category
