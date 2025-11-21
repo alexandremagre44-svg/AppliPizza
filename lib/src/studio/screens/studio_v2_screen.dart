@@ -13,6 +13,7 @@ import '../widgets/modules/studio_banners_v2.dart';
 import '../widgets/modules/studio_popups_v2.dart';
 import '../widgets/modules/studio_texts_v2.dart';
 import '../widgets/modules/studio_settings_v2.dart';
+import '../content/screens/studio_content_screen.dart';
 import '../../services/home_config_service.dart';
 import '../../services/home_layout_service.dart';
 import '../../services/banner_service.dart';
@@ -344,6 +345,8 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
             ref.read(studioDraftStateProvider.notifier).setTextBlocks(blocks);
           },
         );
+      case 'content':
+        return const StudioContentScreen();
       case 'settings':
         return StudioSettingsV2(
           layoutConfig: draftState.layoutConfig,

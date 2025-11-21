@@ -147,6 +147,11 @@ class StudioNavigation extends StatelessWidget {
                     icon: Icons.text_fields_outlined,
                     label: 'Textes dynamiques',
                   ),
+                  _NavItem(
+                    id: 'content',
+                    icon: Icons.home_outlined,
+                    label: 'Contenu d\'accueil',
+                  ),
                 ]),
                 const SizedBox(height: 16),
                 _buildNavSection(context, 'CONFIGURATION', [

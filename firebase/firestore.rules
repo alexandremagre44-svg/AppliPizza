@@ -393,6 +393,80 @@ service cloud.firestore {
     }
     
     // =========================================================================
+    // HOME CONTENT MANAGER COLLECTIONS - For Studio V2 Content Module
+    // =========================================================================
+    
+    // Custom sections on home screen
+    match /home_custom_sections/{sectionId} {
+      // Public read - HomeScreen needs this for all users
+      allow read: if true;
+      
+      // Only admins can write
+      allow write: if isAdmin();
+      
+      // Validate structure when writing
+      allow update, create: if isAdmin() &&
+                               request.resource.data.keys().hasAll(['id', 'title', 'displayType', 'contentMode', 'isActive', 'order', 'createdAt', 'updatedAt']) &&
+                               request.resource.data.title is string &&
+                               request.resource.data.displayType is string &&
+                               request.resource.data.contentMode is string &&
+                               request.resource.data.isActive is bool &&
+                               request.resource.data.order is int;
+    }
+    
+    // Featured products configuration (stored in config collection)
+    match /config/home_featured_products {
+      // Public read
+      allow read: if true;
+      
+      // Only admins can write
+      allow write: if isAdmin();
+      
+      // Validate structure
+      allow update, create: if isAdmin() &&
+                               request.resource.data.keys().hasAll(['id', 'isActive', 'productIds', 'displayType', 'position', 'autoFill', 'updatedAt']) &&
+                               request.resource.data.isActive is bool &&
+                               request.resource.data.productIds is list &&
+                               request.resource.data.displayType is string &&
+                               request.resource.data.position is string &&
+                               request.resource.data.autoFill is bool;
+    }
+    
+    // Category display overrides on home screen
+    match /home_category_overrides/{categoryId} {
+      // Public read
+      allow read: if true;
+      
+      // Only admins can write
+      allow write: if isAdmin();
+      
+      // Validate structure
+      allow update, create: if isAdmin() &&
+                               request.resource.data.keys().hasAll(['categoryId', 'isVisibleOnHome', 'order', 'updatedAt']) &&
+                               request.resource.data.categoryId is string &&
+                               request.resource.data.isVisibleOnHome is bool &&
+                               request.resource.data.order is int;
+    }
+    
+    // Product display overrides within categories on home screen
+    match /home_product_overrides/{productId} {
+      // Public read
+      allow read: if true;
+      
+      // Only admins can write
+      allow write: if isAdmin();
+      
+      // Validate structure
+      allow update, create: if isAdmin() &&
+                               request.resource.data.keys().hasAll(['productId', 'categoryId', 'isVisibleOnHome', 'isPinned', 'order', 'updatedAt']) &&
+                               request.resource.data.productId is string &&
+                               request.resource.data.categoryId is string &&
+                               request.resource.data.isVisibleOnHome is bool &&
+                               request.resource.data.isPinned is bool &&
+                               request.resource.data.order is int;
+    }
+    
+    // =========================================================================
     // DENY ALL OTHER COLLECTIONS
     // =========================================================================
     // Explicitly deny access to any other paths not matched above
