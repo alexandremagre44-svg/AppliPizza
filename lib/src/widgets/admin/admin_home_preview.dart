@@ -1,5 +1,8 @@
 // lib/src/widgets/admin/admin_home_preview.dart
-// Widget for live preview of home screen in admin studio
+// ⚠️ DEPRECATED - Old preview widget that does NOT use real HomeScreen
+// Prefer AdminHomePreviewAdvanced (lib/src/studio/preview/admin_home_preview_advanced.dart)
+// which uses the real HomeScreen component with provider overrides
+// See STUDIO_V2_CLEANUP_NOTES.md for details
 
 import 'package:flutter/material.dart';
 import '../../models/home_config.dart';

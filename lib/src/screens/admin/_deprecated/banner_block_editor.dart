@@ -1,3 +1,8 @@
+// ⚠️ DEPRECATED - Old block editor - Do not use
+// This file is kept for reference only and should not be imported
+// Use Studio V2 modules instead (lib/src/studio/widgets/modules/)
+// See STUDIO_V2_CLEANUP_NOTES.md for details
+
 // lib/src/screens/admin/_deprecated/banner_block_editor.dart
 // ⚠️ DEPRECATED - Migrated to unified Studio (admin_studio_screen_refactored.dart)
 // Preserved ONLY for rollback and reference.

@@ -1,6 +1,8 @@
 // lib/src/screens/admin/admin_studio_screen_refactored.dart
-// NOUVEAU Studio Builder - Écran principal unifié REFONTE COMPLÈTE
-// Avec prévisualisation LIVE, mode brouillon, drag & drop, et toggle global
+// ⚠️ DEPRECATED - Studio V1 - Superseded by StudioV2Screen
+// This screen imports deprecated files and is no longer routable
+// Use lib/src/studio/screens/studio_v2_screen.dart instead
+// See STUDIO_V2_CLEANUP_NOTES.md for details
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

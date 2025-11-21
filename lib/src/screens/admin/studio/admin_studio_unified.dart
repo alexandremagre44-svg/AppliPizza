@@ -1,6 +1,8 @@
 // lib/src/screens/admin/studio/admin_studio_unified.dart
-// UNIFIED ADMIN STUDIO - Complete implementation with all 6 modules
-// Replaces AdminStudioScreenRefactored with full functionality
+// ⚠️ DEPRECATED - Unified Studio - Superseded by StudioV2Screen
+// Route /admin/studio/new now redirects to /admin/studio (Studio V2)
+// Use lib/src/studio/screens/studio_v2_screen.dart instead
+// See STUDIO_V2_CLEANUP_NOTES.md for details
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
