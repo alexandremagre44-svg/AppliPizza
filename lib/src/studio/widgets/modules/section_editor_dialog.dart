@@ -87,9 +87,14 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
       
       // Initialize custom fields if it's a free-layout section
       if (_selectedType == DynamicSectionType.freeLayout && _content['customFields'] != null) {
-        _customFields = (_content['customFields'] as List<dynamic>)
-            .map((e) => CustomField.fromJson(e as Map<String, dynamic>))
-            .toList();
+        try {
+          _customFields = (_content['customFields'] as List<dynamic>)
+              .map((e) => CustomField.fromJson(e as Map<String, dynamic>))
+              .toList();
+        } catch (e) {
+          debugPrint('Error parsing custom fields: $e');
+          _customFields = [];
+        }
       }
     } else {
       // Create mode
@@ -114,11 +119,14 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
-        width: 800,
-        height: 700,
+        width: screenWidth > 800 ? 800 : screenWidth * 0.9,
+        height: screenHeight > 700 ? 700 : screenHeight * 0.9,
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,6 +426,9 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
               border: OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
+            controller: TextEditingController(
+              text: _requireOrdersMin?.toString() ?? '',
+            ),
             onChanged: (value) {
               _requireOrdersMin = int.tryParse(value);
             },
@@ -430,6 +441,9 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
               border: OutlineInputBorder(),
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            controller: TextEditingController(
+              text: _requireCartMin?.toString() ?? '',
+            ),
             onChanged: (value) {
               _requireCartMin = double.tryParse(value);
             },

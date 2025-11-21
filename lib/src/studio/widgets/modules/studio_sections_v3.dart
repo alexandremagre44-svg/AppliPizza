@@ -502,11 +502,11 @@ class _StudioSectionsV3State extends State<StudioSectionsV3> {
   }
 
   String _getSectionDescription(DynamicSection section) {
-    if (section.content.containsKey('title')) {
-      return section.content['title'] as String;
+    if (section.content.containsKey('title') && section.content['title'] != null) {
+      return section.content['title'] as String? ?? '';
     }
-    if (section.content.containsKey('text')) {
-      return section.content['text'] as String;
+    if (section.content.containsKey('text') && section.content['text'] != null) {
+      return section.content['text'] as String? ?? '';
     }
     return 'Section ${_getSectionTypeName(section.type)}';
   }

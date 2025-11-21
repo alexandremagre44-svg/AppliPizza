@@ -1,6 +1,7 @@
 // lib/src/studio/services/dynamic_section_service.dart
 // Service for managing dynamic sections in Firestore
 
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/dynamic_section_model.dart';
 
@@ -20,7 +21,8 @@ class DynamicSectionService {
           .map((doc) => DynamicSection.fromJson(doc.data()))
           .toList();
     } catch (e) {
-      print('Error getting sections: $e');
+      // TODO: Replace with proper logging framework (e.g., logger package)
+      debugPrint('Error getting sections: $e');
       return [];
     }
   }
@@ -46,7 +48,7 @@ class DynamicSectionService {
           .doc(section.id)
           .set(section.toJson());
     } catch (e) {
-      print('Error creating section: $e');
+      debugPrint('Error creating section: $e');
       rethrow;
     }
   }
@@ -63,7 +65,7 @@ class DynamicSectionService {
           .doc(section.id)
           .update(updatedSection.toJson());
     } catch (e) {
-      print('Error updating section: $e');
+      debugPrint('Error updating section: $e');
       rethrow;
     }
   }
@@ -76,7 +78,7 @@ class DynamicSectionService {
           .doc(sectionId)
           .delete();
     } catch (e) {
-      print('Error deleting section: $e');
+      debugPrint('Error deleting section: $e');
       rethrow;
     }
   }
@@ -100,7 +102,7 @@ class DynamicSectionService {
 
       await batch.commit();
     } catch (e) {
-      print('Error updating sections order: $e');
+      debugPrint('Error updating sections order: $e');
       rethrow;
     }
   }
@@ -136,7 +138,7 @@ class DynamicSectionService {
 
       await batch.commit();
     } catch (e) {
-      print('Error saving all sections: $e');
+      debugPrint('Error saving all sections: $e');
       rethrow;
     }
   }
@@ -148,7 +150,7 @@ class DynamicSectionService {
       await createSection(duplicated);
       return duplicated;
     } catch (e) {
-      print('Error duplicating section: $e');
+      debugPrint('Error duplicating section: $e');
       rethrow;
     }
   }
@@ -164,7 +166,7 @@ class DynamicSectionService {
         'updatedAt': DateTime.now().toIso8601String(),
       });
     } catch (e) {
-      print('Error toggling section active state: $e');
+      debugPrint('Error toggling section active state: $e');
       rethrow;
     }
   }
@@ -181,7 +183,7 @@ class DynamicSectionService {
 
       return DynamicSection.fromJson(doc.data()!);
     } catch (e) {
-      print('Error getting section by ID: $e');
+      debugPrint('Error getting section by ID: $e');
       return null;
     }
   }
@@ -199,7 +201,7 @@ class DynamicSectionService {
           .map((doc) => DynamicSection.fromJson(doc.data()))
           .toList();
     } catch (e) {
-      print('Error getting sections by type: $e');
+      debugPrint('Error getting sections by type: $e');
       return [];
     }
   }
@@ -217,7 +219,7 @@ class DynamicSectionService {
           .map((doc) => DynamicSection.fromJson(doc.data()))
           .toList();
     } catch (e) {
-      print('Error getting active sections: $e');
+      debugPrint('Error getting active sections: $e');
       return [];
     }
   }
