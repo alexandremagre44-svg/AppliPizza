@@ -466,7 +466,9 @@ class _AssetDetailsDialog extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    // TODO: Consider using intl package for proper localization
+    // For now, using simple format consistent with app
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   Future<void> _handleDelete(BuildContext context) async {

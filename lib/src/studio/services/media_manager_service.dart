@@ -109,10 +109,14 @@ class MediaManagerService {
       final Uint8List bytes = await imageFile.readAsBytes();
       
       // Get original dimensions
-      // Note: For production, you'd use image package to get actual dimensions
-      // For now, we'll use estimated dimensions
-      final originalWidth = 1920; // Default assumption
-      final originalHeight = 1080;
+      // TODO: CRITICAL - Extract actual dimensions using image package before production
+      // This is a temporary placeholder and MUST be replaced
+      // Add 'image: ^4.0.0' to pubspec.yaml and use:
+      // final image = img.decodeImage(bytes);
+      // final originalWidth = image?.width ?? 0;
+      // final originalHeight = image?.height ?? 0;
+      final originalWidth = 1920; // TEMPORARY: Default assumption
+      final originalHeight = 1080; // TEMPORARY: Default assumption
       
       // Determine if we should use WebP or JPEG
       // WebP is supported on most modern platforms
@@ -232,9 +236,14 @@ class MediaManagerService {
   }
 
   /// Check if WebP is supported
+  /// NOTE: This currently assumes WebP support is universal on modern platforms.
+  /// For production, consider implementing proper feature detection or
+  /// always defaulting to JPEG if compatibility is a concern.
   bool _isWebPSupported() {
-    // WebP is supported in most modern browsers
-    // This is a simplified check
+    // WebP is widely supported:
+    // - Web: Chrome 23+, Firefox 65+, Edge 18+, Safari 14+
+    // - Mobile: Android 4.0+, iOS 14+
+    // For this app, we assume modern platform support
     return true;
   }
 
