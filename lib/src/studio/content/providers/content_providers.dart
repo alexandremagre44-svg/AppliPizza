@@ -2,6 +2,7 @@
 // Riverpod providers for home content management
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/content_section_model.dart';
 import '../models/featured_products_model.dart';
 import '../models/category_override_model.dart';
@@ -90,6 +91,3 @@ final productOverridesByCategoryProvider = FutureProvider.family<List<ProductOve
   final service = ref.watch(productOverrideServiceProvider);
   return await service.getOverridesForCategory(categoryId);
 });
-
-// Import for Firestore
-import 'package:cloud_firestore/cloud_firestore.dart';
