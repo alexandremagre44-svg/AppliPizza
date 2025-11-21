@@ -8,7 +8,7 @@ import '../../models/theme_config.dart';
 import '../../providers/theme_providers.dart';
 import '../../services/theme_service.dart';
 import '../widgets/theme/theme_editor_panel.dart';
-import '../widgets/theme/theme_preview_panel.dart';
+import '../preview/admin_home_preview_advanced.dart';
 
 /// Theme Manager PRO Screen
 /// 
@@ -295,11 +295,11 @@ class _ThemeManagerScreenState extends ConsumerState<ThemeManagerScreen> {
           color: AppColors.outline,
         ),
         
-        // Preview panel
+        // Preview panel - Real HomeScreen with draft theme
         Expanded(
           flex: 1,
-          child: ThemePreviewPanel(
-            config: _draftConfig!,
+          child: AdminHomePreviewAdvanced(
+            draftTheme: _draftConfig,
           ),
         ),
       ],

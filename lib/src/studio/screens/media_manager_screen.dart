@@ -9,6 +9,7 @@ import '../services/media_manager_service.dart';
 import '../widgets/media/media_upload_widget.dart';
 import '../widgets/media/media_gallery_widget.dart';
 import '../../providers/auth_provider.dart';
+import '../preview/admin_home_preview_advanced.dart';
 
 /// Media Manager Screen
 /// Professional media management with upload, gallery, and organization
@@ -25,6 +26,7 @@ class _MediaManagerScreenState extends ConsumerState<MediaManagerScreen> {
   MediaFolder _selectedFolder = MediaFolder.misc;
   String _searchQuery = '';
   SortOption _sortBy = SortOption.date;
+  bool _showPreview = false;
   
   @override
   Widget build(BuildContext context) {
@@ -51,6 +53,12 @@ class _MediaManagerScreenState extends ConsumerState<MediaManagerScreen> {
             onPressed: () => setState(() {}),
             tooltip: 'Actualiser',
           ),
+          // Toggle Preview
+          IconButton(
+            icon: Icon(_showPreview ? Icons.visibility_off : Icons.visibility),
+            onPressed: () => setState(() => _showPreview = !_showPreview),
+            tooltip: _showPreview ? 'Masquer l\'aperçu' : 'Afficher l\'aperçu',
+          ),
         ],
       ),
       body: Column(
@@ -68,6 +76,7 @@ class _MediaManagerScreenState extends ConsumerState<MediaManagerScreen> {
                 
                 // Main content
                 Expanded(
+                  flex: _showPreview ? 2 : 1,
                   child: Column(
                     children: [
                       // Upload area
@@ -89,6 +98,21 @@ class _MediaManagerScreenState extends ConsumerState<MediaManagerScreen> {
                     ],
                   ),
                 ),
+                
+                // Optional Preview Panel
+                if (_showPreview) ...[
+                  Container(
+                    width: 1,
+                    color: Colors.grey.shade300,
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      color: Colors.grey.shade50,
+                      child: const AdminHomePreviewAdvanced(),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
