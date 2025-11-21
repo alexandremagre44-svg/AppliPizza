@@ -37,6 +37,15 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
     _initControllers();
   }
 
+  @override
+  void didUpdateWidget(StudioHeroV2 oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update controllers when homeConfig prop changes (e.g., when cancelling changes)
+    if (widget.homeConfig != oldWidget.homeConfig) {
+      _updateControllers();
+    }
+  }
+
   void _initControllers() {
     final config = widget.homeConfig ?? HomeConfig.initial();
     _titleController = TextEditingController(text: config.heroTitle);
@@ -54,6 +63,27 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
     } else {
       _ctaLinkType = 'customUrl';
     }
+  }
+
+  void _updateControllers() {
+    final config = widget.homeConfig ?? HomeConfig.initial();
+    _titleController.text = config.heroTitle;
+    _subtitleController.text = config.heroSubtitle;
+    _ctaTextController.text = config.heroCtaText;
+    _imageUrlController.text = config.heroImageUrl ?? '';
+    _ctaActionController.text = config.heroCtaAction;
+    
+    // Determine CTA link type based on current action
+    final action = config.heroCtaAction;
+    setState(() {
+      if (action.contains('/menu')) {
+        _ctaLinkType = 'menu';
+      } else if (action.contains('/promotions')) {
+        _ctaLinkType = 'promotions';
+      } else {
+        _ctaLinkType = 'customUrl';
+      }
+    });
   }
 
   @override
