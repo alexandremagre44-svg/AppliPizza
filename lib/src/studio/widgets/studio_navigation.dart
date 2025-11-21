@@ -2,7 +2,9 @@
 // Professional navigation sidebar for Studio V2
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart';
+import '../../core/constants.dart';
 
 class StudioNavigation extends StatelessWidget {
   final String selectedSection;
@@ -271,7 +273,13 @@ class StudioNavigation extends StatelessWidget {
           ],
           PopupMenuButton<String>(
             icon: const Icon(Icons.menu),
-            onSelected: onSectionChanged,
+            onSelected: (value) {
+              if (value == 'theme') {
+                context.go(AppRoutes.adminStudioV3Theme);
+              } else {
+                onSectionChanged(value);
+              }
+            },
             itemBuilder: (context) => [
               const PopupMenuItem(
                 value: 'overview',
@@ -380,7 +388,14 @@ class StudioNavigation extends StatelessWidget {
             : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
-          onTap: () => onSectionChanged(item.id),
+          onTap: () {
+            // Handle theme navigation specially - it's a separate route
+            if (item.id == 'theme') {
+              context.go(AppRoutes.adminStudioV3Theme);
+            } else {
+              onSectionChanged(item.id);
+            }
+          },
           borderRadius: BorderRadius.circular(8),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
