@@ -181,7 +181,7 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
         debugPrint('STUDIO V2 PUBLISH → Saving layoutConfig to config/home_layout');
         debugPrint('  Studio Enabled: ${draftState.layoutConfig?.studioEnabled}');
         debugPrint('  Sections Order: ${draftState.layoutConfig?.sectionsOrder}');
-        debugPrint('  Sections Enabled: ${draftState.layoutConfig?.sectionsEnabled}');
+        debugPrint('  Sections Enabled: ${draftState.layoutConfig?.enabledSections}');
         await _homeLayoutService.saveHomeLayout(draftState.layoutConfig!);
         debugPrint('  ✓ LayoutConfig saved successfully');
       }
