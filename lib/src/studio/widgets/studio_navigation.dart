@@ -161,6 +161,11 @@ class StudioNavigation extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildNavSection(context, 'CONFIGURATION', [
                   _NavItem(
+                    id: 'theme',
+                    icon: Icons.palette_outlined,
+                    label: 'Theme Manager PRO',
+                  ),
+                  _NavItem(
                     id: 'settings',
                     icon: Icons.settings_outlined,
                     label: 'Paramètres',
@@ -313,6 +318,14 @@ class StudioNavigation extends StatelessWidget {
                 child: ListTile(
                   leading: Icon(Icons.view_module_outlined),
                   title: Text('Sections V3'),
+                  dense: true,
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'theme',
+                child: ListTile(
+                  leading: Icon(Icons.palette_outlined),
+                  title: Text('Theme Manager PRO'),
                   dense: true,
                 ),
               ),
