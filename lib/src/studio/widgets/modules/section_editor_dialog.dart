@@ -43,6 +43,8 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
   final _imageUrlController = TextEditingController();
   final _ctaTextController = TextEditingController();
   final _ctaUrlController = TextEditingController();
+  final _ordersMinController = TextEditingController();
+  final _cartMinController = TextEditingController();
 
   // Custom fields for free-layout sections
   List<CustomField> _customFields = [];
@@ -69,12 +71,26 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
       _applyOncePerSession = _conditions.applyOncePerSession;
       
       if (_conditions.hoursStart != null) {
-        final parts = _conditions.hoursStart!.split(':');
-        _startTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+        try {
+          final parts = _conditions.hoursStart!.split(':');
+          _startTime = TimeOfDay(
+            hour: int.tryParse(parts[0]) ?? 0,
+            minute: int.tryParse(parts[1]) ?? 0,
+          );
+        } catch (e) {
+          debugPrint('Error parsing start time: $e');
+        }
       }
       if (_conditions.hoursEnd != null) {
-        final parts = _conditions.hoursEnd!.split(':');
-        _endTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+        try {
+          final parts = _conditions.hoursEnd!.split(':');
+          _endTime = TimeOfDay(
+            hour: int.tryParse(parts[0]) ?? 0,
+            minute: int.tryParse(parts[1]) ?? 0,
+          );
+        } catch (e) {
+          debugPrint('Error parsing end time: $e');
+        }
       }
       
       // Initialize content fields
@@ -84,6 +100,8 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
       _imageUrlController.text = _content['imageUrl'] ?? '';
       _ctaTextController.text = _content['ctaText'] ?? '';
       _ctaUrlController.text = _content['ctaUrl'] ?? '';
+      _ordersMinController.text = _requireOrdersMin?.toString() ?? '';
+      _cartMinController.text = _requireCartMin?.toString() ?? '';
       
       // Initialize custom fields if it's a free-layout section
       if (_selectedType == DynamicSectionType.freeLayout && _content['customFields'] != null) {
@@ -114,6 +132,8 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
     _imageUrlController.dispose();
     _ctaTextController.dispose();
     _ctaUrlController.dispose();
+    _ordersMinController.dispose();
+    _cartMinController.dispose();
     super.dispose();
   }
 
@@ -426,9 +446,7 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
               border: OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
-            controller: TextEditingController(
-              text: _requireOrdersMin?.toString() ?? '',
-            ),
+            controller: _ordersMinController,
             onChanged: (value) {
               _requireOrdersMin = int.tryParse(value);
             },
@@ -441,9 +459,7 @@ class _SectionEditorDialogState extends State<SectionEditorDialog> {
               border: OutlineInputBorder(),
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            controller: TextEditingController(
-              text: _requireCartMin?.toString() ?? '',
-            ),
+            controller: _cartMinController,
             onChanged: (value) {
               _requireCartMin = double.tryParse(value);
             },
