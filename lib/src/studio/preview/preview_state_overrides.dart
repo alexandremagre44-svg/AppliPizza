@@ -31,50 +31,60 @@ class PreviewStateOverrides {
       case SimulatedUserType.newCustomer:
         return UserProfile(
           id: simulation.userId,
+          name: 'Nouveau Client',
           email: 'preview.new@test.com',
-          displayName: 'Nouveau Client',
-          createdAt: now.subtract(const Duration(days: 1)),
+          imageUrl: '',
+          address: '',
           favoriteProducts: [],
+          orderHistory: [],
           loyaltyPoints: 0,
         );
       
       case SimulatedUserType.returningCustomer:
         return UserProfile(
           id: simulation.userId,
+          name: 'Client Habituel',
           email: 'preview.returning@test.com',
-          displayName: 'Client Habituel',
-          createdAt: now.subtract(const Duration(days: 90)),
+          imageUrl: '',
+          address: '',
           favoriteProducts: ['pizza_1', 'pizza_2'],
+          orderHistory: [],
           loyaltyPoints: 50,
         );
       
       case SimulatedUserType.cartFilled:
         return UserProfile(
           id: simulation.userId,
+          name: 'Client Panier Actif',
           email: 'preview.cart@test.com',
-          displayName: 'Client Panier Actif',
-          createdAt: now.subtract(const Duration(days: 30)),
+          imageUrl: '',
+          address: '',
           favoriteProducts: ['pizza_1'],
+          orderHistory: [],
           loyaltyPoints: 25,
         );
       
       case SimulatedUserType.frequentBuyer:
         return UserProfile(
           id: simulation.userId,
+          name: 'Client Fréquent',
           email: 'preview.frequent@test.com',
-          displayName: 'Client Fréquent',
-          createdAt: now.subtract(const Duration(days: 180)),
+          imageUrl: '',
+          address: '',
           favoriteProducts: ['pizza_1', 'pizza_2', 'drink_1'],
+          orderHistory: [],
           loyaltyPoints: 150,
         );
       
       case SimulatedUserType.vipLoyalty:
         return UserProfile(
           id: simulation.userId,
+          name: 'Client VIP',
           email: 'preview.vip@test.com',
-          displayName: 'Client VIP',
-          createdAt: now.subtract(const Duration(days: 365)),
+          imageUrl: '',
+          address: '',
           favoriteProducts: ['pizza_1', 'pizza_2', 'pizza_3', 'drink_1', 'dessert_1'],
+          orderHistory: [],
           loyaltyPoints: 500,
         );
     }
@@ -108,7 +118,6 @@ class PreviewStateOverrides {
     for (int i = 0; i < simulation.previousOrdersCount; i++) {
       orders.add(Order(
         id: 'preview_order_$i',
-        userId: simulation.userId,
         date: now.subtract(Duration(days: i * 7)),
         status: i == 0 ? 'completed' : 'completed',
         items: [],
@@ -136,7 +145,7 @@ class PreviewStateOverrides {
     // User provider override - wrap in StateNotifierProvider
     overrides.add(
       userProvider.overrideWith((ref) {
-        return FakeUserNotifier(simulation);
+        return FakeUserNotifier(simulation, ref);
       }),
     );
 
@@ -226,41 +235,49 @@ class PreviewStateOverrides {
 }
 
 /// Fake user notifier for preview
-class FakeUserNotifier extends StateNotifier<UserProfile> {
+class FakeUserNotifier extends UserProfileNotifier {
   final SimulationState simulation;
 
-  FakeUserNotifier(this.simulation) : super(PreviewStateOverrides.createFakeUser(simulation));
+  FakeUserNotifier(this.simulation, Ref ref) : super(ref) {
+    state = PreviewStateOverrides.createFakeUser(simulation);
+  }
 
   // Preview mode: all methods are no-ops
-  void loadProfile(String userId) {
+  @override
+  Future<void> loadProfile(String userId) async {
     // Do nothing in preview mode
   }
 
-  bool saveProfile() {
+  @override
+  Future<bool> saveProfile() async {
     // Do nothing in preview mode
     return true;
   }
 
-  void toggleFavorite(String productId) {
+  @override
+  Future<void> toggleFavorite(String productId) async {
     // Do nothing in preview mode
   }
 
-  void updateAddress(String address) {
+  @override
+  Future<void> updateAddress(String address) async {
     // Do nothing in preview mode
   }
 
-  void updateProfileImage(String imageUrl) {
+  @override
+  Future<void> updateProfileImage(String imageUrl) async {
     // Do nothing in preview mode
   }
 
-  void addOrder({
+  @override
+  Future<void> addOrder({
     String? customerName,
     String? customerPhone,
     String? customerEmail,
     String? comment,
     String? pickupDate,
     String? pickupTimeSlot,
-  }) {
+  }) async {
     // Do nothing in preview mode
   }
 }
