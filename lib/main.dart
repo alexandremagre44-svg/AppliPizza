@@ -27,6 +27,15 @@ import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
 
+// Admin screens imports
+import 'src/screens/admin/products_admin_screen.dart';
+import 'src/screens/admin/product_form_screen.dart';
+import 'src/screens/admin/mailing_admin_screen.dart';
+import 'src/screens/admin/promotions_admin_screen.dart';
+import 'src/screens/admin/promotion_form_screen.dart';
+import 'src/screens/admin/ingredients_admin_screen.dart';
+import 'src/screens/admin/ingredient_form_screen.dart';
+
 // Staff Tablet imports
 import 'src/staff_tablet/screens/staff_tablet_pin_screen.dart';
 import 'src/staff_tablet/screens/staff_tablet_catalog_screen.dart';
@@ -243,6 +252,71 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: AppRoutes.adminTexts,
               redirect: (context, state) => AppRoutes.adminStudio,
+            ),
+            // Admin Management Routes
+            GoRoute(
+              path: AppRoutes.adminProducts,
+              builder: (context, state) {
+                // PROTECTION: Admin only
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const ProductsAdminScreen();
+              },
+            ),
+            GoRoute(
+              path: AppRoutes.adminMailing,
+              builder: (context, state) {
+                // PROTECTION: Admin only
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const MailingAdminScreen();
+              },
+            ),
+            GoRoute(
+              path: AppRoutes.adminPromotions,
+              builder: (context, state) {
+                // PROTECTION: Admin only
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const PromotionsAdminScreen();
+              },
+            ),
+            GoRoute(
+              path: AppRoutes.adminIngredients,
+              builder: (context, state) {
+                // PROTECTION: Admin only
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const IngredientsAdminScreen();
+              },
             ),
           ],
         ),

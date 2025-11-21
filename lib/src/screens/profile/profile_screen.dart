@@ -260,6 +260,120 @@ class ProfileScreen extends ConsumerWidget {
 
             SizedBox(height: AppSpacing.xxl),
 
+            // Admin Panel Section (for admins only)
+            if (authState.isAdmin) ...[
+              Padding(
+                padding: AppSpacing.paddingHorizontalLG,
+                child: Text(
+                  'Panneau d\'administration',
+                  style: AppTextStyles.titleLarge,
+                ),
+              ),
+              SizedBox(height: AppSpacing.md),
+              Padding(
+                padding: AppSpacing.paddingHorizontalLG,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => context.go(AppRoutes.adminProducts),
+                        icon: const Icon(Icons.inventory, size: 20),
+                        label: const Text(
+                          'Produits',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[700],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => context.go(AppRoutes.adminIngredients),
+                        icon: const Icon(Icons.category, size: 20),
+                        label: const Text(
+                          'Ingrédients',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green[700],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: AppSpacing.sm),
+              Padding(
+                padding: AppSpacing.paddingHorizontalLG,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => context.go(AppRoutes.adminMailing),
+                        icon: const Icon(Icons.email, size: 20),
+                        label: const Text(
+                          'Mailing',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple[700],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => context.go(AppRoutes.adminPromotions),
+                        icon: const Icon(Icons.local_offer, size: 20),
+                        label: const Text(
+                          'Promotions',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[700],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: AppSpacing.xxl),
+            ],
+
             // Staff Tablet Access (for all staff)
             Padding(
               padding: AppSpacing.paddingHorizontalLG,

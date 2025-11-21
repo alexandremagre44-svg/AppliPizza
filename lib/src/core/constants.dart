@@ -35,6 +35,7 @@ class AppRoutes {
   static const String adminProducts = '/admin/products';
   static const String adminMailing = '/admin/mailing';
   static const String adminPromotions = '/admin/promotions';
+  static const String adminIngredients = '/admin/ingredients';
   
   // Staff Tablet routes (CAISSE - Admin Only)
   static const String staffTabletPin = '/staff-tablet';
