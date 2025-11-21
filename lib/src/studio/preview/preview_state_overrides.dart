@@ -13,8 +13,12 @@ import '../../providers/order_provider.dart';
 import '../../providers/theme_providers.dart';
 import '../../providers/home_layout_provider.dart';
 import '../models/popup_v2_model.dart';
+import '../models/text_block_model.dart';
 import '../services/popup_v2_service.dart';
 import '../../services/banner_service.dart';
+import '../providers/banner_provider.dart';
+import '../providers/popup_v2_provider.dart';
+import '../providers/text_block_provider.dart';
 import 'simulation_state.dart';
 
 /// Creates provider overrides for preview mode
@@ -124,6 +128,7 @@ class PreviewStateOverrides {
     HomeLayoutConfig? draftHomeLayout,
     List<BannerConfig>? draftBanners,
     List<PopupV2Model>? draftPopups,
+    List<TextBlockModel>? draftTextBlocks,
     ThemeConfig? draftTheme,
   }) {
     final overrides = <Override>[];
@@ -159,6 +164,57 @@ class PreviewStateOverrides {
       overrides.add(
         themeConfigStreamProvider.overrideWith((ref) {
           return Stream.value(draftTheme);
+        }),
+      );
+    }
+
+    // Banner provider override (with draft support)
+    if (draftBanners != null) {
+      overrides.add(
+        bannersProvider.overrideWith((ref) {
+          return Stream.value(draftBanners);
+        }),
+      );
+      overrides.add(
+        activeBannersProvider.overrideWith((ref) {
+          return Stream.value(
+            draftBanners.where((b) => b.isCurrentlyActive).toList(),
+          );
+        }),
+      );
+    }
+
+    // Popup provider override (with draft support)
+    if (draftPopups != null) {
+      overrides.add(
+        popupsV2Provider.overrideWith((ref) {
+          return Stream.value(draftPopups);
+        }),
+      );
+      overrides.add(
+        activePopupsV2Provider.overrideWith((ref) {
+          return Stream.value(
+            draftPopups
+                .where((p) => p.isCurrentlyActive)
+                .toList()
+              ..sort((a, b) => b.priority.compareTo(a.priority)),
+          );
+        }),
+      );
+    }
+
+    // Text blocks provider override (with draft support)
+    if (draftTextBlocks != null) {
+      overrides.add(
+        textBlocksProvider.overrideWith((ref) {
+          return Stream.value(draftTextBlocks);
+        }),
+      );
+      overrides.add(
+        enabledTextBlocksProvider.overrideWith((ref) {
+          return Stream.value(
+            draftTextBlocks.where((b) => b.isEnabled).toList(),
+          );
         }),
       );
     }

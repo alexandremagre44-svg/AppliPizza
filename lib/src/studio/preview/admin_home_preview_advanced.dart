@@ -25,6 +25,9 @@ class AdminHomePreviewAdvanced extends StatefulWidget {
   /// Draft popups (if being edited)
   final List<PopupV2Model>? draftPopups;
   
+  /// Draft text blocks (if being edited)
+  final List? draftTextBlocks;
+  
   /// Draft theme (if being edited)
   final ThemeConfig? draftTheme;
 
@@ -33,6 +36,7 @@ class AdminHomePreviewAdvanced extends StatefulWidget {
     this.draftHomeLayout,
     this.draftBanners,
     this.draftPopups,
+    this.draftTextBlocks,
     this.draftTheme,
   });
 
@@ -84,6 +88,7 @@ class _AdminHomePreviewAdvancedState extends State<AdminHomePreviewAdvanced> {
       draftHomeLayout: widget.draftHomeLayout,
       draftBanners: widget.draftBanners,
       draftPopups: widget.draftPopups,
+      draftTextBlocks: widget.draftTextBlocks,
       draftTheme: widget.draftTheme,
     );
 
@@ -145,6 +150,7 @@ class _AdminHomePreviewAdvancedState extends State<AdminHomePreviewAdvanced> {
           if (widget.draftHomeLayout != null ||
               widget.draftBanners != null ||
               widget.draftPopups != null ||
+              widget.draftTextBlocks != null ||
               widget.draftTheme != null)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
