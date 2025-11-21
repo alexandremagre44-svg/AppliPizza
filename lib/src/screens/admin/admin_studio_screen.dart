@@ -1,5 +1,8 @@
 // lib/src/screens/admin/admin_studio_screen.dart
-// Studio Builder - Écran d'accueil avec choix entre ancien et nouveau studio
+// ⚠️ DEPRECATED - This screen is NO LONGER ROUTABLE
+// Route /admin/studio now points directly to StudioV2Screen
+// This file is kept for reference but should not be used
+// See STUDIO_V2_CLEANUP_NOTES.md for details
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
