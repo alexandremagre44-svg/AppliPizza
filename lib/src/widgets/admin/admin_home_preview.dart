@@ -1,7 +1,7 @@
 // lib/src/widgets/admin/admin_home_preview.dart
 // ⚠️ DEPRECATED - Old preview widget that does NOT use real HomeScreen
-// Prefer AdminHomePreviewAdvanced (lib/src/studio/preview/admin_home_preview_advanced.dart)
-// which uses the real HomeScreen component with provider overrides
+// Prefer StudioPreviewPanelV2 or SimpleHomePreview which use the real HomeScreen
+// component with provider overrides
 // See STUDIO_V2_CLEANUP_NOTES.md for details
 
 import 'package:flutter/material.dart';
