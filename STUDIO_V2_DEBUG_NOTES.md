@@ -235,22 +235,32 @@ ref.read(studioDraftStateProvider.notifier).loadInitialState(
 8. **Vérifier:** HomeScreen affiche "Nouvelle Pizza!" ✅
 
 ### Test Cas 2: Mode sombre / Thème
-⚠️ **PROBLÈME TROUVÉ:** `HomeLayoutConfig` ne contient PAS de champ `darkMode`
+✅ **DÉCOUVERTE:** Le thème est géré séparément via Theme Manager PRO
 
-**Structure actuelle:**
+**Système de thème existant:**
+- **Fichier:** `/lib/src/studio/screens/theme_manager_screen.dart`
+- **Route:** `/admin/studio/v3/theme`
+- **Collection:** `config/theme`
+- **Service:** `ThemeService` (`/lib/src/services/theme_service.dart`)
+- **Provider:** `themeConfigStreamProvider` (`/lib/src/providers/theme_providers.dart`)
+
+**Structure ThemeConfig:**
 ```dart
-class HomeLayoutConfig {
-  final bool studioEnabled;
-  final List<String> sectionsOrder;
-  final Map<String, bool> sectionsEnabled;
+class ThemeConfig {
+  final ThemeColorsConfig colors;
+  final TypographyConfig typography;
+  final RadiusConfig radius;
+  final ShadowsConfig shadows;
+  final SpacingConfig spacing;
+  final bool darkMode;  // ← Champ existe déjà!
   final DateTime updatedAt;
 }
 ```
 
-**Action requise:**
-- Ajouter un champ `themeMode` dans `HomeLayoutConfig`
-- Ajouter un toggle dans module Settings
-- Appliquer le thème dans HomeScreen via un provider
+**Conclusion:** Le thème sombre est DÉJÀ implémenté via Theme Manager PRO, séparé de Studio V2.
+- Pas besoin d'ajouter `darkMode` dans `HomeLayoutConfig`
+- Le système de thème est indépendant et fonctionne correctement
+- Les deux systèmes coexistent: Studio V2 pour le contenu, Theme Manager pour l'apparence
 
 ---
 
@@ -260,24 +270,84 @@ class HomeLayoutConfig {
 1. Pipeline Studio V2 → Firestore → HomeScreen est correct
 2. Riverpod lifecycles sont gérés correctement
 3. Services écrivent et lisent depuis les mêmes collections
+4. Système de thème séparé existe et fonctionne
 
-### ⚠️ À corriger
-1. **Preview n'utilise pas le vrai HomeScreen**
-   - Solution: Intégrer `AdminHomePreviewAdvanced` avec overrides
-2. **Pas de gestion du thème sombre**
-   - Solution: Ajouter `themeMode` dans `HomeLayoutConfig`
-3. **Logs manquants pour debugging**
-   - Solution: Ajouter des logs détaillés dans publish pipeline
+### ✅ CORRIGÉ
+1. ✅ **Preview n'utilise pas le vrai HomeScreen**
+   - **Solution appliquée:** Créé `StudioPreviewPanelV2` avec provider overrides
+   - Utilise maintenant le vrai widget `HomeScreen`
+   - Injecte les données brouillon via `ProviderScope`
+2. ✅ **Logs manquants pour debugging**
+   - **Solution appliquée:** Ajouté logs détaillés dans `_publishChanges()` et `_loadAllData()`
+   - Format clair avec séparateurs visuels
+   - Affiche toutes les valeurs clés (titre, sous-titre, sections, etc.)
+
+---
+
+## CORRECTIONS APPORTÉES
+
+### 1. StudioPreviewPanelV2 (NOUVEAU)
+**Fichier:** `/lib/src/studio/widgets/studio_preview_panel_v2.dart`
+
+**Fonctionnalités:**
+- Affiche le **vrai widget HomeScreen** (pas une copie simplifiée)
+- Utilise `ProviderScope` avec overrides pour injecter l'état brouillon
+- Preview 1:1 identique à l'app réelle
+- Supporte: HomeConfig, HomeLayoutConfig, Banners, Popups, Text Blocks
+
+**Overrides injectés:**
+```dart
+homeConfigProvider → draft homeConfig
+homeLayoutProvider → draft layoutConfig
+bannersProvider → draft banners
+popupsV2Provider → draft popups
+textBlocksProvider → draft textBlocks
+```
+
+### 2. Logs détaillés dans Studio V2
+**Fichier:** `/lib/src/studio/screens/studio_v2_screen.dart`
+
+**Ajout dans `_loadAllData()`:**
+```
+═══════════════════════════════════════════════════════
+STUDIO V2 LOAD → Loading published data from Firestore...
+  Hero Title: "..."
+  Hero Subtitle: "..."
+  Hero Enabled: true
+  Studio Enabled: true
+  Sections Order: [hero, banner, popups]
+  Loaded X banners, Y text blocks, Z popups
+STUDIO V2 LOAD → ✓ All data loaded successfully!
+═══════════════════════════════════════════════════════
+```
+
+**Ajout dans `_publishChanges()`:**
+```
+═══════════════════════════════════════════════════════
+STUDIO V2 PUBLISH → Starting publication process...
+  Hero Title: "..."
+  Hero Subtitle: "..."
+  Hero CTA Text: "..."
+  Hero Image URL: "..."
+  Hero Enabled: true
+  ✓ HomeConfig saved successfully
+  ✓ LayoutConfig saved successfully
+  ✓ Banners saved successfully
+  ✓ Text blocks saved successfully
+  ✓ Popups saved successfully
+STUDIO V2 PUBLISH → ✓ All changes published successfully!
+═══════════════════════════════════════════════════════
+```
 
 ---
 
 ## PROCHAINES ÉTAPES
 
 1. ✅ Créer ce document d'audit
-2. ⏳ Ajouter logs détaillés dans `_publishChanges()`
-3. ⏳ Remplacer preview par `AdminHomePreviewAdvanced`
-4. ⏳ Ajouter support thème sombre (si demandé)
-5. ⏳ Tester le cycle complet publish → reload
+2. ✅ Ajouter logs détaillés dans `_publishChanges()` et `_loadAllData()`
+3. ✅ Remplacer preview par widget utilisant le vrai HomeScreen
+4. ⏳ Tester le cycle complet dans l'application Flutter
+5. ⏳ Valider avec CodeQL security scan
 
 ---
 

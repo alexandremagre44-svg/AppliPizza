@@ -163,12 +163,11 @@ class StudioPreviewPanelV2 extends StatelessWidget {
     );
     overrides.add(
       activePopupsV2Provider.overrideWith((ref) {
-        return Stream.value(
-          popupsV2
-              .where((p) => p.isCurrentlyActive)
-              .toList()
-            ..sort((a, b) => b.priority.compareTo(a.priority)),
-        );
+        final activePopups = popupsV2
+            .where((p) => p.isCurrentlyActive)
+            .toList();
+        activePopups.sort((a, b) => b.priority.compareTo(a.priority));
+        return Stream.value(activePopups);
       }),
     );
 
