@@ -19,7 +19,7 @@ import 'src/screens/cart/cart_screen.dart';
 import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
 import 'src/screens/product_detail/product_detail_screen.dart';
-// Studio V2 - Official professional studio (only version exposed via routes)
+// Studio V2 - Official professional studio (only version exposed via routes).
 import 'src/studio/screens/studio_v2_screen.dart';
 import 'src/studio/screens/theme_manager_screen.dart';
 import 'src/studio/screens/media_manager_screen.dart';
@@ -166,7 +166,7 @@ class MyApp extends ConsumerWidget {
               path: AppRoutes.profile,
               builder: (context, state) => const ProfileScreen(),
             ),
-            // Studio V2 route - OFFICIAL Professional Studio (main admin entry point)
+            // Studio V2 route - Official professional studio (main admin entry point)
             GoRoute(
               path: AppRoutes.adminStudio,
               builder: (context, state) {

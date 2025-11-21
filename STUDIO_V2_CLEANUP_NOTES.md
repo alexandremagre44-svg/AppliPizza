@@ -31,7 +31,7 @@ Clean up and unify the Studio/Builder system in the Pizza Deli'Zza application b
 ### 🔴 DEPRECATED - Admin Studio Screen (Menu)
 **File:** `lib/src/screens/admin/admin_studio_screen.dart`
 **Route:** None (not routable anymore)
-**Status:** **DEPRECATED - No longer accessible**
+**Status:** DEPRECATED - No longer accessible
 **Purpose:** Was a menu screen to access different admin tools (Studio V2, Studio Unified, Products, Ingredients, etc.)
 **Note:** This screen is kept in the codebase but is not accessible via routes. It provided navigation to:
 - Studio V2
@@ -48,7 +48,7 @@ Clean up and unify the Studio/Builder system in the Pizza Deli'Zza application b
 ### 🔴 DEPRECATED - Admin Studio Screen Refactored (V1)
 **File:** `lib/src/screens/admin/admin_studio_screen_refactored.dart`
 **Route:** None (was `/admin/studio/old`, now redirects)
-**Status:** **DEPRECATED - Imports deprecated files**
+**Status:** DEPRECATED - Imports deprecated files
 **Purpose:** First refactored version of the studio with live preview
 **Issues:**
 - Imports deprecated files from `_deprecated/` folder
@@ -64,13 +64,13 @@ Clean up and unify the Studio/Builder system in the Pizza Deli'Zza application b
 ### 🔴 DEPRECATED - Admin Studio Unified
 **File:** `lib/src/screens/admin/studio/admin_studio_unified.dart`
 **Route:** None (was `/admin/studio/new`, now redirects to `/admin/studio`)
-**Status:** **DEPRECATED - Superseded by Studio V2**
+**Status:** DEPRECATED - Superseded by Studio V2
 **Purpose:** Unified studio implementation with 6 modules
 **Note:** This was an intermediate version between refactored and V2
 
 ### 🔴 DEPRECATED - Individual Block Editors
 **Location:** `lib/src/screens/admin/_deprecated/`
-**Status:** **DEPRECATED - Isolated in _deprecated folder**
+**Status:** DEPRECATED - Isolated in _deprecated folder
 **Files:**
 - `hero_block_editor.dart` - Old hero editor
 - `banner_block_editor.dart` - Old banner editor
@@ -142,7 +142,7 @@ Clean up and unify the Studio/Builder system in the Pizza Deli'Zza application b
 #### 🔴 AdminHomePreview (Old - DEPRECATED)
 **File:** `lib/src/widgets/admin/admin_home_preview.dart`
 **Used by:** AdminStudioScreenRefactored, AdminStudioUnified
-**Status:** **DEPRECATED**
+**Status:** DEPRECATED
 **Issues:**
 - Does NOT use real HomeScreen
 - Custom preview implementation
