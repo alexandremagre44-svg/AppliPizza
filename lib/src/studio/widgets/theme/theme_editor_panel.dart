@@ -258,7 +258,7 @@ class _ThemeEditorPanelState extends State<ThemeEditorPanel> {
   Widget _buildShadowsSection() {
     return _buildSection(
       title: 'Shadows',
-      icon: Icons.shadow,
+      icon: Icons.blur_on,
       children: [
         _buildSlider(
           'Card Shadow',
