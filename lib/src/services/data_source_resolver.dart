@@ -55,7 +55,7 @@ class DataSourceResolver {
         final spot = DisplaySpot.fromString(displaySpotFilter);
         if (spot != DisplaySpot.all) {
           filteredProducts = filteredProducts.where((product) {
-            return product.displaySpots.contains(spot);
+            return product.displaySpot == spot;
           }).toList();
           developer.log('   Filtered by displaySpot "$displaySpotFilter": ${filteredProducts.length} products');
         }
