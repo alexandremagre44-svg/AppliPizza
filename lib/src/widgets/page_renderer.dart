@@ -1114,7 +1114,9 @@ class _PageRendererState extends State<PageRenderer> {
     developer.log('🎯 Building product slider block');
 
     return FutureBuilder<List<Product>>(
-      future: _dataSourceResolver.resolveProducts(block.dataSource),
+      future: _dataSourceResolver.resolveProducts(
+        block.dataSource ?? DataSource.empty(),
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -1198,7 +1200,9 @@ class _PageRendererState extends State<PageRenderer> {
     developer.log('🎯 Building category slider block');
 
     return FutureBuilder<List<ProductCategory>>(
-      future: _dataSourceResolver.resolveCategories(block.dataSource),
+      future: _dataSourceResolver.resolveCategories(
+        block.dataSource ?? DataSource.empty(),
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
