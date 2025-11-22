@@ -159,6 +159,9 @@ class _StudioPreviewPanelV2State extends State<StudioPreviewPanelV2> {
     final overrides = <Override>[];
 
     // Override homeConfigProvider with draft data
+    // NOTE: homeConfig can be null during initial load or when no draft exists.
+    // In such cases, the override is not added and HomeScreen will use the
+    // published config from Firestore via the default provider.
     if (widget.homeConfig != null) {
       overrides.add(
         homeConfigProvider.overrideWith((ref) {

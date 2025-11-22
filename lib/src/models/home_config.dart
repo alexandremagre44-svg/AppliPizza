@@ -158,6 +158,9 @@ class HomeConfig {
         other.id == id &&
         other.hero == hero &&
         other.promoBanner == promoBanner &&
+        // NOTE: Using blocks.length comparison for performance in Studio V2 preview.
+        // Full blocks comparison would be expensive and blocks are rarely modified.
+        // For draft/publish workflow, hero changes are the primary use case.
         other.blocks.length == blocks.length &&
         other.updatedAt == updatedAt;
   }
