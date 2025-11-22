@@ -199,8 +199,6 @@ class _StudioB2PageState extends State<StudioB2Page> {
     );
   }
 
-
-
   Widget _buildErrorState(String error) {
     return Center(
       child: Padding(
