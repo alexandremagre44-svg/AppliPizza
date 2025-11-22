@@ -272,10 +272,197 @@ class PagesConfig {
   factory PagesConfig.initial() {
     return PagesConfig(
       pages: [
+        _createDefaultHomePage(),
         _createDefaultMenuPage(),
         _createDefaultCategoriesPage(),
         _createDefaultCartPage(),
       ],
+    );
+  }
+
+  /// Create default home page
+  /// Note: This is a default template for Pizza Deli'Zza.
+  /// All content is editable via Studio B3 after initialization.
+  static PageSchema _createDefaultHomePage() {
+    return PageSchema(
+      id: 'home_b3',
+      name: 'Accueil B3',
+      route: '/home-b3',
+      enabled: true,
+      blocks: [
+        // Hero banner with welcome message
+        WidgetBlock(
+          id: 'hero_home',
+          type: WidgetBlockType.heroAdvanced,
+          order: 1,
+          visible: true,
+          properties: {
+            'title': 'Bienvenue chez Pizza Deli\'Zza', // Editable in Studio B3
+            'subtitle': 'La pizza 100% appli - Commandez en quelques clics',
+            'imageUrl': 'https://images.unsplash.com/photo-1513104890138-7c749659a591', // Default demo image, replaceable in Studio B3
+            'height': 350.0,
+            'borderRadius': 0.0,
+            'imageFit': 'cover',
+            'hasGradient': true,
+            'gradientStartColor': '#000000CC',
+            'gradientEndColor': '#00000000',
+            'gradientDirection': 'vertical',
+            'overlayOpacity': 0.3,
+            'titleColor': '#FFFFFF',
+            'subtitleColor': '#FFFFFFDD',
+            'contentAlign': 'bottom',
+            'spacing': 8.0,
+            'ctas': [
+              {
+                'label': 'Commander maintenant',
+                'action': 'navigate:/menu-b3',
+                'backgroundColor': '#D62828',
+                'textColor': '#FFFFFF',
+                'borderRadius': 8.0,
+                'padding': 16.0,
+              }
+            ],
+          },
+        ),
+        // Promo banner
+        WidgetBlock(
+          id: 'promo_home',
+          type: WidgetBlockType.promoBanner,
+          order: 2,
+          visible: true,
+          properties: {
+            'title': '🎉 Offre Spéciale',
+            'subtitle': 'Livraison offerte dès 25€ de commande',
+            'backgroundColor': '#FFA726',
+            'textColor': '#FFFFFF',
+            'borderRadius': 12.0,
+            'padding': 20.0,
+            'gradientStartColor': '#FF6F00',
+            'gradientEndColor': '#FFA726',
+            'gradientDirection': 'horizontal',
+          },
+          styling: {
+            'padding': {'top': 16.0, 'bottom': 16.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        // Featured products slider
+        WidgetBlock(
+          id: 'bestsellers_slider',
+          type: WidgetBlockType.productSlider,
+          order: 3,
+          visible: true,
+          properties: {
+            'title': '⭐ Nos Meilleures Ventes',
+            'showTitle': true,
+            'columns': 2,
+            'spacing': 16.0,
+            'showPrice': true,
+          },
+          dataSource: DataSource(
+            id: 'featured_products',
+            type: DataSourceType.products,
+            config: {
+              'category': 'pizza',
+              'limit': 6,
+            },
+          ),
+          styling: {
+            'padding': {'top': 16.0, 'bottom': 16.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        // Category slider
+        WidgetBlock(
+          id: 'categories_slider',
+          type: WidgetBlockType.categorySlider,
+          order: 4,
+          visible: true,
+          properties: {
+            'title': '📂 Explorez nos catégories',
+            'showTitle': true,
+            'itemWidth': 120.0,
+            'itemHeight': 120.0,
+            'showCountBadge': true,
+          },
+          dataSource: DataSource(
+            id: 'all_categories',
+            type: DataSourceType.categories,
+            config: {
+              'limit': 10,
+            },
+          ),
+          styling: {
+            'padding': {'top': 16.0, 'bottom': 16.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        // Sticky CTA for quick cart access
+        WidgetBlock(
+          id: 'sticky_cart_cta',
+          type: WidgetBlockType.stickyCta,
+          order: 5,
+          visible: true,
+          properties: {
+            'label': 'Voir le panier',
+            'icon': 'shopping_cart',
+            'backgroundColor': '#D62828',
+            'textColor': '#FFFFFF',
+            'borderRadius': 25.0,
+            'position': 'bottom',
+            'visibleOnScrollUp': true,
+            'visibleOnScrollDown': false,
+            'action': {
+              'type': 'navigate',
+              'value': '/cart',
+            },
+          },
+        ),
+        // Welcome popup (conditional)
+        WidgetBlock(
+          id: 'welcome_popup',
+          type: WidgetBlockType.popup,
+          order: 6,
+          visible: true,
+          properties: {
+            'title': 'Bienvenue ! 🍕',
+            'message': 'Découvrez nos pizzas artisanales et nos offres exclusives',
+            'titleColor': '#000000',
+            'messageColor': '#666666',
+            'alignment': 'center',
+            'icon': 'promo',
+            'backgroundColor': '#FFFFFF',
+            'borderRadius': 16.0,
+            'padding': 24.0,
+            'maxWidth': 320.0,
+            'elevation': 8.0,
+            'overlayColor': '#000000',
+            'overlayOpacity': 0.5,
+            'showOnLoad': false,
+            'triggerType': 'delayed',
+            'delayMs': 2000,
+            'dismissibleByTapOutside': true,
+            'showOncePerSession': true,
+            'ctas': [
+              {
+                'label': 'Découvrir',
+                'action': 'navigate:/menu-b3',
+                'backgroundColor': '#D62828',
+                'textColor': '#FFFFFF',
+                'borderRadius': 8.0,
+              },
+              {
+                'label': 'Plus tard',
+                'action': 'dismissOnly',
+                'backgroundColor': '#EEEEEE',
+                'textColor': '#666666',
+                'borderRadius': 8.0,
+              }
+            ],
+          },
+        ),
+      ],
+      metadata: {
+        'description': 'Page d\'accueil dynamique B3 - Migration Phase 6',
+        'version': 1,
+      },
     );
   }
 
