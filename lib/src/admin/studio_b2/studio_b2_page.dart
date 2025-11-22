@@ -293,7 +293,7 @@ class _StudioB2PageState extends State<StudioB2Page> {
 
   Future<void> _handleCreateDraft() async {
     try {
-      await _configService.createDraftFromPublished(appId: _appId);
+      await _configService.ensureDraftExists(appId: _appId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -376,7 +376,10 @@ class _StudioB2PageState extends State<StudioB2Page> {
 
     if (confirmed == true) {
       try {
-        await _configService.createDraftFromPublished(appId: _appId);
+        // Delete existing draft first
+        await _configService.deleteDraft(appId: _appId);
+        // Then create new draft from published (will auto-create if needed)
+        await _configService.ensureDraftExists(appId: _appId);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
