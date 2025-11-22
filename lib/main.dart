@@ -28,6 +28,8 @@ import 'src/studio/screens/theme_manager_screen.dart';
 import 'src/studio/screens/media_manager_screen.dart';
 // Studio B2 - New admin interface for AppConfig B2 management
 import 'src/admin/studio_b2/studio_b2_page.dart';
+// Studio B3 - Page editor for dynamic pages
+import 'src/admin/studio_b3/studio_b3_page.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
@@ -257,6 +259,24 @@ class MyApp extends ConsumerWidget {
                   );
                 }
                 return const StudioB2Page();
+              },
+            ),
+            // Studio B3 - Page editor for dynamic pages
+            GoRoute(
+              path: AppRoutes.adminStudioB3,
+              builder: (context, state) {
+                // PROTECTION: Studio B3 is reserved for admins
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  // Redirect to home if not admin
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const StudioB3Page();
               },
             ),
             // Deprecated routes - redirect to admin menu
