@@ -172,7 +172,9 @@ class _StudioV2ScreenState extends ConsumerState<StudioV2Screen> {
         debugPrint('  Hero CTA Text: "${draftState.homeConfig?.heroCtaText}"');
         debugPrint('  Hero Image URL: "${draftState.homeConfig?.heroImageUrl}"');
         debugPrint('  Hero Enabled: ${draftState.homeConfig?.heroEnabled}');
-        await _homeConfigService.saveHomeConfig(draftState.homeConfig!);
+        // Update timestamp before saving to ensure Firestore recognizes the change
+        final configToSave = draftState.homeConfig!.copyWith(updatedAt: DateTime.now());
+        await _homeConfigService.saveHomeConfig(configToSave);
         debugPrint('  ✓ HomeConfig saved successfully');
       }
 

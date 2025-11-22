@@ -201,10 +201,11 @@ class StudioPreviewPanelV2 extends StatelessWidget {
     );
 
     // Wrap HomeScreen with ProviderScope to inject draft data
+    // Remove 'const' to ensure HomeScreen rebuilds when providers change
     return ProviderScope(
       key: key,
       overrides: overrides,
-      child: const HomeScreen(),
+      child: HomeScreen(),
     );
   }
 }

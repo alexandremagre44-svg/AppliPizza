@@ -37,6 +37,15 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
     _initControllers();
   }
 
+  @override
+  void didUpdateWidget(StudioHeroV2 oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update controllers when homeConfig prop changes (e.g., when cancelling changes)
+    if (widget.homeConfig != oldWidget.homeConfig) {
+      _updateControllers();
+    }
+  }
+
   void _initControllers() {
     final config = widget.homeConfig ?? HomeConfig.initial();
     _titleController = TextEditingController(text: config.heroTitle);
@@ -45,14 +54,30 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
     _imageUrlController = TextEditingController(text: config.heroImageUrl ?? '');
     _ctaActionController = TextEditingController(text: config.heroCtaAction);
     
-    // Determine CTA link type based on current action
-    final action = config.heroCtaAction;
+    _ctaLinkType = _determineLinkType(config.heroCtaAction);
+  }
+
+  void _updateControllers() {
+    final config = widget.homeConfig ?? HomeConfig.initial();
+    _titleController.text = config.heroTitle;
+    _subtitleController.text = config.heroSubtitle;
+    _ctaTextController.text = config.heroCtaText;
+    _imageUrlController.text = config.heroImageUrl ?? '';
+    _ctaActionController.text = config.heroCtaAction;
+    
+    setState(() {
+      _ctaLinkType = _determineLinkType(config.heroCtaAction);
+    });
+  }
+
+  /// Determine CTA link type based on action string
+  String _determineLinkType(String action) {
     if (action.contains('/menu')) {
-      _ctaLinkType = 'menu';
+      return 'menu';
     } else if (action.contains('/promotions')) {
-      _ctaLinkType = 'promotions';
+      return 'promotions';
     } else {
-      _ctaLinkType = 'customUrl';
+      return 'customUrl';
     }
   }
 
