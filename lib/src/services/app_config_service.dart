@@ -93,31 +93,62 @@ class AppConfigService {
       if (!snapshot.exists || snapshot.data() == null) {
         print('AppConfigService: Config not found for appId: $appId, draft: $draft');
         
-        if (autoCreate) {
-          print('AppConfigService: Auto-creating config for appId: $appId, draft: $draft');
-          
-          if (draft) {
-            // For draft: try to copy from published first, otherwise create default
-            final published = await getConfig(appId: appId, draft: false, autoCreate: true);
-            if (published != null) {
+        if (!autoCreate) {
+          return null;
+        }
+        
+        print('AppConfigService: Auto-creating config for appId: $appId, draft: $draft');
+        
+        if (draft) {
+          // For draft: try to copy from published first, otherwise create default
+          final published = await getConfig(appId: appId, draft: false, autoCreate: true);
+          if (published != null) {
+            try {
               await saveDraft(appId: appId, config: published);
+              print('AppConfigService: Draft created from published config');
               return published;
+            } catch (e) {
+              print('AppConfigService: Error saving draft, creating default instead: $e');
+              // Fall through to create default
             }
-          } else {
-            // For published: create default config
-            final defaultConfig = getDefaultConfig(appId);
+          }
+          
+          // If published doesn't exist or save failed, create default in both locations
+          final defaultConfig = getDefaultConfig(appId);
+          try {
+            // Save to published first
+            await _firestore
+                .collection(_collectionName)
+                .doc(appId)
+                .collection('configs')
+                .doc(_configDocName)
+                .set(defaultConfig.toJson());
+            
+            // Then save to draft
+            await saveDraft(appId: appId, config: defaultConfig);
+            print('AppConfigService: Default config created in both published and draft');
+            return defaultConfig;
+          } catch (e) {
+            print('AppConfigService: Error creating default config: $e');
+            return null;
+          }
+        } else {
+          // For published: create default config
+          final defaultConfig = getDefaultConfig(appId);
+          try {
             await _firestore
                 .collection(_collectionName)
                 .doc(appId)
                 .collection('configs')
                 .doc(docName)
                 .set(defaultConfig.toJson());
-            print('AppConfigService: Default config created for appId: $appId');
+            print('AppConfigService: Default published config created for appId: $appId');
             return defaultConfig;
+          } catch (e) {
+            print('AppConfigService: Error creating default published config: $e');
+            return null;
           }
         }
-        
-        return null;
       }
 
       return AppConfig.fromJson(snapshot.data()!);
@@ -257,6 +288,7 @@ class AppConfigService {
   /// 
   /// Creates a new draft from the current published configuration
   /// If published config doesn't exist, creates default config in both locations
+  /// Never throws exceptions - always ensures both configs exist
   /// [appId] - The application identifier
   Future<void> createDraftFromPublished({
     required String appId,
@@ -267,29 +299,38 @@ class AppConfigService {
       
       if (published == null) {
         // This should not happen with autoCreate=true, but handle gracefully
-        print('AppConfigService: Creating default config for both published and draft');
+        print('AppConfigService: WARNING - Auto-create failed, manually creating default config');
         final defaultConfig = getDefaultConfig(appId);
         
-        // Save to both published and draft
-        await _firestore
-            .collection(_collectionName)
-            .doc(appId)
-            .collection('configs')
-            .doc(_configDocName)
-            .set(defaultConfig.toJson());
-        
-        await saveDraft(appId: appId, config: defaultConfig);
-        print('AppConfigService: Default config created for both published and draft');
+        try {
+          // Save to both published and draft
+          await _firestore
+              .collection(_collectionName)
+              .doc(appId)
+              .collection('configs')
+              .doc(_configDocName)
+              .set(defaultConfig.toJson());
+          
+          await saveDraft(appId: appId, config: defaultConfig);
+          print('AppConfigService: Default config created for both published and draft');
+        } catch (e) {
+          print('AppConfigService: ERROR - Failed to create default config: $e');
+          // Don't rethrow - log only
+        }
         return;
       }
 
       // Save as draft
-      await saveDraft(appId: appId, config: published);
-
-      print('AppConfigService: Draft created from published config for appId: $appId');
+      try {
+        await saveDraft(appId: appId, config: published);
+        print('AppConfigService: Draft created from published config for appId: $appId');
+      } catch (e) {
+        print('AppConfigService: ERROR - Failed to save draft: $e');
+        // Don't rethrow - log only
+      }
     } catch (e) {
-      print('AppConfigService: Error creating draft from published: $e');
-      rethrow;
+      print('AppConfigService: ERROR - Unexpected error in createDraftFromPublished: $e');
+      // Don't rethrow - log only
     }
   }
 
@@ -331,6 +372,7 @@ class AppConfigService {
   /// 
   /// Creates default published config if it doesn't exist
   /// Safe to call multiple times - will not overwrite existing config
+  /// Never throws exceptions - logs errors only
   /// [appId] - The application identifier
   Future<void> ensurePublishedExists({
     required String appId,
@@ -342,20 +384,25 @@ class AppConfigService {
         print('AppConfigService: Creating default published config for appId: $appId');
         final defaultConfig = getDefaultConfig(appId);
         
-        await _firestore
-            .collection(_collectionName)
-            .doc(appId)
-            .collection('configs')
-            .doc(_configDocName)
-            .set(defaultConfig.toJson());
-        
-        print('AppConfigService: Default published config created');
+        try {
+          await _firestore
+              .collection(_collectionName)
+              .doc(appId)
+              .collection('configs')
+              .doc(_configDocName)
+              .set(defaultConfig.toJson());
+          
+          print('AppConfigService: Default published config created successfully');
+        } catch (e) {
+          print('AppConfigService: ERROR - Failed to create published config: $e');
+          // Don't rethrow - log only
+        }
       } else {
         print('AppConfigService: Published config already exists for appId: $appId');
       }
     } catch (e) {
-      print('AppConfigService: Error ensuring published exists: $e');
-      rethrow;
+      print('AppConfigService: ERROR - Unexpected error in ensurePublishedExists: $e');
+      // Don't rethrow - log only
     }
   }
 
@@ -365,6 +412,7 @@ class AppConfigService {
   /// - If published config exists, copies it to draft
   /// - If published config doesn't exist, creates default in both locations
   /// Safe to call multiple times - will not overwrite existing draft
+  /// Never throws exceptions - logs errors only
   /// [appId] - The application identifier
   Future<void> ensureDraftExists({
     required String appId,
@@ -385,29 +433,39 @@ class AppConfigService {
       
       if (published != null) {
         // Copy from published
-        await saveDraft(appId: appId, config: published);
-        print('AppConfigService: Draft created from published config');
+        try {
+          await saveDraft(appId: appId, config: published);
+          print('AppConfigService: Draft created from published config successfully');
+        } catch (e) {
+          print('AppConfigService: ERROR - Failed to save draft from published: $e');
+          // Don't rethrow - log only
+        }
       } else {
         // Create default in both locations
         print('AppConfigService: Creating default config for both published and draft');
         final defaultConfig = getDefaultConfig(appId);
         
-        // Save to published
-        await _firestore
-            .collection(_collectionName)
-            .doc(appId)
-            .collection('configs')
-            .doc(_configDocName)
-            .set(defaultConfig.toJson());
-        
-        // Save to draft
-        await saveDraft(appId: appId, config: defaultConfig);
-        
-        print('AppConfigService: Default config created for both locations');
+        try {
+          // Save to published
+          await _firestore
+              .collection(_collectionName)
+              .doc(appId)
+              .collection('configs')
+              .doc(_configDocName)
+              .set(defaultConfig.toJson());
+          
+          // Save to draft
+          await saveDraft(appId: appId, config: defaultConfig);
+          
+          print('AppConfigService: Default config created for both locations successfully');
+        } catch (e) {
+          print('AppConfigService: ERROR - Failed to create default config: $e');
+          // Don't rethrow - log only
+        }
       }
     } catch (e) {
-      print('AppConfigService: Error ensuring draft exists: $e');
-      rethrow;
+      print('AppConfigService: ERROR - Unexpected error in ensureDraftExists: $e');
+      // Don't rethrow - log only
     }
   }
 }
