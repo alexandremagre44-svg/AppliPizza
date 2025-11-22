@@ -14,6 +14,7 @@ import 'src/screens/splash/splash_screen.dart';
 import 'src/screens/auth/login_screen.dart';
 import 'src/screens/auth/signup_screen.dart';
 import 'src/screens/home/home_screen.dart'; 
+import 'src/screens/home/home_screen_b2.dart'; // NEW: HomeScreen based on AppConfig B2
 import 'src/screens/menu/menu_screen.dart'; 
 import 'src/screens/cart/cart_screen.dart';
 import 'src/screens/checkout/checkout_screen.dart';
@@ -165,6 +166,11 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: AppRoutes.home,
               builder: (context, state) => const HomeScreen(),
+            ),
+            // HomeScreenB2 - Test route for new AppConfig B2 architecture
+            GoRoute(
+              path: '/home-b2',
+              builder: (context, state) => const HomeScreenB2(),
             ),
             GoRoute(
               path: AppRoutes.menu,
