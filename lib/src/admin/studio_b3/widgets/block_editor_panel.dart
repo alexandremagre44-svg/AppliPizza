@@ -153,6 +153,8 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         return _buildProductListFields();
       case WidgetBlockType.categoryList:
         return _buildCategoryListFields();
+      case WidgetBlockType.heroAdvanced:
+        return _buildHeroAdvancedFields();
       case WidgetBlockType.custom:
         return [const Text('Bloc personnalisé (aucun champ)')];
     }
@@ -381,6 +383,327 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
     ];
   }
 
+  List<Widget> _buildHeroAdvancedFields() {
+    final List<Widget> fields = [];
+    
+    // === IMAGE SECTION ===
+    fields.addAll([
+      const Text('Image de fond', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      const SizedBox(height: 8),
+      TextField(
+        controller: TextEditingController(text: _properties['imageUrl']?.toString()),
+        decoration: const InputDecoration(
+          labelText: 'URL de l\'image',
+          border: OutlineInputBorder(),
+          hintText: 'https://...',
+        ),
+        onChanged: (value) => _updateProperty('imageUrl', value),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: TextEditingController(
+          text: _properties['height']?.toString() ?? '400',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Hauteur',
+          border: OutlineInputBorder(),
+          suffixText: 'px',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+        onChanged: (value) => _updateProperty('height', double.tryParse(value) ?? 400.0),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: TextEditingController(
+          text: _properties['borderRadius']?.toString() ?? '0',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Border Radius',
+          border: OutlineInputBorder(),
+          suffixText: 'px',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+        onChanged: (value) => _updateProperty('borderRadius', double.tryParse(value) ?? 0.0),
+      ),
+      const SizedBox(height: 12),
+      DropdownButtonFormField<String>(
+        value: _properties['imageFit']?.toString() ?? 'cover',
+        decoration: const InputDecoration(
+          labelText: 'Ajustement image',
+          border: OutlineInputBorder(),
+        ),
+        items: ['cover', 'contain', 'fill', 'fitWidth', 'fitHeight']
+            .map((fit) => DropdownMenuItem(value: fit, child: Text(fit)))
+            .toList(),
+        onChanged: (value) => _updateProperty('imageFit', value),
+      ),
+      const Divider(height: 32),
+    ]);
+    
+    // === OVERLAY SECTION ===
+    fields.addAll([
+      const Text('Overlay / Gradient', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      const SizedBox(height: 8),
+      SwitchListTile(
+        title: const Text('Utiliser un gradient'),
+        value: _properties['hasGradient'] == true,
+        onChanged: (value) => _updateProperty('hasGradient', value),
+        dense: true,
+        contentPadding: EdgeInsets.zero,
+      ),
+      if (_properties['hasGradient'] != true) ...[
+        TextField(
+          controller: TextEditingController(text: _properties['overlayColor']?.toString()),
+          decoration: const InputDecoration(
+            labelText: 'Couleur overlay (hex)',
+            border: OutlineInputBorder(),
+            hintText: '#000000',
+          ),
+          onChanged: (value) => _updateProperty('overlayColor', value),
+        ),
+      ] else ...[
+        TextField(
+          controller: TextEditingController(text: _properties['gradientStartColor']?.toString()),
+          decoration: const InputDecoration(
+            labelText: 'Couleur début (hex)',
+            border: OutlineInputBorder(),
+            hintText: '#000000',
+          ),
+          onChanged: (value) => _updateProperty('gradientStartColor', value),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: TextEditingController(text: _properties['gradientEndColor']?.toString()),
+          decoration: const InputDecoration(
+            labelText: 'Couleur fin (hex)',
+            border: OutlineInputBorder(),
+            hintText: '#00000000',
+          ),
+          onChanged: (value) => _updateProperty('gradientEndColor', value),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          value: _properties['gradientDirection']?.toString() ?? 'vertical',
+          decoration: const InputDecoration(
+            labelText: 'Direction gradient',
+            border: OutlineInputBorder(),
+          ),
+          items: ['vertical', 'horizontal']
+              .map((dir) => DropdownMenuItem(value: dir, child: Text(dir)))
+              .toList(),
+          onChanged: (value) => _updateProperty('gradientDirection', value),
+        ),
+      ],
+      const SizedBox(height: 12),
+      TextField(
+        controller: TextEditingController(
+          text: _properties['overlayOpacity']?.toString() ?? '0.4',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Opacité',
+          border: OutlineInputBorder(),
+          hintText: '0.0 - 1.0',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+        onChanged: (value) {
+          final opacity = double.tryParse(value) ?? 0.4;
+          _updateProperty('overlayOpacity', opacity.clamp(0.0, 1.0));
+        },
+      ),
+      const Divider(height: 32),
+    ]);
+    
+    // === CONTENT SECTION ===
+    fields.addAll([
+      const Text('Contenu', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      const SizedBox(height: 8),
+      TextField(
+        controller: TextEditingController(text: _properties['title']?.toString()),
+        decoration: const InputDecoration(
+          labelText: 'Titre',
+          border: OutlineInputBorder(),
+        ),
+        onChanged: (value) => _updateProperty('title', value),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: TextEditingController(text: _properties['subtitle']?.toString()),
+        decoration: const InputDecoration(
+          labelText: 'Sous-titre',
+          border: OutlineInputBorder(),
+        ),
+        maxLines: 2,
+        onChanged: (value) => _updateProperty('subtitle', value),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: TextEditingController(text: _properties['titleColor']?.toString()),
+        decoration: const InputDecoration(
+          labelText: 'Couleur titre (hex)',
+          border: OutlineInputBorder(),
+          hintText: '#FFFFFF',
+        ),
+        onChanged: (value) => _updateProperty('titleColor', value),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: TextEditingController(text: _properties['subtitleColor']?.toString()),
+        decoration: const InputDecoration(
+          labelText: 'Couleur sous-titre (hex)',
+          border: OutlineInputBorder(),
+          hintText: '#FFFFFFB3',
+        ),
+        onChanged: (value) => _updateProperty('subtitleColor', value),
+      ),
+      const SizedBox(height: 12),
+      DropdownButtonFormField<String>(
+        value: _properties['contentAlign']?.toString() ?? 'center',
+        decoration: const InputDecoration(
+          labelText: 'Alignement',
+          border: OutlineInputBorder(),
+        ),
+        items: ['center', 'left', 'right', 'top', 'bottom']
+            .map((align) => DropdownMenuItem(value: align, child: Text(align)))
+            .toList(),
+        onChanged: (value) => _updateProperty('contentAlign', value),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: TextEditingController(
+          text: _properties['spacing']?.toString() ?? '8',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Espacement',
+          border: OutlineInputBorder(),
+          suffixText: 'px',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+        onChanged: (value) => _updateProperty('spacing', double.tryParse(value) ?? 8.0),
+      ),
+      const Divider(height: 32),
+    ]);
+    
+    // === CTA BUTTONS SECTION ===
+    fields.addAll([
+      Row(
+        children: [
+          const Text('CTA Buttons', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.add, size: 20),
+            onPressed: _addCTAButton,
+            tooltip: 'Ajouter un CTA',
+          ),
+        ],
+      ),
+      const SizedBox(height: 8),
+    ]);
+    
+    final ctas = _properties['ctas'] as List<dynamic>? ?? [];
+    for (int i = 0; i < ctas.length && i < 3; i++) {
+      fields.add(_buildCTAEditor(i, ctas[i] as Map<String, dynamic>));
+      fields.add(const SizedBox(height: 12));
+    }
+    
+    if (ctas.isEmpty) {
+      fields.add(const Text('Aucun CTA. Cliquez sur + pour en ajouter.', style: TextStyle(color: Colors.grey, fontSize: 12)));
+    }
+    
+    return fields;
+  }
+
+  Widget _buildCTAEditor(int index, Map<String, dynamic> cta) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('CTA ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.delete, size: 18),
+                  onPressed: () => _removeCTAButton(index),
+                  tooltip: 'Supprimer',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: TextEditingController(text: cta['label']?.toString()),
+              decoration: const InputDecoration(
+                labelText: 'Label',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              onChanged: (value) => _updateCTA(index, 'label', value),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: TextEditingController(text: cta['action']?.toString()),
+              decoration: const InputDecoration(
+                labelText: 'Action',
+                border: OutlineInputBorder(),
+                isDense: true,
+                hintText: 'navigate:/menu',
+              ),
+              onChanged: (value) => _updateCTA(index, 'action', value),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _addCTAButton() {
+    final ctas = List<Map<String, dynamic>>.from(_properties['ctas'] as List<dynamic>? ?? []);
+    if (ctas.length >= 3) {
+      return; // Max 3 CTAs
+    }
+    ctas.add({
+      'label': 'Nouveau CTA',
+      'action': 'navigate:/menu',
+      'backgroundColor': '#D62828',
+      'textColor': '#FFFFFF',
+      'borderRadius': 8.0,
+      'padding': 16.0,
+    });
+    setState(() {
+      _properties['ctas'] = ctas;
+    });
+    _notifyUpdate();
+  }
+
+  void _removeCTAButton(int index) {
+    final ctas = List<Map<String, dynamic>>.from(_properties['ctas'] as List<dynamic>? ?? []);
+    if (index >= 0 && index < ctas.length) {
+      ctas.removeAt(index);
+      setState(() {
+        _properties['ctas'] = ctas;
+      });
+      _notifyUpdate();
+    }
+  }
+
+  void _updateCTA(int index, String key, dynamic value) {
+    final ctas = List<Map<String, dynamic>>.from(_properties['ctas'] as List<dynamic>? ?? []);
+    if (index >= 0 && index < ctas.length) {
+      ctas[index][key] = value;
+      setState(() {
+        _properties['ctas'] = ctas;
+      });
+      _notifyUpdate();
+    }
+  }
+
   Widget _buildStylingSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,6 +858,8 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         return Icons.grid_view;
       case WidgetBlockType.categoryList:
         return Icons.category;
+      case WidgetBlockType.heroAdvanced:
+        return Icons.view_agenda;
       case WidgetBlockType.custom:
         return Icons.extension;
     }
@@ -554,6 +879,8 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         return 'Produits';
       case WidgetBlockType.categoryList:
         return 'Catégories';
+      case WidgetBlockType.heroAdvanced:
+        return 'Hero Avancé';
       case WidgetBlockType.custom:
         return 'Custom';
     }

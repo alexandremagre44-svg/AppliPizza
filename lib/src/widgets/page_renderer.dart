@@ -61,6 +61,8 @@ class _PageRendererState extends State<PageRenderer> {
         return _buildProductListBlock(context, block);
       case WidgetBlockType.categoryList:
         return _buildCategoryListBlock(context, block);
+      case WidgetBlockType.heroAdvanced:
+        return _buildHeroAdvancedBlock(context, block);
       case WidgetBlockType.custom:
       default:
         return _buildCustomBlock(context, block);
@@ -458,6 +460,207 @@ class _PageRendererState extends State<PageRenderer> {
         return Icons.local_drink;
       case ProductCategory.desserts:
         return Icons.cake;
+    }
+  }
+
+  /// Build an advanced hero block (B3.5.A)
+  Widget _buildHeroAdvancedBlock(BuildContext context, WidgetBlock block) {
+    developer.log('🔨 PageRenderer: Building heroAdvanced block: ${block.id}');
+    
+    // Extract properties
+    final imageUrl = block.properties['imageUrl'] as String? ?? '';
+    final height = (block.properties['height'] as num?)?.toDouble() ?? 300.0;
+    final borderRadius = (block.properties['borderRadius'] as num?)?.toDouble() ?? 0.0;
+    final imageFit = block.properties['imageFit'] as String? ?? 'cover';
+    
+    // Overlay properties
+    final overlayColor = _parseColor(block.properties['overlayColor'] as String?) ?? Colors.black;
+    final overlayOpacity = (block.properties['overlayOpacity'] as num?)?.toDouble() ?? 0.4;
+    
+    // Gradient properties
+    final hasGradient = block.properties['hasGradient'] == true;
+    final gradientStartColor = _parseColor(block.properties['gradientStartColor'] as String?) ?? Colors.black;
+    final gradientEndColor = _parseColor(block.properties['gradientEndColor'] as String?) ?? Colors.transparent;
+    final gradientDirection = block.properties['gradientDirection'] as String? ?? 'vertical';
+    
+    // Content properties
+    final title = block.properties['title'] as String? ?? '';
+    final subtitle = block.properties['subtitle'] as String? ?? '';
+    final titleColor = _parseColor(block.properties['titleColor'] as String?) ?? Colors.white;
+    final subtitleColor = _parseColor(block.properties['subtitleColor'] as String?) ?? Colors.white70;
+    final contentAlign = block.properties['contentAlign'] as String? ?? 'center';
+    final spacing = (block.properties['spacing'] as num?)?.toDouble() ?? 8.0;
+    
+    // CTA buttons
+    final ctas = (block.properties['ctas'] as List<dynamic>?) ?? [];
+    
+    // Animation properties
+    final hasAnimation = block.properties['hasAnimation'] == true;
+    final animationType = block.properties['animationType'] as String? ?? 'fadeIn';
+    final animationDuration = (block.properties['animationDuration'] as num?)?.toInt() ?? 1000;
+
+    return Container(
+      height: height,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background image
+            if (imageUrl.isNotEmpty)
+              Image.network(
+                imageUrl,
+                fit: _parseBoxFit(imageFit),
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey[300],
+                    child: const Center(
+                      child: Icon(Icons.broken_image, size: 64, color: Colors.grey),
+                    ),
+                  );
+                },
+              )
+            else
+              Container(color: Colors.grey[300]),
+            
+            // Overlay or gradient
+            if (hasGradient)
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: gradientDirection == 'vertical' ? Alignment.topCenter : Alignment.centerLeft,
+                    end: gradientDirection == 'vertical' ? Alignment.bottomCenter : Alignment.centerRight,
+                    colors: [
+                      gradientStartColor.withOpacity(overlayOpacity),
+                      gradientEndColor.withOpacity(overlayOpacity),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Container(
+                color: overlayColor.withOpacity(overlayOpacity),
+              ),
+            
+            // Content (title, subtitle, CTAs)
+            Positioned.fill(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: _parseMainAxisAlignment(contentAlign),
+                  crossAxisAlignment: _parseCrossAxisAlignment(contentAlign),
+                  children: [
+                    if (title.isNotEmpty)
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: titleColor,
+                        ),
+                        textAlign: _parseTextAlign(contentAlign),
+                      ),
+                    if (title.isNotEmpty && subtitle.isNotEmpty)
+                      SizedBox(height: spacing),
+                    if (subtitle.isNotEmpty)
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: subtitleColor,
+                        ),
+                        textAlign: _parseTextAlign(contentAlign),
+                      ),
+                    if (ctas.isNotEmpty && (title.isNotEmpty || subtitle.isNotEmpty))
+                      SizedBox(height: spacing * 2),
+                    if (ctas.isNotEmpty)
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        alignment: _parseWrapAlignment(contentAlign),
+                        children: ctas.take(3).map((cta) => _buildCTAButton(context, cta)).toList(),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build a CTA button for hero block
+  Widget _buildCTAButton(BuildContext context, dynamic cta) {
+    if (cta is! Map<String, dynamic>) return const SizedBox.shrink();
+    
+    final label = cta['label'] as String? ?? 'Button';
+    final action = cta['action'] as String? ?? '';
+    final backgroundColor = _parseColor(cta['backgroundColor'] as String?) ?? Colors.blue;
+    final textColor = _parseColor(cta['textColor'] as String?) ?? Colors.white;
+    final borderRadius = (cta['borderRadius'] as num?)?.toDouble() ?? 8.0;
+    final padding = (cta['padding'] as num?)?.toDouble() ?? 16.0;
+    
+    return ElevatedButton(
+      onPressed: () {
+        if (action.isNotEmpty) {
+          _handleAction(context, action, null);
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: textColor,
+        padding: EdgeInsets.symmetric(horizontal: padding, vertical: padding / 2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+      ),
+      child: Text(label),
+    );
+  }
+
+  /// Parse MainAxisAlignment from string
+  MainAxisAlignment _parseMainAxisAlignment(String? align) {
+    switch (align?.toLowerCase()) {
+      case 'top':
+      case 'start':
+        return MainAxisAlignment.start;
+      case 'bottom':
+      case 'end':
+        return MainAxisAlignment.end;
+      case 'center':
+      default:
+        return MainAxisAlignment.center;
+    }
+  }
+
+  /// Parse CrossAxisAlignment from string
+  CrossAxisAlignment _parseCrossAxisAlignment(String? align) {
+    switch (align?.toLowerCase()) {
+      case 'left':
+      case 'start':
+        return CrossAxisAlignment.start;
+      case 'right':
+      case 'end':
+        return CrossAxisAlignment.end;
+      case 'center':
+      default:
+        return CrossAxisAlignment.center;
+    }
+  }
+
+  /// Parse WrapAlignment from string
+  WrapAlignment _parseWrapAlignment(String? align) {
+    switch (align?.toLowerCase()) {
+      case 'left':
+      case 'start':
+        return WrapAlignment.start;
+      case 'right':
+      case 'end':
+        return WrapAlignment.end;
+      case 'center':
+      default:
+        return WrapAlignment.center;
     }
   }
 

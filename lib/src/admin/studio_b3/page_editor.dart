@@ -321,6 +321,38 @@ class _PageEditorState extends State<PageEditor> {
         return {'title': 'Produits'};
       case WidgetBlockType.categoryList:
         return {'title': 'Catégories'};
+      case WidgetBlockType.heroAdvanced:
+        return {
+          'imageUrl': 'https://picsum.photos/800/600',
+          'height': 400.0,
+          'borderRadius': 0.0,
+          'imageFit': 'cover',
+          'overlayColor': '#000000',
+          'overlayOpacity': 0.4,
+          'hasGradient': false,
+          'gradientStartColor': '#000000',
+          'gradientEndColor': '#00000000',
+          'gradientDirection': 'vertical',
+          'title': 'Bienvenue chez Pizza Deli\'Zza',
+          'subtitle': 'Découvrez nos délicieuses pizzas artisanales',
+          'titleColor': '#FFFFFF',
+          'subtitleColor': '#FFFFFFB3',
+          'contentAlign': 'center',
+          'spacing': 8.0,
+          'ctas': [
+            {
+              'label': 'Commander maintenant',
+              'action': 'navigate:/menu',
+              'backgroundColor': '#D62828',
+              'textColor': '#FFFFFF',
+              'borderRadius': 8.0,
+              'padding': 16.0,
+            }
+          ],
+          'hasAnimation': true,
+          'animationType': 'fadeIn',
+          'animationDuration': 1000,
+        };
       case WidgetBlockType.custom:
         return {};
     }
@@ -340,6 +372,8 @@ class _PageEditorState extends State<PageEditor> {
         return Icons.grid_view;
       case WidgetBlockType.categoryList:
         return Icons.category;
+      case WidgetBlockType.heroAdvanced:
+        return Icons.view_agenda;
       case WidgetBlockType.custom:
         return Icons.extension;
     }
@@ -359,6 +393,8 @@ class _PageEditorState extends State<PageEditor> {
         return 'Liste de produits';
       case WidgetBlockType.categoryList:
         return 'Liste de catégories';
+      case WidgetBlockType.heroAdvanced:
+        return 'Hero Avancé';
       case WidgetBlockType.custom:
         return 'Personnalisé';
     }
@@ -378,6 +414,8 @@ class _PageEditorState extends State<PageEditor> {
         return 'Grille de produits';
       case WidgetBlockType.categoryList:
         return 'Liste des catégories';
+      case WidgetBlockType.heroAdvanced:
+        return 'Hero avec image, overlay, gradient et CTAs';
       case WidgetBlockType.custom:
         return 'Bloc personnalisé';
     }

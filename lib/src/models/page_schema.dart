@@ -10,6 +10,7 @@ enum WidgetBlockType {
   productList('product_list'),
   categoryList('category_list'),
   banner('banner'),
+  heroAdvanced('hero_advanced'), // B3.5.A: Advanced hero block with image, overlay, gradient, CTAs
   custom('custom');
 
   const WidgetBlockType(this.value);

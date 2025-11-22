@@ -240,6 +240,8 @@ class BlockListPanel extends StatelessWidget {
         return Icons.grid_view;
       case WidgetBlockType.categoryList:
         return Icons.category;
+      case WidgetBlockType.heroAdvanced:
+        return Icons.view_agenda;
       case WidgetBlockType.custom:
         return Icons.extension;
     }
@@ -259,6 +261,8 @@ class BlockListPanel extends StatelessWidget {
         return 'Produits';
       case WidgetBlockType.categoryList:
         return 'Catégories';
+      case WidgetBlockType.heroAdvanced:
+        return 'Hero Avancé';
       case WidgetBlockType.custom:
         return 'Custom';
     }
