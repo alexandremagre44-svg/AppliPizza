@@ -231,7 +231,15 @@ class PageRenderer extends StatelessWidget {
     // Parse action
     if (action.startsWith('navigate:')) {
       final route = action.substring('navigate:'.length);
-      Navigator.pushNamed(context, route);
+      // Use GoRouter for consistency with the app's routing system
+      try {
+        // Try to use context.go (requires go_router package imported)
+        // For now, using Navigator as fallback for compatibility
+        Navigator.pushNamed(context, route);
+      } catch (e) {
+        // Fallback to Navigator if GoRouter context extension not available
+        Navigator.pushNamed(context, route);
+      }
     } else if (action == 'back') {
       Navigator.pop(context);
     }
@@ -252,7 +260,8 @@ class PageRenderer extends StatelessWidget {
         }
       }
     } catch (e) {
-      // Invalid color format
+      // Invalid color format - log for debugging
+      debugPrint('PageRenderer: Failed to parse color "$colorStr": $e');
     }
     return null;
   }

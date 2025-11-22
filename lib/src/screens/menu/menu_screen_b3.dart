@@ -19,6 +19,8 @@ class MenuScreenB3 extends StatelessWidget {
   }
 
   /// Create a sample PageSchema for demonstration
+  /// Note: Text is hardcoded in French for testing purposes.
+  /// In production, use i18n or configurable text from Firestore.
   PageSchema _createSamplePageSchema() {
     return PageSchema(
       id: 'menu_b3_test',
