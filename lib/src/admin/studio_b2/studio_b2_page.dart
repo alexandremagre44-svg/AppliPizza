@@ -30,33 +30,35 @@ class _StudioB2PageState extends State<StudioB2Page> {
   final AppConfigService _configService = AppConfigService();
   static const String _appId = 'pizza_delizza';
   
-  int _selectedTab = 0;
   bool _isPublishing = false;
   bool _showPreview = true;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      appBar: _buildAppBar(),
-      body: StreamBuilder<AppConfig?>(
-        stream: _configService.watchConfig(appId: _appId, draft: true),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        backgroundColor: AppColors.backgroundLight,
+        appBar: _buildAppBar(),
+        body: StreamBuilder<AppConfig?>(
+          stream: _configService.watchConfig(appId: _appId, draft: true),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (snapshot.hasError) {
-            return _buildErrorState(snapshot.error.toString());
-          }
+            if (snapshot.hasError) {
+              return _buildErrorState(snapshot.error.toString());
+            }
 
-          if (!snapshot.hasData || snapshot.data == null) {
-            return _buildNoConfigState();
-          }
+            if (!snapshot.hasData || snapshot.data == null) {
+              return _buildNoConfigState();
+            }
 
-          final config = snapshot.data!;
-          return _buildContent(config);
-        },
+            final config = snapshot.data!;
+            return _buildContent(config);
+          },
+        ),
       ),
     );
   }
@@ -141,77 +143,60 @@ class _StudioB2PageState extends State<StudioB2Page> {
   }
 
   Widget _buildContent(AppConfig config) {
-    final contentWidth = _showPreview 
-        ? MediaQuery.of(context).size.width * 0.6
-        : MediaQuery.of(context).size.width;
-
     return Row(
       children: [
         // Main content area
-        SizedBox(
-          width: contentWidth,
+        Expanded(
           child: Column(
             children: [
               // Tabs
               Container(
                 color: AppColors.surfaceWhite,
-                child: TabBar(
-                  controller: null,
+                child: const TabBar(
                   isScrollable: true,
                   labelColor: AppColors.primaryRed,
                   unselectedLabelColor: AppColors.textMedium,
                   indicatorColor: AppColors.primaryRed,
-                  tabs: const [
+                  tabs: [
                     Tab(text: 'Sections'),
                     Tab(text: 'Textes'),
                     Tab(text: 'Thème'),
                   ],
-                  onTap: (index) {
-                    setState(() {
-                      _selectedTab = index;
-                    });
-                  },
                 ),
               ),
               // Content
               Expanded(
-                child: _buildTabContent(config),
+                child: TabBarView(
+                  children: [
+                    SectionListWidget(
+                      config: config,
+                      appId: _appId,
+                      onConfigUpdated: _handleConfigUpdate,
+                    ),
+                    TextsEditor(
+                      config: config,
+                      appId: _appId,
+                      onConfigUpdated: _handleConfigUpdate,
+                    ),
+                    ThemeEditor(
+                      config: config,
+                      appId: _appId,
+                      onConfigUpdated: _handleConfigUpdate,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
         // Preview panel
         if (_showPreview)
-          Expanded(
+          SizedBox(
+            width: 420,
             child: PreviewPanel(appId: _appId),
           ),
       ],
     );
-  }
-
-  Widget _buildTabContent(AppConfig config) {
-    switch (_selectedTab) {
-      case 0:
-        return SectionListWidget(
-          config: config,
-          appId: _appId,
-          onConfigUpdated: _handleConfigUpdate,
-        );
-      case 1:
-        return TextsEditor(
-          config: config,
-          appId: _appId,
-          onConfigUpdated: _handleConfigUpdate,
-        );
-      case 2:
-        return ThemeEditor(
-          config: config,
-          appId: _appId,
-          onConfigUpdated: _handleConfigUpdate,
-        );
-      default:
-        return const Center(child: Text('Onglet non implémenté'));
-    }
   }
 
   Widget _buildErrorState(String error) {
