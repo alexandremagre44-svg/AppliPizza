@@ -152,26 +152,37 @@ Depuis le Studio B3, créer et publier des pages directement dans Firestore.
 ### 3. Vérifier si une Page Existe
 
 ```dart
-final config = appConfigService.getDefaultConfig('pizza_delizza');
+// Phase 7: Utiliser le provider pour accéder à la config depuis Firestore
+final configAsync = ref.watch(appConfigProvider);
 
-if (config.pages.hasPage('/my-route')) {
-  // La page existe
-  final page = config.pages.getPage('/my-route');
-  // Utiliser la page
-}
+configAsync.when(
+  data: (config) {
+    if (config != null && config.pages.hasPage('/my-route')) {
+      // La page existe
+      final page = config.pages.getPage('/my-route');
+      // Utiliser la page
+    }
+  },
+  loading: () => /* Afficher un loader */,
+  error: (error, stack) => /* Gérer l'erreur */,
+);
 ```
 
 ## Auto-Initialisation
 
-Lors du premier lancement de l'app :
+**Phase 7 Update**: Lors du premier lancement de l'app :
 
-1. `AppConfigService.getConfig()` est appelé
-2. Si la config n'existe pas → `getDefaultConfig()` est appelé
-3. `AppConfig.initial()` crée la config avec `PagesConfig.initial()`
-4. Les 3 pages par défaut sont incluses automatiquement
-5. La config est sauvegardée dans Firestore
+1. Le `appConfigProvider` est initialisé
+2. Il appelle `AppConfigService.getConfig(autoCreate: true)`
+3. Si la config n'existe pas dans Firestore → `getDefaultConfig()` est appelé
+4. `AppConfig.initial()` crée la config avec `PagesConfig.initial()`
+5. Les 4 pages par défaut sont incluses automatiquement (home_b3, menu_b3, categories_b3, cart_b3)
+6. La config est sauvegardée dans Firestore (published ET draft)
 
-**Résultat** : Les routes `/menu-b3`, `/categories-b3`, et `/cart-b3` fonctionnent immédiatement.
+**Résultat** : 
+- Les routes `/home-b3`, `/menu-b3`, `/categories-b3`, et `/cart-b3` fonctionnent immédiatement
+- Les pages sont immédiatement éditables dans Studio B3 (`/admin/studio-b3`)
+- Les modifications dans Studio B3 sont reflétées en temps réel dans les pages
 
 ## Compatibilité
 
@@ -283,9 +294,10 @@ Phase 3 inclura :
 
 ## Notes Techniques
 
-- Les pages sont chargées de manière synchrone pour l'instant (via `getDefaultConfig`)
-- En production, elles seront chargées depuis Firestore de manière asynchrone
-- Le `_buildDynamicPage` peut être optimisé avec un provider/state management
+- ✅ **Phase 7 Update**: Les pages sont maintenant chargées depuis Firestore via `appConfigProvider`
+- ✅ Le `_buildDynamicPage` utilise maintenant un provider Riverpod avec state management
+- ✅ Auto-création de la config avec les pages B3 au premier lancement
+- ✅ Éditions dans Studio B3 sont maintenant reflétées dans les pages live
 - Les DataSources (productList, categoryList) affichent des placeholders pour l'instant
 
 ## Sécurité
