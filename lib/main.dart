@@ -24,6 +24,8 @@ import 'src/screens/product_detail/product_detail_screen.dart';
 import 'src/studio/screens/studio_v2_screen.dart';
 import 'src/studio/screens/theme_manager_screen.dart';
 import 'src/studio/screens/media_manager_screen.dart';
+// Studio B2 - New admin interface for AppConfig B2 management
+import 'src/admin/studio_b2/studio_b2_page.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
@@ -218,6 +220,24 @@ class MyApp extends ConsumerWidget {
                   );
                 }
                 return const StudioV2Screen();
+              },
+            ),
+            // Studio B2 - New admin interface for AppConfig management
+            GoRoute(
+              path: '/admin/studio-b2',
+              builder: (context, state) {
+                // PROTECTION: Studio B2 is reserved for admins
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  // Redirect to home if not admin
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const StudioB2Page();
               },
             ),
             // Deprecated routes - redirect to admin menu
