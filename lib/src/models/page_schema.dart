@@ -452,7 +452,7 @@ class PagesConfig {
             'label': 'Retour au menu',
           },
           actions: {
-            'onTap': 'navigate:/menu',
+            'onTap': 'navigate:/menu-b3',
           },
           styling: {
             'backgroundColor': '#D62828',
@@ -489,6 +489,10 @@ class PagesConfig {
   }
 
   /// Get a page by route (alias for findByRoute)
+  /// 
+  /// Convenience method with shorter name for common use case.
+  /// Use this when you want to retrieve a page for display.
+  /// Returns null if page not found or disabled.
   PageSchema? getPage(String route) {
     return findByRoute(route);
   }

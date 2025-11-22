@@ -577,13 +577,13 @@ class MyApp extends ConsumerWidget {
 
   /// Build a dynamic page from AppConfig
   /// Returns DynamicPageScreen if page exists, otherwise PageNotFoundScreen
+  /// 
+  /// TODO Phase 3: Use a provider/state management for AppConfig instead of
+  /// creating a new service instance on each build
   static Widget _buildDynamicPage(BuildContext context, WidgetRef ref, String route) {
-    // Get AppConfig from service
-    final appConfigService = AppConfigService();
-    
     // For now, use the default config synchronously
-    // In production, this should be fetched from Firestore
-    final config = appConfigService.getDefaultConfig('pizza_delizza');
+    // In production, this should be fetched from Firestore via a provider
+    final config = AppConfigService().getDefaultConfig('pizza_delizza');
     
     // Find the page by route
     final pageSchema = config.pages.getPage(route);
