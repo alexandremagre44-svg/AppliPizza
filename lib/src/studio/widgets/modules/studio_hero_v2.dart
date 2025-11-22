@@ -58,7 +58,11 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
   }
 
   void _updateControllers() {
+    debugPrint('═══ STUDIO HERO: _updateControllers called ═══');
     final config = widget.homeConfig ?? HomeConfig.initial();
+    debugPrint('  New config title: "${config.heroTitle}"');
+    debugPrint('  New config subtitle: "${config.heroSubtitle}"');
+    
     _titleController.text = config.heroTitle;
     _subtitleController.text = config.heroSubtitle;
     _ctaTextController.text = config.heroCtaText;
@@ -68,6 +72,8 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
     setState(() {
       _ctaLinkType = _determineLinkType(config.heroCtaAction);
     });
+    
+    debugPrint('═══ STUDIO HERO: _updateControllers done ═══');
   }
 
   /// Determine CTA link type based on action string
@@ -92,14 +98,24 @@ class _StudioHeroV2State extends State<StudioHeroV2> {
   }
 
   void _updateConfig() {
+    debugPrint('═══ STUDIO HERO: _updateConfig called ═══');
+    debugPrint('  Title: "${_titleController.text}"');
+    debugPrint('  Subtitle: "${_subtitleController.text}"');
+    debugPrint('  CTA Text: "${_ctaTextController.text}"');
+    debugPrint('  Image URL: "${_imageUrlController.text}"');
+    
     final config = widget.homeConfig ?? HomeConfig.initial();
-    widget.onUpdate(config.copyWith(
+    final newConfig = config.copyWith(
       heroTitle: _titleController.text,
       heroSubtitle: _subtitleController.text,
       heroCtaText: _ctaTextController.text,
       heroImageUrl: _imageUrlController.text.isEmpty ? null : _imageUrlController.text,
       heroCtaAction: _ctaActionController.text,
-    ));
+    );
+    
+    debugPrint('  Calling widget.onUpdate...');
+    widget.onUpdate(newConfig);
+    debugPrint('═══ STUDIO HERO: _updateConfig done ═══');
   }
 
   void _onCtaLinkTypeChanged(String? value) {
