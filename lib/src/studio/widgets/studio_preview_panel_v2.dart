@@ -17,7 +17,7 @@ import '../providers/text_block_provider.dart';
 
 /// Preview panel for Studio V2 that displays the REAL HomeScreen
 /// with draft configuration using provider overrides
-class StudioPreviewPanelV2 extends StatelessWidget {
+class StudioPreviewPanelV2 extends StatefulWidget {
   final HomeConfig? homeConfig;
   final HomeLayoutConfig? layoutConfig;
   final List<BannerConfig> banners;
@@ -32,6 +32,41 @@ class StudioPreviewPanelV2 extends StatelessWidget {
     this.popupsV2 = const [],
     this.textBlocks = const [],
   });
+
+  @override
+  State<StudioPreviewPanelV2> createState() => _StudioPreviewPanelV2State();
+}
+
+class _StudioPreviewPanelV2State extends State<StudioPreviewPanelV2> {
+  int _rebuildKey = 0;
+
+  @override
+  void didUpdateWidget(StudioPreviewPanelV2 oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // Force rebuild when any prop changes to ensure preview updates
+    if (widget.homeConfig != oldWidget.homeConfig ||
+        widget.layoutConfig != oldWidget.layoutConfig ||
+        widget.banners != oldWidget.banners ||
+        widget.popupsV2 != oldWidget.popupsV2 ||
+        widget.textBlocks != oldWidget.textBlocks) {
+      setState(() {
+        _rebuildKey++;
+        debugPrint('═══ PREVIEW: Forcing rebuild #$_rebuildKey ═══');
+        if (widget.homeConfig != oldWidget.homeConfig) {
+          debugPrint('  → homeConfig changed');
+          debugPrint('    Old title: "${oldWidget.homeConfig?.heroTitle}"');
+          debugPrint('    New title: "${widget.homeConfig?.heroTitle}"');
+        }
+        if (widget.layoutConfig != oldWidget.layoutConfig) {
+          debugPrint('  → layoutConfig changed');
+        }
+        if (widget.banners != oldWidget.banners) {
+          debugPrint('  → banners changed (${oldWidget.banners.length} → ${widget.banners.length})');
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,19 +159,19 @@ class StudioPreviewPanelV2 extends StatelessWidget {
     final overrides = <Override>[];
 
     // Override homeConfigProvider with draft data
-    if (homeConfig != null) {
+    if (widget.homeConfig != null) {
       overrides.add(
         homeConfigProvider.overrideWith((ref) {
-          return Stream.value(homeConfig);
+          return Stream.value(widget.homeConfig);
         }),
       );
     }
 
     // Override homeLayoutProvider with draft data
-    if (layoutConfig != null) {
+    if (widget.layoutConfig != null) {
       overrides.add(
         homeLayoutProvider.overrideWith((ref) {
-          return Stream.value(layoutConfig);
+          return Stream.value(widget.layoutConfig);
         }),
       );
     }
@@ -144,13 +179,13 @@ class StudioPreviewPanelV2 extends StatelessWidget {
     // Override bannersProvider with draft data
     overrides.add(
       bannersProvider.overrideWith((ref) {
-        return Stream.value(banners);
+        return Stream.value(widget.banners);
       }),
     );
     overrides.add(
       activeBannersProvider.overrideWith((ref) {
         return Stream.value(
-          banners.where((b) => b.isCurrentlyActive).toList(),
+          widget.banners.where((b) => b.isCurrentlyActive).toList(),
         );
       }),
     );
@@ -158,12 +193,12 @@ class StudioPreviewPanelV2 extends StatelessWidget {
     // Override popupsV2Provider with draft data
     overrides.add(
       popupsV2Provider.overrideWith((ref) {
-        return Stream.value(popupsV2);
+        return Stream.value(widget.popupsV2);
       }),
     );
     overrides.add(
       activePopupsV2Provider.overrideWith((ref) {
-        final activePopups = popupsV2
+        final activePopups = widget.popupsV2
             .where((p) => p.isCurrentlyActive)
             .toList();
         activePopups.sort((a, b) => b.priority.compareTo(a.priority));
@@ -174,29 +209,30 @@ class StudioPreviewPanelV2 extends StatelessWidget {
     // Override textBlocksProvider with draft data
     overrides.add(
       textBlocksProvider.overrideWith((ref) {
-        return Stream.value(textBlocks);
+        return Stream.value(widget.textBlocks);
       }),
     );
     overrides.add(
       enabledTextBlocksProvider.overrideWith((ref) {
         return Stream.value(
-          textBlocks.where((b) => b.isEnabled).toList(),
+          widget.textBlocks.where((b) => b.isEnabled).toList(),
         );
       }),
     );
 
-    // Generate a unique key based on the draft data to force rebuild when data changes
-    // Using Object.hash for a robust composite key
+    // Generate a unique key based on the draft data AND rebuild counter to force rebuild
+    // Using Object.hash for a robust composite key + _rebuildKey to force unique keys
     final key = ValueKey(
       Object.hash(
-        homeConfig?.heroTitle ?? '',
-        homeConfig?.heroSubtitle ?? '',
-        homeConfig?.heroImageUrl ?? '',
-        homeConfig?.heroEnabled ?? false,
-        layoutConfig?.studioEnabled ?? false,
-        banners.length,
-        popupsV2.length,
-        textBlocks.length,
+        _rebuildKey,
+        widget.homeConfig?.heroTitle ?? '',
+        widget.homeConfig?.heroSubtitle ?? '',
+        widget.homeConfig?.heroImageUrl ?? '',
+        widget.homeConfig?.heroEnabled ?? false,
+        widget.layoutConfig?.studioEnabled ?? false,
+        widget.banners.length,
+        widget.popupsV2.length,
+        widget.textBlocks.length,
       ),
     );
 

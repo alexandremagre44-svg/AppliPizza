@@ -1,6 +1,7 @@
 // lib/src/studio/controllers/studio_state_controller.dart
 // Riverpod state management for Studio V2
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/text_block_model.dart';
 import '../models/popup_v2_model.dart';
@@ -115,10 +116,17 @@ class StudioDraftStateNotifier extends StateNotifier<StudioDraftState> {
   StudioDraftStateNotifier() : super(StudioDraftState());
 
   void setHomeConfig(HomeConfig config) {
+    debugPrint('═══ DRAFT STATE: setHomeConfig called ═══');
+    debugPrint('  New title: "${config.heroTitle}"');
+    debugPrint('  New subtitle: "${config.heroSubtitle}"');
+    debugPrint('  Setting hasUnsavedChanges: true');
+    
     state = state.copyWith(
       homeConfig: config,
       hasUnsavedChanges: true,
     );
+    
+    debugPrint('═══ DRAFT STATE: State updated ═══');
   }
 
   void setLayoutConfig(HomeLayoutConfig config) {

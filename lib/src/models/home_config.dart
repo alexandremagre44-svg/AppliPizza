@@ -150,6 +150,28 @@ class HomeConfig {
       updatedAt: DateTime.now(),
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is HomeConfig &&
+        other.id == id &&
+        other.hero == hero &&
+        other.promoBanner == promoBanner &&
+        other.blocks.length == blocks.length &&
+        other.updatedAt == updatedAt;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      id,
+      hero,
+      promoBanner,
+      blocks.length,
+      updatedAt,
+    );
+  }
 }
 
 // Hero Banner Configuration
@@ -220,6 +242,30 @@ class HeroConfig {
       subtitle: subtitle ?? this.subtitle,
       ctaText: ctaText ?? this.ctaText,
       ctaAction: ctaAction ?? this.ctaAction,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is HeroConfig &&
+        other.isActive == isActive &&
+        other.imageUrl == imageUrl &&
+        other.title == title &&
+        other.subtitle == subtitle &&
+        other.ctaText == ctaText &&
+        other.ctaAction == ctaAction;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      isActive,
+      imageUrl,
+      title,
+      subtitle,
+      ctaText,
+      ctaAction,
     );
   }
 }
