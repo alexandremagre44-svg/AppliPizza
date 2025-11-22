@@ -1102,48 +1102,42 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
       _buildSectionTitle('Configuration'),
       _buildTextField('title', 'Titre', _properties['title'] as String? ?? ''),
       _buildSwitchField('showTitle', 'Afficher le titre', _properties['showTitle'] as bool? ?? true),
-      
-      TextField(
-        controller: TextEditingController(
-          text: (_properties['columns'] as num? ?? 2).toInt().toString(),
-        ),
-        decoration: const InputDecoration(
-          labelText: 'Colonnes',
-          border: OutlineInputBorder(),
-        ),
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: (value) => _updateProperty('columns', int.tryParse(value) ?? 2),
-      ),
-      const SizedBox(height: 12),
-      
+      _buildNumberField('columns', 'Colonnes', (_properties['columns'] as num? ?? 2)),
       _buildNumberField('spacing', 'Espacement (px)', _properties['spacing'] as num? ?? 16),
       _buildSwitchField('showPrice', 'Afficher les prix', _properties['showPrice'] as bool? ?? true),
       
       const SizedBox(height: 16),
       _buildSectionTitle('Source de données'),
       
-      TextField(
-        controller: TextEditingController(
-          text: _dataSource?.config['category'] as String? ?? '',
-        ),
+      DropdownButtonFormField<String>(
+        value: _dataSource?.config['category'] as String? ?? '',
         decoration: const InputDecoration(
-          labelText: 'Catégorie (filtrer par)',
+          labelText: 'Filtrer par catégorie',
           border: OutlineInputBorder(),
-          hintText: 'pizza, menus, boissons, desserts',
         ),
-        onChanged: (value) => _updateDataSourceConfig('category', value),
+        items: [
+          const DropdownMenuItem(value: '', child: Text('Toutes')),
+          const DropdownMenuItem(value: 'pizza', child: Text('Pizza')),
+          const DropdownMenuItem(value: 'menus', child: Text('Menus')),
+          const DropdownMenuItem(value: 'boissons', child: Text('Boissons')),
+          const DropdownMenuItem(value: 'desserts', child: Text('Desserts')),
+        ],
+        onChanged: (value) {
+          if (value != null) {
+            _updateDataSourceConfig('category', value);
+          }
+        },
       ),
       const SizedBox(height: 12),
       
       TextField(
         controller: TextEditingController(
-          text: (_dataSource?.config['limit'] as num?)?.toString() ?? '10',
+          text: (_dataSource?.config['limit'] as num?)?.toString() ?? '',
         ),
         decoration: const InputDecoration(
           labelText: 'Limite (nombre de produits)',
           border: OutlineInputBorder(),
-          hintText: '10',
+          hintText: 'Laisser vide pour tout afficher',
         ),
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -1185,12 +1179,12 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
       
       TextField(
         controller: TextEditingController(
-          text: (_dataSource?.config['limit'] as num?)?.toString() ?? '10',
+          text: (_dataSource?.config['limit'] as num?)?.toString() ?? '',
         ),
         decoration: const InputDecoration(
           labelText: 'Limite (nombre de catégories)',
           border: OutlineInputBorder(),
-          hintText: '10',
+          hintText: 'Laisser vide pour tout afficher',
         ),
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -1249,7 +1243,7 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
   List<Widget> _buildStickyCtaFields() {
     // Ensure action object exists
     if (_properties['action'] == null) {
-      _properties['action'] = <String, dynamic>{};
+      _updateProperty('action', <String, dynamic>{});
     }
     
     final action = _properties['action'] as Map<String, dynamic>;
@@ -1297,10 +1291,7 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
             .toList(),
         onChanged: (value) {
           if (value != null) {
-            setState(() {
-              action['type'] = value;
-            });
-            _notifyUpdate();
+            _updateProperty('action', {...action, 'type': value});
           }
         },
       ),
@@ -1314,10 +1305,7 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
           hintText: 'navigate:/menu ou https://...',
         ),
         onChanged: (value) {
-          setState(() {
-            action['value'] = value;
-          });
-          _notifyUpdate();
+          _updateProperty('action', {...action, 'value': value});
         },
       ),
       const SizedBox(height: 12),
