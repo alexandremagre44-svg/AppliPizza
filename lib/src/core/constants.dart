@@ -7,7 +7,9 @@ class AppRoutes {
   static const String home = '/home';
   static const String menu = '/menu';
   static const String menuB3 = '/menu-b3'; // B3: Dynamic page test route
+  static const String categoriesB3 = '/categories-b3'; // B3 Phase 2: Dynamic categories page
   static const String cart = '/cart';
+  static const String cartB3 = '/cart-b3'; // B3 Phase 2: Dynamic cart page
   static const String profile = '/profile';
   static const String productDetail = '/details';
   static const String checkout = '/checkout';

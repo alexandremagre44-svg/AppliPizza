@@ -255,6 +255,219 @@ class PagesConfig {
     );
   }
 
+  /// Create initial PagesConfig with default B3 pages
+  factory PagesConfig.initial() {
+    return PagesConfig(
+      pages: [
+        _createDefaultMenuPage(),
+        _createDefaultCategoriesPage(),
+        _createDefaultCartPage(),
+      ],
+    );
+  }
+
+  /// Create default menu page
+  static PageSchema _createDefaultMenuPage() {
+    return PageSchema(
+      id: 'menu_b3',
+      name: 'Menu B3',
+      route: '/menu-b3',
+      enabled: true,
+      blocks: [
+        WidgetBlock(
+          id: 'banner_menu',
+          type: WidgetBlockType.banner,
+          order: 1,
+          visible: true,
+          properties: {
+            'text': '🍕 Notre Menu',
+          },
+          styling: {
+            'backgroundColor': '#D62828',
+            'textColor': '#FFFFFF',
+            'padding': 16.0,
+          },
+        ),
+        WidgetBlock(
+          id: 'title_menu',
+          type: WidgetBlockType.text,
+          order: 2,
+          visible: true,
+          properties: {
+            'text': 'Découvrez nos pizzas',
+            'fontSize': 24.0,
+            'bold': true,
+            'align': 'center',
+          },
+          styling: {
+            'padding': {'top': 24.0, 'bottom': 16.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        WidgetBlock(
+          id: 'products_menu',
+          type: WidgetBlockType.productList,
+          order: 3,
+          visible: true,
+          properties: {
+            'title': 'Nos Pizzas',
+          },
+          dataSource: DataSource(
+            id: 'all_products',
+            type: DataSourceType.products,
+            config: {'category': 'pizza'},
+          ),
+          styling: {
+            'padding': 8.0,
+          },
+        ),
+      ],
+      metadata: {
+        'description': 'Page menu dynamique B3',
+        'version': 1,
+      },
+    );
+  }
+
+  /// Create default categories page
+  static PageSchema _createDefaultCategoriesPage() {
+    return PageSchema(
+      id: 'categories_b3',
+      name: 'Catégories B3',
+      route: '/categories-b3',
+      enabled: true,
+      blocks: [
+        WidgetBlock(
+          id: 'banner_categories',
+          type: WidgetBlockType.banner,
+          order: 1,
+          visible: true,
+          properties: {
+            'text': '📂 Catégories',
+          },
+          styling: {
+            'backgroundColor': '#2E7D32',
+            'textColor': '#FFFFFF',
+            'padding': 16.0,
+          },
+        ),
+        WidgetBlock(
+          id: 'title_categories',
+          type: WidgetBlockType.text,
+          order: 2,
+          visible: true,
+          properties: {
+            'text': 'Explorez nos catégories',
+            'fontSize': 24.0,
+            'bold': true,
+            'align': 'center',
+          },
+          styling: {
+            'padding': {'top': 24.0, 'bottom': 16.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        WidgetBlock(
+          id: 'categories_list',
+          type: WidgetBlockType.categoryList,
+          order: 3,
+          visible: true,
+          properties: {
+            'title': 'Toutes les catégories',
+          },
+          dataSource: DataSource(
+            id: 'all_categories',
+            type: DataSourceType.categories,
+            config: {},
+          ),
+          styling: {
+            'padding': 8.0,
+          },
+        ),
+      ],
+      metadata: {
+        'description': 'Page catégories dynamique B3',
+        'version': 1,
+      },
+    );
+  }
+
+  /// Create default cart page
+  static PageSchema _createDefaultCartPage() {
+    return PageSchema(
+      id: 'cart_b3',
+      name: 'Panier B3',
+      route: '/cart-b3',
+      enabled: true,
+      blocks: [
+        WidgetBlock(
+          id: 'banner_cart',
+          type: WidgetBlockType.banner,
+          order: 1,
+          visible: true,
+          properties: {
+            'text': '🛒 Votre Panier',
+          },
+          styling: {
+            'backgroundColor': '#1976D2',
+            'textColor': '#FFFFFF',
+            'padding': 16.0,
+          },
+        ),
+        WidgetBlock(
+          id: 'empty_cart_message',
+          type: WidgetBlockType.text,
+          order: 2,
+          visible: true,
+          properties: {
+            'text': 'Votre panier est vide',
+            'fontSize': 20.0,
+            'bold': true,
+            'align': 'center',
+          },
+          styling: {
+            'color': '#666666',
+            'padding': {'top': 48.0, 'bottom': 24.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        WidgetBlock(
+          id: 'empty_cart_subtitle',
+          type: WidgetBlockType.text,
+          order: 3,
+          visible: true,
+          properties: {
+            'text': 'Ajoutez des produits depuis notre menu pour commencer votre commande',
+            'fontSize': 16.0,
+            'align': 'center',
+          },
+          styling: {
+            'color': '#999999',
+            'padding': {'top': 0.0, 'bottom': 32.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        WidgetBlock(
+          id: 'back_to_menu_button',
+          type: WidgetBlockType.button,
+          order: 4,
+          visible: true,
+          properties: {
+            'label': 'Retour au menu',
+          },
+          actions: {
+            'onTap': 'navigate:/menu',
+          },
+          styling: {
+            'backgroundColor': '#D62828',
+            'textColor': '#FFFFFF',
+            'padding': 16.0,
+          },
+        ),
+      ],
+      metadata: {
+        'description': 'Page panier dynamique B3',
+        'version': 1,
+      },
+    );
+  }
+
   /// Find a page by route
   PageSchema? findByRoute(String route) {
     try {
@@ -273,5 +486,15 @@ class PagesConfig {
     } catch (e) {
       return null;
     }
+  }
+
+  /// Get a page by route (alias for findByRoute)
+  PageSchema? getPage(String route) {
+    return findByRoute(route);
+  }
+
+  /// Check if a page exists for a given route
+  bool hasPage(String route) {
+    return pages.any((p) => p.route == route && p.enabled);
   }
 }

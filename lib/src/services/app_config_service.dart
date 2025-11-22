@@ -28,6 +28,7 @@ class AppConfigService {
   /// - Default texts
   /// - Default theme
   /// - Disabled roulette module
+  /// - Default B3 dynamic pages (menu_b3, categories_b3, cart_b3)
   AppConfig getDefaultConfig(String appId) {
     return AppConfig.initial(appId: appId);
   }

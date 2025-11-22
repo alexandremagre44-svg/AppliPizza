@@ -17,6 +17,7 @@ import 'src/screens/home/home_screen.dart';
 import 'src/screens/home/home_screen_b2.dart'; // NEW: HomeScreen based on AppConfig B2
 import 'src/screens/menu/menu_screen.dart';
 import 'src/screens/menu/menu_screen_b3.dart'; // B3: Dynamic page architecture 
+import 'src/screens/dynamic/dynamic_page_screen.dart'; // B3 Phase 2: Dynamic page screen
 import 'src/screens/cart/cart_screen.dart';
 import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
@@ -56,6 +57,9 @@ import 'src/models/product.dart';
 import 'src/theme/app_theme.dart';
 import 'src/core/constants.dart';
 import 'src/providers/auth_provider.dart';
+// B3 Phase 2: AppConfig for dynamic pages
+import 'src/services/app_config_service.dart';
+import 'src/models/page_schema.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -183,6 +187,15 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: AppRoutes.menuB3,
               builder: (context, state) => const MenuScreenB3(),
+            ),
+            // B3 Phase 2: Dynamic page routes from AppConfig
+            GoRoute(
+              path: AppRoutes.categoriesB3,
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.categoriesB3),
+            ),
+            GoRoute(
+              path: AppRoutes.cartB3,
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.cartB3),
             ),
             GoRoute(
               path: AppRoutes.cart,
@@ -560,5 +573,25 @@ class MyApp extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  /// Build a dynamic page from AppConfig
+  /// Returns DynamicPageScreen if page exists, otherwise PageNotFoundScreen
+  static Widget _buildDynamicPage(BuildContext context, WidgetRef ref, String route) {
+    // Get AppConfig from service
+    final appConfigService = AppConfigService();
+    
+    // For now, use the default config synchronously
+    // In production, this should be fetched from Firestore
+    final config = appConfigService.getDefaultConfig('pizza_delizza');
+    
+    // Find the page by route
+    final pageSchema = config.pages.getPage(route);
+    
+    if (pageSchema != null) {
+      return DynamicPageScreen(pageSchema: pageSchema);
+    } else {
+      return PageNotFoundScreen(route: route);
+    }
   }
 }

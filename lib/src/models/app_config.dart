@@ -141,7 +141,7 @@ class AppConfig {
       branding: BrandingConfig.empty(),
       legal: LegalConfig.empty(),
       modules: ModulesConfig.empty(),
-      pages: PagesConfig.empty(),
+      pages: PagesConfig.initial(), // B3 Phase 2: Include default dynamic pages
       createdAt: now,
       updatedAt: now,
     );
