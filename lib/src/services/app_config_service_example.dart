@@ -2,7 +2,6 @@
 // Example usage of AppConfigService
 // This file demonstrates how to use the new unified configuration system
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/app_config.dart';
 import 'app_config_service.dart';
 
@@ -160,7 +159,7 @@ class AppConfigServiceExample {
       active: true,
       data: {
         'title': 'Info allergènes',
-        'content': 'Nos pizzas peuvent contenir des traces d\'allergènes',
+        'content': 'Nos pizzas peuvent contenir des traces d\'allergènes. Consultez notre carte pour plus de détails.',
         'showOnAppStart': true,
       },
     );

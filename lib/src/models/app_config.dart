@@ -2,6 +2,15 @@
 // Unified configuration model for the entire application
 // This centralizes all configuration aspects for white-label support
 
+/// Default text constants
+class AppConfigDefaults {
+  static const String defaultWelcomeTitle = 'Bienvenue chez Pizza Deli\'Zza';
+  static const String defaultWelcomeSubtitle = 'La pizza 100% appli';
+  static const String defaultPrimaryColor = '#D62828';
+  static const String defaultSecondaryColor = '#000000';
+  static const String defaultAccentColor = '#FFFFFF';
+}
+
 /// Enum for different types of home sections
 enum HomeSectionType {
   hero('hero'),
@@ -192,8 +201,8 @@ class HomeConfigV2 {
           order: 1,
           active: true,
           data: {
-            'title': 'Bienvenue chez Pizza Deli\'Zza',
-            'subtitle': 'La pizza 100% appli',
+            'title': AppConfigDefaults.defaultWelcomeTitle,
+            'subtitle': AppConfigDefaults.defaultWelcomeSubtitle,
             'imageUrl': '',
             'ctaLabel': 'Voir le menu',
             'ctaTarget': 'menu',
@@ -206,7 +215,7 @@ class HomeConfigV2 {
           active: false,
           data: {
             'text': '−20% le mardi',
-            'backgroundColor': '#D62828',
+            'backgroundColor': AppConfigDefaults.defaultPrimaryColor,
           },
         ),
       ],
@@ -320,8 +329,8 @@ class TextsConfig {
 
   factory TextsConfig.initial() {
     return TextsConfig(
-      welcomeTitle: 'Bienvenue chez Pizza Deli\'Zza',
-      welcomeSubtitle: 'La pizza 100% appli',
+      welcomeTitle: AppConfigDefaults.defaultWelcomeTitle,
+      welcomeSubtitle: AppConfigDefaults.defaultWelcomeSubtitle,
     );
   }
 }
@@ -351,9 +360,9 @@ class ThemeConfigV2 {
 
   factory ThemeConfigV2.fromJson(Map<String, dynamic> json) {
     return ThemeConfigV2(
-      primaryColor: json['primaryColor'] as String? ?? '#D62828',
-      secondaryColor: json['secondaryColor'] as String? ?? '#000000',
-      accentColor: json['accentColor'] as String? ?? '#FFFFFF',
+      primaryColor: json['primaryColor'] as String? ?? AppConfigDefaults.defaultPrimaryColor,
+      secondaryColor: json['secondaryColor'] as String? ?? AppConfigDefaults.defaultSecondaryColor,
+      accentColor: json['accentColor'] as String? ?? AppConfigDefaults.defaultAccentColor,
       darkMode: json['darkMode'] as bool? ?? false,
     );
   }
@@ -374,18 +383,18 @@ class ThemeConfigV2 {
 
   factory ThemeConfigV2.empty() {
     return ThemeConfigV2(
-      primaryColor: '#D62828',
-      secondaryColor: '#000000',
-      accentColor: '#FFFFFF',
+      primaryColor: AppConfigDefaults.defaultPrimaryColor,
+      secondaryColor: AppConfigDefaults.defaultSecondaryColor,
+      accentColor: AppConfigDefaults.defaultAccentColor,
       darkMode: false,
     );
   }
 
   factory ThemeConfigV2.initial() {
     return ThemeConfigV2(
-      primaryColor: '#D62828',
-      secondaryColor: '#000000',
-      accentColor: '#FFFFFF',
+      primaryColor: AppConfigDefaults.defaultPrimaryColor,
+      secondaryColor: AppConfigDefaults.defaultSecondaryColor,
+      accentColor: AppConfigDefaults.defaultAccentColor,
       darkMode: false,
     );
   }
