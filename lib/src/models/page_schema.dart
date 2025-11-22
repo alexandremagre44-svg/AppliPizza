@@ -13,6 +13,10 @@ enum WidgetBlockType {
   heroAdvanced('hero_advanced'), // B3.5.A: Advanced hero block with image, overlay, gradient, CTAs
   carousel('carousel'), // B3.5.B: Carousel block with images, products, categories, promotions
   popup('popup'), // B3.5.C: Popup/modal overlay with triggers and show-once logic
+  productSlider('product_slider'), // B3.5.D.1: Horizontal scrolling product slider
+  categorySlider('category_slider'), // B3.5.D.2: Horizontal scrolling category slider
+  promoBanner('promo_banner'), // B3.5.D.3: Promotional banner with conditions
+  stickyCta('sticky_cta'), // B3.5.D.4: Fixed CTA button with scroll behavior
   custom('custom');
 
   const WidgetBlockType(this.value);

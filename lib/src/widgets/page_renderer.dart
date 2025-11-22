@@ -28,6 +28,7 @@ class _PageRendererState extends State<PageRenderer> {
   final DataSourceResolver _dataSourceResolver = DataSourceResolver();
   final Map<String, bool> _popupShownState = {}; // Track which popups have been shown
   Timer? _delayedPopupTimer;
+  WidgetBlock? _stickyCta; // Track sticky CTA block
 
   @override
   void initState() {
@@ -128,12 +129,20 @@ class _PageRendererState extends State<PageRenderer> {
     final sortedBlocks = List<WidgetBlock>.from(widget.pageSchema.blocks)
       ..sort((a, b) => a.order.compareTo(b.order));
 
-    // Filter visible blocks (exclude popups as they're rendered separately)
+    // Filter visible blocks (exclude popups and sticky CTAs as they're rendered separately)
     final visibleBlocks = sortedBlocks.where((block) => 
-      block.visible && block.type != WidgetBlockType.popup
+      block.visible && 
+      block.type != WidgetBlockType.popup &&
+      block.type != WidgetBlockType.stickyCta
     ).toList();
 
-    return Scaffold(
+    // Find sticky CTA block (if any)
+    _stickyCta = sortedBlocks
+        .where((block) => block.visible && block.type == WidgetBlockType.stickyCta)
+        .toList()
+        .lastOrNull; // Use the last one if multiple exist
+
+    final mainContent = Scaffold(
       appBar: AppBar(
         title: Text(widget.pageSchema.name),
       ),
@@ -143,6 +152,18 @@ class _PageRendererState extends State<PageRenderer> {
         ),
       ),
     );
+
+    // Wrap with Stack if sticky CTA exists
+    if (_stickyCta != null) {
+      return Stack(
+        children: [
+          mainContent,
+          _buildStickyCta(context, _stickyCta!),
+        ],
+      );
+    }
+
+    return mainContent;
   }
 
   /// Build a widget from a WidgetBlock
@@ -164,6 +185,15 @@ class _PageRendererState extends State<PageRenderer> {
         return _buildHeroAdvancedBlock(context, block);
       case WidgetBlockType.carousel:
         return _buildCarouselBlock(context, block);
+      case WidgetBlockType.productSlider:
+        return _buildProductSliderBlock(context, block);
+      case WidgetBlockType.categorySlider:
+        return _buildCategorySliderBlock(context, block);
+      case WidgetBlockType.promoBanner:
+        return _buildPromoBannerBlock(context, block);
+      case WidgetBlockType.stickyCta:
+        // Sticky CTAs are handled separately in build(), return empty container
+        return const SizedBox.shrink();
       case WidgetBlockType.custom:
       default:
         return _buildCustomBlock(context, block);
@@ -1432,6 +1462,437 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build product slider block (B3.5.D.1)
+  Widget _buildProductSliderBlock(BuildContext context, WidgetBlock block) {
+    final title = block.properties['title'] as String?;
+    final showTitle = block.properties['showTitle'] as bool? ?? true;
+    final itemWidth = (block.properties['itemWidth'] as num?)?.toDouble() ?? 180.0;
+    final itemHeight = (block.properties['itemHeight'] as num?)?.toDouble() ?? 280.0;
+    final spacing = (block.properties['spacing'] as num?)?.toDouble() ?? 12.0;
+    final showPrice = block.properties['showPrice'] as bool? ?? true;
+    final limit = block.properties['limit'] as int? ?? 10;
+
+    developer.log('🎯 Building product slider block');
+
+    return FutureBuilder<List<Product>>(
+      future: _dataSourceResolver.resolveProducts(block.dataSource),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Error loading products: ${snapshot.error}'),
+            ),
+          );
+        }
+
+        final products = (snapshot.data ?? []).take(limit).toList();
+
+        if (products.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Text('No products found'),
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (showTitle && title != null && title.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            SizedBox(
+              height: itemHeight,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: products.length,
+                separatorBuilder: (context, index) => SizedBox(width: spacing),
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  return SizedBox(
+                    width: itemWidth,
+                    child: ProductCard(product: product),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Build category slider block (B3.5.D.2)
+  Widget _buildCategorySliderBlock(BuildContext context, WidgetBlock block) {
+    final title = block.properties['title'] as String?;
+    final itemWidth = (block.properties['itemWidth'] as num?)?.toDouble() ?? 120.0;
+    final itemHeight = (block.properties['itemHeight'] as num?)?.toDouble() ?? 140.0;
+    final spacing = (block.properties['spacing'] as num?)?.toDouble() ?? 12.0;
+    final limit = block.properties['limit'] as int? ?? 10;
+
+    developer.log('🎯 Building category slider block');
+
+    return FutureBuilder<Map<String, int>>(
+      future: _dataSourceResolver.resolveCategories(block.dataSource),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Error loading categories: ${snapshot.error}'),
+            ),
+          );
+        }
+
+        final categories = snapshot.data ?? {};
+        final categoryList = categories.entries.take(limit).toList();
+
+        if (categoryList.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Text('No categories found'),
+            ),
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (title != null && title.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            SizedBox(
+              height: itemHeight,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: categoryList.length,
+                separatorBuilder: (context, index) => SizedBox(width: spacing),
+                itemBuilder: (context, index) {
+                  final entry = categoryList[index];
+                  return SizedBox(
+                    width: itemWidth,
+                    child: Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          // Navigate to category
+                          developer.log('Open category: ${entry.key}');
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.category,
+                                size: 48,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                entry.key,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '${entry.value}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Build promo banner block (B3.5.D.3)
+  Widget _buildPromoBannerBlock(BuildContext context, WidgetBlock block) {
+    final title = block.properties['title'] as String? ?? '';
+    final subtitle = block.properties['subtitle'] as String? ?? '';
+    final backgroundColor = _parseColor(block.properties['backgroundColor'] as String?) ?? Colors.red;
+    final textColor = _parseColor(block.properties['textColor'] as String?) ?? Colors.white;
+    final imageUrl = block.properties['imageUrl'] as String?;
+    final borderRadius = (block.properties['borderRadius'] as num?)?.toDouble() ?? 12.0;
+    final padding = (block.properties['padding'] as num?)?.toDouble() ?? 16.0;
+    final ctaLabel = block.properties['ctaLabel'] as String?;
+    final ctaAction = block.properties['ctaAction'] as String?;
+
+    // Display conditions (for future implementation)
+    final displayCondition = block.properties['displayCondition'] as Map<String, dynamic>?;
+    final activeOnly = displayCondition?['activeOnly'] as bool? ?? false;
+    
+    // TODO: Implement display conditions logic
+    // For now, always show if activeOnly is false
+
+    developer.log('🎯 Building promo banner block');
+
+    return Container(
+      margin: EdgeInsets.all(padding),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Container(
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+          child: Stack(
+            children: [
+              if (imageUrl != null && imageUrl.isNotEmpty)
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0.3,
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: EdgeInsets.all(padding),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.local_offer,
+                      size: 40,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (title.isNotEmpty)
+                            Text(
+                              title,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                            ),
+                          if (subtitle.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              subtitle,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: textColor.withOpacity(0.9),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (ctaLabel != null && ctaLabel.isNotEmpty)
+                      ElevatedButton(
+                        onPressed: () {
+                          if (ctaAction != null) {
+                            if (ctaAction.startsWith('navigate:')) {
+                              final route = ctaAction.substring('navigate:'.length);
+                              Navigator.of(context).pushNamed(route);
+                            } else if (ctaAction.startsWith('openUrl:')) {
+                              developer.log('Open URL: $ctaAction');
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: textColor,
+                          foregroundColor: backgroundColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        ),
+                        child: Text(
+                          ctaLabel,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build sticky CTA block (B3.5.D.4)
+  Widget _buildStickyCta(BuildContext context, WidgetBlock block) {
+    final label = block.properties['label'] as String? ?? 'Action';
+    final iconName = block.properties['icon'] as String?;
+    final backgroundColor = _parseColor(block.properties['backgroundColor'] as String?) ?? Colors.blue;
+    final textColor = _parseColor(block.properties['textColor'] as String?) ?? Colors.white;
+    final borderRadius = (block.properties['borderRadius'] as num?)?.toDouble() ?? 24.0;
+    final padding = (block.properties['padding'] as num?)?.toDouble() ?? 16.0;
+    final position = block.properties['position'] as String? ?? 'bottom';
+    final action = block.properties['action'] as Map<String, dynamic>?;
+    final behavior = block.properties['behavior'] as Map<String, dynamic>?;
+    final elevation = (behavior?['elevation'] as num?)?.toDouble() ?? 4.0;
+
+    // TODO: Implement scroll behaviors (showOnScrollUp, hideOnScrollDown)
+    // TODO: Implement conditional display (showIfCartNotEmpty, showIfCategory)
+    // For now, always show
+
+    IconData? icon;
+    if (iconName != null) {
+      switch (iconName) {
+        case 'shopping_cart':
+          icon = Icons.shopping_cart;
+          break;
+        case 'local_pizza':
+          icon = Icons.local_pizza;
+          break;
+        case 'arrow_forward':
+          icon = Icons.arrow_forward;
+          break;
+        case 'info':
+          icon = Icons.info;
+          break;
+        default:
+          icon = Icons.touch_app;
+      }
+    }
+
+    developer.log('🎯 Building sticky CTA block at $position');
+
+    return Positioned(
+      bottom: position == 'bottom' ? 16 : null,
+      top: position == 'top' ? 16 : null,
+      left: 16,
+      right: 16,
+      child: Material(
+        elevation: elevation,
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(borderRadius),
+          onTap: () {
+            if (action != null) {
+              final actionType = action['type'] as String?;
+              if (actionType == 'navigate') {
+                final route = action['route'] as String?;
+                if (route != null) {
+                  Navigator.of(context).pushNamed(route);
+                }
+              } else if (actionType == 'openProduct') {
+                final productId = action['productId'] as String?;
+                developer.log('Open product: $productId');
+              } else if (actionType == 'openCategory') {
+                final categoryId = action['categoryId'] as String?;
+                developer.log('Open category: $categoryId');
+              } else if (actionType == 'openUrl') {
+                final url = action['url'] as String?;
+                developer.log('Open URL: $url');
+              }
+            }
+          },
+          child: Container(
+            padding: EdgeInsets.all(padding),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: textColor, size: 24),
+                  const SizedBox(width: 12),
+                ],
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

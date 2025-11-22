@@ -246,6 +246,14 @@ class BlockListPanel extends StatelessWidget {
         return Icons.view_carousel_outlined;
       case WidgetBlockType.popup:
         return Icons.notifications_active;
+      case WidgetBlockType.productSlider:
+        return Icons.view_stream;
+      case WidgetBlockType.categorySlider:
+        return Icons.category_outlined;
+      case WidgetBlockType.promoBanner:
+        return Icons.local_offer;
+      case WidgetBlockType.stickyCta:
+        return Icons.touch_app;
       case WidgetBlockType.custom:
         return Icons.extension;
     }
@@ -271,6 +279,14 @@ class BlockListPanel extends StatelessWidget {
         return 'Carrousel';
       case WidgetBlockType.popup:
         return 'Popup';
+      case WidgetBlockType.productSlider:
+        return 'Slider Produits';
+      case WidgetBlockType.categorySlider:
+        return 'Slider Catégories';
+      case WidgetBlockType.promoBanner:
+        return 'Bannière Promo';
+      case WidgetBlockType.stickyCta:
+        return 'CTA Fixe';
       case WidgetBlockType.custom:
         return 'Custom';
     }

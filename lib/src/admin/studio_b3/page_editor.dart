@@ -425,6 +425,62 @@ class _PageEditorState extends State<PageEditor> {
             }
           ],
         };
+      case WidgetBlockType.productSlider:
+        return {
+          'title': 'Nos produits populaires',
+          'showTitle': true,
+          'itemWidth': 180.0,
+          'itemHeight': 280.0,
+          'spacing': 12.0,
+          'showPrice': true,
+          'limit': 10,
+        };
+      case WidgetBlockType.categorySlider:
+        return {
+          'title': 'Catégories',
+          'itemWidth': 120.0,
+          'itemHeight': 140.0,
+          'spacing': 12.0,
+          'limit': 10,
+        };
+      case WidgetBlockType.promoBanner:
+        return {
+          'title': 'Offre limitée',
+          'subtitle': 'Profitez de -30% sur toutes nos pizzas !',
+          'backgroundColor': '#D62828',
+          'textColor': '#FFFFFF',
+          'imageUrl': '',
+          'borderRadius': 12.0,
+          'padding': 16.0,
+          'ctaLabel': 'Commander',
+          'ctaAction': 'navigate:/menu-b3',
+          'displayCondition': {
+            'activeOnly': false,
+            'minOrderPrice': null,
+            'specificCategory': null,
+          },
+        };
+      case WidgetBlockType.stickyCta:
+        return {
+          'label': 'Voir le menu',
+          'icon': 'local_pizza',
+          'backgroundColor': '#D62828',
+          'textColor': '#FFFFFF',
+          'borderRadius': 24.0,
+          'padding': 16.0,
+          'position': 'bottom',
+          'action': {
+            'type': 'navigate',
+            'route': '/menu-b3',
+          },
+          'behavior': {
+            'showOnScrollUp': false,
+            'hideOnScrollDown': false,
+            'showIfCartNotEmpty': false,
+            'showIfCategory': null,
+            'elevation': 4.0,
+          },
+        };
       case WidgetBlockType.custom:
         return {};
     }
@@ -450,6 +506,14 @@ class _PageEditorState extends State<PageEditor> {
         return Icons.view_carousel_outlined;
       case WidgetBlockType.popup:
         return Icons.notifications_active;
+      case WidgetBlockType.productSlider:
+        return Icons.view_stream;
+      case WidgetBlockType.categorySlider:
+        return Icons.category_outlined;
+      case WidgetBlockType.promoBanner:
+        return Icons.local_offer;
+      case WidgetBlockType.stickyCta:
+        return Icons.touch_app;
       case WidgetBlockType.custom:
         return Icons.extension;
     }
@@ -475,6 +539,14 @@ class _PageEditorState extends State<PageEditor> {
         return 'Carrousel';
       case WidgetBlockType.popup:
         return 'Popup';
+      case WidgetBlockType.productSlider:
+        return 'Slider Produits';
+      case WidgetBlockType.categorySlider:
+        return 'Slider Catégories';
+      case WidgetBlockType.promoBanner:
+        return 'Bannière Promo';
+      case WidgetBlockType.stickyCta:
+        return 'CTA Fixe';
       case WidgetBlockType.custom:
         return 'Personnalisé';
     }
@@ -500,6 +572,14 @@ class _PageEditorState extends State<PageEditor> {
         return 'Carrousel d\'images, produits ou catégories';
       case WidgetBlockType.popup:
         return 'Popup/modal avec déclencheurs et conditions';
+      case WidgetBlockType.productSlider:
+        return 'Défilement horizontal de produits';
+      case WidgetBlockType.categorySlider:
+        return 'Défilement horizontal de catégories';
+      case WidgetBlockType.promoBanner:
+        return 'Bannière promotionnelle avec conditions d\'affichage';
+      case WidgetBlockType.stickyCta:
+        return 'Bouton CTA toujours visible (fixe en haut/bas)';
       case WidgetBlockType.custom:
         return 'Bloc personnalisé';
     }
