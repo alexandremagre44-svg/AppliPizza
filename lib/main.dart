@@ -190,10 +190,10 @@ class MyApp extends ConsumerWidget {
               path: AppRoutes.menu,
               builder: (context, state) => const MenuScreen(),
             ),
-            // MenuScreenB3 - Test route for B3 dynamic page architecture
+            // MenuB3 - B3 Phase 6: Dynamic menu page
             GoRoute(
               path: AppRoutes.menuB3,
-              builder: (context, state) => const MenuScreenB3(),
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.menuB3),
             ),
             // B3 Phase 2: Dynamic page routes from AppConfig
             GoRoute(

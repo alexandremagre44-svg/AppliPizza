@@ -281,6 +281,8 @@ class PagesConfig {
   }
 
   /// Create default home page
+  /// Note: This is a default template for Pizza Deli'Zza.
+  /// All content is editable via Studio B3 after initialization.
   static PageSchema _createDefaultHomePage() {
     return PageSchema(
       id: 'home_b3',
@@ -295,9 +297,9 @@ class PagesConfig {
           order: 1,
           visible: true,
           properties: {
-            'title': 'Bienvenue chez Pizza Deli\'Zza',
+            'title': 'Bienvenue chez Pizza Deli\'Zza', // Editable in Studio B3
             'subtitle': 'La pizza 100% appli - Commandez en quelques clics',
-            'imageUrl': 'https://images.unsplash.com/photo-1513104890138-7c749659a591',
+            'imageUrl': 'https://images.unsplash.com/photo-1513104890138-7c749659a591', // Default demo image, replaceable in Studio B3
             'height': 350.0,
             'borderRadius': 0.0,
             'imageFit': 'cover',
