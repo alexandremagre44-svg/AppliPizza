@@ -167,36 +167,86 @@ class _PageRendererState extends State<PageRenderer> {
   }
 
   /// Build a widget from a WidgetBlock
+  /// Wraps rendering in error handling to prevent crashes
   Widget _buildBlock(BuildContext context, WidgetBlock block) {
-    switch (block.type) {
-      case WidgetBlockType.text:
-        return _buildTextBlock(context, block);
-      case WidgetBlockType.image:
-        return _buildImageBlock(context, block);
-      case WidgetBlockType.button:
-        return _buildButtonBlock(context, block);
-      case WidgetBlockType.banner:
-        return _buildBannerBlock(context, block);
-      case WidgetBlockType.productList:
-        return _buildProductListBlock(context, block);
-      case WidgetBlockType.categoryList:
-        return _buildCategoryListBlock(context, block);
-      case WidgetBlockType.heroAdvanced:
-        return _buildHeroAdvancedBlock(context, block);
-      case WidgetBlockType.carousel:
-        return _buildCarouselBlock(context, block);
-      case WidgetBlockType.productSlider:
-        return _buildProductSliderBlock(context, block);
-      case WidgetBlockType.categorySlider:
-        return _buildCategorySliderBlock(context, block);
-      case WidgetBlockType.promoBanner:
-        return _buildPromoBannerBlock(context, block);
-      case WidgetBlockType.stickyCta:
-        // Sticky CTAs are handled separately in build(), return empty container
-        return const SizedBox.shrink();
-      case WidgetBlockType.custom:
-      default:
-        return _buildCustomBlock(context, block);
+    try {
+      switch (block.type) {
+        case WidgetBlockType.text:
+          return _buildTextBlock(context, block);
+        case WidgetBlockType.image:
+          return _buildImageBlock(context, block);
+        case WidgetBlockType.button:
+          return _buildButtonBlock(context, block);
+        case WidgetBlockType.banner:
+          return _buildBannerBlock(context, block);
+        case WidgetBlockType.productList:
+          return _buildProductListBlock(context, block);
+        case WidgetBlockType.categoryList:
+          return _buildCategoryListBlock(context, block);
+        case WidgetBlockType.heroAdvanced:
+          return _buildHeroAdvancedBlock(context, block);
+        case WidgetBlockType.carousel:
+          return _buildCarouselBlock(context, block);
+        case WidgetBlockType.popup:
+          // Popups are handled separately in initState(), return empty container
+          return const SizedBox.shrink();
+        case WidgetBlockType.productSlider:
+          return _buildProductSliderBlock(context, block);
+        case WidgetBlockType.categorySlider:
+          return _buildCategorySliderBlock(context, block);
+        case WidgetBlockType.promoBanner:
+          return _buildPromoBannerBlock(context, block);
+        case WidgetBlockType.stickyCta:
+          // Sticky CTAs are handled separately in build(), return empty container
+          return const SizedBox.shrink();
+        case WidgetBlockType.custom:
+        default:
+          return _buildCustomBlock(context, block);
+      }
+    } catch (e, stackTrace) {
+      developer.log(
+        '❌ PageRenderer: Error rendering block ${block.id} (${block.type.value})',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      // Return error widget instead of crashing
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.red[50],
+          border: Border.all(color: Colors.red[300]!, width: 2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.red[700]),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Erreur de rendu',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red[900],
+                    ),
+                  ),
+                  Text(
+                    'Bloc: ${block.type.value} (${block.id})',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
     }
   }
 
@@ -831,9 +881,41 @@ class _PageRendererState extends State<PageRenderer> {
   /// Build a custom block (fallback)
   Widget _buildCustomBlock(BuildContext context, WidgetBlock block) {
     return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       padding: const EdgeInsets.all(16.0),
-      color: Colors.amber[100],
-      child: Text('Custom Block: ${block.id} (type: ${block.type.value})'),
+      decoration: BoxDecoration(
+        color: Colors.amber[50],
+        border: Border.all(color: Colors.amber[300]!, width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.widgets, color: Colors.amber[700]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Bloc personnalisé',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.amber[900],
+                  ),
+                ),
+                Text(
+                  'Type: ${block.type.value}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

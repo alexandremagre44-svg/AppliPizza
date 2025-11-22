@@ -77,6 +77,13 @@ class StorageKeys {
   static const String dessertsList = 'desserts_list';
 }
 
+/// Configuration de l'application
+class AppConstants {
+  /// App ID used for Firestore configuration
+  /// B3 Phase 7: Centralized constant for AppConfig
+  static const String appId = 'pizza_delizza';
+}
+
 /// Constantes visuelles
 class VisualConstants {
   // Grid
