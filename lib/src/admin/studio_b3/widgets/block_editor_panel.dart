@@ -160,13 +160,13 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
       case WidgetBlockType.popup:
         return _buildPopupFields();
       case WidgetBlockType.productSlider:
-        return [const Text('Product Slider (configuration minimale)')];
+        return _buildProductSliderFields();
       case WidgetBlockType.categorySlider:
-        return [const Text('Category Slider (configuration minimale)')];
+        return _buildCategorySliderFields();
       case WidgetBlockType.promoBanner:
-        return [const Text('Promo Banner (configuration minimale)')];
+        return _buildPromoBannerFields();
       case WidgetBlockType.stickyCta:
-        return [const Text('Sticky CTA (configuration minimale)')];
+        return _buildStickyCtaFields();
       case WidgetBlockType.custom:
         return [const Text('Bloc personnalisé (aucun champ)')];
     }
@@ -1085,6 +1085,243 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
       });
       _notifyUpdate();
     }
+  }
+
+  /// Build fields for productSlider block
+  List<Widget> _buildProductSliderFields() {
+    // Initialize DataSource if needed
+    if (_dataSource == null) {
+      _dataSource = DataSource(
+        id: 'datasource_${widget.block.id}',
+        type: DataSourceType.products,
+        config: {},
+      );
+    }
+    
+    return [
+      _buildSectionTitle('Configuration'),
+      _buildTextField('title', 'Titre', _properties['title'] as String? ?? ''),
+      _buildSwitchField('showTitle', 'Afficher le titre', _properties['showTitle'] as bool? ?? true),
+      
+      TextField(
+        controller: TextEditingController(
+          text: (_properties['columns'] as num? ?? 2).toInt().toString(),
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Colonnes',
+          border: OutlineInputBorder(),
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) => _updateProperty('columns', int.tryParse(value) ?? 2),
+      ),
+      const SizedBox(height: 12),
+      
+      _buildNumberField('spacing', 'Espacement (px)', _properties['spacing'] as num? ?? 16),
+      _buildSwitchField('showPrice', 'Afficher les prix', _properties['showPrice'] as bool? ?? true),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('Source de données'),
+      
+      TextField(
+        controller: TextEditingController(
+          text: _dataSource?.config['category'] as String? ?? '',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Catégorie (filtrer par)',
+          border: OutlineInputBorder(),
+          hintText: 'pizza, menus, boissons, desserts',
+        ),
+        onChanged: (value) => _updateDataSourceConfig('category', value),
+      ),
+      const SizedBox(height: 12),
+      
+      TextField(
+        controller: TextEditingController(
+          text: (_dataSource?.config['limit'] as num?)?.toString() ?? '10',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Limite (nombre de produits)',
+          border: OutlineInputBorder(),
+          hintText: '10',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) {
+          final limit = value.isEmpty ? null : int.tryParse(value);
+          _updateDataSourceConfig('limit', limit);
+        },
+      ),
+      const SizedBox(height: 12),
+      
+      const Text(
+        'DataSource: produits connectés à Firestore',
+        style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
+      ),
+    ];
+  }
+
+  /// Build fields for categorySlider block
+  List<Widget> _buildCategorySliderFields() {
+    // Initialize DataSource if needed
+    if (_dataSource == null) {
+      _dataSource = DataSource(
+        id: 'datasource_${widget.block.id}',
+        type: DataSourceType.categories,
+        config: {},
+      );
+    }
+    
+    return [
+      _buildSectionTitle('Configuration'),
+      _buildTextField('title', 'Titre', _properties['title'] as String? ?? ''),
+      _buildSwitchField('showTitle', 'Afficher le titre', _properties['showTitle'] as bool? ?? true),
+      _buildNumberField('itemWidth', 'Largeur item (px)', _properties['itemWidth'] as num? ?? 120),
+      _buildNumberField('itemHeight', 'Hauteur item (px)', _properties['itemHeight'] as num? ?? 120),
+      _buildSwitchField('showCountBadge', 'Afficher badge compteur', _properties['showCountBadge'] as bool? ?? true),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('Source de données'),
+      
+      TextField(
+        controller: TextEditingController(
+          text: (_dataSource?.config['limit'] as num?)?.toString() ?? '10',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Limite (nombre de catégories)',
+          border: OutlineInputBorder(),
+          hintText: '10',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) {
+          final limit = value.isEmpty ? null : int.tryParse(value);
+          _updateDataSourceConfig('limit', limit);
+        },
+      ),
+      const SizedBox(height: 12),
+      
+      const Text(
+        'DataSource: catégories connectées à Firestore',
+        style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
+      ),
+    ];
+  }
+
+  /// Build fields for promoBanner block
+  List<Widget> _buildPromoBannerFields() {
+    return [
+      _buildSectionTitle('Contenu'),
+      _buildTextField('title', 'Titre', _properties['title'] as String? ?? ''),
+      _buildTextField('subtitle', 'Sous-titre', _properties['subtitle'] as String? ?? ''),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('Apparence'),
+      _buildColorField('backgroundColor', 'Couleur de fond', _properties['backgroundColor'] as String? ?? '#D62828'),
+      _buildColorField('textColor', 'Couleur du texte', _properties['textColor'] as String? ?? '#FFFFFF'),
+      _buildNumberField('borderRadius', 'Border Radius (px)', _properties['borderRadius'] as num? ?? 12),
+      _buildNumberField('padding', 'Padding (px)', _properties['padding'] as num? ?? 16),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('Gradient'),
+      _buildColorField('gradientStartColor', 'Couleur début gradient', _properties['gradientStartColor'] as String? ?? ''),
+      _buildColorField('gradientEndColor', 'Couleur fin gradient', _properties['gradientEndColor'] as String? ?? ''),
+      _buildDropdownField(
+        'gradientDirection',
+        'Direction gradient',
+        _properties['gradientDirection'] as String? ?? 'horizontal',
+        ['horizontal', 'vertical'],
+        (value) => _updateProperty('gradientDirection', value),
+      ),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('Conditions de visibilité'),
+      _buildSwitchField('visibilityCondition', 'Activer conditions', _properties['visibilityCondition'] as bool? ?? false),
+      if (_properties['visibilityCondition'] == true) ...[
+        _buildNumberField('minTotal', 'Montant minimum (€)', _properties['minTotal'] as num? ?? 0),
+        _buildTextField('startDate', 'Date de début (ISO)', _properties['startDate'] as String? ?? ''),
+        _buildTextField('endDate', 'Date de fin (ISO)', _properties['endDate'] as String? ?? ''),
+      ],
+    ];
+  }
+
+  /// Build fields for stickyCta block
+  List<Widget> _buildStickyCtaFields() {
+    // Ensure action object exists
+    if (_properties['action'] == null) {
+      _properties['action'] = <String, dynamic>{};
+    }
+    
+    final action = _properties['action'] as Map<String, dynamic>;
+    
+    return [
+      _buildSectionTitle('Contenu'),
+      _buildTextField('label', 'Label', _properties['label'] as String? ?? ''),
+      _buildDropdownField(
+        'icon',
+        'Icône',
+        _properties['icon'] as String? ?? 'shopping_cart',
+        ['shopping_cart', 'phone', 'info', 'arrow_forward'],
+        (value) => _updateProperty('icon', value),
+      ),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('Apparence'),
+      _buildColorField('backgroundColor', 'Couleur de fond', _properties['backgroundColor'] as String? ?? '#D62828'),
+      _buildColorField('textColor', 'Couleur du texte', _properties['textColor'] as String? ?? '#FFFFFF'),
+      _buildNumberField('borderRadius', 'Border Radius (px)', _properties['borderRadius'] as num? ?? 25),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('Position'),
+      _buildDropdownField(
+        'position',
+        'Position',
+        _properties['position'] as String? ?? 'bottom',
+        ['bottom', 'top'],
+        (value) => _updateProperty('position', value),
+      ),
+      _buildSwitchField('visibleOnScrollUp', 'Visible au scroll vers le haut', _properties['visibleOnScrollUp'] as bool? ?? true),
+      _buildSwitchField('visibleOnScrollDown', 'Visible au scroll vers le bas', _properties['visibleOnScrollDown'] as bool? ?? false),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('Action'),
+      
+      DropdownButtonFormField<String>(
+        value: action['type'] as String? ?? 'navigate',
+        decoration: const InputDecoration(
+          labelText: 'Type d\'action',
+          border: OutlineInputBorder(),
+        ),
+        items: ['navigate', 'url', 'none']
+            .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+            .toList(),
+        onChanged: (value) {
+          if (value != null) {
+            setState(() {
+              action['type'] = value;
+            });
+            _notifyUpdate();
+          }
+        },
+      ),
+      const SizedBox(height: 12),
+      
+      TextField(
+        controller: TextEditingController(text: action['value'] as String? ?? ''),
+        decoration: const InputDecoration(
+          labelText: 'Valeur de l\'action',
+          border: OutlineInputBorder(),
+          hintText: 'navigate:/menu ou https://...',
+        ),
+        onChanged: (value) {
+          setState(() {
+            action['value'] = value;
+          });
+          _notifyUpdate();
+        },
+      ),
+      const SizedBox(height: 12),
+    ];
   }
 
   Widget _buildStylingSection() {
