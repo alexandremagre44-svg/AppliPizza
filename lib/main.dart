@@ -15,7 +15,9 @@ import 'src/screens/auth/login_screen.dart';
 import 'src/screens/auth/signup_screen.dart';
 import 'src/screens/home/home_screen.dart'; 
 import 'src/screens/home/home_screen_b2.dart'; // NEW: HomeScreen based on AppConfig B2
-import 'src/screens/menu/menu_screen.dart'; 
+import 'src/screens/menu/menu_screen.dart';
+import 'src/screens/menu/menu_screen_b3.dart'; // B3: Dynamic page architecture 
+import 'src/screens/dynamic/dynamic_page_screen.dart'; // B3 Phase 2: Dynamic page screen
 import 'src/screens/cart/cart_screen.dart';
 import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
@@ -26,6 +28,8 @@ import 'src/studio/screens/theme_manager_screen.dart';
 import 'src/studio/screens/media_manager_screen.dart';
 // Studio B2 - New admin interface for AppConfig B2 management
 import 'src/admin/studio_b2/studio_b2_page.dart';
+// Studio B3 - Page editor for dynamic pages
+import 'src/admin/studio_b3/studio_b3_page.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
@@ -55,6 +59,9 @@ import 'src/models/product.dart';
 import 'src/theme/app_theme.dart';
 import 'src/core/constants.dart';
 import 'src/providers/auth_provider.dart';
+// B3 Phase 2: AppConfig for dynamic pages
+import 'src/services/app_config_service.dart';
+import 'src/models/page_schema.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -178,6 +185,20 @@ class MyApp extends ConsumerWidget {
               path: AppRoutes.menu,
               builder: (context, state) => const MenuScreen(),
             ),
+            // MenuScreenB3 - Test route for B3 dynamic page architecture
+            GoRoute(
+              path: AppRoutes.menuB3,
+              builder: (context, state) => const MenuScreenB3(),
+            ),
+            // B3 Phase 2: Dynamic page routes from AppConfig
+            GoRoute(
+              path: AppRoutes.categoriesB3,
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.categoriesB3),
+            ),
+            GoRoute(
+              path: AppRoutes.cartB3,
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.cartB3),
+            ),
             GoRoute(
               path: AppRoutes.cart,
               builder: (context, state) => const CartScreen(),
@@ -238,6 +259,24 @@ class MyApp extends ConsumerWidget {
                   );
                 }
                 return const StudioB2Page();
+              },
+            ),
+            // Studio B3 - Page editor for dynamic pages
+            GoRoute(
+              path: AppRoutes.adminStudioB3,
+              builder: (context, state) {
+                // PROTECTION: Studio B3 is reserved for admins
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  // Redirect to home if not admin
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.home);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const StudioB3Page();
               },
             ),
             // Deprecated routes - redirect to admin menu
@@ -554,5 +593,25 @@ class MyApp extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  /// Build a dynamic page from AppConfig
+  /// Returns DynamicPageScreen if page exists, otherwise PageNotFoundScreen
+  /// 
+  /// TODO Phase 3: Use a provider/state management for AppConfig instead of
+  /// creating a new service instance on each build
+  static Widget _buildDynamicPage(BuildContext context, WidgetRef ref, String route) {
+    // For now, use the default config synchronously
+    // In production, this should be fetched from Firestore via a provider
+    final config = AppConfigService().getDefaultConfig('pizza_delizza');
+    
+    // Find the page by route
+    final pageSchema = config.pages.getPage(route);
+    
+    if (pageSchema != null) {
+      return DynamicPageScreen(pageSchema: pageSchema);
+    } else {
+      return PageNotFoundScreen(route: route);
+    }
   }
 }

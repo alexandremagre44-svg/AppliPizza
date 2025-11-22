@@ -2,6 +2,8 @@
 // Unified configuration model for the entire application
 // This centralizes all configuration aspects for white-label support
 
+import 'page_schema.dart';
+
 /// Default text constants
 class AppConfigDefaults {
   static const String defaultWelcomeTitle = 'Bienvenue chez Pizza Deli\'Zza';
@@ -40,6 +42,7 @@ class AppConfig {
   final BrandingConfig branding;
   final LegalConfig legal;
   final ModulesConfig modules;
+  final PagesConfig pages; // B3: Dynamic pages configuration
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -51,6 +54,7 @@ class AppConfig {
     required this.branding,
     required this.legal,
     required this.modules,
+    required this.pages,
     this.createdAt,
     this.updatedAt,
   });
@@ -64,6 +68,7 @@ class AppConfig {
       'branding': branding.toJson(),
       'legal': legal.toJson(),
       'modules': modules.toJson(),
+      'pages': pages.toJson(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -88,6 +93,9 @@ class AppConfig {
       modules: json['modules'] != null
           ? ModulesConfig.fromJson(json['modules'] as Map<String, dynamic>)
           : ModulesConfig.empty(),
+      pages: json['pages'] != null
+          ? PagesConfig.fromJson(json['pages'] as Map<String, dynamic>)
+          : PagesConfig.empty(),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
@@ -105,6 +113,7 @@ class AppConfig {
     BrandingConfig? branding,
     LegalConfig? legal,
     ModulesConfig? modules,
+    PagesConfig? pages,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -116,6 +125,7 @@ class AppConfig {
       branding: branding ?? this.branding,
       legal: legal ?? this.legal,
       modules: modules ?? this.modules,
+      pages: pages ?? this.pages,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -131,6 +141,7 @@ class AppConfig {
       branding: BrandingConfig.empty(),
       legal: LegalConfig.empty(),
       modules: ModulesConfig.empty(),
+      pages: PagesConfig.initial(), // B3 Phase 2: Include default dynamic pages
       createdAt: now,
       updatedAt: now,
     );
