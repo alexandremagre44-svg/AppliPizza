@@ -6,6 +6,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String home = '/home';
   static const String menu = '/menu';
+  static const String menuB3 = '/menu-b3'; // B3: Dynamic page test route
   static const String cart = '/cart';
   static const String profile = '/profile';
   static const String productDetail = '/details';

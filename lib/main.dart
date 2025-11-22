@@ -15,7 +15,8 @@ import 'src/screens/auth/login_screen.dart';
 import 'src/screens/auth/signup_screen.dart';
 import 'src/screens/home/home_screen.dart'; 
 import 'src/screens/home/home_screen_b2.dart'; // NEW: HomeScreen based on AppConfig B2
-import 'src/screens/menu/menu_screen.dart'; 
+import 'src/screens/menu/menu_screen.dart';
+import 'src/screens/menu/menu_screen_b3.dart'; // B3: Dynamic page architecture 
 import 'src/screens/cart/cart_screen.dart';
 import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
@@ -177,6 +178,11 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: AppRoutes.menu,
               builder: (context, state) => const MenuScreen(),
+            ),
+            // MenuScreenB3 - Test route for B3 dynamic page architecture
+            GoRoute(
+              path: AppRoutes.menuB3,
+              builder: (context, state) => const MenuScreenB3(),
             ),
             GoRoute(
               path: AppRoutes.cart,
