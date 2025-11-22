@@ -931,380 +931,6 @@ class _PageRendererState extends State<PageRenderer> {
         return BoxFit.cover;
     }
   }
-}
-
-/// Stateful widget for carousel with autoplay support
-class _CarouselWidget extends StatefulWidget {
-  final WidgetBlock block;
-  final String carouselType;
-  final double height;
-  final double viewportFraction;
-  final bool autoPlay;
-  final int autoPlayIntervalMs;
-  final bool enlargeCenterPage;
-  final bool showIndicators;
-  final Color indicatorColor;
-  final Color indicatorActiveColor;
-  final double borderRadius;
-  final DataSourceResolver dataSourceResolver;
-  final Function(String) onAction;
-
-  const _CarouselWidget({
-    Key? key,
-    required this.block,
-    required this.carouselType,
-    required this.height,
-    required this.viewportFraction,
-    required this.autoPlay,
-    required this.autoPlayIntervalMs,
-    required this.enlargeCenterPage,
-    required this.showIndicators,
-    required this.indicatorColor,
-    required this.indicatorActiveColor,
-    required this.borderRadius,
-    required this.dataSourceResolver,
-    required this.onAction,
-  }) : super(key: key);
-
-  @override
-  State<_CarouselWidget> createState() => _CarouselWidgetState();
-}
-
-class _CarouselWidgetState extends State<_CarouselWidget> {
-  late PageController _pageController;
-  int _currentPage = 0;
-  Timer? _autoPlayTimer;
-  List<dynamic> _slides = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(
-      viewportFraction: widget.viewportFraction,
-      initialPage: 0,
-    );
-    _loadSlides();
-  }
-
-  @override
-  void dispose() {
-    _autoPlayTimer?.cancel();
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadSlides() async {
-    try {
-      if (widget.carouselType == 'images') {
-        // Load slides from properties
-        final slides = widget.block.properties['slides'] as List? ?? [];
-        setState(() {
-          _slides = slides;
-          _isLoading = false;
-        });
-        _startAutoPlay();
-      } else if (widget.carouselType == 'products' && widget.block.dataSource != null) {
-        // Load products from DataSource
-        final products = await widget.dataSourceResolver.resolveProducts(widget.block.dataSource!);
-        developer.log('✅ CarouselWidget: Loaded ${products.length} products');
-        setState(() {
-          _slides = products;
-          _isLoading = false;
-        });
-        _startAutoPlay();
-      } else if (widget.carouselType == 'categories' && widget.block.dataSource != null) {
-        // Load categories from DataSource
-        final categories = await widget.dataSourceResolver.resolveCategories(widget.block.dataSource!);
-        developer.log('✅ CarouselWidget: Loaded ${categories.length} categories');
-        setState(() {
-          _slides = categories.map((cat) => {'name': cat.value, 'count': 0}).toList();
-          _isLoading = false;
-        });
-        _startAutoPlay();
-      } else {
-        // Fallback: empty slides
-        setState(() {
-          _slides = [];
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      developer.log('❌ CarouselWidget: Error loading slides: $e');
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _startAutoPlay() {
-    if (widget.autoPlay && _slides.isNotEmpty) {
-      _autoPlayTimer = Timer.periodic(
-        Duration(milliseconds: widget.autoPlayIntervalMs),
-        (_) {
-          if (_currentPage < _slides.length - 1) {
-            _pageController.nextPage(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
-          } else {
-            _pageController.animateToPage(
-              0,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
-          }
-        },
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return SizedBox(
-        height: widget.height,
-        child: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (_slides.isEmpty) {
-      return Container(
-        height: widget.height,
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-        ),
-        child: const Center(
-          child: Text('No slides available'),
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        SizedBox(
-          height: widget.height,
-          child: PageView.builder(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentPage = index;
-              });
-            },
-            itemCount: _slides.length,
-            itemBuilder: (context, index) {
-              return AnimatedBuilder(
-                animation: _pageController,
-                builder: (context, child) {
-                  double value = 1.0;
-                  if (_pageController.position.haveDimensions) {
-                    value = _pageController.page! - index;
-                    value = (1 - (value.abs() * 0.3)).clamp(0.0, 1.0);
-                  }
-
-                  final scale = widget.enlargeCenterPage 
-                      ? Curves.easeOut.transform(value)
-                      : 1.0;
-
-                  return Center(
-                    child: SizedBox(
-                      height: widget.height * scale,
-                      child: child,
-                    ),
-                  );
-                },
-                child: _buildSlide(context, _slides[index], index),
-              );
-            },
-          ),
-        ),
-        if (widget.showIndicators && _slides.length > 1) ...[
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              _slides.length,
-              (index) => Container(
-                width: 8,
-                height: 8,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _currentPage == index
-                      ? widget.indicatorActiveColor
-                      : widget.indicatorColor,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildSlide(BuildContext context, dynamic slide, int index) {
-    if (widget.carouselType == 'images') {
-      return _buildImageSlide(context, slide);
-    } else if (widget.carouselType == 'products') {
-      return _buildProductSlide(context, slide as Product);
-    } else if (widget.carouselType == 'categories') {
-      return _buildCategorySlide(context, slide);
-    }
-    return Container();
-  }
-
-  Widget _buildImageSlide(BuildContext context, Map<String, dynamic> slide) {
-    final imageUrl = slide['imageUrl'] as String? ?? '';
-    final title = slide['title'] as String? ?? '';
-    final subtitle = slide['subtitle'] as String? ?? '';
-    final action = slide['action'] as String? ?? '';
-    final overlayColor = _parseColor(slide['overlayColor'] as String?);
-    final overlayOpacity = (slide['overlayOpacity'] as num?)?.toDouble() ?? 0.3;
-    final useGradient = slide['useGradient'] as bool? ?? false;
-    final gradientStartColor = _parseColor(slide['gradientStartColor'] as String?) ?? Colors.black;
-    final gradientEndColor = _parseColor(slide['gradientEndColor'] as String?) ?? Colors.transparent;
-    final gradientDirection = slide['gradientDirection'] as String? ?? 'vertical';
-
-    return GestureDetector(
-      onTap: () {
-        if (action.isNotEmpty) {
-          widget.onAction(action);
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Background image
-              Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.broken_image, size: 64, color: Colors.grey),
-                  );
-                },
-              ),
-              
-              // Overlay or gradient
-              if (useGradient)
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: gradientDirection == 'horizontal' ? Alignment.centerLeft : Alignment.topCenter,
-                      end: gradientDirection == 'horizontal' ? Alignment.centerRight : Alignment.bottomCenter,
-                      colors: [gradientStartColor, gradientEndColor],
-                    ),
-                  ),
-                )
-              else if (overlayColor != null)
-                Container(
-                  color: overlayColor.withOpacity(overlayOpacity),
-                ),
-              
-              // Content
-              if (title.isNotEmpty || subtitle.isNotEmpty)
-                Positioned(
-                  bottom: 24,
-                  left: 24,
-                  right: 24,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (title.isNotEmpty)
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      if (subtitle.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          subtitle,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProductSlide(BuildContext context, Product product) {
-    final showPrice = widget.block.properties['showPrice'] as bool? ?? true;
-    
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      child: ProductCard(
-        product: product,
-        onAddToCart: () {
-          // TODO: Implement add to cart functionality
-          developer.log('Add to cart: ${product.name}');
-        },
-      ),
-    );
-  }
-
-  Widget _buildCategorySlide(BuildContext context, Map<String, dynamic> category) {
-    final name = category['name'] as String? ?? '';
-    final count = category['count'] as int? ?? 0;
-    
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(widget.borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.category, size: 48, color: Colors.blue[700]),
-            const SizedBox(height: 12),
-            Text(
-              name,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              '$count produit${count != 1 ? 's' : ''}',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   /// Build popup dialog content
   Widget _buildPopupContent(BuildContext context, WidgetBlock block) {
@@ -1892,7 +1518,382 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
       ),
     );
   }
+}
 
+/// Stateful widget for carousel with autoplay support
+class _CarouselWidget extends StatefulWidget {
+  final WidgetBlock block;
+  final String carouselType;
+  final double height;
+  final double viewportFraction;
+  final bool autoPlay;
+  final int autoPlayIntervalMs;
+  final bool enlargeCenterPage;
+  final bool showIndicators;
+  final Color indicatorColor;
+  final Color indicatorActiveColor;
+  final double borderRadius;
+  final DataSourceResolver dataSourceResolver;
+  final Function(String) onAction;
+
+  const _CarouselWidget({
+    Key? key,
+    required this.block,
+    required this.carouselType,
+    required this.height,
+    required this.viewportFraction,
+    required this.autoPlay,
+    required this.autoPlayIntervalMs,
+    required this.enlargeCenterPage,
+    required this.showIndicators,
+    required this.indicatorColor,
+    required this.indicatorActiveColor,
+    required this.borderRadius,
+    required this.dataSourceResolver,
+    required this.onAction,
+  }) : super(key: key);
+
+  @override
+  State<_CarouselWidget> createState() => _CarouselWidgetState();
+}
+
+class _CarouselWidgetState extends State<_CarouselWidget> {
+  late PageController _pageController;
+  int _currentPage = 0;
+  Timer? _autoPlayTimer;
+  List<dynamic> _slides = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(
+      viewportFraction: widget.viewportFraction,
+      initialPage: 0,
+    );
+    _loadSlides();
+  }
+
+  @override
+  void dispose() {
+    _autoPlayTimer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadSlides() async {
+    try {
+      if (widget.carouselType == 'images') {
+        // Load slides from properties
+        final slides = widget.block.properties['slides'] as List? ?? [];
+        setState(() {
+          _slides = slides;
+          _isLoading = false;
+        });
+        _startAutoPlay();
+      } else if (widget.carouselType == 'products' && widget.block.dataSource != null) {
+        // Load products from DataSource
+        final products = await widget.dataSourceResolver.resolveProducts(widget.block.dataSource!);
+        developer.log('✅ CarouselWidget: Loaded ${products.length} products');
+        setState(() {
+          _slides = products;
+          _isLoading = false;
+        });
+        _startAutoPlay();
+      } else if (widget.carouselType == 'categories' && widget.block.dataSource != null) {
+        // Load categories from DataSource
+        final categories = await widget.dataSourceResolver.resolveCategories(widget.block.dataSource!);
+        developer.log('✅ CarouselWidget: Loaded ${categories.length} categories');
+        setState(() {
+          _slides = categories.map((cat) => {'name': cat.value, 'count': 0}).toList();
+          _isLoading = false;
+        });
+        _startAutoPlay();
+      } else {
+        // Fallback: empty slides
+        setState(() {
+          _slides = [];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      developer.log('❌ CarouselWidget: Error loading slides: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _startAutoPlay() {
+    if (widget.autoPlay && _slides.isNotEmpty) {
+      _autoPlayTimer = Timer.periodic(
+        Duration(milliseconds: widget.autoPlayIntervalMs),
+        (_) {
+          if (_currentPage < _slides.length - 1) {
+            _pageController.nextPage(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          } else {
+            _pageController.animateToPage(
+              0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        },
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return SizedBox(
+        height: widget.height,
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_slides.isEmpty) {
+      return Container(
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+        ),
+        child: const Center(
+          child: Text('No slides available'),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        SizedBox(
+          height: widget.height,
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPage = index;
+              });
+            },
+            itemCount: _slides.length,
+            itemBuilder: (context, index) {
+              return AnimatedBuilder(
+                animation: _pageController,
+                builder: (context, child) {
+                  double value = 1.0;
+                  if (_pageController.position.haveDimensions) {
+                    value = _pageController.page! - index;
+                    value = (1 - (value.abs() * 0.3)).clamp(0.0, 1.0);
+                  }
+
+                  final scale = widget.enlargeCenterPage 
+                      ? Curves.easeOut.transform(value)
+                      : 1.0;
+
+                  return Center(
+                    child: SizedBox(
+                      height: widget.height * scale,
+                      child: child,
+                    ),
+                  );
+                },
+                child: _buildSlide(context, _slides[index], index),
+              );
+            },
+          ),
+        ),
+        if (widget.showIndicators && _slides.length > 1) ...[
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              _slides.length,
+              (index) => Container(
+                width: 8,
+                height: 8,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentPage == index
+                      ? widget.indicatorActiveColor
+                      : widget.indicatorColor,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSlide(BuildContext context, dynamic slide, int index) {
+    if (widget.carouselType == 'images') {
+      return _buildImageSlide(context, slide);
+    } else if (widget.carouselType == 'products') {
+      return _buildProductSlide(context, slide as Product);
+    } else if (widget.carouselType == 'categories') {
+      return _buildCategorySlide(context, slide);
+    }
+    return Container();
+  }
+
+  Widget _buildImageSlide(BuildContext context, Map<String, dynamic> slide) {
+    final imageUrl = slide['imageUrl'] as String? ?? '';
+    final title = slide['title'] as String? ?? '';
+    final subtitle = slide['subtitle'] as String? ?? '';
+    final action = slide['action'] as String? ?? '';
+    final overlayColor = _parseColor(slide['overlayColor'] as String?);
+    final overlayOpacity = (slide['overlayOpacity'] as num?)?.toDouble() ?? 0.3;
+    final useGradient = slide['useGradient'] as bool? ?? false;
+    final gradientStartColor = _parseColor(slide['gradientStartColor'] as String?) ?? Colors.black;
+    final gradientEndColor = _parseColor(slide['gradientEndColor'] as String?) ?? Colors.transparent;
+    final gradientDirection = slide['gradientDirection'] as String? ?? 'vertical';
+
+    return GestureDetector(
+      onTap: () {
+        if (action.isNotEmpty) {
+          widget.onAction(action);
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Background image
+              Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.broken_image, size: 64, color: Colors.grey),
+                  );
+                },
+              ),
+              
+              // Overlay or gradient
+              if (useGradient)
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: gradientDirection == 'horizontal' ? Alignment.centerLeft : Alignment.topCenter,
+                      end: gradientDirection == 'horizontal' ? Alignment.centerRight : Alignment.bottomCenter,
+                      colors: [gradientStartColor, gradientEndColor],
+                    ),
+                  ),
+                )
+              else if (overlayColor != null)
+                Container(
+                  color: overlayColor.withOpacity(overlayOpacity),
+                ),
+              
+              // Content
+              if (title.isNotEmpty || subtitle.isNotEmpty)
+                Positioned(
+                  bottom: 24,
+                  left: 24,
+                  right: 24,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (title.isNotEmpty)
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          subtitle,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductSlide(BuildContext context, Product product) {
+    final showPrice = widget.block.properties['showPrice'] as bool? ?? true;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      child: ProductCard(
+        product: product,
+        onAddToCart: () {
+          // TODO: Implement add to cart functionality
+          developer.log('Add to cart: ${product.name}');
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategorySlide(BuildContext context, Map<String, dynamic> category) {
+    final name = category['name'] as String? ?? '';
+    final count = category['count'] as int? ?? 0;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.category, size: 48, color: Colors.blue[700]),
+            const SizedBox(height: 12),
+            Text(
+              name,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              '$count produit${count != 1 ? 's' : ''}',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Helper method to parse colors used by carousel slides
   Color? _parseColor(String? colorStr) {
     if (colorStr == null || colorStr.isEmpty) return null;
     
