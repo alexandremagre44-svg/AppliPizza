@@ -494,10 +494,7 @@ class _PageRendererState extends State<PageRenderer> {
     // CTA buttons
     final ctas = (block.properties['ctas'] as List<dynamic>?) ?? [];
     
-    // Animation properties
-    final hasAnimation = block.properties['hasAnimation'] == true;
-    final animationType = block.properties['animationType'] as String? ?? 'fadeIn';
-    final animationDuration = (block.properties['animationDuration'] as num?)?.toInt() ?? 1000;
+    // Note: Animation support to be implemented in future phase
 
     return Container(
       height: height,
@@ -523,17 +520,17 @@ class _PageRendererState extends State<PageRenderer> {
             else
               Container(color: Colors.grey[300]),
             
-            // Overlay or gradient
+            // Overlay or gradient with opacity
             if (hasGradient)
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: gradientDirection == 'vertical' ? Alignment.topCenter : Alignment.centerLeft,
-                    end: gradientDirection == 'vertical' ? Alignment.bottomCenter : Alignment.centerRight,
-                    colors: [
-                      gradientStartColor.withOpacity(overlayOpacity),
-                      gradientEndColor.withOpacity(overlayOpacity),
-                    ],
+              Opacity(
+                opacity: overlayOpacity,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: gradientDirection == 'vertical' ? Alignment.topCenter : Alignment.centerLeft,
+                      end: gradientDirection == 'vertical' ? Alignment.bottomCenter : Alignment.centerRight,
+                      colors: [gradientStartColor, gradientEndColor],
+                    ),
                   ),
                 ),
               )
