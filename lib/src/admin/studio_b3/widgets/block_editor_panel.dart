@@ -1265,7 +1265,7 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
       _buildSliderField(
         'overlayOpacity',
         'Opacité overlay',
-        _properties['overlayOpacity'] as num? ?? 0.5,
+        (_properties['overlayOpacity'] as num?)?.toDouble() ?? 0.5,
         0.0,
         1.0,
       ),

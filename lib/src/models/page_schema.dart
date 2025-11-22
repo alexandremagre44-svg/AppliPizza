@@ -88,6 +88,12 @@ class DataSource {
       config: config ?? this.config,
     );
   }
+
+  static DataSource empty() => DataSource(
+    id: '',
+    type: DataSourceType.static,
+    config: {},
+  );
 }
 
 /// Widget block configuration for a page
