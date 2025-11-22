@@ -62,6 +62,7 @@ import 'src/providers/auth_provider.dart';
 // B3 Phase 2: AppConfig for dynamic pages
 import 'src/services/app_config_service.dart';
 import 'src/models/page_schema.dart';
+import 'src/providers/app_config_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -600,28 +601,49 @@ class MyApp extends ConsumerWidget {
     );
   }
 
-  /// Build a dynamic page from AppConfig
+  /// Build a dynamic page from AppConfig (Firestore-backed)
   /// Returns DynamicPageScreen if page exists, otherwise PageNotFoundScreen
   /// 
-  /// TODO Phase 3: Use a provider/state management for AppConfig instead of
-  /// creating a new service instance on each build
+  /// B3 Phase 7: Now uses appConfigProvider to fetch published config from Firestore
+  /// This ensures Studio B3 edits are reflected in the live pages
   static Widget _buildDynamicPage(BuildContext context, WidgetRef ref, String route) {
-    // For now, use the default config synchronously
-    // In production, this should be fetched from Firestore via a provider
-    final config = AppConfigService().getDefaultConfig('pizza_delizza');
+    // Watch the published AppConfig from Firestore
+    final configAsync = ref.watch(appConfigProvider);
     
-    // Find the page by route
-    final pageSchema = config.pages.getPage(route);
-    
-    if (pageSchema != null) {
-      // B3 Migration Phase 6: Log successful page load
-      if (route == AppRoutes.homeB3 || route == AppRoutes.menuB3 || route == AppRoutes.categoriesB3) {
-        print('B3 Migration: ${pageSchema.name} loaded successfully (route: $route)');
-      }
-      return DynamicPageScreen(pageSchema: pageSchema);
-    } else {
-      print('B3 Migration: Page not found for route: $route');
-      return PageNotFoundScreen(route: route);
-    }
+    return configAsync.when(
+      data: (config) {
+        // If config exists, try to find the page
+        if (config != null) {
+          final pageSchema = config.pages.getPage(route);
+          
+          if (pageSchema != null) {
+            // B3 Migration: Log successful page load
+            print('B3: ${pageSchema.name} loaded from Firestore (route: $route)');
+            return DynamicPageScreen(pageSchema: pageSchema);
+          }
+        }
+        
+        // Page not found in config
+        print('B3: Page not found for route: $route');
+        return PageNotFoundScreen(route: route);
+      },
+      loading: () => Scaffold(
+        appBar: AppBar(title: const Text('Chargement...')),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) {
+        print('B3: Error loading config: $error');
+        // On error, fallback to in-memory default config
+        final config = AppConfigService().getDefaultConfig('pizza_delizza');
+        final pageSchema = config.pages.getPage(route);
+        
+        if (pageSchema != null) {
+          print('B3: Using fallback config for route: $route');
+          return DynamicPageScreen(pageSchema: pageSchema);
+        }
+        
+        return PageNotFoundScreen(route: route);
+      },
+    );
   }
 }
