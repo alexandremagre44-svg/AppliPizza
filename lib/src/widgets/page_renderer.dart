@@ -1018,7 +1018,7 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
         final categories = await widget.dataSourceResolver.resolveCategories(widget.block.dataSource!);
         developer.log('✅ CarouselWidget: Loaded ${categories.length} categories');
         setState(() {
-          _slides = categories.map((cat) => {'name': cat['name'], 'count': cat['count']}).toList();
+          _slides = categories.map((cat) => {'name': cat.value, 'count': 0}).toList();
           _isLoading = false;
         });
         _startAutoPlay();
@@ -1253,7 +1253,13 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
-      child: ProductCard(product: product),
+      child: ProductCard(
+        product: product,
+        onAddToCart: () {
+          // TODO: Implement add to cart functionality
+          developer.log('Add to cart: ${product.name}');
+        },
+      ),
     );
   }
 
@@ -1538,7 +1544,13 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
                   final product = products[index];
                   return SizedBox(
                     width: itemWidth,
-                    child: ProductCard(product: product),
+                    child: ProductCard(
+                      product: product,
+                      onAddToCart: () {
+                        // TODO: Implement add to cart functionality
+                        developer.log('Add to cart: ${product.name}');
+                      },
+                    ),
                   );
                 },
               ),
@@ -1559,7 +1571,7 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
 
     developer.log('🎯 Building category slider block');
 
-    return FutureBuilder<Map<String, int>>(
+    return FutureBuilder<List<ProductCategory>>(
       future: _dataSourceResolver.resolveCategories(block.dataSource),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -1580,8 +1592,8 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
           );
         }
 
-        final categories = snapshot.data ?? {};
-        final categoryList = categories.entries.take(limit).toList();
+        final categories = snapshot.data ?? [];
+        final categoryList = categories.take(limit).toList();
 
         if (categoryList.isEmpty) {
           return const Center(
@@ -1614,7 +1626,7 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
                 itemCount: categoryList.length,
                 separatorBuilder: (context, index) => SizedBox(width: spacing),
                 itemBuilder: (context, index) {
-                  final entry = categoryList[index];
+                  final category = categoryList[index];
                   return SizedBox(
                     width: itemWidth,
                     child: Card(
@@ -1626,7 +1638,7 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
                         borderRadius: BorderRadius.circular(12),
                         onTap: () {
                           // Navigate to category
-                          developer.log('Open category: ${entry.key}');
+                          developer.log('Open category: ${category.value}');
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
@@ -1640,7 +1652,7 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                entry.key,
+                                category.value,
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -1648,25 +1660,6 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  '${entry.value}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
                               ),
                             ],
                           ),

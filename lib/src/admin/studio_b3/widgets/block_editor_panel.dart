@@ -159,6 +159,14 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         return _buildCarouselFields();
       case WidgetBlockType.popup:
         return _buildPopupFields();
+      case WidgetBlockType.productSlider:
+        return [const Text('Product Slider (configuration minimale)')];
+      case WidgetBlockType.categorySlider:
+        return [const Text('Category Slider (configuration minimale)')];
+      case WidgetBlockType.promoBanner:
+        return [const Text('Promo Banner (configuration minimale)')];
+      case WidgetBlockType.stickyCta:
+        return [const Text('Sticky CTA (configuration minimale)')];
       case WidgetBlockType.custom:
         return [const Text('Bloc personnalisé (aucun champ)')];
     }
@@ -1397,6 +1405,14 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         return Icons.view_carousel;
       case WidgetBlockType.popup:
         return Icons.notifications_active;
+      case WidgetBlockType.productSlider:
+        return Icons.view_carousel;
+      case WidgetBlockType.categorySlider:
+        return Icons.category;
+      case WidgetBlockType.promoBanner:
+        return Icons.campaign;
+      case WidgetBlockType.stickyCta:
+        return Icons.touch_app;
       case WidgetBlockType.custom:
         return Icons.extension;
     }
@@ -1424,6 +1440,188 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         return 'Popup';
       case WidgetBlockType.custom:
         return 'Custom';
+      case WidgetBlockType.productSlider:
+        return 'Product Slider';
+      case WidgetBlockType.categorySlider:
+        return 'Category Slider';
+      case WidgetBlockType.promoBanner:
+        return 'Promo Banner';
+      case WidgetBlockType.stickyCta:
+        return 'Sticky CTA';
     }
+  }
+
+  /// Helper method to build a section title
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+      ),
+    );
+  }
+
+  /// Helper method to build a text field
+  Widget _buildTextField(String key, String label, String value, {int maxLines = 1}) {
+    return Column(
+      children: [
+        TextField(
+          controller: TextEditingController(text: value),
+          decoration: InputDecoration(
+            labelText: label,
+            border: const OutlineInputBorder(),
+          ),
+          maxLines: maxLines,
+          onChanged: (newValue) => _updateProperty(key, newValue),
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
+  /// Helper method to build a number field
+  Widget _buildNumberField(String key, String label, num value) {
+    return Column(
+      children: [
+        TextField(
+          controller: TextEditingController(text: value.toString()),
+          decoration: InputDecoration(
+            labelText: label,
+            border: const OutlineInputBorder(),
+          ),
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+          onChanged: (newValue) {
+            final parsed = double.tryParse(newValue);
+            if (parsed != null) {
+              _updateProperty(key, parsed);
+            }
+          },
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
+  /// Helper method to build a color field
+  Widget _buildColorField(String key, String label, String value) {
+    return Column(
+      children: [
+        TextField(
+          controller: TextEditingController(text: value),
+          decoration: InputDecoration(
+            labelText: label,
+            border: const OutlineInputBorder(),
+            hintText: '#RRGGBB',
+            prefixIcon: Container(
+              margin: const EdgeInsets.all(8),
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: _parseColor(value),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.grey),
+              ),
+            ),
+          ),
+          onChanged: (newValue) => _updateProperty(key, newValue),
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
+  Color _parseColor(String? colorStr) {
+    if (colorStr == null || colorStr.isEmpty) return Colors.grey;
+    try {
+      final hex = colorStr.replaceAll('#', '');
+      if (hex.length == 6) {
+        return Color(int.parse('FF$hex', radix: 16));
+      } else if (hex.length == 8) {
+        return Color(int.parse(hex, radix: 16));
+      }
+    } catch (e) {
+      // Invalid color
+    }
+    return Colors.grey;
+  }
+
+  /// Helper method to build a dropdown field
+  Widget _buildDropdownField(String key, String label, String value, List<String> options, Function(String?) onChanged) {
+    return Column(
+      children: [
+        DropdownButtonFormField<String>(
+          value: options.contains(value) ? value : options.first,
+          decoration: InputDecoration(
+            labelText: label,
+            border: const OutlineInputBorder(),
+          ),
+          items: options.map((option) {
+            return DropdownMenuItem(
+              value: option,
+              child: Text(option.isEmpty ? '(Aucun)' : option),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+        const SizedBox(height: 12),
+      ],
+    );
+  }
+
+  /// Helper method to build a switch field
+  Widget _buildSwitchField(String key, String label, bool value) {
+    return Column(
+      children: [
+        SwitchListTile(
+          title: Text(label),
+          value: value,
+          onChanged: (newValue) => _updateProperty(key, newValue),
+          contentPadding: EdgeInsets.zero,
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  /// Helper method to build a slider field
+  Widget _buildSliderField(String key, String label, double value, double min, double max, {int? divisions}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: Colors.black87),
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Slider(
+                value: value.clamp(min, max),
+                min: min,
+                max: max,
+                divisions: divisions,
+                label: value.toStringAsFixed(2),
+                onChanged: (newValue) => _updateProperty(key, newValue),
+              ),
+            ),
+            SizedBox(
+              width: 50,
+              child: Text(
+                value.toStringAsFixed(2),
+                textAlign: TextAlign.right,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
   }
 }
