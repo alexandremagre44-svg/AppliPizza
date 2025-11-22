@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../models/page_schema.dart';
+import 'dart:developer' as developer;
 
 /// Panel for editing block properties with dynamic forms
 class BlockEditorPanel extends StatefulWidget {
@@ -24,6 +25,7 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
   late Map<String, dynamic> _properties;
   late Map<String, dynamic>? _styling;
   late Map<String, dynamic>? _actions;
+  late DataSource? _dataSource;
 
   @override
   void initState() {
@@ -47,6 +49,22 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
     _actions = widget.block.actions != null 
         ? Map<String, dynamic>.from(widget.block.actions!) 
         : {};
+    _dataSource = widget.block.dataSource;
+    
+    // Initialize DataSource for product/category lists if not present
+    if (_dataSource == null && 
+        (widget.block.type == WidgetBlockType.productList || 
+         widget.block.type == WidgetBlockType.categoryList)) {
+      final sourceType = widget.block.type == WidgetBlockType.productList
+          ? DataSourceType.products
+          : DataSourceType.categories;
+      _dataSource = DataSource(
+        id: 'datasource_${widget.block.id}',
+        type: sourceType,
+        config: {},
+      );
+      developer.log('🔧 BlockEditorPanel: Initialized DataSource for ${widget.block.type.value}');
+    }
   }
 
   @override
@@ -263,9 +281,79 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         onChanged: (value) => _updateProperty('title', value),
       ),
       const SizedBox(height: 16),
+      TextField(
+        controller: TextEditingController(
+          text: _properties['columns']?.toString() ?? '2',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Nombre de colonnes',
+          border: OutlineInputBorder(),
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) => _updateProperty('columns', int.tryParse(value) ?? 2),
+      ),
+      const SizedBox(height: 16),
+      TextField(
+        controller: TextEditingController(
+          text: _properties['spacing']?.toString() ?? '16',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Espacement',
+          border: OutlineInputBorder(),
+          suffixText: 'px',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+        onChanged: (value) => _updateProperty('spacing', double.tryParse(value) ?? 16.0),
+      ),
+      const SizedBox(height: 16),
+      SwitchListTile(
+        title: const Text('Afficher les prix'),
+        value: _properties['showPrice'] == true,
+        onChanged: (value) => _updateProperty('showPrice', value),
+      ),
+      const SizedBox(height: 16),
+      DropdownButtonFormField<String>(
+        value: _getCategoryFilter(),
+        decoration: const InputDecoration(
+          labelText: 'Filtrer par catégorie',
+          border: OutlineInputBorder(),
+        ),
+        items: [
+          const DropdownMenuItem(value: '', child: Text('Toutes')),
+          const DropdownMenuItem(value: 'pizza', child: Text('Pizza')),
+          const DropdownMenuItem(value: 'menus', child: Text('Menus')),
+          const DropdownMenuItem(value: 'boissons', child: Text('Boissons')),
+          const DropdownMenuItem(value: 'desserts', child: Text('Desserts')),
+        ],
+        onChanged: (value) {
+          if (value != null) {
+            _updateDataSourceConfig('category', value);
+          }
+        },
+      ),
+      const SizedBox(height: 16),
+      TextField(
+        controller: TextEditingController(
+          text: _getDataSourceLimit()?.toString() ?? '',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Limite (nombre de produits)',
+          border: OutlineInputBorder(),
+          hintText: 'Laisser vide pour tout afficher',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) {
+          final limit = value.isEmpty ? null : int.tryParse(value);
+          _updateDataSourceConfig('limit', limit);
+        },
+      ),
+      const SizedBox(height: 8),
       const Text(
-        'DataSource: produits (sera connecté en Phase 4)',
-        style: TextStyle(color: Colors.grey, fontSize: 12),
+        'DataSource: produits connectés à Firestore',
+        style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
       ),
     ];
   }
@@ -282,8 +370,13 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
       ),
       const SizedBox(height: 16),
       const Text(
-        'DataSource: catégories (sera connecté en Phase 4)',
-        style: TextStyle(color: Colors.grey, fontSize: 12),
+        'DataSource: catégories connectées à Firestore',
+        style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 8),
+      const Text(
+        'Les catégories sont extraites automatiquement des produits disponibles.',
+        style: TextStyle(color: Colors.grey, fontSize: 11),
       ),
     ];
   }
@@ -399,8 +492,33 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
       properties: _properties,
       styling: _styling,
       actions: _actions,
+      dataSource: _dataSource,
     );
     widget.onBlockUpdated(updatedBlock);
+  }
+
+  void _updateDataSourceConfig(String key, dynamic value) {
+    if (_dataSource != null) {
+      setState(() {
+        final newConfig = Map<String, dynamic>.from(_dataSource!.config);
+        if (value == null || (value is String && value.isEmpty)) {
+          newConfig.remove(key);
+        } else {
+          newConfig[key] = value;
+        }
+        _dataSource = _dataSource!.copyWith(config: newConfig);
+      });
+      _notifyUpdate();
+      developer.log('🔧 BlockEditorPanel: Updated DataSource config: $key = $value');
+    }
+  }
+
+  String? _getCategoryFilter() {
+    return _dataSource?.config['category'] as String? ?? '';
+  }
+
+  int? _getDataSourceLimit() {
+    return _dataSource?.config['limit'] as int?;
   }
 
   IconData _getIconForBlockType(WidgetBlockType type) {
