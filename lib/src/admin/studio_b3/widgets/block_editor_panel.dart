@@ -157,6 +157,8 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         return _buildHeroAdvancedFields();
       case WidgetBlockType.carousel:
         return _buildCarouselFields();
+      case WidgetBlockType.popup:
+        return _buildPopupFields();
       case WidgetBlockType.custom:
         return [const Text('Bloc personnalisé (aucun champ)')];
     }
@@ -1217,6 +1219,164 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
     return _dataSource?.config['limit'] as int?;
   }
 
+  /// Build popup configuration fields
+  List<Widget> _buildPopupFields() {
+    return [
+      _buildSectionTitle('Contenu'),
+      _buildTextField('title', 'Titre', _properties['title'] as String? ?? ''),
+      _buildTextField('message', 'Message', _properties['message'] as String? ?? '', maxLines: 3),
+      _buildColorField('titleColor', 'Couleur du titre', _properties['titleColor'] as String? ?? '#000000'),
+      _buildColorField('messageColor', 'Couleur du message', _properties['messageColor'] as String? ?? '#757575'),
+      _buildDropdownField(
+        'alignment',
+        'Alignement',
+        _properties['alignment'] as String? ?? 'center',
+        ['start', 'center'],
+        (value) {
+          _updateProperty('alignment', value);
+        },
+      ),
+      _buildDropdownField(
+        'icon',
+        'Icône',
+        _properties['icon'] as String? ?? '',
+        ['', 'info', 'warning', 'promo', 'success', 'error'],
+        (value) {
+          _updateProperty('icon', value);
+        },
+      ),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('Apparence'),
+      _buildColorField('backgroundColor', 'Couleur de fond', _properties['backgroundColor'] as String? ?? '#FFFFFF'),
+      _buildNumberField('borderRadius', 'Border Radius (px)', _properties['borderRadius'] as num? ?? 16),
+      _buildNumberField('padding', 'Padding (px)', _properties['padding'] as num? ?? 20),
+      _buildNumberField('maxWidth', 'Largeur max (px)', _properties['maxWidth'] as num? ?? 300),
+      _buildNumberField('elevation', 'Élévation (ombre)', _properties['elevation'] as num? ?? 8),
+      _buildColorField('overlayColor', 'Couleur overlay', _properties['overlayColor'] as String? ?? '#000000'),
+      _buildSliderField(
+        'overlayOpacity',
+        'Opacité overlay',
+        _properties['overlayOpacity'] as num? ?? 0.5,
+        0.0,
+        1.0,
+      ),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('Comportement'),
+      _buildSwitchField('showOnLoad', 'Afficher au chargement', _properties['showOnLoad'] as bool? ?? true),
+      _buildDropdownField(
+        'triggerType',
+        'Type de déclencheur',
+        _properties['triggerType'] as String? ?? 'onLoad',
+        ['onLoad', 'delayed', 'onScrollStart'],
+        (value) {
+          _updateProperty('triggerType', value);
+        },
+      ),
+      _buildNumberField('delayMs', 'Délai (ms)', _properties['delayMs'] as num? ?? 0),
+      _buildSwitchField('dismissibleByTapOutside', 'Fermer en tapant dehors', _properties['dismissibleByTapOutside'] as bool? ?? true),
+      _buildSwitchField('showOncePerSession', 'Afficher 1 fois par session', _properties['showOncePerSession'] as bool? ?? false),
+      
+      const SizedBox(height: 16),
+      _buildSectionTitle('CTAs (Boutons)'),
+      _buildCTAsManager(),
+    ];
+  }
+
+  /// Build CTAs manager for popup
+  Widget _buildCTAsManager() {
+    final ctas = (_properties['ctas'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...ctas.asMap().entries.map((entry) {
+          final index = entry.key;
+          final cta = entry.value;
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('CTA ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      IconButton(
+                        icon: const Icon(Icons.delete, size: 20),
+                        onPressed: () {
+                          final newCtas = List<Map<String, dynamic>>.from(ctas);
+                          newCtas.removeAt(index);
+                          _updateProperty('ctas', newCtas);
+                        },
+                      ),
+                    ],
+                  ),
+                  TextField(
+                    decoration: const InputDecoration(labelText: 'Label'),
+                    controller: TextEditingController(text: cta['label'] as String? ?? ''),
+                    onChanged: (value) {
+                      final newCtas = List<Map<String, dynamic>>.from(ctas);
+                      newCtas[index] = {...cta, 'label': value};
+                      _updateProperty('ctas', newCtas);
+                    },
+                  ),
+                  TextField(
+                    decoration: const InputDecoration(labelText: 'Action (ex: navigate:/menu ou dismissOnly)'),
+                    controller: TextEditingController(text: cta['action'] as String? ?? 'dismissOnly'),
+                    onChanged: (value) {
+                      final newCtas = List<Map<String, dynamic>>.from(ctas);
+                      newCtas[index] = {...cta, 'action': value};
+                      _updateProperty('ctas', newCtas);
+                    },
+                  ),
+                  TextField(
+                    decoration: const InputDecoration(labelText: 'Background Color (hex)'),
+                    controller: TextEditingController(text: cta['backgroundColor'] as String? ?? '#2196F3'),
+                    onChanged: (value) {
+                      final newCtas = List<Map<String, dynamic>>.from(ctas);
+                      newCtas[index] = {...cta, 'backgroundColor': value};
+                      _updateProperty('ctas', newCtas);
+                    },
+                  ),
+                  TextField(
+                    decoration: const InputDecoration(labelText: 'Text Color (hex)'),
+                    controller: TextEditingController(text: cta['textColor'] as String? ?? '#FFFFFF'),
+                    onChanged: (value) {
+                      final newCtas = List<Map<String, dynamic>>.from(ctas);
+                      newCtas[index] = {...cta, 'textColor': value};
+                      _updateProperty('ctas', newCtas);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+        
+        if (ctas.length < 2)
+          ElevatedButton.icon(
+            onPressed: () {
+              final newCtas = List<Map<String, dynamic>>.from(ctas);
+              newCtas.add({
+                'label': 'OK',
+                'action': 'dismissOnly',
+                'backgroundColor': '#2196F3',
+                'textColor': '#FFFFFF',
+                'borderRadius': 8.0,
+              });
+              _updateProperty('ctas', newCtas);
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Ajouter un CTA'),
+          ),
+      ],
+    );
+  }
+
   IconData _getIconForBlockType(WidgetBlockType type) {
     switch (type) {
       case WidgetBlockType.text:
@@ -1233,6 +1393,10 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         return Icons.category;
       case WidgetBlockType.heroAdvanced:
         return Icons.view_agenda;
+      case WidgetBlockType.carousel:
+        return Icons.view_carousel;
+      case WidgetBlockType.popup:
+        return Icons.notifications_active;
       case WidgetBlockType.custom:
         return Icons.extension;
     }
@@ -1254,6 +1418,10 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         return 'Catégories';
       case WidgetBlockType.heroAdvanced:
         return 'Hero Avancé';
+      case WidgetBlockType.carousel:
+        return 'Carousel';
+      case WidgetBlockType.popup:
+        return 'Popup';
       case WidgetBlockType.custom:
         return 'Custom';
     }

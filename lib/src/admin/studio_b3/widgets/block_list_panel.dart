@@ -244,6 +244,8 @@ class BlockListPanel extends StatelessWidget {
         return Icons.view_agenda;
       case WidgetBlockType.carousel:
         return Icons.view_carousel_outlined;
+      case WidgetBlockType.popup:
+        return Icons.notifications_active;
       case WidgetBlockType.custom:
         return Icons.extension;
     }
@@ -267,6 +269,8 @@ class BlockListPanel extends StatelessWidget {
         return 'Hero Avancé';
       case WidgetBlockType.carousel:
         return 'Carrousel';
+      case WidgetBlockType.popup:
+        return 'Popup';
       case WidgetBlockType.custom:
         return 'Custom';
     }

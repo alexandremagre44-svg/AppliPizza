@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/page_schema.dart';
 import '../models/product.dart';
 import '../services/data_source_resolver.dart';
@@ -25,6 +26,101 @@ class PageRenderer extends StatefulWidget {
 
 class _PageRendererState extends State<PageRenderer> {
   final DataSourceResolver _dataSourceResolver = DataSourceResolver();
+  final Map<String, bool> _popupShownState = {}; // Track which popups have been shown
+  Timer? _delayedPopupTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePopups();
+  }
+
+  @override
+  void dispose() {
+    _delayedPopupTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Initialize popups with triggers
+  Future<void> _initializePopups() async {
+    final sortedBlocks = List<WidgetBlock>.from(widget.pageSchema.blocks)
+      ..sort((a, b) => a.order.compareTo(b.order));
+    
+    final popupBlocks = sortedBlocks.where((block) => 
+      block.visible && block.type == WidgetBlockType.popup
+    ).toList();
+
+    for (final popup in popupBlocks) {
+      final showOnLoad = popup.properties['showOnLoad'] as bool? ?? true;
+      final triggerType = popup.properties['triggerType'] as String? ?? 'onLoad';
+      final delayMs = popup.properties['delayMs'] as int? ?? 0;
+      final showOncePerSession = popup.properties['showOncePerSession'] as bool? ?? false;
+
+      // Check if popup should be shown based on session storage
+      if (showOncePerSession) {
+        final prefs = await SharedPreferences.getInstance();
+        final key = 'popup_shown_${popup.id}';
+        final hasShown = prefs.getBool(key) ?? false;
+        if (hasShown) {
+          continue; // Skip this popup
+        }
+      }
+
+      // Handle different trigger types
+      if (showOnLoad && triggerType == 'onLoad') {
+        if (delayMs > 0) {
+          _delayedPopupTimer = Timer(Duration(milliseconds: delayMs), () {
+            if (mounted) {
+              _showPopup(context, popup);
+            }
+          });
+        } else {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _showPopup(context, popup);
+            }
+          });
+        }
+      } else if (triggerType == 'delayed' && delayMs > 0) {
+        _delayedPopupTimer = Timer(Duration(milliseconds: delayMs), () {
+          if (mounted) {
+            _showPopup(context, popup);
+          }
+        });
+      }
+    }
+  }
+
+  /// Show a popup dialog
+  Future<void> _showPopup(BuildContext context, WidgetBlock popupBlock) async {
+    // Mark as shown in state
+    if (_popupShownState[popupBlock.id] == true) {
+      return; // Already shown
+    }
+    _popupShownState[popupBlock.id] = true;
+
+    // Mark as shown in persistent storage if needed
+    final showOncePerSession = popupBlock.properties['showOncePerSession'] as bool? ?? false;
+    if (showOncePerSession) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('popup_shown_${popupBlock.id}', true);
+    }
+
+    final dismissibleByTapOutside = popupBlock.properties['dismissibleByTapOutside'] as bool? ?? true;
+    final overlayColor = _parseColor(popupBlock.properties['overlayColor'] as String?) ?? Colors.black;
+    final overlayOpacity = (popupBlock.properties['overlayOpacity'] as num?)?.toDouble() ?? 0.5;
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: dismissibleByTapOutside,
+      barrierColor: overlayColor.withOpacity(overlayOpacity),
+      builder: (BuildContext dialogContext) {
+        return _buildPopupContent(dialogContext, popupBlock);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +128,10 @@ class _PageRendererState extends State<PageRenderer> {
     final sortedBlocks = List<WidgetBlock>.from(widget.pageSchema.blocks)
       ..sort((a, b) => a.order.compareTo(b.order));
 
-    // Filter visible blocks
-    final visibleBlocks = sortedBlocks.where((block) => block.visible).toList();
+    // Filter visible blocks (exclude popups as they're rendered separately)
+    final visibleBlocks = sortedBlocks.where((block) => 
+      block.visible && block.type != WidgetBlockType.popup
+    ).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -1167,6 +1265,175 @@ class _CarouselWidgetState extends State<_CarouselWidget> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Build popup dialog content
+  Widget _buildPopupContent(BuildContext context, WidgetBlock block) {
+    final title = block.properties['title'] as String? ?? '';
+    final message = block.properties['message'] as String? ?? '';
+    final titleColor = _parseColor(block.properties['titleColor'] as String?) ?? Colors.black;
+    final messageColor = _parseColor(block.properties['messageColor'] as String?) ?? Colors.grey[700];
+    final alignment = block.properties['alignment'] as String? ?? 'center';
+    final icon = block.properties['icon'] as String?;
+    
+    final backgroundColor = _parseColor(block.properties['backgroundColor'] as String?) ?? Colors.white;
+    final borderRadius = (block.properties['borderRadius'] as num?)?.toDouble() ?? 16.0;
+    final padding = (block.properties['padding'] as num?)?.toDouble() ?? 20.0;
+    final maxWidth = (block.properties['maxWidth'] as num?)?.toDouble() ?? 300.0;
+    final elevation = (block.properties['elevation'] as num?)?.toDouble() ?? 8.0;
+
+    // Parse CTAs
+    final ctas = (block.properties['ctas'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: Container(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(borderRadius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: elevation,
+              offset: Offset(0, elevation / 2),
+            ),
+          ],
+        ),
+        padding: EdgeInsets.all(padding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: alignment == 'start' 
+            ? CrossAxisAlignment.start 
+            : CrossAxisAlignment.center,
+          children: [
+            // Icon
+            if (icon != null && icon.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: _buildPopupIcon(icon),
+              ),
+            
+            // Title
+            if (title.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: titleColor,
+                  ),
+                  textAlign: alignment == 'start' ? TextAlign.left : TextAlign.center,
+                ),
+              ),
+            
+            // Message
+            if (message.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: messageColor,
+                  ),
+                  textAlign: alignment == 'start' ? TextAlign.left : TextAlign.center,
+                ),
+              ),
+            
+            // CTAs
+            if (ctas.isNotEmpty)
+              ...ctas.map((cta) => _buildPopupCTA(context, cta)).toList(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build popup icon
+  Widget _buildPopupIcon(String iconType) {
+    IconData iconData;
+    Color iconColor;
+
+    switch (iconType.toLowerCase()) {
+      case 'info':
+        iconData = Icons.info_outline;
+        iconColor = Colors.blue;
+        break;
+      case 'warning':
+        iconData = Icons.warning_amber_outlined;
+        iconColor = Colors.orange;
+        break;
+      case 'promo':
+        iconData = Icons.local_offer_outlined;
+        iconColor = Colors.green;
+        break;
+      case 'success':
+        iconData = Icons.check_circle_outline;
+        iconColor = Colors.green;
+        break;
+      case 'error':
+        iconData = Icons.error_outline;
+        iconColor = Colors.red;
+        break;
+      default:
+        iconData = Icons.notifications_outlined;
+        iconColor = Colors.blue;
+    }
+
+    return Icon(
+      iconData,
+      size: 48,
+      color: iconColor,
+    );
+  }
+
+  /// Build popup CTA button
+  Widget _buildPopupCTA(BuildContext context, Map<String, dynamic> cta) {
+    final label = cta['label'] as String? ?? 'OK';
+    final action = cta['action'] as String? ?? 'dismissOnly';
+    final bgColor = _parseColor(cta['backgroundColor'] as String?) ?? Colors.blue;
+    final textColor = _parseColor(cta['textColor'] as String?) ?? Colors.white;
+    final borderRadius = (cta['borderRadius'] as num?)?.toDouble() ?? 8.0;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop(); // Always dismiss the popup
+            
+            // Handle additional actions
+            if (action.startsWith('navigate:')) {
+              final route = action.substring('navigate:'.length);
+              Navigator.of(context).pushNamed(route);
+            } else if (action.startsWith('openUrl:')) {
+              // TODO: Implement URL opening if needed
+              developer.log('Open URL action: $action');
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: bgColor,
+            foregroundColor: textColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );

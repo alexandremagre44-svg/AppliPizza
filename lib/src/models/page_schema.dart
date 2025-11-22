@@ -12,6 +12,7 @@ enum WidgetBlockType {
   banner('banner'),
   heroAdvanced('hero_advanced'), // B3.5.A: Advanced hero block with image, overlay, gradient, CTAs
   carousel('carousel'), // B3.5.B: Carousel block with images, products, categories, promotions
+  popup('popup'), // B3.5.C: Popup/modal overlay with triggers and show-once logic
   custom('custom');
 
   const WidgetBlockType(this.value);

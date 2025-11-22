@@ -395,6 +395,36 @@ class _PageEditorState extends State<PageEditor> {
             },
           ],
         };
+      case WidgetBlockType.popup:
+        return {
+          'title': 'Offre spéciale !',
+          'message': 'Profitez de -20% sur votre première commande avec le code BIENVENUE20',
+          'titleColor': '#212121',
+          'messageColor': '#757575',
+          'alignment': 'center',
+          'icon': 'promo',
+          'backgroundColor': '#FFFFFF',
+          'borderRadius': 16.0,
+          'padding': 20.0,
+          'maxWidth': 300.0,
+          'elevation': 8.0,
+          'overlayColor': '#000000',
+          'overlayOpacity': 0.5,
+          'showOnLoad': true,
+          'triggerType': 'onLoad',
+          'delayMs': 0,
+          'dismissibleByTapOutside': true,
+          'showOncePerSession': false,
+          'ctas': [
+            {
+              'label': 'J\'en profite !',
+              'action': 'navigate:/menu',
+              'backgroundColor': '#4CAF50',
+              'textColor': '#FFFFFF',
+              'borderRadius': 8.0,
+            }
+          ],
+        };
       case WidgetBlockType.custom:
         return {};
     }
@@ -418,6 +448,8 @@ class _PageEditorState extends State<PageEditor> {
         return Icons.view_agenda;
       case WidgetBlockType.carousel:
         return Icons.view_carousel_outlined;
+      case WidgetBlockType.popup:
+        return Icons.notifications_active;
       case WidgetBlockType.custom:
         return Icons.extension;
     }
@@ -441,6 +473,8 @@ class _PageEditorState extends State<PageEditor> {
         return 'Hero Avancé';
       case WidgetBlockType.carousel:
         return 'Carrousel';
+      case WidgetBlockType.popup:
+        return 'Popup';
       case WidgetBlockType.custom:
         return 'Personnalisé';
     }
@@ -464,6 +498,8 @@ class _PageEditorState extends State<PageEditor> {
         return 'Hero avec image, overlay, gradient et CTAs';
       case WidgetBlockType.carousel:
         return 'Carrousel d\'images, produits ou catégories';
+      case WidgetBlockType.popup:
+        return 'Popup/modal avec déclencheurs et conditions';
       case WidgetBlockType.custom:
         return 'Bloc personnalisé';
     }
