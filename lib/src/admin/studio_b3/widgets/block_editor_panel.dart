@@ -264,7 +264,7 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
       ),
       const SizedBox(height: 16),
       const Text(
-        'DataSource: produits (sera connecté en Phase 3)',
+        'DataSource: produits (sera connecté en Phase 4)',
         style: TextStyle(color: Colors.grey, fontSize: 12),
       ),
     ];
@@ -282,7 +282,7 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
       ),
       const SizedBox(height: 16),
       const Text(
-        'DataSource: catégories (sera connecté en Phase 3)',
+        'DataSource: catégories (sera connecté en Phase 4)',
         style: TextStyle(color: Colors.grey, fontSize: 12),
       ),
     ];
