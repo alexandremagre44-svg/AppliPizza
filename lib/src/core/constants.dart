@@ -5,6 +5,7 @@ class AppRoutes {
   static const String splash = '/';
   static const String login = '/login';
   static const String home = '/home';
+  static const String homeB3 = '/home-b3'; // B3 Phase 6: Dynamic home page
   static const String menu = '/menu';
   static const String menuB3 = '/menu-b3'; // B3: Dynamic page test route
   static const String categoriesB3 = '/categories-b3'; // B3 Phase 2: Dynamic categories page

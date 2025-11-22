@@ -181,6 +181,11 @@ class MyApp extends ConsumerWidget {
               path: '/home-b2',
               builder: (context, state) => const HomeScreenB2(),
             ),
+            // HomeB3 - B3 Phase 6: Dynamic home page
+            GoRoute(
+              path: AppRoutes.homeB3,
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.homeB3),
+            ),
             GoRoute(
               path: AppRoutes.menu,
               builder: (context, state) => const MenuScreen(),
@@ -609,8 +614,13 @@ class MyApp extends ConsumerWidget {
     final pageSchema = config.pages.getPage(route);
     
     if (pageSchema != null) {
+      // B3 Migration Phase 6: Log successful page load
+      if (route == AppRoutes.homeB3 || route == AppRoutes.menuB3 || route == AppRoutes.categoriesB3) {
+        print('B3 Migration: ${pageSchema.name} loaded successfully (route: $route)');
+      }
       return DynamicPageScreen(pageSchema: pageSchema);
     } else {
+      print('B3 Migration: Page not found for route: $route');
       return PageNotFoundScreen(route: route);
     }
   }
