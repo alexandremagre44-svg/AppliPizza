@@ -155,6 +155,8 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
         return _buildCategoryListFields();
       case WidgetBlockType.heroAdvanced:
         return _buildHeroAdvancedFields();
+      case WidgetBlockType.carousel:
+        return _buildCarouselFields();
       case WidgetBlockType.custom:
         return [const Text('Bloc personnalisé (aucun champ)')];
     }
@@ -699,6 +701,377 @@ class _BlockEditorPanelState extends State<BlockEditorPanel> {
       ctas[index][key] = value;
       setState(() {
         _properties['ctas'] = ctas;
+      });
+      _notifyUpdate();
+    }
+  }
+
+  /// Build fields for carousel block (B3.5.B)
+  List<Widget> _buildCarouselFields() {
+    final carouselType = _properties['carouselType'] as String? ?? 'images';
+    
+    return [
+      // Carousel Type
+      DropdownButtonFormField<String>(
+        value: carouselType,
+        decoration: const InputDecoration(
+          labelText: 'Type de carrousel',
+          border: OutlineInputBorder(),
+        ),
+        items: [
+          const DropdownMenuItem(value: 'images', child: Text('Images')),
+          const DropdownMenuItem(value: 'products', child: Text('Produits')),
+          const DropdownMenuItem(value: 'categories', child: Text('Catégories')),
+        ],
+        onChanged: (value) {
+          _updateProperty('carouselType', value);
+          // Initialize DataSource for products/categories
+          if (value == 'products' || value == 'categories') {
+            final sourceType = value == 'products'
+                ? DataSourceType.products
+                : DataSourceType.categories;
+            _dataSource = DataSource(
+              id: 'datasource_${widget.block.id}',
+              type: sourceType,
+              config: {},
+            );
+          }
+        },
+      ),
+      const SizedBox(height: 16),
+      
+      // Height
+      TextField(
+        controller: TextEditingController(
+          text: _properties['height']?.toString() ?? '250',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Hauteur',
+          border: OutlineInputBorder(),
+          suffixText: 'px',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+        onChanged: (value) => _updateProperty('height', double.tryParse(value) ?? 250.0),
+      ),
+      const SizedBox(height: 16),
+      
+      // Viewport Fraction
+      TextField(
+        controller: TextEditingController(
+          text: _properties['viewportFraction']?.toString() ?? '0.85',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Viewport Fraction',
+          border: OutlineInputBorder(),
+          hintText: '0.85 (0.5 - 1.0)',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+        onChanged: (value) {
+          final val = double.tryParse(value) ?? 0.85;
+          _updateProperty('viewportFraction', val.clamp(0.5, 1.0));
+        },
+      ),
+      const SizedBox(height: 16),
+      
+      // Border Radius
+      TextField(
+        controller: TextEditingController(
+          text: _properties['borderRadius']?.toString() ?? '12',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Border Radius',
+          border: OutlineInputBorder(),
+          suffixText: 'px',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+        onChanged: (value) => _updateProperty('borderRadius', double.tryParse(value) ?? 12.0),
+      ),
+      const SizedBox(height: 16),
+      
+      // AutoPlay
+      SwitchListTile(
+        title: const Text('AutoPlay'),
+        value: _properties['autoPlay'] as bool? ?? false,
+        onChanged: (value) => _updateProperty('autoPlay', value),
+      ),
+      
+      // AutoPlay Interval
+      if (_properties['autoPlay'] == true) ...[
+        const SizedBox(height: 16),
+        TextField(
+          controller: TextEditingController(
+            text: _properties['autoPlayIntervalMs']?.toString() ?? '3000',
+          ),
+          decoration: const InputDecoration(
+            labelText: 'Intervalle AutoPlay',
+            border: OutlineInputBorder(),
+            suffixText: 'ms',
+          ),
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          onChanged: (value) => _updateProperty('autoPlayIntervalMs', int.tryParse(value) ?? 3000),
+        ),
+      ],
+      const SizedBox(height: 16),
+      
+      // Enlarge Center Page
+      SwitchListTile(
+        title: const Text('Agrandir page centrale'),
+        value: _properties['enlargeCenterPage'] as bool? ?? true,
+        onChanged: (value) => _updateProperty('enlargeCenterPage', value),
+      ),
+      const SizedBox(height: 16),
+      
+      // Show Indicators
+      SwitchListTile(
+        title: const Text('Afficher indicateurs'),
+        value: _properties['showIndicators'] as bool? ?? true,
+        onChanged: (value) => _updateProperty('showIndicators', value),
+      ),
+      
+      // Indicator Colors
+      if (_properties['showIndicators'] == true) ...[
+        const SizedBox(height: 16),
+        TextField(
+          controller: TextEditingController(text: _properties['indicatorColor']?.toString() ?? '#9E9E9E'),
+          decoration: const InputDecoration(
+            labelText: 'Couleur indicateur',
+            border: OutlineInputBorder(),
+            hintText: '#9E9E9E',
+          ),
+          onChanged: (value) => _updateProperty('indicatorColor', value),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: TextEditingController(text: _properties['indicatorActiveColor']?.toString() ?? '#2196F3'),
+          decoration: const InputDecoration(
+            labelText: 'Couleur indicateur actif',
+            border: OutlineInputBorder(),
+            hintText: '#2196F3',
+          ),
+          onChanged: (value) => _updateProperty('indicatorActiveColor', value),
+        ),
+      ],
+      
+      const SizedBox(height: 24),
+      const Divider(),
+      const SizedBox(height: 16),
+      
+      // Type-specific fields
+      if (carouselType == 'images') ..._buildImageSlideFields(),
+      if (carouselType == 'products') ..._buildProductCarouselFields(),
+      if (carouselType == 'categories') ..._buildCategoryCarouselFields(),
+    ];
+  }
+
+  /// Build fields for image slides
+  List<Widget> _buildImageSlideFields() {
+    final slides = List<Map<String, dynamic>>.from(_properties['slides'] as List<dynamic>? ?? []);
+    
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Slides (Images)',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+          ElevatedButton.icon(
+            onPressed: _addImageSlide,
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text('Ajouter'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      ...slides.asMap().entries.map((entry) {
+        final index = entry.key;
+        final slide = entry.value;
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Slide ${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    IconButton(
+                      icon: const Icon(Icons.delete, size: 20),
+                      onPressed: () => _removeImageSlide(index),
+                      color: Colors.red,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: TextEditingController(text: slide['imageUrl']?.toString()),
+                  decoration: const InputDecoration(
+                    labelText: 'URL Image',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  onChanged: (value) => _updateImageSlide(index, 'imageUrl', value),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: TextEditingController(text: slide['title']?.toString()),
+                  decoration: const InputDecoration(
+                    labelText: 'Titre',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  onChanged: (value) => _updateImageSlide(index, 'title', value),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: TextEditingController(text: slide['subtitle']?.toString()),
+                  decoration: const InputDecoration(
+                    labelText: 'Sous-titre',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  onChanged: (value) => _updateImageSlide(index, 'subtitle', value),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: TextEditingController(text: slide['action']?.toString()),
+                  decoration: const InputDecoration(
+                    labelText: 'Action',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                    hintText: 'navigate:/menu',
+                  ),
+                  onChanged: (value) => _updateImageSlide(index, 'action', value),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    ];
+  }
+
+  /// Build fields for product carousel
+  List<Widget> _buildProductCarouselFields() {
+    return [
+      const Text(
+        'Configuration Produits',
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 12),
+      SwitchListTile(
+        title: const Text('Afficher prix'),
+        value: _properties['showPrice'] as bool? ?? true,
+        onChanged: (value) => _updateProperty('showPrice', value),
+      ),
+      const SizedBox(height: 16),
+      TextField(
+        controller: TextEditingController(
+          text: _dataSource?.config['limit']?.toString() ?? '',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Limite de produits',
+          border: OutlineInputBorder(),
+          hintText: 'Laisser vide pour tout',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) {
+          if (_dataSource != null) {
+            final config = Map<String, dynamic>.from(_dataSource!.config);
+            config['limit'] = value.isEmpty ? null : int.tryParse(value);
+            _dataSource = DataSource(
+              id: _dataSource!.id,
+              type: _dataSource!.type,
+              config: config,
+            );
+            _notifyUpdate();
+          }
+        },
+      ),
+    ];
+  }
+
+  /// Build fields for category carousel
+  List<Widget> _buildCategoryCarouselFields() {
+    return [
+      const Text(
+        'Configuration Catégories',
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 12),
+      TextField(
+        controller: TextEditingController(
+          text: _dataSource?.config['limit']?.toString() ?? '',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Limite de catégories',
+          border: OutlineInputBorder(),
+          hintText: 'Laisser vide pour tout',
+        ),
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (value) {
+          if (_dataSource != null) {
+            final config = Map<String, dynamic>.from(_dataSource!.config);
+            config['limit'] = value.isEmpty ? null : int.tryParse(value);
+            _dataSource = DataSource(
+              id: _dataSource!.id,
+              type: _dataSource!.type,
+              config: config,
+            );
+            _notifyUpdate();
+          }
+        },
+      ),
+    ];
+  }
+
+  void _addImageSlide() {
+    final slides = List<Map<String, dynamic>>.from(_properties['slides'] as List<dynamic>? ?? []);
+    slides.add({
+      'imageUrl': 'https://picsum.photos/800/600',
+      'title': 'Nouveau slide',
+      'subtitle': '',
+      'action': '',
+      'overlayColor': '#000000',
+      'overlayOpacity': 0.3,
+      'useGradient': false,
+    });
+    setState(() {
+      _properties['slides'] = slides;
+    });
+    _notifyUpdate();
+  }
+
+  void _removeImageSlide(int index) {
+    final slides = List<Map<String, dynamic>>.from(_properties['slides'] as List<dynamic>? ?? []);
+    if (index >= 0 && index < slides.length) {
+      slides.removeAt(index);
+      setState(() {
+        _properties['slides'] = slides;
+      });
+      _notifyUpdate();
+    }
+  }
+
+  void _updateImageSlide(int index, String key, dynamic value) {
+    final slides = List<Map<String, dynamic>>.from(_properties['slides'] as List<dynamic>? ?? []);
+    if (index >= 0 && index < slides.length) {
+      slides[index][key] = value;
+      setState(() {
+        _properties['slides'] = slides;
       });
       _notifyUpdate();
     }

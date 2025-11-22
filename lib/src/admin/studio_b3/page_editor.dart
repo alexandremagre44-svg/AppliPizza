@@ -353,6 +353,48 @@ class _PageEditorState extends State<PageEditor> {
           'animationType': 'fadeIn',
           'animationDuration': 1000,
         };
+      case WidgetBlockType.carousel:
+        return {
+          'carouselType': 'images',
+          'height': 250.0,
+          'viewportFraction': 0.85,
+          'autoPlay': true,
+          'autoPlayIntervalMs': 3000,
+          'enlargeCenterPage': true,
+          'showIndicators': true,
+          'indicatorColor': '#9E9E9E',
+          'indicatorActiveColor': '#2196F3',
+          'borderRadius': 12.0,
+          'slides': [
+            {
+              'imageUrl': 'https://picsum.photos/800/600?random=1',
+              'title': 'Pizza Margherita',
+              'subtitle': 'La classique italienne',
+              'action': 'navigate:/menu',
+              'overlayColor': '#000000',
+              'overlayOpacity': 0.3,
+              'useGradient': false,
+            },
+            {
+              'imageUrl': 'https://picsum.photos/800/600?random=2',
+              'title': 'Pizza 4 Fromages',
+              'subtitle': 'Un délice pour les amateurs',
+              'action': 'navigate:/menu',
+              'overlayColor': '#000000',
+              'overlayOpacity': 0.3,
+              'useGradient': false,
+            },
+            {
+              'imageUrl': 'https://picsum.photos/800/600?random=3',
+              'title': 'Pizza Végétarienne',
+              'subtitle': 'Fraîche et savoureuse',
+              'action': 'navigate:/menu',
+              'overlayColor': '#000000',
+              'overlayOpacity': 0.3,
+              'useGradient': false,
+            },
+          ],
+        };
       case WidgetBlockType.custom:
         return {};
     }
@@ -374,6 +416,8 @@ class _PageEditorState extends State<PageEditor> {
         return Icons.category;
       case WidgetBlockType.heroAdvanced:
         return Icons.view_agenda;
+      case WidgetBlockType.carousel:
+        return Icons.view_carousel_outlined;
       case WidgetBlockType.custom:
         return Icons.extension;
     }
@@ -395,6 +439,8 @@ class _PageEditorState extends State<PageEditor> {
         return 'Liste de catégories';
       case WidgetBlockType.heroAdvanced:
         return 'Hero Avancé';
+      case WidgetBlockType.carousel:
+        return 'Carrousel';
       case WidgetBlockType.custom:
         return 'Personnalisé';
     }
@@ -416,6 +462,8 @@ class _PageEditorState extends State<PageEditor> {
         return 'Liste des catégories';
       case WidgetBlockType.heroAdvanced:
         return 'Hero avec image, overlay, gradient et CTAs';
+      case WidgetBlockType.carousel:
+        return 'Carrousel d\'images, produits ou catégories';
       case WidgetBlockType.custom:
         return 'Bloc personnalisé';
     }
