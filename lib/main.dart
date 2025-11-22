@@ -634,7 +634,7 @@ class MyApp extends ConsumerWidget {
       error: (error, stack) {
         print('B3: Error loading config: $error');
         // On error, fallback to in-memory default config
-        final config = AppConfigService().getDefaultConfig('pizza_delizza');
+        final config = AppConfigService().getDefaultConfig(AppConstants.appId);
         final pageSchema = config.pages.getPage(route);
         
         if (pageSchema != null) {

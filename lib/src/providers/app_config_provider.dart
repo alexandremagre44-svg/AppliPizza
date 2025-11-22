@@ -4,6 +4,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/app_config.dart';
 import '../services/app_config_service.dart';
+import '../core/constants.dart';
 
 // Service provider
 final appConfigServiceProvider = Provider<AppConfigService>((ref) {
@@ -14,7 +15,7 @@ final appConfigServiceProvider = Provider<AppConfigService>((ref) {
 // Auto-creates config with B3 pages on first access if it doesn't exist
 final appConfigProvider = StreamProvider<AppConfig?>((ref) async* {
   final service = ref.watch(appConfigServiceProvider);
-  const appId = 'pizza_delizza';
+  final appId = AppConstants.appId;
   
   // First, try to get the config (which will auto-create if needed)
   final initialConfig = await service.getConfig(
@@ -40,7 +41,7 @@ final appConfigProvider = StreamProvider<AppConfig?>((ref) async* {
 // Auto-creates draft from published on first access if it doesn't exist
 final appConfigDraftProvider = StreamProvider<AppConfig?>((ref) async* {
   final service = ref.watch(appConfigServiceProvider);
-  const appId = 'pizza_delizza';
+  final appId = AppConstants.appId;
   
   // First, try to get the draft config (which will auto-create if needed)
   final initialConfig = await service.getConfig(
@@ -63,9 +64,11 @@ final appConfigDraftProvider = StreamProvider<AppConfig?>((ref) async* {
 });
 
 // Future provider for one-time fetch with auto-initialization
+// Note: This is useful for non-reactive contexts where a Stream is not needed
+// For most UI code, prefer using appConfigProvider which provides real-time updates
 final appConfigFutureProvider = FutureProvider<AppConfig?>((ref) async {
   final service = ref.watch(appConfigServiceProvider);
-  const appId = 'pizza_delizza';
+  final appId = AppConstants.appId;
   
   // Get published config, auto-creating if needed
   final config = await service.getConfig(appId: appId, draft: false, autoCreate: true);
