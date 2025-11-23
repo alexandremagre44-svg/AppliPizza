@@ -193,30 +193,45 @@ class MyApp extends ConsumerWidget {
             return ScaffoldWithNavBar(child: child);
           },
           routes: [
+            // PRIMARY ROUTES: Now using B3 dynamic pages
+            // This allows Studio B3 to edit the actual app pages
+            
+            // Home - Main landing page (editable in Studio B3)
             GoRoute(
               path: AppRoutes.home,
-              builder: (context, state) => const HomeScreen(),
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.homeB3),
             ),
+            // Menu - Product listing page (editable in Studio B3)
+            GoRoute(
+              path: AppRoutes.menu,
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.menuB3),
+            ),
+            // Categories - Category listing page (editable in Studio B3)
+            GoRoute(
+              path: AppRoutes.categories,
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.categoriesB3),
+            ),
+            // Cart - Shopping cart page (editable in Studio B3)
+            GoRoute(
+              path: AppRoutes.cart,
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.cartB3),
+            ),
+            
+            // LEGACY/TEST ROUTES: Keep for backward compatibility
             // HomeScreenB2 - Test route for new AppConfig B2 architecture
             GoRoute(
               path: '/home-b2',
               builder: (context, state) => const HomeScreenB2(),
             ),
-            // HomeB3 - B3 Phase 6: Dynamic home page
+            // B3 alternate routes (kept for backward compatibility)
             GoRoute(
               path: AppRoutes.homeB3,
               builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.homeB3),
             ),
             GoRoute(
-              path: AppRoutes.menu,
-              builder: (context, state) => const MenuScreen(),
-            ),
-            // MenuB3 - B3 Phase 6: Dynamic menu page
-            GoRoute(
               path: AppRoutes.menuB3,
               builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.menuB3),
             ),
-            // B3 Phase 2: Dynamic page routes from AppConfig
             GoRoute(
               path: AppRoutes.categoriesB3,
               builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.categoriesB3),
@@ -224,10 +239,6 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: AppRoutes.cartB3,
               builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.cartB3),
-            ),
-            GoRoute(
-              path: AppRoutes.cart,
-              builder: (context, state) => const CartScreen(),
             ),
             GoRoute(
               path: AppRoutes.profile,
