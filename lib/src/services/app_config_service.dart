@@ -35,6 +35,7 @@ class AppConfigService {
   static const String _defaultWhiteColor = '#FFFFFF';
   
   // B3 route constants - DEPRECATED: kept for backward compatibility
+  // TODO: Remove these constants after migration period (est. 2025-01)
   static const String _homeB3Route = '/home-b3';
   static const String _menuB3Route = '/menu-b3';
   static const String _categoriesB3Route = '/categories-b3';
@@ -1821,6 +1822,14 @@ class AppConfigService {
     }
   }
 
+  // Old B3 routes to clean up during migration
+  static const Set<String> _oldB3Routes = {
+    '/home-b3',
+    '/menu-b3',
+    '/categories-b3',
+    '/cart-b3',
+  };
+
   /// One-time cleanup: Remove old duplicate -b3 pages
   /// 
   /// This method removes the old duplicate pages that had -b3 suffixes
@@ -1831,11 +1840,11 @@ class AppConfigService {
   /// but see different content in the actual app.
   /// 
   /// **Safe to call multiple times** - it only removes pages with -b3 routes
-  Future<void> cleanupDuplicateB3Pages({String appId = 'pizza_delizza'}) async {
+  Future<void> cleanupDuplicateB3Pages({String appId = AppConstants.appId}) async {
     const String cleanupKey = 'b3_duplicate_pages_cleanup_completed';
     
     try {
-      // Check if cleanup already completed
+      // Check if cleanup already completed (cache the prefs instance)
       final prefs = await SharedPreferences.getInstance();
       final alreadyCleaned = prefs.getBool(cleanupKey) ?? false;
       
@@ -1846,9 +1855,6 @@ class AppConfigService {
       
       debugPrint('🧹 CLEANUP: Starting duplicate -b3 pages cleanup for appId: $appId');
       
-      // Routes to remove (old -b3 pages)
-      final oldB3Routes = {_homeB3Route, _menuB3Route, _categoriesB3Route, _cartB3Route};
-      
       // Clean published config
       try {
         final publishedConfig = await getConfig(appId: appId, draft: false, autoCreate: false);
@@ -1857,7 +1863,7 @@ class AppConfigService {
           
           // Keep only pages that are NOT old -b3 routes
           final cleanedPages = publishedConfig.pages.pages
-              .where((page) => !oldB3Routes.contains(page.route))
+              .where((page) => !_oldB3Routes.contains(page.route))
               .toList();
           
           if (cleanedPages.length < originalCount) {
@@ -1889,7 +1895,7 @@ class AppConfigService {
           
           // Keep only pages that are NOT old -b3 routes
           final cleanedPages = draftConfig.pages.pages
-              .where((page) => !oldB3Routes.contains(page.route))
+              .where((page) => !_oldB3Routes.contains(page.route))
               .toList();
           
           if (cleanedPages.length < originalCount) {

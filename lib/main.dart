@@ -250,7 +250,7 @@ class MyApp extends ConsumerWidget {
             ),
             GoRoute(
               path: AppRoutes.categoriesB3,
-              builder: (context, state) => _buildDynamicPage(context, ref, '/categories'),
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.categories),
             ),
             GoRoute(
               path: AppRoutes.cartB3,
