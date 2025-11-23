@@ -483,16 +483,30 @@ class AppConfigService {
   /// Safe to call multiple times - will not overwrite existing pages
   /// Never throws exceptions - logs errors only
   Future<void> ensureMandatoryB3Pages() async {
-    final firebase = FirebaseFirestore.instance;
-    final docPublished = firebase.collection('app_configs').doc('pizza_delizza').collection('configs').doc('config');
-    final docDraft = firebase.collection('app_configs').doc('pizza_delizza').collection('configs').doc('config_draft');
+    final docPublished = _firestore
+        .collection(_collectionName)
+        .doc('pizza_delizza')
+        .collection('configs')
+        .doc(_configDocName);
+    final docDraft = _firestore
+        .collection(_collectionName)
+        .doc('pizza_delizza')
+        .collection('configs')
+        .doc(_configDraftDocName);
 
     Future<void> ensure(DocumentReference<Map<String, dynamic>> ref) async {
       final snap = await ref.get();
       Map<String, dynamic> data = snap.data() ?? {};
 
-      data.putIfAbsent('pages', () => {'pages': []});
-      List pages = data['pages']['pages'] ?? [];
+      // Ensure pages structure exists
+      if (!data.containsKey('pages')) {
+        data['pages'] = {'pages': []};
+      }
+      
+      // Safely access nested pages list
+      final pagesData = data['pages'] as Map<String, dynamic>?;
+      final pagesList = pagesData?['pages'] as List?;
+      List<dynamic> pages = pagesList != null ? List.from(pagesList) : [];
 
       final required = [
         '/home-b3',
@@ -501,34 +515,43 @@ class AppConfigService {
         '/cart-b3',
       ];
 
-      // Déjà présentes ?
-      final existingRoutes = pages.map((p) => p['route']).toList();
+      // Check which pages already exist
+      final existingRoutes = pages
+          .whereType<Map<String, dynamic>>()
+          .map((p) => p['route'] as String?)
+          .whereType<String>()
+          .toList();
       final missing = required.where((r) => !existingRoutes.contains(r)).toList();
 
       if (missing.isEmpty) {
-        return; // rien à faire
+        return; // Nothing to do
       }
 
-      // Génération des pages manquantes
-      final generated = missing.map((route) {
-        switch (route) {
-          case '/home-b3':
-            return PageSchema.homeB3().toJson();
-          case '/menu-b3':
-            return PageSchema.menuB3().toJson();
-          case '/categories-b3':
-            return PageSchema.categoriesB3().toJson();
-          case '/cart-b3':
-            return PageSchema.cartB3().toJson();
-          default:
-            return null;
-        }
-      }).where((e) => e != null).toList();
+      // Generate missing pages
+      final generated = missing
+          .map((route) {
+            switch (route) {
+              case '/home-b3':
+                return PageSchema.homeB3().toJson();
+              case '/menu-b3':
+                return PageSchema.menuB3().toJson();
+              case '/categories-b3':
+                return PageSchema.categoriesB3().toJson();
+              case '/cart-b3':
+                return PageSchema.cartB3().toJson();
+              default:
+                return null;
+            }
+          })
+          .whereType<Map<String, dynamic>>()
+          .toList();
 
-      data['pages']['pages'] = [...pages, ...generated];
+      data['pages'] = {
+        'pages': [...pages, ...generated]
+      };
 
       await ref.set(data, SetOptions(merge: true));
-      debugPrint("🔥 ensureMandatoryB3Pages: pages injectées dans ${ref.id}");
+      debugPrint("🔥 ensureMandatoryB3Pages: pages injected in ${ref.id}");
     }
 
     try {
