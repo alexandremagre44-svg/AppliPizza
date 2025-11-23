@@ -85,7 +85,8 @@ final appConfigDraftProvider = StreamProvider<AppConfig?>((ref) async* {
   
   // If we need fallback (draft is null, empty, or became empty), use published config
   if (needsFallback) {
-    debugPrint('📝 AppConfigDraftProvider: Draft is ${initialConfig == null ? "null" : "empty (0 pages)"}, falling back to published config');
+    final pageCount = initialConfig?.pages.pages.length ?? 0;
+    debugPrint('📝 AppConfigDraftProvider: Draft is ${initialConfig == null ? "null" : "empty ($pageCount pages)"}, falling back to published config');
     
     // Load and watch published config as fallback
     final publishedConfig = await service.getConfig(
