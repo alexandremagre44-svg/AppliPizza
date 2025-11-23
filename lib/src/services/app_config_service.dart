@@ -33,6 +33,12 @@ class AppConfigService {
   static const String _defaultGradientEndColor = '#00000000';
   static const String _defaultPrimaryColor = '#D62828';
   static const String _defaultWhiteColor = '#FFFFFF';
+  
+  // B3 route constants
+  static const String _homeB3Route = '/home-b3';
+  static const String _menuB3Route = '/menu-b3';
+  static const String _categoriesB3Route = '/categories-b3';
+  static const String _cartB3Route = '/cart-b3';
 
   AppConfigService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -1180,7 +1186,7 @@ class AppConfigService {
     return PageSchema(
       id: 'home_b3',
       name: 'Accueil B3',
-      route: '/home-b3',
+      route: _homeB3Route,
       enabled: true,
       blocks: blocks,
       metadata: {
@@ -1189,6 +1195,37 @@ class AppConfigService {
         'migrated': true,
       },
     );
+  }
+
+  /// Build navigation action for B3 routes
+  /// 
+  /// Converts V2 target names to B3 routes
+  /// Examples: 'menu' → '/menu-b3', 'categories' → '/categories-b3'
+  String _buildNavigationAction(dynamic target) {
+    if (target == null) {
+      return 'navigate:$_menuB3Route'; // Default to menu
+    }
+    
+    final targetStr = target.toString().toLowerCase();
+    
+    // Map V2 targets to B3 routes
+    switch (targetStr) {
+      case 'menu':
+        return 'navigate:$_menuB3Route';
+      case 'categories':
+        return 'navigate:$_categoriesB3Route';
+      case 'cart':
+        return 'navigate:$_cartB3Route';
+      case 'home':
+        return 'navigate:$_homeB3Route';
+      default:
+        // If it's already a path, keep it
+        if (targetStr.startsWith('/')) {
+          return 'navigate:$targetStr';
+        }
+        // Otherwise default to menu
+        return 'navigate:$_menuB3Route';
+    }
   }
 
   /// Convert Hero section to B3 heroAdvanced block
@@ -1218,7 +1255,7 @@ class AppConfigService {
         'ctas': [
           {
             'label': data['ctaLabel'] ?? 'Commander maintenant',
-            'action': 'navigate:/${data['ctaTarget'] ?? 'menu'}',
+            'action': _buildNavigationAction(data['ctaTarget']),
             'backgroundColor': _defaultPrimaryColor,
             'textColor': _defaultWhiteColor,
             'borderRadius': 8.0,
@@ -1284,7 +1321,7 @@ class AppConfigService {
         'ctas': [
           {
             'label': 'Découvrir',
-            'action': 'navigate:/menu-b3',
+            'action': 'navigate:$_menuB3Route',
             'backgroundColor': _defaultPrimaryColor,
             'textColor': _defaultWhiteColor,
             'borderRadius': 8.0,
@@ -1306,7 +1343,7 @@ class AppConfigService {
     return PageSchema(
       id: 'menu_b3',
       name: 'Menu B3',
-      route: '/menu-b3',
+      route: _menuB3Route,
       enabled: true,
       blocks: [
         WidgetBlock(
@@ -1369,7 +1406,7 @@ class AppConfigService {
     return PageSchema(
       id: 'categories_b3',
       name: 'Catégories B3',
-      route: '/categories-b3',
+      route: _categoriesB3Route,
       enabled: true,
       blocks: [
         WidgetBlock(
@@ -1432,7 +1469,7 @@ class AppConfigService {
     return PageSchema(
       id: 'cart_b3',
       name: 'Panier B3',
-      route: '/cart-b3',
+      route: _cartB3Route,
       enabled: true,
       blocks: [
         WidgetBlock(
@@ -1489,7 +1526,7 @@ class AppConfigService {
             'label': 'Retour au menu',
           },
           actions: {
-            'onTap': 'navigate:/menu-b3',
+            'onTap': 'navigate:$_menuB3Route',
           },
           styling: {
             'backgroundColor': _defaultPrimaryColor,
