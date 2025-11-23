@@ -22,8 +22,7 @@ import 'src/screens/cart/cart_screen.dart';
 import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
 import 'src/screens/product_detail/product_detail_screen.dart';
-// Studio V2 - Official professional studio (only version exposed via routes).
-import 'src/studio/screens/studio_v2_screen.dart';
+// Studio V2 removed - Studio B3 is now the primary studio
 import 'src/studio/screens/theme_manager_screen.dart';
 import 'src/studio/screens/media_manager_screen.dart';
 // Studio B2 - New admin interface for AppConfig B2 management
@@ -252,23 +251,10 @@ class MyApp extends ConsumerWidget {
                 return const AdminStudioScreen();
               },
             ),
-            // Studio V2 Editor - Direct access to content editor
+            // Studio V2 deprecated - Redirect to Studio B3
             GoRoute(
               path: AppRoutes.adminStudioV2,
-              builder: (context, state) {
-                // PROTECTION: Studio V2 is reserved for admins
-                final authState = ref.read(authProvider);
-                if (!authState.isAdmin) {
-                  // Redirect to home if not admin
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
-                  });
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                return const StudioV2Screen();
-              },
+              redirect: (context, state) => AppRoutes.adminStudioB3,
             ),
             // Studio B2 - New admin interface for AppConfig management
             GoRoute(
@@ -367,7 +353,7 @@ class MyApp extends ConsumerWidget {
                 return const MediaManagerScreen();
               },
             ),
-            // Deprecated routes - redirect to Studio V2
+            // Deprecated routes - redirect to Studio B3
             GoRoute(
               path: AppRoutes.adminHero,
               redirect: (context, state) => AppRoutes.adminStudio,
