@@ -83,3 +83,24 @@ class CustomizationGroup {
     );
   }
 }
+
+/// Bridge class pour faciliter la transition entre l'ancien et le nouveau modèle de groupe
+/// TODO: Utilisé plus tard pour unifier les groupes anciens/nouveaux lors de la migration
+class CustomizationGroupBridge {
+  /// Crée un groupe depuis une catégorie d'ingrédients de l'ancien système
+  /// TODO: À implémenter lors de la Phase 3 de migration
+  static CustomizationGroup fromLegacyCategory(
+    IngredientCategory category,
+    List<dynamic> legacyIngredients,
+  ) {
+    // TODO: Créer un CustomizationGroup depuis une liste d'ingrédients legacy
+    throw UnimplementedError('Bridge non implémenté - Phase 3');
+  }
+  
+  /// Convertit vers le format legacy si nécessaire
+  /// TODO: À implémenter lors de la Phase 3 de migration
+  static Map<String, dynamic> toLegacy(CustomizationGroup group) {
+    // TODO: Mapping vers l'ancien format
+    throw UnimplementedError('Bridge non implémenté - Phase 3');
+  }
+}

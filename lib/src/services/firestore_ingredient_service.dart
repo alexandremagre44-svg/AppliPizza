@@ -1,4 +1,8 @@
 // lib/src/services/firestore_ingredient_service.dart
+// TODO: Uses legacy version. Bridge to new module under construction.
+// Nouveau module: lib/modules/customization/data/services/customization_service.dart
+// Ce fichier reste la source ACTIVE pour l'instant. Ne pas modifier sans coordination.
+// 
 // Service pour gérer les ingrédients dans Firestore
 
 import 'dart:developer' as developer;

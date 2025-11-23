@@ -1,4 +1,7 @@
 // lib/src/screens/home/pizza_customization_modal.dart
+// TODO: Uses legacy version. Bridge to new module under construction.
+// Nouveau module: lib/modules/customization/presentation/widgets/pizza_customization_widget.dart
+// Ce fichier reste la source ACTIVE pour l'instant. Ne pas modifier sans coordination.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

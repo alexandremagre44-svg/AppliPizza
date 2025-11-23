@@ -25,6 +25,14 @@ class CustomizationGroupSection extends StatelessWidget {
     required this.onOptionToggle,
   });
   
+  /// Bridge constructor pour créer depuis un widget legacy
+  /// TODO: À implémenter lors de la Phase 3 de migration
+  /// IMPORTANT: Non utilisé dans l'app actuelle
+  factory CustomizationGroupSection.fromLegacy(dynamic legacyWidget) {
+    // TODO: Mapping depuis l'ancien code de _buildCategorySection
+    throw UnimplementedError('Bridge non implémenté - Phase 3');
+  }
+  
   @override
   Widget build(BuildContext context) {
     // TODO: Implémenter l'affichage complet avec le design system

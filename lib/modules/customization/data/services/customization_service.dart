@@ -8,6 +8,14 @@ import '../models/customization_option.dart';
 
 /// Interface abstraite pour le service des ingrédients/options de personnalisation
 abstract class CustomizationService {
+  /// Bridge pour créer le nouveau service depuis l'ancien
+  /// TODO: À implémenter lors de la Phase 3 de migration
+  /// @param legacy L'ancien service FirestoreIngredientService
+  static CustomizationService fromLegacy(dynamic legacyService) {
+    // TODO: Wrapping du service legacy pour compatibilité
+    // Permet de faire la transition progressive sans casser l'existant
+    throw UnimplementedError('Bridge non implémenté - Phase 3');
+  }
   /// Charger tous les ingrédients
   Future<List<Ingredient>> loadIngredients();
   

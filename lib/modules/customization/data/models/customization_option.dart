@@ -91,3 +91,28 @@ class Ingredient {
     );
   }
 }
+
+/// Bridge class pour faciliter la transition entre l'ancien et le nouveau modèle
+/// TODO: Utilisé plus tard pour unifier les modèles anciens/nouveaux lors de la migration
+class CustomizationModelBridge {
+  /// Convertit un Ingredient de l'ancien système vers le nouveau
+  /// TODO: À implémenter lors de la Phase 3 de migration
+  static Ingredient fromLegacy(dynamic legacyIngredient) {
+    // TODO: Mapping depuis lib/src/models/product.dart Ingredient
+    throw UnimplementedError('Bridge non implémenté - Phase 3');
+  }
+  
+  /// Convertit un Ingredient du nouveau système vers l'ancien
+  /// TODO: À implémenter lors de la Phase 3 de migration
+  static dynamic toLegacy(Ingredient newIngredient) {
+    // TODO: Mapping vers lib/src/models/product.dart Ingredient
+    throw UnimplementedError('Bridge non implémenté - Phase 3');
+  }
+  
+  /// Convertit une liste d'Ingredients
+  /// TODO: À implémenter lors de la Phase 3 de migration
+  static List<Ingredient> fromLegacyList(List<dynamic> legacyList) {
+    // TODO: Mapping de liste
+    throw UnimplementedError('Bridge non implémenté - Phase 3');
+  }
+}

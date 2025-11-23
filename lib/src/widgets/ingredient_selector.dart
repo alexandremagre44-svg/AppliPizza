@@ -1,4 +1,8 @@
 // lib/src/widgets/ingredient_selector.dart
+// TODO: Uses legacy version. Bridge to new module under construction.
+// Nouveau module: lib/modules/customization/presentation/widgets/ingredient_selector_widget.dart
+// Ce fichier reste la source ACTIVE pour l'instant. Ne pas modifier sans coordination.
+// 
 // Widget réutilisable pour la gestion dynamique des ingrédients
 // ⚠️ DÉPRÉCIÉ: Ce widget utilise une liste statique d'ingrédients
 // Utilisez plutôt les providers Firestore (ingredientStreamProvider) pour une gestion dynamique

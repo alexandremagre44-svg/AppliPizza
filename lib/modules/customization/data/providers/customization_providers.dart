@@ -61,3 +61,24 @@ final ingredientsByCategoryProvider = FutureProvider.family<List<Ingredient>, In
 ///   final String? specialInstructions;
 ///   ...
 /// }
+
+/// Bridge provider pour faciliter la transition entre ancien et nouveau système
+/// TODO: Utilisé lors de la Phase 3 pour mapper les providers legacy vers les nouveaux
+final customizationBridgeProvider = Provider<dynamic>((ref) {
+  // TODO: Futur mapping depuis les providers legacy (ingredient_provider.dart)
+  // Permet de faire coexister ancien et nouveau système pendant la migration
+  // return CustomizationBridge(
+  //   legacyProvider: ref.watch(ingredientStreamProvider),
+  //   newProvider: ref.watch(ingredientStreamProvider),
+  // );
+  return null; // Non utilisé pour le moment - Phase 3
+});
+
+/// Provider bridge pour la compatibilité avec l'ancien système
+/// TODO: À activer lors de la Phase 3 de migration
+final legacyCompatibilityProvider = Provider<bool>((ref) {
+  // TODO: Flag pour activer/désactiver le mode compatibilité
+  // false = utilise l'ancien système (actuel)
+  // true = utilise le nouveau module (futur)
+  return false; // Toujours false en Phase 2
+});
