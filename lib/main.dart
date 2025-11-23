@@ -72,6 +72,13 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
+  // DEBUG ONLY: Force B3 initialization without auth/permissions
+  // This makes Studio B3 immediately functional in DEBUG/CHROME mode
+  // Writes 4 mandatory B3 pages directly to Firestore, ignoring permission errors
+  if (kDebugMode) {
+    await AppConfigService().forceB3InitializationForDebug();
+  }
+  
   // B3 Auto-Initialization: Check and create mandatory B3 pages if needed
   // This runs once on first boot and handles Firestore permission checks
   await AppConfigService().autoInitializeB3IfNeeded();
