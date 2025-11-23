@@ -21,6 +21,11 @@ class AppConfigService {
   static const String _collectionName = 'app_configs';
   static const String _configDocName = 'config';
   static const String _configDraftDocName = 'config_draft';
+  
+  // B3 initialization constants
+  static const String _b3TestCollection = '_b3_test';
+  static const String _b3TestDocName = '__b3_init__';
+  static const String _b3InitializedKey = 'b3_auto_initialized';
 
   AppConfigService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -587,7 +592,7 @@ class AppConfigService {
 
       // 2. Test Firestore write permissions with a test document
       try {
-        final testDoc = _firestore.collection('_b3_test').doc('__b3_init__');
+        final testDoc = _firestore.collection(_b3TestCollection).doc(_b3TestDocName);
         
         await testDoc.set({
           'timestamp': FieldValue.serverTimestamp(),
@@ -607,22 +612,7 @@ class AppConfigService {
 
       } on FirebaseException catch (e) {
         if (e.code == 'permission-denied') {
-          debugPrint('');
-          debugPrint('╔═══════════════════════════════════════════════════════════════╗');
-          debugPrint('║  ⚠️  FIRESTORE PERMISSION DENIED                              ║');
-          debugPrint('╠═══════════════════════════════════════════════════════════════╣');
-          debugPrint('║  Les règles Firestore actuelles bloquent l\'écriture.         ║');
-          debugPrint('║                                                               ║');
-          debugPrint('║  ACTION REQUISE:                                              ║');
-          debugPrint('║  1. Connectez-vous à la Firebase Console                     ║');
-          debugPrint('║  2. Allez dans Firestore Database > Règles                   ║');
-          debugPrint('║  3. Appliquez les règles temporaires du fichier:             ║');
-          debugPrint('║     B3_FIRESTORE_RULES.md                                    ║');
-          debugPrint('║                                                               ║');
-          debugPrint('║  Les pages B3 seront créées automatiquement après            ║');
-          debugPrint('║  la mise à jour des règles au prochain lancement.            ║');
-          debugPrint('╚═══════════════════════════════════════════════════════════════╝');
-          debugPrint('');
+          _logPermissionDeniedError();
           return;
         }
         
@@ -656,9 +646,8 @@ class AppConfigService {
     try {
       // Check if already initialized
       final prefs = await SharedPreferences.getInstance();
-      const key = 'b3_auto_initialized';
       
-      final alreadyInitialized = prefs.getBool(key) ?? false;
+      final alreadyInitialized = prefs.getBool(_b3InitializedKey) ?? false;
       
       if (alreadyInitialized) {
         debugPrint('B3 Init: Already initialized, skipping');
@@ -671,14 +660,36 @@ class AppConfigService {
       await ensureFirestoreRulesAndMandatoryPages();
 
       // Mark as initialized
-      await prefs.setBool(key, true);
+      await prefs.setBool(_b3InitializedKey, true);
       
-      debugPrint('✅ B3 Init: Pages auto-créées avec succès');
+      debugPrint('B3 Init: Pages auto-created successfully');
 
     } catch (e) {
       debugPrint('B3 Init: Error in autoInitializeB3IfNeeded: $e');
       // Don't rethrow - log only
       // Don't set the flag on error, so it will retry next time
     }
+  }
+
+  /// Log a clear error message when Firestore permissions are denied
+  /// 
+  /// This message guides the user to update Firestore rules in Firebase Console
+  void _logPermissionDeniedError() {
+    debugPrint('');
+    debugPrint('╔═══════════════════════════════════════════════════════════════╗');
+    debugPrint('║  ⚠️  FIRESTORE PERMISSION DENIED                              ║');
+    debugPrint('╠═══════════════════════════════════════════════════════════════╣');
+    debugPrint('║  Current Firestore rules block write access.                 ║');
+    debugPrint('║                                                               ║');
+    debugPrint('║  ACTION REQUIRED:                                             ║');
+    debugPrint('║  1. Go to Firebase Console                                   ║');
+    debugPrint('║  2. Navigate to Firestore Database > Rules                   ║');
+    debugPrint('║  3. Apply temporary rules from file:                         ║');
+    debugPrint('║     B3_FIRESTORE_RULES.md                                    ║');
+    debugPrint('║                                                               ║');
+    debugPrint('║  B3 pages will be created automatically after                ║');
+    debugPrint('║  updating the rules on the next launch.                      ║');
+    debugPrint('╚═══════════════════════════════════════════════════════════════╝');
+    debugPrint('');
   }
 }
