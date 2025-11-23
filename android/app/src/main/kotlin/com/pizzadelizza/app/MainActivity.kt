@@ -1,4 +1,4 @@
-package com.example.pizza_delizza_clean
+package com.pizzadelizza.app
 
 import io.flutter.embedding.android.FlutterActivity
 
