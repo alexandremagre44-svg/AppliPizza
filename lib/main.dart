@@ -83,6 +83,10 @@ void main() async {
   // This runs once on first boot and handles Firestore permission checks
   await AppConfigService().autoInitializeB3IfNeeded();
   
+  // B3 Migration: Migrate existing V2 pages to B3 architecture
+  // This runs once and converts HomeConfigV2 sections to B3 PageSchema
+  await AppConfigService().migrateExistingPagesToB3('pizza_delizza');
+  
   // Initialize Firebase App Check
   // DISABLED on Web in debug mode to prevent errors during development
   // ENABLED on Android/iOS for production security
