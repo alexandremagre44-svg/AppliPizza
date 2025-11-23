@@ -707,8 +707,11 @@ class AppConfigService {
   /// - Ignores all permission errors (logs them only)
   /// 
   /// **Usage**: Call this in main.dart immediately after Firebase.initializeApp()
+  /// wrapped in an `if (kDebugMode)` check to ensure it only runs in debug mode.
   /// 
-  /// **IMPORTANT**: Never throws exceptions - always handles errors gracefully
+  /// **IMPORTANT**: 
+  /// - Never throws exceptions - always handles errors gracefully
+  /// - The caller is responsible for checking kDebugMode before calling this method
   Future<void> forceB3InitializationForDebug() async {
     try {
       debugPrint('🔧 DEBUG: Force B3 initialization starting...');
@@ -717,9 +720,8 @@ class AppConfigService {
       final pagesConfig = PagesConfig.initial();
       
       // Create the document data structure
-      final Map<String, dynamic> documentData = {
-        'pages': pagesConfig.toJson(),
-      };
+      // Note: pagesConfig.toJson() already returns {'pages': [...]} structure
+      final Map<String, dynamic> documentData = pagesConfig.toJson();
       
       // Define Firestore paths (new structure for debug initialization)
       final publishedDoc = _firestore
