@@ -39,6 +39,11 @@ class AppConfigService {
   static const String _menuB3Route = '/menu-b3';
   static const String _categoriesB3Route = '/categories-b3';
   static const String _cartB3Route = '/cart-b3';
+  
+  /// Get all mandatory B3 routes (main + alternate)
+  static Set<String> _getMandatoryB3Routes() {
+    return {'/home', _homeB3Route, '/menu', _menuB3Route, _categoriesB3Route, '/cart', _cartB3Route};
+  }
 
   AppConfigService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -748,7 +753,7 @@ class AppConfigService {
       // Build the mandatory B3 pages (includes both /home and /home-b3 routes)
       final mandatoryB3Pages = _buildMandatoryB3Pages();
       // Main routes that can be edited in Builder B3
-      final mandatoryRoutes = {'/home', '/home-b3', '/menu', '/menu-b3', '/categories-b3', '/cart', '/cart-b3'};
+      final mandatoryRoutes = _getMandatoryB3Routes();
       
       // Use correct Firestore paths: app_configs/{appId}/configs/{config|config_draft}
       final publishedDoc = _firestore
@@ -913,7 +918,7 @@ class AppConfigService {
       debugPrint("B3 FORCE: Built ${mandatoryPages.length} mandatory pages");
 
       // Define the routes to replace
-      final mandatoryRoutes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
+      final mandatoryRoutes = _getMandatoryB3Routes();
 
       // 2. Load current configs from Firestore if available
       AppConfig? draftConfig;
@@ -1115,7 +1120,7 @@ class AppConfigService {
       }
       
       // Define the B3 routes that will be replaced
-      final b3Routes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
+      final b3Routes = _getMandatoryB3Routes();
       
       // Preserve existing non-B3 pages
       List<PageSchema> existingNonB3Pages = [];
@@ -1732,7 +1737,7 @@ class AppConfigService {
       debugPrint('🔧 FIX: Starting to fix pages in Firestore for appId: $appId');
       
       final mandatoryB3Pages = _buildMandatoryB3Pages();
-      final b3Routes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
+      final b3Routes = _getMandatoryB3Routes();
       
       // Fix published config
       try {

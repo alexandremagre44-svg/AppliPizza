@@ -711,13 +711,13 @@ class MyApp extends ConsumerWidget {
           
           if (pageSchema != null && pageSchema.enabled) {
             // B3 page exists and is enabled - use it
-            print('B3 Hybrid: Using B3 page for route: $route');
+            debugPrint('B3 Hybrid: Using B3 page for route: $route');
             return DynamicPageScreen(pageSchema: pageSchema);
           }
         }
         
         // No B3 page found or disabled - use fallback static screen
-        print('B3 Hybrid: Using fallback static screen for route: $route');
+        debugPrint('B3 Hybrid: Using fallback static screen for route: $route');
         return fallback;
       },
       loading: () => Scaffold(
@@ -726,7 +726,7 @@ class MyApp extends ConsumerWidget {
       ),
       error: (error, stack) {
         // On error, always fallback to static screen to ensure app works
-        print('B3 Hybrid: Error loading config, using fallback for route: $route - $error');
+        debugPrint('B3 Hybrid: Error loading config, using fallback for route: $route - $error');
         return fallback;
       },
     );
