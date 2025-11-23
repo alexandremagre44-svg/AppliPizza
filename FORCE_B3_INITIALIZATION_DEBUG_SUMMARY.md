@@ -25,10 +25,11 @@ Location: `lib/src/services/app_config_service.dart`
 
 ```dart
 Future<void> forceB3InitializationForDebug() async {
-  // Generates 4 mandatory B3 pages using PagesConfig.initial()
-  // Writes to /config/pizza_delizza/data/published
-  // Writes to /config/pizza_delizza/data/draft
+  // Creates full AppConfig with 4 mandatory B3 pages using getDefaultConfig()
+  // Writes to app_configs/pizza_delizza/configs/config (published)
+  // Writes to app_configs/pizza_delizza/configs/config_draft (draft)
   // All writes wrapped in try/catch to ignore permission errors
+  // Uses merge: true to preserve existing data
 }
 ```
 
@@ -58,26 +59,37 @@ if (kDebugMode) {
 The method writes to the following Firestore paths:
 
 ```
-/config
+/app_configs
   └── pizza_delizza
-      └── data
-          ├── published  (live config for dynamic pages)
-          └── draft      (config for Studio B3 editing)
+      └── configs
+          ├── config        (published config for live dynamic pages)
+          └── config_draft  (draft config for Studio B3 editing)
 ```
 
-Each document contains:
+Each document contains a full AppConfig structure:
 ```json
 {
-  "pages": [
-    {...},  // home-b3 page schema
-    {...},  // menu-b3 page schema
-    {...},  // categories-b3 page schema
-    {...}   // cart-b3 page schema
-  ]
+  "appId": "pizza_delizza",
+  "version": 1,
+  "home": {...},
+  "menu": {...},
+  "branding": {...},
+  "legal": {...},
+  "modules": {...},
+  "pages": {
+    "pages": [
+      {...},  // home-b3 page schema
+      {...},  // menu-b3 page schema
+      {...},  // categories-b3 page schema
+      {...}   // cart-b3 page schema
+    ]
+  },
+  "createdAt": "...",
+  "updatedAt": "..."
 }
 ```
 
-Note: This matches the structure used by `PagesConfig.toJson()` which returns `{'pages': [...]}`
+Note: This matches the structure used by `AppConfig.toJson()` which includes all app configuration, not just pages.
 
 ## Pages Generated
 
@@ -147,7 +159,7 @@ For full functionality in DEBUG mode, use temporary permissive rules:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /config/{appId}/data/{document=**} {
+    match /app_configs/{appId}/configs/{document=**} {
       allow read, write: if true;  // DEBUG ONLY - Remove in production
     }
   }
@@ -163,9 +175,9 @@ service cloud.firestore {
    - Verify no crashes occur
 
 2. **Check Firestore Console**
-   - Navigate to `/config/pizza_delizza/data/published`
-   - Navigate to `/config/pizza_delizza/data/draft`
-   - Verify both documents contain the 4 B3 pages
+   - Navigate to `/app_configs/pizza_delizza/configs/config`
+   - Navigate to `/app_configs/pizza_delizza/configs/config_draft`
+   - Verify both documents contain the full AppConfig with 4 B3 pages in the `pages.pages` array
 
 3. **Test Studio B3**
    - Navigate to `/admin/studio-b3`
@@ -211,9 +223,9 @@ Potential enhancements (not required for current implementation):
 ✅ **Never uses FirebaseAuth**: No authentication checks in the code  
 ✅ **Never verifies permissions**: Direct Firestore writes without permission checks  
 ✅ **Ignores permission errors**: All writes wrapped in try/catch blocks  
-✅ **Writes to specified paths**: `/config/pizza_delizza/published` and `/config/pizza_delizza/draft`  
-✅ **Always overwrites**: Uses `SetOptions(merge: false)`  
-✅ **Correct format**: Writes `{'pages': [...]}` structure using PagesConfig.toJson()  
+✅ **Writes to correct paths**: `/app_configs/pizza_delizza/configs/config` (published) and `config_draft` (draft)  
+✅ **Uses merge mode**: Uses `SetOptions(merge: true)` to preserve existing data  
+✅ **Correct format**: Writes full AppConfig structure using `AppConfig.toJson()`  
 ✅ **Uses PagesConfig.initial()**: Generates all 4 mandatory pages  
 ✅ **Called after Firebase.initializeApp()**: Integrated in main.dart  
 ✅ **100% robust**: Never throws exceptions, comprehensive error handling  
