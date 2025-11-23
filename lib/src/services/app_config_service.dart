@@ -469,4 +469,88 @@ class AppConfigService {
       // Don't rethrow - log only
     }
   }
+
+  /// Ensure all mandatory B3 pages exist in both draft and published configs
+  /// 
+  /// Verifies that the following pages exist and creates them if missing:
+  /// - home-b3 (/home-b3)
+  /// - menu-b3 (/menu-b3) 
+  /// - categories-b3 (/categories-b3)
+  /// - cart-b3 (/cart-b3)
+  /// 
+  /// Safe to call multiple times - will not overwrite existing pages
+  /// Never throws exceptions - logs errors only
+  /// [appId] - The application identifier
+  Future<void> ensureMandatoryB3Pages({
+    required String appId,
+  }) async {
+    try {
+      print('AppConfigService: Checking mandatory B3 pages for appId: $appId');
+      
+      // List of mandatory B3 page routes
+      final mandatoryRoutes = ['/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'];
+      
+      // Check published config
+      final published = await getConfig(appId: appId, draft: false, autoCreate: true);
+      if (published == null) {
+        print('AppConfigService: ERROR - Failed to get published config for B3 page check');
+        return;
+      }
+      
+      // Check which pages are missing
+      final missingRoutes = <String>[];
+      for (final route in mandatoryRoutes) {
+        if (!published.pages.hasPage(route)) {
+          missingRoutes.add(route);
+        }
+      }
+      
+      if (missingRoutes.isEmpty) {
+        print('AppConfigService: All mandatory B3 pages exist');
+        return;
+      }
+      
+      print('AppConfigService: Missing B3 pages: $missingRoutes');
+      
+      // Get default config to extract missing pages
+      final defaultConfig = getDefaultConfig(appId);
+      final updatedPages = List<PageSchema>.from(published.pages.pages);
+      
+      // Add missing pages from default config
+      for (final route in missingRoutes) {
+        final defaultPage = defaultConfig.pages.getPage(route);
+        if (defaultPage != null) {
+          print('AppConfigService: Adding missing page: ${defaultPage.name} ($route)');
+          updatedPages.add(defaultPage);
+        }
+      }
+      
+      // Update published config
+      final updatedPublished = published.copyWith(
+        pages: published.pages.copyWith(pages: updatedPages),
+      );
+      
+      try {
+        // Save to published
+        await _firestore
+            .collection(_collectionName)
+            .doc(appId)
+            .collection('configs')
+            .doc(_configDocName)
+            .set(updatedPublished.toJson());
+        
+        print('AppConfigService: Published config updated with missing B3 pages');
+        
+        // Also update draft
+        await saveDraft(appId: appId, config: updatedPublished);
+        print('AppConfigService: Draft config updated with missing B3 pages');
+      } catch (e) {
+        print('AppConfigService: ERROR - Failed to save configs with B3 pages: $e');
+        // Don't rethrow - log only
+      }
+    } catch (e) {
+      print('AppConfigService: ERROR - Unexpected error in ensureMandatoryB3Pages: $e');
+      // Don't rethrow - log only
+    }
+  }
 }

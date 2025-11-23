@@ -17,7 +17,80 @@ class DynamicPageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PageRenderer(pageSchema: pageSchema);
+    // Wrap PageRenderer in error boundary
+    try {
+      return PageRenderer(pageSchema: pageSchema);
+    } catch (e, stackTrace) {
+      // Log error for debugging
+      print('DynamicPageScreen: Error rendering page "${pageSchema.name}" - $e');
+      print('StackTrace: $stackTrace');
+      
+      // Return error screen
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(pageSchema.name),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  size: 80,
+                  color: Colors.red,
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Erreur d\'affichage',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Impossible d\'afficher cette page en raison d\'une erreur.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red[200]!),
+                  ),
+                  child: Text(
+                    e.toString(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[700],
+                      fontFamily: 'monospace',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Retour'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
   }
 }
 
