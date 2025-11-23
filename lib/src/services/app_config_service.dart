@@ -1154,7 +1154,7 @@ class AppConfigService {
       // Mark migration as completed only if at least one write succeeded
       if (publishedWriteSuccess || draftWriteSuccess) {
         await prefs.setBool(migrationKey, true);
-        debugPrint('✅ Migration B3 SUCCESS - ${migratedPages.length} pages migrated');
+        debugPrint('✅ Migration B3 SUCCESS - ${migratedB3Pages.length} pages migrated');
       } else {
         debugPrint('B3 Migration: Both writes failed, will retry on next launch');
       }
