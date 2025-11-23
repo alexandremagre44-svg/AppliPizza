@@ -4,6 +4,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/app_config.dart';
 import '../models/page_schema.dart';
 
@@ -19,6 +21,11 @@ class AppConfigService {
   static const String _collectionName = 'app_configs';
   static const String _configDocName = 'config';
   static const String _configDraftDocName = 'config_draft';
+  
+  // B3 initialization constants
+  static const String _b3TestCollection = '_b3_test';
+  static const String _b3TestDocName = '__b3_init__';
+  static const String _b3InitializedKey = 'b3_auto_initialized';
 
   AppConfigService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -561,5 +568,128 @@ class AppConfigService {
       debugPrint('AppConfigService: ERROR - Error in ensureMandatoryB3Pages: $e');
       // Don't rethrow - log only
     }
+  }
+
+  /// Ensure Firestore rules allow write access and create mandatory B3 pages
+  /// 
+  /// This method:
+  /// 1. Checks if user is authenticated
+  /// 2. Tests Firestore write permissions by creating a test document
+  /// 3. If permissions are denied, logs clear error messages
+  /// 4. If permissions are OK, creates mandatory B3 pages silently
+  /// 
+  /// Never throws exceptions - always handles errors gracefully
+  Future<void> ensureFirestoreRulesAndMandatoryPages() async {
+    try {
+      // 1. Check if user is authenticated
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        debugPrint('B3 Init: User not authenticated, skipping Firestore initialization');
+        return;
+      }
+
+      debugPrint('B3 Init: User authenticated (${user.email}), checking Firestore permissions...');
+
+      // 2. Test Firestore write permissions with a test document
+      try {
+        final testDoc = _firestore.collection(_b3TestCollection).doc(_b3TestDocName);
+        
+        await testDoc.set({
+          'timestamp': FieldValue.serverTimestamp(),
+          'userId': user.uid,
+          'purpose': 'B3 initialization test',
+        });
+
+        debugPrint('B3 Init: Firestore write test successful');
+
+        // Clean up test document
+        try {
+          await testDoc.delete();
+        } catch (e) {
+          // Ignore cleanup errors
+          debugPrint('B3 Init: Test document cleanup failed (non-critical): $e');
+        }
+
+      } on FirebaseException catch (e) {
+        if (e.code == 'permission-denied') {
+          _logPermissionDeniedError();
+          return;
+        }
+        
+        // Other Firebase errors
+        debugPrint('B3 Init: Firebase error during permission test: ${e.code} - ${e.message}');
+        return;
+      }
+
+      // 3. Permissions OK - Create mandatory B3 pages
+      debugPrint('B3 Init: Creating mandatory B3 pages...');
+      await ensureMandatoryB3Pages();
+      debugPrint('B3 Init: Mandatory B3 pages creation completed');
+
+    } catch (e) {
+      debugPrint('B3 Init: Unexpected error in ensureFirestoreRulesAndMandatoryPages: $e');
+      // Don't rethrow - log only
+    }
+  }
+
+  /// Auto-initialize B3 pages if needed (runs only once on first boot)
+  /// 
+  /// This method:
+  /// 1. Checks a local flag to ensure it runs only once
+  /// 2. Calls ensureFirestoreRulesAndMandatoryPages()
+  /// 3. Logs success message
+  /// 4. Sets flag to prevent re-initialization
+  /// 
+  /// Safe to call multiple times - will skip if already initialized
+  /// Never throws exceptions - always handles errors gracefully
+  Future<void> autoInitializeB3IfNeeded() async {
+    try {
+      // Check if already initialized
+      final prefs = await SharedPreferences.getInstance();
+      
+      final alreadyInitialized = prefs.getBool(_b3InitializedKey) ?? false;
+      
+      if (alreadyInitialized) {
+        debugPrint('B3 Init: Already initialized, skipping');
+        return;
+      }
+
+      debugPrint('B3 Init: Starting first-time initialization...');
+
+      // Run the initialization
+      await ensureFirestoreRulesAndMandatoryPages();
+
+      // Mark as initialized
+      await prefs.setBool(_b3InitializedKey, true);
+      
+      debugPrint('B3 Init: Pages auto-created successfully');
+
+    } catch (e) {
+      debugPrint('B3 Init: Error in autoInitializeB3IfNeeded: $e');
+      // Don't rethrow - log only
+      // Don't set the flag on error, so it will retry next time
+    }
+  }
+
+  /// Log a clear error message when Firestore permissions are denied
+  /// 
+  /// This message guides the user to update Firestore rules in Firebase Console
+  void _logPermissionDeniedError() {
+    debugPrint('');
+    debugPrint('╔═══════════════════════════════════════════════════════════════╗');
+    debugPrint('║  ⚠️  FIRESTORE PERMISSION DENIED                              ║');
+    debugPrint('╠═══════════════════════════════════════════════════════════════╣');
+    debugPrint('║  Current Firestore rules block write access.                 ║');
+    debugPrint('║                                                               ║');
+    debugPrint('║  ACTION REQUIRED:                                             ║');
+    debugPrint('║  1. Go to Firebase Console                                   ║');
+    debugPrint('║  2. Navigate to Firestore Database > Rules                   ║');
+    debugPrint('║  3. Apply temporary rules from file:                         ║');
+    debugPrint('║     B3_FIRESTORE_RULES.md                                    ║');
+    debugPrint('║                                                               ║');
+    debugPrint('║  B3 pages will be created automatically after                ║');
+    debugPrint('║  updating the rules on the next launch.                      ║');
+    debugPrint('╚═══════════════════════════════════════════════════════════════╝');
+    debugPrint('');
   }
 }

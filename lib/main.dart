@@ -72,8 +72,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  // B3 Phase 7: Ensure mandatory B3 pages exist in Firestore
-  await AppConfigService().ensureMandatoryB3Pages();
+  // B3 Auto-Initialization: Check and create mandatory B3 pages if needed
+  // This runs once on first boot and handles Firestore permission checks
+  await AppConfigService().autoInitializeB3IfNeeded();
   
   // Initialize Firebase App Check
   // DISABLED on Web in debug mode to prevent errors during development
