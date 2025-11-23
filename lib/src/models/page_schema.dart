@@ -229,6 +229,26 @@ class PageSchema {
       metadata: metadata ?? this.metadata,
     );
   }
+
+  /// Factory method for creating home-b3 page
+  static PageSchema homeB3() {
+    return PagesConfig._createDefaultHomePage();
+  }
+
+  /// Factory method for creating menu-b3 page
+  static PageSchema menuB3() {
+    return PagesConfig._createDefaultMenuPage();
+  }
+
+  /// Factory method for creating categories-b3 page
+  static PageSchema categoriesB3() {
+    return PagesConfig._createDefaultCategoriesPage();
+  }
+
+  /// Factory method for creating cart-b3 page
+  static PageSchema cartB3() {
+    return PagesConfig._createDefaultCartPage();
+  }
 }
 
 /// Configuration for dynamic pages section in AppConfig
