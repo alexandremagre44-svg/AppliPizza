@@ -213,7 +213,7 @@ Potential enhancements (not required for current implementation):
 ✅ **Ignores permission errors**: All writes wrapped in try/catch blocks  
 ✅ **Writes to specified paths**: `/config/pizza_delizza/published` and `/config/pizza_delizza/draft`  
 ✅ **Always overwrites**: Uses `SetOptions(merge: false)`  
-✅ **Correct format**: Writes `{'pages': {'pages': [...]}}` structure  
+✅ **Correct format**: Writes `{'pages': [...]}` structure using PagesConfig.toJson()  
 ✅ **Uses PagesConfig.initial()**: Generates all 4 mandatory pages  
 ✅ **Called after Firebase.initializeApp()**: Integrated in main.dart  
 ✅ **100% robust**: Never throws exceptions, comprehensive error handling  
