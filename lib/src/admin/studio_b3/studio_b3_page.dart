@@ -76,6 +76,10 @@ class _StudioB3PageState extends ConsumerState<StudioB3Page> {
   }
 
   Widget _buildContent(AppConfig config, AppConfigService configService) {
+    // Get pages from config (already includes fallback from appConfigDraftProvider)
+    final pages = config.pages.pages;
+    debugPrint('StudioB3: displaying ${pages.length} pages from provider');
+    
     // Initialize selected page from route parameter if provided and not yet initialized
     if (!_isInitialized && widget.initialPageRoute != null && _selectedPage == null) {
       _isInitialized = true;
@@ -126,7 +130,7 @@ class _StudioB3PageState extends ConsumerState<StudioB3Page> {
 
     // Otherwise, show the page list
     return PageList(
-      pages: config.pages.pages,
+      pages: pages,
       onPageSelected: (page) {
         setState(() {
           _selectedPage = page;
