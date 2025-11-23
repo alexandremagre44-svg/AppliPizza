@@ -1420,7 +1420,7 @@ class AppConfigService {
         'ctas': [
           {
             'label': 'Découvrir',
-            'action': 'navigate:$_menuB3Route',
+            'action': 'navigate:/menu',
             'backgroundColor': _defaultPrimaryColor,
             'textColor': _defaultWhiteColor,
             'borderRadius': 8.0,
