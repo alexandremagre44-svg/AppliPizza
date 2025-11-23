@@ -72,6 +72,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
+  // B3 Phase 7: Ensure mandatory B3 pages exist in Firestore
+  await AppConfigService().ensureMandatoryB3Pages();
+  
   // Initialize Firebase App Check
   // DISABLED on Web in debug mode to prevent errors during development
   // ENABLED on Android/iOS for production security
