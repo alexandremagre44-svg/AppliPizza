@@ -743,37 +743,84 @@ class AppConfigService {
   Future<void> forceB3InitializationForDebug() async {
     try {
       debugPrint('🔧 DEBUG: Force B3 initialization starting...');
+      const appId = 'pizza_delizza';
       
-      // Create full default AppConfig with mandatory B3 pages
-      final defaultConfig = getDefaultConfig('pizza_delizza');
-      final configData = defaultConfig.toJson();
+      // Build the 4 mandatory B3 pages
+      final mandatoryB3Pages = _buildMandatoryB3Pages();
+      final mandatoryRoutes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
       
       // Use correct Firestore paths: app_configs/{appId}/configs/{config|config_draft}
       final publishedDoc = _firestore
           .collection(_collectionName)
-          .doc('pizza_delizza')
+          .doc(appId)
           .collection('configs')
           .doc(_configDocName);
       
       final draftDoc = _firestore
           .collection(_collectionName)
-          .doc('pizza_delizza')
+          .doc(appId)
           .collection('configs')
           .doc(_configDraftDocName);
       
-      // Write to published document
+      // Write to published document - preserving existing pages
       try {
-        await publishedDoc.set(configData, SetOptions(merge: true));
-        debugPrint('🔧 DEBUG: B3 config written to app_configs/pizza_delizza/configs/config');
+        // Load existing published config
+        AppConfig? existingPublished = await getConfig(appId: appId, draft: false, autoCreate: false);
+        
+        if (existingPublished != null) {
+          // Keep all non-B3 pages
+          final nonB3Pages = existingPublished.pages.pages
+              .where((page) => !mandatoryRoutes.contains(page.route))
+              .toList();
+          
+          // Combine with mandatory B3 pages
+          final updatedPages = [...nonB3Pages, ...mandatoryB3Pages];
+          
+          // Update config
+          final updatedConfig = existingPublished.copyWith(
+            pages: existingPublished.pages.copyWith(pages: updatedPages),
+          );
+          
+          await publishedDoc.set(updatedConfig.toJson(), SetOptions(merge: true));
+          debugPrint('🔧 DEBUG: B3 config updated in published with ${updatedPages.length} pages (${nonB3Pages.length} existing + ${mandatoryB3Pages.length} B3)');
+        } else {
+          // No existing config - create new one with B3 pages only
+          final defaultConfig = getDefaultConfig(appId);
+          await publishedDoc.set(defaultConfig.toJson(), SetOptions(merge: true));
+          debugPrint('🔧 DEBUG: B3 config created in published with ${mandatoryB3Pages.length} B3 pages');
+        }
       } catch (e) {
         // Log error but don't throw - permission denied is expected in some environments
         debugPrint('🔧 DEBUG: Failed to write to published (expected in restrictive environments): $e');
       }
       
-      // Write to draft document
+      // Write to draft document - preserving existing pages
       try {
-        await draftDoc.set(configData, SetOptions(merge: true));
-        debugPrint('🔧 DEBUG: B3 config written to app_configs/pizza_delizza/configs/config_draft');
+        // Load existing draft config
+        AppConfig? existingDraft = await getConfig(appId: appId, draft: true, autoCreate: false);
+        
+        if (existingDraft != null) {
+          // Keep all non-B3 pages
+          final nonB3Pages = existingDraft.pages.pages
+              .where((page) => !mandatoryRoutes.contains(page.route))
+              .toList();
+          
+          // Combine with mandatory B3 pages
+          final updatedPages = [...nonB3Pages, ...mandatoryB3Pages];
+          
+          // Update config
+          final updatedConfig = existingDraft.copyWith(
+            pages: existingDraft.pages.copyWith(pages: updatedPages),
+          );
+          
+          await draftDoc.set(updatedConfig.toJson(), SetOptions(merge: true));
+          debugPrint('🔧 DEBUG: B3 config updated in draft with ${updatedPages.length} pages (${nonB3Pages.length} existing + ${mandatoryB3Pages.length} B3)');
+        } else {
+          // No existing config - create new one with B3 pages only
+          final defaultConfig = getDefaultConfig(appId);
+          await draftDoc.set(defaultConfig.toJson(), SetOptions(merge: true));
+          debugPrint('🔧 DEBUG: B3 config created in draft with ${mandatoryB3Pages.length} B3 pages');
+        }
       } catch (e) {
         // Log error but don't throw - permission denied is expected in some environments
         debugPrint('🔧 DEBUG: Failed to write to draft (expected in restrictive environments): $e');
@@ -1004,47 +1051,62 @@ class AppConfigService {
       }
       
       // Build the 4 B3 pages based on existing content
-      final List<PageSchema> migratedPages = [];
+      final List<PageSchema> migratedB3Pages = [];
       
       // 1. HOME PAGE - Convert V2 home sections to B3 blocks
       try {
         final homePage = _buildHomePageFromV2(existingConfig);
-        migratedPages.add(homePage);
+        migratedB3Pages.add(homePage);
         debugPrint('B3 Migration: Home page created with ${homePage.blocks.length} blocks');
       } catch (e) {
         debugPrint('B3 Migration: Error creating home page: $e (using default)');
-        migratedPages.add(PageSchema.homeB3());
+        migratedB3Pages.add(PageSchema.homeB3());
       }
       
       // 2. MENU PAGE
       try {
-        migratedPages.add(_buildMenuPage());
+        migratedB3Pages.add(_buildMenuPage());
         debugPrint('B3 Migration: Menu page created');
       } catch (e) {
         debugPrint('B3 Migration: Error creating menu page: $e (using default)');
-        migratedPages.add(PageSchema.menuB3());
+        migratedB3Pages.add(PageSchema.menuB3());
       }
       
       // 3. CATEGORIES PAGE
       try {
-        migratedPages.add(_buildCategoriesPage());
+        migratedB3Pages.add(_buildCategoriesPage());
         debugPrint('B3 Migration: Categories page created');
       } catch (e) {
         debugPrint('B3 Migration: Error creating categories page: $e (using default)');
-        migratedPages.add(PageSchema.categoriesB3());
+        migratedB3Pages.add(PageSchema.categoriesB3());
       }
       
       // 4. CART PAGE
       try {
-        migratedPages.add(_buildCartPage());
+        migratedB3Pages.add(_buildCartPage());
         debugPrint('B3 Migration: Cart page created');
       } catch (e) {
         debugPrint('B3 Migration: Error creating cart page: $e (using default)');
-        migratedPages.add(PageSchema.cartB3());
+        migratedB3Pages.add(PageSchema.cartB3());
       }
       
-      // Create PagesConfig
-      final pagesConfig = PagesConfig(pages: migratedPages);
+      // Define the B3 routes that will be replaced
+      final b3Routes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
+      
+      // Preserve existing non-B3 pages
+      List<PageSchema> existingNonB3Pages = [];
+      if (existingConfig != null && existingConfig.pages.pages.isNotEmpty) {
+        existingNonB3Pages = existingConfig.pages.pages
+            .where((page) => !b3Routes.contains(page.route))
+            .toList();
+        debugPrint('B3 Migration: Preserving ${existingNonB3Pages.length} existing non-B3 pages');
+      }
+      
+      // Combine existing non-B3 pages with migrated B3 pages
+      final allPages = [...existingNonB3Pages, ...migratedB3Pages];
+      
+      // Create PagesConfig with all pages
+      final pagesConfig = PagesConfig(pages: allPages);
       
       // Get or create base config
       AppConfig baseConfig;
@@ -1054,6 +1116,8 @@ class AppConfigService {
         baseConfig = getDefaultConfig(appId);
         baseConfig = baseConfig.copyWith(pages: pagesConfig);
       }
+      
+      debugPrint('B3 Migration: Final config has ${allPages.length} pages total (${existingNonB3Pages.length} existing + ${migratedB3Pages.length} B3)');
       
       // Track if at least one write succeeds
       bool publishedWriteSuccess = false;
