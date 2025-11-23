@@ -692,4 +692,72 @@ class AppConfigService {
     debugPrint('╚═══════════════════════════════════════════════════════════════╝');
     debugPrint('');
   }
+
+  /// Force B3 initialization for DEBUG mode
+  /// 
+  /// **DEBUG ONLY**: This method writes directly to Firestore without any 
+  /// authentication or permission checks. It's designed to make Studio B3 
+  /// immediately functional in DEBUG/CHROME mode where Firebase Auth is not available.
+  /// 
+  /// **What it does**:
+  /// - Writes 4 mandatory B3 pages (home-b3, menu-b3, categories-b3, cart-b3) to Firestore
+  /// - Writes to both /config/pizza_delizza/published and /config/pizza_delizza/draft
+  /// - Always overwrites existing documents
+  /// - Never checks Firebase Auth or permissions
+  /// - Ignores all permission errors (logs them only)
+  /// 
+  /// **Usage**: Call this in main.dart immediately after Firebase.initializeApp()
+  /// 
+  /// **IMPORTANT**: Never throws exceptions - always handles errors gracefully
+  Future<void> forceB3InitializationForDebug() async {
+    try {
+      debugPrint('🔧 DEBUG: Force B3 initialization starting...');
+      
+      // Generate the 4 mandatory B3 pages using PagesConfig.initial()
+      final pagesConfig = PagesConfig.initial();
+      
+      // Create the document data structure
+      final Map<String, dynamic> documentData = {
+        'pages': pagesConfig.toJson(),
+      };
+      
+      // Define Firestore paths (new structure for debug initialization)
+      final publishedDoc = _firestore
+          .collection('config')
+          .doc('pizza_delizza')
+          .collection('data')
+          .doc('published');
+      
+      final draftDoc = _firestore
+          .collection('config')
+          .doc('pizza_delizza')
+          .collection('data')
+          .doc('draft');
+      
+      // Write to published document
+      try {
+        await publishedDoc.set(documentData, SetOptions(merge: false));
+        debugPrint('🔧 DEBUG: B3 pages written to /config/pizza_delizza/published');
+      } catch (e) {
+        // Log error but don't throw - permission denied is expected in some environments
+        debugPrint('🔧 DEBUG: Failed to write to published (expected in restrictive environments): $e');
+      }
+      
+      // Write to draft document
+      try {
+        await draftDoc.set(documentData, SetOptions(merge: false));
+        debugPrint('🔧 DEBUG: B3 pages written to /config/pizza_delizza/draft');
+      } catch (e) {
+        // Log error but don't throw - permission denied is expected in some environments
+        debugPrint('🔧 DEBUG: Failed to write to draft (expected in restrictive environments): $e');
+      }
+      
+      debugPrint('🔧 DEBUG: Force B3 initialization completed (errors ignored if any)');
+      
+    } catch (e) {
+      // Catch any unexpected errors and log only - never crash the app
+      debugPrint('🔧 DEBUG: Unexpected error in forceB3InitializationForDebug: $e');
+      // Don't rethrow - this is a debug helper that should never break the app
+    }
+  }
 }
