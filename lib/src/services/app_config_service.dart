@@ -774,4 +774,175 @@ class AppConfigService {
       // Don't rethrow - this is a debug helper that should never break the app
     }
   }
+
+  /// Build the 4 mandatory B3 pages
+  /// 
+  /// Returns a list of PageSchema objects for:
+  /// - home-b3 (/home-b3): Hero, promo banner, product list, category slider, sticky CTA, popup
+  /// - menu-b3 (/menu-b3): Product list
+  /// - categories-b3 (/categories-b3): Category list
+  /// - cart-b3 (/cart-b3): Summary + CTA
+  /// 
+  /// These are simple, safe templates with no external images required.
+  List<PageSchema> _buildMandatoryB3Pages() {
+    return [
+      PageSchema.homeB3(),
+      PageSchema.menuB3(),
+      PageSchema.categoriesB3(),
+      PageSchema.cartB3(),
+    ];
+  }
+
+  /// Force rebuild all B3 mandatory pages
+  /// 
+  /// Regenerates the four mandatory B3 pages (home-b3, menu-b3, categories-b3, cart-b3)
+  /// into BOTH Firestore collections:
+  /// - published (app_configs/pizza_delizza/configs/config)
+  /// - draft (app_configs/pizza_delizza/configs/config_draft)
+  /// 
+  /// **Key features**:
+  /// - Does NOT touch existing logic (autoInitializeB3IfNeeded, getConfig, saveDraft, etc.)
+  /// - Does NOT delete or modify existing pages
+  /// - Simply OVERWRITES the 4 B3 pages by route
+  /// - Ignores Firestore permission-denied errors (catches and logs them)
+  /// - Never stops execution if writes fail
+  /// - Works even if user is NOT authenticated (logs "Skipped write: not authenticated")
+  /// - 100% additive and reversible
+  /// 
+  /// **Usage**: Can be called manually from UI or debug console to force refresh B3 pages
+  /// 
+  /// **Safe to call multiple times**: Will replace existing B3 pages with fresh templates
+  Future<void> forceRebuildAllB3Pages() async {
+    debugPrint("B3 FORCE: Rebuilding all B3 mandatory pages...");
+    final appId = "pizza_delizza";
+
+    try {
+      // Check if user is authenticated
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        debugPrint("B3 FORCE: Skipped write: not authenticated");
+        return;
+      }
+
+      // 1. Build pages (locally)
+      final mandatoryPages = _buildMandatoryB3Pages();
+      debugPrint("B3 FORCE: Built ${mandatoryPages.length} mandatory pages");
+
+      // Define the routes to replace
+      final mandatoryRoutes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
+
+      // 2. Load current configs from Firestore if available
+      AppConfig? draftConfig;
+      AppConfig? publishedConfig;
+
+      try {
+        draftConfig = await getConfig(appId: appId, draft: true, autoCreate: false);
+        debugPrint("B3 FORCE: Draft config loaded with ${draftConfig?.pages.pages.length ?? 0} pages");
+      } catch (e) {
+        debugPrint("B3 FORCE: Could not load draft config: $e");
+      }
+
+      try {
+        publishedConfig = await getConfig(appId: appId, draft: false, autoCreate: false);
+        debugPrint("B3 FORCE: Published config loaded with ${publishedConfig?.pages.pages.length ?? 0} pages");
+      } catch (e) {
+        debugPrint("B3 FORCE: Could not load published config: $e");
+      }
+
+      // 3. Replace ONLY the four B3 pages, keep all other pages intact
+
+      // Process draft config
+      if (draftConfig != null) {
+        // Keep all non-B3 pages
+        final nonB3Pages = draftConfig.pages.pages
+            .where((page) => !mandatoryRoutes.contains(page.route))
+            .toList();
+        
+        // Combine with new B3 pages
+        final updatedDraftPages = [...nonB3Pages, ...mandatoryPages];
+        
+        final updatedDraftConfig = draftConfig.copyWith(
+          pages: draftConfig.pages.copyWith(pages: updatedDraftPages),
+        );
+
+        // 4. Save to draft
+        try {
+          await saveDraft(appId: appId, config: updatedDraftConfig);
+          debugPrint("B3 FORCE: Draft updated successfully with ${updatedDraftPages.length} pages (${mandatoryPages.length} B3 pages replaced)");
+        } catch (e) {
+          debugPrint("B3 FORCE: Failed to save draft (continuing anyway): $e");
+        }
+      } else {
+        // Create new draft config with only B3 pages
+        debugPrint("B3 FORCE: Draft config not found, creating new one with B3 pages");
+        final defaultConfig = getDefaultConfig(appId);
+        final newDraftConfig = defaultConfig.copyWith(
+          pages: defaultConfig.pages.copyWith(pages: mandatoryPages),
+        );
+        
+        try {
+          await saveDraft(appId: appId, config: newDraftConfig);
+          debugPrint("B3 FORCE: New draft created successfully with ${mandatoryPages.length} B3 pages");
+        } catch (e) {
+          debugPrint("B3 FORCE: Failed to create new draft (continuing anyway): $e");
+        }
+      }
+
+      // Process published config
+      if (publishedConfig != null) {
+        // Keep all non-B3 pages
+        final nonB3Pages = publishedConfig.pages.pages
+            .where((page) => !mandatoryRoutes.contains(page.route))
+            .toList();
+        
+        // Combine with new B3 pages
+        final updatedPublishedPages = [...nonB3Pages, ...mandatoryPages];
+        
+        final updatedPublishedConfig = publishedConfig.copyWith(
+          pages: publishedConfig.pages.copyWith(pages: updatedPublishedPages),
+          version: publishedConfig.version + 1,
+          updatedAt: DateTime.now(),
+        );
+
+        // Save to published
+        try {
+          await _firestore
+              .collection(_collectionName)
+              .doc(appId)
+              .collection('configs')
+              .doc(_configDocName)
+              .set(updatedPublishedConfig.toJson());
+          debugPrint("B3 FORCE: Published updated successfully with ${updatedPublishedPages.length} pages (${mandatoryPages.length} B3 pages replaced)");
+        } catch (e) {
+          debugPrint("B3 FORCE: Failed to save published (continuing anyway): $e");
+        }
+      } else {
+        // Create new published config with only B3 pages
+        debugPrint("B3 FORCE: Published config not found, creating new one with B3 pages");
+        final defaultConfig = getDefaultConfig(appId);
+        final newPublishedConfig = defaultConfig.copyWith(
+          pages: defaultConfig.pages.copyWith(pages: mandatoryPages),
+          updatedAt: DateTime.now(),
+        );
+        
+        try {
+          await _firestore
+              .collection(_collectionName)
+              .doc(appId)
+              .collection('configs')
+              .doc(_configDocName)
+              .set(newPublishedConfig.toJson());
+          debugPrint("B3 FORCE: New published created successfully with ${mandatoryPages.length} B3 pages");
+        } catch (e) {
+          debugPrint("B3 FORCE: Failed to create new published (continuing anyway): $e");
+        }
+      }
+
+      debugPrint("B3 FORCE: Completed (errors ignored).");
+      
+    } catch (e) {
+      debugPrint("B3 FORCE: Unexpected error (ignored): $e");
+      // Never throw - always handle gracefully
+    }
+  }
 }

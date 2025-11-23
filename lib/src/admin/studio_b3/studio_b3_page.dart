@@ -15,7 +15,7 @@ import 'page_editor.dart';
 /// Studio B3 - Editor for dynamic pages (PageSchema)
 /// 
 /// Features:
-/// - List of all B3 pages from draft config (Firestore-backed)
+/// - List of all B3 pages from appConfigDraftProvider (with automatic fallback to published config)
 /// - Add, edit, delete pages
 /// - Block editing with drag & drop
 /// - Live preview
