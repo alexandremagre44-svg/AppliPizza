@@ -19,7 +19,10 @@ import 'page_editor.dart';
 /// - Live preview
 /// - Publish/revert workflow
 class StudioB3Page extends StatefulWidget {
-  const StudioB3Page({super.key});
+  /// Optional initial page route to open directly (e.g., '/home-b3')
+  final String? initialPageRoute;
+
+  const StudioB3Page({super.key, this.initialPageRoute});
 
   @override
   State<StudioB3Page> createState() => _StudioB3PageState();
@@ -31,6 +34,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
   
   PageSchema? _selectedPage;
   bool _isPublishing = false;
+  bool _isInitialized = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +57,35 @@ class _StudioB3PageState extends State<StudioB3Page> {
           }
 
           final config = snapshot.data!;
+          
+          // Initialize selected page from route parameter if provided and not yet initialized
+          if (!_isInitialized && widget.initialPageRoute != null && _selectedPage == null) {
+            _isInitialized = true;
+            // Find page by route
+            final page = config.pages.getPage(widget.initialPageRoute!);
+            if (page != null) {
+              // Use WidgetsBinding to set state after build
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    _selectedPage = page;
+                  });
+                }
+              });
+            } else {
+              // Page not found - show message
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Page "${widget.initialPageRoute}" non trouvée'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              });
+            }
+          }
           
           // If a page is selected, show the editor
           if (_selectedPage != null) {

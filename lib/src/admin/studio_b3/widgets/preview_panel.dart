@@ -117,11 +117,75 @@ class PreviewPanel extends StatelessWidget {
             ),
           ),
         ),
-        // Page content
+        // Page content with error boundary
         Expanded(
-          child: PageRenderer(pageSchema: pageSchema),
+          child: _buildPreviewContent(),
         ),
       ],
     );
+  }
+
+  /// Build preview content with comprehensive error handling
+  Widget _buildPreviewContent() {
+    try {
+      return PageRenderer(pageSchema: pageSchema);
+    } catch (e, stackTrace) {
+      // Log error for debugging
+      print('PreviewPanel: Error rendering page - $e');
+      print('StackTrace: $stackTrace');
+      
+      // Return user-friendly error widget
+      return Container(
+        color: Colors.white,
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.orange[700],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Impossible d\'afficher l\'aperçu',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Une erreur est survenue lors du rendu de la page',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange[200]!),
+              ),
+              child: Text(
+                e.toString(),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[700],
+                  fontFamily: 'monospace',
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }

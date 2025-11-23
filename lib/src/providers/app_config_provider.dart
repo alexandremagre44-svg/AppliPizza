@@ -24,6 +24,10 @@ final appConfigProvider = StreamProvider<AppConfig?>((ref) async* {
     autoCreate: true,
   );
   
+  // Ensure all mandatory B3 pages exist (silent verification)
+  // This will create missing pages without overwriting existing ones
+  await service.ensureMandatoryB3Pages(appId: appId);
+  
   // Yield the initial config immediately
   if (initialConfig != null) {
     yield initialConfig;

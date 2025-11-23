@@ -284,6 +284,28 @@ class MyApp extends ConsumerWidget {
                 }
                 return const StudioB3Page();
               },
+              routes: [
+                // Support for direct page navigation: /admin/studio-b3/:pageRoute
+                GoRoute(
+                  path: ':pageRoute',
+                  builder: (context, state) {
+                    // PROTECTION: Studio B3 is reserved for admins
+                    final authState = ref.read(authProvider);
+                    if (!authState.isAdmin) {
+                      // Redirect to home if not admin
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        context.go(AppRoutes.home);
+                      });
+                      return const Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    // Get the route parameter and pass it to StudioB3Page
+                    final pageRoute = state.pathParameters['pageRoute'];
+                    return StudioB3Page(initialPageRoute: pageRoute != null ? '/$pageRoute' : null);
+                  },
+                ),
+              ],
             ),
             // Deprecated routes - redirect to admin menu
             GoRoute(
