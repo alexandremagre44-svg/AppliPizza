@@ -21,8 +21,9 @@ class AppRoutes {
   // Studio Builder - Admin entry point
   static const String adminStudio = '/admin/studio';
   static const String adminStudioNew = '/admin/studio/new';
+  @deprecated // Deprecated - Use adminStudioB3 instead
   static const String adminStudioV2 = '/admin/studio/v2';
-  static const String adminStudioB3 = '/admin/studio-b3'; // B3 Phase 3: Dynamic page editor
+  static const String adminStudioB3 = '/admin/studio-b3'; // B3 Phase 3: Dynamic page editor (Primary studio)
   static const String adminStudioV3Theme = '/admin/studio/v3/theme';
   static const String adminStudioV3Media = '/admin/studio/v3/media';
   

@@ -270,7 +270,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
               SizedBox(height: AppSpacing.md),
-              // Studio V2 - Main admin tool (prominent position)
+              // Studio B3 - Main admin tool (prominent position)
               Padding(
                 padding: AppSpacing.paddingHorizontalLG,
                 child: SizedBox(

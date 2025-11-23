@@ -16,7 +16,7 @@ import 'promotions_admin_screen.dart';
 /// Admin Menu - Point d'entrée principal pour tous les outils d'administration
 /// 
 /// Ce menu centralise l'accès à tous les outils admin:
-/// - Studio V2 (éditeur de contenu professionnel)
+/// - Studio B3 (éditeur de contenu professionnel pour pages dynamiques)
 /// - Gestion des produits (pizzas, menus, boissons, desserts)
 /// - Gestion des ingrédients
 /// - Gestion des promotions
@@ -45,14 +45,14 @@ class AdminStudioScreen extends StatelessWidget {
         children: [
           SizedBox(height: AppSpacing.md),
           
-          // Studio V2 PRO - PRINCIPAL
+          // Studio B3 - PRINCIPAL
           _buildHighlightedBlock(
             context,
             iconData: Icons.dashboard_customize,
-            title: '🎨 Studio - Éditeur de Contenu',
-            subtitle: 'Interface professionnelle • Textes dynamiques illimités • Popups Ultimate\nPrévisualisation temps réel • Mode brouillon • Architecture modulaire\n\n8 modules: Hero, Bannières, Popups, Textes, Contenu, Sections, Thème, Médias',
+            title: '🎨 Studio B3 - Éditeur de Pages',
+            subtitle: 'Éditeur de pages dynamiques • Gestion complète des blocs • Interface 3 panneaux\nPrévisualisation temps réel • Mode brouillon • Publish/Revert\n\nTypes de blocs: Texte, Image, Bouton, Bannière, Produits, Catégories',
             onTap: () {
-              context.go(AppRoutes.adminStudioV2);
+              context.go(AppRoutes.adminStudioB3);
             },
             isNew: true,
           ),
