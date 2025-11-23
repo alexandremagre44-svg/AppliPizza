@@ -541,11 +541,16 @@ class AppConfigService {
         
         print('AppConfigService: Published config updated with missing B3 pages');
         
-        // Also update draft
-        await saveDraft(appId: appId, config: updatedPublished);
-        print('AppConfigService: Draft config updated with missing B3 pages');
+        // Also update draft - handle separately to ensure partial success
+        try {
+          await saveDraft(appId: appId, config: updatedPublished);
+          print('AppConfigService: Draft config updated with missing B3 pages');
+        } catch (draftError) {
+          print('AppConfigService: ERROR - Failed to update draft, but published succeeded: $draftError');
+          // Draft will be synced on next manual publish or draft creation
+        }
       } catch (e) {
-        print('AppConfigService: ERROR - Failed to save configs with B3 pages: $e');
+        print('AppConfigService: ERROR - Failed to save published config with B3 pages: $e');
         // Don't rethrow - log only
       }
     } catch (e) {
