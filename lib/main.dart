@@ -193,23 +193,38 @@ class MyApp extends ConsumerWidget {
             return ScaffoldWithNavBar(child: child);
           },
           routes: [
-            // PRIMARY ROUTES: Using original static screens
-            // B3 dynamic pages are available separately at /home-b3, /menu-b3, etc.
+            // PRIMARY ROUTES: Hybrid system - uses B3 if available, falls back to static screens
+            // This allows Builder B3 to edit the real application pages
             
-            // Home - Main landing page (original static screen)
+            // Home - Main landing page (B3-aware with fallback to HomeScreen)
             GoRoute(
               path: AppRoutes.home,
-              builder: (context, state) => const HomeScreen(),
+              builder: (context, state) => _buildHybridPage(
+                context, 
+                ref, 
+                AppRoutes.home,
+                fallback: const HomeScreen(),
+              ),
             ),
-            // Menu - Product listing page (original static screen)
+            // Menu - Product listing page (B3-aware with fallback to MenuScreen)
             GoRoute(
               path: AppRoutes.menu,
-              builder: (context, state) => const MenuScreen(),
+              builder: (context, state) => _buildHybridPage(
+                context,
+                ref,
+                AppRoutes.menu,
+                fallback: const MenuScreen(),
+              ),
             ),
-            // Cart - Shopping cart page (original static screen)
+            // Cart - Shopping cart page (B3-aware with fallback to CartScreen)
             GoRoute(
               path: AppRoutes.cart,
-              builder: (context, state) => const CartScreen(),
+              builder: (context, state) => _buildHybridPage(
+                context,
+                ref,
+                AppRoutes.cart,
+                fallback: const CartScreen(),
+              ),
             ),
             
             // LEGACY/TEST ROUTES: Keep for backward compatibility
@@ -678,6 +693,41 @@ class MyApp extends ConsumerWidget {
         }
         
         return PageNotFoundScreen(route: route);
+      },
+    );
+  }
+
+  /// Build a hybrid page that uses B3 data if available, otherwise falls back to a static screen
+  /// This allows Builder B3 to edit real application pages while preserving functionality
+  static Widget _buildHybridPage(BuildContext context, WidgetRef ref, String route, {required Widget fallback}) {
+    // Watch the published AppConfig from Firestore
+    final configAsync = ref.watch(appConfigProvider);
+    
+    return configAsync.when(
+      data: (config) {
+        // If config exists, try to find the B3 page override
+        if (config != null) {
+          final pageSchema = config.pages.getPage(route);
+          
+          if (pageSchema != null && pageSchema.enabled) {
+            // B3 page exists and is enabled - use it
+            print('B3 Hybrid: Using B3 page for route: $route');
+            return DynamicPageScreen(pageSchema: pageSchema);
+          }
+        }
+        
+        // No B3 page found or disabled - use fallback static screen
+        print('B3 Hybrid: Using fallback static screen for route: $route');
+        return fallback;
+      },
+      loading: () => Scaffold(
+        appBar: AppBar(title: const Text('Chargement...')),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) {
+        // On error, always fallback to static screen to ensure app works
+        print('B3 Hybrid: Error loading config, using fallback for route: $route - $error');
+        return fallback;
       },
     );
   }
