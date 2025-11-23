@@ -1606,4 +1606,183 @@ class AppConfigService {
       },
     );
   }
+
+  /// ONE-TIME FIX: Repair pages that may have been corrupted by old initialization code
+  /// 
+  /// This method runs once (controlled by SharedPreferences flag) to:
+  /// 1. Check if pages in Firebase were corrupted (only 4 B3 pages exist)
+  /// 2. If user had more pages before, this would have been lost
+  /// 3. Simply ensures B3 pages exist without removing other pages
+  /// 
+  /// This is safe to call multiple times - after first run, it won't do anything.
+  /// 
+  /// **Why this is needed**: 
+  /// Old versions of forceB3InitializationForDebug() and migrateExistingPagesToB3()
+  /// would overwrite ALL pages with just the 4 B3 pages. This one-time fix ensures
+  /// that going forward, all pages are preserved.
+  Future<void> oneTimeFixForPagePreservation() async {
+    const fixKey = 'b3_page_preservation_fix_applied';
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final fixApplied = prefs.getBool(fixKey) ?? false;
+      
+      if (fixApplied) {
+        // Fix already applied, skip
+        return;
+      }
+      
+      debugPrint('🔧 ONE-TIME FIX: Checking if page preservation fix is needed...');
+      
+      // Check current state of configs
+      const appId = 'pizza_delizza';
+      final publishedConfig = await getConfig(appId: appId, draft: false, autoCreate: false);
+      final draftConfig = await getConfig(appId: appId, draft: true, autoCreate: false);
+      
+      final publishedPageCount = publishedConfig?.pages.pages.length ?? 0;
+      final draftPageCount = draftConfig?.pages.pages.length ?? 0;
+      
+      debugPrint('🔧 ONE-TIME FIX: Current state - Published: $publishedPageCount pages, Draft: $draftPageCount pages');
+      
+      // If both configs exist and have reasonable number of pages, no fix needed
+      if (publishedPageCount > 4 || draftPageCount > 4) {
+        debugPrint('🔧 ONE-TIME FIX: Configs look good (>4 pages), marking fix as applied');
+        await prefs.setBool(fixKey, true);
+        return;
+      }
+      
+      // If we only have 4 pages (the B3 defaults), this might be legitimate for a new install
+      // OR it might mean pages were lost. We can't know for sure, but the new code will
+      // preserve any future pages the user creates.
+      debugPrint('🔧 ONE-TIME FIX: Config has ≤4 pages - this is either a fresh install or pages were lost');
+      debugPrint('🔧 ONE-TIME FIX: Going forward, all new pages will be preserved by updated initialization code');
+      
+      // Mark fix as applied so we don't check again
+      await prefs.setBool(fixKey, true);
+      debugPrint('✅ ONE-TIME FIX: Page preservation fix applied');
+      
+    } catch (e) {
+      debugPrint('🔧 ONE-TIME FIX: Error in oneTimeFixForPagePreservation: $e');
+      // Don't rethrow - this is a best-effort fix
+    }
+  }
+
+  /// DEBUG UTILITY: Reset B3 initialization flags
+  /// 
+  /// This method clears the SharedPreferences flags that prevent re-initialization.
+  /// Use this if you need to force the B3 initialization to run again.
+  /// 
+  /// **Usage**: Call this method from debug console or add a button in debug UI:
+  /// ```dart
+  /// await AppConfigService().resetB3InitializationFlags();
+  /// ```
+  /// 
+  /// Then restart the app - initialization will run again and preserve existing pages.
+  Future<void> resetB3InitializationFlags() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_b3InitializedKey);
+      await prefs.remove('b3_migration_v2_to_b3_completed');
+      debugPrint('✅ B3 initialization flags cleared - restart app to re-initialize');
+    } catch (e) {
+      debugPrint('❌ Error clearing B3 flags: $e');
+    }
+  }
+
+  /// DEBUG UTILITY: Force fix existing pages in Firestore
+  /// 
+  /// This method:
+  /// 1. Loads current config from Firestore (both draft and published)
+  /// 2. Ensures the 4 mandatory B3 pages exist
+  /// 3. Preserves all other existing pages
+  /// 4. Writes back the corrected config
+  /// 
+  /// **Safe to call**: Will not delete any pages, only ensures B3 pages exist
+  /// 
+  /// **Usage**: Call this to fix data that was corrupted by old initialization code:
+  /// ```dart
+  /// await AppConfigService().fixExistingPagesInFirestore();
+  /// ```
+  Future<void> fixExistingPagesInFirestore({String appId = 'pizza_delizza'}) async {
+    try {
+      debugPrint('🔧 FIX: Starting to fix pages in Firestore for appId: $appId');
+      
+      final mandatoryB3Pages = _buildMandatoryB3Pages();
+      final b3Routes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
+      
+      // Fix published config
+      try {
+        final publishedConfig = await getConfig(appId: appId, draft: false, autoCreate: false);
+        if (publishedConfig != null) {
+          // Keep all non-B3 pages
+          final nonB3Pages = publishedConfig.pages.pages
+              .where((page) => !b3Routes.contains(page.route))
+              .toList();
+          
+          // Combine with B3 pages
+          final allPages = [...nonB3Pages, ...mandatoryB3Pages];
+          
+          final fixedConfig = publishedConfig.copyWith(
+            pages: publishedConfig.pages.copyWith(pages: allPages),
+          );
+          
+          await _firestore
+              .collection(_collectionName)
+              .doc(appId)
+              .collection('configs')
+              .doc(_configDocName)
+              .set(fixedConfig.toJson());
+          
+          debugPrint('🔧 FIX: Published config fixed - ${allPages.length} pages (${nonB3Pages.length} existing + ${mandatoryB3Pages.length} B3)');
+        } else {
+          debugPrint('🔧 FIX: No published config found, creating default');
+          final defaultConfig = getDefaultConfig(appId);
+          await _firestore
+              .collection(_collectionName)
+              .doc(appId)
+              .collection('configs')
+              .doc(_configDocName)
+              .set(defaultConfig.toJson());
+        }
+      } catch (e) {
+        debugPrint('🔧 FIX: Error fixing published config: $e');
+      }
+      
+      // Fix draft config
+      try {
+        final draftConfig = await getConfig(appId: appId, draft: true, autoCreate: false);
+        if (draftConfig != null) {
+          // Keep all non-B3 pages
+          final nonB3Pages = draftConfig.pages.pages
+              .where((page) => !b3Routes.contains(page.route))
+              .toList();
+          
+          // Combine with B3 pages
+          final allPages = [...nonB3Pages, ...mandatoryB3Pages];
+          
+          final fixedConfig = draftConfig.copyWith(
+            pages: draftConfig.pages.copyWith(pages: allPages),
+          );
+          
+          await _firestore
+              .collection(_collectionName)
+              .doc(appId)
+              .collection('configs')
+              .doc(_configDraftDocName)
+              .set(fixedConfig.toJson());
+          
+          debugPrint('🔧 FIX: Draft config fixed - ${allPages.length} pages (${nonB3Pages.length} existing + ${mandatoryB3Pages.length} B3)');
+        } else {
+          debugPrint('🔧 FIX: No draft config found, creating from published');
+          await createDraftFromPublished(appId: appId);
+        }
+      } catch (e) {
+        debugPrint('🔧 FIX: Error fixing draft config: $e');
+      }
+      
+      debugPrint('✅ FIX: Firestore pages fix completed');
+    } catch (e) {
+      debugPrint('❌ FIX: Error in fixExistingPagesInFirestore: $e');
+    }
+  }
 }

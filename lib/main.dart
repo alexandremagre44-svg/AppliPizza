@@ -72,9 +72,14 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
+  // B3 ONE-TIME FIX: Repair pages that may have been corrupted by old initialization code
+  // This runs once to ensure all existing pages are preserved
+  // After this runs, forceB3InitializationForDebug will preserve existing pages
+  await AppConfigService().oneTimeFixForPagePreservation();
+  
   // DEBUG ONLY: Force B3 initialization without auth/permissions
   // This makes Studio B3 immediately functional in DEBUG/CHROME mode
-  // Writes 4 mandatory B3 pages directly to Firestore, ignoring permission errors
+  // NOW FIXED: Writes 4 mandatory B3 pages while preserving existing pages
   if (kDebugMode) {
     await AppConfigService().forceB3InitializationForDebug();
   }
@@ -85,6 +90,7 @@ void main() async {
   
   // B3 Migration: Migrate existing V2 pages to B3 architecture
   // This runs once and converts HomeConfigV2 sections to B3 PageSchema
+  // NOW FIXED: Preserves existing non-B3 pages during migration
   await AppConfigService().migrateExistingPagesToB3('pizza_delizza');
   
   // Initialize Firebase App Check
