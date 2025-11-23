@@ -723,7 +723,9 @@ class AppConfigService {
       // Note: pagesConfig.toJson() already returns {'pages': [...]} structure
       final Map<String, dynamic> documentData = pagesConfig.toJson();
       
-      // Define Firestore paths (new structure for debug initialization)
+      // Define Firestore paths as per requirements: /config/pizza_delizza/published and /config/pizza_delizza/draft
+      // In Firestore structure: collection('config')/doc('pizza_delizza')/collection('data')/doc('published' or 'draft')
+      // This provides a clean separation for debug initialization
       final publishedDoc = _firestore
           .collection('config')
           .doc('pizza_delizza')

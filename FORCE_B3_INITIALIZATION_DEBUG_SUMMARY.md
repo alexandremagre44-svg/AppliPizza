@@ -68,16 +68,16 @@ The method writes to the following Firestore paths:
 Each document contains:
 ```json
 {
-  "pages": {
-    "pages": [
-      {...},  // home-b3
-      {...},  // menu-b3
-      {...},  // categories-b3
-      {...}   // cart-b3
-    ]
-  }
+  "pages": [
+    {...},  // home-b3 page schema
+    {...},  // menu-b3 page schema
+    {...},  // categories-b3 page schema
+    {...}   // cart-b3 page schema
+  ]
 }
 ```
+
+Note: This matches the structure used by `PagesConfig.toJson()` which returns `{'pages': [...]}`
 
 ## Pages Generated
 
