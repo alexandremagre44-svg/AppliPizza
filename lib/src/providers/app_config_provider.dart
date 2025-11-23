@@ -60,9 +60,12 @@ final appConfigDraftProvider = StreamProvider<AppConfig?>((ref) async* {
     autoCreate: false,
   );
   
-  // Check if draft is usable (exists and has pages)
-  if (initialConfig != null && initialConfig.pages.pages.isNotEmpty) {
-    debugPrint('📝 AppConfigDraftProvider: Draft config loaded with ${initialConfig.pages.pages.length} pages');
+  // Track whether we need to fall back to published config
+  bool needsFallback = initialConfig == null || initialConfig.pages.pages.isEmpty;
+  
+  // If draft is usable, use it and watch for updates
+  if (!needsFallback) {
+    debugPrint('📝 AppConfigDraftProvider: Draft config loaded with ${initialConfig!.pages.pages.length} pages');
     yield initialConfig;
     
     // Then switch to watching for real-time updates on draft
@@ -72,40 +75,41 @@ final appConfigDraftProvider = StreamProvider<AppConfig?>((ref) async* {
         debugPrint('📝 AppConfigDraftProvider: Draft config updated (${config.pages.pages.length} pages)');
         yield config;
       } else {
-        // Draft became empty during watch - switch to watching published config
+        // Draft became empty during watch - need to fall back to published
         debugPrint('📝 AppConfigDraftProvider: Draft became empty, switching to published config fallback');
+        needsFallback = true;
         break; // Exit draft watch loop to enter published watch loop below
       }
     }
   }
   
-  // Draft is null, empty, or became empty - fall back to published config
-  if (initialConfig == null || initialConfig.pages.pages.isEmpty) {
+  // If we need fallback (draft is null, empty, or became empty), use published config
+  if (needsFallback) {
     debugPrint('📝 AppConfigDraftProvider: Draft is ${initialConfig == null ? "null" : "empty (0 pages)"}, falling back to published config');
-  }
-  
-  // Load and watch published config as fallback
-  final publishedConfig = await service.getConfig(
-    appId: appId, 
-    draft: false, 
-    autoCreate: false,
-  );
-  
-  if (publishedConfig != null) {
-    debugPrint('📝 AppConfigDraftProvider: Draft empty → using published config with ${publishedConfig.pages.pages.length} pages (read-only fallback)');
-    yield publishedConfig;
     
-    // Watch for changes to published config
-    debugPrint('📝 AppConfigDraftProvider: Now watching published config (read-only fallback mode)');
-    await for (final config in service.watchConfig(appId: appId, draft: false)) {
-      if (config != null) {
-        debugPrint('📝 AppConfigDraftProvider: Published config updated (${config.pages.pages.length} pages) - read-only fallback');
-        yield config;
+    // Load and watch published config as fallback
+    final publishedConfig = await service.getConfig(
+      appId: appId, 
+      draft: false, 
+      autoCreate: false,
+    );
+    
+    if (publishedConfig != null) {
+      debugPrint('📝 AppConfigDraftProvider: Draft empty → using published config with ${publishedConfig.pages.pages.length} pages (read-only fallback)');
+      yield publishedConfig;
+      
+      // Watch for changes to published config
+      debugPrint('📝 AppConfigDraftProvider: Now watching published config (read-only fallback mode)');
+      await for (final config in service.watchConfig(appId: appId, draft: false)) {
+        if (config != null) {
+          debugPrint('📝 AppConfigDraftProvider: Published config updated (${config.pages.pages.length} pages) - read-only fallback');
+          yield config;
+        }
       }
+    } else {
+      debugPrint('📝 AppConfigDraftProvider: ERROR - Both draft and published configs are unavailable');
+      yield null;
     }
-  } else {
-    debugPrint('📝 AppConfigDraftProvider: ERROR - Both draft and published configs are unavailable');
-    yield null;
   }
 });
 
