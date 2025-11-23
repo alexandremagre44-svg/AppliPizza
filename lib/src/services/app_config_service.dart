@@ -797,8 +797,8 @@ class AppConfigService {
   /// 
   /// Regenerates the four mandatory B3 pages (home-b3, menu-b3, categories-b3, cart-b3)
   /// into BOTH Firestore collections:
-  /// - published (app_config/pizza_delizza/published)
-  /// - draft (app_config/pizza_delizza/draft)
+  /// - published (app_configs/pizza_delizza/configs/config)
+  /// - draft (app_configs/pizza_delizza/configs/config_draft)
   /// 
   /// **Key features**:
   /// - Does NOT touch existing logic (autoInitializeB3IfNeeded, getConfig, saveDraft, etc.)
@@ -901,6 +901,7 @@ class AppConfigService {
         final updatedPublishedConfig = publishedConfig.copyWith(
           pages: publishedConfig.pages.copyWith(pages: updatedPublishedPages),
           version: publishedConfig.version + 1,
+          updatedAt: DateTime.now(),
         );
 
         // Save to published
@@ -921,6 +922,7 @@ class AppConfigService {
         final defaultConfig = getDefaultConfig(appId);
         final newPublishedConfig = defaultConfig.copyWith(
           pages: defaultConfig.pages.copyWith(pages: mandatoryPages),
+          updatedAt: DateTime.now(),
         );
         
         try {
