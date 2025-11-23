@@ -193,28 +193,23 @@ class MyApp extends ConsumerWidget {
             return ScaffoldWithNavBar(child: child);
           },
           routes: [
-            // PRIMARY ROUTES: Now using B3 dynamic pages
-            // This allows Studio B3 to edit the actual app pages
+            // PRIMARY ROUTES: Using original static screens
+            // B3 dynamic pages are available separately at /home-b3, /menu-b3, etc.
             
-            // Home - Main landing page (editable in Studio B3)
+            // Home - Main landing page (original static screen)
             GoRoute(
               path: AppRoutes.home,
-              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.homeB3),
+              builder: (context, state) => const HomeScreen(),
             ),
-            // Menu - Product listing page (editable in Studio B3)
+            // Menu - Product listing page (original static screen)
             GoRoute(
               path: AppRoutes.menu,
-              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.menuB3),
+              builder: (context, state) => const MenuScreen(),
             ),
-            // Categories - Category listing page (editable in Studio B3)
-            GoRoute(
-              path: AppRoutes.categories,
-              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.categoriesB3),
-            ),
-            // Cart - Shopping cart page (editable in Studio B3)
+            // Cart - Shopping cart page (original static screen)
             GoRoute(
               path: AppRoutes.cart,
-              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.cartB3),
+              builder: (context, state) => const CartScreen(),
             ),
             
             // LEGACY/TEST ROUTES: Keep for backward compatibility
