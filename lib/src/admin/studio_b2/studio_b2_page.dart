@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../models/app_config.dart';
 import '../../services/app_config_service.dart';
 import '../../theme/app_theme.dart';
+import '../../core/constants.dart';
 import 'section_list_widget.dart';
 import 'texts_editor.dart';
 import 'theme_editor.dart';
@@ -28,7 +29,7 @@ class StudioB2Page extends StatefulWidget {
 
 class _StudioB2PageState extends State<StudioB2Page> {
   final AppConfigService _configService = AppConfigService();
-  static const String _appId = 'pizza_delizza';
+  static const String _appId = AppConstants.appId;
   
   bool _isPublishing = false;
   bool _showPreview = true;

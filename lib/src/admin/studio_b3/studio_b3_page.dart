@@ -6,6 +6,7 @@ import '../../models/app_config.dart';
 import '../../models/page_schema.dart';
 import '../../services/app_config_service.dart';
 import '../../theme/app_theme.dart';
+import '../../core/constants.dart';
 import 'page_list.dart';
 import 'page_editor.dart';
 
@@ -26,7 +27,7 @@ class StudioB3Page extends StatefulWidget {
 
 class _StudioB3PageState extends State<StudioB3Page> {
   final AppConfigService _configService = AppConfigService();
-  static const String _appId = 'pizza_delizza';
+  static const String _appId = AppConstants.appId;
   
   PageSchema? _selectedPage;
   bool _isPublishing = false;
