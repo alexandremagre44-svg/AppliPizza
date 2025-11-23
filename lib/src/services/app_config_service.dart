@@ -26,6 +26,19 @@ class AppConfigService {
   static const String _b3TestCollection = '_b3_test';
   static const String _b3TestDocName = '__b3_init__';
   static const String _b3InitializedKey = 'b3_auto_initialized';
+  
+  // B3 migration constants
+  static const String _defaultHeroImageUrl = 'https://images.unsplash.com/photo-1513104890138-7c749659a591';
+  static const String _defaultGradientStartColor = '#000000CC';
+  static const String _defaultGradientEndColor = '#00000000';
+  static const String _defaultPrimaryColor = '#D62828';
+  static const String _defaultWhiteColor = '#FFFFFF';
+  
+  // B3 route constants
+  static const String _homeB3Route = '/home-b3';
+  static const String _menuB3Route = '/menu-b3';
+  static const String _categoriesB3Route = '/categories-b3';
+  static const String _cartB3Route = '/cart-b3';
 
   AppConfigService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -944,5 +957,589 @@ class AppConfigService {
       debugPrint("B3 FORCE: Unexpected error (ignored): $e");
       // Never throw - always handle gracefully
     }
+  }
+
+  /// Migrate existing V2 pages to B3 architecture
+  /// 
+  /// This method reads existing content from HomeConfigV2 sections (hero, promo banner, etc.)
+  /// and converts them into B3 PageSchema format. It creates 4 pages:
+  /// - home_b3 (/home-b3): Based on existing home sections
+  /// - menu_b3 (/menu-b3): Product list page
+  /// - categories_b3 (/categories-b3): Category list page
+  /// - cart_b3 (/cart-b3): Cart summary page
+  /// 
+  /// The migration:
+  /// - Only runs once (uses SharedPreferences flag)
+  /// - Writes to both draft and published Firestore paths
+  /// - Never crashes even if content is missing
+  /// - Logs clear success message
+  /// 
+  /// Mapping:
+  /// - Hero → WidgetBlockType.heroAdvanced
+  /// - PromoBanner → WidgetBlockType.promoBanner
+  /// - Other sections → appropriate B3 types
+  /// 
+  /// [appId] - The application identifier (default: 'pizza_delizza')
+  Future<void> migrateExistingPagesToB3(String appId) async {
+    const String migrationKey = 'b3_migration_v2_to_b3_completed';
+    
+    try {
+      // Check if migration already completed
+      final prefs = await SharedPreferences.getInstance();
+      final alreadyMigrated = prefs.getBool(migrationKey) ?? false;
+      
+      if (alreadyMigrated) {
+        debugPrint('B3 Migration: Already completed, skipping');
+        return;
+      }
+      
+      debugPrint('B3 Migration: Starting V2 → B3 migration for appId: $appId');
+      
+      // Get existing configuration
+      AppConfig? existingConfig;
+      try {
+        existingConfig = await getConfig(appId: appId, draft: false, autoCreate: false);
+      } catch (e) {
+        debugPrint('B3 Migration: Could not load existing config: $e');
+      }
+      
+      // Build the 4 B3 pages based on existing content
+      final List<PageSchema> migratedPages = [];
+      
+      // 1. HOME PAGE - Convert V2 home sections to B3 blocks
+      try {
+        final homePage = _buildHomePageFromV2(existingConfig);
+        migratedPages.add(homePage);
+        debugPrint('B3 Migration: Home page created with ${homePage.blocks.length} blocks');
+      } catch (e) {
+        debugPrint('B3 Migration: Error creating home page: $e (using default)');
+        migratedPages.add(PageSchema.homeB3());
+      }
+      
+      // 2. MENU PAGE
+      try {
+        migratedPages.add(_buildMenuPage());
+        debugPrint('B3 Migration: Menu page created');
+      } catch (e) {
+        debugPrint('B3 Migration: Error creating menu page: $e (using default)');
+        migratedPages.add(PageSchema.menuB3());
+      }
+      
+      // 3. CATEGORIES PAGE
+      try {
+        migratedPages.add(_buildCategoriesPage());
+        debugPrint('B3 Migration: Categories page created');
+      } catch (e) {
+        debugPrint('B3 Migration: Error creating categories page: $e (using default)');
+        migratedPages.add(PageSchema.categoriesB3());
+      }
+      
+      // 4. CART PAGE
+      try {
+        migratedPages.add(_buildCartPage());
+        debugPrint('B3 Migration: Cart page created');
+      } catch (e) {
+        debugPrint('B3 Migration: Error creating cart page: $e (using default)');
+        migratedPages.add(PageSchema.cartB3());
+      }
+      
+      // Create PagesConfig
+      final pagesConfig = PagesConfig(pages: migratedPages);
+      
+      // Get or create base config
+      AppConfig baseConfig;
+      if (existingConfig != null) {
+        baseConfig = existingConfig.copyWith(pages: pagesConfig);
+      } else {
+        baseConfig = getDefaultConfig(appId);
+        baseConfig = baseConfig.copyWith(pages: pagesConfig);
+      }
+      
+      // Track if at least one write succeeds
+      bool publishedWriteSuccess = false;
+      bool draftWriteSuccess = false;
+      
+      // Write to published
+      try {
+        await _firestore
+            .collection(_collectionName)
+            .doc(appId)
+            .collection('configs')
+            .doc(_configDocName)
+            .set(baseConfig.toJson(), SetOptions(merge: true));
+        publishedWriteSuccess = true;
+        debugPrint('B3 Migration: Written to published config');
+      } catch (e) {
+        debugPrint('B3 Migration: Failed to write published (continuing): $e');
+      }
+      
+      // Write to draft
+      try {
+        await _firestore
+            .collection(_collectionName)
+            .doc(appId)
+            .collection('configs')
+            .doc(_configDraftDocName)
+            .set(baseConfig.toJson(), SetOptions(merge: true));
+        draftWriteSuccess = true;
+        debugPrint('B3 Migration: Written to draft config');
+      } catch (e) {
+        debugPrint('B3 Migration: Failed to write draft (continuing): $e');
+      }
+      
+      // Mark migration as completed only if at least one write succeeded
+      if (publishedWriteSuccess || draftWriteSuccess) {
+        await prefs.setBool(migrationKey, true);
+        debugPrint('✅ Migration B3 SUCCESS - ${migratedPages.length} pages migrated');
+      } else {
+        debugPrint('B3 Migration: Both writes failed, will retry on next launch');
+      }
+      
+    } catch (e) {
+      debugPrint('B3 Migration: Unexpected error (not setting migration flag): $e');
+      // Don't set flag on error so it retries next time
+    }
+  }
+
+  /// Build home page from existing V2 configuration
+  PageSchema _buildHomePageFromV2(AppConfig? config) {
+    final List<WidgetBlock> blocks = [];
+    int order = 1;
+    
+    if (config != null && config.home.sections.isNotEmpty) {
+      // Convert existing sections to B3 blocks
+      for (final section in config.home.sections) {
+        if (!section.active) continue;
+        
+        try {
+          switch (section.type) {
+            case HomeSectionType.hero:
+              blocks.add(_convertHeroToB3(section, order++));
+              break;
+            case HomeSectionType.promoBanner:
+              blocks.add(_convertPromoBannerToB3(section, order++));
+              break;
+            case HomeSectionType.popup:
+              blocks.add(_convertPopupToB3(section, order++));
+              break;
+            default:
+              debugPrint('B3 Migration: Unknown section type: ${section.type}');
+          }
+        } catch (e) {
+          debugPrint('B3 Migration: Error converting section ${section.id}: $e');
+        }
+      }
+    }
+    
+    // If no blocks were created, add default blocks
+    if (blocks.isEmpty) {
+      debugPrint('B3 Migration: No V2 sections found, using default home page');
+      return PageSchema.homeB3();
+    }
+    
+    // Add product slider if not present
+    blocks.add(WidgetBlock(
+      id: 'bestsellers_slider',
+      type: WidgetBlockType.productSlider,
+      order: order++,
+      visible: true,
+      properties: {
+        'title': '⭐ Nos Meilleures Ventes',
+        'showTitle': true,
+        'columns': 2,
+        'spacing': 16.0,
+        'showPrice': true,
+      },
+      dataSource: DataSource(
+        id: 'featured_products',
+        type: DataSourceType.products,
+        config: {'category': 'pizza', 'limit': 6},
+      ),
+      styling: {
+        'padding': {'top': 16.0, 'bottom': 16.0, 'left': 16.0, 'right': 16.0},
+      },
+    ));
+    
+    // Add category slider
+    blocks.add(WidgetBlock(
+      id: 'categories_slider',
+      type: WidgetBlockType.categorySlider,
+      order: order++,
+      visible: true,
+      properties: {
+        'title': '📂 Explorez nos catégories',
+        'showTitle': true,
+        'itemWidth': 120.0,
+        'itemHeight': 120.0,
+        'showCountBadge': true,
+      },
+      dataSource: DataSource(
+        id: 'all_categories',
+        type: DataSourceType.categories,
+        config: {'limit': 10},
+      ),
+      styling: {
+        'padding': {'top': 16.0, 'bottom': 16.0, 'left': 16.0, 'right': 16.0},
+      },
+    ));
+    
+    return PageSchema(
+      id: 'home_b3',
+      name: 'Accueil B3',
+      route: _homeB3Route,
+      enabled: true,
+      blocks: blocks,
+      metadata: {
+        'description': 'Page d\'accueil migrée depuis V2',
+        'version': 1,
+        'migrated': true,
+      },
+    );
+  }
+
+  /// Build navigation action for B3 routes
+  /// 
+  /// Converts V2 target names to B3 routes
+  /// Examples: 'menu' → '/menu-b3', 'categories' → '/categories-b3'
+  String _buildNavigationAction(dynamic target) {
+    if (target == null) {
+      return 'navigate:$_menuB3Route'; // Default to menu
+    }
+    
+    final targetStr = target.toString().toLowerCase();
+    
+    // Map V2 targets to B3 routes
+    switch (targetStr) {
+      case 'menu':
+        return 'navigate:$_menuB3Route';
+      case 'categories':
+        return 'navigate:$_categoriesB3Route';
+      case 'cart':
+        return 'navigate:$_cartB3Route';
+      case 'home':
+        return 'navigate:$_homeB3Route';
+      default:
+        // If it's already a path, keep it
+        if (targetStr.startsWith('/')) {
+          return 'navigate:$targetStr';
+        }
+        // Otherwise default to menu
+        return 'navigate:$_menuB3Route';
+    }
+  }
+
+  /// Convert Hero section to B3 heroAdvanced block
+  WidgetBlock _convertHeroToB3(HomeSectionConfig section, int order) {
+    final data = section.data;
+    return WidgetBlock(
+      id: 'hero_${section.id}',
+      type: WidgetBlockType.heroAdvanced,
+      order: order,
+      visible: true,
+      properties: {
+        'title': data['title'] ?? 'Bienvenue',
+        'subtitle': data['subtitle'] ?? '',
+        'imageUrl': data['imageUrl'] ?? _defaultHeroImageUrl,
+        'height': 350.0,
+        'borderRadius': 0.0,
+        'imageFit': 'cover',
+        'hasGradient': true,
+        'gradientStartColor': _defaultGradientStartColor,
+        'gradientEndColor': _defaultGradientEndColor,
+        'gradientDirection': 'vertical',
+        'overlayOpacity': 0.3,
+        'titleColor': _defaultWhiteColor,
+        'subtitleColor': '#FFFFFFDD',
+        'contentAlign': 'bottom',
+        'spacing': 8.0,
+        'ctas': [
+          {
+            'label': data['ctaLabel'] ?? 'Commander maintenant',
+            'action': _buildNavigationAction(data['ctaTarget']),
+            'backgroundColor': _defaultPrimaryColor,
+            'textColor': _defaultWhiteColor,
+            'borderRadius': 8.0,
+            'padding': 16.0,
+          }
+        ],
+      },
+    );
+  }
+
+  /// Convert PromoBanner section to B3 promoBanner block
+  WidgetBlock _convertPromoBannerToB3(HomeSectionConfig section, int order) {
+    final data = section.data;
+    return WidgetBlock(
+      id: 'promo_${section.id}',
+      type: WidgetBlockType.promoBanner,
+      order: order,
+      visible: true,
+      properties: {
+        'title': data['text'] ?? '🎉 Offre Spéciale',
+        'subtitle': data['subtitle'] ?? '',
+        'backgroundColor': data['backgroundColor'] ?? '#FFA726',
+        'textColor': _defaultWhiteColor,
+        'borderRadius': 12.0,
+        'padding': 20.0,
+        'gradientStartColor': '#FF6F00',
+        'gradientEndColor': '#FFA726',
+        'gradientDirection': 'horizontal',
+      },
+      styling: {
+        'padding': {'top': 16.0, 'bottom': 16.0, 'left': 16.0, 'right': 16.0},
+      },
+    );
+  }
+
+  /// Convert Popup section to B3 popup block
+  WidgetBlock _convertPopupToB3(HomeSectionConfig section, int order) {
+    final data = section.data;
+    return WidgetBlock(
+      id: 'popup_${section.id}',
+      type: WidgetBlockType.popup,
+      order: order,
+      visible: true,
+      properties: {
+        'title': data['title'] ?? 'Bienvenue ! 🍕',
+        'message': data['message'] ?? 'Découvrez nos pizzas artisanales',
+        'titleColor': '#000000',
+        'messageColor': '#666666',
+        'alignment': 'center',
+        'icon': 'promo',
+        'backgroundColor': _defaultWhiteColor,
+        'borderRadius': 16.0,
+        'padding': 24.0,
+        'maxWidth': 320.0,
+        'elevation': 8.0,
+        'overlayColor': '#000000',
+        'overlayOpacity': 0.5,
+        'showOnLoad': false,
+        'triggerType': 'delayed',
+        'delayMs': 2000,
+        'dismissibleByTapOutside': true,
+        'showOncePerSession': true,
+        'ctas': [
+          {
+            'label': 'Découvrir',
+            'action': 'navigate:$_menuB3Route',
+            'backgroundColor': _defaultPrimaryColor,
+            'textColor': _defaultWhiteColor,
+            'borderRadius': 8.0,
+          },
+          {
+            'label': 'Plus tard',
+            'action': 'dismissOnly',
+            'backgroundColor': '#EEEEEE',
+            'textColor': '#666666',
+            'borderRadius': 8.0,
+          }
+        ],
+      },
+    );
+  }
+
+  /// Build menu page with product list
+  PageSchema _buildMenuPage() {
+    return PageSchema(
+      id: 'menu_b3',
+      name: 'Menu B3',
+      route: _menuB3Route,
+      enabled: true,
+      blocks: [
+        WidgetBlock(
+          id: 'banner_menu',
+          type: WidgetBlockType.banner,
+          order: 1,
+          visible: true,
+          properties: {
+            'text': '🍕 Notre Menu',
+          },
+          styling: {
+            'backgroundColor': _defaultPrimaryColor,
+            'textColor': _defaultWhiteColor,
+            'padding': 16.0,
+          },
+        ),
+        WidgetBlock(
+          id: 'title_menu',
+          type: WidgetBlockType.text,
+          order: 2,
+          visible: true,
+          properties: {
+            'text': 'Découvrez nos pizzas',
+            'fontSize': 24.0,
+            'bold': true,
+            'align': 'center',
+          },
+          styling: {
+            'padding': {'top': 24.0, 'bottom': 16.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        WidgetBlock(
+          id: 'products_menu',
+          type: WidgetBlockType.productList,
+          order: 3,
+          visible: true,
+          properties: {
+            'title': 'Nos Pizzas',
+          },
+          dataSource: DataSource(
+            id: 'all_products',
+            type: DataSourceType.products,
+            config: {'category': 'pizza'},
+          ),
+          styling: {
+            'padding': 8.0,
+          },
+        ),
+      ],
+      metadata: {
+        'description': 'Page menu dynamique B3',
+        'version': 1,
+        'migrated': true,
+      },
+    );
+  }
+
+  /// Build categories page with category list
+  PageSchema _buildCategoriesPage() {
+    return PageSchema(
+      id: 'categories_b3',
+      name: 'Catégories B3',
+      route: _categoriesB3Route,
+      enabled: true,
+      blocks: [
+        WidgetBlock(
+          id: 'banner_categories',
+          type: WidgetBlockType.banner,
+          order: 1,
+          visible: true,
+          properties: {
+            'text': '📂 Catégories',
+          },
+          styling: {
+            'backgroundColor': '#2E7D32',
+            'textColor': _defaultWhiteColor,
+            'padding': 16.0,
+          },
+        ),
+        WidgetBlock(
+          id: 'title_categories',
+          type: WidgetBlockType.text,
+          order: 2,
+          visible: true,
+          properties: {
+            'text': 'Explorez nos catégories',
+            'fontSize': 24.0,
+            'bold': true,
+            'align': 'center',
+          },
+          styling: {
+            'padding': {'top': 24.0, 'bottom': 16.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        WidgetBlock(
+          id: 'categories_list',
+          type: WidgetBlockType.categoryList,
+          order: 3,
+          visible: true,
+          properties: {
+            'title': 'Toutes les catégories',
+          },
+          dataSource: DataSource(
+            id: 'all_categories',
+            type: DataSourceType.categories,
+            config: {},
+          ),
+          styling: {
+            'padding': 8.0,
+          },
+        ),
+      ],
+      metadata: {
+        'description': 'Page catégories dynamique B3',
+        'version': 1,
+        'migrated': true,
+      },
+    );
+  }
+
+  /// Build cart page with empty state
+  PageSchema _buildCartPage() {
+    return PageSchema(
+      id: 'cart_b3',
+      name: 'Panier B3',
+      route: _cartB3Route,
+      enabled: true,
+      blocks: [
+        WidgetBlock(
+          id: 'banner_cart',
+          type: WidgetBlockType.banner,
+          order: 1,
+          visible: true,
+          properties: {
+            'text': '🛒 Votre Panier',
+          },
+          styling: {
+            'backgroundColor': '#1976D2',
+            'textColor': _defaultWhiteColor,
+            'padding': 16.0,
+          },
+        ),
+        WidgetBlock(
+          id: 'empty_cart_message',
+          type: WidgetBlockType.text,
+          order: 2,
+          visible: true,
+          properties: {
+            'text': 'Votre panier est vide',
+            'fontSize': 20.0,
+            'bold': true,
+            'align': 'center',
+          },
+          styling: {
+            'color': '#666666',
+            'padding': {'top': 48.0, 'bottom': 24.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        WidgetBlock(
+          id: 'empty_cart_subtitle',
+          type: WidgetBlockType.text,
+          order: 3,
+          visible: true,
+          properties: {
+            'text': 'Ajoutez des produits depuis notre menu pour commencer votre commande',
+            'fontSize': 16.0,
+            'align': 'center',
+          },
+          styling: {
+            'color': '#999999',
+            'padding': {'top': 0.0, 'bottom': 32.0, 'left': 16.0, 'right': 16.0},
+          },
+        ),
+        WidgetBlock(
+          id: 'back_to_menu_button',
+          type: WidgetBlockType.button,
+          order: 4,
+          visible: true,
+          properties: {
+            'label': 'Retour au menu',
+          },
+          actions: {
+            'onTap': 'navigate:$_menuB3Route',
+          },
+          styling: {
+            'backgroundColor': _defaultPrimaryColor,
+            'textColor': _defaultWhiteColor,
+            'padding': 16.0,
+          },
+        ),
+      ],
+      metadata: {
+        'description': 'Page panier dynamique B3',
+        'version': 1,
+        'migrated': true,
+      },
+    );
   }
 }
