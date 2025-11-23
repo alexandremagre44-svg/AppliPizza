@@ -39,6 +39,11 @@ class AppConfigService {
   static const String _menuB3Route = '/menu-b3';
   static const String _categoriesB3Route = '/categories-b3';
   static const String _cartB3Route = '/cart-b3';
+  
+  /// Get all mandatory B3 routes (main + alternate)
+  static Set<String> _getMandatoryB3Routes() {
+    return {'/home', _homeB3Route, '/menu', _menuB3Route, _categoriesB3Route, '/cart', _cartB3Route};
+  }
 
   AppConfigService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -745,9 +750,10 @@ class AppConfigService {
       debugPrint('🔧 DEBUG: Force B3 initialization starting...');
       const appId = 'pizza_delizza';
       
-      // Build the 4 mandatory B3 pages
+      // Build the mandatory B3 pages (includes both /home and /home-b3 routes)
       final mandatoryB3Pages = _buildMandatoryB3Pages();
-      final mandatoryRoutes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
+      // Main routes that can be edited in Builder B3
+      final mandatoryRoutes = _getMandatoryB3Routes();
       
       // Use correct Firestore paths: app_configs/{appId}/configs/{config|config_draft}
       final publishedDoc = _firestore
@@ -835,17 +841,40 @@ class AppConfigService {
     }
   }
 
-  /// Build the 4 mandatory B3 pages
+  /// Build the mandatory B3 pages
   /// 
   /// Returns a list of PageSchema objects for:
-  /// - home-b3 (/home-b3): Hero, promo banner, product list, category slider, sticky CTA, popup
-  /// - menu-b3 (/menu-b3): Product list
+  /// - home (/home): Main home page - editable in Builder B3
+  /// - home-b3 (/home-b3): Alternate B3 home page
+  /// - menu (/menu): Main menu page - editable in Builder B3
+  /// - menu-b3 (/menu-b3): Alternate B3 menu page
   /// - categories-b3 (/categories-b3): Category list
-  /// - cart-b3 (/cart-b3): Summary + CTA
+  /// - cart (/cart): Main cart page - editable in Builder B3
+  /// - cart-b3 (/cart-b3): Alternate B3 cart page
   /// 
-  /// These are simple, safe templates with no external images required.
+  /// These pages allow Builder B3 to edit the real application pages.
   List<PageSchema> _buildMandatoryB3Pages() {
     return [
+      // Main application pages (editable in Builder B3)
+      PageSchema.homeB3().copyWith(
+        id: 'home_main',
+        name: 'Accueil',
+        route: '/home',
+        enabled: false, // Disabled by default - admin can enable in Studio B3
+      ),
+      PageSchema.menuB3().copyWith(
+        id: 'menu_main',
+        name: 'Menu',
+        route: '/menu',
+        enabled: false, // Disabled by default
+      ),
+      PageSchema.cartB3().copyWith(
+        id: 'cart_main',
+        name: 'Panier',
+        route: '/cart',
+        enabled: false, // Disabled by default
+      ),
+      // Alternate B3 pages (for testing/development)
       PageSchema.homeB3(),
       PageSchema.menuB3(),
       PageSchema.categoriesB3(),
@@ -889,7 +918,7 @@ class AppConfigService {
       debugPrint("B3 FORCE: Built ${mandatoryPages.length} mandatory pages");
 
       // Define the routes to replace
-      final mandatoryRoutes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
+      final mandatoryRoutes = _getMandatoryB3Routes();
 
       // 2. Load current configs from Firestore if available
       AppConfig? draftConfig;
@@ -1091,7 +1120,7 @@ class AppConfigService {
       }
       
       // Define the B3 routes that will be replaced
-      final b3Routes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
+      final b3Routes = _getMandatoryB3Routes();
       
       // Preserve existing non-B3 pages
       List<PageSchema> existingNonB3Pages = [];
@@ -1708,7 +1737,7 @@ class AppConfigService {
       debugPrint('🔧 FIX: Starting to fix pages in Firestore for appId: $appId');
       
       final mandatoryB3Pages = _buildMandatoryB3Pages();
-      final b3Routes = {'/home-b3', '/menu-b3', '/categories-b3', '/cart-b3'};
+      final b3Routes = _getMandatoryB3Routes();
       
       // Fix published config
       try {
