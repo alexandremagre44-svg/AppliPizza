@@ -4,11 +4,23 @@
 
 Le Studio B3 est un éditeur complet pour créer et modifier des pages dynamiques basées sur des schémas JSON (`PageSchema`). Il permet de construire des pages Flutter sans écrire de code.
 
+> **📌 Note importante:** Studio B3 est maintenant pleinement intégré avec Firestore. Si vous rencontrez des problèmes (pages non affichées, erreurs de sauvegarde), consultez [STUDIO_B3_FIRESTORE_INTEGRATION_FIX.md](STUDIO_B3_FIRESTORE_INTEGRATION_FIX.md) pour le guide de dépannage complet.
+
 ## Accès
 
 **Route:** `/admin/studio-b3`
 
 **Accès:** Réservé aux administrateurs uniquement
+
+## Pages B3 par défaut
+
+Studio B3 gère 4 pages dynamiques obligatoires :
+- **Accueil B3** (`/home-b3`) - Page d'accueil avec hero, promos, sliders
+- **Menu B3** (`/menu-b3`) - Page menu avec liste de produits
+- **Catégories B3** (`/categories-b3`) - Page des catégories
+- **Panier B3** (`/cart-b3`) - Page du panier
+
+Ces pages sont automatiquement créées au premier lancement en mode debug.
 
 ## Architecture
 
