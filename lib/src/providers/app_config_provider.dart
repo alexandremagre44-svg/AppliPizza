@@ -46,34 +46,70 @@ final appConfigProvider = StreamProvider<AppConfig?>((ref) async* {
 });
 
 // Draft AppConfig stream provider (for Studio B3 editing)
-// Auto-creates draft from published on first access if it doesn't exist
+// Falls back to published config if draft is empty or absent (read-only mode)
 final appConfigDraftProvider = StreamProvider<AppConfig?>((ref) async* {
   final service = ref.watch(appConfigServiceProvider);
   final appId = AppConstants.appId;
   
   debugPrint('📝 AppConfigDraftProvider: Loading draft config for appId: $appId');
   
-  // First, try to get the draft config (which will auto-create if needed)
+  // First, try to get the draft config (without auto-create to avoid Firestore writes)
   final initialConfig = await service.getConfig(
     appId: appId, 
     draft: true, 
-    autoCreate: true,
+    autoCreate: false,
   );
   
-  // Yield the initial config immediately
-  if (initialConfig != null) {
+  // Check if draft is usable (exists and has pages)
+  if (initialConfig != null && initialConfig.pages.pages.isNotEmpty) {
     debugPrint('📝 AppConfigDraftProvider: Draft config loaded with ${initialConfig.pages.pages.length} pages');
     yield initialConfig;
+    
+    // Then switch to watching for real-time updates on draft
+    debugPrint('📝 AppConfigDraftProvider: Now watching for real-time updates on draft');
+    await for (final config in service.watchConfig(appId: appId, draft: true)) {
+      if (config != null && config.pages.pages.isNotEmpty) {
+        debugPrint('📝 AppConfigDraftProvider: Draft config updated (${config.pages.pages.length} pages)');
+        yield config;
+      } else {
+        // Draft became empty, fall back to published
+        debugPrint('📝 AppConfigDraftProvider: Draft became empty, falling back to published config');
+        final publishedConfig = await service.getConfig(
+          appId: appId, 
+          draft: false, 
+          autoCreate: false,
+        );
+        if (publishedConfig != null) {
+          debugPrint('📝 AppConfigDraftProvider: Draft empty → using published config with ${publishedConfig.pages.pages.length} pages (read-only fallback)');
+          yield publishedConfig;
+        }
+      }
+    }
   } else {
-    debugPrint('📝 AppConfigDraftProvider: WARNING - Draft config is null');
-  }
-  
-  // Then switch to watching for real-time updates
-  debugPrint('📝 AppConfigDraftProvider: Now watching for real-time updates');
-  await for (final config in service.watchConfig(appId: appId, draft: true)) {
-    if (config != null) {
-      debugPrint('📝 AppConfigDraftProvider: Draft config updated (${config.pages.pages.length} pages)');
-      yield config;
+    // Draft is null or empty - fall back to published config
+    debugPrint('📝 AppConfigDraftProvider: Draft is ${initialConfig == null ? "null" : "empty (0 pages)"}, falling back to published config');
+    
+    final publishedConfig = await service.getConfig(
+      appId: appId, 
+      draft: false, 
+      autoCreate: false,
+    );
+    
+    if (publishedConfig != null) {
+      debugPrint('📝 AppConfigDraftProvider: Draft empty → using published config with ${publishedConfig.pages.pages.length} pages (read-only fallback)');
+      yield publishedConfig;
+      
+      // Watch for changes to published config
+      debugPrint('📝 AppConfigDraftProvider: Now watching published config (read-only fallback mode)');
+      await for (final config in service.watchConfig(appId: appId, draft: false)) {
+        if (config != null) {
+          debugPrint('📝 AppConfigDraftProvider: Published config updated (${config.pages.pages.length} pages) - read-only fallback');
+          yield config;
+        }
+      }
+    } else {
+      debugPrint('📝 AppConfigDraftProvider: ERROR - Both draft and published configs are unavailable');
+      yield null;
     }
   }
 });
