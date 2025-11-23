@@ -1,6 +1,7 @@
 // lib/src/providers/app_config_provider.dart
 // Provider for application configuration (including B3 pages)
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/app_config.dart';
 import '../services/app_config_service.dart';
@@ -17,6 +18,8 @@ final appConfigProvider = StreamProvider<AppConfig?>((ref) async* {
   final service = ref.watch(appConfigServiceProvider);
   final appId = AppConstants.appId;
   
+  debugPrint('📡 AppConfigProvider: Loading published config for appId: $appId');
+  
   // First, try to get the config (which will auto-create if needed)
   final initialConfig = await service.getConfig(
     appId: appId, 
@@ -26,12 +29,17 @@ final appConfigProvider = StreamProvider<AppConfig?>((ref) async* {
   
   // Yield the initial config immediately
   if (initialConfig != null) {
+    debugPrint('📡 AppConfigProvider: Published config loaded with ${initialConfig.pages.pages.length} pages');
     yield initialConfig;
+  } else {
+    debugPrint('📡 AppConfigProvider: WARNING - Published config is null');
   }
   
   // Then switch to watching for real-time updates
+  debugPrint('📡 AppConfigProvider: Now watching for real-time updates');
   await for (final config in service.watchConfig(appId: appId, draft: false)) {
     if (config != null) {
+      debugPrint('📡 AppConfigProvider: Published config updated (${config.pages.pages.length} pages)');
       yield config;
     }
   }
@@ -43,6 +51,8 @@ final appConfigDraftProvider = StreamProvider<AppConfig?>((ref) async* {
   final service = ref.watch(appConfigServiceProvider);
   final appId = AppConstants.appId;
   
+  debugPrint('📝 AppConfigDraftProvider: Loading draft config for appId: $appId');
+  
   // First, try to get the draft config (which will auto-create if needed)
   final initialConfig = await service.getConfig(
     appId: appId, 
@@ -52,12 +62,17 @@ final appConfigDraftProvider = StreamProvider<AppConfig?>((ref) async* {
   
   // Yield the initial config immediately
   if (initialConfig != null) {
+    debugPrint('📝 AppConfigDraftProvider: Draft config loaded with ${initialConfig.pages.pages.length} pages');
     yield initialConfig;
+  } else {
+    debugPrint('📝 AppConfigDraftProvider: WARNING - Draft config is null');
   }
   
   // Then switch to watching for real-time updates
+  debugPrint('📝 AppConfigDraftProvider: Now watching for real-time updates');
   await for (final config in service.watchConfig(appId: appId, draft: true)) {
     if (config != null) {
+      debugPrint('📝 AppConfigDraftProvider: Draft config updated (${config.pages.pages.length} pages)');
       yield config;
     }
   }
