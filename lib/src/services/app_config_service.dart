@@ -487,6 +487,7 @@ class AppConfigService {
   /// - categories-b3 (/categories-b3)
   /// - cart-b3 (/cart-b3)
   /// 
+  /// If the config document doesn't exist, creates a full default AppConfig
   /// Safe to call multiple times - will not overwrite existing pages
   /// Never throws exceptions - logs errors only
   Future<void> ensureMandatoryB3Pages() async {
@@ -501,8 +502,18 @@ class AppConfigService {
         .collection('configs')
         .doc(_configDraftDocName);
 
-    Future<void> ensure(DocumentReference<Map<String, dynamic>> ref) async {
+    Future<void> ensure(DocumentReference<Map<String, dynamic>> ref, bool isDraft) async {
       final snap = await ref.get();
+      
+      // If document doesn't exist, create full default AppConfig
+      if (!snap.exists) {
+        debugPrint('🔥 ensureMandatoryB3Pages: Document ${ref.id} does not exist, creating default AppConfig');
+        final defaultConfig = getDefaultConfig('pizza_delizza');
+        await ref.set(defaultConfig.toJson(), SetOptions(merge: false));
+        debugPrint('🔥 ensureMandatoryB3Pages: Default AppConfig created in ${ref.id}');
+        return;
+      }
+      
       Map<String, dynamic> data = snap.data() ?? {};
 
       // Ensure pages structure exists
@@ -531,8 +542,11 @@ class AppConfigService {
       final missing = required.where((r) => !existingRoutes.contains(r)).toList();
 
       if (missing.isEmpty) {
+        debugPrint('🔥 ensureMandatoryB3Pages: All mandatory pages already exist in ${ref.id}');
         return; // Nothing to do
       }
+
+      debugPrint('🔥 ensureMandatoryB3Pages: Adding ${missing.length} missing pages to ${ref.id}: $missing');
 
       // Generate missing pages
       final generated = missing
@@ -558,12 +572,13 @@ class AppConfigService {
       };
 
       await ref.set(data, SetOptions(merge: true));
-      debugPrint("🔥 ensureMandatoryB3Pages: pages injected in ${ref.id}");
+      debugPrint('🔥 ensureMandatoryB3Pages: ${missing.length} pages injected in ${ref.id}');
     }
 
     try {
-      await ensure(docPublished);
-      await ensure(docDraft);
+      await ensure(docPublished, false);
+      await ensure(docDraft, true);
+      debugPrint('🔥 ensureMandatoryB3Pages: Completed successfully');
     } catch (e) {
       debugPrint('AppConfigService: ERROR - Error in ensureMandatoryB3Pages: $e');
       // Don't rethrow - log only
@@ -700,9 +715,9 @@ class AppConfigService {
   /// immediately functional in DEBUG/CHROME mode where Firebase Auth is not available.
   /// 
   /// **What it does**:
-  /// - Writes 4 mandatory B3 pages (home-b3, menu-b3, categories-b3, cart-b3) to Firestore
-  /// - Writes to both /config/pizza_delizza/published and /config/pizza_delizza/draft
-  /// - Always overwrites existing documents
+  /// - Creates full AppConfig with 4 mandatory B3 pages (home-b3, menu-b3, categories-b3, cart-b3) in Firestore
+  /// - Writes to both app_configs/pizza_delizza/configs/config (published) and config_draft (draft)
+  /// - Uses merge mode to preserve existing data
   /// - Never checks Firebase Auth or permissions
   /// - Ignores all permission errors (logs them only)
   /// 
@@ -716,32 +731,27 @@ class AppConfigService {
     try {
       debugPrint('🔧 DEBUG: Force B3 initialization starting...');
       
-      // Generate the 4 mandatory B3 pages using PagesConfig.initial()
-      final pagesConfig = PagesConfig.initial();
+      // Create full default AppConfig with mandatory B3 pages
+      final defaultConfig = getDefaultConfig('pizza_delizza');
+      final configData = defaultConfig.toJson();
       
-      // Create the document data structure
-      // Note: pagesConfig.toJson() already returns {'pages': [...]} structure
-      final Map<String, dynamic> documentData = pagesConfig.toJson();
-      
-      // Define Firestore paths as per requirements: /config/pizza_delizza/published and /config/pizza_delizza/draft
-      // In Firestore structure: collection('config')/doc('pizza_delizza')/collection('data')/doc('published' or 'draft')
-      // This provides a clean separation for debug initialization
+      // Use correct Firestore paths: app_configs/{appId}/configs/{config|config_draft}
       final publishedDoc = _firestore
-          .collection('config')
+          .collection(_collectionName)
           .doc('pizza_delizza')
-          .collection('data')
-          .doc('published');
+          .collection('configs')
+          .doc(_configDocName);
       
       final draftDoc = _firestore
-          .collection('config')
+          .collection(_collectionName)
           .doc('pizza_delizza')
-          .collection('data')
-          .doc('draft');
+          .collection('configs')
+          .doc(_configDraftDocName);
       
       // Write to published document
       try {
-        await publishedDoc.set(documentData, SetOptions(merge: false));
-        debugPrint('🔧 DEBUG: B3 pages written to /config/pizza_delizza/published');
+        await publishedDoc.set(configData, SetOptions(merge: true));
+        debugPrint('🔧 DEBUG: B3 config written to app_configs/pizza_delizza/configs/config');
       } catch (e) {
         // Log error but don't throw - permission denied is expected in some environments
         debugPrint('🔧 DEBUG: Failed to write to published (expected in restrictive environments): $e');
@@ -749,8 +759,8 @@ class AppConfigService {
       
       // Write to draft document
       try {
-        await draftDoc.set(documentData, SetOptions(merge: false));
-        debugPrint('🔧 DEBUG: B3 pages written to /config/pizza_delizza/draft');
+        await draftDoc.set(configData, SetOptions(merge: true));
+        debugPrint('🔧 DEBUG: B3 config written to app_configs/pizza_delizza/configs/config_draft');
       } catch (e) {
         // Log error but don't throw - permission denied is expected in some environments
         debugPrint('🔧 DEBUG: Failed to write to draft (expected in restrictive environments): $e');

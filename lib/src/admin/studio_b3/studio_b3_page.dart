@@ -2,9 +2,11 @@
 // Studio B3 - Page editor for dynamic pages based on PageSchema
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/app_config.dart';
 import '../../models/page_schema.dart';
 import '../../services/app_config_service.dart';
+import '../../providers/app_config_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../core/constants.dart';
 import 'page_list.dart';
@@ -13,23 +15,22 @@ import 'page_editor.dart';
 /// Studio B3 - Editor for dynamic pages (PageSchema)
 /// 
 /// Features:
-/// - List of all B3 pages
+/// - List of all B3 pages from draft config (Firestore-backed)
 /// - Add, edit, delete pages
 /// - Block editing with drag & drop
 /// - Live preview
 /// - Publish/revert workflow
-class StudioB3Page extends StatefulWidget {
+class StudioB3Page extends ConsumerStatefulWidget {
   /// Optional initial page route to open directly (e.g., '/home-b3')
   final String? initialPageRoute;
 
   const StudioB3Page({super.key, this.initialPageRoute});
 
   @override
-  State<StudioB3Page> createState() => _StudioB3PageState();
+  ConsumerState<StudioB3Page> createState() => _StudioB3PageState();
 }
 
-class _StudioB3PageState extends State<StudioB3Page> {
-  final AppConfigService _configService = AppConfigService();
+class _StudioB3PageState extends ConsumerState<StudioB3Page> {
   static const String _appId = AppConstants.appId;
   
   PageSchema? _selectedPage;
@@ -38,94 +39,108 @@ class _StudioB3PageState extends State<StudioB3Page> {
 
   @override
   Widget build(BuildContext context) {
+    final configService = ref.watch(appConfigServiceProvider);
+    final configAsync = ref.watch(appConfigDraftProvider);
+    
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: _buildAppBar(),
-      body: StreamBuilder<AppConfig?>(
-        stream: _configService.watchConfig(appId: _appId, draft: true),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return _buildErrorState(snapshot.error.toString());
-          }
-
-          if (!snapshot.hasData || snapshot.data == null) {
+      body: configAsync.when(
+        data: (config) {
+          if (config == null) {
             return _buildNoConfigState();
           }
-
-          final config = snapshot.data!;
           
-          // Initialize selected page from route parameter if provided and not yet initialized
-          if (!_isInitialized && widget.initialPageRoute != null && _selectedPage == null) {
-            _isInitialized = true;
-            // Find page by route
-            final page = config.pages.getPage(widget.initialPageRoute!);
-            if (page != null) {
-              // Use WidgetsBinding to set state after build
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) {
-                  setState(() {
-                    _selectedPage = page;
-                  });
-                }
-              });
-            } else {
-              // Page not found - show message
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Page "${widget.initialPageRoute}" non trouvée'),
-                      backgroundColor: Colors.orange,
-                    ),
-                  );
-                }
-              });
-            }
-          }
-          
-          // If a page is selected, show the editor
-          if (_selectedPage != null) {
-            return PageEditor(
-              pageSchema: _selectedPage!,
-              config: config,
-              onBack: () {
-                setState(() {
-                  _selectedPage = null;
-                });
-              },
-              onSave: (updatedPage) async {
-                await _updatePage(config, updatedPage);
-                setState(() {
-                  _selectedPage = updatedPage;
-                });
-              },
-            );
-          }
-
-          // Otherwise, show the page list
-          return PageList(
-            pages: config.pages.pages,
-            onPageSelected: (page) {
-              setState(() {
-                _selectedPage = page;
-              });
-            },
-            onPageToggle: (page, enabled) async {
-              await _togglePage(config, page, enabled);
-            },
-            onAddPage: () async {
-              await _addNewPage(config);
-            },
-            onDeletePage: (page) async {
-              await _deletePage(config, page);
-            },
-          );
+          return _buildContent(config, configService);
+        },
+        loading: () => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                'Chargement des pages B3...',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+        error: (error, stack) {
+          debugPrint('Studio B3: Error loading draft config: $error');
+          debugPrint('Stack trace: $stack');
+          return _buildErrorState(error.toString());
         },
       ),
+    );
+  }
+
+  Widget _buildContent(AppConfig config, AppConfigService configService) {
+    // Initialize selected page from route parameter if provided and not yet initialized
+    if (!_isInitialized && widget.initialPageRoute != null && _selectedPage == null) {
+      _isInitialized = true;
+      // Find page by route
+      final page = config.pages.getPage(widget.initialPageRoute!);
+      if (page != null) {
+        // Use WidgetsBinding to set state after build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _selectedPage = page;
+            });
+          }
+        });
+      } else {
+        // Page not found - show message
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Page "${widget.initialPageRoute}" non trouvée'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        });
+      }
+    }
+    
+    // If a page is selected, show the editor
+    if (_selectedPage != null) {
+      return PageEditor(
+        pageSchema: _selectedPage!,
+        config: config,
+        onBack: () {
+          setState(() {
+            _selectedPage = null;
+          });
+        },
+        onSave: (updatedPage) async {
+          await _updatePage(config, updatedPage, configService);
+          setState(() {
+            _selectedPage = updatedPage;
+          });
+        },
+      );
+    }
+
+    // Otherwise, show the page list
+    return PageList(
+      pages: config.pages.pages,
+      onPageSelected: (page) {
+        setState(() {
+          _selectedPage = page;
+        });
+      },
+      onPageToggle: (page, enabled) async {
+        await _togglePage(config, page, enabled, configService);
+      },
+      onAddPage: () async {
+        await _addNewPage(config, configService);
+      },
+      onDeletePage: (page) async {
+        await _deletePage(config, page, configService);
+      },
     );
   }
 
@@ -242,8 +257,9 @@ class _StudioB3PageState extends State<StudioB3Page> {
   Future<void> _createDefaultConfig() async {
     setState(() => _isPublishing = true);
     try {
-      final defaultConfig = _configService.getDefaultConfig(_appId);
-      await _configService.saveDraft(appId: _appId, config: defaultConfig);
+      final configService = ref.read(appConfigServiceProvider);
+      final defaultConfig = configService.getDefaultConfig(_appId);
+      await configService.saveDraft(appId: _appId, config: defaultConfig);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -251,6 +267,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
         );
       }
     } catch (e) {
+      debugPrint('Studio B3: Error creating default config: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
@@ -264,7 +281,8 @@ class _StudioB3PageState extends State<StudioB3Page> {
   Future<void> _publishChanges() async {
     setState(() => _isPublishing = true);
     try {
-      await _configService.publishDraft(appId: _appId);
+      final configService = ref.read(appConfigServiceProvider);
+      await configService.publishDraft(appId: _appId);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -275,6 +293,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
         );
       }
     } catch (e) {
+      debugPrint('Studio B3: Error publishing draft: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
@@ -311,7 +330,8 @@ class _StudioB3PageState extends State<StudioB3Page> {
 
     setState(() => _isPublishing = true);
     try {
-      await _configService.createDraftFromPublished(appId: _appId);
+      final configService = ref.read(appConfigServiceProvider);
+      await configService.createDraftFromPublished(appId: _appId);
       
       if (mounted) {
         setState(() => _selectedPage = null);
@@ -320,6 +340,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
         );
       }
     } catch (e) {
+      debugPrint('Studio B3: Error reverting changes: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
@@ -330,7 +351,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
     }
   }
 
-  Future<void> _updatePage(AppConfig config, PageSchema updatedPage) async {
+  Future<void> _updatePage(AppConfig config, PageSchema updatedPage, AppConfigService configService) async {
     try {
       final updatedPages = config.pages.pages.map((p) {
         return p.id == updatedPage.id ? updatedPage : p;
@@ -340,8 +361,10 @@ class _StudioB3PageState extends State<StudioB3Page> {
         pages: config.pages.copyWith(pages: updatedPages),
       );
 
-      await _configService.saveDraft(appId: _appId, config: updatedConfig);
+      await configService.saveDraft(appId: _appId, config: updatedConfig);
+      debugPrint('Studio B3: Page "${updatedPage.name}" updated successfully');
     } catch (e) {
+      debugPrint('Studio B3: Error updating page: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
@@ -350,10 +373,10 @@ class _StudioB3PageState extends State<StudioB3Page> {
     }
   }
 
-  Future<void> _togglePage(AppConfig config, PageSchema page, bool enabled) async {
+  Future<void> _togglePage(AppConfig config, PageSchema page, bool enabled, AppConfigService configService) async {
     try {
       final updatedPage = page.copyWith(enabled: enabled);
-      await _updatePage(config, updatedPage);
+      await _updatePage(config, updatedPage, configService);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -363,6 +386,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
         );
       }
     } catch (e) {
+      debugPrint('Studio B3: Error toggling page: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
@@ -371,7 +395,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
     }
   }
 
-  Future<void> _addNewPage(AppConfig config) async {
+  Future<void> _addNewPage(AppConfig config, AppConfigService configService) async {
     final newPage = PageSchema(
       id: 'page_${DateTime.now().millisecondsSinceEpoch}',
       name: 'Nouvelle Page',
@@ -387,7 +411,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
         pages: config.pages.copyWith(pages: updatedPages),
       );
 
-      await _configService.saveDraft(appId: _appId, config: updatedConfig);
+      await configService.saveDraft(appId: _appId, config: updatedConfig);
       
       if (mounted) {
         setState(() => _selectedPage = newPage);
@@ -396,6 +420,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
         );
       }
     } catch (e) {
+      debugPrint('Studio B3: Error adding new page: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
@@ -404,7 +429,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
     }
   }
 
-  Future<void> _deletePage(AppConfig config, PageSchema page) async {
+  Future<void> _deletePage(AppConfig config, PageSchema page, AppConfigService configService) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -434,7 +459,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
         pages: config.pages.copyWith(pages: updatedPages),
       );
 
-      await _configService.saveDraft(appId: _appId, config: updatedConfig);
+      await configService.saveDraft(appId: _appId, config: updatedConfig);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -442,6 +467,7 @@ class _StudioB3PageState extends State<StudioB3Page> {
         );
       }
     } catch (e) {
+      debugPrint('Studio B3: Error deleting page: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
