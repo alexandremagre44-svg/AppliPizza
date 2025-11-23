@@ -26,6 +26,13 @@ class AppConfigService {
   static const String _b3TestCollection = '_b3_test';
   static const String _b3TestDocName = '__b3_init__';
   static const String _b3InitializedKey = 'b3_auto_initialized';
+  
+  // B3 migration constants
+  static const String _defaultHeroImageUrl = 'https://images.unsplash.com/photo-1513104890138-7c749659a591';
+  static const String _defaultGradientStartColor = '#000000CC';
+  static const String _defaultGradientEndColor = '#00000000';
+  static const String _defaultPrimaryColor = '#D62828';
+  static const String _defaultWhiteColor = '#FFFFFF';
 
   AppConfigService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -1042,6 +1049,10 @@ class AppConfigService {
         baseConfig = baseConfig.copyWith(pages: pagesConfig);
       }
       
+      // Track if at least one write succeeds
+      bool publishedWriteSuccess = false;
+      bool draftWriteSuccess = false;
+      
       // Write to published
       try {
         await _firestore
@@ -1050,6 +1061,7 @@ class AppConfigService {
             .collection('configs')
             .doc(_configDocName)
             .set(baseConfig.toJson(), SetOptions(merge: true));
+        publishedWriteSuccess = true;
         debugPrint('B3 Migration: Written to published config');
       } catch (e) {
         debugPrint('B3 Migration: Failed to write published (continuing): $e');
@@ -1063,15 +1075,19 @@ class AppConfigService {
             .collection('configs')
             .doc(_configDraftDocName)
             .set(baseConfig.toJson(), SetOptions(merge: true));
+        draftWriteSuccess = true;
         debugPrint('B3 Migration: Written to draft config');
       } catch (e) {
         debugPrint('B3 Migration: Failed to write draft (continuing): $e');
       }
       
-      // Mark migration as completed
-      await prefs.setBool(migrationKey, true);
-      
-      debugPrint('✅ Migration B3 SUCCESS - ${migratedPages.length} pages migrated');
+      // Mark migration as completed only if at least one write succeeded
+      if (publishedWriteSuccess || draftWriteSuccess) {
+        await prefs.setBool(migrationKey, true);
+        debugPrint('✅ Migration B3 SUCCESS - ${migratedPages.length} pages migrated');
+      } else {
+        debugPrint('B3 Migration: Both writes failed, will retry on next launch');
+      }
       
     } catch (e) {
       debugPrint('B3 Migration: Unexpected error (not setting migration flag): $e');
@@ -1186,16 +1202,16 @@ class AppConfigService {
       properties: {
         'title': data['title'] ?? 'Bienvenue',
         'subtitle': data['subtitle'] ?? '',
-        'imageUrl': data['imageUrl'] ?? 'https://images.unsplash.com/photo-1513104890138-7c749659a591',
+        'imageUrl': data['imageUrl'] ?? _defaultHeroImageUrl,
         'height': 350.0,
         'borderRadius': 0.0,
         'imageFit': 'cover',
         'hasGradient': true,
-        'gradientStartColor': '#000000CC',
-        'gradientEndColor': '#00000000',
+        'gradientStartColor': _defaultGradientStartColor,
+        'gradientEndColor': _defaultGradientEndColor,
         'gradientDirection': 'vertical',
         'overlayOpacity': 0.3,
-        'titleColor': '#FFFFFF',
+        'titleColor': _defaultWhiteColor,
         'subtitleColor': '#FFFFFFDD',
         'contentAlign': 'bottom',
         'spacing': 8.0,
@@ -1203,8 +1219,8 @@ class AppConfigService {
           {
             'label': data['ctaLabel'] ?? 'Commander maintenant',
             'action': 'navigate:/${data['ctaTarget'] ?? 'menu'}',
-            'backgroundColor': '#D62828',
-            'textColor': '#FFFFFF',
+            'backgroundColor': _defaultPrimaryColor,
+            'textColor': _defaultWhiteColor,
             'borderRadius': 8.0,
             'padding': 16.0,
           }
@@ -1225,7 +1241,7 @@ class AppConfigService {
         'title': data['text'] ?? '🎉 Offre Spéciale',
         'subtitle': data['subtitle'] ?? '',
         'backgroundColor': data['backgroundColor'] ?? '#FFA726',
-        'textColor': '#FFFFFF',
+        'textColor': _defaultWhiteColor,
         'borderRadius': 12.0,
         'padding': 20.0,
         'gradientStartColor': '#FF6F00',
@@ -1253,7 +1269,7 @@ class AppConfigService {
         'messageColor': '#666666',
         'alignment': 'center',
         'icon': 'promo',
-        'backgroundColor': '#FFFFFF',
+        'backgroundColor': _defaultWhiteColor,
         'borderRadius': 16.0,
         'padding': 24.0,
         'maxWidth': 320.0,
@@ -1269,8 +1285,8 @@ class AppConfigService {
           {
             'label': 'Découvrir',
             'action': 'navigate:/menu-b3',
-            'backgroundColor': '#D62828',
-            'textColor': '#FFFFFF',
+            'backgroundColor': _defaultPrimaryColor,
+            'textColor': _defaultWhiteColor,
             'borderRadius': 8.0,
           },
           {
@@ -1302,8 +1318,8 @@ class AppConfigService {
             'text': '🍕 Notre Menu',
           },
           styling: {
-            'backgroundColor': '#D62828',
-            'textColor': '#FFFFFF',
+            'backgroundColor': _defaultPrimaryColor,
+            'textColor': _defaultWhiteColor,
             'padding': 16.0,
           },
         ),
@@ -1366,7 +1382,7 @@ class AppConfigService {
           },
           styling: {
             'backgroundColor': '#2E7D32',
-            'textColor': '#FFFFFF',
+            'textColor': _defaultWhiteColor,
             'padding': 16.0,
           },
         ),
@@ -1429,7 +1445,7 @@ class AppConfigService {
           },
           styling: {
             'backgroundColor': '#1976D2',
-            'textColor': '#FFFFFF',
+            'textColor': _defaultWhiteColor,
             'padding': 16.0,
           },
         ),
@@ -1476,8 +1492,8 @@ class AppConfigService {
             'onTap': 'navigate:/menu-b3',
           },
           styling: {
-            'backgroundColor': '#D62828',
-            'textColor': '#FFFFFF',
+            'backgroundColor': _defaultPrimaryColor,
+            'textColor': _defaultWhiteColor,
             'padding': 16.0,
           },
         ),
