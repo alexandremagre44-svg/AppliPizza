@@ -1,6 +1,7 @@
 // lib/src/screens/home/home_screen.dart
 // HomeScreen - Professional showcase page for Pizza Deli'Zza
 // PROMPT 3F - Uses centralized text system
+// BUILDER B3 INTEGRATION - Loads published layouts from Builder B3
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,12 +24,19 @@ import 'pizza_customization_modal.dart';
 import '../../theme/app_theme.dart';
 import '../../core/constants.dart';
 import '../../services/roulette_rules_service.dart';
+import '../../../builder/models/models.dart';
+import '../../../builder/services/services.dart';
+import '../../../builder/preview/builder_runtime_renderer.dart';
 
 /// Home screen - Professional showcase page
 /// Displays hero banner, promos, bestsellers, category shortcuts, and info
 /// This is DISTINCT from the Menu page
+/// BUILDER B3: Attempts to load published layout, falls back to default behavior
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
+  // App ID for multi-resto support (configure as needed)
+  static const String appId = 'pizza_delizza';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -45,15 +53,15 @@ class HomeScreen extends ConsumerWidget {
       body: productsAsync.when(
         data: (products) => homeConfigAsync.when(
           data: (homeConfig) => appTextsAsync.when(
-            data: (appTexts) => _buildContentWithAnimation(context, ref, products, homeConfig, appTexts.home),
+            data: (appTexts) => _buildContentWithBuilderIntegration(context, ref, products, homeConfig, appTexts.home),
             loading: () => const HomeShimmerLoading(),
-            error: (error, stack) => _buildContentWithAnimation(context, ref, products, homeConfig, null),
+            error: (error, stack) => _buildContentWithBuilderIntegration(context, ref, products, homeConfig, null),
           ),
           loading: () => const HomeShimmerLoading(),
           error: (error, stack) => appTextsAsync.when(
-            data: (appTexts) => _buildContentWithAnimation(context, ref, products, null, appTexts.home),
+            data: (appTexts) => _buildContentWithBuilderIntegration(context, ref, products, null, appTexts.home),
             loading: () => const HomeShimmerLoading(),
-            error: (_, __) => _buildContentWithAnimation(context, ref, products, null, null),
+            error: (_, __) => _buildContentWithBuilderIntegration(context, ref, products, null, null),
           ),
         ),
         loading: () => const HomeShimmerLoading(),
@@ -107,21 +115,58 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// Wrapper with fade-in animation
-  Widget _buildContentWithAnimation(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts) {
-    return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 500),
-      tween: Tween(begin: 0.0, end: 1.0),
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - value)),
-            child: child,
-          ),
+  /// Wrapper with Builder B3 integration and fade-in animation
+  /// Tries to load published layout from Builder B3, falls back to default
+  Widget _buildContentWithBuilderIntegration(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts) {
+    return FutureBuilder<BuilderPage?>(
+      future: BuilderLayoutService().loadPublished(appId, BuilderPageId.home),
+      builder: (context, snapshot) {
+        // If we have a published layout, use it
+        if (snapshot.hasData && snapshot.data != null && snapshot.data!.blocks.isNotEmpty) {
+          return TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 500),
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, 20 * (1 - value)),
+                  child: child,
+                ),
+              );
+            },
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(productListProvider);
+                await ref.read(productListProvider.future);
+              },
+              color: AppColors.primaryRed,
+              child: SingleChildScrollView(
+                child: BuilderRuntimeRenderer(
+                  blocks: snapshot.data!.blocks,
+                  backgroundColor: Colors.white,
+                ),
+              ),
+            ),
+          );
+        }
+        
+        // Fallback to default behavior if no layout or error
+        return TweenAnimationBuilder<double>(
+          duration: const Duration(milliseconds: 500),
+          tween: Tween(begin: 0.0, end: 1.0),
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: _buildContent(context, ref, allProducts, homeConfig, homeTexts),
         );
       },
-      child: _buildContent(context, ref, allProducts, homeConfig, homeTexts),
     );
   }
 
