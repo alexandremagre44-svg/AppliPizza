@@ -222,7 +222,7 @@ class BannerBlockRuntime extends StatelessWidget {
       ),
       child: Text(
         _ctaLabel!,
-        style: AppTextStyles.buttonMedium.copyWith(
+        style: AppTextStyles.button.copyWith(
           color: isOnImage ? _backgroundColor : Colors.white,
         ),
       ),

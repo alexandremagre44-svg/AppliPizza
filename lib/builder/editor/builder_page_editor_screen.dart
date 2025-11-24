@@ -127,7 +127,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       await _service.publishPage(
         _page!,
         userId: 'admin', // TODO: Get from auth
-        deleteDraft: false,
+        shouldDeleteDraft: false,
       );
       
       setState(() => _hasChanges = false);
