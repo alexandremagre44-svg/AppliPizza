@@ -3,3 +3,4 @@
 // Export all service classes for easy importing
 
 export 'builder_layout_service.dart';
+export 'builder_navigation_service.dart';
