@@ -5,13 +5,9 @@ class AppRoutes {
   static const String splash = '/';
   static const String login = '/login';
   static const String home = '/home';
-  static const String homeB3 = '/home-b3'; // B3 Phase 6: Dynamic home page
   static const String menu = '/menu';
-  static const String menuB3 = '/menu-b3'; // B3: Dynamic page test route
   static const String categories = '/categories';
-  static const String categoriesB3 = '/categories-b3'; // B3 Phase 2: Dynamic categories page
   static const String cart = '/cart';
-  static const String cartB3 = '/cart-b3'; // B3 Phase 2: Dynamic cart page
   static const String profile = '/profile';
   static const String productDetail = '/details';
   static const String checkout = '/checkout';
@@ -19,24 +15,8 @@ class AppRoutes {
   static const String roulette = '/roulette';
   static const String rewards = '/rewards';
   
-  // Studio Builder - Admin entry point
+  // Admin entry point
   static const String adminStudio = '/admin/studio';
-  static const String adminStudioNew = '/admin/studio/new';
-  @deprecated // Deprecated - Use adminStudioB3 instead
-  static const String adminStudioV2 = '/admin/studio/v2';
-  static const String adminStudioB3 = '/admin/studio-b3'; // B3 Phase 3: Dynamic page editor (Primary studio)
-  static const String adminStudioV3Theme = '/admin/studio/v3/theme';
-  static const String adminStudioV3Media = '/admin/studio/v3/media';
-  
-  // Deprecated routes (redirect to new studio)
-  @deprecated
-  static const String adminHero = '/admin/hero';
-  @deprecated
-  static const String adminBanner = '/admin/banner';
-  @deprecated
-  static const String adminPopups = '/admin/popups';
-  @deprecated
-  static const String adminTexts = '/admin/texts';
   
   // Admin management routes
   static const String adminProducts = '/admin/products';
