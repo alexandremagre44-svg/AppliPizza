@@ -14,21 +14,11 @@ import 'src/screens/splash/splash_screen.dart';
 import 'src/screens/auth/login_screen.dart';
 import 'src/screens/auth/signup_screen.dart';
 import 'src/screens/home/home_screen.dart'; 
-import 'src/screens/home/home_screen_b2.dart'; // NEW: HomeScreen based on AppConfig B2
 import 'src/screens/menu/menu_screen.dart';
-import 'src/screens/menu/menu_screen_b3.dart'; // B3: Dynamic page architecture 
-import 'src/screens/dynamic/dynamic_page_screen.dart'; // B3 Phase 2: Dynamic page screen
 import 'src/screens/cart/cart_screen.dart';
 import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
 import 'src/screens/product_detail/product_detail_screen.dart';
-// Studio V2 removed - Studio B3 is now the primary studio
-import 'src/studio/screens/theme_manager_screen.dart';
-import 'src/studio/screens/media_manager_screen.dart';
-// Studio B2 - New admin interface for AppConfig B2 management
-import 'src/admin/studio_b2/studio_b2_page.dart';
-// Studio B3 - Page editor for dynamic pages
-import 'src/admin/studio_b3/studio_b3_page.dart';
 import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
@@ -58,10 +48,6 @@ import 'src/models/product.dart';
 import 'src/theme/app_theme.dart';
 import 'src/core/constants.dart';
 import 'src/providers/auth_provider.dart';
-// B3 Phase 2: AppConfig for dynamic pages
-import 'src/services/app_config_service.dart';
-import 'src/models/page_schema.dart';
-import 'src/providers/app_config_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,32 +56,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  // B3 ONE-TIME FIX: Repair pages that may have been corrupted by old initialization code
-  // This runs once to ensure all existing pages are preserved
-  // After this runs, forceB3InitializationForDebug will preserve existing pages
-  await AppConfigService().oneTimeFixForPagePreservation();
-  
-  // DEBUG ONLY: Force B3 initialization without auth/permissions
-  // This makes Studio B3 immediately functional in DEBUG/CHROME mode
-  // NOW FIXED: Writes 4 mandatory B3 pages while preserving existing pages
-  if (kDebugMode) {
-    await AppConfigService().forceB3InitializationForDebug();
-  }
-  
-  // B3 Auto-Initialization: Check and create mandatory B3 pages if needed
-  // This runs once on first boot and handles Firestore permission checks
-  await AppConfigService().autoInitializeB3IfNeeded();
-  
-  // B3 Migration: Migrate existing V2 pages to B3 architecture
-  // This runs once and converts HomeConfigV2 sections to B3 PageSchema
-  // NOW FIXED: Preserves existing non-B3 pages during migration
-  await AppConfigService().migrateExistingPagesToB3('pizza_delizza');
-  
-  // B3 Cleanup: Remove old duplicate -b3 pages
-  // This runs once to clean up the old architecture where we had duplicate pages
-  // (e.g., /home and /home-b3 both existing)
-  await AppConfigService().cleanupDuplicateB3Pages();
   
   // Initialize Firebase App Check
   // DISABLED on Web in debug mode to prevent errors during development
@@ -198,63 +158,18 @@ class MyApp extends ConsumerWidget {
             return ScaffoldWithNavBar(child: child);
           },
           routes: [
-            // PRIMARY ROUTES: Hybrid system - uses B3 if available, falls back to static screens
-            // This allows Builder B3 to edit the real application pages
-            
-            // Home - Main landing page (B3-aware with fallback to HomeScreen)
+            // Main app routes
             GoRoute(
               path: AppRoutes.home,
-              builder: (context, state) => _buildHybridPage(
-                context, 
-                ref, 
-                AppRoutes.home,
-                fallback: const HomeScreen(),
-              ),
+              builder: (context, state) => const HomeScreen(),
             ),
-            // Menu - Product listing page (B3-aware with fallback to MenuScreen)
             GoRoute(
               path: AppRoutes.menu,
-              builder: (context, state) => _buildHybridPage(
-                context,
-                ref,
-                AppRoutes.menu,
-                fallback: const MenuScreen(),
-              ),
+              builder: (context, state) => const MenuScreen(),
             ),
-            // Cart - Shopping cart page (B3-aware with fallback to CartScreen)
             GoRoute(
               path: AppRoutes.cart,
-              builder: (context, state) => _buildHybridPage(
-                context,
-                ref,
-                AppRoutes.cart,
-                fallback: const CartScreen(),
-              ),
-            ),
-            
-            // LEGACY/TEST ROUTES: Keep for backward compatibility
-            // HomeScreenB2 - Test route for new AppConfig B2 architecture
-            GoRoute(
-              path: '/home-b2',
-              builder: (context, state) => const HomeScreenB2(),
-            ),
-            // B3 alternate routes - DEPRECATED: Redirect to main routes
-            // These routes are kept for backward compatibility only
-            GoRoute(
-              path: AppRoutes.homeB3,
-              redirect: (context, state) => AppRoutes.home,
-            ),
-            GoRoute(
-              path: AppRoutes.menuB3,
-              redirect: (context, state) => AppRoutes.menu,
-            ),
-            GoRoute(
-              path: AppRoutes.categoriesB3,
-              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.categories),
-            ),
-            GoRoute(
-              path: AppRoutes.cartB3,
-              redirect: (context, state) => AppRoutes.cart,
+              builder: (context, state) => const CartScreen(),
             ),
             GoRoute(
               path: AppRoutes.profile,
@@ -278,125 +193,7 @@ class MyApp extends ConsumerWidget {
                 return const AdminStudioScreen();
               },
             ),
-            // Studio V2 deprecated - Redirect to Studio B3
-            GoRoute(
-              path: AppRoutes.adminStudioV2,
-              redirect: (context, state) => AppRoutes.adminStudioB3,
-            ),
-            // Studio B2 - New admin interface for AppConfig management
-            GoRoute(
-              path: '/admin/studio-b2',
-              builder: (context, state) {
-                // PROTECTION: Studio B2 is reserved for admins
-                final authState = ref.read(authProvider);
-                if (!authState.isAdmin) {
-                  // Redirect to home if not admin
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
-                  });
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                return const StudioB2Page();
-              },
-            ),
-            // Studio B3 - Page editor for dynamic pages
-            GoRoute(
-              path: AppRoutes.adminStudioB3,
-              builder: (context, state) {
-                // PROTECTION: Studio B3 is reserved for admins
-                final authState = ref.read(authProvider);
-                if (!authState.isAdmin) {
-                  // Redirect to home if not admin
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
-                  });
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                return const StudioB3Page();
-              },
-              routes: [
-                // Support for direct page navigation: /admin/studio-b3/:pageRoute
-                GoRoute(
-                  path: ':pageRoute',
-                  builder: (context, state) {
-                    // PROTECTION: Studio B3 is reserved for admins
-                    final authState = ref.read(authProvider);
-                    if (!authState.isAdmin) {
-                      // Redirect to home if not admin
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        context.go(AppRoutes.home);
-                      });
-                      return const Scaffold(
-                        body: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-                    // Get the route parameter and pass it to StudioB3Page
-                    final pageRoute = state.pathParameters['pageRoute'];
-                    return StudioB3Page(initialPageRoute: pageRoute != null ? '/$pageRoute' : null);
-                  },
-                ),
-              ],
-            ),
-            // Deprecated routes - redirect to admin menu
-            GoRoute(
-              path: AppRoutes.adminStudioNew,
-              redirect: (context, state) => AppRoutes.adminStudio,
-            ),
-            // Theme Manager V3 route
-            GoRoute(
-              path: AppRoutes.adminStudioV3Theme,
-              builder: (context, state) {
-                // PROTECTION: Admin only
-                final authState = ref.read(authProvider);
-                if (!authState.isAdmin) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
-                  });
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                return const ThemeManagerScreen();
-              },
-            ),
-            // Media Manager V3 route
-            GoRoute(
-              path: AppRoutes.adminStudioV3Media,
-              builder: (context, state) {
-                // PROTECTION: Admin only
-                final authState = ref.read(authProvider);
-                if (!authState.isAdmin) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
-                  });
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                return const MediaManagerScreen();
-              },
-            ),
-            // Deprecated routes - redirect to Studio B3
-            GoRoute(
-              path: AppRoutes.adminHero,
-              redirect: (context, state) => AppRoutes.adminStudio,
-            ),
-            GoRoute(
-              path: AppRoutes.adminBanner,
-              redirect: (context, state) => AppRoutes.adminStudio,
-            ),
-            GoRoute(
-              path: AppRoutes.adminPopups,
-              redirect: (context, state) => AppRoutes.adminStudio,
-            ),
-            GoRoute(
-              path: AppRoutes.adminTexts,
-              redirect: (context, state) => AppRoutes.adminStudio,
-            ),
+
             // Admin Management Routes
             GoRoute(
               path: AppRoutes.adminProducts,
@@ -657,84 +454,4 @@ class MyApp extends ConsumerWidget {
     );
   }
 
-  /// Build a dynamic page from AppConfig (Firestore-backed)
-  /// Returns DynamicPageScreen if page exists, otherwise PageNotFoundScreen
-  /// 
-  /// B3 Phase 7: Now uses appConfigProvider to fetch published config from Firestore
-  /// This ensures Studio B3 edits are reflected in the live pages
-  static Widget _buildDynamicPage(BuildContext context, WidgetRef ref, String route) {
-    // Watch the published AppConfig from Firestore
-    final configAsync = ref.watch(appConfigProvider);
-    
-    return configAsync.when(
-      data: (config) {
-        // If config exists, try to find the page
-        if (config != null) {
-          final pageSchema = config.pages.getPage(route);
-          
-          if (pageSchema != null) {
-            // B3 Migration: Log successful page load
-            print('B3: ${pageSchema.name} loaded from Firestore (route: $route)');
-            return DynamicPageScreen(pageSchema: pageSchema);
-          }
-        }
-        
-        // Page not found in config
-        print('B3: Page not found for route: $route');
-        return PageNotFoundScreen(route: route);
-      },
-      loading: () => Scaffold(
-        appBar: AppBar(title: const Text('Chargement...')),
-        body: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) {
-        print('B3: Error loading config: $error');
-        // On error, fallback to in-memory default config
-        final config = AppConfigService().getDefaultConfig(AppConstants.appId);
-        final pageSchema = config.pages.getPage(route);
-        
-        if (pageSchema != null) {
-          print('B3: Using fallback config for route: $route');
-          return DynamicPageScreen(pageSchema: pageSchema);
-        }
-        
-        return PageNotFoundScreen(route: route);
-      },
-    );
-  }
-
-  /// Build a hybrid page that uses B3 data if available, otherwise falls back to a static screen
-  /// This allows Builder B3 to edit real application pages while preserving functionality
-  static Widget _buildHybridPage(BuildContext context, WidgetRef ref, String route, {required Widget fallback}) {
-    // Watch the published AppConfig from Firestore
-    final configAsync = ref.watch(appConfigProvider);
-    
-    return configAsync.when(
-      data: (config) {
-        // If config exists, try to find the B3 page override
-        if (config != null) {
-          final pageSchema = config.pages.getPage(route);
-          
-          if (pageSchema != null && pageSchema.enabled) {
-            // B3 page exists and is enabled - use it
-            debugPrint('B3 Hybrid: Using B3 page for route: $route');
-            return DynamicPageScreen(pageSchema: pageSchema);
-          }
-        }
-        
-        // No B3 page found or disabled - use fallback static screen
-        debugPrint('B3 Hybrid: Using fallback static screen for route: $route');
-        return fallback;
-      },
-      loading: () => Scaffold(
-        appBar: AppBar(title: const Text('Chargement...')),
-        body: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) {
-        // On error, always fallback to static screen to ensure app works
-        debugPrint('B3 Hybrid: Error loading config, using fallback for route: $route - $error');
-        return fallback;
-      },
-    );
-  }
 }

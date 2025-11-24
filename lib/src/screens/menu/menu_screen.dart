@@ -11,6 +11,8 @@ import 'menu_customization_modal.dart';
 import '../home/pizza_customization_modal.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../../builder/models/models.dart';
+import '../../../builder/utils/utils.dart';
 
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
@@ -20,6 +22,7 @@ class MenuScreen extends ConsumerStatefulWidget {
 }
 
 class _MenuScreenState extends ConsumerState<MenuScreen> {
+  static const String appId = 'pizza_delizza';
   String _selectedCategory = 'Pizza';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -60,6 +63,15 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Try Builder B3 first, fallback to default implementation
+    return BuilderPageWrapper(
+      pageId: BuilderPageId.menu,
+      appId: appId,
+      fallbackBuilder: _buildDefaultMenu,
+    );
+  }
+
+  Widget _buildDefaultMenu() {
     // Charger les produits depuis le provider (inclut mock + admin + Firestore)
     final productsAsync = ref.watch(productListProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
@@ -322,4 +334,5 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       ),
     );
   }
+}
 }

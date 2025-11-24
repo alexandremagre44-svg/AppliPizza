@@ -1,20 +1,17 @@
 // lib/src/screens/home/home_screen.dart
 // HomeScreen - Professional showcase page for Pizza Deli'Zza
 // PROMPT 3F - Uses centralized text system
+// BUILDER B3 INTEGRATION - Loads published layouts from Builder B3
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/product.dart';
 import '../../models/home_config.dart';
-import '../../models/home_layout_config.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/home_config_provider.dart';
 import '../../providers/app_texts_provider.dart';
-import '../../providers/home_layout_provider.dart';
-import '../../studio/content/providers/content_providers.dart';
-import '../../studio/content/models/featured_products_model.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/home/hero_banner.dart';
 import '../../widgets/home/section_header.dart';
@@ -24,23 +21,28 @@ import '../../widgets/home/info_banner.dart';
 import '../../widgets/home/home_shimmer_loading.dart';
 import '../menu/menu_customization_modal.dart';
 import 'pizza_customization_modal.dart';
-import 'home_content_helper.dart';
 import '../../theme/app_theme.dart';
 import '../../core/constants.dart';
 import '../../services/roulette_rules_service.dart';
+import '../../../builder/models/models.dart';
+import '../../../builder/services/services.dart';
+import '../../../builder/preview/builder_runtime_renderer.dart';
 
 /// Home screen - Professional showcase page
 /// Displays hero banner, promos, bestsellers, category shortcuts, and info
 /// This is DISTINCT from the Menu page
+/// BUILDER B3: Attempts to load published layout, falls back to default behavior
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
+  // App ID for multi-resto support (configure as needed)
+  static const String appId = 'pizza_delizza';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(productListProvider);
     final homeConfigAsync = ref.watch(homeConfigProvider);
     final appTextsAsync = ref.watch(appTextsConfigProvider);
-    final homeLayoutAsync = ref.watch(homeLayoutProvider);
 
     return Scaffold(
       appBar: appTextsAsync.when(
@@ -51,19 +53,15 @@ class HomeScreen extends ConsumerWidget {
       body: productsAsync.when(
         data: (products) => homeConfigAsync.when(
           data: (homeConfig) => appTextsAsync.when(
-            data: (appTexts) => homeLayoutAsync.when(
-              data: (homeLayout) => _buildContentWithAnimation(context, ref, products, homeConfig, appTexts.home, homeLayout),
-              loading: () => _buildContentWithAnimation(context, ref, products, homeConfig, appTexts.home, null),
-              error: (_, __) => _buildContentWithAnimation(context, ref, products, homeConfig, appTexts.home, null),
-            ),
+            data: (appTexts) => _buildContentWithBuilderIntegration(context, ref, products, homeConfig, appTexts.home),
             loading: () => const HomeShimmerLoading(),
-            error: (error, stack) => _buildContentWithAnimation(context, ref, products, homeConfig, null, null),
+            error: (error, stack) => _buildContentWithBuilderIntegration(context, ref, products, homeConfig, null),
           ),
           loading: () => const HomeShimmerLoading(),
           error: (error, stack) => appTextsAsync.when(
-            data: (appTexts) => _buildContentWithAnimation(context, ref, products, null, appTexts.home, null),
+            data: (appTexts) => _buildContentWithBuilderIntegration(context, ref, products, null, appTexts.home),
             loading: () => const HomeShimmerLoading(),
-            error: (_, __) => _buildContentWithAnimation(context, ref, products, null, null, null),
+            error: (_, __) => _buildContentWithBuilderIntegration(context, ref, products, null, null),
           ),
         ),
         loading: () => const HomeShimmerLoading(),
@@ -117,25 +115,62 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// Wrapper with fade-in animation
-  Widget _buildContentWithAnimation(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts, HomeLayoutConfig? homeLayout) {
-    return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 500),
-      tween: Tween(begin: 0.0, end: 1.0),
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - value)),
-            child: child,
-          ),
+  /// Wrapper with Builder B3 integration and fade-in animation
+  /// Tries to load published layout from Builder B3, falls back to default
+  Widget _buildContentWithBuilderIntegration(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts) {
+    return FutureBuilder<BuilderPage?>(
+      future: BuilderLayoutService().loadPublished(appId, BuilderPageId.home),
+      builder: (context, snapshot) {
+        // If we have a published layout, use it
+        if (snapshot.hasData && snapshot.data != null && snapshot.data!.blocks.isNotEmpty) {
+          return TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 500),
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, 20 * (1 - value)),
+                  child: child,
+                ),
+              );
+            },
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(productListProvider);
+                await ref.read(productListProvider.future);
+              },
+              color: AppColors.primaryRed,
+              child: SingleChildScrollView(
+                child: BuilderRuntimeRenderer(
+                  blocks: snapshot.data!.blocks,
+                  backgroundColor: Colors.white,
+                ),
+              ),
+            ),
+          );
+        }
+        
+        // Fallback to default behavior if no layout or error
+        return TweenAnimationBuilder<double>(
+          duration: const Duration(milliseconds: 500),
+          tween: Tween(begin: 0.0, end: 1.0),
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: _buildContent(context, ref, allProducts, homeConfig, homeTexts),
         );
       },
-      child: _buildContent(context, ref, allProducts, homeConfig, homeTexts, homeLayout),
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts, HomeLayoutConfig? homeLayout) {
+  Widget _buildContent(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts) {
     // Filter active products
     final activeProducts = allProducts.where((p) => p.isActive).toList();
     
@@ -151,17 +186,9 @@ class HomeScreen extends ConsumerWidget {
         ? activeProducts.where((p) => p.category == ProductCategory.pizza).take(4).toList()
         : bestSellers.take(4).toList();
 
-    // Watch new content providers
-    final featuredConfigAsync = ref.watch(featuredProductsProvider);
-    final customSectionsAsync = ref.watch(customSectionsProvider);
-    final categoryOverridesAsync = ref.watch(categoryOverridesProvider);
-
     return RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(productListProvider);
-        ref.invalidate(featuredProductsProvider);
-        ref.invalidate(customSectionsProvider);
-        ref.invalidate(categoryOverridesProvider);
         await ref.read(productListProvider.future);
       },
       color: AppColors.primaryRed,
@@ -171,64 +198,49 @@ class HomeScreen extends ConsumerWidget {
           children: [
             SizedBox(height: AppSpacing.lg),
             
-            // REFONTE: Dynamic sections based on layout configuration
-            // If studioEnabled is false or layout is null, fall back to default behavior
-            ...(_buildDynamicSections(context, ref, homeConfig, homeTexts, homeLayout)),
+            // 1. Hero banner
+            if (homeConfig?.hero != null && homeConfig!.hero.isActive)
+              HeroBanner(
+                imageUrl: homeConfig.hero.imageUrl,
+                title: homeConfig.hero.title,
+                subtitle: homeConfig.hero.subtitle,
+                onTap: () {
+                  // Navigate to menu or specific product
+                  context.go(AppRoutes.menu);
+                },
+              ),
             
-            // Roulette promotional banner (conditionally displayed)
+            // 2. Roulette promotional banner (conditionally displayed)
             _buildRouletteBanner(context, ref),
             
             SizedBox(height: AppSpacing.xxxl),
             
-            // NEW: Featured products section (before or after categories based on config)
-            ...featuredConfigAsync.when(
-              data: (config) {
-                if (config.position == FeaturedPosition.beforeCategories) {
-                  return HomeContentHelper.buildFeaturedSection(
-                    context: context,
-                    ref: ref,
-                    config: config,
-                    allProducts: activeProducts,
-                    onProductTap: (product) => _handleProductTap(context, ref, product),
-                  );
-                }
-                return [];
-              },
-              loading: () => [],
-              error: (_, __) => [],
-            ),
+            // 3. Promo banner (if configured)
+            if (homeConfig?.promoBanner != null && homeConfig!.promoBanner.isActive) ...[
+              SectionHeader(
+                title: homeTexts?.promoBannerTitle ?? '🎉 Promotions',
+              ),
+              SizedBox(height: AppSpacing.lg),
+              if (promoProducts.isNotEmpty)
+                _buildPromotionsSection(context, ref, promoProducts)
+              else
+                _buildEmptySection('Aucune promotion pour le moment'),
+              SizedBox(height: AppSpacing.xxxl),
+            ],
             
-            // NEW: Custom sections (active only)
-            ...customSectionsAsync.when(
-              data: (sections) {
-                final widgets = <Widget>[];
-                for (final section in sections.where((s) => s.isActive)) {
-                  widgets.addAll(
-                    HomeContentHelper.buildCustomSection(
-                      context: context,
-                      ref: ref,
-                      section: section,
-                      allProducts: activeProducts,
-                      onProductTap: (product) => _handleProductTap(context, ref, product),
-                    ),
-                  );
-                }
-                return widgets;
-              },
-              loading: () => [],
-              error: (_, __) => [],
+            // 4. Best sellers section
+            SectionHeader(
+              title: homeTexts?.bestsellersTitle ?? '⭐ Nos meilleures ventes',
             ),
-            
-            // 2. Dynamic blocks from configuration (fallback)
-            if (homeConfig?.blocks != null && homeConfig!.blocks.isNotEmpty)
-              ..._buildDynamicBlocks(context, ref, homeConfig.blocks, activeProducts, homeTexts)
+            SizedBox(height: AppSpacing.lg),
+            if (fallbackBestSellers.isNotEmpty)
+              _buildBestsellersGrid(context, ref, fallbackBestSellers)
             else
-              // Fallback to default sections if no blocks configured
-              ..._buildDefaultSections(context, ref, promoProducts, fallbackBestSellers, homeTexts),
+              _buildEmptySection('Aucun produit disponible'),
             
             SizedBox(height: AppSpacing.xxxl),
             
-            // 3. Category shortcuts (always shown)
+            // 5. Category shortcuts (always shown)
             SectionHeader(
               title: homeTexts?.categoriesTitle ?? 'Nos catégories',
             ),
@@ -237,25 +249,7 @@ class HomeScreen extends ConsumerWidget {
             
             SizedBox(height: AppSpacing.xxxl),
             
-            // NEW: Featured products section (after categories if configured)
-            ...featuredConfigAsync.when(
-              data: (config) {
-                if (config.position == FeaturedPosition.afterCategories) {
-                  return HomeContentHelper.buildFeaturedSection(
-                    context: context,
-                    ref: ref,
-                    config: config,
-                    allProducts: activeProducts,
-                    onProductTap: (product) => _handleProductTap(context, ref, product),
-                  );
-                }
-                return [];
-              },
-              loading: () => [],
-              error: (_, __) => [],
-            ),
-            
-            // 5. Info banner
+            // 6. Info banner
             const InfoBanner(
               text: 'À emporter uniquement — 11h–21h (Mar→Dim)',
               icon: Icons.info_outline,
@@ -315,196 +309,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  /// REFONTE: Build dynamic sections based on layout configuration
-  /// This method controls the order and visibility of Hero, Banner, and Popups
-  /// based on the HomeLayoutConfig from Firestore
-  List<Widget> _buildDynamicSections(
-    BuildContext context,
-    WidgetRef ref,
-    dynamic homeConfig,
-    dynamic homeTexts,
-    HomeLayoutConfig? homeLayout,
-  ) {
-    final widgets = <Widget>[];
-
-    // If homeLayout is null or studioEnabled is false globally, use fallback behavior
-    if (homeLayout == null || !homeLayout.studioEnabled) {
-      // Fallback: Show Hero and Banner if they are individually active (backward compatibility)
-      if (homeConfig?.hero?.isActive ?? true) {
-        widgets.add(_buildHeroSection(context, homeConfig, homeTexts));
-      }
-      if (homeConfig?.promoBanner?.isCurrentlyActive ?? false) {
-        widgets.add(_buildBannerSection(context, homeConfig));
-      }
-      return widgets;
-    }
-
-    // Use layout configuration to determine order and visibility
-    final orderedSections = homeLayout.getOrderedEnabledSections();
-    
-    for (final sectionKey in orderedSections) {
-      switch (sectionKey) {
-        case 'hero':
-          if (homeConfig?.hero?.isActive ?? false) {
-            widgets.add(_buildHeroSection(context, homeConfig, homeTexts));
-          }
-          break;
-        case 'banner':
-          if (homeConfig?.promoBanner?.isCurrentlyActive ?? false) {
-            widgets.add(_buildBannerSection(context, homeConfig));
-          }
-          break;
-        case 'popups':
-          // Popups are handled separately via popup system
-          // This section is just a placeholder for ordering purposes
-          break;
-      }
-    }
-
-    return widgets;
-  }
-
-  /// Build Hero section widget
-  Widget _buildHeroSection(BuildContext context, dynamic homeConfig, dynamic homeTexts) {
-    return HeroBanner(
-      title: homeConfig?.hero?.title ?? homeTexts?.title ?? 'Bienvenue chez\nPizza Deli\'Zza',
-      subtitle: homeConfig?.hero?.subtitle ?? homeTexts?.subtitle ?? 'Découvrez nos pizzas artisanales et nos menus gourmands',
-      buttonText: homeConfig?.hero?.ctaText ?? homeTexts?.ctaViewMenu ?? 'Voir le menu',
-      imageUrl: homeConfig?.hero?.imageUrl,
-      onPressed: () {
-        final action = homeConfig?.hero?.ctaAction ?? AppRoutes.menu;
-        if (action.startsWith('/')) {
-          context.push(action);
-        } else {
-          context.push(AppRoutes.menu);
-        }
-      },
-    );
-  }
-
-  /// Build Banner section widget
-  Widget _buildBannerSection(BuildContext context, dynamic homeConfig) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      child: InfoBanner(
-        text: homeConfig!.promoBanner!.text,
-        icon: Icons.local_offer,
-        backgroundColor: homeConfig.promoBanner!.backgroundColor != null
-            ? Color(ColorConverter.hexToColor(homeConfig.promoBanner!.backgroundColor) ?? 0xFFD32F2F)
-            : AppColors.primaryRed,
-        textColor: homeConfig.promoBanner!.textColor != null
-            ? Color(ColorConverter.hexToColor(homeConfig.promoBanner!.textColor) ?? 0xFFFFFFFF)
-            : Colors.white,
-      ),
-    );
-  }
-
-  // Build dynamic blocks based on configuration
-  List<Widget> _buildDynamicBlocks(
-    BuildContext context,
-    WidgetRef ref,
-    List<dynamic> blocks,
-    List<Product> allProducts,
-    dynamic homeTexts,
-  ) {
-    // Sort blocks by order and filter visible ones
-    final sortedBlocks = blocks
-        .where((b) => b.isActive == true)
-        .toList()
-      ..sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
-
-    final widgets = <Widget>[];
-
-    for (final block in sortedBlocks) {
-      widgets.addAll(_buildBlockContent(context, ref, block, allProducts, homeTexts));
-      widgets.add(SizedBox(height: AppSpacing.xxxl));
-    }
-
-    return widgets;
-  }
-
-  // Build content for a specific block type
-  List<Widget> _buildBlockContent(
-    BuildContext context,
-    WidgetRef ref,
-    dynamic block,
-    List<Product> allProducts,
-    dynamic homeTexts,
-  ) {
-    final widgets = <Widget>[];
-    final maxItems = block.maxItems ?? 6;
-
-    switch (block.type) {
-      case 'featuredProducts':
-      case 'featured_products':
-        // Show featured products
-        final featured = allProducts
-            .where((p) => p.isFeatured)
-            .take(maxItems)
-            .toList();
-        
-        if (featured.isNotEmpty) {
-          widgets.add(SectionHeader(title: block.title ?? homeTexts?.featuredTitle ?? '⭐ Produits phares'));
-          widgets.add(SizedBox(height: AppSpacing.lg));
-          widgets.add(_buildProductGrid(context, ref, featured));
-        } else {
-          // No featured products found - display empty message or skip
-          // For better UX, we show the section with an empty state
-          widgets.add(SectionHeader(title: block.title ?? homeTexts?.featuredTitle ?? '⭐ Produits phares'));
-          widgets.add(SizedBox(height: AppSpacing.lg));
-          widgets.add(_buildEmptySection('Aucun produit en vedette pour le moment'));
-        }
-        break;
-
-      case 'bestSellers':
-        // Show best sellers (use isFeatured as proxy or first pizzas)
-        final bestSellers = allProducts.where((p) => p.isFeatured).toList();
-        final products = bestSellers.isEmpty
-            ? allProducts.where((p) => p.category == ProductCategory.pizza).take(maxItems).toList()
-            : bestSellers.take(maxItems).toList();
-        
-        if (products.isNotEmpty) {
-          widgets.add(SectionHeader(title: block.title ?? homeTexts?.bestSellersTitle ?? '🔥 Best-sellers'));
-          widgets.add(SizedBox(height: AppSpacing.lg));
-          widgets.add(_buildProductGrid(context, ref, products));
-        } else {
-          widgets.add(SectionHeader(title: block.title ?? homeTexts?.bestSellersTitle ?? '🔥 Best-sellers'));
-          widgets.add(SizedBox(height: AppSpacing.lg));
-          widgets.add(_buildEmptySection('Aucun best-seller disponible'));
-        }
-        break;
-
-      case 'categories':
-        // Show categories section
-        widgets.add(SectionHeader(title: block.title ?? homeTexts?.categoriesTitle ?? 'Nos catégories'));
-        widgets.add(SizedBox(height: AppSpacing.lg));
-        widgets.add(const CategoryShortcuts());
-        break;
-
-      case 'promotions':
-        // Show promo products
-        final promos = allProducts
-            .where((p) => p.displaySpot == DisplaySpot.promotions)
-            .take(maxItems)
-            .toList();
-        
-        if (promos.isNotEmpty) {
-          widgets.add(SectionHeader(title: block.title ?? homeTexts?.promosTitle ?? '🔥 Promos du moment'));
-          widgets.add(SizedBox(height: AppSpacing.lg));
-          widgets.add(_buildPromoCarousel(context, ref, promos));
-        }
-        break;
-
-      default:
-        // Unknown block type, skip
-        break;
-    }
-
-    return widgets;
-  }
 
   // Build default sections (fallback when no blocks configured)
   List<Widget> _buildDefaultSections(
