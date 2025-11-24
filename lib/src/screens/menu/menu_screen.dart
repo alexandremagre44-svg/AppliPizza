@@ -76,7 +76,11 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 // Invalidate both providers to reload data
                 ref.invalidate(menuPagePublishedProvider);
                 ref.invalidate(productListProvider);
-                await ref.read(productListProvider.future);
+                // Wait for both providers to reload
+                await Future.wait([
+                  ref.read(menuPagePublishedProvider.future),
+                  ref.read(productListProvider.future),
+                ]);
               },
               color: AppColors.primaryRed,
               child: BuilderRuntimeRenderer(
