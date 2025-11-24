@@ -28,6 +28,10 @@ import '../utils/action_helper.dart';
 class HeroBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
 
+  // Responsive breakpoints
+  static const double _desktopBreakpoint = 800.0;
+  static const double _maxDesktopWidth = 1200.0;
+
   const HeroBlockRuntime({
     super.key,
     required this.block,
@@ -41,26 +45,16 @@ class HeroBlockRuntime extends StatelessWidget {
     final title = helper.getString('title', defaultValue: 'Hero Title');
     final subtitle = helper.getString('subtitle', defaultValue: 'Hero subtitle');
     final imageUrl = helper.getString('imageUrl', defaultValue: '');
-    
-    // Support both 'align' (new) and 'alignment' (legacy) for backward compatibility
-    final align = helper.getString('align', 
-        defaultValue: helper.getString('alignment', defaultValue: 'center'));
+    final align = _getAlignValue(helper);
     final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(16));
     final margin = helper.getEdgeInsets('margin');
     final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFD32F2F));
     final textColor = helper.getColor('textColor', defaultValue: Colors.white);
-    
-    // Support both 'buttonText' (new) and 'buttonLabel' (legacy) for backward compatibility
-    final buttonText = helper.getString('buttonText', 
-        defaultValue: helper.getString('buttonLabel', defaultValue: 'Button'));
+    final buttonText = _getButtonTextValue(helper);
     final buttonColor = helper.getColor('buttonColor', defaultValue: Colors.white);
     final buttonTextColor = helper.getColor('buttonTextColor', defaultValue: const Color(0xFFD32F2F));
     final borderRadius = helper.getDouble('borderRadius', defaultValue: 0.0);
-    
-    // Get action config
     final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
-    
-    // Calculate height with responsive defaults and legacy support
     final height = _calculateHeight(helper, context);
 
     // Determine alignment
@@ -198,10 +192,10 @@ class HeroBlockRuntime extends StatelessWidget {
     // Responsive: constrain width on desktop
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth > 1200) {
+        if (constraints.maxWidth > _maxDesktopWidth) {
           return Center(
             child: SizedBox(
-              width: 1200,
+              width: _maxDesktopWidth,
               child: heroContent,
             ),
           );
@@ -211,10 +205,24 @@ class HeroBlockRuntime extends StatelessWidget {
     );
   }
 
+  /// Get align value with backward compatibility for 'alignment' field
+  String _getAlignValue(BlockConfigHelper helper) {
+    // Support both 'align' (new) and 'alignment' (legacy)
+    return helper.getString('align', 
+        defaultValue: helper.getString('alignment', defaultValue: 'center'));
+  }
+
+  /// Get button text value with backward compatibility for 'buttonLabel' field
+  String _getButtonTextValue(BlockConfigHelper helper) {
+    // Support both 'buttonText' (new) and 'buttonLabel' (legacy)
+    return helper.getString('buttonText', 
+        defaultValue: helper.getString('buttonLabel', defaultValue: 'Button'));
+  }
+
   /// Calculate height with responsive defaults and legacy support
   double _calculateHeight(BlockConfigHelper helper, BuildContext context) {
     // Responsive height: check screen size
-    final isDesktop = MediaQuery.of(context).size.width > 800;
+    final isDesktop = MediaQuery.of(context).size.width > _desktopBreakpoint;
     final defaultHeight = isDesktop ? 280.0 : 200.0;
     
     // Support legacy 'heightPreset' field
