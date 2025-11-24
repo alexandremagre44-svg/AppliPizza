@@ -10,7 +10,7 @@ class ResponsiveBreakpoints {
   static const double mobile = 600;
   
   // Tablet: >= 600px and < 1024px (tablets, large phones in landscape)
-  static const double tablet = 1024;
+  static const double tablet = 600;
   
   // Desktop: >= 1024px (desktops, large tablets in landscape)
   static const double desktop = 1024;

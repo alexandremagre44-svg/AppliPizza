@@ -349,7 +349,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
             right: 0,
             bottom: 0,
             child: Container(
-              color: Colors.blue,
+              color: Theme.of(context).primaryColor,
               child: SafeArea(
                 top: false,
                 child: ListTile(

@@ -61,7 +61,7 @@ class BuilderPageWrapper extends StatelessWidget {
             await Future.delayed(const Duration(milliseconds: 300));
           },
           child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             child: BuilderRuntimeRenderer(
               blocks: page.blocks,
               wrapInScrollView: false, // We handle scroll here

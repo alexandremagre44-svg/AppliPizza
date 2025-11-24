@@ -46,7 +46,9 @@ class BuilderPagePreview extends StatelessWidget {
         return Container(
           color: backgroundColor ?? Colors.grey.shade50,
           child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
+            physics: responsive.isMobile 
+              ? const ClampingScrollPhysics() 
+              : const AlwaysScrollableScrollPhysics(),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: responsive.previewMaxWidth,
