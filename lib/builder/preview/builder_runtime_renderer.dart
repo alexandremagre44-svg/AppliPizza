@@ -1,6 +1,7 @@
 // lib/builder/preview/builder_runtime_renderer.dart
 // Renders builder blocks using runtime widgets (with real providers and data)
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
@@ -95,9 +96,11 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
     try {
       return _buildBlock(block);
     } catch (e, stackTrace) {
-      // Log error in debug mode
-      debugPrint('Error rendering block ${block.id} (${block.type.value}): $e');
-      debugPrint('Stack trace: $stackTrace');
+      // Log error in debug mode only
+      if (kDebugMode) {
+        debugPrint('Error rendering block ${block.id} (${block.type.value}): $e');
+        debugPrint('Stack trace: $stackTrace');
+      }
       
       // Return empty widget instead of crashing the page
       return const SizedBox.shrink();
@@ -139,7 +142,9 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
       
       // Unknown block types are silently ignored
       default:
-        debugPrint('Unknown block type: ${block.type.value} for block ${block.id}');
+        if (kDebugMode) {
+          debugPrint('Unknown block type: ${block.type.value} for block ${block.id}');
+        }
         return const SizedBox.shrink();
     }
   }
