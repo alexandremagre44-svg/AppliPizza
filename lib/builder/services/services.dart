@@ -4,3 +4,4 @@
 
 export 'builder_layout_service.dart';
 export 'builder_navigation_service.dart';
+export 'dynamic_page_resolver.dart';
