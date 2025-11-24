@@ -1,9 +1,17 @@
 // lib/builder/blocks/spacer_block_runtime.dart
-// Runtime version of SpacerBlock
+// Runtime version of SpacerBlock - Phase 5 enhanced
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
+import '../utils/block_config_helper.dart';
 
+/// Spacer block for adding vertical space
+/// 
+/// Configuration:
+/// - height: Height in pixels (default: 24)
+/// - margin: Optional margin around the spacer
+/// 
+/// Responsive: Maintains same height on all devices
 class SpacerBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
 
@@ -14,9 +22,23 @@ class SpacerBlockRuntime extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heightStr = block.getConfig<String>('height') ?? '32';
-    final height = double.tryParse(heightStr) ?? 32.0;
+    final helper = BlockConfigHelper(block.config, blockId: block.id);
+    
+    // Get configuration with defaults
+    final height = helper.getDouble('height', defaultValue: 24.0);
+    final margin = helper.getEdgeInsets('margin');
 
-    return SizedBox(height: height);
+    // Build spacer
+    Widget spacer = SizedBox(height: height);
+
+    // Apply margin if configured
+    if (margin != EdgeInsets.zero) {
+      spacer = Padding(
+        padding: margin,
+        child: spacer,
+      );
+    }
+
+    return spacer;
   }
 }

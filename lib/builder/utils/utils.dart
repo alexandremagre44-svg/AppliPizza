@@ -5,3 +5,5 @@ export 'builder_page_wrapper.dart';
 export 'app_context.dart';
 export 'responsive.dart';
 export 'icon_helper.dart';
+export 'block_config_helper.dart';
+export 'action_helper.dart';
