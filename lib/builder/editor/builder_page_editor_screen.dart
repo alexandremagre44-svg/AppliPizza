@@ -1,10 +1,12 @@
 // lib/builder/editor/builder_page_editor_screen.dart
 // Page editor screen for Builder B3 system
+// MOBILE RESPONSIVE: Adapts layout for mobile (<600px), tablet, and desktop
 
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 import '../preview/preview.dart';
+import '../utils/responsive.dart';
 
 /// Builder Page Editor Screen
 /// 
@@ -249,57 +251,71 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Éditeur: ${widget.pageId.label}'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.edit), text: 'Édition'),
-            Tab(icon: Icon(Icons.visibility), text: 'Prévisualisation'),
-          ],
-        ),
-        actions: [
-          if (_hasChanges)
-            IconButton(
-              icon: const Icon(Icons.save),
-              tooltip: 'Sauvegarder',
-              onPressed: _saveDraft,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final responsive = ResponsiveBuilder(constraints.maxWidth);
+        
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(responsive.isMobile 
+              ? widget.pageId.label 
+              : 'Éditeur: ${widget.pageId.label}'
             ),
-          IconButton(
-            icon: const Icon(Icons.fullscreen),
-            tooltip: 'Prévisualisation plein écran',
-            onPressed: _showFullScreenPreview,
-          ),
-          IconButton(
-            icon: const Icon(Icons.publish),
-            tooltip: 'Publier',
-            onPressed: _publishPage,
-          ),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _page == null
-              ? const Center(child: Text('Impossible de charger la page'))
-              : TabBarView(
+            bottom: responsive.isMobile 
+              ? null // No tabs on mobile - use bottom sheet instead
+              : TabBar(
                   controller: _tabController,
-                  children: [
-                    _buildEditorTab(),
-                    _buildPreviewTab(),
+                  tabs: const [
+                    Tab(icon: Icon(Icons.edit), text: 'Édition'),
+                    Tab(icon: Icon(Icons.visibility), text: 'Prévisualisation'),
                   ],
                 ),
-      floatingActionButton: _tabController.index == 0
-          ? FloatingActionButton.extended(
-              onPressed: _showAddBlockDialog,
-              icon: const Icon(Icons.add),
-              label: const Text('Ajouter un bloc'),
-            )
-          : null,
+            actions: [
+              if (_hasChanges)
+                IconButton(
+                  icon: const Icon(Icons.save),
+                  tooltip: 'Sauvegarder',
+                  onPressed: _saveDraft,
+                ),
+              if (!responsive.isMobile)
+                IconButton(
+                  icon: const Icon(Icons.fullscreen),
+                  tooltip: 'Prévisualisation plein écran',
+                  onPressed: _showFullScreenPreview,
+                ),
+              IconButton(
+                icon: const Icon(Icons.publish),
+                tooltip: 'Publier',
+                onPressed: _publishPage,
+              ),
+            ],
+          ),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _page == null
+                  ? const Center(child: Text('Impossible de charger la page'))
+                  : responsive.isMobile
+                      ? _buildMobileLayout()
+                      : TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildEditorTab(responsive),
+                            _buildPreviewTab(),
+                          ],
+                        ),
+          floatingActionButton: (_tabController.index == 0 || responsive.isMobile)
+              ? FloatingActionButton.extended(
+                  onPressed: _showAddBlockDialog,
+                  icon: const Icon(Icons.add),
+                  label: Text(responsive.isMobile ? 'Bloc' : 'Ajouter un bloc'),
+                )
+              : null,
+        );
+      },
     );
   }
 
-  Widget _buildEditorTab() {
+  Widget _buildEditorTab(ResponsiveBuilder responsive) {
     return Row(
       children: [
         // Blocks list (left side)
@@ -307,13 +323,156 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           flex: 2,
           child: _buildBlocksList(),
         ),
-        // Configuration panel (right side)
-        if (_selectedBlock != null)
+        // Configuration panel (right side) - only on desktop/tablet
+        if (_selectedBlock != null && responsive.isNotMobile)
           Expanded(
             flex: 1,
             child: _buildConfigPanel(),
           ),
       ],
+    );
+  }
+
+  /// Mobile layout with preview on top and editor panel in bottom sheet
+  Widget _buildMobileLayout() {
+    return Stack(
+      children: [
+        // Preview (full screen with padding for bottom sheet)
+        Positioned.fill(
+          bottom: _selectedBlock != null ? 60 : 0,
+          child: _buildPreviewTab(),
+        ),
+        // Floating editor panel button (when block is selected)
+        if (_selectedBlock != null)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              color: Colors.blue,
+              child: SafeArea(
+                top: false,
+                child: ListTile(
+                  leading: Text(
+                    _selectedBlock!.type.icon,
+                    style: const TextStyle(fontSize: 24, color: Colors.white),
+                  ),
+                  title: Text(
+                    _selectedBlock!.type.label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Tapez pour configurer',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 12,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.white),
+                        onPressed: () => _showMobileEditorSheet(),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () => setState(() => _selectedBlock = null),
+                      ),
+                    ],
+                  ),
+                  onTap: () => _showMobileEditorSheet(),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Show mobile editor sheet with block configuration
+  void _showMobileEditorSheet() {
+    if (_selectedBlock == null) return;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                // Handle bar
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Text(
+                        _selectedBlock!.type.icon,
+                        style: const TextStyle(fontSize: 28),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _selectedBlock!.type.label,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                // Configuration fields (scrollable)
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      const Text(
+                        'Configuration',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ..._buildConfigFields(_selectedBlock!),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
