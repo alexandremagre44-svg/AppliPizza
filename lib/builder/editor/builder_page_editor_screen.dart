@@ -32,12 +32,19 @@ class BuilderPageEditorScreen extends StatefulWidget {
 }
 
 class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with SingleTickerProviderStateMixin {
+  static const double _mobileEditorPanelHeight = 60.0;
+  
   final BuilderLayoutService _service = BuilderLayoutService();
   BuilderPage? _page;
   bool _isLoading = true;
   BuilderBlock? _selectedBlock;
   bool _hasChanges = false;
+  bool _showPreviewInMobile = false;
   late TabController _tabController;
+  
+  /// Whether to show the mobile editor panel at the bottom
+  /// Panel is shown when a block is selected AND we're showing the blocks list (not preview)
+  bool get _shouldShowMobileEditorPanel => _selectedBlock != null && !_showPreviewInMobile;
 
   @override
   void initState() {
@@ -277,6 +284,13 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                   tooltip: 'Sauvegarder',
                   onPressed: _saveDraft,
                 ),
+              if (responsive.isMobile)
+                IconButton(
+                  // When showing list, button switches to preview; when showing preview, button switches to list
+                  icon: Icon(!_showPreviewInMobile ? Icons.visibility : Icons.view_list),
+                  tooltip: !_showPreviewInMobile ? 'Voir la prévisualisation' : 'Voir la liste',
+                  onPressed: () => setState(() => _showPreviewInMobile = !_showPreviewInMobile),
+                ),
               if (!responsive.isMobile)
                 IconButton(
                   icon: const Icon(Icons.fullscreen),
@@ -333,17 +347,17 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     );
   }
 
-  /// Mobile layout with preview on top and editor panel in bottom sheet
+  /// Mobile layout with blocks list showing delete/drag actions permanently
   Widget _buildMobileLayout() {
     return Stack(
       children: [
-        // Preview (full screen with padding for bottom sheet)
+        // Show either blocks list (default) or preview (when toggled)
         Positioned.fill(
-          bottom: _selectedBlock != null ? 60 : 0,
-          child: _buildPreviewTab(),
+          bottom: _shouldShowMobileEditorPanel ? _mobileEditorPanelHeight : 0,
+          child: _showPreviewInMobile ? _buildPreviewTab() : _buildBlocksList(),
         ),
-        // Floating editor panel button (when block is selected)
-        if (_selectedBlock != null)
+        // Floating editor panel button (when block is selected and in list view)
+        if (_shouldShowMobileEditorPanel)
           Positioned(
             left: 0,
             right: 0,
