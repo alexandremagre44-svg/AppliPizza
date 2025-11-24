@@ -58,6 +58,9 @@ dependencies:
   # Shimmer effect for loading states
   shimmer: ^3.0.0
   
+  # URL launcher for opening external links, phone, email
+  url_launcher: ^6.2.4
+  
   # Roulette wheel for Module 2
   flutter_fortune_wheel: ^1.3.1
   

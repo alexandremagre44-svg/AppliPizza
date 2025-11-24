@@ -17,9 +17,9 @@ class ImageBlockPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = block.getConfig<String>('imageUrl', '');
-    final caption = block.getConfig<String>('caption', '');
-    final height = block.getConfig<double>('height', 200.0);
+    final imageUrl = block.getConfig<String>('imageUrl', '') ?? '';
+    final caption = block.getConfig<String>('caption', '') ?? '';
+    final height = block.getConfig<double>('height', 200.0) ?? 200.0;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

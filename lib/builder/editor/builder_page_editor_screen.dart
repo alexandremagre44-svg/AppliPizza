@@ -181,8 +181,10 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         };
       case BlockType.productList:
         return {
-          'mode': 'manual',
-          'productIds': [],
+          'mode': 'featured',
+          'productIds': '',
+          'layout': 'grid',
+          'limit': 6,
         };
       case BlockType.banner:
         return {
@@ -390,15 +392,15 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   String _getBlockSummary(BuilderBlock block) {
     switch (block.type) {
       case BlockType.hero:
-        return block.getConfig<String>('title', 'Sans titre');
+        return block.getConfig<String>('title', 'Sans titre') ?? 'Sans titre';
       case BlockType.text:
-        final content = block.getConfig<String>('content', '');
+        final content = block.getConfig<String>('content', '') ?? '';
         return content.length > 40 ? '${content.substring(0, 40)}...' : content;
       case BlockType.productList:
-        final ids = block.getConfig<List>('productIds', []);
+        final ids = block.getConfig<List>('productIds', []) ?? [];
         return '${ids.length} produit(s)';
       case BlockType.banner:
-        return block.getConfig<String>('text', 'Bannière');
+        return block.getConfig<String>('text', 'Bannière') ?? 'Bannière';
       default:
         return 'Bloc ${block.type.value}';
     }
@@ -465,6 +467,18 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         return _buildProductListConfig(block);
       case BlockType.banner:
         return _buildBannerConfig(block);
+      case BlockType.info:
+        return _buildInfoConfig(block);
+      case BlockType.button:
+        return _buildButtonConfig(block);
+      case BlockType.image:
+        return _buildImageConfig(block);
+      case BlockType.spacer:
+        return _buildSpacerConfig(block);
+      case BlockType.categoryList:
+        return _buildCategoryListConfig(block);
+      case BlockType.html:
+        return _buildHtmlConfig(block);
       default:
         return [const Text('Configuration non disponible pour ce type')];
     }
@@ -474,28 +488,44 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     return [
       _buildTextField(
         label: 'Titre',
-        value: block.getConfig<String>('title', ''),
+        value: block.getConfig<String>('title', '') ?? '',
         onChanged: (v) => _updateBlockConfig('title', v),
+        helperText: 'Titre principal du hero banner',
       ),
       _buildTextField(
         label: 'Sous-titre',
-        value: block.getConfig<String>('subtitle', ''),
+        value: block.getConfig<String>('subtitle', '') ?? '',
         onChanged: (v) => _updateBlockConfig('subtitle', v),
-      ),
-      _buildTextField(
-        label: 'URL Image',
-        value: block.getConfig<String>('imageUrl', ''),
-        onChanged: (v) => _updateBlockConfig('imageUrl', v),
-      ),
-      _buildTextField(
-        label: 'Couleur de fond',
-        value: block.getConfig<String>('backgroundColor', ''),
-        onChanged: (v) => _updateBlockConfig('backgroundColor', v),
+        helperText: 'Texte secondaire (optionnel)',
       ),
       _buildTextField(
         label: 'Label du bouton',
-        value: block.getConfig<String>('buttonLabel', ''),
+        value: block.getConfig<String>('buttonLabel', '') ?? '',
         onChanged: (v) => _updateBlockConfig('buttonLabel', v),
+        helperText: 'Texte du bouton CTA',
+      ),
+      _buildTextField(
+        label: 'URL Image',
+        value: block.getConfig<String>('imageUrl', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('imageUrl', v),
+        helperText: 'URL de l\'image de fond',
+      ),
+      _buildDropdown<String>(
+        label: 'Alignement',
+        value: block.getConfig<String>('alignment', 'left') ?? 'left',
+        items: const ['left', 'center'],
+        onChanged: (v) => _updateBlockConfig('alignment', v),
+      ),
+      _buildDropdown<String>(
+        label: 'Hauteur',
+        value: block.getConfig<String>('heightPreset', 'normal') ?? 'normal',
+        items: const ['small', 'normal', 'large'],
+        onChanged: (v) => _updateBlockConfig('heightPreset', v),
+      ),
+      _buildColorPicker(
+        label: 'Couleur de fond',
+        value: block.getConfig<String>('backgroundColor', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('backgroundColor', v),
       ),
     ];
   }
@@ -504,44 +534,73 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     return [
       _buildTextField(
         label: 'Contenu',
-        value: block.getConfig<String>('content', ''),
+        value: block.getConfig<String>('content', '') ?? '',
         onChanged: (v) => _updateBlockConfig('content', v),
         maxLines: 5,
+        helperText: 'Texte du bloc',
       ),
       _buildDropdown<String>(
         label: 'Alignement',
-        value: block.getConfig<String>('alignment', 'left'),
+        value: block.getConfig<String>('alignment', 'left') ?? 'left',
         items: const ['left', 'center', 'right'],
         onChanged: (v) => _updateBlockConfig('alignment', v),
       ),
       _buildDropdown<String>(
         label: 'Taille',
-        value: block.getConfig<String>('size', 'normal'),
+        value: block.getConfig<String>('size', 'normal') ?? 'normal',
         items: const ['small', 'normal', 'large'],
         onChanged: (v) => _updateBlockConfig('size', v),
+      ),
+      _buildCheckbox(
+        label: 'Gras',
+        value: block.getConfig<bool>('bold', false) ?? false,
+        onChanged: (v) => _updateBlockConfig('bold', v),
+      ),
+      _buildColorPicker(
+        label: 'Couleur du texte',
+        value: block.getConfig<String>('color', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('color', v),
       ),
     ];
   }
 
   List<Widget> _buildProductListConfig(BuilderBlock block) {
-    final productIds = block.getConfig<List>('productIds', []);
-    final idsText = productIds.join(', ');
+    final productIds = block.getConfig<String>('productIds', '') ?? '';
 
     return [
+      _buildTextField(
+        label: 'Titre (optionnel)',
+        value: block.getConfig<String>('title', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('title', v),
+        helperText: 'Titre de la section de produits',
+      ),
       _buildDropdown<String>(
         label: 'Mode',
-        value: block.getConfig<String>('mode', 'manual'),
-        items: const ['manual', 'auto'],
+        value: block.getConfig<String>('mode', 'featured') ?? 'featured',
+        items: const ['featured', 'manual', 'top_selling', 'promo'],
         onChanged: (v) => _updateBlockConfig('mode', v),
       ),
+      _buildDropdown<String>(
+        label: 'Layout',
+        value: block.getConfig<String>('layout', 'grid') ?? 'grid',
+        items: const ['grid', 'carousel', 'list'],
+        onChanged: (v) => _updateBlockConfig('layout', v),
+      ),
       _buildTextField(
-        label: 'IDs des produits (séparés par virgule)',
-        value: idsText,
+        label: 'IDs des produits (pour mode manuel)',
+        value: productIds,
+        onChanged: (v) => _updateBlockConfig('productIds', v),
+        helperText: 'Séparés par virgule. Ex: prod1,prod2,prod3',
+        maxLines: 2,
+      ),
+      _buildTextField(
+        label: 'Limite',
+        value: (block.getConfig<int>('limit', 6) ?? 6).toString(),
         onChanged: (v) {
-          final ids = v.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
-          _updateBlockConfig('productIds', ids);
+          final limit = int.tryParse(v) ?? 6;
+          _updateBlockConfig('limit', limit);
         },
-        helperText: 'Ex: prod1, prod2, prod3',
+        helperText: 'Nombre maximum de produits à afficher',
       ),
     ];
   }
@@ -549,19 +608,202 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   List<Widget> _buildBannerConfig(BuilderBlock block) {
     return [
       _buildTextField(
-        label: 'Texte',
-        value: block.getConfig<String>('text', ''),
-        onChanged: (v) => _updateBlockConfig('text', v),
+        label: 'Titre',
+        value: block.getConfig<String>('title', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('title', v),
+        helperText: 'Titre principal de la bannière',
       ),
       _buildTextField(
+        label: 'Sous-titre',
+        value: block.getConfig<String>('subtitle', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('subtitle', v),
+        helperText: 'Texte secondaire (optionnel)',
+      ),
+      _buildTextField(
+        label: 'Texte (fallback)',
+        value: block.getConfig<String>('text', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('text', v),
+        helperText: 'Utilisé si titre absent',
+      ),
+      _buildTextField(
+        label: 'URL Image',
+        value: block.getConfig<String>('imageUrl', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('imageUrl', v),
+        helperText: 'Image de fond (optionnelle)',
+      ),
+      _buildTextField(
+        label: 'Label CTA',
+        value: block.getConfig<String>('ctaLabel', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('ctaLabel', v),
+        helperText: 'Texte du bouton d\'action',
+      ),
+      _buildTextField(
+        label: 'Action CTA',
+        value: block.getConfig<String>('ctaAction', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('ctaAction', v),
+        helperText: 'Route ex: /menu',
+      ),
+      _buildDropdown<String>(
+        label: 'Style',
+        value: block.getConfig<String>('style', 'info') ?? 'info',
+        items: const ['info', 'promo', 'warning', 'success'],
+        onChanged: (v) => _updateBlockConfig('style', v),
+      ),
+      _buildColorPicker(
         label: 'Couleur de fond',
-        value: block.getConfig<String>('backgroundColor', ''),
+        value: block.getConfig<String>('backgroundColor', '') ?? '',
         onChanged: (v) => _updateBlockConfig('backgroundColor', v),
       ),
+    ];
+  }
+
+  List<Widget> _buildInfoConfig(BuilderBlock block) {
+    return [
       _buildTextField(
-        label: 'Couleur du texte',
-        value: block.getConfig<String>('textColor', ''),
-        onChanged: (v) => _updateBlockConfig('textColor', v),
+        label: 'Titre',
+        value: block.getConfig<String>('title', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('title', v),
+        helperText: 'Titre de l\'information',
+      ),
+      _buildTextField(
+        label: 'Contenu',
+        value: block.getConfig<String>('content', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('content', v),
+        maxLines: 3,
+        helperText: 'Texte descriptif',
+      ),
+      _buildDropdown<String>(
+        label: 'Icône',
+        value: block.getConfig<String>('icon', 'info') ?? 'info',
+        items: const ['info', 'warning', 'success', 'error', 'time', 'phone', 'location', 'email'],
+        onChanged: (v) => _updateBlockConfig('icon', v),
+      ),
+      _buildCheckbox(
+        label: 'Mise en évidence',
+        value: block.getConfig<bool>('highlight', false) ?? false,
+        onChanged: (v) => _updateBlockConfig('highlight', v),
+      ),
+      _buildDropdown<String>(
+        label: 'Type d\'action',
+        value: block.getConfig<String>('actionType', 'none') ?? 'none',
+        items: const ['none', 'call', 'email', 'navigate'],
+        onChanged: (v) => _updateBlockConfig('actionType', v),
+      ),
+      _buildTextField(
+        label: 'Valeur de l\'action',
+        value: block.getConfig<String>('actionValue', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('actionValue', v),
+        helperText: 'Numéro, email ou URL',
+      ),
+    ];
+  }
+
+  List<Widget> _buildButtonConfig(BuilderBlock block) {
+    return [
+      _buildTextField(
+        label: 'Label',
+        value: block.getConfig<String>('label', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('label', v),
+        helperText: 'Texte du bouton',
+      ),
+      _buildTextField(
+        label: 'Action',
+        value: block.getConfig<String>('action', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('action', v),
+        helperText: 'Route ex: /menu',
+      ),
+      _buildDropdown<String>(
+        label: 'Style',
+        value: block.getConfig<String>('style', 'primary') ?? 'primary',
+        items: const ['primary', 'secondary', 'outline'],
+        onChanged: (v) => _updateBlockConfig('style', v),
+      ),
+      _buildDropdown<String>(
+        label: 'Alignement',
+        value: block.getConfig<String>('alignment', 'center') ?? 'center',
+        items: const ['left', 'center', 'right'],
+        onChanged: (v) => _updateBlockConfig('alignment', v),
+      ),
+    ];
+  }
+
+  List<Widget> _buildImageConfig(BuilderBlock block) {
+    return [
+      _buildTextField(
+        label: 'URL Image',
+        value: block.getConfig<String>('imageUrl', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('imageUrl', v),
+        helperText: 'URL de l\'image',
+      ),
+      _buildTextField(
+        label: 'Légende',
+        value: block.getConfig<String>('caption', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('caption', v),
+        helperText: 'Texte sous l\'image (optionnel)',
+      ),
+      _buildDropdown<String>(
+        label: 'Alignement',
+        value: block.getConfig<String>('alignment', 'center') ?? 'center',
+        items: const ['left', 'center', 'right'],
+        onChanged: (v) => _updateBlockConfig('alignment', v),
+      ),
+      _buildTextField(
+        label: 'Hauteur',
+        value: (block.getConfig<int>('height', 300) ?? 300).toString(),
+        onChanged: (v) {
+          final height = int.tryParse(v) ?? 300;
+          _updateBlockConfig('height', height);
+        },
+        helperText: 'Hauteur en pixels',
+      ),
+    ];
+  }
+
+  List<Widget> _buildSpacerConfig(BuilderBlock block) {
+    return [
+      _buildTextField(
+        label: 'Hauteur',
+        value: (block.getConfig<int>('height', 24) ?? 24).toString(),
+        onChanged: (v) {
+          final height = int.tryParse(v) ?? 24;
+          _updateBlockConfig('height', height);
+        },
+        helperText: 'Hauteur de l\'espace en pixels',
+      ),
+    ];
+  }
+
+  List<Widget> _buildCategoryListConfig(BuilderBlock block) {
+    return [
+      _buildTextField(
+        label: 'Titre (optionnel)',
+        value: block.getConfig<String>('title', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('title', v),
+        helperText: 'Titre de la section',
+      ),
+      _buildDropdown<String>(
+        label: 'Mode',
+        value: block.getConfig<String>('mode', 'auto') ?? 'auto',
+        items: const ['auto', 'custom'],
+        onChanged: (v) => _updateBlockConfig('mode', v),
+      ),
+      _buildDropdown<String>(
+        label: 'Layout',
+        value: block.getConfig<String>('layout', 'horizontal') ?? 'horizontal',
+        items: const ['horizontal', 'grid'],
+        onChanged: (v) => _updateBlockConfig('layout', v),
+      ),
+    ];
+  }
+
+  List<Widget> _buildHtmlConfig(BuilderBlock block) {
+    return [
+      _buildTextField(
+        label: 'Contenu HTML',
+        value: block.getConfig<String>('htmlContent', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('htmlContent', v),
+        maxLines: 10,
+        helperText: 'Code HTML personnalisé',
       ),
     ];
   }
@@ -614,6 +856,114 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           );
         }).toList(),
         onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildCheckbox({
+    required String label,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: CheckboxListTile(
+        title: Text(label),
+        value: value,
+        onChanged: (v) => onChanged(v ?? false),
+        controlAffinity: ListTileControlAffinity.leading,
+        contentPadding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
+        tileColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildColorPicker({
+    required String label,
+    required String value,
+    required Function(String) onChanged,
+  }) {
+    // Predefined color palette
+    final colors = {
+      '': 'Par défaut',
+      '#DC2626': 'Rouge',
+      '#EA580C': 'Orange',
+      '#CA8A04': 'Jaune',
+      '#16A34A': 'Vert',
+      '#0284C7': 'Bleu',
+      '#9333EA': 'Violet',
+      '#DB2777': 'Rose',
+      '#000000': 'Noir',
+      '#FFFFFF': 'Blanc',
+    };
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: colors.entries.map((entry) {
+              final isSelected = value == entry.key;
+              Color colorValue;
+              
+              if (entry.key.isEmpty) {
+                colorValue = Colors.grey.shade300;
+              } else {
+                try {
+                  colorValue = Color(int.parse(entry.key.replaceAll('#', '0xFF')));
+                } catch (e) {
+                  // Fallback to grey if color parsing fails
+                  colorValue = Colors.grey.shade300;
+                  debugPrint('Invalid color format: ${entry.key}');
+                }
+              }
+              
+              return InkWell(
+                onTap: () => onChanged(entry.key),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: colorValue,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isSelected ? Colors.blue : Colors.grey.shade300,
+                      width: isSelected ? 3 : 1,
+                    ),
+                  ),
+                  child: entry.key.isEmpty
+                      ? const Icon(Icons.block, color: Colors.grey)
+                      : null,
+                ),
+              );
+            }).toList(),
+          ),
+          if (value.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Sélectionné: ${colors[value] ?? value}',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

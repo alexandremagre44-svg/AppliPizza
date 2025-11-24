@@ -17,9 +17,9 @@ class BannerBlockPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = block.getConfig<String>('text', 'Bannière');
-    final backgroundColor = block.getConfig<String>('backgroundColor', '#2196F3');
-    final textColor = block.getConfig<String>('textColor', '#FFFFFF');
+    final text = block.getConfig<String>('text', 'Bannière') ?? 'Bannière';
+    final backgroundColor = block.getConfig<String>('backgroundColor', '#2196F3') ?? '#2196F3';
+    final textColor = block.getConfig<String>('textColor', '#FFFFFF') ?? '#FFFFFF';
 
     final bgColor = _parseColor(backgroundColor);
     final txtColor = _parseColor(textColor);

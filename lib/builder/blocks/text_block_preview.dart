@@ -17,9 +17,9 @@ class TextBlockPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = block.getConfig<String>('content', 'Texte par défaut');
-    final alignment = block.getConfig<String>('alignment', 'left');
-    final size = block.getConfig<String>('size', 'normal');
+    final content = block.getConfig<String>('content', 'Texte par défaut') ?? 'Texte par défaut';
+    final alignment = block.getConfig<String>('alignment', 'left') ?? 'left';
+    final size = block.getConfig<String>('size', 'normal') ?? 'normal';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),

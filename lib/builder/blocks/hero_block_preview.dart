@@ -18,11 +18,11 @@ class HeroBlockPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = block.getConfig<String>('title', 'Titre du Hero');
-    final subtitle = block.getConfig<String>('subtitle', 'Sous-titre');
-    final imageUrl = block.getConfig<String>('imageUrl', '');
-    final backgroundColor = block.getConfig<String>('backgroundColor', '#D32F2F');
-    final buttonLabel = block.getConfig<String>('buttonLabel', 'En savoir plus');
+    final title = block.getConfig<String>('title', 'Titre du Hero') ?? 'Titre du Hero';
+    final subtitle = block.getConfig<String>('subtitle', 'Sous-titre') ?? 'Sous-titre';
+    final imageUrl = block.getConfig<String>('imageUrl', '') ?? '';
+    final backgroundColor = block.getConfig<String>('backgroundColor', '#D32F2F') ?? '#D32F2F';
+    final buttonLabel = block.getConfig<String>('buttonLabel', 'En savoir plus') ?? 'En savoir plus';
 
     final bgColor = _parseColor(backgroundColor);
 

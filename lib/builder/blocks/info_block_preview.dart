@@ -17,9 +17,9 @@ class InfoBlockPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = block.getConfig<String>('title', 'Information');
-    final content = block.getConfig<String>('content', 'Contenu informatif');
-    final icon = block.getConfig<String>('icon', 'info');
+    final title = block.getConfig<String>('title', 'Information') ?? 'Information';
+    final content = block.getConfig<String>('content', 'Contenu informatif') ?? 'Contenu informatif';
+    final icon = block.getConfig<String>('icon', 'info') ?? 'info';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

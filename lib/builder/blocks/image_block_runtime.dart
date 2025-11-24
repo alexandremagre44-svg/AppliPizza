@@ -60,7 +60,7 @@ class ImageBlockRuntime extends StatelessWidget {
             SizedBox(height: AppSpacing.sm),
             Text(
               caption,
-              style: AppTextStyles.caption.copyWith(
+              style: AppTextStyles.captionLarge.copyWith(
                 fontStyle: FontStyle.italic,
                 color: Colors.grey.shade600,
               ),

@@ -12,7 +12,8 @@ import '../home/pizza_customization_modal.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 import '../../../builder/models/models.dart';
-import '../../../builder/utils/utils.dart';
+import '../../../builder/providers/builder_providers.dart';
+import '../../../builder/preview/builder_runtime_renderer.dart';
 
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
@@ -22,7 +23,6 @@ class MenuScreen extends ConsumerStatefulWidget {
 }
 
 class _MenuScreenState extends ConsumerState<MenuScreen> {
-  static const String appId = 'pizza_delizza';
   String _selectedCategory = 'Pizza';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -63,11 +63,67 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Try Builder B3 first, fallback to default implementation
-    return BuilderPageWrapper(
-      pageId: BuilderPageId.menu,
-      appId: appId,
-      fallbackBuilder: _buildDefaultMenu,
+    // Watch the published menu page layout from provider
+    final menuPageAsync = ref.watch(menuPagePublishedProvider);
+    
+    return menuPageAsync.when(
+      data: (builderPage) {
+        // If we have a published layout with blocks, use it
+        if (builderPage != null && builderPage.blocks.isNotEmpty) {
+          return Scaffold(
+            body: RefreshIndicator(
+              onRefresh: () async {
+                // Invalidate both providers to reload data
+                ref.invalidate(menuPagePublishedProvider);
+                ref.invalidate(productListProvider);
+                // Wait for both providers to reload, handle errors gracefully
+                try {
+                  await Future.wait([
+                    ref.read(menuPagePublishedProvider.future),
+                    ref.read(productListProvider.future),
+                  ]);
+                } catch (e) {
+                  debugPrint('Error during refresh: $e');
+                  // Continue even if one provider fails
+                }
+              },
+              color: AppColors.primaryRed,
+              child: BuilderRuntimeRenderer(
+                blocks: builderPage.blocks,
+                backgroundColor: Colors.white,
+                wrapInScrollView: true,
+              ),
+            ),
+          );
+        }
+        
+        // Fallback to default menu implementation if no layout exists
+        return _buildDefaultMenu();
+      },
+      loading: () {
+        // Show loading indicator while fetching layout
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              'Notre Menu',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+          ),
+          body: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
+      error: (error, stackTrace) {
+        // On error, fallback to default menu behavior
+        debugPrint('Error loading builder menu layout: $error');
+        return _buildDefaultMenu();
+      },
     );
   }
 
@@ -334,5 +390,4 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       ),
     );
   }
-}
 }

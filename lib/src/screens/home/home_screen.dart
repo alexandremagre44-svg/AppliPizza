@@ -26,6 +26,7 @@ import '../../core/constants.dart';
 import '../../services/roulette_rules_service.dart';
 import '../../../builder/models/models.dart';
 import '../../../builder/services/services.dart';
+import '../../../builder/providers/builder_providers.dart';
 import '../../../builder/preview/builder_runtime_renderer.dart';
 
 /// Home screen - Professional showcase page
@@ -118,11 +119,13 @@ class HomeScreen extends ConsumerWidget {
   /// Wrapper with Builder B3 integration and fade-in animation
   /// Tries to load published layout from Builder B3, falls back to default
   Widget _buildContentWithBuilderIntegration(BuildContext context, WidgetRef ref, List<Product> allProducts, dynamic homeConfig, dynamic homeTexts) {
-    return FutureBuilder<BuilderPage?>(
-      future: BuilderLayoutService().loadPublished(appId, BuilderPageId.home),
-      builder: (context, snapshot) {
-        // If we have a published layout, use it
-        if (snapshot.hasData && snapshot.data != null && snapshot.data!.blocks.isNotEmpty) {
+    // Watch the published home page layout from provider
+    final homePageAsync = ref.watch(homePagePublishedProvider);
+    
+    return homePageAsync.when(
+      data: (builderPage) {
+        // If we have a published layout with blocks, use it
+        if (builderPage != null && builderPage.blocks.isNotEmpty) {
           return TweenAnimationBuilder<double>(
             duration: const Duration(milliseconds: 500),
             tween: Tween(begin: 0.0, end: 1.0),
@@ -137,21 +140,44 @@ class HomeScreen extends ConsumerWidget {
             },
             child: RefreshIndicator(
               onRefresh: () async {
+                // Invalidate both providers to reload data
+                ref.invalidate(homePagePublishedProvider);
                 ref.invalidate(productListProvider);
                 await ref.read(productListProvider.future);
               },
               color: AppColors.primaryRed,
-              child: SingleChildScrollView(
-                child: BuilderRuntimeRenderer(
-                  blocks: snapshot.data!.blocks,
-                  backgroundColor: Colors.white,
-                ),
+              child: BuilderRuntimeRenderer(
+                blocks: builderPage.blocks,
+                backgroundColor: Colors.white,
+                wrapInScrollView: true,
               ),
             ),
           );
         }
         
-        // Fallback to default behavior if no layout or error
+        // Fallback to default behavior if no layout exists
+        return TweenAnimationBuilder<double>(
+          duration: const Duration(milliseconds: 500),
+          tween: Tween(begin: 0.0, end: 1.0),
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: _buildContent(context, ref, allProducts, homeConfig, homeTexts),
+        );
+      },
+      loading: () {
+        // Show shimmer loading while fetching layout
+        return const HomeShimmerLoading();
+      },
+      error: (error, stackTrace) {
+        // On error, fallback to default behavior
+        debugPrint('Error loading builder layout: $error');
         return TweenAnimationBuilder<double>(
           duration: const Duration(milliseconds: 500),
           tween: Tween(begin: 0.0, end: 1.0),
@@ -204,6 +230,7 @@ class HomeScreen extends ConsumerWidget {
                 imageUrl: homeConfig.hero.imageUrl,
                 title: homeConfig.hero.title,
                 subtitle: homeConfig.hero.subtitle,
+                buttonText: homeConfig.hero.ctaText,
                 onTap: () {
                   // Navigate to menu or specific product
                   context.go(AppRoutes.menu);
@@ -389,6 +416,16 @@ class HomeScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  // Build promotions section (for promo products)
+  Widget _buildPromotionsSection(BuildContext context, WidgetRef ref, List<Product> products) {
+    return _buildPromoCarousel(context, ref, products);
+  }
+
+  // Build bestsellers grid
+  Widget _buildBestsellersGrid(BuildContext context, WidgetRef ref, List<Product> products) {
+    return _buildProductGrid(context, ref, products);
   }
 
   void _handleProductTap(BuildContext context, WidgetRef ref, Product product) {

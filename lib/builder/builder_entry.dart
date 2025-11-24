@@ -137,63 +137,66 @@ class _BuilderStudioScreenState extends ConsumerState<BuilderStudioScreen> {
       color: Colors.blue.shade50,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        children: [
-          Row(
-            children: [
-              Icon(Icons.admin_panel_settings, color: Colors.blue.shade700),
-              const SizedBox(width: 12),
-              const Text(
-                'Super Admin',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.admin_panel_settings, color: Colors.blue.shade700),
+                const SizedBox(width: 12),
+                const Text(
+                  'Super Admin',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Restaurant actif:',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              value: appContext.currentAppId,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Restaurant actif:',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              items: appContext.accessibleApps.map((app) {
+                return DropdownMenuItem(
+                  value: app.appId,
+                  child: Text('${app.name} (${app.appId})'),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(appContextProvider.notifier).switchApp(value);
+                }
+              },
             ),
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            value: appContext.currentAppId,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
+            const SizedBox(height: 8),
+            Text(
+              '${appContext.accessibleApps.length} restaurant(s) accessible(s)',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
               ),
             ),
-            items: appContext.accessibleApps.map((app) {
-              return DropdownMenuItem(
-                value: app.appId,
-                child: Text('${app.name} (${app.appId})'),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value != null) {
-                ref.read(appContextProvider.notifier).switchApp(value);
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${appContext.accessibleApps.length} restaurant(s) accessible(s)',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -211,69 +214,67 @@ class _BuilderStudioScreenState extends ConsumerState<BuilderStudioScreen> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.restaurant, color: Colors.orange),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade100,
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      currentApp.name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+              child: const Icon(Icons.restaurant, color: Colors.orange),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    currentApp.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'ID: ${currentApp.appId}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  if (currentApp.description.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
-                      'ID: ${currentApp.appId}',
+                      currentApp.description,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         color: Colors.grey.shade600,
                       ),
                     ),
-                    if (currentApp.description.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        currentApp.description,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
                   ],
+                ],
+              ),
+            ),
+            // Role badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _getRoleColor(appContext.userRole),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                _getRoleLabel(appContext.userRole),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              // Role badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _getRoleColor(appContext.userRole),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  _getRoleLabel(appContext.userRole),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

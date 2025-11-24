@@ -18,7 +18,7 @@ class HtmlBlockPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final htmlContent = block.getConfig<String>('html', '<p>Contenu HTML personnalisé</p>');
+    final htmlContent = block.getConfig<String>('html', '<p>Contenu HTML personnalisé</p>') ?? '<p>Contenu HTML personnalisé</p>';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

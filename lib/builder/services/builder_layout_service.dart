@@ -85,7 +85,7 @@ class BuilderLayoutService {
         return null;
       }
 
-      return BuilderPage.fromJson(snapshot.data()!);
+      return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
     } catch (e) {
       print('Error loading draft: $e');
       return null;
@@ -109,7 +109,7 @@ class BuilderLayoutService {
       }
       
       try {
-        return BuilderPage.fromJson(snapshot.data()!);
+        return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
       } catch (e) {
         print('Error parsing draft: $e');
         return null;
@@ -143,12 +143,12 @@ class BuilderLayoutService {
   /// Example:
   /// ```dart
   /// final draft = await service.loadDraft('pizza_delizza', BuilderPageId.home);
-  /// await service.publishPage(draft!, userId: 'admin_123', deleteDraft: true);
+  /// await service.publishPage(draft!, userId: 'admin_123', shouldDeleteDraft: true);
   /// ```
   Future<void> publishPage(
     BuilderPage page, {
     required String userId,
-    bool deleteDraft = false,
+    bool shouldDeleteDraft = false,
   }) async {
     // Create published version
     final publishedPage = page.publish(userId: userId);
@@ -158,7 +158,7 @@ class BuilderLayoutService {
     await ref.set(publishedPage.toJson());
 
     // Optionally delete draft
-    if (deleteDraft) {
+    if (shouldDeleteDraft) {
       await deleteDraft(page.appId, page.pageId);
     }
   }
@@ -175,7 +175,7 @@ class BuilderLayoutService {
         return null;
       }
 
-      return BuilderPage.fromJson(snapshot.data()!);
+      return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
     } catch (e) {
       print('Error loading published page: $e');
       return null;
@@ -199,7 +199,7 @@ class BuilderLayoutService {
       }
       
       try {
-        return BuilderPage.fromJson(snapshot.data()!);
+        return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
       } catch (e) {
         print('Error parsing published page: $e');
         return null;

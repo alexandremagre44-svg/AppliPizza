@@ -27,7 +27,7 @@ class BuilderPageWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final service = BuilderLayoutService(FirebaseFirestore.instance);
+    final service = BuilderLayoutService();
 
     return FutureBuilder<BuilderPage?>(
       future: service.loadPublished(appId, pageId),
