@@ -25,8 +25,8 @@ class InfoBlockPreview extends StatelessWidget {
     final title = helper.getString('title', defaultValue: 'Info Title');
     final subtitle = helper.getString('subtitle', defaultValue: 'Info subtitle');
     final iconName = helper.getString('icon', defaultValue: 'info');
-    final iconColor = helper.getColor('iconColor', defaultValue: const Color(0xFFD32F2F));
-    final textColor = helper.getColor('textColor', defaultValue: Colors.black);
+    final iconColor = helper.getColor('iconColor', defaultValue: const Color(0xFFD32F2F)) ?? const Color(0xFFD32F2F);
+    final textColor = helper.getColor('textColor', defaultValue: Colors.black) ?? Colors.black;
     final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFF5F5F5));
     final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
     final align = helper.getString('align', defaultValue: 'left');

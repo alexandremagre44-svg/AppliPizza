@@ -48,8 +48,8 @@ class HeroBlockRuntime extends StatelessWidget {
     final align = _getAlignValue(helper);
     final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(16));
     final margin = helper.getEdgeInsets('margin');
-    final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFD32F2F));
-    final textColor = helper.getColor('textColor', defaultValue: Colors.white);
+    final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFD32F2F)) ?? const Color(0xFFD32F2F);
+    final textColor = helper.getColor('textColor', defaultValue: Colors.white) ?? Colors.white;
     final buttonText = _getButtonTextValue(helper);
     final buttonColor = helper.getColor('buttonColor', defaultValue: Colors.white);
     final buttonTextColor = helper.getColor('buttonTextColor', defaultValue: const Color(0xFFD32F2F));

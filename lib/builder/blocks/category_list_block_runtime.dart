@@ -135,7 +135,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
   List<_CategoryItem> _getCategories() {
     return ProductCategory.values.map((category) {
       return _CategoryItem(
-        name: category.displayName,
+        name: category.value,
         icon: _getCategoryIcon(category),
         category: category,
       );
@@ -147,14 +147,12 @@ class CategoryListBlockRuntime extends StatelessWidget {
     switch (category) {
       case ProductCategory.pizza:
         return Icons.local_pizza;
-      case ProductCategory.menu:
+      case ProductCategory.menus:
         return Icons.restaurant_menu;
-      case ProductCategory.boisson:
+      case ProductCategory.boissons:
         return Icons.local_drink;
-      case ProductCategory.dessert:
+      case ProductCategory.desserts:
         return Icons.cake;
-      default:
-        return Icons.category;
     }
   }
 
@@ -466,7 +464,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
     ActionHelper.execute(
       context,
       BlockAction(
-        type: ActionType.openPage,
+        type: BlockActionType.openPage,
         value: '/menu?category=${category.category.value}',
       ),
     );

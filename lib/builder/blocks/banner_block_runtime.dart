@@ -46,7 +46,7 @@ class BannerBlockRuntime extends StatelessWidget {
     final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(16));
     final margin = helper.getEdgeInsets('margin');
     final backgroundColor = helper.getColor('backgroundColor');
-    final textColor = helper.getColor('textColor', defaultValue: Colors.black);
+    final textColor = helper.getColor('textColor', defaultValue: Colors.black) ?? Colors.black;
     final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
     final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
     final height = _calculateHeight(helper, context);
