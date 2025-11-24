@@ -32,6 +32,8 @@ class BuilderPageEditorScreen extends StatefulWidget {
 }
 
 class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with SingleTickerProviderStateMixin {
+  static const double _mobileEditorPanelHeight = 60.0;
+  
   final BuilderLayoutService _service = BuilderLayoutService();
   BuilderPage? _page;
   bool _isLoading = true;
@@ -39,6 +41,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   bool _hasChanges = false;
   bool _showPreviewInMobile = false;
   late TabController _tabController;
+  
+  /// Whether to show the mobile editor panel at the bottom
+  bool get _shouldShowMobileEditorPanel => _selectedBlock != null && !_showPreviewInMobile;
 
   @override
   void initState() {
@@ -280,8 +285,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                 ),
               if (responsive.isMobile)
                 IconButton(
-                  icon: Icon(_showPreviewInMobile ? Icons.list : Icons.visibility),
-                  tooltip: _showPreviewInMobile ? 'Liste des blocs' : 'Prévisualisation',
+                  // When showing list, button switches to preview; when showing preview, button switches to list
+                  icon: Icon(!_showPreviewInMobile ? Icons.visibility : Icons.view_list),
+                  tooltip: !_showPreviewInMobile ? 'Voir la prévisualisation' : 'Voir la liste',
                   onPressed: () => setState(() => _showPreviewInMobile = !_showPreviewInMobile),
                 ),
               if (!responsive.isMobile)
@@ -346,11 +352,11 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       children: [
         // Show either blocks list (default) or preview (when toggled)
         Positioned.fill(
-          bottom: _selectedBlock != null && !_showPreviewInMobile ? 60 : 0,
+          bottom: _shouldShowMobileEditorPanel ? _mobileEditorPanelHeight : 0,
           child: _showPreviewInMobile ? _buildPreviewTab() : _buildBlocksList(),
         ),
         // Floating editor panel button (when block is selected and in list view)
-        if (_selectedBlock != null && !_showPreviewInMobile)
+        if (_shouldShowMobileEditorPanel)
           Positioned(
             left: 0,
             right: 0,
