@@ -23,7 +23,6 @@ class MenuScreen extends ConsumerStatefulWidget {
 }
 
 class _MenuScreenState extends ConsumerState<MenuScreen> {
-  static const String appId = 'pizza_delizza';
   String _selectedCategory = 'Pizza';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
