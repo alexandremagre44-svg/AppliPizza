@@ -22,9 +22,10 @@ class BuilderLayoutService {
   final FirebaseFirestore _firestore;
 
   // Collection paths
-  static const String _appsCollection = 'apps';
+  // Structure: builder/apps/{appId}/pages/{pageId}/{draft|published}
   static const String _builderCollection = 'builder';
-  static const String _pagesCollection = 'pages';
+  static const String _appsSubcollection = 'apps';
+  static const String _pagesSubcollection = 'pages';
   static const String _draftDoc = 'draft';
   static const String _publishedDoc = 'published';
 
@@ -34,10 +35,10 @@ class BuilderLayoutService {
   /// Get document reference for draft page
   DocumentReference _getDraftRef(String appId, BuilderPageId pageId) {
     return _firestore
-        .collection(_appsCollection)
-        .doc(appId)
         .collection(_builderCollection)
-        .doc(_pagesCollection)
+        .doc(_appsSubcollection)
+        .collection(appId)
+        .doc(_pagesSubcollection)
         .collection(pageId.value)
         .doc(_draftDoc);
   }
@@ -45,10 +46,10 @@ class BuilderLayoutService {
   /// Get document reference for published page
   DocumentReference _getPublishedRef(String appId, BuilderPageId pageId) {
     return _firestore
-        .collection(_appsCollection)
-        .doc(appId)
         .collection(_builderCollection)
-        .doc(_pagesCollection)
+        .doc(_appsSubcollection)
+        .collection(appId)
+        .doc(_pagesSubcollection)
         .collection(pageId.value)
         .doc(_publishedDoc);
   }

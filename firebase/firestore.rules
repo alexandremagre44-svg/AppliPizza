@@ -492,6 +492,19 @@ service cloud.firestore {
     }
     
     // =========================================================================
+    // BUILDER B3 - Page Builder System
+    // =========================================================================
+    // Structure: builder/apps/{appId}/pages/{pageId}/{draft|published}
+    // 
+    // Permissions:
+    // - Admin only (using custom claims): full read/write access
+    // - No public access
+    // =========================================================================
+    match /builder/{path=**} {
+      allow read, write: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // =========================================================================
     // DENY ALL OTHER COLLECTIONS
     // =========================================================================
     // Explicitly deny access to any other paths not matched above

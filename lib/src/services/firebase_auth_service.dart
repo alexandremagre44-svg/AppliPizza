@@ -306,4 +306,18 @@ class FirebaseAuthService {
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
+
+  /// Récupérer les custom claims du token Firebase Auth
+  /// Returns null if user is null or claims cannot be retrieved
+  Future<Map<String, dynamic>?> getCustomClaims(User user) async {
+    try {
+      final idTokenResult = await user.getIdTokenResult();
+      return idTokenResult.claims;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error retrieving custom claims: $e');
+      }
+      return null;
+    }
+  }
 }
