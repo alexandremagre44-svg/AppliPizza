@@ -92,6 +92,11 @@ void main() async {
   // NOW FIXED: Preserves existing non-B3 pages during migration
   await AppConfigService().migrateExistingPagesToB3('pizza_delizza');
   
+  // B3 Cleanup: Remove old duplicate -b3 pages
+  // This runs once to clean up the old architecture where we had duplicate pages
+  // (e.g., /home and /home-b3 both existing)
+  await AppConfigService().cleanupDuplicateB3Pages();
+  
   // Initialize Firebase App Check
   // DISABLED on Web in debug mode to prevent errors during development
   // ENABLED on Android/iOS for production security
@@ -233,22 +238,23 @@ class MyApp extends ConsumerWidget {
               path: '/home-b2',
               builder: (context, state) => const HomeScreenB2(),
             ),
-            // B3 alternate routes (kept for backward compatibility)
+            // B3 alternate routes - DEPRECATED: Redirect to main routes
+            // These routes are kept for backward compatibility only
             GoRoute(
               path: AppRoutes.homeB3,
-              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.homeB3),
+              redirect: (context, state) => AppRoutes.home,
             ),
             GoRoute(
               path: AppRoutes.menuB3,
-              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.menuB3),
+              redirect: (context, state) => AppRoutes.menu,
             ),
             GoRoute(
               path: AppRoutes.categoriesB3,
-              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.categoriesB3),
+              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.categories),
             ),
             GoRoute(
               path: AppRoutes.cartB3,
-              builder: (context, state) => _buildDynamicPage(context, ref, AppRoutes.cartB3),
+              redirect: (context, state) => AppRoutes.cart,
             ),
             GoRoute(
               path: AppRoutes.profile,

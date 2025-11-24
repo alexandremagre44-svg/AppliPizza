@@ -34,15 +34,17 @@ class AppConfigService {
   static const String _defaultPrimaryColor = '#D62828';
   static const String _defaultWhiteColor = '#FFFFFF';
   
-  // B3 route constants
+  // B3 route constants - DEPRECATED: kept for backward compatibility
+  // TODO: Remove these constants after migration period (est. 2025-01)
   static const String _homeB3Route = '/home-b3';
   static const String _menuB3Route = '/menu-b3';
   static const String _categoriesB3Route = '/categories-b3';
   static const String _cartB3Route = '/cart-b3';
   
-  /// Get all mandatory B3 routes (main + alternate)
+  /// Get all mandatory B3 routes
+  /// FIX: Only main routes now - no duplicate -b3 routes
   static Set<String> _getMandatoryB3Routes() {
-    return {'/home', _homeB3Route, '/menu', _menuB3Route, _categoriesB3Route, '/cart', _cartB3Route};
+    return {'/home', '/menu', '/cart', '/categories'};
   }
 
   AppConfigService({FirebaseFirestore? firestore})
@@ -854,8 +856,11 @@ class AppConfigService {
   /// 
   /// These pages allow Builder B3 to edit the real application pages.
   List<PageSchema> _buildMandatoryB3Pages() {
+    // FIX: Create ONLY main routes - no duplicate -b3 pages
+    // This ensures Studio B3 edits the REAL pages that the app displays
     return [
       // Main application pages (editable in Builder B3)
+      // These are the ONLY pages - no duplicates
       PageSchema.homeB3().copyWith(
         id: 'home_main',
         name: 'Accueil',
@@ -874,11 +879,13 @@ class AppConfigService {
         route: '/cart',
         enabled: false, // Disabled by default
       ),
-      // Alternate B3 pages (for testing/development)
-      PageSchema.homeB3(),
-      PageSchema.menuB3(),
-      PageSchema.categoriesB3(),
-      PageSchema.cartB3(),
+      // Categories page (not in hybrid system, but available for future use)
+      PageSchema.categoriesB3().copyWith(
+        id: 'categories_main',
+        name: 'Catégories',
+        route: '/categories',
+        enabled: false,
+      ),
     ];
   }
 
@@ -1277,10 +1284,10 @@ class AppConfigService {
     ));
     
     return PageSchema(
-      id: 'home_b3',
-      name: 'Accueil B3',
-      route: _homeB3Route,
-      enabled: true,
+      id: 'home_main',
+      name: 'Accueil',
+      route: '/home',
+      enabled: false, // Disabled by default to preserve existing behavior
       blocks: blocks,
       metadata: {
         'description': 'Page d\'accueil migrée depuis V2',
@@ -1290,34 +1297,34 @@ class AppConfigService {
     );
   }
 
-  /// Build navigation action for B3 routes
+  /// Build navigation action for main routes
   /// 
-  /// Converts V2 target names to B3 routes
-  /// Examples: 'menu' → '/menu-b3', 'categories' → '/categories-b3'
+  /// Converts V2 target names to main routes
+  /// Examples: 'menu' → '/menu', 'categories' → '/categories'
   String _buildNavigationAction(dynamic target) {
     if (target == null) {
-      return 'navigate:$_menuB3Route'; // Default to menu
+      return 'navigate:/menu'; // Default to menu
     }
     
     final targetStr = target.toString().toLowerCase();
     
-    // Map V2 targets to B3 routes
+    // Map V2 targets to main routes
     switch (targetStr) {
       case 'menu':
-        return 'navigate:$_menuB3Route';
+        return 'navigate:/menu';
       case 'categories':
-        return 'navigate:$_categoriesB3Route';
+        return 'navigate:/categories';
       case 'cart':
-        return 'navigate:$_cartB3Route';
+        return 'navigate:/cart';
       case 'home':
-        return 'navigate:$_homeB3Route';
+        return 'navigate:/home';
       default:
         // If it's already a path, keep it
         if (targetStr.startsWith('/')) {
           return 'navigate:$targetStr';
         }
         // Otherwise default to menu
-        return 'navigate:$_menuB3Route';
+        return 'navigate:/menu';
     }
   }
 
@@ -1414,7 +1421,7 @@ class AppConfigService {
         'ctas': [
           {
             'label': 'Découvrir',
-            'action': 'navigate:$_menuB3Route',
+            'action': 'navigate:/menu',
             'backgroundColor': _defaultPrimaryColor,
             'textColor': _defaultWhiteColor,
             'borderRadius': 8.0,
@@ -1434,10 +1441,10 @@ class AppConfigService {
   /// Build menu page with product list
   PageSchema _buildMenuPage() {
     return PageSchema(
-      id: 'menu_b3',
-      name: 'Menu B3',
-      route: _menuB3Route,
-      enabled: true,
+      id: 'menu_main',
+      name: 'Menu',
+      route: '/menu',
+      enabled: false, // Disabled by default to preserve existing behavior
       blocks: [
         WidgetBlock(
           id: 'banner_menu',
@@ -1497,10 +1504,10 @@ class AppConfigService {
   /// Build categories page with category list
   PageSchema _buildCategoriesPage() {
     return PageSchema(
-      id: 'categories_b3',
-      name: 'Catégories B3',
-      route: _categoriesB3Route,
-      enabled: true,
+      id: 'categories_main',
+      name: 'Catégories',
+      route: '/categories',
+      enabled: false, // Disabled by default to preserve existing behavior
       blocks: [
         WidgetBlock(
           id: 'banner_categories',
@@ -1560,10 +1567,10 @@ class AppConfigService {
   /// Build cart page with empty state
   PageSchema _buildCartPage() {
     return PageSchema(
-      id: 'cart_b3',
-      name: 'Panier B3',
-      route: _cartB3Route,
-      enabled: true,
+      id: 'cart_main',
+      name: 'Panier',
+      route: '/cart',
+      enabled: false, // Disabled by default to preserve existing behavior
       blocks: [
         WidgetBlock(
           id: 'banner_cart',
@@ -1619,7 +1626,7 @@ class AppConfigService {
             'label': 'Retour au menu',
           },
           actions: {
-            'onTap': 'navigate:$_menuB3Route',
+            'onTap': 'navigate:/menu',
           },
           styling: {
             'backgroundColor': _defaultPrimaryColor,
@@ -1812,6 +1819,111 @@ class AppConfigService {
       debugPrint('✅ FIX: Firestore pages fix completed');
     } catch (e) {
       debugPrint('❌ FIX: Error in fixExistingPagesInFirestore: $e');
+    }
+  }
+
+  // Old B3 routes to clean up during migration
+  static const Set<String> _oldB3Routes = {
+    '/home-b3',
+    '/menu-b3',
+    '/categories-b3',
+    '/cart-b3',
+  };
+
+  /// One-time cleanup: Remove old duplicate -b3 pages
+  /// 
+  /// This method removes the old duplicate pages that had -b3 suffixes
+  /// (like /home-b3, /menu-b3, /cart-b3, /categories-b3) and keeps only
+  /// the main routes (/home, /menu, /cart, /categories).
+  /// 
+  /// This fixes the confusion where users would edit one page in Studio B3
+  /// but see different content in the actual app.
+  /// 
+  /// **Safe to call multiple times** - it only removes pages with -b3 routes
+  Future<void> cleanupDuplicateB3Pages({String appId = AppConstants.appId}) async {
+    const String cleanupKey = 'b3_duplicate_pages_cleanup_completed';
+    
+    try {
+      // Check if cleanup already completed (cache the prefs instance)
+      final prefs = await SharedPreferences.getInstance();
+      final alreadyCleaned = prefs.getBool(cleanupKey) ?? false;
+      
+      if (alreadyCleaned) {
+        debugPrint('🧹 CLEANUP: Already completed, skipping');
+        return;
+      }
+      
+      debugPrint('🧹 CLEANUP: Starting duplicate -b3 pages cleanup for appId: $appId');
+      
+      // Clean published config
+      try {
+        final publishedConfig = await getConfig(appId: appId, draft: false, autoCreate: false);
+        if (publishedConfig != null) {
+          final originalCount = publishedConfig.pages.pages.length;
+          
+          // Keep only pages that are NOT old -b3 routes
+          final cleanedPages = publishedConfig.pages.pages
+              .where((page) => !_oldB3Routes.contains(page.route))
+              .toList();
+          
+          if (cleanedPages.length < originalCount) {
+            final fixedConfig = publishedConfig.copyWith(
+              pages: publishedConfig.pages.copyWith(pages: cleanedPages),
+            );
+            
+            await _firestore
+                .collection(_collectionName)
+                .doc(appId)
+                .collection('configs')
+                .doc(_configDocName)
+                .set(fixedConfig.toJson());
+            
+            debugPrint('🧹 CLEANUP: Published config cleaned - removed ${originalCount - cleanedPages.length} duplicate pages');
+          } else {
+            debugPrint('🧹 CLEANUP: Published config - no duplicates found');
+          }
+        }
+      } catch (e) {
+        debugPrint('🧹 CLEANUP: Error cleaning published config: $e');
+      }
+      
+      // Clean draft config
+      try {
+        final draftConfig = await getConfig(appId: appId, draft: true, autoCreate: false);
+        if (draftConfig != null) {
+          final originalCount = draftConfig.pages.pages.length;
+          
+          // Keep only pages that are NOT old -b3 routes
+          final cleanedPages = draftConfig.pages.pages
+              .where((page) => !_oldB3Routes.contains(page.route))
+              .toList();
+          
+          if (cleanedPages.length < originalCount) {
+            final fixedConfig = draftConfig.copyWith(
+              pages: draftConfig.pages.copyWith(pages: cleanedPages),
+            );
+            
+            await _firestore
+                .collection(_collectionName)
+                .doc(appId)
+                .collection('configs')
+                .doc(_configDraftDocName)
+                .set(fixedConfig.toJson());
+            
+            debugPrint('🧹 CLEANUP: Draft config cleaned - removed ${originalCount - cleanedPages.length} duplicate pages');
+          } else {
+            debugPrint('🧹 CLEANUP: Draft config - no duplicates found');
+          }
+        }
+      } catch (e) {
+        debugPrint('🧹 CLEANUP: Error cleaning draft config: $e');
+      }
+      
+      // Mark cleanup as completed
+      await prefs.setBool(cleanupKey, true);
+      debugPrint('✅ CLEANUP: Duplicate -b3 pages cleanup completed');
+    } catch (e) {
+      debugPrint('❌ CLEANUP: Error in cleanupDuplicateB3Pages: $e');
     }
   }
 }
