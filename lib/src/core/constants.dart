@@ -40,6 +40,11 @@ class UserRole {
   static const String admin = 'admin';
   static const String client = 'client';
   static const String kitchen = 'kitchen';
+  
+  // Builder B3 roles
+  static const String superAdmin = 'super_admin';    // Full access to all restaurants
+  static const String adminResto = 'admin_resto';    // Access to specific restaurant
+  static const String studio = 'studio';              // Limited access (optional)
 }
 
 /// Clés SharedPreferences (encore utilisé pour les produits)
