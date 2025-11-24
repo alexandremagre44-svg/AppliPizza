@@ -17,9 +17,9 @@ class ButtonBlockPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = block.getConfig<String>('label', 'Bouton');
-    final alignment = block.getConfig<String>('alignment', 'center');
-    final style = block.getConfig<String>('style', 'primary');
+    final label = block.getConfig<String>('label', 'Bouton') ?? 'Bouton';
+    final alignment = block.getConfig<String>('alignment', 'center') ?? 'center';
+    final style = block.getConfig<String>('style', 'primary') ?? 'primary';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

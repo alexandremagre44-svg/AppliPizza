@@ -335,4 +335,3 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     );
   }
 }
-}

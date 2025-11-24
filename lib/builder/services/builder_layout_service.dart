@@ -85,7 +85,7 @@ class BuilderLayoutService {
         return null;
       }
 
-      return BuilderPage.fromJson(snapshot.data()!);
+      return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
     } catch (e) {
       print('Error loading draft: $e');
       return null;
@@ -109,7 +109,7 @@ class BuilderLayoutService {
       }
       
       try {
-        return BuilderPage.fromJson(snapshot.data()!);
+        return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
       } catch (e) {
         print('Error parsing draft: $e');
         return null;
@@ -159,7 +159,7 @@ class BuilderLayoutService {
 
     // Optionally delete draft
     if (deleteDraft) {
-      await deleteDraft(page.appId, page.pageId);
+      await this.deleteDraft(page.appId, page.pageId);
     }
   }
 
@@ -175,7 +175,7 @@ class BuilderLayoutService {
         return null;
       }
 
-      return BuilderPage.fromJson(snapshot.data()!);
+      return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
     } catch (e) {
       print('Error loading published page: $e');
       return null;
@@ -199,7 +199,7 @@ class BuilderLayoutService {
       }
       
       try {
-        return BuilderPage.fromJson(snapshot.data()!);
+        return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
       } catch (e) {
         print('Error parsing published page: $e');
         return null;

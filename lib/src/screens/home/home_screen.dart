@@ -391,6 +391,16 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  // Build promotions section (for promo products)
+  Widget _buildPromotionsSection(BuildContext context, WidgetRef ref, List<Product> products) {
+    return _buildPromoCarousel(context, ref, products);
+  }
+
+  // Build bestsellers grid
+  Widget _buildBestsellersGrid(BuildContext context, WidgetRef ref, List<Product> products) {
+    return _buildProductGrid(context, ref, products);
+  }
+
   void _handleProductTap(BuildContext context, WidgetRef ref, Product product) {
     final cartNotifier = ref.read(cartProvider.notifier);
     

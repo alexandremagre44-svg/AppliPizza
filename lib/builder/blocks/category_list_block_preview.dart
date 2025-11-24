@@ -17,7 +17,7 @@ class CategoryListBlockPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categoryIds = block.getConfig<List>('categoryIds', []);
+    final categoryIds = block.getConfig<List>('categoryIds', []) ?? [];
     final categoryCount = categoryIds.isNotEmpty ? categoryIds.length : 4;
 
     return Container(

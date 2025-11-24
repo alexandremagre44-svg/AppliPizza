@@ -390,15 +390,15 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   String _getBlockSummary(BuilderBlock block) {
     switch (block.type) {
       case BlockType.hero:
-        return block.getConfig<String>('title', 'Sans titre');
+        return block.getConfig<String>('title', 'Sans titre') ?? 'Sans titre';
       case BlockType.text:
-        final content = block.getConfig<String>('content', '');
+        final content = block.getConfig<String>('content', '') ?? '';
         return content.length > 40 ? '${content.substring(0, 40)}...' : content;
       case BlockType.productList:
-        final ids = block.getConfig<List>('productIds', []);
+        final ids = block.getConfig<List>('productIds', []) ?? [];
         return '${ids.length} produit(s)';
       case BlockType.banner:
-        return block.getConfig<String>('text', 'Bannière');
+        return block.getConfig<String>('text', 'Bannière') ?? 'Bannière';
       default:
         return 'Bloc ${block.type.value}';
     }
@@ -474,27 +474,27 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     return [
       _buildTextField(
         label: 'Titre',
-        value: block.getConfig<String>('title', ''),
+        value: block.getConfig<String>('title', '') ?? '',
         onChanged: (v) => _updateBlockConfig('title', v),
       ),
       _buildTextField(
         label: 'Sous-titre',
-        value: block.getConfig<String>('subtitle', ''),
+        value: block.getConfig<String>('subtitle', '') ?? '',
         onChanged: (v) => _updateBlockConfig('subtitle', v),
       ),
       _buildTextField(
         label: 'URL Image',
-        value: block.getConfig<String>('imageUrl', ''),
+        value: block.getConfig<String>('imageUrl', '') ?? '',
         onChanged: (v) => _updateBlockConfig('imageUrl', v),
       ),
       _buildTextField(
         label: 'Couleur de fond',
-        value: block.getConfig<String>('backgroundColor', ''),
+        value: block.getConfig<String>('backgroundColor', '') ?? '',
         onChanged: (v) => _updateBlockConfig('backgroundColor', v),
       ),
       _buildTextField(
         label: 'Label du bouton',
-        value: block.getConfig<String>('buttonLabel', ''),
+        value: block.getConfig<String>('buttonLabel', '') ?? '',
         onChanged: (v) => _updateBlockConfig('buttonLabel', v),
       ),
     ];
@@ -504,19 +504,19 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     return [
       _buildTextField(
         label: 'Contenu',
-        value: block.getConfig<String>('content', ''),
+        value: block.getConfig<String>('content', '') ?? '',
         onChanged: (v) => _updateBlockConfig('content', v),
         maxLines: 5,
       ),
       _buildDropdown<String>(
         label: 'Alignement',
-        value: block.getConfig<String>('alignment', 'left'),
+        value: block.getConfig<String>('alignment', 'left') ?? 'left',
         items: const ['left', 'center', 'right'],
         onChanged: (v) => _updateBlockConfig('alignment', v),
       ),
       _buildDropdown<String>(
         label: 'Taille',
-        value: block.getConfig<String>('size', 'normal'),
+        value: block.getConfig<String>('size', 'normal') ?? 'normal',
         items: const ['small', 'normal', 'large'],
         onChanged: (v) => _updateBlockConfig('size', v),
       ),
@@ -524,13 +524,13 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   List<Widget> _buildProductListConfig(BuilderBlock block) {
-    final productIds = block.getConfig<List>('productIds', []);
+    final productIds = block.getConfig<List>('productIds', []) ?? [];
     final idsText = productIds.join(', ');
 
     return [
       _buildDropdown<String>(
         label: 'Mode',
-        value: block.getConfig<String>('mode', 'manual'),
+        value: block.getConfig<String>('mode', 'manual') ?? 'manual',
         items: const ['manual', 'auto'],
         onChanged: (v) => _updateBlockConfig('mode', v),
       ),
@@ -550,17 +550,17 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     return [
       _buildTextField(
         label: 'Texte',
-        value: block.getConfig<String>('text', ''),
+        value: block.getConfig<String>('text', '') ?? '',
         onChanged: (v) => _updateBlockConfig('text', v),
       ),
       _buildTextField(
         label: 'Couleur de fond',
-        value: block.getConfig<String>('backgroundColor', ''),
+        value: block.getConfig<String>('backgroundColor', '') ?? '',
         onChanged: (v) => _updateBlockConfig('backgroundColor', v),
       ),
       _buildTextField(
         label: 'Couleur du texte',
-        value: block.getConfig<String>('textColor', ''),
+        value: block.getConfig<String>('textColor', '') ?? '',
         onChanged: (v) => _updateBlockConfig('textColor', v),
       ),
     ];

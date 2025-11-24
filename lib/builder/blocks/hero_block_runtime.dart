@@ -26,7 +26,8 @@ class HeroBlockRuntime extends ConsumerWidget {
     return HeroBanner(
       imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
       title: title,
-      subtitle: subtitle.isNotEmpty ? subtitle : null,
+      subtitle: subtitle.isNotEmpty ? subtitle : '',
+      buttonText: buttonLabel ?? 'Commander',
       onTap: () {
         // Navigate to menu when tapped
         context.go(AppRoutes.menu);

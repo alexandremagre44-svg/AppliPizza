@@ -18,8 +18,8 @@ class ProductListBlockPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mode = block.getConfig<String>('mode', 'manual');
-    final productIds = block.getConfig<List>('productIds', []);
+    final mode = block.getConfig<String>('mode', 'manual') ?? 'manual';
+    final productIds = block.getConfig<List>('productIds', []) ?? [];
 
     final productCount = productIds.isNotEmpty ? productIds.length : 4;
 
