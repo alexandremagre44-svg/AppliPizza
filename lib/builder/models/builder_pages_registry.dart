@@ -86,4 +86,17 @@ class BuilderPagesRegistry {
       return null;
     }
   }
+
+  /// Filter pages by display location
+  /// 
+  /// This is a helper for working with page metadata.
+  /// For actual page filtering with displayLocation, use BuilderNavigationService.
+  static List<BuilderPageMetadata> filterByRoute(bool Function(String route) predicate) {
+    return pages.where((page) => predicate(page.route)).toList();
+  }
+
+  /// Check if a route exists in the registry
+  static bool hasRoute(String route) {
+    return pages.any((page) => page.route == route);
+  }
 }
