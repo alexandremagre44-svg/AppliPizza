@@ -44,18 +44,19 @@ final promoPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
   return await service.loadPublished(_defaultAppId, BuilderPageId.promo);
 });
 
-/// Generic provider factory for any page
+/// Generic family provider for any page
+/// Uses Riverpod family for proper caching and state management
 /// 
 /// Usage:
 /// ```dart
-/// final aboutPageProvider = publishedPageProvider(BuilderPageId.about);
+/// final aboutPage = ref.watch(publishedPageProvider(BuilderPageId.about));
 /// ```
-FutureProvider<BuilderPage?> publishedPageProvider(BuilderPageId pageId) {
-  return FutureProvider<BuilderPage?>((ref) async {
+final publishedPageProvider = FutureProvider.family<BuilderPage?, BuilderPageId>(
+  (ref, pageId) async {
     final service = ref.watch(builderLayoutServiceProvider);
     return await service.loadPublished(_defaultAppId, pageId);
-  });
-}
+  },
+);
 
 /// Stream provider for real-time updates of home page
 /// Use this if you need live updates when layout changes in Firestore
