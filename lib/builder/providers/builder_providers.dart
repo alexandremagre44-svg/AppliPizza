@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 
+/// Default app ID for single-restaurant deployments
+/// TODO: Replace with multi-resto app context provider
+const String _defaultAppId = 'pizza_delizza';
+
 /// Service provider for BuilderLayoutService
 /// Provides singleton instance of the layout service
 final builderLayoutServiceProvider = Provider<BuilderLayoutService>((ref) {
@@ -25,22 +29,19 @@ final builderLayoutServiceProvider = Provider<BuilderLayoutService>((ref) {
 /// ```
 final homePagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
   final service = ref.watch(builderLayoutServiceProvider);
-  const appId = 'pizza_delizza'; // TODO: Get from config/context
-  return await service.loadPublished(appId, BuilderPageId.home);
+  return await service.loadPublished(_defaultAppId, BuilderPageId.home);
 });
 
 /// Provider for published menu page layout
 final menuPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
   final service = ref.watch(builderLayoutServiceProvider);
-  const appId = 'pizza_delizza';
-  return await service.loadPublished(appId, BuilderPageId.menu);
+  return await service.loadPublished(_defaultAppId, BuilderPageId.menu);
 });
 
 /// Provider for published promo page layout
 final promoPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
   final service = ref.watch(builderLayoutServiceProvider);
-  const appId = 'pizza_delizza';
-  return await service.loadPublished(appId, BuilderPageId.promo);
+  return await service.loadPublished(_defaultAppId, BuilderPageId.promo);
 });
 
 /// Generic provider factory for any page
@@ -52,8 +53,7 @@ final promoPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
 FutureProvider<BuilderPage?> publishedPageProvider(BuilderPageId pageId) {
   return FutureProvider<BuilderPage?>((ref) async {
     final service = ref.watch(builderLayoutServiceProvider);
-    const appId = 'pizza_delizza';
-    return await service.loadPublished(appId, pageId);
+    return await service.loadPublished(_defaultAppId, pageId);
   });
 }
 
@@ -61,6 +61,5 @@ FutureProvider<BuilderPage?> publishedPageProvider(BuilderPageId pageId) {
 /// Use this if you need live updates when layout changes in Firestore
 final homePagePublishedStreamProvider = StreamProvider<BuilderPage?>((ref) {
   final service = ref.watch(builderLayoutServiceProvider);
-  const appId = 'pizza_delizza';
-  return service.watchPublished(appId, BuilderPageId.home);
+  return service.watchPublished(_defaultAppId, BuilderPageId.home);
 });
