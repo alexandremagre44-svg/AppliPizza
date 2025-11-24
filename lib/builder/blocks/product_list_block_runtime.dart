@@ -132,9 +132,9 @@ class ProductListBlockRuntime extends ConsumerWidget {
         break;
 
       case 'top_selling':
-        // Top selling products (using displaySpot as proxy)
+        // Top selling products (using isBestSeller property)
         filtered = allProducts
-            .where((p) => p.isActive && p.displaySpot == DisplaySpot.bestseller)
+            .where((p) => p.isActive && p.isBestSeller)
             .take(_limit)
             .toList();
         break;

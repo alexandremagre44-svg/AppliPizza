@@ -46,7 +46,7 @@ Future<void> exampleDraftWorkflow() async {
   await service.publishPage(
     loadedDraft!,
     userId: 'admin_123',
-    deleteDraft: true,
+    shouldDeleteDraft: true,
   );
   print('Published!');
 }
@@ -138,7 +138,7 @@ Future<void> examplePublishingWorkflow() async {
   await service.publishPage(
     draft,
     userId: 'admin_123',
-    deleteDraft: true, // Clean up draft after publishing
+    shouldDeleteDraft: true, // Clean up draft after publishing
   );
 
   print('Published! New version: v${draft.version}');

@@ -389,7 +389,7 @@ class BuilderLayoutService {
     for (final pageId in BuilderPageId.values) {
       final draft = await loadDraft(appId, pageId);
       if (draft != null) {
-        await publishPage(draft, userId: userId, deleteDraft: deleteDrafts);
+        await publishPage(draft, userId: userId, shouldDeleteDraft: deleteDrafts);
         published.add(pageId);
       }
     }
