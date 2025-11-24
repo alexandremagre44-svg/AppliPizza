@@ -98,12 +98,18 @@ class BuilderAutoInitService {
   Future<void> resetAutoInitFlag(String appId) async {
     try {
       final ref = _getMetaRef(appId);
-      await ref.update({
-        'autoInitDone': FieldValue.delete(),
-        'autoInitAt': FieldValue.delete(),
-      });
-
-      debugPrint('[BuilderAutoInitService] Reset autoInitDone flag for appId: $appId');
+      final snapshot = await ref.get();
+      
+      // Only attempt to delete fields if document exists
+      if (snapshot.exists) {
+        await ref.update({
+          'autoInitDone': FieldValue.delete(),
+          'autoInitAt': FieldValue.delete(),
+        });
+        debugPrint('[BuilderAutoInitService] Reset autoInitDone flag for appId: $appId');
+      } else {
+        debugPrint('[BuilderAutoInitService] No meta document found for appId: $appId, nothing to reset');
+      }
     } catch (e, stackTrace) {
       debugPrint('[BuilderAutoInitService] Error resetting autoInitDone for $appId: $e');
       if (kDebugMode) {
