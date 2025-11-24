@@ -120,10 +120,22 @@ class AppContextService {
       );
     }
     
-    // Load user profile from Firestore
+    // Check custom claims first (more secure)
+    Map<String, dynamic>? customClaims;
+    try {
+      final idTokenResult = await user.getIdTokenResult();
+      customClaims = idTokenResult.claims;
+    } catch (e) {
+      print('Error retrieving custom claims: $e');
+    }
+    
+    // Check if user has admin claim
+    final hasAdminClaim = customClaims?['admin'] == true;
+    
+    // Load user profile from Firestore as fallback
     final userDoc = await _firestore.collection('users').doc(user.uid).get();
     
-    if (!userDoc.exists) {
+    if (!userDoc.exists && !hasAdminClaim) {
       return AppContextState(
         currentAppId: 'pizza_delizza',
         accessibleApps: [],
@@ -133,15 +145,15 @@ class AppContextService {
       );
     }
     
-    final userData = userDoc.data()!;
+    final userData = userDoc.exists ? userDoc.data()! : <String, dynamic>{};
     final role = userData['role'] as String? ?? BuilderRole.client;
     
     // Determine accessible apps based on role
     List<AppInfo> accessibleApps;
     String defaultAppId;
     
-    if (role == BuilderRole.superAdmin) {
-      // Super admin: load all apps
+    if (role == BuilderRole.superAdmin || hasAdminClaim) {
+      // Super admin or admin claim: load all apps
       accessibleApps = await _loadAllApps();
       defaultAppId = accessibleApps.isNotEmpty 
           ? accessibleApps.first.appId 
@@ -163,8 +175,9 @@ class AppContextService {
       defaultAppId = 'pizza_delizza';
     }
     
-    // Check if user has Builder access
-    final hasBuilderAccess = role == BuilderRole.superAdmin ||
+    // Check if user has Builder access (custom claim OR role-based)
+    final hasBuilderAccess = hasAdminClaim ||
+        role == BuilderRole.superAdmin ||
         role == BuilderRole.adminResto ||
         role == BuilderRole.studio ||
         role == BuilderRole.admin;

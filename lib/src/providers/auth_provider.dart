@@ -44,6 +44,7 @@ class AuthState {
   final String? userRole;
   final String? displayName;
   final Map<String, dynamic>? userProfile; // Full user profile from Firestore
+  final Map<String, dynamic>? customClaims; // Custom claims from Firebase Auth token
   final bool isLoading;
   final String? error;
 
@@ -54,11 +55,12 @@ class AuthState {
     this.userRole,
     this.displayName,
     this.userProfile,
+    this.customClaims,
     this.isLoading = false,
     this.error,
   });
 
-  bool get isAdmin => userRole == UserRole.admin;
+  bool get isAdmin => userRole == UserRole.admin || (customClaims?['admin'] == true);
   bool get isKitchen => userRole == UserRole.kitchen;
 
   AuthState copyWith({
@@ -68,6 +70,7 @@ class AuthState {
     String? userRole,
     String? displayName,
     Map<String, dynamic>? userProfile,
+    Map<String, dynamic>? customClaims,
     bool? isLoading,
     String? error,
   }) {
@@ -78,6 +81,7 @@ class AuthState {
       userRole: userRole ?? this.userRole,
       displayName: displayName ?? this.displayName,
       userProfile: userProfile ?? this.userProfile,
+      customClaims: customClaims ?? this.customClaims,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
@@ -104,6 +108,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final role = profile?['role'] ?? UserRole.client;
         final displayName = profile?['displayName'] ?? user.displayName;
         
+        // Récupérer les custom claims depuis le token Firebase Auth
+        final customClaims = await _authService.getCustomClaims(user);
+        
         state = AuthState(
           isLoggedIn: true,
           userId: user.uid,
@@ -111,6 +118,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           userRole: role,
           displayName: displayName,
           userProfile: profile,
+          customClaims: customClaims,
           isLoading: false,
         );
       }
@@ -157,6 +165,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final role = profile?['role'] ?? UserRole.client;
       final displayName = profile?['displayName'] ?? user.displayName;
       
+      // Récupérer les custom claims depuis le token Firebase Auth
+      final customClaims = await _authService.getCustomClaims(user);
+      
       state = AuthState(
         isLoggedIn: true,
         userId: user.uid,
@@ -164,6 +175,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         userRole: role,
         displayName: displayName,
         userProfile: profile,
+        customClaims: customClaims,
       );
       return true;
     }
