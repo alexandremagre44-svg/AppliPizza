@@ -141,11 +141,10 @@ class HomeScreen extends ConsumerWidget {
                 await ref.read(productListProvider.future);
               },
               color: AppColors.primaryRed,
-              child: SingleChildScrollView(
-                child: BuilderRuntimeRenderer(
-                  blocks: snapshot.data!.blocks,
-                  backgroundColor: Colors.white,
-                ),
+              child: BuilderRuntimeRenderer(
+                blocks: snapshot.data!.blocks,
+                backgroundColor: Colors.white,
+                wrapInScrollView: true,
               ),
             ),
           );
