@@ -143,12 +143,12 @@ class BuilderLayoutService {
   /// Example:
   /// ```dart
   /// final draft = await service.loadDraft('pizza_delizza', BuilderPageId.home);
-  /// await service.publishPage(draft!, userId: 'admin_123', deleteDraft: true);
+  /// await service.publishPage(draft!, userId: 'admin_123', shouldDeleteDraft: true);
   /// ```
   Future<void> publishPage(
     BuilderPage page, {
     required String userId,
-    bool deleteDraft = false,
+    bool shouldDeleteDraft = false,
   }) async {
     // Create published version
     final publishedPage = page.publish(userId: userId);
@@ -158,8 +158,8 @@ class BuilderLayoutService {
     await ref.set(publishedPage.toJson());
 
     // Optionally delete draft
-    if (deleteDraft) {
-      await this.deleteDraft(page.appId, page.pageId);
+    if (shouldDeleteDraft) {
+      await deleteDraft(page.appId, page.pageId);
     }
   }
 
