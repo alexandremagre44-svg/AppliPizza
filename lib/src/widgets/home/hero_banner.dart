@@ -18,7 +18,7 @@ class HeroBanner extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
-    this.buttonText = 'Commander',
+    required this.buttonText,
     this.onPressed,
     this.onTap,
     this.imageUrl,

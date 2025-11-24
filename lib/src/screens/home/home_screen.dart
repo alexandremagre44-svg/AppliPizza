@@ -204,6 +204,7 @@ class HomeScreen extends ConsumerWidget {
                 imageUrl: homeConfig.hero.imageUrl,
                 title: homeConfig.hero.title,
                 subtitle: homeConfig.hero.subtitle,
+                buttonText: homeConfig.hero.ctaText,
                 onTap: () {
                   // Navigate to menu or specific product
                   context.go(AppRoutes.menu);
