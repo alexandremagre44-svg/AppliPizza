@@ -181,8 +181,10 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         };
       case BlockType.productList:
         return {
-          'mode': 'manual',
-          'productIds': [],
+          'mode': 'featured',
+          'productIds': '',
+          'layout': 'grid',
+          'limit': 6,
         };
       case BlockType.banner:
         return {
