@@ -1,12 +1,14 @@
 // lib/builder/blocks/banner_block_preview.dart
-// Banner block preview widget
+// Banner block preview widget - Phase 5 enhanced
 
 import 'package:flutter/material.dart';
 import '../models/models.dart';
+import '../utils/block_config_helper.dart';
 
 /// Banner Block Preview
 /// 
-/// Displays a colored banner with text.
+/// Displays a promotional or informational banner.
+/// Preview version with debug borders and stable rendering even with empty config.
 class BannerBlockPreview extends StatelessWidget {
   final BuilderBlock block;
 
@@ -17,60 +19,145 @@ class BannerBlockPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = block.getConfig<String>('text', 'Bannière') ?? 'Bannière';
-    final backgroundColor = block.getConfig<String>('backgroundColor', '#2196F3') ?? '#2196F3';
-    final textColor = block.getConfig<String>('textColor', '#FFFFFF') ?? '#FFFFFF';
+    final helper = BlockConfigHelper(block.config, blockId: block.id);
+    
+    // Get configuration with defaults matching runtime
+    final title = helper.getString('title', defaultValue: 'Banner Title');
+    final subtitle = helper.getString('subtitle', defaultValue: '');
+    final imageUrl = helper.getString('imageUrl', defaultValue: '');
+    final align = helper.getString('align', defaultValue: 'center');
+    final backgroundColor = helper.getColor('backgroundColor');
+    final textColor = helper.getColor('textColor', defaultValue: Colors.black);
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
+    final height = helper.getDouble('height', defaultValue: 160.0);
 
-    final bgColor = _parseColor(backgroundColor);
-    final txtColor = _parseColor(textColor);
+    // Determine alignment
+    CrossAxisAlignment crossAxisAlignment;
+    TextAlign textAlign;
+    switch (align.toLowerCase()) {
+      case 'left':
+        crossAxisAlignment = CrossAxisAlignment.start;
+        textAlign = TextAlign.left;
+        break;
+      case 'right':
+        crossAxisAlignment = CrossAxisAlignment.end;
+        textAlign = TextAlign.right;
+        break;
+      default: // center
+        crossAxisAlignment = CrossAxisAlignment.center;
+        textAlign = TextAlign.center;
+    }
 
     return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      height: height,
+      margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: Colors.orange.withOpacity(0.5),
+          width: 2,
+        ),
+        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
       ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.info_outline,
-            color: txtColor,
-            size: 24,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: txtColor,
+      child: ClipRRect(
+        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : BorderRadius.zero,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background image or color
+            if (imageUrl.isNotEmpty)
+              Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(color: backgroundColor ?? Colors.grey.shade200);
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(color: backgroundColor ?? Colors.grey.shade200);
+                },
+              )
+            else
+              Container(color: backgroundColor ?? Colors.transparent),
+            
+            // Preview label
+            Positioned(
+              top: 4,
+              right: 4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'BANNER',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+            
+            // Content
+            if (title.isNotEmpty || subtitle.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: crossAxisAlignment,
+                  children: [
+                    // Title (only if not empty)
+                    if (title.isNotEmpty)
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                        textAlign: textAlign,
+                      ),
+                    
+                    // Subtitle (only if not empty)
+                    if (subtitle.isNotEmpty) ...[
+                      if (title.isNotEmpty) const SizedBox(height: 6),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: textColor.withOpacity(0.9),
+                        ),
+                        textAlign: textAlign,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            
+            // Config info overlay (bottom)
+            Positioned(
+              bottom: 4,
+              left: 4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: Text(
+                  'h:${height.toInt()} align:$align',
+                  style: const TextStyle(
+                    fontSize: 9,
+                    color: Colors.white70,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
-  }
-
-  Color _parseColor(String colorString) {
-    try {
-      if (colorString.startsWith('#')) {
-        final hex = colorString.substring(1);
-        return Color(int.parse('FF$hex', radix: 16));
-      }
-      return Colors.blue;
-    } catch (e) {
-      return Colors.blue;
-    }
   }
 }
