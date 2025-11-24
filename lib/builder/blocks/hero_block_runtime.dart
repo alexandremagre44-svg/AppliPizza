@@ -1,24 +1,31 @@
 // lib/builder/blocks/hero_block_runtime.dart
-// Runtime version of HeroBlock - uses real widgets and styling
+// Runtime version of HeroBlock - Phase 5 enhanced
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../models/builder_block.dart';
-import '../../src/theme/app_theme.dart';
-import '../../src/core/constants.dart';
+import '../utils/block_config_helper.dart';
+import '../utils/action_helper.dart';
 
-/// Enhanced HeroBlockRuntime with configurable properties
+/// Hero block for prominent headers with image, title, subtitle, and CTA button
 /// 
-/// Configuration options:
-/// - title: Hero title text
-/// - subtitle: Hero subtitle text
-/// - buttonLabel: CTA button text
-/// - imageUrl: Background image URL
-/// - backgroundColor: Hex color for background (e.g., '#FF5733')
-/// - heightPreset: 'small' (200px), 'normal' (280px), 'large' (400px)
-/// - alignment: 'left', 'center' (text alignment)
-class HeroBlockRuntime extends ConsumerWidget {
+/// Configuration:
+/// - title: Hero title text (default: 'Bienvenue')
+/// - subtitle: Hero subtitle text (default: 'Les meilleures pizzas')
+/// - imageUrl: Background image URL (default: '')
+/// - align: Text alignment - left, center, right (default: center)
+/// - padding: Padding inside the hero (default: 16)
+/// - margin: Margin around the hero (default: 0)
+/// - backgroundColor: Background color in hex (default: #D32F2F)
+/// - textColor: Text color in hex (default: #FFFFFF)
+/// - buttonText: CTA button text (default: 'Commander')
+/// - buttonColor: Button background color in hex (default: #FFFFFF)
+/// - buttonTextColor: Button text color in hex (default: #D32F2F)
+/// - borderRadius: Corner radius (default: 0)
+/// - height: Hero height in pixels (default: 200 mobile, 280 desktop)
+/// - tapAction: Action when hero is tapped (openPage, openUrl, scrollToBlock)
+/// 
+/// Responsive: Full width on mobile, max 1200px centered on desktop
+class HeroBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
 
   const HeroBlockRuntime({
@@ -26,69 +33,90 @@ class HeroBlockRuntime extends ConsumerWidget {
     required this.block,
   });
 
-  // Helper getters for configuration
-  String get _title => block.getConfig<String>('title') ?? 'Bienvenue chez Pizza Deli\'Zza';
-  String get _subtitle => block.getConfig<String>('subtitle') ?? 'Les meilleures pizzas artisanales';
-  String get _buttonLabel => block.getConfig<String>('buttonLabel') ?? 'Commander';
-  String? get _imageUrl {
-    final url = block.getConfig<String>('imageUrl');
-    return (url != null && url.isNotEmpty) ? url : null;
-  }
-  
-  Color get _backgroundColor {
-    final colorStr = block.getConfig<String>('backgroundColor');
-    if (colorStr != null && colorStr.isNotEmpty) {
-      try {
-        return Color(int.parse(colorStr.replaceAll('#', '0xFF')));
-      } catch (e) {
-        // Fallback to default
+  @override
+  Widget build(BuildContext context) {
+    final helper = BlockConfigHelper(block.config, blockId: block.id);
+    
+    // Get configuration with defaults
+    final title = helper.getString('title', defaultValue: 'Bienvenue');
+    final subtitle = helper.getString('subtitle', defaultValue: 'Les meilleures pizzas');
+    final imageUrl = helper.getString('imageUrl', defaultValue: '');
+    
+    // Support both 'align' (new) and 'alignment' (legacy) for backward compatibility
+    final align = helper.getString('align', 
+        defaultValue: helper.getString('alignment', defaultValue: 'center'));
+    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(16));
+    final margin = helper.getEdgeInsets('margin');
+    final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFD32F2F));
+    final textColor = helper.getColor('textColor', defaultValue: Colors.white);
+    
+    // Support both 'buttonText' (new) and 'buttonLabel' (legacy) for backward compatibility
+    final buttonText = helper.getString('buttonText', 
+        defaultValue: helper.getString('buttonLabel', defaultValue: 'Commander'));
+    final buttonColor = helper.getColor('buttonColor', defaultValue: Colors.white);
+    final buttonTextColor = helper.getColor('buttonTextColor', defaultValue: const Color(0xFFD32F2F));
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: 0.0);
+    
+    // Get action config
+    final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
+    
+    // Responsive height: check screen size
+    final isDesktop = MediaQuery.of(context).size.width > 800;
+    final defaultHeight = isDesktop ? 280.0 : 200.0;
+    
+    // Support legacy 'heightPreset' field
+    final heightPreset = helper.getString('heightPreset', defaultValue: '');
+    double legacyHeight = defaultHeight;
+    if (heightPreset.isNotEmpty) {
+      switch (heightPreset.toLowerCase()) {
+        case 'small':
+          legacyHeight = 200;
+          break;
+        case 'large':
+          legacyHeight = 400;
+          break;
+        case 'normal':
+        default:
+          legacyHeight = 280;
       }
     }
-    return AppColors.primaryRed;
-  }
-  
-  double get _height {
-    final preset = block.getConfig<String>('heightPreset') ?? 'normal';
-    switch (preset) {
-      case 'small':
-        return 200;
-      case 'large':
-        return 400;
-      case 'normal':
-      default:
-        return 280;
-    }
-  }
-  
-  CrossAxisAlignment get _alignment {
-    final align = block.getConfig<String>('alignment') ?? 'left';
-    return align == 'center' ? CrossAxisAlignment.center : CrossAxisAlignment.start;
-  }
+    
+    // Use explicit 'height' if provided, otherwise use heightPreset value, otherwise default
+    final height = helper.has('height') 
+        ? helper.getDouble('height', defaultValue: defaultHeight)
+        : legacyHeight;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      height: _height,
-      margin: AppSpacing.paddingHorizontalLG,
+    // Determine alignment
+    CrossAxisAlignment crossAxisAlignment;
+    TextAlign textAlign;
+    switch (align.toLowerCase()) {
+      case 'left':
+        crossAxisAlignment = CrossAxisAlignment.start;
+        textAlign = TextAlign.left;
+        break;
+      case 'right':
+        crossAxisAlignment = CrossAxisAlignment.end;
+        textAlign = TextAlign.right;
+        break;
+      default: // center
+        crossAxisAlignment = CrossAxisAlignment.center;
+        textAlign = TextAlign.center;
+    }
+
+    // Build hero content
+    Widget heroContent = Container(
+      height: height,
       decoration: BoxDecoration(
-        borderRadius: AppRadius.card,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
       ),
-      child: ClipRRect(
-        borderRadius: AppRadius.card,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Background (image or solid color)
-            _buildBackground(),
-            
-            // Dark overlay for text readability
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background (image or solid color)
+          _buildBackground(imageUrl, backgroundColor, borderRadius),
+          
+          // Dark overlay for text readability (only if image is present)
+          if (imageUrl.isNotEmpty)
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -101,18 +129,22 @@ class HeroBlockRuntime extends ConsumerWidget {
                 ),
               ),
             ),
-            
-            // Content
-            Padding(
-              padding: AppSpacing.paddingXXL,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: _alignment,
-                children: [
+          
+          // Content
+          Padding(
+            padding: padding,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: crossAxisAlignment,
+              children: [
+                // Title (only if not empty)
+                if (title.isNotEmpty)
                   Text(
-                    _title,
-                    style: AppTextStyles.displayMedium.copyWith(
-                      color: Colors.white,
+                    title,
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
                       shadows: [
                         Shadow(
                           color: Colors.black.withOpacity(0.5),
@@ -120,89 +152,178 @@ class HeroBlockRuntime extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    textAlign: _alignment == CrossAxisAlignment.center 
-                        ? TextAlign.center 
-                        : TextAlign.left,
+                    textAlign: textAlign,
                   ),
-                  if (_subtitle.isNotEmpty) ...[
-                    SizedBox(height: AppSpacing.md),
-                    Text(
-                      _subtitle,
-                      style: AppTextStyles.titleLarge.copyWith(
-                        color: Colors.white.withOpacity(0.95),
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.5),
-                            blurRadius: 4,
-                          ),
-                        ],
-                      ),
-                      textAlign: _alignment == CrossAxisAlignment.center 
-                          ? TextAlign.center 
-                          : TextAlign.left,
+                
+                // Subtitle (only if not empty)
+                if (subtitle.isNotEmpty) ...[
+                  if (title.isNotEmpty) const SizedBox(height: 12),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: textColor.withOpacity(0.95),
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
-                  ],
-                  SizedBox(height: AppSpacing.xxl),
+                    textAlign: textAlign,
+                  ),
+                ],
+                
+                // Button (only if buttonText is not empty)
+                if (buttonText.isNotEmpty) ...[
+                  if (title.isNotEmpty || subtitle.isNotEmpty) const SizedBox(height: 24),
                   ElevatedButton(
-                    onPressed: () {
-                      // Navigate to menu when tapped
-                      context.go(AppRoutes.menu);
-                    },
+                    onPressed: tapActionConfig != null && tapActionConfig.isNotEmpty
+                        ? () => ActionHelper.execute(context, BlockAction.fromConfig(tapActionConfig))
+                        : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: _backgroundColor,
+                      backgroundColor: buttonColor,
+                      foregroundColor: buttonTextColor,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
                         vertical: 16,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: AppRadius.button,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       elevation: 4,
                     ),
                     child: Text(
-                      _buttonLabel,
-                      style: AppTextStyles.buttonLarge.copyWith(
-                        color: _backgroundColor,
+                      buttonText,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: buttonTextColor,
                       ),
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+
+    // Apply margin if configured
+    if (margin != EdgeInsets.zero) {
+      heroContent = Padding(
+        padding: margin,
+        child: heroContent,
+      );
+    }
+
+    // Responsive: constrain width on desktop
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 1200) {
+          return Center(
+            child: SizedBox(
+              width: 1200,
+              child: heroContent,
+            ),
+          );
+        }
+        return heroContent;
+      },
     );
   }
 
-  Widget _buildBackground() {
-    if (_imageUrl != null) {
-      return Image.network(
-        _imageUrl!,
+  /// Build background with image or gradient
+  Widget _buildBackground(String imageUrl, Color backgroundColor, double borderRadius) {
+    Widget background;
+    
+    if (imageUrl.isNotEmpty) {
+      background = Image.network(
+        imageUrl,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          // Fallback to gradient if image fails
-          return _buildGradientBackground();
+          // Fallback to gradient if image fails with placeholder
+          return _buildErrorPlaceholder(backgroundColor);
         },
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return _buildGradientBackground();
+          return _buildLoadingPlaceholder(backgroundColor);
         },
       );
+    } else {
+      background = _buildGradientBackground(backgroundColor);
     }
-    return _buildGradientBackground();
+
+    // Apply ClipRRect if borderRadius > 0
+    if (borderRadius > 0) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: background,
+      );
+    }
+
+    return background;
   }
 
-  Widget _buildGradientBackground() {
+  /// Build gradient background
+  Widget _buildGradientBackground(Color color) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            _backgroundColor,
-            _backgroundColor.withOpacity(0.8),
+            color,
+            color.withOpacity(0.8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build loading placeholder
+  Widget _buildLoadingPlaceholder(Color backgroundColor) {
+    return Container(
+      color: backgroundColor.withOpacity(0.7),
+      child: const Center(
+        child: CircularProgressIndicator(
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  /// Build error placeholder (same style as image_block_runtime)
+  Widget _buildErrorPlaceholder(Color backgroundColor) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            backgroundColor,
+            backgroundColor.withOpacity(0.8),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.broken_image,
+              size: 48,
+              color: Colors.white70,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Failed to load image',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.7),
+              ),
+            ),
           ],
         ),
       ),
