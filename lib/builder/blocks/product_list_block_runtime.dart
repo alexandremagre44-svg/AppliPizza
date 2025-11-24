@@ -1,207 +1,248 @@
 // lib/builder/blocks/product_list_block_runtime.dart
-// Runtime version of ProductListBlock - uses real product data and providers
+// Runtime version of ProductListBlock - Phase 5 enhanced
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../models/builder_block.dart';
+import '../utils/block_config_helper.dart';
+import '../utils/action_helper.dart';
 import '../../src/models/product.dart';
 import '../../src/providers/product_provider.dart';
 import '../../src/providers/cart_provider.dart';
 import '../../src/widgets/product_card.dart';
 import '../../src/widgets/home/promo_card_compact.dart';
-import '../../src/theme/app_theme.dart';
-import '../../src/core/constants.dart';
 import '../../src/screens/home/pizza_customization_modal.dart';
 import '../../src/screens/menu/menu_customization_modal.dart';
 
-/// Enhanced ProductListBlockRuntime with multiple layouts and modes
+/// Product list block for displaying product grids, carousels, or lists
 /// 
-/// Configuration options:
-/// - mode: 'manual' (specific IDs), 'featured', 'top_selling', 'promo'
-/// - productIds: Comma-separated list of product IDs (for manual mode)
-/// - layout: 'grid', 'carousel', 'list'
-/// - title: Optional title for the product section
-/// - limit: Maximum number of products to show (default 6)
+/// Configuration:
+/// - title: Section title (default: '')
+/// - layout: Display layout - grid, carousel, list (default: grid)
+/// - columns: Grid columns (default: 2 mobile, 4 desktop)
+/// - showPrices: Display prices (default: true)
+/// - showBadges: Display product badges (default: true)
+/// - category: Filter by category (default: null = all products)
+/// - limit: Maximum products to show (default: null = unlimited)
+/// - padding: Padding around container (default: 12)
+/// - margin: Margin around container (default: 0)
+/// - backgroundColor: Background color in hex (default: transparent)
+/// - borderRadius: Corner radius (default: 0)
+/// - tapAction: Custom action on product tap (optional)
+/// 
+/// Responsive: Grid adapts columns based on screen size
 class ProductListBlockRuntime extends ConsumerWidget {
   final BuilderBlock block;
+
+  // Responsive breakpoints
+  static const double _mobileBreakpoint = 600.0;
+  static const double _desktopBreakpoint = 800.0;
 
   const ProductListBlockRuntime({
     super.key,
     required this.block,
   });
 
-  // Helper getters for configuration
-  String get _mode => block.getConfig<String>('mode') ?? 'featured';
-  String get _layout => block.getConfig<String>('layout') ?? 'grid';
-  String? get _title => block.getConfig<String>('title');
-  int get _limit => block.getConfig<int>('limit') ?? 6;
-  
-  List<String> get _productIds {
-    final idsStr = block.getConfig<String>('productIds') ?? '';
-    return idsStr.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final helper = BlockConfigHelper(block.config, blockId: block.id);
+    
+    // Get configuration with defaults
+    final title = helper.getString('title', defaultValue: '');
+    final layout = helper.getString('layout', defaultValue: 'grid');
+    final columns = _calculateColumns(helper, context);
+    final showPrices = helper.getBool('showPrices', defaultValue: true);
+    final showBadges = helper.getBool('showBadges', defaultValue: true);
+    final category = helper.getString('category', defaultValue: '');
+    final limitValue = helper.has('limit') ? helper.getInt('limit') : null;
+    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
+    final margin = helper.getEdgeInsets('margin');
+    final backgroundColor = helper.getColor('backgroundColor');
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: 0.0);
+    final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
+
     final productsAsync = ref.watch(productListProvider);
 
     return productsAsync.when(
       data: (allProducts) {
-        final products = _filterProducts(allProducts);
+        final products = _filterProducts(allProducts, category, limitValue);
 
         if (products.isEmpty) {
-          // Graceful fallback for empty list
-          return Padding(
-            padding: AppSpacing.paddingHorizontalLG,
-            child: Container(
-              padding: AppSpacing.paddingLG,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: AppRadius.card,
-              ),
-              child: Center(
-                child: Text(
-                  'Aucun produit disponible',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
+          return _buildPlaceholder(padding, margin, backgroundColor, borderRadius);
+        }
+
+        Widget content = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (title.isNotEmpty) ...[
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
+              const SizedBox(height: 16),
+            ],
+            _buildLayout(
+              context,
+              ref,
+              products,
+              layout,
+              columns,
+              showPrices,
+              showBadges,
+              tapActionConfig,
             ),
+          ],
+        );
+
+        // Apply padding
+        content = Padding(
+          padding: padding,
+          child: content,
+        );
+
+        // Apply background color and border radius
+        if (backgroundColor != null || borderRadius > 0) {
+          content = Container(
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
+            ),
+            child: content,
           );
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (_title != null && _title!.isNotEmpty) ...[
-              Padding(
-                padding: AppSpacing.paddingHorizontalLG,
-                child: Text(
-                  _title!,
-                  style: AppTextStyles.headlineMedium,
-                ),
-              ),
-              SizedBox(height: AppSpacing.md),
-            ],
-            _buildLayout(context, ref, products),
-          ],
-        );
+        // Apply margin
+        if (margin != EdgeInsets.zero) {
+          content = Padding(
+            padding: margin,
+            child: content,
+          );
+        }
+
+        return content;
       },
-      loading: () => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24.0),
-          child: CircularProgressIndicator(),
-        ),
-      ),
+      loading: () => _buildLoadingPlaceholder(padding, margin),
       error: (error, stack) {
-        // Graceful error handling
         debugPrint('Error loading products: $error');
-        return const SizedBox.shrink();
+        return _buildErrorPlaceholder(padding, margin, backgroundColor, borderRadius);
       },
     );
   }
 
-  List<Product> _filterProducts(List<Product> allProducts) {
-    List<Product> filtered;
-
-    switch (_mode) {
-      case 'manual':
-        // Manual mode: filter by specific IDs
-        if (_productIds.isEmpty) {
-          return [];
-        }
-        filtered = allProducts
-            .where((p) => _productIds.contains(p.id) && p.isActive)
-            .toList();
-        // Preserve order from productIds
-        filtered.sort((a, b) {
-          final indexA = _productIds.indexOf(a.id);
-          final indexB = _productIds.indexOf(b.id);
-          return indexA.compareTo(indexB);
-        });
-        break;
-
-      case 'featured':
-        // Featured products
-        filtered = allProducts
-            .where((p) => p.isActive && p.isFeatured)
-            .take(_limit)
-            .toList();
-        break;
-
-      case 'top_selling':
-        // Top selling products (using isBestSeller property)
-        filtered = allProducts
-            .where((p) => p.isActive && p.isBestSeller)
-            .take(_limit)
-            .toList();
-        break;
-
-      case 'promo':
-        // Promo products
-        filtered = allProducts
-            .where((p) => p.isActive && p.displaySpot == DisplaySpot.promotions)
-            .take(_limit)
-            .toList();
-        break;
-
-      default:
-        // Fallback: featured or active products
-        filtered = allProducts
-            .where((p) => p.isActive && p.isFeatured)
-            .take(_limit)
-            .toList();
+  /// Calculate grid columns based on screen size and config
+  int _calculateColumns(BlockConfigHelper helper, BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < _mobileBreakpoint;
+    
+    // Use config value if provided, otherwise use responsive defaults
+    if (helper.has('columns')) {
+      return helper.getInt('columns', defaultValue: isMobile ? 2 : 4);
     }
+    
+    return isMobile ? 2 : 4;
+  }
 
+  /// Filter products by category and limit
+  List<Product> _filterProducts(List<Product> allProducts, String category, int? limit) {
+    // Filter by category if specified
+    List<Product> filtered = allProducts.where((p) => p.isActive).toList();
+    
+    if (category.isNotEmpty) {
+      try {
+        final categoryEnum = ProductCategory.values.firstWhere(
+          (c) => c.value == category,
+          orElse: () => ProductCategory.values.first,
+        );
+        filtered = filtered.where((p) => p.category == categoryEnum).toList();
+      } catch (e) {
+        debugPrint('Invalid category: $category');
+      }
+    }
+    
+    // Apply limit if specified
+    if (limit != null && limit > 0) {
+      filtered = filtered.take(limit).toList();
+    }
+    
     return filtered;
   }
 
-  Widget _buildLayout(BuildContext context, WidgetRef ref, List<Product> products) {
-    switch (_layout) {
+  /// Build layout based on configuration
+  Widget _buildLayout(
+    BuildContext context,
+    WidgetRef ref,
+    List<Product> products,
+    String layout,
+    int columns,
+    bool showPrices,
+    bool showBadges,
+    Map<String, dynamic>? tapActionConfig,
+  ) {
+    switch (layout.toLowerCase()) {
       case 'carousel':
-        return _buildCarousel(context, ref, products);
+        return _buildCarousel(context, ref, products, tapActionConfig);
       case 'list':
-        return _buildList(context, ref, products);
+        return _buildList(context, ref, products, showPrices, showBadges, tapActionConfig);
       case 'grid':
       default:
-        return _buildGrid(context, ref, products);
+        return _buildGrid(context, ref, products, columns, showPrices, showBadges, tapActionConfig);
     }
   }
 
-  Widget _buildGrid(BuildContext context, WidgetRef ref, List<Product> products) {
-    return Padding(
-      padding: AppSpacing.paddingHorizontalLG,
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 0.75,
-        ),
-        itemCount: products.length,
-        itemBuilder: (context, index) => _buildProductCard(context, ref, products[index]),
+  /// Build grid layout
+  Widget _buildGrid(
+    BuildContext context,
+    WidgetRef ref,
+    List<Product> products,
+    int columns,
+    bool showPrices,
+    bool showBadges,
+    Map<String, dynamic>? tapActionConfig,
+  ) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.75,
+      ),
+      itemCount: products.length,
+      itemBuilder: (context, index) => _buildProductCard(
+        context,
+        ref,
+        products[index],
+        showPrices,
+        showBadges,
+        tapActionConfig,
       ),
     );
   }
 
-  Widget _buildCarousel(BuildContext context, WidgetRef ref, List<Product> products) {
+  /// Build carousel layout
+  Widget _buildCarousel(
+    BuildContext context,
+    WidgetRef ref,
+    List<Product> products,
+    Map<String, dynamic>? tapActionConfig,
+  ) {
     return SizedBox(
       height: 200,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: AppSpacing.paddingHorizontalLG,
         itemCount: products.length,
         itemBuilder: (context, index) {
           final product = products[index];
           return Padding(
-            padding: EdgeInsets.only(right: AppSpacing.md),
+            padding: const EdgeInsets.only(right: 12),
             child: PromoCardCompact(
               product: product,
-              onTap: () => _handleProductTap(context, ref, product),
+              onTap: () => _handleProductTap(context, ref, product, tapActionConfig),
             ),
           );
         },
@@ -209,21 +250,41 @@ class ProductListBlockRuntime extends ConsumerWidget {
     );
   }
 
-  Widget _buildList(BuildContext context, WidgetRef ref, List<Product> products) {
-    return Padding(
-      padding: AppSpacing.paddingHorizontalLG,
-      child: Column(
-        children: products
-            .map((product) => Padding(
-                  padding: EdgeInsets.only(bottom: AppSpacing.md),
-                  child: _buildProductCard(context, ref, product),
-                ))
-            .toList(),
-      ),
+  /// Build list layout
+  Widget _buildList(
+    BuildContext context,
+    WidgetRef ref,
+    List<Product> products,
+    bool showPrices,
+    bool showBadges,
+    Map<String, dynamic>? tapActionConfig,
+  ) {
+    return Column(
+      children: products
+          .map((product) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildProductCard(
+                  context,
+                  ref,
+                  product,
+                  showPrices,
+                  showBadges,
+                  tapActionConfig,
+                ),
+              ))
+          .toList(),
     );
   }
 
-  Widget _buildProductCard(BuildContext context, WidgetRef ref, Product product) {
+  /// Build product card
+  Widget _buildProductCard(
+    BuildContext context,
+    WidgetRef ref,
+    Product product,
+    bool showPrices,
+    bool showBadges,
+    Map<String, dynamic>? tapActionConfig,
+  ) {
     final cart = ref.watch(cartProvider);
     final cartItem = cart.items.cast<CartItem?>().firstWhere(
       (item) => item?.productId == product.id,
@@ -232,15 +293,27 @@ class ProductListBlockRuntime extends ConsumerWidget {
 
     return ProductCard(
       product: product,
-      onAddToCart: () => _handleProductTap(context, ref, product),
+      onAddToCart: () => _handleProductTap(context, ref, product, tapActionConfig),
       cartQuantity: cartItem?.quantity,
     );
   }
 
-  void _handleProductTap(BuildContext context, WidgetRef ref, Product product) {
+  /// Handle product tap with custom action or default behavior
+  void _handleProductTap(
+    BuildContext context,
+    WidgetRef ref,
+    Product product,
+    Map<String, dynamic>? tapActionConfig,
+  ) {
+    // If custom tap action is configured, use ActionHelper
+    if (tapActionConfig != null && tapActionConfig.isNotEmpty) {
+      ActionHelper.execute(context, BlockAction.fromConfig(tapActionConfig));
+      return;
+    }
+
+    // Default behavior: show customization or add to cart
     final cartNotifier = ref.read(cartProvider.notifier);
     
-    // If menu, show menu customization modal
     if (product.isMenu) {
       showModalBottomSheet(
         context: context,
@@ -248,38 +321,113 @@ class ProductListBlockRuntime extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         builder: (context) => MenuCustomizationModal(menu: product),
       );
-    }
-    // If pizza, show pizza customization modal
-    else if (product.category == ProductCategory.pizza) {
+    } else if (product.category == ProductCategory.pizza) {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (context) => PizzaCustomizationModal(pizza: product),
       );
-    }
-    // For other products, add directly to cart
-    else {
+    } else {
       cartNotifier.addItem(product);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Row(
-            children: [
-              const Text('🍕', style: TextStyle(fontSize: 20)),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text('${product.name} ajouté au panier !'),
-              ),
-            ],
-          ),
-          backgroundColor: AppColors.primaryRed,
+          content: Text('${product.name} ajouté au panier !'),
+          backgroundColor: const Color(0xFFD32F2F),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
-          shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.button,
-          ),
         ),
       );
     }
+  }
+
+  /// Build placeholder when no products available
+  Widget _buildPlaceholder(
+    EdgeInsets padding,
+    EdgeInsets margin,
+    Color? backgroundColor,
+    double borderRadius,
+  ) {
+    Widget placeholder = Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Colors.grey.shade100,
+        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
+        border: Border.all(color: Colors.grey.shade300, width: 2),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.shopping_bag_outlined, size: 48, color: Colors.grey.shade400),
+            const SizedBox(height: 8),
+            Text(
+              'No products available',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (margin != EdgeInsets.zero) {
+      placeholder = Padding(padding: margin, child: placeholder);
+    }
+
+    return placeholder;
+  }
+
+  /// Build loading placeholder
+  Widget _buildLoadingPlaceholder(EdgeInsets padding, EdgeInsets margin) {
+    Widget placeholder = Padding(
+      padding: padding,
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    if (margin != EdgeInsets.zero) {
+      placeholder = Padding(padding: margin, child: placeholder);
+    }
+
+    return placeholder;
+  }
+
+  /// Build error placeholder
+  Widget _buildErrorPlaceholder(
+    EdgeInsets padding,
+    EdgeInsets margin,
+    Color? backgroundColor,
+    double borderRadius,
+  ) {
+    Widget placeholder = Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Colors.grey.shade100,
+        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 8),
+            const Text(
+              'Error loading products',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (margin != EdgeInsets.zero) {
+      placeholder = Padding(padding: margin, child: placeholder);
+    }
+
+    return placeholder;
   }
 }

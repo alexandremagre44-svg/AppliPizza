@@ -1,229 +1,218 @@
 // lib/builder/blocks/banner_block_runtime.dart
-// Runtime version of BannerBlock - promotional and informational banners
+// Runtime version of BannerBlock - Phase 5 enhanced
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../models/builder_block.dart';
-import '../../src/theme/app_theme.dart';
-import '../../src/core/constants.dart';
+import '../utils/block_config_helper.dart';
+import '../utils/action_helper.dart';
 
-/// Enhanced BannerBlockRuntime with rich configuration
+/// Banner block for promotional and informational messages
 /// 
-/// Configuration options:
-/// - title: Main banner title
-/// - subtitle: Optional subtitle text
-/// - text: Main content text (fallback if title not set)
-/// - imageUrl: Optional background/side image
-/// - backgroundColor: Hex color (e.g., '#FF5733')
-/// - ctaLabel: Call-to-action button text
-/// - ctaAction: Route to navigate to (e.g., '/menu')
-/// - style: 'info', 'promo', 'warning', 'success'
+/// Configuration:
+/// - title: Banner title text (default: 'Banner Title')
+/// - subtitle: Banner subtitle text (default: '')
+/// - imageUrl: Background image URL (default: '')
+/// - align: Text alignment - left, center, right (default: center)
+/// - padding: Padding inside the banner (default: 16)
+/// - margin: Margin around the banner (default: 0)
+/// - backgroundColor: Background color in hex (default: transparent)
+/// - textColor: Text color in hex (default: #000000)
+/// - borderRadius: Corner radius (default: 8)
+/// - height: Banner height in pixels (default: 140 mobile, 180 desktop)
+/// - tapAction: Action when banner is tapped (openPage, openUrl, scrollToBlock)
+/// 
+/// Responsive: Full width on mobile, max 1200px centered on desktop
 class BannerBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
+
+  // Responsive breakpoints
+  static const double _desktopBreakpoint = 800.0;
+  static const double _maxDesktopWidth = 1200.0;
 
   const BannerBlockRuntime({
     super.key,
     required this.block,
   });
 
-  // Helper getters for configuration
-  String? get _title => block.getConfig<String>('title');
-  String? get _subtitle => block.getConfig<String>('subtitle');
-  String get _text {
-    // Fallback chain: title -> text -> default
-    return _title ?? block.getConfig<String>('text') ?? 'Information importante';
-  }
-  
-  String? get _imageUrl {
-    final url = block.getConfig<String>('imageUrl');
-    return (url != null && url.isNotEmpty) ? url : null;
-  }
-  
-  Color get _backgroundColor {
-    final style = block.getConfig<String>('style') ?? 'info';
-    final colorStr = block.getConfig<String>('backgroundColor');
-    
-    // Try custom color first
-    if (colorStr != null && colorStr.isNotEmpty) {
-      try {
-        return Color(int.parse(colorStr.replaceAll('#', '0xFF')));
-      } catch (e) {
-        // Fall through to style-based color
-      }
-    }
-    
-    // Style-based colors
-    switch (style) {
-      case 'promo':
-        return AppColors.primaryRed;
-      case 'warning':
-        return Colors.orange;
-      case 'success':
-        return Colors.green;
-      case 'info':
-      default:
-        return Colors.blue;
-    }
-  }
-  
-  String? get _ctaLabel => block.getConfig<String>('ctaLabel');
-  String? get _ctaAction => block.getConfig<String>('ctaAction');
-
   @override
   Widget build(BuildContext context) {
-    final hasImage = _imageUrl != null;
-    final hasCta = _ctaLabel != null && _ctaLabel!.isNotEmpty;
+    final helper = BlockConfigHelper(block.config, blockId: block.id);
+    
+    // Get configuration with defaults
+    final title = helper.getString('title', defaultValue: 'Banner Title');
+    final subtitle = helper.getString('subtitle', defaultValue: '');
+    final imageUrl = helper.getString('imageUrl', defaultValue: '');
+    final align = helper.getString('align', defaultValue: 'center');
+    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(16));
+    final margin = helper.getEdgeInsets('margin');
+    final backgroundColor = helper.getColor('backgroundColor');
+    final textColor = helper.getColor('textColor', defaultValue: Colors.black);
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
+    final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
+    final height = _calculateHeight(helper, context);
 
-    return Padding(
-      padding: AppSpacing.paddingHorizontalLG,
-      child: Container(
-        decoration: BoxDecoration(
-          color: _backgroundColor.withOpacity(0.1),
-          borderRadius: AppRadius.card,
-          border: Border.all(
-            color: _backgroundColor.withOpacity(0.3),
-            width: 2,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: AppRadius.card,
-          child: hasImage
-              ? _buildBannerWithImage(context)
-              : _buildSimpleBanner(context, hasCta),
-        ),
+    // Determine alignment
+    CrossAxisAlignment crossAxisAlignment;
+    TextAlign textAlign;
+    switch (align.toLowerCase()) {
+      case 'left':
+        crossAxisAlignment = CrossAxisAlignment.start;
+        textAlign = TextAlign.left;
+        break;
+      case 'right':
+        crossAxisAlignment = CrossAxisAlignment.end;
+        textAlign = TextAlign.right;
+        break;
+      default: // center
+        crossAxisAlignment = CrossAxisAlignment.center;
+        textAlign = TextAlign.center;
+    }
+
+    // Build banner content
+    Widget bannerContent = Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
       ),
-    );
-  }
-
-  Widget _buildSimpleBanner(BuildContext context, bool hasCta) {
-    return Padding(
-      padding: AppSpacing.paddingLG,
-      child: Row(
-        children: [
-          Icon(
-            Icons.campaign_outlined,
-            color: _backgroundColor,
-            size: 28,
-          ),
-          SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _text,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: _backgroundColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (_subtitle != null && _subtitle!.isNotEmpty) ...[
-                  SizedBox(height: AppSpacing.xs),
-                  Text(
-                    _subtitle!,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (hasCta) ...[
-            SizedBox(width: AppSpacing.md),
-            _buildCtaButton(context),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBannerWithImage(BuildContext context) {
-    return Stack(
-      children: [
-        // Background image with overlay
-        Positioned.fill(
-          child: Image.network(
-            _imageUrl!,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(color: _backgroundColor.withOpacity(0.2));
-            },
-          ),
-        ),
-        
-        // Content overlay
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                _backgroundColor.withOpacity(0.9),
-                _backgroundColor.withOpacity(0.7),
-              ],
-            ),
-          ),
-          padding: AppSpacing.paddingXL,
-          child: Row(
-            children: [
-              Expanded(
+      child: ClipRRect(
+        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : BorderRadius.zero,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background (image or solid color)
+            if (imageUrl.isNotEmpty)
+              _buildBackground(imageUrl, backgroundColor, borderRadius),
+            
+            // Content
+            if (title.isNotEmpty || subtitle.isNotEmpty)
+              Padding(
+                padding: padding,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: crossAxisAlignment,
                   children: [
-                    Text(
-                      _text,
-                      style: AppTextStyles.headlineSmall.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (_subtitle != null && _subtitle!.isNotEmpty) ...[
-                      SizedBox(height: AppSpacing.sm),
+                    // Title (only if not empty)
+                    if (title.isNotEmpty)
                       Text(
-                        _subtitle!,
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: Colors.white.withOpacity(0.95),
+                        title,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
                         ),
+                        textAlign: textAlign,
                       ),
-                    ],
-                    if (_ctaLabel != null && _ctaLabel!.isNotEmpty) ...[
-                      SizedBox(height: AppSpacing.md),
-                      _buildCtaButton(context, isOnImage: true),
+                    
+                    // Subtitle (only if not empty)
+                    if (subtitle.isNotEmpty) ...[
+                      if (title.isNotEmpty) const SizedBox(height: 8),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: textColor.withOpacity(0.9),
+                        ),
+                        textAlign: textAlign,
+                      ),
                     ],
                   ],
                 ),
               ),
-            ],
-          ),
+          ],
         ),
-      ],
+      ),
+    );
+
+    // Apply margin if configured
+    if (margin != EdgeInsets.zero) {
+      bannerContent = Padding(
+        padding: margin,
+        child: bannerContent,
+      );
+    }
+
+    // Wrap with action if configured
+    if (tapActionConfig != null && tapActionConfig.isNotEmpty) {
+      bannerContent = ActionHelper.wrapWithAction(context, bannerContent, tapActionConfig);
+    }
+
+    // Responsive: constrain width on desktop
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > _maxDesktopWidth) {
+          return Center(
+            child: SizedBox(
+              width: _maxDesktopWidth,
+              child: bannerContent,
+            ),
+          );
+        }
+        return bannerContent;
+      },
     );
   }
 
-  Widget _buildCtaButton(BuildContext context, {bool isOnImage = false}) {
-    return ElevatedButton(
-      onPressed: () {
-        if (_ctaAction != null && _ctaAction!.isNotEmpty) {
-          context.go(_ctaAction!);
-        }
+  /// Calculate height with responsive defaults
+  double _calculateHeight(BlockConfigHelper helper, BuildContext context) {
+    // Responsive height: check screen size
+    final isDesktop = MediaQuery.of(context).size.width > _desktopBreakpoint;
+    final defaultHeight = isDesktop ? 180.0 : 140.0;
+    
+    // Use explicit 'height' if provided, otherwise use default
+    return helper.getDouble('height', defaultValue: defaultHeight);
+  }
+
+  /// Build background with image or gradient
+  Widget _buildBackground(String imageUrl, Color? backgroundColor, double borderRadius) {
+    Widget background = Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        // Fallback to color or gradient if image fails
+        return _buildErrorPlaceholder(backgroundColor);
       },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isOnImage ? Colors.white : _backgroundColor,
-        foregroundColor: isOnImage ? _backgroundColor : Colors.white,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 12,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.button,
-        ),
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return _buildLoadingPlaceholder(backgroundColor);
+      },
+    );
+
+    return background;
+  }
+
+  /// Build loading placeholder
+  Widget _buildLoadingPlaceholder(Color? backgroundColor) {
+    return Container(
+      color: backgroundColor ?? Colors.grey.shade200,
+      child: const Center(
+        child: CircularProgressIndicator(),
       ),
-      child: Text(
-        _ctaLabel!,
-        style: AppTextStyles.button.copyWith(
-          color: isOnImage ? _backgroundColor : Colors.white,
+    );
+  }
+
+  /// Build error placeholder
+  Widget _buildErrorPlaceholder(Color? backgroundColor) {
+    return Container(
+      color: backgroundColor ?? Colors.grey.shade200,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.broken_image,
+              size: 48,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Failed to load image',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+              ),
+            ),
+          ],
         ),
       ),
     );

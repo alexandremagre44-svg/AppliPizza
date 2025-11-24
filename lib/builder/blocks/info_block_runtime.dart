@@ -1,20 +1,27 @@
 // lib/builder/blocks/info_block_runtime.dart
-// Runtime version of InfoBlock - practical information display
+// Runtime version of InfoBlock - Phase 5 enhanced
 
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/builder_block.dart';
-import '../../src/theme/app_theme.dart';
+import '../utils/block_config_helper.dart';
+import '../utils/action_helper.dart';
 
-/// Enhanced InfoBlockRuntime for practical information
+/// Info block for displaying informational content with icon
 /// 
-/// Configuration options:
-/// - icon: Icon type ('info', 'warning', 'success', 'error', 'time', 'phone', 'location', 'email')
-/// - title: Info title/heading
-/// - content: Main information text
-/// - highlight: Set to true for emphasized display
-/// - actionType: 'none', 'call', 'email', 'navigate' (for interactive info)
-/// - actionValue: Phone number, email, or URL for action
+/// Configuration:
+/// - title: Info title text (default: '')
+/// - subtitle: Info subtitle text (default: '')
+/// - icon: Material icon name (default: 'info')
+/// - iconColor: Icon color in hex (default: primary)
+/// - textColor: Text color in hex (default: black)
+/// - backgroundColor: Background color in hex (default: #F5F5F5)
+/// - borderRadius: Corner radius (default: 8)
+/// - padding: Padding inside the container (default: 12)
+/// - margin: Margin around the container (default: 0)
+/// - align: Text alignment - left, center, right (default: left)
+/// - tapAction: Action when info is tapped (openPage, openUrl, scrollToBlock)
+/// 
+/// Layout: Horizontal (icon + text column) by default
 class InfoBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
 
@@ -23,16 +30,212 @@ class InfoBlockRuntime extends StatelessWidget {
     required this.block,
   });
 
-  // Helper getters for configuration
-  String get _iconName => block.getConfig<String>('icon') ?? 'info';
-  String get _title => block.getConfig<String>('title') ?? '';
-  String get _content => block.getConfig<String>('content') ?? '';
-  bool get _highlight => block.getConfig<bool>('highlight') ?? false;
-  String? get _actionType => block.getConfig<String>('actionType');
-  String? get _actionValue => block.getConfig<String>('actionValue');
+  @override
+  Widget build(BuildContext context) {
+    final helper = BlockConfigHelper(block.config, blockId: block.id);
+    
+    // Get configuration with defaults
+    final title = helper.getString('title', defaultValue: '');
+    final subtitle = helper.getString('subtitle', defaultValue: '');
+    final iconName = helper.getString('icon', defaultValue: 'info');
+    final iconColor = helper.getColor('iconColor', defaultValue: const Color(0xFFD32F2F));
+    final textColor = helper.getColor('textColor', defaultValue: Colors.black);
+    final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFF5F5F5));
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
+    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
+    final margin = helper.getEdgeInsets('margin');
+    final align = helper.getString('align', defaultValue: 'left');
+    final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
 
-  IconData get _icon {
-    switch (_iconName) {
+    // If no title and no subtitle, don't render anything
+    if (title.isEmpty && subtitle.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Get icon
+    final icon = _getIcon(iconName);
+
+    // Determine alignment
+    CrossAxisAlignment crossAxisAlignment;
+    MainAxisAlignment mainAxisAlignment;
+    TextAlign textAlign;
+    switch (align.toLowerCase()) {
+      case 'center':
+        crossAxisAlignment = CrossAxisAlignment.center;
+        mainAxisAlignment = MainAxisAlignment.center;
+        textAlign = TextAlign.center;
+        break;
+      case 'right':
+        crossAxisAlignment = CrossAxisAlignment.end;
+        mainAxisAlignment = MainAxisAlignment.end;
+        textAlign = TextAlign.right;
+        break;
+      default: // left
+        crossAxisAlignment = CrossAxisAlignment.start;
+        mainAxisAlignment = MainAxisAlignment.start;
+        textAlign = TextAlign.left;
+    }
+
+    // Build info content
+    Widget infoContent = Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
+      ),
+      child: align.toLowerCase() == 'center'
+          ? _buildCenteredLayout(icon, iconColor, title, subtitle, textColor, textAlign)
+          : _buildHorizontalLayout(icon, iconColor, title, subtitle, textColor, crossAxisAlignment, textAlign, tapActionConfig),
+    );
+
+    // Apply border radius with ClipRRect
+    if (borderRadius > 0) {
+      infoContent = ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: infoContent,
+      );
+    }
+
+    // Apply margin
+    if (margin != EdgeInsets.zero) {
+      infoContent = Padding(
+        padding: margin,
+        child: infoContent,
+      );
+    }
+
+    // Wrap with action if configured
+    if (tapActionConfig != null && tapActionConfig.isNotEmpty) {
+      infoContent = ActionHelper.wrapWithAction(context, infoContent, tapActionConfig);
+    }
+
+    return infoContent;
+  }
+
+  /// Build horizontal layout (icon + text column)
+  Widget _buildHorizontalLayout(
+    IconData icon,
+    Color iconColor,
+    String title,
+    String subtitle,
+    Color textColor,
+    CrossAxisAlignment crossAxisAlignment,
+    TextAlign textAlign,
+    Map<String, dynamic>? tapActionConfig,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Icon container
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.15),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: iconColor, size: 24),
+        ),
+        const SizedBox(width: 12),
+        
+        // Text column
+        Expanded(
+          child: Column(
+            crossAxisAlignment: crossAxisAlignment,
+            children: [
+              if (title.isNotEmpty)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                        textAlign: textAlign,
+                      ),
+                    ),
+                    if (tapActionConfig != null && tapActionConfig.isNotEmpty)
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 14,
+                        color: textColor.withOpacity(0.5),
+                      ),
+                  ],
+                ),
+              if (title.isNotEmpty && subtitle.isNotEmpty)
+                const SizedBox(height: 4),
+              if (subtitle.isNotEmpty)
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: textColor.withOpacity(0.8),
+                    height: 1.4,
+                  ),
+                  textAlign: textAlign,
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Build centered layout (vertical stack)
+  Widget _buildCenteredLayout(
+    IconData icon,
+    Color iconColor,
+    String title,
+    String subtitle,
+    Color textColor,
+    TextAlign textAlign,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Icon container
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.15),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: iconColor, size: 32),
+        ),
+        if (title.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+            textAlign: textAlign,
+          ),
+        ],
+        if (subtitle.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 14,
+              color: textColor.withOpacity(0.8),
+              height: 1.4,
+            ),
+            textAlign: textAlign,
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// Get icon from name
+  IconData _getIcon(String iconName) {
+    switch (iconName.toLowerCase()) {
       case 'warning':
         return Icons.warning_amber_outlined;
       case 'error':
@@ -47,147 +250,31 @@ class InfoBlockRuntime extends StatelessWidget {
         return Icons.location_on_outlined;
       case 'email':
         return Icons.email_outlined;
+      case 'star':
+        return Icons.star_outline;
+      case 'heart':
+        return Icons.favorite_outline;
+      case 'settings':
+        return Icons.settings_outlined;
+      case 'help':
+        return Icons.help_outline;
+      case 'notification':
+        return Icons.notifications_outlined;
+      case 'calendar':
+        return Icons.calendar_today_outlined;
+      case 'shopping':
+        return Icons.shopping_cart_outlined;
+      case 'delivery':
+        return Icons.local_shipping_outlined;
+      case 'payment':
+        return Icons.payment_outlined;
+      case 'gift':
+        return Icons.card_giftcard_outlined;
+      case 'discount':
+        return Icons.local_offer_outlined;
+      case 'info':
       default:
         return Icons.info_outline;
-    }
-  }
-
-  Color get _color {
-    if (_highlight) {
-      return AppColors.primaryRed;
-    }
-    
-    switch (_iconName) {
-      case 'warning':
-        return Colors.orange;
-      case 'error':
-        return AppColors.errorRed;
-      case 'success':
-        return Colors.green;
-      case 'phone':
-      case 'location':
-      case 'email':
-        return AppColors.primaryRed;
-      default:
-        return Colors.blue;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_title.isEmpty && _content.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final hasAction = _actionType != null && 
-                      _actionType != 'none' && 
-                      _actionValue != null && 
-                      _actionValue!.isNotEmpty;
-
-    return Padding(
-      padding: AppSpacing.paddingHorizontalLG,
-      child: GestureDetector(
-        onTap: hasAction ? () => _handleAction(context) : null,
-        child: Container(
-          padding: AppSpacing.paddingLG,
-          decoration: BoxDecoration(
-            color: _highlight 
-                ? _color.withOpacity(0.15) 
-                : _color.withOpacity(0.1),
-            border: Border.all(
-              color: _color.withOpacity(_highlight ? 0.5 : 0.3),
-              width: _highlight ? 2 : 1,
-            ),
-            borderRadius: AppRadius.card,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: _color.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(_icon, color: _color, size: 24),
-              ),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_title.isNotEmpty) ...[
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _title,
-                              style: _highlight 
-                                  ? AppTextStyles.titleLarge.copyWith(
-                                      color: _color,
-                                      fontWeight: FontWeight.bold,
-                                    )
-                                  : AppTextStyles.titleMedium.copyWith(color: _color),
-                            ),
-                          ),
-                          if (hasAction)
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                              color: _color,
-                            ),
-                        ],
-                      ),
-                      SizedBox(height: AppSpacing.xs),
-                    ],
-                    if (_content.isNotEmpty)
-                      Text(
-                        _content,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          height: 1.5,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _handleAction(BuildContext context) async {
-    if (_actionType == null || _actionValue == null) return;
-
-    try {
-      Uri? uri;
-      
-      switch (_actionType) {
-        case 'call':
-          uri = Uri.parse('tel:$_actionValue');
-          break;
-        case 'email':
-          uri = Uri.parse('mailto:$_actionValue');
-          break;
-        case 'navigate':
-          uri = Uri.parse(_actionValue!);
-          break;
-      }
-
-      if (uri != null && await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      }
-    } catch (e) {
-      debugPrint('Error launching action: $e');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Impossible d\'effectuer cette action'),
-            backgroundColor: AppColors.errorRed,
-          ),
-        );
-      }
     }
   }
 }
