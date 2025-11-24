@@ -264,6 +264,196 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  /// REFONTE: Build dynamic sections based on layout configuration
+  /// This method controls the order and visibility of Hero, Banner, and Popups
+  /// based on the HomeLayoutConfig from Firestore
+  List<Widget> _buildDynamicSections(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic homeConfig,
+    dynamic homeTexts,
+    HomeLayoutConfig? homeLayout,
+  ) {
+    final widgets = <Widget>[];
+
+    // If homeLayout is null or studioEnabled is false globally, use fallback behavior
+    if (homeLayout == null || !homeLayout.studioEnabled) {
+      // Fallback: Show Hero and Banner if they are individually active (backward compatibility)
+      if (homeConfig?.hero?.isActive ?? true) {
+        widgets.add(_buildHeroSection(context, homeConfig, homeTexts));
+      }
+      if (homeConfig?.promoBanner?.isCurrentlyActive ?? false) {
+        widgets.add(_buildBannerSection(context, homeConfig));
+      }
+      return widgets;
+    }
+
+    // Use layout configuration to determine order and visibility
+    final orderedSections = homeLayout.getOrderedEnabledSections();
+    
+    for (final sectionKey in orderedSections) {
+      switch (sectionKey) {
+        case 'hero':
+          if (homeConfig?.hero?.isActive ?? false) {
+            widgets.add(_buildHeroSection(context, homeConfig, homeTexts));
+          }
+          break;
+        case 'banner':
+          if (homeConfig?.promoBanner?.isCurrentlyActive ?? false) {
+            widgets.add(_buildBannerSection(context, homeConfig));
+          }
+          break;
+        case 'popups':
+          // Popups are handled separately via popup system
+          // This section is just a placeholder for ordering purposes
+          break;
+      }
+    }
+
+    return widgets;
+  }
+
+  /// Build Hero section widget
+  Widget _buildHeroSection(BuildContext context, dynamic homeConfig, dynamic homeTexts) {
+    return HeroBanner(
+      title: homeConfig?.hero?.title ?? homeTexts?.title ?? 'Bienvenue chez\nPizza Deli\'Zza',
+      subtitle: homeConfig?.hero?.subtitle ?? homeTexts?.subtitle ?? 'Découvrez nos pizzas artisanales et nos menus gourmands',
+      buttonText: homeConfig?.hero?.ctaText ?? homeTexts?.ctaViewMenu ?? 'Voir le menu',
+      imageUrl: homeConfig?.hero?.imageUrl,
+      onPressed: () {
+        final action = homeConfig?.hero?.ctaAction ?? AppRoutes.menu;
+        if (action.startsWith('/')) {
+          context.push(action);
+        } else {
+          context.push(AppRoutes.menu);
+        }
+      },
+    );
+  }
+
+  /// Build Banner section widget
+  Widget _buildBannerSection(BuildContext context, dynamic homeConfig) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      child: InfoBanner(
+        text: homeConfig!.promoBanner!.text,
+        icon: Icons.local_offer,
+        backgroundColor: homeConfig.promoBanner!.backgroundColor != null
+            ? Color(ColorConverter.hexToColor(homeConfig.promoBanner!.backgroundColor) ?? 0xFFD32F2F)
+            : AppColors.primaryRed,
+        textColor: homeConfig.promoBanner!.textColor != null
+            ? Color(ColorConverter.hexToColor(homeConfig.promoBanner!.textColor) ?? 0xFFFFFFFF)
+            : Colors.white,
+      ),
+    );
+  }
+
+  // Build dynamic blocks based on configuration
+  List<Widget> _buildDynamicBlocks(
+    BuildContext context,
+    WidgetRef ref,
+    List<dynamic> blocks,
+    List<Product> allProducts,
+    dynamic homeTexts,
+  ) {
+    // Sort blocks by order and filter visible ones
+    final sortedBlocks = blocks
+        .where((b) => b.isActive == true)
+        .toList()
+      ..sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+
+    final widgets = <Widget>[];
+
+    for (final block in sortedBlocks) {
+      widgets.addAll(_buildBlockContent(context, ref, block, allProducts, homeTexts));
+      widgets.add(SizedBox(height: AppSpacing.xxxl));
+    }
+
+    return widgets;
+  }
+
+  // Build content for a specific block type
+  List<Widget> _buildBlockContent(
+    BuildContext context,
+    WidgetRef ref,
+    dynamic block,
+    List<Product> allProducts,
+    dynamic homeTexts,
+  ) {
+    final widgets = <Widget>[];
+    final maxItems = block.maxItems ?? 6;
+
+    switch (block.type) {
+      case 'featuredProducts':
+      case 'featured_products':
+        // Show featured products
+        final featured = allProducts
+            .where((p) => p.isFeatured)
+            .take(maxItems)
+            .toList();
+        
+        if (featured.isNotEmpty) {
+          widgets.add(SectionHeader(title: block.title ?? homeTexts?.featuredTitle ?? '⭐ Produits phares'));
+          widgets.add(SizedBox(height: AppSpacing.lg));
+          widgets.add(_buildProductGrid(context, ref, featured));
+        } else {
+          // No featured products found - display empty message or skip
+          // For better UX, we show the section with an empty state
+          widgets.add(SectionHeader(title: block.title ?? homeTexts?.featuredTitle ?? '⭐ Produits phares'));
+          widgets.add(SizedBox(height: AppSpacing.lg));
+          widgets.add(_buildEmptySection('Aucun produit en vedette pour le moment'));
+        }
+        break;
+
+      case 'bestSellers':
+        // Show best sellers (use isFeatured as proxy or first pizzas)
+        final bestSellers = allProducts.where((p) => p.isFeatured).toList();
+        final products = bestSellers.isEmpty
+            ? allProducts.where((p) => p.category == ProductCategory.pizza).take(maxItems).toList()
+            : bestSellers.take(maxItems).toList();
+        
+        if (products.isNotEmpty) {
+          widgets.add(SectionHeader(title: block.title ?? homeTexts?.bestSellersTitle ?? '🔥 Best-sellers'));
+          widgets.add(SizedBox(height: AppSpacing.lg));
+          widgets.add(_buildProductGrid(context, ref, products));
+        } else {
+          widgets.add(SectionHeader(title: block.title ?? homeTexts?.bestSellersTitle ?? '🔥 Best-sellers'));
+          widgets.add(SizedBox(height: AppSpacing.lg));
+          widgets.add(_buildEmptySection('Aucun best-seller disponible'));
+        }
+        break;
+
+      case 'categories':
+        // Show categories section
+        widgets.add(SectionHeader(title: block.title ?? homeTexts?.categoriesTitle ?? 'Nos catégories'));
+        widgets.add(SizedBox(height: AppSpacing.lg));
+        widgets.add(const CategoryShortcuts());
+        break;
+
+      case 'promotions':
+        // Show promo products
+        final promos = allProducts
+            .where((p) => p.displaySpot == DisplaySpot.promotions)
+            .take(maxItems)
+            .toList();
+        
+        if (promos.isNotEmpty) {
+          widgets.add(SectionHeader(title: block.title ?? homeTexts?.promosTitle ?? '🔥 Promos du moment'));
+          widgets.add(SizedBox(height: AppSpacing.lg));
+          widgets.add(_buildPromoCarousel(context, ref, promos));
+        }
+        break;
+
+      default:
+        // Unknown block type, skip
+        break;
+    }
+
+    return widgets;
+  }
 
   // Build default sections (fallback when no blocks configured)
   List<Widget> _buildDefaultSections(

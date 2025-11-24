@@ -7,7 +7,6 @@ import '../../design_system/app_theme.dart';
 import '../../core/constants.dart';
 import 'studio/roulette_segments_list_screen.dart';
 import 'studio/roulette_admin_settings_screen.dart';
-import '../../features/content/presentation/admin/content_studio_screen.dart';
 import 'products_admin_screen.dart';
 import 'ingredients_admin_screen.dart';
 import 'mailing_admin_screen.dart';
@@ -16,13 +15,11 @@ import 'promotions_admin_screen.dart';
 /// Admin Menu - Point d'entrée principal pour tous les outils d'administration
 /// 
 /// Ce menu centralise l'accès à tous les outils admin:
-/// - Studio B3 (éditeur de contenu professionnel pour pages dynamiques)
 /// - Gestion des produits (pizzas, menus, boissons, desserts)
 /// - Gestion des ingrédients
 /// - Gestion des promotions
 /// - Mailing
 /// - Configuration de la roulette
-/// - Contenu dynamique
 class AdminStudioScreen extends StatelessWidget {
   const AdminStudioScreen({super.key});
 
@@ -44,20 +41,6 @@ class AdminStudioScreen extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
         children: [
           SizedBox(height: AppSpacing.md),
-          
-          // Studio B3 - PRINCIPAL
-          _buildHighlightedBlock(
-            context,
-            iconData: Icons.dashboard_customize,
-            title: '🎨 Studio B3 - Éditeur de Pages',
-            subtitle: 'Éditeur de pages dynamiques • Gestion complète des blocs • Interface 3 panneaux\nPrévisualisation temps réel • Mode brouillon • Publish/Revert\n\nTypes de blocs: Texte, Image, Bouton, Bannière, Produits, Catégories',
-            onTap: () {
-              context.go(AppRoutes.adminStudioB3);
-            },
-            isNew: true,
-          ),
-          
-          SizedBox(height: AppSpacing.lg),
           
           Padding(
             padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
@@ -161,94 +144,11 @@ class AdminStudioScreen extends StatelessWidget {
             },
           ),
           SizedBox(height: AppSpacing.md),
-          _buildStudioBlock(
-            context,
-            iconData: Icons.widgets_rounded,
-            title: 'Contenu',
-            subtitle: 'Studio de contenu',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ContentStudioScreen()),
-              );
-            },
-          ),
-          SizedBox(height: AppSpacing.md),
         ],
       ),
     );
   }
 
-  /// Highlighted block for the new unified studio
-  Widget _buildHighlightedBlock(
-    BuildContext context, {
-    required IconData iconData,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    bool isNew = false,
-  }) {
-    return Card(
-      elevation: 4,
-      color: AppColors.primaryContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: AppRadius.card,
-        side: BorderSide(color: AppColors.primary, width: 2),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.card,
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.lg),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  iconData,
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppTextStyles.titleLarge.copyWith(
-                        color: AppColors.onPrimaryContainer,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.onPrimaryContainer.withOpacity(0.8),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_rounded,
-                color: AppColors.primary,
-                size: 32,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Standard block for other sections
   Widget _buildStudioBlock(
     BuildContext context, {
     required IconData iconData,
