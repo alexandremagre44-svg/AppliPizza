@@ -37,6 +37,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   bool _isLoading = true;
   BuilderBlock? _selectedBlock;
   bool _hasChanges = false;
+  bool _showPreviewInMobile = false;
   late TabController _tabController;
 
   @override
@@ -277,6 +278,12 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                   tooltip: 'Sauvegarder',
                   onPressed: _saveDraft,
                 ),
+              if (responsive.isMobile)
+                IconButton(
+                  icon: Icon(_showPreviewInMobile ? Icons.list : Icons.visibility),
+                  tooltip: _showPreviewInMobile ? 'Liste des blocs' : 'Prévisualisation',
+                  onPressed: () => setState(() => _showPreviewInMobile = !_showPreviewInMobile),
+                ),
               if (!responsive.isMobile)
                 IconButton(
                   icon: const Icon(Icons.fullscreen),
@@ -333,17 +340,17 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     );
   }
 
-  /// Mobile layout with preview on top and editor panel in bottom sheet
+  /// Mobile layout with blocks list showing delete/drag actions permanently
   Widget _buildMobileLayout() {
     return Stack(
       children: [
-        // Preview (full screen with padding for bottom sheet)
+        // Show either blocks list (default) or preview (when toggled)
         Positioned.fill(
-          bottom: _selectedBlock != null ? 60 : 0,
-          child: _buildPreviewTab(),
+          bottom: _selectedBlock != null && !_showPreviewInMobile ? 60 : 0,
+          child: _showPreviewInMobile ? _buildPreviewTab() : _buildBlocksList(),
         ),
-        // Floating editor panel button (when block is selected)
-        if (_selectedBlock != null)
+        // Floating editor panel button (when block is selected and in list view)
+        if (_selectedBlock != null && !_showPreviewInMobile)
           Positioned(
             left: 0,
             right: 0,
