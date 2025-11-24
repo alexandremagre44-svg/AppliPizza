@@ -11,10 +11,12 @@ import 'products_admin_screen.dart';
 import 'ingredients_admin_screen.dart';
 import 'mailing_admin_screen.dart';
 import 'promotions_admin_screen.dart';
+import '../../../builder/builder_entry.dart';
 
 /// Admin Menu - Point d'entrée principal pour tous les outils d'administration
 /// 
 /// Ce menu centralise l'accès à tous les outils admin:
+/// - Builder B3 (nouveau système de construction de pages)
 /// - Gestion des produits (pizzas, menus, boissons, desserts)
 /// - Gestion des ingrédients
 /// - Gestion des promotions
@@ -41,6 +43,22 @@ class AdminStudioScreen extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
         children: [
           SizedBox(height: AppSpacing.md),
+          
+          // Builder B3 - NEW - Page Builder System
+          _buildBuilderB3Block(
+            context,
+            iconData: Icons.dashboard_customize_rounded,
+            title: '🎨 Builder B3 - Constructeur de Pages',
+            subtitle: 'Nouveau système modulaire • Multi-pages • Multi-resto\nArchitecture propre • Blocs réutilisables • Prêt pour implémentation',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BuilderStudioScreen()),
+              );
+            },
+          ),
+          
+          SizedBox(height: AppSpacing.lg),
           
           Padding(
             padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
@@ -205,6 +223,74 @@ class AdminStudioScreen extends StatelessWidget {
                 Icons.chevron_right_rounded,
                 color: AppColors.onSurfaceVariant,
                 size: 24,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builder B3 highlighted block - Featured module
+  Widget _buildBuilderB3Block(
+    BuildContext context, {
+    required IconData iconData,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 4,
+      color: AppColors.primaryContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.card,
+        side: BorderSide(color: AppColors.primary, width: 2),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadius.card,
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  iconData,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyles.titleLarge.copyWith(
+                        color: AppColors.onPrimaryContainer,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.onPrimaryContainer.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: AppColors.primary,
+                size: 32,
               ),
             ],
           ),
