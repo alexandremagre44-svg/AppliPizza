@@ -13,6 +13,10 @@ import '../utils/block_config_helper.dart';
 class ProductListBlockPreview extends StatelessWidget {
   final BuilderBlock block;
 
+  // Responsive column constants (must match _calculateResponsiveColumns logic)
+  static const int _minColumns = 2;  // Mobile minimum
+  static const int _maxColumns = 4;  // Desktop maximum
+
   // Fake product data for preview
   static const List<_FakeProduct> _fakeProducts = [
     _FakeProduct(name: 'Pizza Margherita', price: 12.99, description: 'Classic Italian pizza'),
@@ -120,12 +124,15 @@ class ProductListBlockPreview extends StatelessWidget {
 
   /// Build header with block name and config summary
   Widget _buildHeader(_PreviewConfig config) {
+    // Ensure border radius doesn't go negative
+    final headerBorderRadius = (config.borderRadius - 2).clamp(0.0, double.infinity);
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.blue.withOpacity(0.1),
         borderRadius: config.borderRadius > 0
-            ? BorderRadius.vertical(top: Radius.circular(config.borderRadius - 2))
+            ? BorderRadius.vertical(top: Radius.circular(headerBorderRadius))
             : null,
       ),
       child: Row(
@@ -262,7 +269,7 @@ class ProductListBlockPreview extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: config.columns.clamp(1, 4),
+        crossAxisCount: config.columns.clamp(_minColumns, _maxColumns),
         childAspectRatio: 0.75,
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,

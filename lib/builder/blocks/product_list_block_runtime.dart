@@ -140,19 +140,23 @@ class ProductListBlockRuntime extends ConsumerWidget {
   List<Product> _filterProducts(List<Product> allProducts, String categoryId, int? limit) {
     List<Product> filtered = allProducts.where((p) => p.isActive).toList();
     
-    // Filter by categoryId if specified
+    // Filter by categoryId if specified (match against enum value only for simplicity)
     if (categoryId.isNotEmpty) {
-      try {
-        final categoryEnum = ProductCategory.values.firstWhere(
-          (c) => c.value.toLowerCase() == categoryId.toLowerCase() || c.name.toLowerCase() == categoryId.toLowerCase(),
-          orElse: () {
-            debugPrint('ProductListBlock: Invalid categoryId "$categoryId", showing all products');
-            return ProductCategory.values.first;
-          },
-        );
-        filtered = filtered.where((p) => p.category == categoryEnum).toList();
-      } catch (e) {
-        debugPrint('ProductListBlock: Error filtering by category "$categoryId": $e');
+      final normalizedCategoryId = categoryId.trim().toLowerCase();
+      
+      // Find matching category by value field
+      ProductCategory? matchedCategory;
+      for (final category in ProductCategory.values) {
+        if (category.value.toLowerCase() == normalizedCategoryId) {
+          matchedCategory = category;
+          break;
+        }
+      }
+      
+      if (matchedCategory != null) {
+        filtered = filtered.where((p) => p.category == matchedCategory).toList();
+      } else {
+        debugPrint('ProductListBlock: Invalid categoryId "$categoryId", showing all products');
       }
     }
     
