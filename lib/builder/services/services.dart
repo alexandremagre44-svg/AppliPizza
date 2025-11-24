@@ -4,5 +4,6 @@
 
 export 'builder_layout_service.dart';
 export 'builder_navigation_service.dart';
+export 'builder_autoinit_service.dart';
 export 'dynamic_page_resolver.dart';
 export 'default_page_creator.dart';

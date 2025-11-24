@@ -4,6 +4,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/models.dart';
 import 'builder_layout_service.dart';
+import 'builder_autoinit_service.dart';
 
 /// Service for managing dynamic navigation based on Builder B3 pages
 /// 
@@ -11,12 +12,20 @@ import 'builder_layout_service.dart';
 /// - bottomBar: Pages that appear in bottom navigation bar
 /// - hidden: Pages accessible only via actions (not visible in nav)
 /// - internal: Internal system pages (cart, profile, checkout, login)
+/// 
+/// If no bottomBar pages exist, this service will auto-create a default "home"
+/// page once per appId (using autoInitDone flag in Firestore).
 class BuilderNavigationService {
   final String appId;
   final BuilderLayoutService _layoutService;
+  final BuilderAutoInitService _autoInitService;
 
-  BuilderNavigationService(this.appId, {BuilderLayoutService? layoutService})
-      : _layoutService = layoutService ?? BuilderLayoutService();
+  BuilderNavigationService(
+    this.appId, {
+    BuilderLayoutService? layoutService,
+    BuilderAutoInitService? autoInitService,
+  })  : _layoutService = layoutService ?? BuilderLayoutService(),
+        _autoInitService = autoInitService ?? BuilderAutoInitService();
 
   /// Get all published pages for bottom navigation bar
   /// 
@@ -24,6 +33,9 @@ class BuilderNavigationService {
   /// - displayLocation == 'bottomBar'
   /// - isEnabled == true
   /// - Sorted by order ASC
+  /// 
+  /// If no bottomBar pages exist and autoInitDone flag is not set,
+  /// this method will auto-create a default "home" page.
   /// 
   /// Example:
   /// ```dart
@@ -36,22 +48,102 @@ class BuilderNavigationService {
       final allPages = await _layoutService.loadAllPublishedPages(appId);
       
       // Filter pages for bottom bar
-      final bottomBarPages = allPages.values
+      var bottomBarPages = allPages.values
           .where((page) => 
               page.displayLocation == 'bottomBar' && 
               page.isEnabled)
           .toList();
+      
+      // If no bottomBar pages exist, try auto-create fallback
+      if (bottomBarPages.isEmpty) {
+        debugPrint('[BuilderNavigationService] ⚠️ No bottomBar pages found for appId: $appId');
+        final autoCreatedPage = await _autoCreateIfEmpty();
+        if (autoCreatedPage != null) {
+          bottomBarPages = [autoCreatedPage];
+        }
+      }
       
       // Sort by order
       bottomBarPages.sort((a, b) => a.order.compareTo(b.order));
       
       return bottomBarPages;
     } catch (e, stackTrace) {
-      debugPrint('Error loading bottom bar pages: $e');
+      debugPrint('[BuilderNavigationService] Error loading bottom bar pages: $e');
       if (kDebugMode) {
         debugPrint('Stack trace: $stackTrace');
       }
       return [];
+    }
+  }
+
+  /// Auto-create a default home page if none exists
+  /// 
+  /// Only runs once per appId (checks autoInitDone flag).
+  /// Creates a "home" page with:
+  /// - pageId: "home"
+  /// - title: "Accueil"
+  /// - icon: "home"
+  /// - order: 1
+  /// - displayLocation: "bottomBar"
+  /// - blocks: []
+  /// - published = true
+  Future<BuilderPage?> _autoCreateIfEmpty() async {
+    try {
+      // Check if auto-init was already done
+      final isAlreadyDone = await _autoInitService.isAutoInitDone(appId);
+      if (isAlreadyDone) {
+        debugPrint('[BuilderNavigationService] Auto-init already done for appId: $appId, skipping auto-create');
+        return null;
+      }
+
+      debugPrint('[BuilderNavigationService] 🚀 FALLBACK TRIGGERED: Auto-creating default home page for appId: $appId');
+
+      // Create the default home page
+      final now = DateTime.now();
+      final defaultPage = BuilderPage(
+        pageId: BuilderPageId.home,
+        appId: appId,
+        name: 'Accueil',
+        description: 'Page d\'accueil créée automatiquement',
+        route: '/home',
+        blocks: [],
+        isEnabled: true,
+        isDraft: true,
+        displayLocation: 'bottomBar',
+        icon: 'home',
+        order: 1,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      // Save as draft first
+      await _layoutService.saveDraft(defaultPage);
+      debugPrint('[BuilderNavigationService] ✓ Draft saved for default home page');
+
+      // Publish immediately (copy draft → published)
+      await _layoutService.publishPage(
+        defaultPage,
+        userId: 'system_autoinit',
+        shouldDeleteDraft: false,
+      );
+      debugPrint('[BuilderNavigationService] ✓ Default home page published');
+
+      // Mark auto-init as done to prevent future auto-creates
+      await _autoInitService.markAutoInitDone(appId);
+      debugPrint('[BuilderNavigationService] ✓ Auto-init marked as done for appId: $appId');
+
+      // Load and return the published page
+      final publishedPage = await _layoutService.loadPublished(appId, BuilderPageId.home);
+      
+      debugPrint('[BuilderNavigationService] ✅ FALLBACK COMPLETE: Default home page created and returned');
+      
+      return publishedPage;
+    } catch (e, stackTrace) {
+      debugPrint('[BuilderNavigationService] ❌ Error in auto-create fallback: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
+      return null;
     }
   }
 
