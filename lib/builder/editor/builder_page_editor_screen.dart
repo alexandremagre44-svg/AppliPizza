@@ -575,7 +575,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       _buildDropdown<String>(
         label: 'Mode',
         value: block.getConfig<String>('mode', 'featured') ?? 'featured',
-        items: const ['manual', 'featured', 'top_selling', 'promo'],
+        items: const ['featured', 'manual', 'top_selling', 'promo'],
         onChanged: (v) => _updateBlockConfig('mode', v),
       ),
       _buildDropdown<String>(
@@ -917,7 +917,19 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
             runSpacing: 8,
             children: colors.entries.map((entry) {
               final isSelected = value == entry.key;
-              final colorValue = entry.key.isEmpty ? Colors.grey.shade300 : Color(int.parse(entry.key.replaceAll('#', '0xFF')));
+              Color colorValue;
+              
+              if (entry.key.isEmpty) {
+                colorValue = Colors.grey.shade300;
+              } else {
+                try {
+                  colorValue = Color(int.parse(entry.key.replaceAll('#', '0xFF')));
+                } catch (e) {
+                  // Fallback to grey if color parsing fails
+                  colorValue = Colors.grey.shade300;
+                  debugPrint('Invalid color format: ${entry.key}');
+                }
+              }
               
               return InkWell(
                 onTap: () => onChanged(entry.key),
