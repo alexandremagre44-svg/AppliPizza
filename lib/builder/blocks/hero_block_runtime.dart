@@ -21,13 +21,13 @@ class HeroBlockRuntime extends ConsumerWidget {
     final title = block.getConfig<String>('title') ?? 'Bienvenue';
     final subtitle = block.getConfig<String>('subtitle') ?? '';
     final imageUrl = block.getConfig<String>('imageUrl') ?? '';
-    final buttonLabel = block.getConfig<String>('buttonLabel');
+    final buttonLabel = block.getConfig<String>('buttonLabel') ?? 'Commander';
 
     return HeroBanner(
       imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
       title: title,
-      subtitle: subtitle.isNotEmpty ? subtitle : '',
-      buttonText: buttonLabel ?? 'Commander',
+      subtitle: subtitle,
+      buttonText: buttonLabel,
       onTap: () {
         // Navigate to menu when tapped
         context.go(AppRoutes.menu);

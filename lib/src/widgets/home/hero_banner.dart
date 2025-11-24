@@ -10,7 +10,6 @@ class HeroBanner extends StatelessWidget {
   final String title;
   final String subtitle;
   final String buttonText;
-  final VoidCallback? onPressed;
   final VoidCallback? onTap;
   final String? imageUrl;
 
@@ -19,7 +18,6 @@ class HeroBanner extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.buttonText,
-    this.onPressed,
     this.onTap,
     this.imageUrl,
   });
@@ -90,7 +88,7 @@ class HeroBanner extends StatelessWidget {
                   ),
                   SizedBox(height: AppSpacing.xxl),
                   ElevatedButton(
-                    onPressed: onPressed ?? onTap,
+                    onPressed: onTap,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.surfaceWhite,
                       foregroundColor: AppColors.primaryRed,
