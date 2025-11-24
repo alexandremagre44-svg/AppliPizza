@@ -10,7 +10,7 @@ class HeroBanner extends StatelessWidget {
   final String title;
   final String subtitle;
   final String buttonText;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
   final String? imageUrl;
 
   const HeroBanner({
@@ -18,7 +18,7 @@ class HeroBanner extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.buttonText,
-    this.onTap,
+    required this.onTap,
     this.imageUrl,
   });
 
