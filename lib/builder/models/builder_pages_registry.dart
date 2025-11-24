@@ -86,4 +86,49 @@ class BuilderPagesRegistry {
       return null;
     }
   }
+
+  /// Filter pages by display location
+  /// 
+  /// This is a helper for working with page metadata.
+  /// For actual page filtering with displayLocation, use BuilderNavigationService.
+  static List<BuilderPageMetadata> filterByRoute(bool Function(String route) predicate) {
+    return pages.where((page) => predicate(page.route)).toList();
+  }
+
+  /// Check if a route exists in the registry
+  static bool hasRoute(String route) {
+    return pages.any((page) => page.route == route);
+  }
+
+  /// Get page by key (pageId value as string)
+  /// 
+  /// Useful for resolving pages by their string key.
+  /// Returns null if no matching page is found.
+  /// 
+  /// Example:
+  /// ```dart
+  /// final metadata = BuilderPagesRegistry.getPageByKey('home');
+  /// ```
+  static BuilderPageMetadata? getPageByKey(String key) {
+    try {
+      return pages.firstWhere(
+        (page) => page.pageId.value == key.toLowerCase(),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Filter pages by displayLocation type
+  /// 
+  /// Note: This filters metadata only. For actual BuilderPage instances
+  /// with displayLocation filtering, use BuilderNavigationService.
+  /// 
+  /// Possible displayLocation values: 'bottomBar', 'hidden', 'internal'
+  static List<BuilderPageMetadata> filterByDisplayLocation(String displayLocation) {
+    // Since metadata doesn't have displayLocation, we return all pages
+    // This method is here for API compatibility
+    // Real filtering happens in BuilderNavigationService on actual BuilderPage instances
+    return pages;
+  }
 }

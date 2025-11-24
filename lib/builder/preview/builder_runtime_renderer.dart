@@ -90,11 +90,18 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
     );
   }
 
-  /// Safely builds a block with error handling
+  /// Safely builds a block with error handling and generic config support
+  /// Applies padding, margin, and other generic styles from config
   /// Returns SizedBox.shrink() if block fails to render
   Widget _buildBlockSafe(BuilderBlock block) {
     try {
-      return _buildBlock(block);
+      // Build the core block widget
+      Widget blockWidget = _buildBlock(block);
+      
+      // Apply generic config: padding, margin, styles
+      blockWidget = _applyGenericConfig(block, blockWidget);
+      
+      return blockWidget;
     } catch (e, stackTrace) {
       // Log error in debug mode only
       if (kDebugMode) {
@@ -105,6 +112,122 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
       // Return empty widget instead of crashing the page
       return const SizedBox.shrink();
     }
+  }
+
+  /// Apply generic configuration to a block widget
+  /// Supports: padding, margin, backgroundColor, borderRadius, elevation
+  Widget _applyGenericConfig(BuilderBlock block, Widget child) {
+    Widget result = child;
+    
+    // Apply padding if configured
+    final padding = _parsePadding(block.getConfig<dynamic>('padding'));
+    if (padding != null) {
+      result = Padding(padding: padding, child: result);
+    }
+    
+    // Apply margin if configured (using Container with margin)
+    final margin = _parsePadding(block.getConfig<dynamic>('margin'));
+    final bgColor = _parseColor(block.getConfig<String>('backgroundColor'));
+    final borderRadius = block.getConfig<double>('borderRadius');
+    final elevation = block.getConfig<double>('elevation');
+    
+    if (margin != null || bgColor != null || borderRadius != null || elevation != null) {
+      result = Container(
+        margin: margin,
+        decoration: bgColor != null || borderRadius != null
+            ? BoxDecoration(
+                color: bgColor,
+                borderRadius: borderRadius != null 
+                    ? BorderRadius.circular(borderRadius) 
+                    : null,
+                boxShadow: elevation != null && elevation > 0
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: elevation * 2,
+                          offset: Offset(0, elevation),
+                        ),
+                      ]
+                    : null,
+              )
+            : null,
+        child: result,
+      );
+    }
+    
+    return result;
+  }
+
+  /// Parse padding/margin value from config
+  /// Supports: number (all sides), map {top, left, right, bottom}, or string
+  EdgeInsets? _parsePadding(dynamic value) {
+    if (value == null) return null;
+    
+    // If it's a number, apply to all sides
+    if (value is num) {
+      return EdgeInsets.all(value.toDouble());
+    }
+    
+    // If it's a map with specific sides
+    if (value is Map) {
+      // Validate known keys and warn about typos in debug mode
+      if (kDebugMode) {
+        final knownKeys = {'top', 'left', 'right', 'bottom'};
+        final unknownKeys = value.keys.where((k) => !knownKeys.contains(k)).toList();
+        if (unknownKeys.isNotEmpty) {
+          debugPrint('Warning: Unknown padding/margin keys: $unknownKeys. Valid keys: $knownKeys');
+        }
+      }
+      
+      return EdgeInsets.only(
+        top: (value['top'] as num?)?.toDouble() ?? 0,
+        left: (value['left'] as num?)?.toDouble() ?? 0,
+        right: (value['right'] as num?)?.toDouble() ?? 0,
+        bottom: (value['bottom'] as num?)?.toDouble() ?? 0,
+      );
+    }
+    
+    // If it's a string like "16" or "16,8,16,8"
+    if (value is String) {
+      final parts = value.split(',').map((s) => double.tryParse(s.trim()) ?? 0).toList();
+      if (parts.length == 1) {
+        return EdgeInsets.all(parts[0]);
+      } else if (parts.length == 2) {
+        return EdgeInsets.symmetric(vertical: parts[0], horizontal: parts[1]);
+      } else if (parts.length == 4) {
+        return EdgeInsets.only(
+          top: parts[0],
+          right: parts[1],
+          bottom: parts[2],
+          left: parts[3],
+        );
+      }
+    }
+    
+    return null;
+  }
+
+  /// Parse color from hex string
+  Color? _parseColor(String? colorStr) {
+    if (colorStr == null || colorStr.isEmpty) return null;
+    
+    try {
+      // Remove # if present
+      final hex = colorStr.replaceAll('#', '');
+      
+      // Support 6-digit (RGB) and 8-digit (ARGB) hex colors
+      if (hex.length == 6) {
+        return Color(int.parse('FF$hex', radix: 16));
+      } else if (hex.length == 8) {
+        return Color(int.parse(hex, radix: 16));
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error parsing color: $colorStr');
+      }
+    }
+    
+    return null;
   }
 
   /// Maps block type to corresponding runtime widget

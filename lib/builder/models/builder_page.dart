@@ -57,6 +57,20 @@ class BuilderPage {
   /// User ID who last modified this page
   final String? lastModifiedBy;
 
+  /// Display location for this page in navigation
+  /// Values: 'bottomBar', 'hidden', 'internal'
+  /// - 'bottomBar': appears in bottom navigation bar
+  /// - 'hidden': accessible only via actions, not visible in nav
+  /// - 'internal': internal pages (cart, profile, checkout, login)
+  final String displayLocation;
+
+  /// Icon name for bottom navigation bar (Material Icon name)
+  /// Example: 'home', 'menu', 'shopping_cart'
+  final String icon;
+
+  /// Order in bottom navigation bar (lower = appears first)
+  final int order;
+
   BuilderPage({
     required this.pageId,
     required this.appId,
@@ -72,6 +86,9 @@ class BuilderPage {
     DateTime? updatedAt,
     this.publishedAt,
     this.lastModifiedBy,
+    this.displayLocation = 'hidden',
+    this.icon = 'help_outline',
+    this.order = 999,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -91,6 +108,9 @@ class BuilderPage {
     DateTime? updatedAt,
     DateTime? publishedAt,
     String? lastModifiedBy,
+    String? displayLocation,
+    String? icon,
+    int? order,
   }) {
     return BuilderPage(
       pageId: pageId ?? this.pageId,
@@ -107,6 +127,9 @@ class BuilderPage {
       updatedAt: updatedAt ?? this.updatedAt,
       publishedAt: publishedAt ?? this.publishedAt,
       lastModifiedBy: lastModifiedBy ?? this.lastModifiedBy,
+      displayLocation: displayLocation ?? this.displayLocation,
+      icon: icon ?? this.icon,
+      order: order ?? this.order,
     );
   }
 
@@ -127,6 +150,9 @@ class BuilderPage {
       'updatedAt': updatedAt.toIso8601String(),
       'publishedAt': publishedAt?.toIso8601String(),
       'lastModifiedBy': lastModifiedBy,
+      'displayLocation': displayLocation,
+      'icon': icon,
+      'order': order,
     };
   }
 
@@ -158,6 +184,9 @@ class BuilderPage {
           ? DateTime.parse(json['publishedAt'] as String)
           : null,
       lastModifiedBy: json['lastModifiedBy'] as String?,
+      displayLocation: json['displayLocation'] as String? ?? 'hidden',
+      icon: json['icon'] as String? ?? 'help_outline',
+      order: json['order'] as int? ?? 999,
     );
   }
 

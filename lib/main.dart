@@ -49,6 +49,10 @@ import 'src/theme/app_theme.dart';
 import 'src/core/constants.dart';
 import 'src/providers/auth_provider.dart';
 
+// Builder B3 imports for dynamic pages
+import 'builder/models/models.dart';
+import 'builder/runtime/runtime.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -158,14 +162,28 @@ class MyApp extends ConsumerWidget {
             return ScaffoldWithNavBar(child: child);
           },
           routes: [
-            // Main app routes
+            // Main app routes - Builder-first with legacy fallback
             GoRoute(
               path: AppRoutes.home,
-              builder: (context, state) => const HomeScreen(),
+              builder: (context, state) => const BuilderPageLoader(
+                pageId: BuilderPageId.home,
+                fallback: HomeScreen(),
+              ),
             ),
             GoRoute(
               path: AppRoutes.menu,
-              builder: (context, state) => const MenuScreen(),
+              builder: (context, state) => const BuilderPageLoader(
+                pageId: BuilderPageId.menu,
+                fallback: MenuScreen(),
+              ),
+            ),
+            // Dynamic Builder pages route
+            GoRoute(
+              path: '/page/:pageId',
+              builder: (context, state) {
+                final pageId = state.pathParameters['pageId'] ?? '';
+                return DynamicBuilderPageScreen(pageKey: pageId);
+              },
             ),
             GoRoute(
               path: AppRoutes.cart,
