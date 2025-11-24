@@ -170,6 +170,15 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
     
     // If it's a map with specific sides
     if (value is Map) {
+      // Validate known keys and warn about typos in debug mode
+      if (kDebugMode) {
+        final knownKeys = {'top', 'left', 'right', 'bottom'};
+        final unknownKeys = value.keys.where((k) => !knownKeys.contains(k)).toList();
+        if (unknownKeys.isNotEmpty) {
+          debugPrint('Warning: Unknown padding/margin keys: $unknownKeys. Valid keys: $knownKeys');
+        }
+      }
+      
       return EdgeInsets.only(
         top: (value['top'] as num?)?.toDouble() ?? 0,
         left: (value['left'] as num?)?.toDouble() ?? 0,

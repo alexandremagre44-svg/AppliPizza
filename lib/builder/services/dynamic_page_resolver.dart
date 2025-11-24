@@ -22,7 +22,10 @@ class DynamicPageResolver {
   /// Resolve a BuilderPage by pageId
   /// 
   /// Loads the published version of the page from Firestore.
-  /// Returns null if the page doesn't exist or isn't published.
+  /// Returns null if the page doesn't exist, isn't published, or isn't enabled.
+  /// 
+  /// Note: loadPublished() already returns only published pages (not drafts).
+  /// The isEnabled check ensures the page is active.
   /// 
   /// Example:
   /// ```dart
@@ -33,6 +36,8 @@ class DynamicPageResolver {
     try {
       final page = await _layoutService.loadPublished(appId, pageId);
       
+      // loadPublished returns only published pages (not drafts)
+      // We additionally check isEnabled to ensure the page is active
       if (page != null && page.isEnabled) {
         return page;
       }

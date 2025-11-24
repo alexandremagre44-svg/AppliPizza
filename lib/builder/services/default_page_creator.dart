@@ -94,22 +94,33 @@ class DefaultPageCreator {
   /// Create default pages for all standard page types
   /// 
   /// Useful for initializing a new restaurant/app with basic pages.
-  Future<Map<BuilderPageId, BuilderPage>> createAllDefaultPages(
+  /// Returns a map of successfully created pages and a list of failures.
+  /// 
+  /// Example:
+  /// ```dart
+  /// final result = await creator.createAllDefaultPages('new_resto');
+  /// print('Created ${result.pages.length} pages');
+  /// print('Failed: ${result.failures.length}');
+  /// ```
+  Future<DefaultPagesResult> createAllDefaultPages(
     String appId, {
     bool publish = false,
   }) async {
     final pages = <BuilderPageId, BuilderPage>{};
+    final failures = <BuilderPageId, String>{};
     
     for (final pageId in BuilderPageId.values) {
       try {
         final page = await createDefaultPage(pageId, appId, publish: publish);
         pages[pageId] = page;
       } catch (e) {
-        debugPrint('Failed to create default page for ${pageId.value}: $e');
+        final errorMsg = 'Failed to create default page for ${pageId.value}: $e';
+        debugPrint(errorMsg);
+        failures[pageId] = e.toString();
       }
     }
     
-    return pages;
+    return DefaultPagesResult(pages: pages, failures: failures);
   }
 
   // ==================== PRIVATE HELPERS ====================
@@ -330,5 +341,25 @@ class DefaultPageCreator {
         },
       ),
     ];
+  }
+}
+
+/// Result of creating multiple default pages
+class DefaultPagesResult {
+  final Map<BuilderPageId, BuilderPage> pages;
+  final Map<BuilderPageId, String> failures;
+  
+  DefaultPagesResult({
+    required this.pages,
+    required this.failures,
+  });
+  
+  bool get hasFailures => failures.isNotEmpty;
+  int get successCount => pages.length;
+  int get failureCount => failures.length;
+  
+  @override
+  String toString() {
+    return 'DefaultPagesResult(success: $successCount, failures: $failureCount)';
   }
 }

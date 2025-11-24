@@ -26,8 +26,11 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appId = ref.watch(currentAppIdProvider);
     
+    // Resolver instance - could be optimized with a provider if needed
+    final resolver = DynamicPageResolver();
+    
     return FutureBuilder<BuilderPage?>(
-      future: DynamicPageResolver().resolveByKey(pageKey, appId),
+      future: resolver.resolveByKey(pageKey, appId),
       builder: (context, snapshot) {
         // Show loading indicator while fetching
         if (snapshot.connectionState == ConnectionState.waiting) {
