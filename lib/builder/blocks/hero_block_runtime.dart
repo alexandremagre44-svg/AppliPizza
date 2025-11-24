@@ -9,15 +9,15 @@ import '../utils/action_helper.dart';
 /// Hero block for prominent headers with image, title, subtitle, and CTA button
 /// 
 /// Configuration:
-/// - title: Hero title text (default: 'Bienvenue')
-/// - subtitle: Hero subtitle text (default: 'Les meilleures pizzas')
+/// - title: Hero title text (default: 'Hero Title')
+/// - subtitle: Hero subtitle text (default: 'Hero subtitle')
 /// - imageUrl: Background image URL (default: '')
 /// - align: Text alignment - left, center, right (default: center)
 /// - padding: Padding inside the hero (default: 16)
 /// - margin: Margin around the hero (default: 0)
 /// - backgroundColor: Background color in hex (default: #D32F2F)
 /// - textColor: Text color in hex (default: #FFFFFF)
-/// - buttonText: CTA button text (default: 'Commander')
+/// - buttonText: CTA button text (default: 'Button')
 /// - buttonColor: Button background color in hex (default: #FFFFFF)
 /// - buttonTextColor: Button text color in hex (default: #D32F2F)
 /// - borderRadius: Corner radius (default: 0)
@@ -38,8 +38,8 @@ class HeroBlockRuntime extends StatelessWidget {
     final helper = BlockConfigHelper(block.config, blockId: block.id);
     
     // Get configuration with defaults
-    final title = helper.getString('title', defaultValue: 'Bienvenue');
-    final subtitle = helper.getString('subtitle', defaultValue: 'Les meilleures pizzas');
+    final title = helper.getString('title', defaultValue: 'Hero Title');
+    final subtitle = helper.getString('subtitle', defaultValue: 'Hero subtitle');
     final imageUrl = helper.getString('imageUrl', defaultValue: '');
     
     // Support both 'align' (new) and 'alignment' (legacy) for backward compatibility
@@ -52,7 +52,7 @@ class HeroBlockRuntime extends StatelessWidget {
     
     // Support both 'buttonText' (new) and 'buttonLabel' (legacy) for backward compatibility
     final buttonText = helper.getString('buttonText', 
-        defaultValue: helper.getString('buttonLabel', defaultValue: 'Commander'));
+        defaultValue: helper.getString('buttonLabel', defaultValue: 'Button'));
     final buttonColor = helper.getColor('buttonColor', defaultValue: Colors.white);
     final buttonTextColor = helper.getColor('buttonTextColor', defaultValue: const Color(0xFFD32F2F));
     final borderRadius = helper.getDouble('borderRadius', defaultValue: 0.0);
@@ -60,31 +60,8 @@ class HeroBlockRuntime extends StatelessWidget {
     // Get action config
     final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
     
-    // Responsive height: check screen size
-    final isDesktop = MediaQuery.of(context).size.width > 800;
-    final defaultHeight = isDesktop ? 280.0 : 200.0;
-    
-    // Support legacy 'heightPreset' field
-    final heightPreset = helper.getString('heightPreset', defaultValue: '');
-    double legacyHeight = defaultHeight;
-    if (heightPreset.isNotEmpty) {
-      switch (heightPreset.toLowerCase()) {
-        case 'small':
-          legacyHeight = 200;
-          break;
-        case 'large':
-          legacyHeight = 400;
-          break;
-        case 'normal':
-        default:
-          legacyHeight = 280;
-      }
-    }
-    
-    // Use explicit 'height' if provided, otherwise use heightPreset value, otherwise default
-    final height = helper.has('height') 
-        ? helper.getDouble('height', defaultValue: defaultHeight)
-        : legacyHeight;
+    // Calculate height with responsive defaults and legacy support
+    final height = _calculateHeight(helper, context);
 
     // Determine alignment
     CrossAxisAlignment crossAxisAlignment;
@@ -232,6 +209,35 @@ class HeroBlockRuntime extends StatelessWidget {
         return heroContent;
       },
     );
+  }
+
+  /// Calculate height with responsive defaults and legacy support
+  double _calculateHeight(BlockConfigHelper helper, BuildContext context) {
+    // Responsive height: check screen size
+    final isDesktop = MediaQuery.of(context).size.width > 800;
+    final defaultHeight = isDesktop ? 280.0 : 200.0;
+    
+    // Support legacy 'heightPreset' field
+    final heightPreset = helper.getString('heightPreset', defaultValue: '');
+    double legacyHeight = defaultHeight;
+    if (heightPreset.isNotEmpty) {
+      switch (heightPreset.toLowerCase()) {
+        case 'small':
+          legacyHeight = 200;
+          break;
+        case 'large':
+          legacyHeight = 400;
+          break;
+        case 'normal':
+        default:
+          legacyHeight = 280;
+      }
+    }
+    
+    // Use explicit 'height' if provided, otherwise use heightPreset value, otherwise default
+    return helper.has('height') 
+        ? helper.getDouble('height', defaultValue: defaultHeight)
+        : legacyHeight;
   }
 
   /// Build background with image or gradient
