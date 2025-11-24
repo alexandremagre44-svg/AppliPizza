@@ -43,6 +43,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   late TabController _tabController;
   
   /// Whether to show the mobile editor panel at the bottom
+  /// Panel is shown when a block is selected AND we're showing the blocks list (not preview)
   bool get _shouldShowMobileEditorPanel => _selectedBlock != null && !_showPreviewInMobile;
 
   @override
