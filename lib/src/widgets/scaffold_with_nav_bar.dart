@@ -1,6 +1,7 @@
 // lib/src/widgets/scaffold_with_nav_bar.dart
 // Dynamic bottom navigation bar controlled by Builder B3
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -107,7 +108,10 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         },
         error: (error, stack) {
           // On error, fallback to basic navigation
-          print('Error loading bottom bar pages: $error');
+          debugPrint('Error loading bottom bar pages: $error');
+          if (kDebugMode && stack != null) {
+            debugPrint('Stack trace: $stack');
+          }
           return Container(
             decoration: BoxDecoration(
               boxShadow: [
@@ -191,7 +195,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       final filledIcon = iconPair.$2;
 
       // Special handling for cart page - add badge
-      if (page.route == '/cart' && totalItems > 0) {
+      if (page.route == '/cart') {
         items.add(
           BottomNavigationBarItem(
             icon: badges.Badge(

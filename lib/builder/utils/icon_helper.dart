@@ -85,9 +85,30 @@ class IconHelper {
   
   /// Get both outlined and filled versions of an icon
   /// Returns a tuple: (outlined, filled)
+  /// 
+  /// Attempts to find both outlined and filled versions.
+  /// If outlined version doesn't exist, uses the filled version for both.
   static (IconData, IconData) getIconPair(String iconName) {
-    final outlined = iconFromName('${iconName}_outlined');
-    final filled = iconFromName(iconName);
+    // Normalize icon name
+    final normalizedName = iconName.toLowerCase().trim();
+    
+    // Try to get outlined version first
+    final outlinedName = normalizedName.endsWith('_outlined') 
+        ? normalizedName 
+        : '${normalizedName}_outlined';
+    
+    // Try to get filled version
+    final filledName = normalizedName.replaceAll('_outlined', '');
+    
+    // Get the icons - if outlined doesn't exist, both will be the filled version
+    final outlined = iconFromName(outlinedName);
+    final filled = iconFromName(filledName);
+    
+    // If outlined is fallback but filled is not, use filled for both
+    if (outlined == Icons.help_outline && filled != Icons.help_outline) {
+      return (filled, filled);
+    }
+    
     return (outlined, filled);
   }
 }

@@ -1,6 +1,7 @@
 // lib/builder/services/builder_navigation_service.dart
 // Service for managing dynamic navigation based on Builder B3 pages
 
+import 'package:flutter/foundation.dart';
 import '../models/models.dart';
 import 'builder_layout_service.dart';
 
@@ -45,8 +46,11 @@ class BuilderNavigationService {
       bottomBarPages.sort((a, b) => a.order.compareTo(b.order));
       
       return bottomBarPages;
-    } catch (e) {
-      print('Error loading bottom bar pages: $e');
+    } catch (e, stackTrace) {
+      debugPrint('Error loading bottom bar pages: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
       return [];
     }
   }
@@ -67,8 +71,11 @@ class BuilderNavigationService {
               page.displayLocation == 'hidden' && 
               page.isEnabled)
           .toList();
-    } catch (e) {
-      print('Error loading hidden pages: $e');
+    } catch (e, stackTrace) {
+      debugPrint('Error loading hidden pages: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
       return [];
     }
   }
@@ -89,8 +96,11 @@ class BuilderNavigationService {
               page.displayLocation == 'internal' && 
               page.isEnabled)
           .toList();
-    } catch (e) {
-      print('Error loading internal pages: $e');
+    } catch (e, stackTrace) {
+      debugPrint('Error loading internal pages: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
       return [];
     }
   }
@@ -106,8 +116,11 @@ class BuilderNavigationService {
         (page) => page.route == route,
         orElse: () => throw StateError('Page not found'),
       );
-    } catch (e) {
-      print('Error finding page by route $route: $e');
+    } catch (e, stackTrace) {
+      debugPrint('Error finding page by route $route: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
       return null;
     }
   }
@@ -122,8 +135,11 @@ class BuilderNavigationService {
       return allPages.values
           .where((page) => page.isEnabled)
           .toList();
-    } catch (e) {
-      print('Error loading all enabled pages: $e');
+    } catch (e, stackTrace) {
+      debugPrint('Error loading all enabled pages: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
       return [];
     }
   }
@@ -147,8 +163,11 @@ class BuilderNavigationService {
       }
       
       return counts;
-    } catch (e) {
-      print('Error counting pages: $e');
+    } catch (e, stackTrace) {
+      debugPrint('Error counting pages: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
       return {'bottomBar': 0, 'hidden': 0, 'internal': 0};
     }
   }
