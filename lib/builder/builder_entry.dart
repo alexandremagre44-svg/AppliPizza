@@ -79,6 +79,8 @@ class _BuilderStudioScreenState extends State<BuilderStudioScreen> {
   }
 
   Widget _buildPageCard(BuilderPageId pageId) {
+    final metadata = BuilderPagesRegistry.getMetadata(pageId);
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -86,18 +88,15 @@ class _BuilderStudioScreenState extends State<BuilderStudioScreen> {
         leading: CircleAvatar(
           backgroundColor: Colors.blue.shade100,
           child: Text(
-            pageId.value[0].toUpperCase(),
-            style: TextStyle(
-              color: Colors.blue.shade900,
-              fontWeight: FontWeight.bold,
-            ),
+            metadata.icon,
+            style: const TextStyle(fontSize: 20),
           ),
         ),
         title: Text(
-          pageId.label,
+          metadata.name,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
-        subtitle: Text('Page: ${pageId.value}'),
+        subtitle: Text(metadata.description),
         trailing: ElevatedButton.icon(
           onPressed: () {
             Navigator.push(

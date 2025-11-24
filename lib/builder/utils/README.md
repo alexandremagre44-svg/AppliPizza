@@ -2,6 +2,29 @@
 
 This directory contains utility functions and helpers for the Builder B3 system.
 
+## Current Contents
+
+### ✅ BuilderPageWrapper
+**File:** `builder_page_wrapper.dart`
+
+Reusable wrapper widget for pages that support Builder B3 layouts with automatic fallback.
+
+**Features:**
+- Loads published layouts from Firestore  
+- Falls back to default content if no layout exists
+- Error handling with graceful degradation
+- Loading state management
+- RefreshIndicator support
+
+**Usage:**
+```dart
+BuilderPageWrapper(
+  pageId: BuilderPageId.menu,
+  appId: 'pizza_delizza',
+  fallbackBuilder: () => DefaultMenuWidget(),
+)
+```
+
 ## Purpose
 - Common utilities and helper functions
 - Validation logic
@@ -23,4 +46,5 @@ This directory contains utility functions and helpers for the Builder B3 system.
 - Common helpers
 
 ## Status
-🚧 Structure ready, awaiting implementation
+✅ BuilderPageWrapper implemented
+🚧 Additional utilities awaiting implementation
