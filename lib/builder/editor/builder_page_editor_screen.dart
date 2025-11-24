@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/services.dart';
+import '../preview/preview.dart';
 
 /// Builder Page Editor Screen
 /// 
@@ -13,6 +14,7 @@ import '../services/services.dart';
 /// - Add/remove blocks
 /// - Reorder blocks (drag & drop)
 /// - Edit block configuration
+/// - Preview page (tab view or full-screen)
 class BuilderPageEditorScreen extends StatefulWidget {
   final String appId;
   final BuilderPageId pageId;
@@ -27,17 +29,25 @@ class BuilderPageEditorScreen extends StatefulWidget {
   State<BuilderPageEditorScreen> createState() => _BuilderPageEditorScreenState();
 }
 
-class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> {
+class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with SingleTickerProviderStateMixin {
   final BuilderLayoutService _service = BuilderLayoutService();
   BuilderPage? _page;
   bool _isLoading = true;
   BuilderBlock? _selectedBlock;
   bool _hasChanges = false;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _loadPage();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadPage() async {
@@ -240,6 +250,13 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Éditeur: ${widget.pageId.label}'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(icon: Icon(Icons.edit), text: 'Édition'),
+            Tab(icon: Icon(Icons.visibility), text: 'Prévisualisation'),
+          ],
+        ),
         actions: [
           if (_hasChanges)
             IconButton(
@@ -247,6 +264,11 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> {
               tooltip: 'Sauvegarder',
               onPressed: _saveDraft,
             ),
+          IconButton(
+            icon: const Icon(Icons.fullscreen),
+            tooltip: 'Prévisualisation plein écran',
+            onPressed: _showFullScreenPreview,
+          ),
           IconButton(
             icon: const Icon(Icons.publish),
             tooltip: 'Publier',
@@ -258,26 +280,56 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _page == null
               ? const Center(child: Text('Impossible de charger la page'))
-              : Row(
+              : TabBarView(
+                  controller: _tabController,
                   children: [
-                    // Blocks list (left side)
-                    Expanded(
-                      flex: 2,
-                      child: _buildBlocksList(),
-                    ),
-                    // Configuration panel (right side)
-                    if (_selectedBlock != null)
-                      Expanded(
-                        flex: 1,
-                        child: _buildConfigPanel(),
-                      ),
+                    _buildEditorTab(),
+                    _buildPreviewTab(),
                   ],
                 ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAddBlockDialog,
-        icon: const Icon(Icons.add),
-        label: const Text('Ajouter un bloc'),
-      ),
+      floatingActionButton: _tabController.index == 0
+          ? FloatingActionButton.extended(
+              onPressed: _showAddBlockDialog,
+              icon: const Icon(Icons.add),
+              label: const Text('Ajouter un bloc'),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildEditorTab() {
+    return Row(
+      children: [
+        // Blocks list (left side)
+        Expanded(
+          flex: 2,
+          child: _buildBlocksList(),
+        ),
+        // Configuration panel (right side)
+        if (_selectedBlock != null)
+          Expanded(
+            flex: 1,
+            child: _buildConfigPanel(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPreviewTab() {
+    if (_page == null) {
+      return const Center(child: Text('Aucune page à prévisualiser'));
+    }
+
+    return BuilderPagePreview(blocks: _page!.blocks);
+  }
+
+  void _showFullScreenPreview() {
+    if (_page == null) return;
+
+    BuilderFullScreenPreview.show(
+      context,
+      blocks: _page!.blocks,
+      pageTitle: widget.pageId.label,
     );
   }
 

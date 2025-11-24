@@ -1,24 +1,69 @@
 # Builder B3 - Preview
 
-This directory contains the preview components for the Builder B3 system.
+This directory contains the preview system components.
 
 ## Purpose
-- Real-time preview of pages being built
-- Mobile device frame simulation
-- Preview different screen sizes
-- Test page functionality before publishing
+- Real-time page preview
+- Visual feedback during editing
+- No runtime dependencies
+- Pure visual rendering
 
-## Future Contents
-- `preview_screen.dart` - Preview display
-- `device_frame_widget.dart` - Mobile device frame
-- `preview_renderer.dart` - Render pages from block data
-- `responsive_preview.dart` - Multi-size preview
+## Files (2 total)
 
-## Features to Implement
-- Live preview updates
-- Device size simulation (phone, tablet)
-- Orientation switching
-- Interactive preview mode
+### ✅ Preview System
+
+1. **`builder_page_preview.dart`** - Main preview widget
+2. **`preview.dart`** - Barrel file for easy imports
+
+## Features
+
+### BuilderPagePreview Widget ✅
+
+```dart
+BuilderPagePreview(
+  blocks: page.blocks,
+  backgroundColor: Colors.grey.shade50,
+)
+```
+
+### BuilderFullScreenPreview Dialog ✅
+
+```dart
+BuilderFullScreenPreview.show(
+  context,
+  blocks: page.blocks,
+  pageTitle: 'Accueil',
+);
+```
+
+## Usage
+
+### In Editor
+
+Integrated automatically in BuilderPageEditorScreen:
+- Tab 1: Édition (editing mode)
+- Tab 2: Prévisualisation (preview mode)
+- Full-screen button in toolbar
+
+### Standalone
+
+```dart
+import 'package:pizza_delizza/builder/preview/preview.dart';
+
+BuilderPagePreview(blocks: myBlocks);
+```
+
+## Architecture
+
+### No Runtime Dependencies
+
+- ❌ No providers
+- ❌ No API calls
+- ❌ No database queries
+- ✅ Pure visual rendering
+- ✅ Configuration-based only
 
 ## Status
-🚧 Structure ready, awaiting implementation
+✅ **IMPLEMENTED** - Core preview system complete
+
+See BUILDER_B3_PREVIEW.md for complete documentation.
