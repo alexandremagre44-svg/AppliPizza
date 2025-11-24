@@ -1,10 +1,18 @@
 // lib/builder/blocks/html_block_runtime.dart
-// Runtime version of HTMLBlock - simplified text rendering
+// Runtime version of HTMLBlock - Phase 5 enhanced with security
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
-import '../../src/theme/app_theme.dart';
+import '../utils/block_config_helper.dart';
 
+/// HTML block for displaying HTML content (sanitized)
+/// 
+/// Configuration:
+/// - html: HTML content (sanitized to plain text for security)
+/// - padding: Padding around content (default: 12)
+/// - margin: Margin around block (default: 0)
+/// 
+/// Security: HTML tags are stripped for safety
 class HtmlBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
 
@@ -15,27 +23,67 @@ class HtmlBlockRuntime extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final html = block.getConfig<String>('html') ?? '';
+    final helper = BlockConfigHelper(block.config, blockId: block.id);
+    
+    final html = helper.getString('html', defaultValue: '');
+    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
+    final margin = helper.getEdgeInsets('margin');
     
     if (html.isEmpty) {
-      return const SizedBox.shrink();
+      return _buildFallback(padding, margin);
     }
 
-    // Simple HTML tag stripping for display
-    final strippedText = html
+    // Sanitize HTML - strip tags for security
+    final strippedText = _sanitizeHtml(html);
+
+    Widget content = Text(
+      strippedText,
+      style: const TextStyle(fontSize: 16),
+    );
+
+    content = Padding(padding: padding, child: content);
+    
+    if (margin != EdgeInsets.zero) {
+      content = Padding(padding: margin, child: content);
+    }
+
+    return content;
+  }
+
+  /// Sanitize HTML by removing tags
+  String _sanitizeHtml(String html) {
+    return html
         .replaceAll(RegExp(r'<[^>]*>'), '')
         .replaceAll('&nbsp;', ' ')
         .replaceAll('&amp;', '&')
         .replaceAll('&lt;', '<')
         .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
         .trim();
+  }
 
-    return Padding(
-      padding: AppSpacing.paddingHorizontalLG,
-      child: Text(
-        strippedText,
-        style: AppTextStyles.bodyMedium,
+  /// Fallback when no content
+  Widget _buildFallback(EdgeInsets padding, EdgeInsets margin) {
+    Widget fallback = Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Center(
+        child: Text(
+          'No HTML content',
+          style: TextStyle(color: Colors.grey, fontSize: 14),
+        ),
       ),
     );
+
+    fallback = Padding(padding: padding, child: fallback);
+    if (margin != EdgeInsets.zero) {
+      fallback = Padding(padding: margin, child: fallback);
+    }
+    
+    return fallback;
   }
 }
