@@ -142,6 +142,9 @@ class HomeTexts {
   final String categoriesTitle;
   final String promosTitle;
   final String bestSellersTitle;
+  final String bestsellersTitle; // Alternative name for bestSellersTitle
+  final String promoBannerTitle; // Title for promo banner section
+  final String promoBannerSubtitle; // Subtitle for promo banner section
   final String featuredTitle;
   final String retryButton;
   final String productAddedToCart;
@@ -156,6 +159,9 @@ class HomeTexts {
     required this.categoriesTitle,
     required this.promosTitle,
     required this.bestSellersTitle,
+    required this.bestsellersTitle,
+    required this.promoBannerTitle,
+    required this.promoBannerSubtitle,
     required this.featuredTitle,
     required this.retryButton,
     required this.productAddedToCart,
@@ -171,6 +177,9 @@ class HomeTexts {
     'categoriesTitle': categoriesTitle,
     'promosTitle': promosTitle,
     'bestSellersTitle': bestSellersTitle,
+    'bestsellersTitle': bestsellersTitle,
+    'promoBannerTitle': promoBannerTitle,
+    'promoBannerSubtitle': promoBannerSubtitle,
     'featuredTitle': featuredTitle,
     'retryButton': retryButton,
     'productAddedToCart': productAddedToCart,
@@ -185,7 +194,10 @@ class HomeTexts {
     welcomeMessage: json['welcomeMessage'] as String? ?? 'Bienvenue',
     categoriesTitle: json['categoriesTitle'] as String? ?? 'Nos catégories',
     promosTitle: json['promosTitle'] as String? ?? '🔥 Promos du moment',
-    bestSellersTitle: json['bestSellersTitle'] as String? ?? '🔥 Best-sellers',
+    bestSellersTitle: json['bestSellersTitle'] as String? ?? '⭐ Best-sellers',
+    bestsellersTitle: json['bestsellersTitle'] as String? ?? '⭐ Nos meilleures ventes',
+    promoBannerTitle: json['promoBannerTitle'] as String? ?? '🎉 Promotions',
+    promoBannerSubtitle: json['promoBannerSubtitle'] as String? ?? 'Découvrez nos offres du moment',
     featuredTitle: json['featuredTitle'] as String? ?? '⭐ Produits phares',
     retryButton: json['retryButton'] as String? ?? 'Réessayer',
     productAddedToCart: json['productAddedToCart'] as String? ?? '{name} ajouté au panier !',
@@ -200,7 +212,10 @@ class HomeTexts {
     welcomeMessage: 'Bienvenue',
     categoriesTitle: 'Nos catégories',
     promosTitle: '🔥 Promos du moment',
-    bestSellersTitle: '🔥 Best-sellers',
+    bestSellersTitle: '⭐ Best-sellers',
+    bestsellersTitle: '⭐ Nos meilleures ventes',
+    promoBannerTitle: '🎉 Promotions',
+    promoBannerSubtitle: 'Découvrez nos offres du moment',
     featuredTitle: '⭐ Produits phares',
     retryButton: 'Réessayer',
     productAddedToCart: '{name} ajouté au panier !',
@@ -216,6 +231,9 @@ class HomeTexts {
     String? categoriesTitle,
     String? promosTitle,
     String? bestSellersTitle,
+    String? bestsellersTitle,
+    String? promoBannerTitle,
+    String? promoBannerSubtitle,
     String? featuredTitle,
     String? retryButton,
     String? productAddedToCart,
@@ -229,6 +247,9 @@ class HomeTexts {
     categoriesTitle: categoriesTitle ?? this.categoriesTitle,
     promosTitle: promosTitle ?? this.promosTitle,
     bestSellersTitle: bestSellersTitle ?? this.bestSellersTitle,
+    bestsellersTitle: bestsellersTitle ?? this.bestsellersTitle,
+    promoBannerTitle: promoBannerTitle ?? this.promoBannerTitle,
+    promoBannerSubtitle: promoBannerSubtitle ?? this.promoBannerSubtitle,
     featuredTitle: featuredTitle ?? this.featuredTitle,
     retryButton: retryButton ?? this.retryButton,
     productAddedToCart: productAddedToCart ?? this.productAddedToCart,

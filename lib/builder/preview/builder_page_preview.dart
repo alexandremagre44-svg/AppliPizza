@@ -1,9 +1,11 @@
 // lib/builder/preview/builder_page_preview.dart
 // Preview widget that renders a list of blocks visually
+// MOBILE RESPONSIVE: Fixed sizing and zoom issues on mobile
 
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../blocks/blocks.dart';
+import '../utils/responsive.dart';
 
 /// Builder Page Preview Widget
 /// 
@@ -37,13 +39,34 @@ class BuilderPagePreview extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    return Container(
-      color: backgroundColor ?? Colors.grey.shade50,
-      child: SingleChildScrollView(
-        child: Column(
-          children: activeBlocks.map((block) => _buildBlock(block)).toList(),
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final responsive = ResponsiveBuilder(constraints.maxWidth);
+        
+        return Container(
+          color: backgroundColor ?? Colors.grey.shade50,
+          child: SingleChildScrollView(
+            physics: responsive.isMobile 
+              ? const ClampingScrollPhysics() 
+              : const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: responsive.previewMaxWidth,
+                minHeight: constraints.maxHeight,
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: responsive.horizontalPadding,
+                  vertical: responsive.verticalPadding,
+                ),
+                child: Column(
+                  children: activeBlocks.map((block) => _buildBlock(block)).toList(),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 

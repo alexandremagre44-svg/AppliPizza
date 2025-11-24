@@ -1,5 +1,6 @@
 // lib/builder/utils/builder_page_wrapper.dart
 // Reusable wrapper for pages that support Builder B3 layouts
+// MOBILE RESPONSIVE: Fixed scroll behavior for mobile
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -59,7 +60,13 @@ class BuilderPageWrapper extends StatelessWidget {
             // Trigger rebuild to reload from Firestore
             await Future.delayed(const Duration(milliseconds: 300));
           },
-          child: BuilderRuntimeRenderer(blocks: page.blocks),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: BuilderRuntimeRenderer(
+              blocks: page.blocks,
+              wrapInScrollView: false, // We handle scroll here
+            ),
+          ),
         );
       },
     );
