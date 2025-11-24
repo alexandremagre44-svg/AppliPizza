@@ -27,7 +27,7 @@ class BannerBlockPreview extends StatelessWidget {
     final imageUrl = helper.getString('imageUrl', defaultValue: '');
     final align = helper.getString('align', defaultValue: 'center');
     final backgroundColor = helper.getColor('backgroundColor');
-    final textColor = helper.getColor('textColor', defaultValue: Colors.black);
+    final textColor = helper.getColor('textColor', defaultValue: Colors.black) ?? Colors.black;
     final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
     final height = helper.getDouble('height', defaultValue: 160.0);
 

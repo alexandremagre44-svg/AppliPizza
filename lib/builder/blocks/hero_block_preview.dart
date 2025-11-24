@@ -26,8 +26,8 @@ class HeroBlockPreview extends StatelessWidget {
     final subtitle = helper.getString('subtitle', defaultValue: 'Hero subtitle text');
     final imageUrl = helper.getString('imageUrl', defaultValue: '');
     final align = helper.getString('align', defaultValue: 'center');
-    final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFD32F2F));
-    final textColor = helper.getColor('textColor', defaultValue: Colors.white);
+    final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFD32F2F)) ?? const Color(0xFFD32F2F);
+    final textColor = helper.getColor('textColor', defaultValue: Colors.white) ?? Colors.white;
     final buttonText = helper.getString('buttonText', defaultValue: 'Button');
     final buttonColor = helper.getColor('buttonColor', defaultValue: Colors.white);
     final buttonTextColor = helper.getColor('buttonTextColor', defaultValue: const Color(0xFFD32F2F));

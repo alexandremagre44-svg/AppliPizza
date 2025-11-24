@@ -90,10 +90,10 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                 ),
               ],
             ),
-            child: const BottomNavigationBar(
+            child: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
               currentIndex: 0,
-              items: [
+              items: const [
                 BottomNavigationBarItem(
                   icon: Icon(Icons.home_outlined),
                   label: 'Accueil',
