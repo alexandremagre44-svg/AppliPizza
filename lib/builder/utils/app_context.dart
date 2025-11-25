@@ -3,6 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../src/core/firestore_paths.dart';
 
 /// Role definitions for Builder B3 access control
 class BuilderRole {
@@ -113,7 +114,7 @@ class AppContextService {
     
     if (user == null) {
       return AppContextState(
-        currentAppId: 'pizza_delizza', // Default
+        currentAppId: kRestaurantId, // Default
         accessibleApps: [],
         userRole: BuilderRole.client,
         hasBuilderAccess: false,
@@ -137,7 +138,7 @@ class AppContextService {
     
     if (!userDoc.exists && !hasAdminClaim) {
       return AppContextState(
-        currentAppId: 'pizza_delizza',
+        currentAppId: kRestaurantId,
         accessibleApps: [],
         userRole: BuilderRole.client,
         userId: user.uid,
@@ -157,22 +158,22 @@ class AppContextService {
       accessibleApps = await _loadAllApps();
       defaultAppId = accessibleApps.isNotEmpty 
           ? accessibleApps.first.appId 
-          : 'pizza_delizza';
+          : kRestaurantId;
     } else if (role == BuilderRole.adminResto || role == BuilderRole.studio) {
       // Admin resto/studio: load their specific app
-      final assignedAppId = userData['appId'] as String? ?? 'pizza_delizza';
+      final assignedAppId = userData['appId'] as String? ?? kRestaurantId;
       final appInfo = await _loadAppInfo(assignedAppId);
       accessibleApps = appInfo != null ? [appInfo] : [];
       defaultAppId = assignedAppId;
     } else if (role == BuilderRole.admin) {
-      // Legacy admin: treat as admin_resto for pizza_delizza
-      final appInfo = await _loadAppInfo('pizza_delizza');
+      // Legacy admin: treat as admin_resto for default restaurant
+      final appInfo = await _loadAppInfo(kRestaurantId);
       accessibleApps = appInfo != null ? [appInfo] : [];
-      defaultAppId = 'pizza_delizza';
+      defaultAppId = kRestaurantId;
     } else {
       // No Builder access
       accessibleApps = [];
-      defaultAppId = 'pizza_delizza';
+      defaultAppId = kRestaurantId;
     }
     
     // Check if user has Builder access (custom claim OR role-based)
@@ -204,8 +205,8 @@ class AppContextService {
       // Fallback to default
       return [
         AppInfo(
-          appId: 'pizza_delizza',
-          name: 'Pizza Delizza',
+          appId: kRestaurantId,
+          name: 'Delizza',
           description: 'Restaurant principal',
         ),
       ];
@@ -223,11 +224,11 @@ class AppContextService {
       print('Error loading app $appId: $e');
     }
     
-    // Fallback for pizza_delizza
-    if (appId == 'pizza_delizza') {
+    // Fallback for default restaurant
+    if (appId == kRestaurantId) {
       return AppInfo(
-        appId: 'pizza_delizza',
-        name: 'Pizza Delizza',
+        appId: kRestaurantId,
+        name: 'Delizza',
         description: 'Restaurant principal',
       );
     }
@@ -252,7 +253,7 @@ class AppContextNotifier extends StateNotifier<AppContextState> {
   
   AppContextNotifier(this._service)
       : super(AppContextState(
-          currentAppId: 'pizza_delizza',
+          currentAppId: kRestaurantId,
           accessibleApps: [],
           userRole: BuilderRole.client,
           hasBuilderAccess: false,

@@ -4,10 +4,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/services.dart';
-
-/// Default app ID for single-restaurant deployments
-/// TODO: Replace with multi-resto app context provider
-const String _defaultAppId = 'pizza_delizza';
+import '../../src/core/firestore_paths.dart';
 
 /// Service provider for BuilderLayoutService
 /// Provides singleton instance of the layout service
@@ -29,19 +26,19 @@ final builderLayoutServiceProvider = Provider<BuilderLayoutService>((ref) {
 /// ```
 final homePagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
   final service = ref.watch(builderLayoutServiceProvider);
-  return await service.loadPublished(_defaultAppId, BuilderPageId.home);
+  return await service.loadPublished(kRestaurantId, BuilderPageId.home);
 });
 
 /// Provider for published menu page layout
 final menuPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
   final service = ref.watch(builderLayoutServiceProvider);
-  return await service.loadPublished(_defaultAppId, BuilderPageId.menu);
+  return await service.loadPublished(kRestaurantId, BuilderPageId.menu);
 });
 
 /// Provider for published promo page layout
 final promoPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
   final service = ref.watch(builderLayoutServiceProvider);
-  return await service.loadPublished(_defaultAppId, BuilderPageId.promo);
+  return await service.loadPublished(kRestaurantId, BuilderPageId.promo);
 });
 
 /// Generic family provider for any page
@@ -54,7 +51,7 @@ final promoPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
 final publishedPageProvider = FutureProvider.family<BuilderPage?, BuilderPageId>(
   (ref, pageId) async {
     final service = ref.watch(builderLayoutServiceProvider);
-    return await service.loadPublished(_defaultAppId, pageId);
+    return await service.loadPublished(kRestaurantId, pageId);
   },
 );
 
@@ -62,5 +59,5 @@ final publishedPageProvider = FutureProvider.family<BuilderPage?, BuilderPageId>
 /// Use this if you need live updates when layout changes in Firestore
 final homePagePublishedStreamProvider = StreamProvider<BuilderPage?>((ref) {
   final service = ref.watch(builderLayoutServiceProvider);
-  return service.watchPublished(_defaultAppId, BuilderPageId.home);
+  return service.watchPublished(kRestaurantId, BuilderPageId.home);
 });

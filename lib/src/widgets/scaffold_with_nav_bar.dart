@@ -1,5 +1,9 @@
 // lib/src/widgets/scaffold_with_nav_bar.dart
 // Dynamic bottom navigation bar controlled by Builder B3
+//
+// Navigation structure loaded from:
+// restaurants/{restaurantId}/pages_system (order)
+// restaurants/{restaurantId}/pages_published (content)
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,16 +12,16 @@ import 'package:go_router/go_router.dart';
 import 'package:badges/badges.dart' as badges;
 import '../providers/cart_provider.dart';
 import '../providers/auth_provider.dart';
+import '../core/firestore_paths.dart';
 import '../../builder/models/builder_page.dart';
 import '../../builder/services/builder_navigation_service.dart';
-import '../../builder/utils/app_context.dart';
 import '../../builder/utils/icon_helper.dart';
 
 /// Provider for bottom bar pages
 /// Loads pages dynamically from Builder B3
+/// Uses kRestaurantId for consistent restaurant scoping
 final bottomBarPagesProvider = FutureProvider.autoDispose<List<BuilderPage>>((ref) async {
-  final appId = ref.watch(currentAppIdProvider);
-  final service = BuilderNavigationService(appId);
+  final service = BuilderNavigationService(kRestaurantId);
   return await service.getBottomBarPages();
 });
 

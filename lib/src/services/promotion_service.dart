@@ -1,18 +1,22 @@
 // lib/src/services/promotion_service.dart
 // Service for managing promotions in Firestore
+//
+// New Firestore structure:
+// restaurants/{restaurantId}/builder_settings/promotions/items/{promotionId}
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/promotion.dart';
+import '../core/firestore_paths.dart';
 
 class PromotionService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const String _collection = 'promotions';
+  /// Get collection reference for promotions
+  CollectionReference<Map<String, dynamic>> get _promotionsCollection =>
+      FirestorePaths.promotions();
 
   // Get all promotions
   Future<List<Promotion>> getAllPromotions() async {
     try {
-      final snapshot = await _firestore
-          .collection(_collection)
+      final snapshot = await _promotionsCollection
           .orderBy('createdAt', descending: true)
           .get();
 
@@ -28,8 +32,7 @@ class PromotionService {
   // Get active promotions
   Future<List<Promotion>> getActivePromotions() async {
     try {
-      final snapshot = await _firestore
-          .collection(_collection)
+      final snapshot = await _promotionsCollection
           .where('isActive', isEqualTo: true)
           .get();
 
@@ -51,8 +54,7 @@ class PromotionService {
   // Get promotions for home banner
   Future<List<Promotion>> getHomeBannerPromotions() async {
     try {
-      final snapshot = await _firestore
-          .collection(_collection)
+      final snapshot = await _promotionsCollection
           .where('isActive', isEqualTo: true)
           .where('showOnHomeBanner', isEqualTo: true)
           .get();
@@ -70,8 +72,7 @@ class PromotionService {
   // Get promotions for promo block
   Future<List<Promotion>> getPromoBlockPromotions() async {
     try {
-      final snapshot = await _firestore
-          .collection(_collection)
+      final snapshot = await _promotionsCollection
           .where('isActive', isEqualTo: true)
           .where('showInPromoBlock', isEqualTo: true)
           .get();
@@ -89,8 +90,7 @@ class PromotionService {
   // Get promotions for roulette
   Future<List<Promotion>> getRoulettePromotions() async {
     try {
-      final snapshot = await _firestore
-          .collection(_collection)
+      final snapshot = await _promotionsCollection
           .where('isActive', isEqualTo: true)
           .where('useInRoulette', isEqualTo: true)
           .get();
@@ -108,8 +108,7 @@ class PromotionService {
   // Get promotions for mailing
   Future<List<Promotion>> getMailingPromotions() async {
     try {
-      final snapshot = await _firestore
-          .collection(_collection)
+      final snapshot = await _promotionsCollection
           .where('isActive', isEqualTo: true)
           .where('useInMailing', isEqualTo: true)
           .get();
@@ -127,7 +126,7 @@ class PromotionService {
   // Get promotion by ID
   Future<Promotion?> getPromotionById(String id) async {
     try {
-      final doc = await _firestore.collection(_collection).doc(id).get();
+      final doc = await _promotionsCollection.doc(id).get();
       if (doc.exists && doc.data() != null) {
         return Promotion.fromJson(doc.data()!);
       }
@@ -141,8 +140,7 @@ class PromotionService {
   // Create promotion
   Future<bool> createPromotion(Promotion promotion) async {
     try {
-      await _firestore
-          .collection(_collection)
+      await _promotionsCollection
           .doc(promotion.id)
           .set(promotion.toJson());
       return true;
@@ -158,8 +156,7 @@ class PromotionService {
       final updatedPromotion = promotion.copyWith(
         updatedAt: DateTime.now(),
       );
-      await _firestore
-          .collection(_collection)
+      await _promotionsCollection
           .doc(promotion.id)
           .update(updatedPromotion.toJson());
       return true;
@@ -172,7 +169,7 @@ class PromotionService {
   // Delete promotion
   Future<bool> deletePromotion(String id) async {
     try {
-      await _firestore.collection(_collection).doc(id).delete();
+      await _promotionsCollection.doc(id).delete();
       return true;
     } catch (e) {
       print('Error deleting promotion: $e');
@@ -200,8 +197,7 @@ class PromotionService {
 
   // Stream for real-time updates
   Stream<List<Promotion>> watchPromotions() {
-    return _firestore
-        .collection(_collection)
+    return _promotionsCollection
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {

@@ -1,11 +1,14 @@
 // lib/builder/runtime/builder_page_loader.dart
 // Widget that loads Builder pages with fallback to legacy screens
+//
+// Uses new Firestore structure:
+// restaurants/{restaurantId}/pages_published/{pageId}
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/dynamic_page_resolver.dart';
-import '../utils/app_context.dart';
+import '../../src/core/firestore_paths.dart';
 import '../preview/builder_runtime_renderer.dart';
 
 /// Widget that loads a Builder page with fallback to legacy screen
@@ -38,7 +41,8 @@ class BuilderPageLoader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appId = ref.watch(currentAppIdProvider);
+    // Use kRestaurantId from FirestorePaths for consistent restaurant scoping
+    final appId = kRestaurantId;
     
     // Resolver instance - could be optimized with a provider if needed
     final resolver = DynamicPageResolver();
@@ -99,7 +103,7 @@ class BuilderPageLoader extends ConsumerWidget {
 /// before deciding whether to show Builder or legacy content.
 final builderPageProvider = FutureProvider.family<BuilderPage?, BuilderPageId>(
   (ref, pageId) async {
-    final appId = ref.watch(currentAppIdProvider);
-    return await DynamicPageResolver().resolve(pageId, appId);
+    // Use kRestaurantId for consistent restaurant scoping
+    return await DynamicPageResolver().resolve(pageId, kRestaurantId);
   },
 );

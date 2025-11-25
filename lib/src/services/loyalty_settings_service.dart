@@ -1,18 +1,18 @@
 // lib/src/services/loyalty_settings_service.dart
 // Service for managing loyalty program settings in Firestore
+//
+// New Firestore structure:
+// restaurants/{restaurantId}/builder_settings/loyalty_settings
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/loyalty_settings.dart';
+import '../core/firestore_paths.dart';
 
 class LoyaltySettingsService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const String _collection = 'loyalty_settings';
-  static const String _configDocId = 'main';
-
   // Get loyalty settings
   Future<LoyaltySettings> getLoyaltySettings() async {
     try {
-      final doc = await _firestore.collection(_collection).doc(_configDocId).get();
+      final doc = await FirestorePaths.loyaltySettingsDoc().get();
       if (doc.exists && doc.data() != null) {
         return LoyaltySettings.fromJson(doc.data()!);
       }
@@ -26,7 +26,7 @@ class LoyaltySettingsService {
   // Save loyalty settings
   Future<bool> saveLoyaltySettings(LoyaltySettings settings) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).set(
+      await FirestorePaths.loyaltySettingsDoc().set(
             settings.toJson(),
             SetOptions(merge: true),
           );
@@ -40,7 +40,7 @@ class LoyaltySettingsService {
   // Initialize with default settings if doesn't exist
   Future<bool> initializeDefaultSettings() async {
     try {
-      final existing = await _firestore.collection(_collection).doc(_configDocId).get();
+      final existing = await FirestorePaths.loyaltySettingsDoc().get();
       if (existing.exists) return true;
 
       final defaultSettings = LoyaltySettings.defaultSettings();
@@ -53,9 +53,7 @@ class LoyaltySettingsService {
 
   // Stream for real-time updates
   Stream<LoyaltySettings> watchLoyaltySettings() {
-    return _firestore
-        .collection(_collection)
-        .doc(_configDocId)
+    return FirestorePaths.loyaltySettingsDoc()
         .snapshots()
         .map((snapshot) {
       if (snapshot.exists && snapshot.data() != null) {
