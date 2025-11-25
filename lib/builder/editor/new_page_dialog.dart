@@ -58,6 +58,7 @@ class _NewPageDialogState extends State<NewPageDialog> {
   String _selectedIcon = 'help_outline';
   bool _isCreating = false;
   bool _userHasEditedPageId = false; // Track if user manually edited page ID
+  bool _publishImmediately = false; // Whether to publish immediately for bottomBar pages
   
   final BuilderLayoutService _service = BuilderLayoutService();
 
@@ -157,9 +158,21 @@ class _NewPageDialogState extends State<NewPageDialog> {
       // Save as draft
       await _service.saveDraft(page);
 
+      // If publish immediately is checked and display location is bottomBar, publish the page
+      if (_publishImmediately && _displayLocation == 'bottomBar') {
+        await _service.publishPage(
+          page,
+          userId: 'system_create',
+          shouldDeleteDraft: false,
+        );
+      }
+
       if (mounted) {
+        final successMessage = _publishImmediately && _displayLocation == 'bottomBar'
+            ? '✅ Page "$title" créée et publiée avec succès'
+            : '✅ Page "$title" créée avec succès';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ Page "$title" créée avec succès')),
+          SnackBar(content: Text(successMessage)),
         );
         widget.onPageCreated(page);
       }
@@ -263,6 +276,20 @@ class _NewPageDialogState extends State<NewPageDialog> {
                       helperText: 'Plus petit = apparaît en premier',
                     ),
                     keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Publish immediately checkbox for bottomBar pages
+                  CheckboxListTile(
+                    value: _publishImmediately,
+                    onChanged: (v) => setState(() => _publishImmediately = v ?? false),
+                    title: const Text('Publier immédiatement'),
+                    subtitle: const Text(
+                      'La page apparaîtra dans la barre de navigation après publication',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
                   ),
                   const SizedBox(height: 16),
                 ],

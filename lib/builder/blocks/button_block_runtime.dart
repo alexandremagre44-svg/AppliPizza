@@ -42,8 +42,10 @@ class ButtonBlockRuntime extends StatelessWidget {
     final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
     final margin = helper.getEdgeInsets('margin');
     
-    // Get action config
-    final actionConfig = block.config['action'] as Map<String, dynamic>?;
+    // Get action config from separate tapAction/tapActionTarget fields
+    // Falls back to 'action' field for backward compatibility
+    var actionConfig = helper.getActionConfig();
+    actionConfig ??= block.config['action'] as Map<String, dynamic>?;
 
     // Determine button size
     EdgeInsets buttonPadding;

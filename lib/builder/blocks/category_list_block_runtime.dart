@@ -52,7 +52,10 @@ class CategoryListBlockRuntime extends StatelessWidget {
     final margin = helper.getEdgeInsets('margin');
     final backgroundColor = helper.getColor('backgroundColor');
     final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
-    final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
+    // Get action config from separate tapAction/tapActionTarget fields
+    // Falls back to direct 'tapAction' Map for backward compatibility
+    var tapActionConfig = helper.getActionConfig();
+    tapActionConfig ??= block.config['tapAction'] as Map<String, dynamic>?;
 
     // Get categories
     final categories = _getCategories();
