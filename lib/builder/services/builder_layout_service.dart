@@ -31,15 +31,21 @@ class BuilderLayoutService {
 
   /// Get document reference for draft page
   /// Path: restaurants/{restaurantId}/pages_draft/{pageId}
+  /// 
+  /// Note: The appId parameter is currently ignored and kRestaurantId is used.
+  /// This maintains backward compatibility while multi-resto is implemented in a future phase.
   DocumentReference _getDraftRef(String appId, BuilderPageId pageId) {
-    // Note: appId parameter is kept for backward compatibility but we now use kRestaurantId
-    // In future multi-resto implementations, this can be made dynamic
+    // TODO: In multi-resto phase, use: FirestorePaths.draftDoc(pageId.value, appId)
     return FirestorePaths.draftDoc(pageId.value);
   }
 
   /// Get document reference for published page
   /// Path: restaurants/{restaurantId}/pages_published/{pageId}
+  /// 
+  /// Note: The appId parameter is currently ignored and kRestaurantId is used.
+  /// This maintains backward compatibility while multi-resto is implemented in a future phase.
   DocumentReference _getPublishedRef(String appId, BuilderPageId pageId) {
+    // TODO: In multi-resto phase, use: FirestorePaths.publishedDoc(pageId.value, appId)
     return FirestorePaths.publishedDoc(pageId.value);
   }
 

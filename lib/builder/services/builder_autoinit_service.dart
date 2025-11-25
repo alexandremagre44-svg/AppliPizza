@@ -27,15 +27,22 @@ class BuilderAutoInitService {
 
   /// Get document reference for meta document
   /// Path: restaurants/{restaurantId}/builder_settings/meta
+  /// 
+  /// Note: The appId parameter is currently ignored and kRestaurantId is used.
+  /// This maintains backward compatibility while the multi-resto feature is 
+  /// implemented in a future phase. When multi-resto is enabled, this method
+  /// will use the appId parameter instead.
   DocumentReference _getMetaRef(String appId) {
-    // Note: appId parameter is kept for backward compatibility
-    // We now use the centralized FirestorePaths
+    // TODO: In multi-resto phase, use: FirestorePaths.metaDoc(appId)
     return FirestorePaths.metaDoc();
   }
 
   /// Check if auto-initialization has already been done for this restaurant
   ///
   /// Returns true if autoInitDone flag exists and is true, false otherwise.
+  /// 
+  /// Note: The appId parameter is accepted for API compatibility but currently
+  /// uses the global kRestaurantId. Multi-resto support will be added in a future phase.
   ///
   /// Example:
   /// ```dart
@@ -68,6 +75,9 @@ class BuilderAutoInitService {
   /// Mark auto-initialization as complete for this restaurant
   ///
   /// Sets autoInitDone = true in Firestore to prevent future auto-init.
+  /// 
+  /// Note: The appId parameter is accepted for API compatibility but currently
+  /// uses the global kRestaurantId. Multi-resto support will be added in a future phase.
   ///
   /// Example:
   /// ```dart
@@ -95,6 +105,9 @@ class BuilderAutoInitService {
   /// Reset auto-initialization flag (for testing/admin purposes only)
   ///
   /// This should only be used in development or by admins.
+  /// 
+  /// Note: The appId parameter is accepted for API compatibility but currently
+  /// uses the global kRestaurantId. Multi-resto support will be added in a future phase.
   Future<void> resetAutoInitFlag(String appId) async {
     try {
       final ref = _getMetaRef(appId);
