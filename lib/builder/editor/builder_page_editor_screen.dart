@@ -1219,9 +1219,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: TextField(
-        controller: TextEditingController(text: value)
-          ..selection = TextSelection.collapsed(offset: value.length),
+      child: TextFormField(
+        key: ValueKey('${label}_$value'), // Unique key for rebuild
+        initialValue: value,
         decoration: InputDecoration(
           labelText: label,
           helperText: helperText,
@@ -1445,10 +1445,12 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           onChanged: (v) => _updateBlockConfig('tapActionTarget', v),
           helperText: 'Ex: promo, menu, about',
         ),
-      if (tapAction == 'openLegacyPage')
+      if (tapAction == 'openLegacyPage' && LegacyRoutes.values.isNotEmpty)
         _buildDropdown<String>(
           label: 'Route de l\'application',
-          value: tapActionTarget.isNotEmpty ? tapActionTarget : LegacyRoutes.values.first,
+          value: LegacyRoutes.values.contains(tapActionTarget) 
+              ? tapActionTarget 
+              : LegacyRoutes.values.first,
           items: LegacyRoutes.values,
           onChanged: (v) => _updateBlockConfig('tapActionTarget', v),
         ),
@@ -1473,9 +1475,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: TextField(
-        controller: TextEditingController(text: value.toString())
-          ..selection = TextSelection.collapsed(offset: value.toString().length),
+      child: TextFormField(
+        key: ValueKey('${label}_$value'), // Unique key for rebuild
+        initialValue: value.toString(),
         decoration: InputDecoration(
           labelText: label,
           helperText: helperText,
