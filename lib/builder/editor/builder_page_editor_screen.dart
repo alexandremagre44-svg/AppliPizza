@@ -465,9 +465,28 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         
         return Scaffold(
           appBar: AppBar(
-            title: Text(responsive.isMobile 
-              ? widget.pageId.label 
-              : 'Éditeur: ${widget.pageId.label}'
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(responsive.isMobile 
+                  ? widget.pageId.label 
+                  : 'Éditeur: ${widget.pageId.label}'
+                ),
+                if (_page != null && _page!.hasUnpublishedChanges) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Modifs',
+                      style: TextStyle(fontSize: 10, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ],
             ),
             bottom: responsive.isMobile 
               ? null // No tabs on mobile - use bottom sheet instead
@@ -479,6 +498,23 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                   ],
                 ),
             actions: [
+              // Active/Inactive toggle
+              if (_page != null)
+                IconButton(
+                  icon: Icon(
+                    _page!.isActive ? Icons.visibility : Icons.visibility_off,
+                    color: _page!.isActive ? Colors.green : Colors.grey,
+                  ),
+                  tooltip: _page!.isActive ? 'Désactiver la page' : 'Activer la page',
+                  onPressed: _toggleActive,
+                ),
+              // Bottom nav order (only if bottomBar)
+              if (_page != null && _page!.displayLocation == 'bottomBar')
+                IconButton(
+                  icon: const Icon(Icons.sort),
+                  tooltip: 'Ordre: ${_page!.bottomNavIndex}',
+                  onPressed: _showBottomNavOrderDialog,
+                ),
               if (_hasChanges)
                 IconButton(
                   icon: const Icon(Icons.save),
@@ -498,10 +534,28 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                   tooltip: 'Prévisualisation plein écran',
                   onPressed: _showFullScreenPreview,
                 ),
-              IconButton(
-                icon: const Icon(Icons.publish),
-                tooltip: 'Publier',
-                onPressed: _publishPage,
+              // Publish button with badge
+              Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.publish),
+                    tooltip: 'Publier',
+                    onPressed: _publishPage,
+                  ),
+                  if (_page != null && _page!.hasUnpublishedChanges)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.orange,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ],
           ),
@@ -528,6 +582,83 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         );
       },
     );
+  }
+
+  /// Toggle active status of the page
+  Future<void> _toggleActive() async {
+    if (_page == null) return;
+    
+    setState(() {
+      _page = _page!.copyWith(isActive: !_page!.isActive);
+      _hasChanges = true;
+    });
+    _scheduleAutoSave();
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_page!.isActive ? '✅ Page activée' : '✅ Page désactivée'),
+        ),
+      );
+    }
+  }
+
+  /// Show bottom nav order dialog
+  Future<void> _showBottomNavOrderDialog() async {
+    if (_page == null) return;
+    
+    final controller = TextEditingController(
+      text: _page!.bottomNavIndex.toString(),
+    );
+    
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Ordre dans la navigation'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Position',
+            hintText: '1, 2, 3...',
+            border: OutlineInputBorder(),
+            helperText: 'Plus petit = apparaît en premier',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final value = int.tryParse(controller.text);
+              if (value != null) {
+                Navigator.pop(context, value);
+              }
+            },
+            child: const Text('Valider'),
+          ),
+        ],
+      ),
+    );
+    
+    if (result != null) {
+      setState(() {
+        _page = _page!.copyWith(
+          bottomNavIndex: result,
+          order: result,
+        );
+        _hasChanges = true;
+      });
+      _scheduleAutoSave();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('✅ Ordre mis à jour: $result')),
+        );
+      }
+    }
   }
 
   Widget _buildEditorTab(ResponsiveBuilder responsive) {
@@ -696,7 +827,11 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       return const Center(child: Text('Aucune page à prévisualiser'));
     }
 
-    return BuilderPagePreview(blocks: _page!.blocks);
+    // Use draftLayout for preview (editor view)
+    return BuilderPagePreview(
+      blocks: _page!.draftLayout.isNotEmpty ? _page!.draftLayout : _page!.blocks,
+      modules: _page!.modules,
+    );
   }
 
   void _showFullScreenPreview() {
@@ -704,7 +839,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
 
     BuilderFullScreenPreview.show(
       context,
-      blocks: _page!.blocks,
+      blocks: _page!.draftLayout.isNotEmpty ? _page!.draftLayout : _page!.blocks,
+      modules: _page!.modules,
       pageTitle: widget.pageId.label,
     );
   }
