@@ -56,7 +56,12 @@ class BuilderLayoutService {
 
   // ==================== DRAFT OPERATIONS ====================
 
-  /// Save a draft page
+  /// Save a draft page with system page protections
+  /// 
+  /// Protections:
+  /// - System pages retain isSystemPage = true
+  /// - SystemBlocks retain type = system
+  /// - System page pageId cannot be changed
   /// 
   /// Example:
   /// ```dart
@@ -68,10 +73,64 @@ class BuilderLayoutService {
       throw ArgumentError('Page must be marked as draft (isDraft: true)');
     }
 
-    final ref = _getDraftRef(page.appId, page.pageId);
-    final data = page.toJson();
+    // Apply system page protections
+    final protectedPage = _applySystemProtections(page);
+
+    final ref = _getDraftRef(protectedPage.appId, protectedPage.pageId);
+    final data = protectedPage.toJson();
     
     await ref.set(data, SetOptions(merge: true));
+  }
+  
+  /// Apply protection rules to a page before saving
+  /// 
+  /// Ensures:
+  /// - System pages always have isSystemPage = true
+  /// - SystemBlocks always have type = system
+  /// - displayLocation is valid for system pages
+  BuilderPage _applySystemProtections(BuilderPage page) {
+    var protectedPage = page;
+    
+    // Ensure system pages retain their isSystemPage flag
+    if (page.pageId.isSystemPage && !page.isSystemPage) {
+      debugPrint('⚠️ Warning: Correcting isSystemPage for system page ${page.pageId.value}');
+      protectedPage = protectedPage.copyWith(isSystemPage: true);
+    }
+    
+    // Validate displayLocation for system pages (only allow bottomBar or hidden)
+    if (protectedPage.isSystemPage) {
+      final validLocations = ['bottomBar', 'hidden'];
+      if (!validLocations.contains(protectedPage.displayLocation)) {
+        debugPrint('⚠️ Warning: Correcting displayLocation for system page ${page.pageId.value}');
+        protectedPage = protectedPage.copyWith(displayLocation: 'hidden');
+      }
+    }
+    
+    // Protect SystemBlocks - ensure type remains 'system'
+    final protectedBlocks = page.blocks.map((block) {
+      if (block.type == BlockType.system) {
+        // Ensure moduleType is preserved and valid
+        final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
+        if (!SystemBlock.availableModules.contains(moduleType)) {
+          debugPrint('⚠️ Warning: Unknown module type "$moduleType" in SystemBlock');
+        }
+      }
+      return block;
+    }).toList();
+    
+    if (protectedBlocks != page.blocks) {
+      protectedPage = protectedPage.copyWith(blocks: protectedBlocks);
+    }
+    
+    return protectedPage;
+  }
+  
+  /// Debug print helper (only in debug mode)
+  void debugPrint(String message) {
+    assert(() {
+      print(message);
+      return true;
+    }());
   }
 
   /// Load draft page

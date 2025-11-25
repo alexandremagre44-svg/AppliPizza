@@ -2,8 +2,10 @@
 // Page editor screen for Builder B3 system
 // MOBILE RESPONSIVE: Adapts layout for mobile (<600px), tablet, and desktop
 // PHASE 7: Enhanced with all block fields, tap actions, auto-save, and page creation
+// PHASE 8E: System page protections and SystemBlock protections
 
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/services.dart';
@@ -110,6 +112,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           isDraft: true,
         );
       }
+      
+      // Verify and correct system page flag if needed
+      page = _verifySystemPageIntegrity(page);
 
       setState(() {
         _page = page;
@@ -123,6 +128,67 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         );
       }
     }
+  }
+  
+  /// Verify and correct system page integrity at load time
+  /// 
+  /// Checks:
+  /// - System pages have isSystemPage = true
+  /// - System pages have valid displayLocation
+  /// - System pages have a default icon if missing
+  BuilderPage _verifySystemPageIntegrity(BuilderPage page) {
+    var correctedPage = page;
+    bool needsCorrection = false;
+    
+    // Check if this should be a system page but isn't marked as such
+    if (page.pageId.isSystemPage && !page.isSystemPage) {
+      debugPrint('⚠️ Correcting isSystemPage for ${page.pageId.value}');
+      correctedPage = correctedPage.copyWith(isSystemPage: true);
+      needsCorrection = true;
+    }
+    
+    // Validate displayLocation for system pages
+    if (correctedPage.isSystemPage) {
+      final validLocations = ['bottomBar', 'hidden'];
+      if (!validLocations.contains(correctedPage.displayLocation)) {
+        debugPrint('⚠️ Correcting displayLocation for ${page.pageId.value}');
+        correctedPage = correctedPage.copyWith(displayLocation: 'hidden');
+        needsCorrection = true;
+      }
+    }
+    
+    // Set default icon for system pages if missing
+    if (correctedPage.isSystemPage && (correctedPage.icon.isEmpty || correctedPage.icon == 'help_outline')) {
+      String defaultIcon;
+      switch (page.pageId) {
+        case BuilderPageId.profile:
+          defaultIcon = 'person';
+          break;
+        case BuilderPageId.cart:
+          defaultIcon = 'shopping_cart';
+          break;
+        case BuilderPageId.rewards:
+          defaultIcon = 'card_giftcard';
+          break;
+        case BuilderPageId.roulette:
+          defaultIcon = 'casino';
+          break;
+        default:
+          defaultIcon = 'help_outline';
+      }
+      if (correctedPage.icon != defaultIcon) {
+        correctedPage = correctedPage.copyWith(icon: defaultIcon);
+        needsCorrection = true;
+      }
+    }
+    
+    // Auto-save corrected page if changes were made
+    if (needsCorrection) {
+      debugPrint('✅ Auto-correcting system page ${page.pageId.value}');
+      _service.saveDraft(correctedPage);
+    }
+    
+    return correctedPage;
   }
 
   Future<void> _saveDraft() async {
@@ -658,23 +724,39 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.blue.shade200),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.shield, color: Colors.blue.shade700, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Page système protégée',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.blue.shade800,
+                Row(
+                  children: [
+                    Icon(Icons.shield, color: Colors.blue.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Page système protégée',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
                     ),
-                  ),
+                    Tooltip(
+                      message: 'Cette page ne peut pas être supprimée.\nL\'ID ne peut pas être modifié.\nVous pouvez modifier les blocs.',
+                      child: Icon(Icons.info_outline, color: Colors.blue.shade400, size: 18),
+                    ),
+                  ],
                 ),
-                Tooltip(
-                  message: 'Cette page ne peut pas être supprimée.\nVous pouvez modifier les blocs.',
-                  child: Icon(Icons.info_outline, color: Colors.blue.shade400, size: 18),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    _buildProtectionChip(Icons.block, 'Suppression', false),
+                    _buildProtectionChip(Icons.block, 'ID', false),
+                    _buildProtectionChip(Icons.check_circle, 'Blocs', true),
+                    _buildProtectionChip(Icons.check_circle, 'Ordre', true),
+                  ],
                 ),
               ],
             ),
@@ -731,6 +813,39 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                 ),
         ),
       ],
+    );
+  }
+  
+  /// Build a small protection chip for system page banner
+  Widget _buildProtectionChip(IconData icon, String label, bool allowed) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: allowed ? Colors.green.shade50 : Colors.red.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: allowed ? Colors.green.shade200 : Colors.red.shade200,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 12,
+            color: allowed ? Colors.green.shade600 : Colors.red.shade600,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: allowed ? Colors.green.shade700 : Colors.red.shade700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -834,9 +949,11 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
 
   /// Build configuration fields for system blocks
   /// System blocks are non-configurable, so we just show info about the module
+  /// Protection: No configuration fields are exposed
   List<Widget> _buildSystemConfig(BuilderBlock block) {
     final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
     final moduleLabel = SystemBlock.getModuleLabel(moduleType);
+    final isValidModule = SystemBlock.availableModules.contains(moduleType);
     
     // Get the appropriate icon for the module type
     IconData moduleIcon;
@@ -864,6 +981,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     }
     
     return [
+      // Module info card
       Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -903,6 +1021,35 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
               ],
             ),
             const SizedBox(height: 16),
+            
+            // Protection banner
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.lock, size: 20, color: Colors.amber.shade700),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Module système protégé',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            // No config message
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -915,7 +1062,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
-                      'Ce module système ne possède pas de configuration.',
+                      'Ce module système ne possède aucune configuration.',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.black87,
@@ -925,10 +1072,92 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                 ],
               ),
             ),
+            
+            // Warning if module type is invalid
+            if (!isValidModule) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning, size: 20, color: Colors.red.shade600),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Module "$moduleType" inconnu. Ce bloc peut ne pas s\'afficher correctement.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      
+      const SizedBox(height: 16),
+      
+      // Restrictions list
+      Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Restrictions',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildRestrictionRow(Icons.block, 'Pas de configuration personnalisée'),
+            const SizedBox(height: 4),
+            _buildRestrictionRow(Icons.block, 'Type de bloc non modifiable'),
+            const SizedBox(height: 4),
+            _buildRestrictionRow(Icons.check_circle, 'Suppression autorisée'),
+            const SizedBox(height: 4),
+            _buildRestrictionRow(Icons.check_circle, 'Réorganisation autorisée'),
           ],
         ),
       ),
     ];
+  }
+  
+  /// Build a restriction row for system block config
+  Widget _buildRestrictionRow(IconData icon, String text) {
+    final isAllowed = icon == Icons.check_circle;
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 14,
+          color: isAllowed ? Colors.green.shade600 : Colors.red.shade400,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade700,
+          ),
+        ),
+      ],
+    );
   }
 
   List<Widget> _buildHeroConfig(BuilderBlock block) {

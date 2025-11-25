@@ -429,37 +429,55 @@ class SystemBlockRuntime extends StatelessWidget {
   }
 
   /// Build unknown module placeholder
+  /// Shows when moduleType is not in the list of available modules
   Widget _buildUnknownModule(String moduleType) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: Colors.amber.shade50,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade400),
+        border: Border.all(color: Colors.amber.shade400, width: 2),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.error_outline,
+            Icons.help_outline,
             size: 48,
-            color: Colors.grey.shade600,
+            color: Colors.amber.shade700,
           ),
           const SizedBox(height: 12),
           Text(
-            'Module système inconnu',
+            'Module système introuvable',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
+              color: Colors.amber.shade800,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade100,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              'Type: "$moduleType"',
+              style: TextStyle(
+                fontSize: 12,
+                fontFamily: 'monospace',
+                color: Colors.amber.shade900,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           Text(
-            'Type: $moduleType',
+            'Les modules disponibles sont:\nroulette, loyalty, rewards, accountActivity',
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
+              fontSize: 11,
+              color: Colors.amber.shade700,
             ),
           ),
         ],
