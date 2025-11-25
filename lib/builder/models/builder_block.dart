@@ -152,3 +152,148 @@ class BuilderBlock {
   @override
   int get hashCode => id.hashCode;
 }
+
+/// System Block - non-configurable but positionable system modules
+/// 
+/// These blocks represent existing application modules that can be
+/// positioned in builder pages without additional configuration options.
+/// 
+/// Supported module types:
+/// - roulette: Roulette wheel game
+/// - loyalty: Loyalty points section
+/// - rewards: Rewards tickets widget
+/// - accountActivity: Account activity widget
+class SystemBlock extends BuilderBlock {
+  /// The system module type (roulette, loyalty, rewards, accountActivity)
+  final String moduleType;
+
+  SystemBlock({
+    required super.id,
+    required this.moduleType,
+    required super.order,
+    Map<String, dynamic>? config,
+    super.isActive,
+    super.visibility,
+    super.customStyles,
+    super.createdAt,
+    super.updatedAt,
+  }) : super(
+          type: BlockType.system,
+          config: config ?? {'moduleType': moduleType},
+        );
+
+  /// Create SystemBlock from a BuilderBlock
+  factory SystemBlock.fromBlock(BuilderBlock block) {
+    final moduleType = block.config['moduleType'] as String? ?? 'unknown';
+    return SystemBlock(
+      id: block.id,
+      moduleType: moduleType,
+      order: block.order,
+      config: block.config,
+      isActive: block.isActive,
+      visibility: block.visibility,
+      customStyles: block.customStyles,
+      createdAt: block.createdAt,
+      updatedAt: block.updatedAt,
+    );
+  }
+
+  /// Available system module types
+  static const List<String> availableModules = [
+    'roulette',
+    'loyalty',
+    'rewards',
+    'accountActivity',
+  ];
+
+  /// Get display label for a module type
+  static String getModuleLabel(String moduleType) {
+    switch (moduleType) {
+      case 'roulette':
+        return 'Roulette';
+      case 'loyalty':
+        return 'Fidélité';
+      case 'rewards':
+        return 'Récompenses';
+      case 'accountActivity':
+        return 'Activité du compte';
+      default:
+        return 'Module inconnu';
+    }
+  }
+
+  /// Get icon for a module type
+  static String getModuleIcon(String moduleType) {
+    switch (moduleType) {
+      case 'roulette':
+        return '🎰';
+      case 'loyalty':
+        return '⭐';
+      case 'rewards':
+        return '🎁';
+      case 'accountActivity':
+        return '📊';
+      default:
+        return '❓';
+    }
+  }
+
+  @override
+  SystemBlock copyWith({
+    String? id,
+    BlockType? type,
+    int? order,
+    Map<String, dynamic>? config,
+    bool? isActive,
+    BlockVisibility? visibility,
+    String? customStyles,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return SystemBlock(
+      id: id ?? this.id,
+      moduleType: moduleType,
+      order: order ?? this.order,
+      config: config ?? Map<String, dynamic>.from(this.config),
+      isActive: isActive ?? this.isActive,
+      visibility: visibility ?? this.visibility,
+      customStyles: customStyles ?? this.customStyles,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    json['config'] = {...config, 'moduleType': moduleType};
+    return json;
+  }
+
+  /// Create from Firestore JSON
+  factory SystemBlock.fromJson(Map<String, dynamic> json) {
+    final config = (json['config'] as Map<String, dynamic>?) ?? {};
+    return SystemBlock(
+      id: json['id'] as String,
+      moduleType: config['moduleType'] as String? ?? 'unknown',
+      order: json['order'] as int? ?? 0,
+      config: config,
+      isActive: json['isActive'] as bool? ?? true,
+      visibility: BlockVisibility.fromJson(
+        json['visibility'] as String? ?? 'visible',
+      ),
+      customStyles: json['customStyles'] as String?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : DateTime.now(),
+    );
+  }
+
+  @override
+  String toString() {
+    return 'SystemBlock(id: $id, moduleType: $moduleType, order: $order, active: $isActive)';
+  }
+}

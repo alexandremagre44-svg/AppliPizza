@@ -221,9 +221,16 @@ class _NewPageDialogState extends State<NewPageDialog> {
                     prefixIcon: Icon(Icons.key),
                     helperText: 'Utilisé dans l\'URL: /page/{id}',
                   ),
-                  validator: (v) => v == null || v.trim().isEmpty 
-                      ? 'L\'ID est obligatoire' 
-                      : null,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'L\'ID est obligatoire';
+                    }
+                    // Prevent creating system pages
+                    if (BuilderPageId.systemPageIds.contains(v.trim().toLowerCase())) {
+                      return 'Cet ID est réservé aux pages système (profile, cart, rewards, roulette)';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 

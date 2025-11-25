@@ -2,8 +2,10 @@
 // Page editor screen for Builder B3 system
 // MOBILE RESPONSIVE: Adapts layout for mobile (<600px), tablet, and desktop
 // PHASE 7: Enhanced with all block fields, tap actions, auto-save, and page creation
+// PHASE 8E: System page protections and SystemBlock protections
 
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/services.dart';
@@ -110,6 +112,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           isDraft: true,
         );
       }
+      
+      // Verify and correct system page flag if needed
+      page = _verifySystemPageIntegrity(page);
 
       setState(() {
         _page = page;
@@ -123,6 +128,67 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         );
       }
     }
+  }
+  
+  /// Verify and correct system page integrity at load time
+  /// 
+  /// Checks:
+  /// - System pages have isSystemPage = true
+  /// - System pages have valid displayLocation
+  /// - System pages have a default icon if missing
+  BuilderPage _verifySystemPageIntegrity(BuilderPage page) {
+    var correctedPage = page;
+    bool needsCorrection = false;
+    
+    // Check if this should be a system page but isn't marked as such
+    if (page.pageId.isSystemPage && !page.isSystemPage) {
+      debugPrint('⚠️ Correcting isSystemPage for ${page.pageId.value}');
+      correctedPage = correctedPage.copyWith(isSystemPage: true);
+      needsCorrection = true;
+    }
+    
+    // Validate displayLocation for system pages
+    if (correctedPage.isSystemPage) {
+      final validLocations = ['bottomBar', 'hidden'];
+      if (!validLocations.contains(correctedPage.displayLocation)) {
+        debugPrint('⚠️ Correcting displayLocation for ${page.pageId.value}');
+        correctedPage = correctedPage.copyWith(displayLocation: 'hidden');
+        needsCorrection = true;
+      }
+    }
+    
+    // Set default icon for system pages if missing
+    if (correctedPage.isSystemPage && (correctedPage.icon.isEmpty || correctedPage.icon == 'help_outline')) {
+      String defaultIcon;
+      switch (page.pageId) {
+        case BuilderPageId.profile:
+          defaultIcon = 'person';
+          break;
+        case BuilderPageId.cart:
+          defaultIcon = 'shopping_cart';
+          break;
+        case BuilderPageId.rewards:
+          defaultIcon = 'card_giftcard';
+          break;
+        case BuilderPageId.roulette:
+          defaultIcon = 'casino';
+          break;
+        default:
+          defaultIcon = 'help_outline';
+      }
+      if (correctedPage.icon != defaultIcon) {
+        correctedPage = correctedPage.copyWith(icon: defaultIcon);
+        needsCorrection = true;
+      }
+    }
+    
+    // Auto-save corrected page if changes were made
+    if (needsCorrection) {
+      debugPrint('✅ Auto-correcting system page ${page.pageId.value}');
+      _service.saveDraft(correctedPage);
+    }
+    
+    return correctedPage;
   }
 
   Future<void> _saveDraft() async {
@@ -312,6 +378,11 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       case BlockType.html:
         return {
           'htmlContent': '<p>Contenu HTML</p>',
+        };
+      case BlockType.system:
+        // System blocks use moduleType, not through _addBlock
+        return {
+          'moduleType': 'unknown',
         };
     }
   }
@@ -641,54 +712,140 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   Widget _buildBlocksList() {
     final blocks = _page!.sortedBlocks;
 
-    if (blocks.isEmpty) {
-      return const Center(
-        child: Text(
-          'Aucun bloc.\nAppuyez sur + pour en ajouter.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-      );
-    }
-
-    return ReorderableListView.builder(
-      onReorder: _reorderBlocks,
-      itemCount: blocks.length,
-      itemBuilder: (context, index) {
-        final block = blocks[index];
-        final isSelected = _selectedBlock?.id == block.id;
-
-        return Card(
-          key: ValueKey(block.id),
-          margin: const EdgeInsets.all(8),
-          color: isSelected ? Colors.blue.shade50 : null,
-          elevation: isSelected ? 4 : 1,
-          child: ListTile(
-            leading: Text(
-              block.type.icon,
-              style: const TextStyle(fontSize: 24),
+    return Column(
+      children: [
+        // System page protection banner
+        if (_page!.isSystemPage)
+          Container(
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(left: 8, right: 8, top: 8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue.shade200),
             ),
-            title: Text(
-              block.type.label,
-              style: TextStyle(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            subtitle: Text(_getBlockSummary(block)),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _removeBlock(block.id),
+                Row(
+                  children: [
+                    Icon(Icons.shield, color: Colors.blue.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Page système protégée',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                    ),
+                    Tooltip(
+                      message: 'Cette page ne peut pas être supprimée.\nL\'ID ne peut pas être modifié.\nVous pouvez modifier les blocs.',
+                      child: Icon(Icons.info_outline, color: Colors.blue.shade400, size: 18),
+                    ),
+                  ],
                 ),
-                const Icon(Icons.drag_handle),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    _buildProtectionChip(Icons.block, 'Suppression', false),
+                    _buildProtectionChip(Icons.block, 'ID', false),
+                    _buildProtectionChip(Icons.check_circle, 'Blocs', true),
+                    _buildProtectionChip(Icons.check_circle, 'Ordre', true),
+                  ],
+                ),
               ],
             ),
-            onTap: () => _selectBlock(block),
           ),
-        );
-      },
+        
+        // Blocks list
+        Expanded(
+          child: blocks.isEmpty
+              ? const Center(
+                  child: Text(
+                    'Aucun bloc.\nAppuyez sur + pour en ajouter.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                )
+              : ReorderableListView.builder(
+                  onReorder: _reorderBlocks,
+                  itemCount: blocks.length,
+                  itemBuilder: (context, index) {
+                    final block = blocks[index];
+                    final isSelected = _selectedBlock?.id == block.id;
+
+                    return Card(
+                      key: ValueKey(block.id),
+                      margin: const EdgeInsets.all(8),
+                      color: isSelected ? Colors.blue.shade50 : null,
+                      elevation: isSelected ? 4 : 1,
+                      child: ListTile(
+                        leading: Text(
+                          block.type.icon,
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                        title: Text(
+                          block.type.label,
+                          style: TextStyle(
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        subtitle: Text(_getBlockSummary(block)),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _removeBlock(block.id),
+                            ),
+                            const Icon(Icons.drag_handle),
+                          ],
+                        ),
+                        onTap: () => _selectBlock(block),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+  
+  /// Build a small protection chip for system page banner
+  Widget _buildProtectionChip(IconData icon, String label, bool allowed) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: allowed ? Colors.green.shade50 : Colors.red.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: allowed ? Colors.green.shade200 : Colors.red.shade200,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 12,
+            color: allowed ? Colors.green.shade600 : Colors.red.shade600,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: allowed ? Colors.green.shade700 : Colors.red.shade700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -704,6 +861,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         return '${ids.length} produit(s)';
       case BlockType.banner:
         return block.getConfig<String>('text', 'Bannière') ?? 'Bannière';
+      case BlockType.system:
+        final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
+        return 'Module ${SystemBlock.getModuleLabel(moduleType)}';
       default:
         return 'Bloc ${block.type.value}';
     }
@@ -782,9 +942,222 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         return _buildCategoryListConfig(block);
       case BlockType.html:
         return _buildHtmlConfig(block);
-      default:
-        return [const Text('Configuration non disponible pour ce type')];
+      case BlockType.system:
+        return _buildSystemConfig(block);
     }
+  }
+
+  /// Build configuration fields for system blocks
+  /// System blocks are non-configurable, so we just show info about the module
+  /// Protection: No configuration fields are exposed
+  List<Widget> _buildSystemConfig(BuilderBlock block) {
+    final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
+    final moduleLabel = SystemBlock.getModuleLabel(moduleType);
+    final isValidModule = SystemBlock.availableModules.contains(moduleType);
+    
+    // Get the appropriate icon for the module type
+    IconData moduleIcon;
+    Color iconColor;
+    switch (moduleType) {
+      case 'roulette':
+        moduleIcon = Icons.casino;
+        iconColor = Colors.purple.shade600;
+        break;
+      case 'loyalty':
+        moduleIcon = Icons.card_giftcard;
+        iconColor = Colors.amber.shade600;
+        break;
+      case 'rewards':
+        moduleIcon = Icons.stars;
+        iconColor = Colors.orange.shade600;
+        break;
+      case 'accountActivity':
+        moduleIcon = Icons.history;
+        iconColor = Colors.blue.shade600;
+        break;
+      default:
+        moduleIcon = Icons.help_outline;
+        iconColor = Colors.grey.shade600;
+    }
+    
+    return [
+      // Module info card
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.blue.shade200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(moduleIcon, size: 32, color: iconColor),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '[Module: $moduleLabel]',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Type: $moduleType',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
+            // Protection banner
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.lock, size: 20, color: Colors.amber.shade700),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Module système protégé',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            // No config message
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, size: 20, color: Colors.grey.shade600),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Ce module système ne possède aucune configuration.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Warning if module type is invalid
+            if (!isValidModule) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning, size: 20, color: Colors.red.shade600),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Module "$moduleType" inconnu. Ce bloc peut ne pas s\'afficher correctement.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      
+      const SizedBox(height: 16),
+      
+      // Restrictions list
+      Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Restrictions',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildRestrictionRow(Icons.block, 'Pas de configuration personnalisée'),
+            const SizedBox(height: 4),
+            _buildRestrictionRow(Icons.block, 'Type de bloc non modifiable'),
+            const SizedBox(height: 4),
+            _buildRestrictionRow(Icons.check_circle, 'Suppression autorisée'),
+            const SizedBox(height: 4),
+            _buildRestrictionRow(Icons.check_circle, 'Réorganisation autorisée'),
+          ],
+        ),
+      ),
+    ];
+  }
+  
+  /// Build a restriction row for system block config
+  Widget _buildRestrictionRow(IconData icon, String text) {
+    final isAllowed = icon == Icons.check_circle;
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 14,
+          color: isAllowed ? Colors.green.shade600 : Colors.red.shade400,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade700,
+          ),
+        ),
+      ],
+    );
   }
 
   List<Widget> _buildHeroConfig(BuilderBlock block) {
@@ -1371,29 +1744,92 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   void _showAddBlockDialog() {
+    // Filter out system type from regular blocks
+    final regularBlocks = BlockType.values.where((t) => t != BlockType.system).toList();
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ajouter un bloc'),
         content: SizedBox(
           width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: BlockType.values.length,
-            itemBuilder: (context, index) {
-              final type = BlockType.values[index];
-              return ListTile(
-                leading: Text(
-                  type.icon,
-                  style: const TextStyle(fontSize: 24),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Regular blocks section
+                const Text(
+                  'Blocs de contenu',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
                 ),
-                title: Text(type.label),
-                onTap: () {
-                  Navigator.pop(context);
-                  _addBlock(type);
-                },
-              );
-            },
+                const Divider(),
+                ...regularBlocks.map((type) => ListTile(
+                  leading: Text(
+                    type.icon,
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  title: Text(type.label),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addBlock(type);
+                  },
+                )),
+                
+                const SizedBox(height: 16),
+                
+                // System modules section
+                const Text(
+                  'Modules système',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+                const Divider(color: Colors.blue),
+                ListTile(
+                  leading: Icon(Icons.casino, size: 28, color: Colors.purple.shade600),
+                  title: const Text('Ajouter module Roulette'),
+                  subtitle: const Text('Roue de la chance'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addSystemBlock('roulette');
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.card_giftcard, size: 28, color: Colors.amber.shade600),
+                  title: const Text('Ajouter module Fidélité'),
+                  subtitle: const Text('Points et progression'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addSystemBlock('loyalty');
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.stars, size: 28, color: Colors.orange.shade600),
+                  title: const Text('Ajouter module Récompenses'),
+                  subtitle: const Text('Tickets et bons'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addSystemBlock('rewards');
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.history, size: 28, color: Colors.blue.shade600),
+                  title: const Text('Ajouter module Activité du compte'),
+                  subtitle: const Text('Commandes et favoris'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addSystemBlock('accountActivity');
+                  },
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
@@ -1404,6 +1840,24 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         ],
       ),
     );
+  }
+
+  /// Add a system block with the specified module type
+  void _addSystemBlock(String moduleType) {
+    if (_page == null) return;
+
+    final newBlock = SystemBlock(
+      id: 'block_${DateTime.now().millisecondsSinceEpoch}',
+      moduleType: moduleType,
+      order: _page!.blocks.length,
+    );
+
+    setState(() {
+      _page = _page!.addBlock(newBlock);
+      _hasChanges = true;
+      _selectedBlock = newBlock;
+    });
+    _scheduleAutoSave();
   }
 
   /// Build tap action configuration fields
@@ -1429,7 +1883,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       _buildDropdown<String>(
         label: 'Type d\'action',
         value: tapAction,
-        items: const ['none', 'openPage', 'openLegacyPage', 'openUrl'],
+        items: const ['none', 'openPage', 'openLegacyPage', 'openSystemPage', 'openUrl'],
         onChanged: (v) {
           _updateBlockConfigMultiple({
             'tapAction': v,
@@ -1453,6 +1907,39 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
               : LegacyRoutes.values.first,
           items: LegacyRoutes.values,
           onChanged: (v) => _updateBlockConfig('tapActionTarget', v),
+        ),
+      if (tapAction == 'openSystemPage')
+        _buildDropdown<String>(
+          label: 'Page système',
+          value: SystemPageRoutes.values.contains(tapActionTarget)
+              ? tapActionTarget
+              : SystemPageRoutes.values.first,
+          items: SystemPageRoutes.values,
+          onChanged: (v) => _updateBlockConfig('tapActionTarget', v),
+        ),
+      if (tapAction == 'openSystemPage')
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Ouvre la page système avec la version Builder si disponible.',
+                    style: TextStyle(fontSize: 11, color: Colors.blue.shade700),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       if (tapAction == 'openUrl')
         _buildTextField(

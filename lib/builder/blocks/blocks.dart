@@ -13,6 +13,7 @@ export 'image_block_preview.dart';
 export 'button_block_preview.dart';
 export 'category_list_block_preview.dart';
 export 'html_block_preview.dart';
+export 'system_block_preview.dart';
 
 // Runtime widgets (for actual app)
 export 'hero_block_runtime.dart';
@@ -25,3 +26,4 @@ export 'image_block_runtime.dart';
 export 'button_block_runtime.dart';
 export 'category_list_block_runtime.dart';
 export 'html_block_runtime.dart';
+export 'system_block_runtime.dart';
