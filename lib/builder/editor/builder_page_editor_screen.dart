@@ -1883,7 +1883,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       _buildDropdown<String>(
         label: 'Type d\'action',
         value: tapAction,
-        items: const ['none', 'openPage', 'openLegacyPage', 'openUrl'],
+        items: const ['none', 'openPage', 'openLegacyPage', 'openSystemPage', 'openUrl'],
         onChanged: (v) {
           _updateBlockConfigMultiple({
             'tapAction': v,
@@ -1907,6 +1907,39 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
               : LegacyRoutes.values.first,
           items: LegacyRoutes.values,
           onChanged: (v) => _updateBlockConfig('tapActionTarget', v),
+        ),
+      if (tapAction == 'openSystemPage')
+        _buildDropdown<String>(
+          label: 'Page système',
+          value: SystemPageRoutes.values.contains(tapActionTarget)
+              ? tapActionTarget
+              : SystemPageRoutes.values.first,
+          items: SystemPageRoutes.values,
+          onChanged: (v) => _updateBlockConfig('tapActionTarget', v),
+        ),
+      if (tapAction == 'openSystemPage')
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Ouvre la page système avec la version Builder si disponible.',
+                    style: TextStyle(fontSize: 11, color: Colors.blue.shade700),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       if (tapAction == 'openUrl')
         _buildTextField(

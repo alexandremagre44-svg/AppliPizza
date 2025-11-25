@@ -12,6 +12,7 @@ enum BlockActionType {
   openLegacyPage,
   openUrl,
   scrollToBlock,
+  openSystemPage,
 }
 
 /// List of legacy app routes for the route picker
@@ -41,6 +42,39 @@ class LegacyRoutes {
       orElse: () => {'value': value, 'label': value},
     );
     return route['label']!;
+  }
+}
+
+/// List of system pages for the openSystemPage action
+class SystemPageRoutes {
+  static const List<Map<String, String>> pages = [
+    {'value': 'profile', 'label': 'Page Profil', 'route': '/profile'},
+    {'value': 'cart', 'label': 'Page Panier', 'route': '/cart'},
+    {'value': 'rewards', 'label': 'Page Récompenses', 'route': '/rewards'},
+    {'value': 'roulette', 'label': 'Page Roulette', 'route': '/roulette'},
+  ];
+  
+  static List<String> get values => pages.map((p) => p['value']!).toList();
+  static List<String> get labels => pages.map((p) => p['label']!).toList();
+  
+  static String getLabelFor(String value) {
+    final page = pages.firstWhere(
+      (p) => p['value'] == value,
+      orElse: () => {'value': value, 'label': value, 'route': '/$value'},
+    );
+    return page['label']!;
+  }
+  
+  static String getRouteFor(String value) {
+    final page = pages.firstWhere(
+      (p) => p['value'] == value,
+      orElse: () => {'value': value, 'label': value, 'route': '/$value'},
+    );
+    return page['route']!;
+  }
+  
+  static bool isValidSystemPage(String value) {
+    return values.contains(value);
   }
 }
 
@@ -76,6 +110,9 @@ class BlockAction {
       case 'scrolltoblock':
       case 'scroll':
         return BlockAction(type: BlockActionType.scrollToBlock, value: value);
+      case 'opensystempage':
+      case 'systempage':
+        return BlockAction(type: BlockActionType.openSystemPage, value: value);
       default:
         return const BlockAction(type: BlockActionType.none);
     }
@@ -104,8 +141,38 @@ class ActionHelper {
       case BlockActionType.scrollToBlock:
         await _scrollToBlock(context, action.value!);
         break;
+      case BlockActionType.openSystemPage:
+        await executeSystemPageNavigation(context, action.value!);
+        break;
       case BlockActionType.none:
         break;
+    }
+  }
+
+  /// Navigate to a system page (profile, cart, rewards, roulette)
+  /// 
+  /// Uses the Builder version if available, otherwise falls back to legacy.
+  /// 
+  /// Example:
+  /// ```dart
+  /// ActionHelper.executeSystemPageNavigation(context, 'profile');
+  /// ```
+  static Future<void> executeSystemPageNavigation(BuildContext context, String pageId) async {
+    try {
+      // Validate system page ID
+      if (!SystemPageRoutes.isValidSystemPage(pageId)) {
+        debugPrint('Invalid system page ID: $pageId');
+        return;
+      }
+      
+      // Get the route for this system page
+      final route = SystemPageRoutes.getRouteFor(pageId);
+      
+      if (context.mounted) {
+        context.go(route);
+      }
+    } catch (e) {
+      debugPrint('Error navigating to system page "$pageId": $e');
     }
   }
 

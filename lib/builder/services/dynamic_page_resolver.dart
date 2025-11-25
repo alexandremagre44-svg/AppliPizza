@@ -164,6 +164,61 @@ class DynamicPageResolver {
       return {};
     }
   }
+  
+  /// Resolve a system page by its string ID
+  /// 
+  /// System pages: profile, cart, rewards, roulette
+  /// 
+  /// Returns the Builder page if it exists and is enabled.
+  /// Returns null if the page doesn't exist or should use legacy fallback.
+  /// 
+  /// Example:
+  /// ```dart
+  /// final page = await resolver.resolveSystemPage('profile', 'pizza_delizza');
+  /// if (page != null) {
+  ///   // Render Builder page
+  /// } else {
+  ///   // Use legacy ProfileScreen
+  /// }
+  /// ```
+  Future<BuilderPage?> resolveSystemPage(String pageId, String appId) async {
+    try {
+      // Map string pageId to BuilderPageId
+      final builderPageId = _systemPageIdToBuilderPageId(pageId);
+      
+      if (builderPageId == null) {
+        debugPrint('Unknown system page ID: $pageId');
+        return null;
+      }
+      
+      return await resolve(builderPageId, appId);
+    } catch (e, stackTrace) {
+      debugPrint('Error resolving system page $pageId for app $appId: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
+      return null;
+    }
+  }
+  
+  /// Map string system page ID to BuilderPageId
+  BuilderPageId? _systemPageIdToBuilderPageId(String pageId) {
+    switch (pageId.toLowerCase()) {
+      case 'profile':
+      case 'profil':
+        return BuilderPageId.profile;
+      case 'cart':
+      case 'panier':
+        return BuilderPageId.cart;
+      case 'rewards':
+      case 'recompenses':
+        return BuilderPageId.rewards;
+      case 'roulette':
+        return BuilderPageId.roulette;
+      default:
+        return null;
+    }
+  }
 
   // ==================== PRIVATE HELPERS ====================
 

@@ -185,13 +185,34 @@ class MyApp extends ConsumerWidget {
                 return DynamicBuilderPageScreen(pageKey: pageId);
               },
             ),
+            // System pages - Builder-first with legacy fallback
             GoRoute(
               path: AppRoutes.cart,
-              builder: (context, state) => const CartScreen(),
+              builder: (context, state) => const BuilderPageLoader(
+                pageId: BuilderPageId.cart,
+                fallback: CartScreen(),
+              ),
             ),
             GoRoute(
               path: AppRoutes.profile,
-              builder: (context, state) => const ProfileScreen(),
+              builder: (context, state) => const BuilderPageLoader(
+                pageId: BuilderPageId.profile,
+                fallback: ProfileScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/rewards',
+              builder: (context, state) => const BuilderPageLoader(
+                pageId: BuilderPageId.rewards,
+                fallback: RewardsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/roulette',
+              builder: (context, state) => const BuilderPageLoader(
+                pageId: BuilderPageId.roulette,
+                fallback: RouletteScreen(),
+              ),
             ),
             // Admin Menu - Main entry point for all admin tools
             GoRoute(

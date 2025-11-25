@@ -257,3 +257,63 @@ case '/new-system-page':
 - Les pages système ne peuvent pas avoir un pageId personnalisé
 - La suppression via l'interface est bloquée mais pas au niveau Firestore
 - Le fallback legacy doit être maintenu tant que les pages peuvent ne pas exister
+
+## Actions système (openSystemPage)
+
+L'action `openSystemPage` permet aux blocs de naviguer vers une page système via un clic.
+
+### Configuration
+
+Dans l'éditeur de page, les blocs interactifs (text, hero, image, button) peuvent être configurés avec :
+
+1. **Type d'action** : `openSystemPage`
+2. **Page cible** : `profile`, `cart`, `rewards`, ou `roulette`
+
+### Pages cibles
+
+| Identifiant | Label dans l'éditeur | Route |
+|-------------|---------------------|-------|
+| `profile` | Page Profil | `/profile` |
+| `cart` | Page Panier | `/cart` |
+| `rewards` | Page Récompenses | `/rewards` |
+| `roulette` | Page Roulette | `/roulette` |
+
+### Exemple de bloc avec action
+
+```dart
+BuilderBlock(
+  id: 'btn_rewards',
+  type: BlockType.button,
+  config: {
+    'label': 'Voir mes récompenses',
+    'tapAction': 'openSystemPage',
+    'tapActionTarget': 'rewards',
+  },
+)
+```
+
+### Format Firestore
+
+```json
+{
+  "type": "button",
+  "config": {
+    "label": "Voir mes récompenses",
+    "tapAction": "openSystemPage",
+    "tapActionTarget": "rewards"
+  }
+}
+```
+
+### Comportement
+
+- **Runtime** : La navigation s'effectue via `go_router` vers la route correspondante
+- **Preview** : L'action n'est pas exécutée pour permettre la sélection du bloc
+- **Builder-first** : Si une version Builder de la page existe, elle est affichée ; sinon, l'écran legacy est utilisé
+
+### Note technique
+
+L'action utilise `ActionHelper.executeSystemPageNavigation(context, pageId)` qui :
+1. Valide l'identifiant de la page système
+2. Obtient la route correspondante via `SystemPageRoutes`
+3. Navigue via `context.go(route)`

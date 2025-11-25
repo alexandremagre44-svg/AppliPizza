@@ -422,3 +422,61 @@ ListTile(
 - Les SystemBlocks ne peuvent pas être personnalisés (couleurs, textes, etc.)
 - Les modules affichent des données de démo (l'intégration avec les providers est à faire au niveau parent)
 - En mode preview, seul un placeholder est affiché
+
+## Actions système (openSystemPage)
+
+### Vue d'ensemble
+
+L'action `openSystemPage` permet aux blocs (text, image, button, hero, etc.) d'ouvrir une page système via un clic. Cette action charge automatiquement la version Builder de la page si disponible, sinon affiche la version legacy.
+
+### Pages système disponibles
+
+| Identifiant | Label | Route | Widget Legacy |
+|-------------|-------|-------|---------------|
+| `profile` | Page Profil | `/profile` | ProfileScreen |
+| `cart` | Page Panier | `/cart` | CartScreen |
+| `rewards` | Page Récompenses | `/rewards` | RewardsScreen |
+| `roulette` | Page Roulette | `/roulette` | RouletteScreen |
+
+### Configuration dans l'éditeur
+
+1. Sélectionner un bloc avec action au clic (text, hero, image, button)
+2. Dans le panneau de configuration, section "Action au clic"
+3. Choisir "openSystemPage" dans le dropdown "Type d'action"
+4. Sélectionner la page système cible dans le dropdown "Page système"
+
+### Format de stockage
+
+```json
+{
+  "tapAction": "openSystemPage",
+  "tapActionTarget": "profile"
+}
+```
+
+### Exemple de configuration
+
+```dart
+// Bloc bouton avec action vers la page profil
+BuilderBlock(
+  id: 'btn_profile',
+  type: BlockType.button,
+  order: 5,
+  config: {
+    'label': 'Mon profil',
+    'tapAction': 'openSystemPage',
+    'tapActionTarget': 'profile',
+  },
+)
+```
+
+### Comportement en preview vs runtime
+
+| Mode | Comportement |
+|------|--------------|
+| **Preview** (éditeur) | L'action n'est pas exécutée - permet de sélectionner le bloc |
+| **Runtime** (application) | Navigation vers la page système via go_router |
+
+### Note importante
+
+Les **SystemBlocks** eux-mêmes ne génèrent pas d'action de navigation. Ils affichent uniquement leur contenu. Pour permettre à l'utilisateur de naviguer vers une page système, utilisez un bloc standard (button, text, image) avec l'action `openSystemPage`.
