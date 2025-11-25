@@ -44,34 +44,18 @@ Widget _placeholderModule(BuildContext context, String moduleName) {
   );
 }
 
-/// Get actual module widget based on moduleId
-/// 
-/// Returns actual runtime widgets for modules.
-/// Falls back to placeholder if widget not available.
-Widget _getModuleWidget(BuildContext context, String moduleId) {
-  switch (moduleId) {
-    case 'menu_catalog':
-      return const MenuCatalogRuntimeWidget();
-    case 'profile_module':
-      return const ProfileModuleWidget();
-    case 'roulette_module':
-      return const RouletteModuleWidget();
-    default:
-      return _placeholderModule(context, moduleId);
-  }
-}
+
 
 /// Builder modules mapping
 /// 
 /// Maps module IDs to their widget builders.
 /// 
-/// Runtime modules are loaded lazily to avoid circular dependencies.
-/// The actual widgets are imported when needed via _getModuleWidget().
+/// All runtime widgets are imported and available directly.
 final Map<String, ModuleWidgetBuilder> builderModules = {
-  'menu_catalog': (context) => _getModuleWidget(context, 'menu_catalog'),
+  'menu_catalog': (context) => const MenuCatalogRuntimeWidget(),
   'cart_module': (context) => const CartModuleWidget(),
-  'profile_module': (context) => _getModuleWidget(context, 'profile_module'),
-  'roulette_module': (context) => _getModuleWidget(context, 'roulette_module'),
+  'profile_module': (context) => const ProfileModuleWidget(),
+  'roulette_module': (context) => const RouletteModuleWidget(),
 };
 
 /// Module configuration

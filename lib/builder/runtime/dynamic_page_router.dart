@@ -23,24 +23,13 @@ import '../utils/builder_modules.dart' as builder_modules;
 /// ```
 Widget buildPageFromBuilder(BuildContext context, BuilderPage page) {
   // Check if page has published content
-  final hasPublishedContent = page.publishedLayout.isNotEmpty;
-  
-  if (hasPublishedContent) {
+  if (page.publishedLayout.isNotEmpty) {
     // Render page with BuilderRuntimeRenderer
+    // This handles all blocks including SystemBlocks with modules
     return BuilderRuntimeRenderer(
       blocks: page.publishedLayout,
       wrapInScrollView: true,
     );
-  }
-  
-  // Check if page has a single module block (common for system pages)
-  if (page.publishedLayout.length == 1 && 
-      page.publishedLayout.first.type == BlockType.system) {
-    final moduleType = page.publishedLayout.first.getConfig<String>('moduleType', '');
-    if (moduleType != null && moduleType.isNotEmpty) {
-      // Render module directly
-      return builder_modules.renderModule(context, moduleType);
-    }
   }
   
   // No content - show empty state
