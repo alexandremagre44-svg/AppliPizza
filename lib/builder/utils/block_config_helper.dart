@@ -222,6 +222,46 @@ class BlockConfigHelper {
   /// Check if a key exists in config
   bool has(String key) => config.containsKey(key);
 
+  /// Get action configuration from separate tapAction and tapActionTarget fields
+  /// 
+  /// The editor saves actions as:
+  /// - tapAction: 'none', 'openPage', 'openLegacyPage', 'openSystemPage', 'openUrl'
+  /// - tapActionTarget: the target value (page id, route, or URL)
+  /// 
+  /// This method converts these to a Map format expected by ActionHelper:
+  /// - {'type': 'openPage', 'value': '/promo'}
+  Map<String, dynamic>? getActionConfig({
+    String actionKey = 'tapAction',
+    String targetKey = 'tapActionTarget',
+  }) {
+    final actionType = getString(actionKey, defaultValue: 'none');
+    final target = getString(targetKey, defaultValue: '');
+    
+    // Return null if no action or 'none'
+    if (actionType.isEmpty || actionType == 'none') {
+      return null;
+    }
+    
+    // Define which action types require a target value
+    const actionsRequiringTarget = {
+      'openPage',
+      'openLegacyPage',
+      'openSystemPage',
+      'openUrl',
+      'scrollToBlock',
+    };
+    
+    // Return null if action requires a target but none provided
+    if (actionsRequiringTarget.contains(actionType) && target.isEmpty) {
+      return null;
+    }
+    
+    return {
+      'type': actionType,
+      'value': target,
+    };
+  }
+
   /// Log warning for config issues
   void _logWarning(String message) {
     debugPrint('BuilderBlock [${blockId ?? 'unknown'}]: $message');

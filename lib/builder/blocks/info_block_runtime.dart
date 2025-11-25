@@ -45,7 +45,10 @@ class InfoBlockRuntime extends StatelessWidget {
     final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
     final margin = helper.getEdgeInsets('margin');
     final align = helper.getString('align', defaultValue: 'left');
-    final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
+    // Get action config from separate tapAction/tapActionTarget fields
+    // Falls back to direct 'tapAction' Map for backward compatibility
+    var tapActionConfig = helper.getActionConfig();
+    tapActionConfig ??= block.config['tapAction'] as Map<String, dynamic>?;
 
     // If no title and no subtitle, don't render anything
     if (title.isEmpty && subtitle.isEmpty) {

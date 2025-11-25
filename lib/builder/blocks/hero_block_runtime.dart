@@ -54,7 +54,10 @@ class HeroBlockRuntime extends StatelessWidget {
     final buttonColor = helper.getColor('buttonColor', defaultValue: Colors.white);
     final buttonTextColor = helper.getColor('buttonTextColor', defaultValue: const Color(0xFFD32F2F));
     final borderRadius = helper.getDouble('borderRadius', defaultValue: 0.0);
-    final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
+    // Get action config from separate tapAction/tapActionTarget fields
+    // Falls back to direct 'tapAction' Map for backward compatibility
+    var tapActionConfig = helper.getActionConfig();
+    tapActionConfig ??= block.config['tapAction'] as Map<String, dynamic>?;
     final height = _calculateHeight(helper, context);
 
     // Determine alignment

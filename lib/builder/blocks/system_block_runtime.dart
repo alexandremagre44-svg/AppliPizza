@@ -10,6 +10,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../models/builder_block.dart';
 import '../utils/block_config_helper.dart';
 
@@ -183,7 +184,7 @@ class SystemBlockRuntime extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: () {
-              Navigator.of(context).pushNamed('/roulette');
+              context.go('/roulette');
             },
             icon: const Icon(Icons.play_arrow),
             label: const Text('Jouer maintenant'),
@@ -317,7 +318,7 @@ class SystemBlockRuntime extends StatelessWidget {
           const SizedBox(height: 16),
           OutlinedButton(
             onPressed: () {
-              Navigator.of(context).pushNamed('/rewards');
+              context.go('/rewards');
             },
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.orange.shade700,
@@ -364,7 +365,7 @@ class SystemBlockRuntime extends StatelessWidget {
             icon: Icons.shopping_bag_outlined,
             label: 'Mes commandes',
             count: _demoOrdersCount,
-            onTap: () => Navigator.of(context).pushNamed('/orders'),
+            onTap: () => context.go('/orders'),
           ),
           const SizedBox(height: 12),
           _buildActivityRow(
@@ -372,7 +373,7 @@ class SystemBlockRuntime extends StatelessWidget {
             icon: Icons.favorite_outline,
             label: 'Mes favoris',
             count: _demoFavoritesCount,
-            onTap: () => Navigator.of(context).pushNamed('/favorites'),
+            onTap: () => context.go('/favorites'),
           ),
         ],
       ),
