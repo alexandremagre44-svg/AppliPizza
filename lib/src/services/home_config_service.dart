@@ -1,18 +1,18 @@
 // lib/src/services/home_config_service.dart
 // Service for managing home page configuration in Firestore
+//
+// New Firestore structure:
+// restaurants/{restaurantId}/builder_settings/home_config
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/home_config.dart';
+import '../core/firestore_paths.dart';
 
 class HomeConfigService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const String _collection = 'app_home_config';
-  static const String _configDocId = 'main';
-
   // Get home configuration
   Future<HomeConfig?> getHomeConfig() async {
     try {
-      final doc = await _firestore.collection(_collection).doc(_configDocId).get();
+      final doc = await FirestorePaths.homeConfigDoc().get();
       if (doc.exists && doc.data() != null) {
         return HomeConfig.fromJson(doc.data()!);
       }
@@ -30,7 +30,7 @@ class HomeConfigService {
       final jsonData = config.toJson();
       print('HomeConfigService: JSON blocks: ${jsonData['blocks']}');
       
-      await _firestore.collection(_collection).doc(_configDocId).set(
+      await FirestorePaths.homeConfigDoc().set(
             jsonData,
             SetOptions(merge: true),
           );
@@ -46,7 +46,7 @@ class HomeConfigService {
   // Update hero configuration
   Future<bool> updateHeroConfig(HeroConfig hero) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.homeConfigDoc().update({
         'hero': hero.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -60,7 +60,7 @@ class HomeConfigService {
   // Update promo banner configuration
   Future<bool> updatePromoBanner(PromoBannerConfig banner) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.homeConfigDoc().update({
         'promoBanner': banner.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -168,7 +168,7 @@ class HomeConfigService {
       if (existing != null) return true;
 
       final defaultConfig = HomeConfig(
-        id: _configDocId,
+        id: FirestorePaths.homeConfigDocId,
         hero: HeroConfig(
           isActive: false,
           imageUrl: '',
@@ -194,9 +194,7 @@ class HomeConfigService {
 
   // Stream for real-time updates
   Stream<HomeConfig?> watchHomeConfig() {
-    return _firestore
-        .collection(_collection)
-        .doc(_configDocId)
+    return FirestorePaths.homeConfigDoc()
         .snapshots()
         .map((snapshot) {
       if (snapshot.exists && snapshot.data() != null) {

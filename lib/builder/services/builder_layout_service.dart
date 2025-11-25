@@ -1,57 +1,46 @@
 // lib/builder/services/builder_layout_service.dart
 // Firestore service for managing Builder B3 page layouts
+//
+// New Firestore structure:
+// restaurants/{restaurantId}/pages_draft/{pageId}
+// restaurants/{restaurantId}/pages_published/{pageId}
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/models.dart';
+import '../../src/core/firestore_paths.dart';
 
 /// Service for managing Builder B3 page layouts in Firestore
 /// 
 /// Firestore structure:
 /// ```
-/// apps/{appId}/builder/pages/{pageId}/draft
-/// apps/{appId}/builder/pages/{pageId}/published
+/// restaurants/{restaurantId}/pages_draft/{pageId}
+/// restaurants/{restaurantId}/pages_published/{pageId}
 /// ```
 /// 
 /// Features:
 /// - Draft/published workflow
 /// - Multi-page support (home, menu, promo, etc.)
-/// - Multi-resto support (different appId per restaurant)
+/// - Multi-resto support (different restaurantId per restaurant)
 /// - Version control
 /// - Real-time updates via streams
 class BuilderLayoutService {
   final FirebaseFirestore _firestore;
 
-  // Collection paths
-  // Structure: builder/apps/{appId}/pages/{pageId}/{draft|published}
-  static const String _builderCollection = 'builder';
-  static const String _appsSubcollection = 'apps';
-  static const String _pagesSubcollection = 'pages';
-  static const String _draftDoc = 'draft';
-  static const String _publishedDoc = 'published';
-
   BuilderLayoutService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Get document reference for draft page
+  /// Path: restaurants/{restaurantId}/pages_draft/{pageId}
   DocumentReference _getDraftRef(String appId, BuilderPageId pageId) {
-    return _firestore
-        .collection(_builderCollection)
-        .doc(_appsSubcollection)
-        .collection(appId)
-        .doc(_pagesSubcollection)
-        .collection(pageId.value)
-        .doc(_draftDoc);
+    // Note: appId parameter is kept for backward compatibility but we now use kRestaurantId
+    // In future multi-resto implementations, this can be made dynamic
+    return FirestorePaths.draftDoc(pageId.value);
   }
 
   /// Get document reference for published page
+  /// Path: restaurants/{restaurantId}/pages_published/{pageId}
   DocumentReference _getPublishedRef(String appId, BuilderPageId pageId) {
-    return _firestore
-        .collection(_builderCollection)
-        .doc(_appsSubcollection)
-        .collection(appId)
-        .doc(_pagesSubcollection)
-        .collection(pageId.value)
-        .doc(_publishedDoc);
+    return FirestorePaths.publishedDoc(pageId.value);
   }
 
   // ==================== DRAFT OPERATIONS ====================

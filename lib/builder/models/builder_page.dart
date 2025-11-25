@@ -3,6 +3,7 @@
 
 import 'builder_enums.dart';
 import 'builder_block.dart';
+import '../../src/core/firestore_paths.dart';
 
 /// Page model for multi-page builder system
 /// 
@@ -17,7 +18,7 @@ class BuilderPage {
   final BuilderPageId pageId;
 
   /// Restaurant/app identifier for multi-resto support
-  /// Example: 'pizza_delizza', 'pizza_express', etc.
+  /// Example: 'delizza', 'pizza_express', etc.
   final String appId;
 
   /// Display name for this page
@@ -170,7 +171,7 @@ class BuilderPage {
     final pageId = BuilderPageId.fromJson(json['pageId'] as String? ?? 'home');
     return BuilderPage(
       pageId: pageId,
-      appId: json['appId'] as String? ?? 'pizza_delizza',
+      appId: json['appId'] as String? ?? kRestaurantId,
       name: json['name'] as String? ?? 'Page',
       description: json['description'] as String? ?? '',
       route: json['route'] as String? ?? '/',

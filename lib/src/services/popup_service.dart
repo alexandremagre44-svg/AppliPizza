@@ -1,18 +1,24 @@
 // lib/src/services/popup_service.dart
 // Service for managing popup configurations in Firestore
+//
+// New Firestore structure:
+// restaurants/{restaurantId}/builder_settings/popups/items/{popupId}
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/popup_config.dart';
+import '../core/firestore_paths.dart';
 
 class PopupService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const String _collection = 'app_popups';
+
+  /// Get collection reference for popups
+  CollectionReference<Map<String, dynamic>> get _popupsCollection =>
+      FirestorePaths.popups();
 
   // Get all popups
   Future<List<PopupConfig>> getAllPopups() async {
     try {
-      final snapshot = await _firestore
-          .collection(_collection)
+      final snapshot = await _popupsCollection
           .orderBy('priority', descending: true)
           .get();
 
@@ -28,9 +34,7 @@ class PopupService {
   // Get active popups
   Future<List<PopupConfig>> getActivePopups() async {
     try {
-      final now = DateTime.now();
-      final snapshot = await _firestore
-          .collection(_collection)
+      final snapshot = await _popupsCollection
           .where('isEnabled', isEqualTo: true)
           .get();
 
@@ -52,7 +56,7 @@ class PopupService {
   // Get popup by ID
   Future<PopupConfig?> getPopupById(String id) async {
     try {
-      final doc = await _firestore.collection(_collection).doc(id).get();
+      final doc = await _popupsCollection.doc(id).get();
       if (doc.exists && doc.data() != null) {
         return PopupConfig.fromFirestore(doc.data()!);
       }
@@ -66,7 +70,7 @@ class PopupService {
   // Create popup
   Future<bool> createPopup(PopupConfig popup) async {
     try {
-      await _firestore.collection(_collection).doc(popup.id).set(popup.toMap());
+      await _popupsCollection.doc(popup.id).set(popup.toMap());
       return true;
     } catch (e) {
       print('Error creating popup: $e');
@@ -82,8 +86,7 @@ class PopupService {
   // Update popup
   Future<bool> updatePopup(PopupConfig popup) async {
     try {
-      await _firestore
-          .collection(_collection)
+      await _popupsCollection
           .doc(popup.id)
           .update(popup.toMap());
       return true;
@@ -96,7 +99,7 @@ class PopupService {
   // Delete popup
   Future<bool> deletePopup(String id) async {
     try {
-      await _firestore.collection(_collection).doc(id).delete();
+      await _popupsCollection.doc(id).delete();
       return true;
     } catch (e) {
       print('Error deleting popup: $e');
@@ -106,8 +109,7 @@ class PopupService {
 
   // Stream for real-time updates
   Stream<List<PopupConfig>> watchPopups() {
-    return _firestore
-        .collection(_collection)
+    return _popupsCollection
         .orderBy('priority', descending: true)
         .snapshots()
         .map((snapshot) {

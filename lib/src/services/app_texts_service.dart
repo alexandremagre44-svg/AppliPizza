@@ -1,18 +1,18 @@
 // lib/src/services/app_texts_service.dart
 // Service for managing configurable app texts in Firestore
+//
+// New Firestore structure:
+// restaurants/{restaurantId}/builder_settings/app_texts
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/app_texts_config.dart';
+import '../core/firestore_paths.dart';
 
 class AppTextsService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const String _collection = 'app_texts_config';
-  static const String _configDocId = 'main';
-
   // Get app texts configuration
   Future<AppTextsConfig> getAppTextsConfig() async {
     try {
-      final doc = await _firestore.collection(_collection).doc(_configDocId).get();
+      final doc = await FirestorePaths.appTextsDoc().get();
       if (doc.exists && doc.data() != null) {
         return AppTextsConfig.fromJson(doc.data()!);
       }
@@ -26,7 +26,7 @@ class AppTextsService {
   // Save complete app texts configuration
   Future<bool> saveAppTextsConfig(AppTextsConfig config) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).set(
+      await FirestorePaths.appTextsDoc().set(
             config.toJson(),
             SetOptions(merge: true),
           );
@@ -40,7 +40,7 @@ class AppTextsService {
   // Update individual module texts
   Future<bool> updateHomeTexts(HomeTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'home': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -53,7 +53,7 @@ class AppTextsService {
 
   Future<bool> updateProfileTexts(ProfileTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'profile': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -66,7 +66,7 @@ class AppTextsService {
 
   Future<bool> updateRewardsTexts(RewardsTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'rewards': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -79,7 +79,7 @@ class AppTextsService {
 
   Future<bool> updateRouletteTexts(RouletteTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'roulette': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -92,7 +92,7 @@ class AppTextsService {
 
   Future<bool> updateLoyaltyTexts(LoyaltyTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'loyalty': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -105,7 +105,7 @@ class AppTextsService {
 
   Future<bool> updateCatalogTexts(CatalogTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'catalog': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -118,7 +118,7 @@ class AppTextsService {
 
   Future<bool> updateCartTexts(CartTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'cart': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -131,7 +131,7 @@ class AppTextsService {
 
   Future<bool> updateCheckoutTexts(CheckoutTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'checkout': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -144,7 +144,7 @@ class AppTextsService {
 
   Future<bool> updateAuthTexts(AuthTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'auth': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -157,7 +157,7 @@ class AppTextsService {
 
   Future<bool> updateAdminTexts(AdminTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'admin': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -170,7 +170,7 @@ class AppTextsService {
 
   Future<bool> updateErrorTexts(ErrorTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'errors': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -183,7 +183,7 @@ class AppTextsService {
 
   Future<bool> updateNotificationTexts(NotificationTexts texts) async {
     try {
-      await _firestore.collection(_collection).doc(_configDocId).update({
+      await FirestorePaths.appTextsDoc().update({
         'notifications': texts.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -197,7 +197,7 @@ class AppTextsService {
   // Initialize with default config if doesn't exist
   Future<bool> initializeDefaultConfig() async {
     try {
-      final existing = await _firestore.collection(_collection).doc(_configDocId).get();
+      final existing = await FirestorePaths.appTextsDoc().get();
       if (existing.exists) return true;
 
       final defaultConfig = AppTextsConfig.defaultConfig();
@@ -210,9 +210,7 @@ class AppTextsService {
 
   // Stream for real-time updates
   Stream<AppTextsConfig> watchAppTextsConfig() {
-    return _firestore
-        .collection(_collection)
-        .doc(_configDocId)
+    return FirestorePaths.appTextsDoc()
         .snapshots()
         .map((snapshot) {
       if (snapshot.exists && snapshot.data() != null) {

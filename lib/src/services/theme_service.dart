@@ -1,26 +1,23 @@
 // lib/src/services/theme_service.dart
 // Service for managing theme configuration in Firestore
+//
+// New Firestore structure:
+// restaurants/{restaurantId}/builder_settings/theme
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/theme_config.dart';
+import '../core/firestore_paths.dart';
 
 /// Service for managing theme configuration
 /// 
-/// Stores theme configuration in Firestore at config/theme
+/// Stores theme configuration in Firestore at:
+/// restaurants/{restaurantId}/builder_settings/theme
 class ThemeService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
-  static const String _collectionPath = 'config';
-  static const String _documentId = 'theme';
-
   /// Get current theme configuration
   /// Returns default config if document doesn't exist
   Future<ThemeConfig> getThemeConfig() async {
     try {
-      final doc = await _firestore
-          .collection(_collectionPath)
-          .doc(_documentId)
-          .get();
+      final doc = await FirestorePaths.themeDoc().get();
 
       if (doc.exists && doc.data() != null) {
         return ThemeConfig.fromMap(doc.data()!);
@@ -39,9 +36,7 @@ class ThemeService {
     try {
       final updatedConfig = config.copyWith(updatedAt: DateTime.now());
       
-      await _firestore
-          .collection(_collectionPath)
-          .doc(_documentId)
+      await FirestorePaths.themeDoc()
           .set(updatedConfig.toMap(), SetOptions(merge: true));
     } catch (e) {
       print('Error updating theme config: $e');
@@ -63,16 +58,11 @@ class ThemeService {
   /// Initialize theme config if missing
   Future<void> initIfMissing() async {
     try {
-      final doc = await _firestore
-          .collection(_collectionPath)
-          .doc(_documentId)
-          .get();
+      final doc = await FirestorePaths.themeDoc().get();
 
       if (!doc.exists) {
         final defaultConfig = ThemeConfig.defaultConfig();
-        await _firestore
-            .collection(_collectionPath)
-            .doc(_documentId)
+        await FirestorePaths.themeDoc()
             .set(defaultConfig.toMap());
         print('Theme config initialized with defaults');
       }
@@ -84,9 +74,7 @@ class ThemeService {
 
   /// Stream for real-time theme updates
   Stream<ThemeConfig> watchThemeConfig() {
-    return _firestore
-        .collection(_collectionPath)
-        .doc(_documentId)
+    return FirestorePaths.themeDoc()
         .snapshots()
         .map((snapshot) {
       if (snapshot.exists && snapshot.data() != null) {
