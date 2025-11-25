@@ -591,8 +591,6 @@ class BuilderPageService {
             continue; // Skip non-applicable system pages
         }
         
-        if (moduleType == null) continue;
-        
         // Create a module block
         final moduleBlock = SystemBlock(
           id: '${moduleType}_auto_${DateTime.now().millisecondsSinceEpoch}',

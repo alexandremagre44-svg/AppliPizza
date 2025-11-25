@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/builder_block.dart';
 import '../utils/block_config_helper.dart';
+import '../utils/builder_modules.dart' as builder_modules;
 
 /// System Block Runtime Widget
 /// 
@@ -158,48 +159,16 @@ class SystemBlockRuntime extends StatelessWidget {
   }
   
   /// Build a module from builder_modules.dart
+  /// Uses the renderModule function which properly displays CartModuleWidget and others
   Widget _buildBuilderModule(BuildContext context, String moduleType) {
-    // Import builder_modules at the top of the file
-    // and use renderModule function
     try {
-      // For now, return a placeholder that shows the module is recognized
-      // The actual rendering will be done by importing builder_modules
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.blue.shade200),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              _getModuleIcon(moduleType),
-              size: 64,
-              color: Colors.blue.shade600,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _getModuleName(moduleType),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue.shade800,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Module Builder',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.blue.shade600,
-              ),
-            ),
-          ],
-        ),
-      );
+      // Use the renderModule function from builder_modules.dart
+      // This renders the actual module widgets (CartModuleWidget, etc.)
+      return builder_modules.renderModule(context, moduleType);
     } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error rendering builder module "$moduleType": $e');
+      }
       return _buildUnknownModule(moduleType);
     }
   }
