@@ -132,7 +132,6 @@ class BuilderPagePreview extends StatelessWidget {
         border: Border.all(
           color: color.withOpacity(0.5),
           width: 2,
-          strokeAlign: BorderSide.strokeAlignOutside,
         ),
       ),
       child: Row(

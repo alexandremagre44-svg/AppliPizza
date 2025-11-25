@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 import '../editor/editor.dart';
+import 'new_page_dialog_v2.dart';
 
 /// Builder Page List Screen
 /// 
@@ -328,7 +329,7 @@ class _BuilderPageListScreenState extends State<BuilderPageListScreen> {
                   icon: const Icon(Icons.copy, size: 18),
                   label: const Text('Dupliquer'),
                 ),
-                if (!page.isSystemPage && page.blocks.isEmpty) ...[
+                if (!page.isSystemPage && page.blocks.isEmpty && page.draftLayout.isEmpty) ...[
                   const SizedBox(width: 8),
                   // Delete
                   TextButton.icon(
