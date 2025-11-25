@@ -11,8 +11,8 @@
 
 import 'package:flutter/foundation.dart';
 import '../models/models.dart';
+import '../utils/builder_modules.dart';
 import 'builder_layout_service.dart';
-import '../../src/core/firestore_paths.dart';
 
 /// Service for managing Builder pages with enhanced draft/publish workflow
 /// 
@@ -381,7 +381,7 @@ class BuilderPageService {
   ) async {
     try {
       // Validate module ID
-      if (!BuilderModules.isValidModule(moduleId)) {
+      if (!isValidModuleId(moduleId)) {
         debugPrint('[BuilderPageService] ⚠️ Invalid module ID: $moduleId');
         return null;
       }
@@ -756,78 +756,5 @@ class BuilderPageService {
         },
       ),
     ];
-  }
-}
-
-/// Module definitions for Builder pages
-/// 
-/// Maps module IDs to their configurations.
-/// These modules can be attached to pages and rendered at runtime.
-class BuilderModules {
-  // Private constructor to prevent instantiation
-  BuilderModules._();
-  
-  /// Menu catalog module
-  static const String menuCatalog = 'menu_catalog';
-  
-  /// Cart module
-  static const String cartModule = 'cart_module';
-  
-  /// Profile module
-  static const String profileModule = 'profile_module';
-  
-  /// Roulette module
-  static const String rouletteModule = 'roulette_module';
-  
-  /// All available module IDs
-  static const List<String> allModules = [
-    menuCatalog,
-    cartModule,
-    profileModule,
-    rouletteModule,
-  ];
-  
-  /// Module metadata for display
-  static const Map<String, Map<String, String>> moduleMetadata = {
-    menuCatalog: {
-      'name': 'Catalogue Menu',
-      'description': 'Affiche le catalogue de produits',
-      'icon': 'restaurant_menu',
-    },
-    cartModule: {
-      'name': 'Panier',
-      'description': 'Widget du panier d\'achat',
-      'icon': 'shopping_cart',
-    },
-    profileModule: {
-      'name': 'Profil',
-      'description': 'Widget du profil utilisateur',
-      'icon': 'person',
-    },
-    rouletteModule: {
-      'name': 'Roulette',
-      'description': 'Widget de la roue de la chance',
-      'icon': 'casino',
-    },
-  };
-  
-  /// Check if a module ID is valid
-  static bool isValidModule(String moduleId) {
-    return allModules.contains(moduleId);
-  }
-  
-  /// Get module display name
-  static String? getModuleName(String moduleId) {
-    return moduleMetadata[moduleId]?['name'];
-  }
-  
-  /// Get module description
-  static String? getModuleDescription(String moduleId) {
-    return moduleMetadata[moduleId]?['description'];
-  }
-  
-  /// Get module icon name
-  static String? getModuleIcon(String moduleId) {
-    return moduleMetadata[moduleId]?['icon'];
   }
 }

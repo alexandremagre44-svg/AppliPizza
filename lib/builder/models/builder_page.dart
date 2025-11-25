@@ -422,8 +422,12 @@ class BuilderPage {
     final newBlocks = <BuilderBlock>[];
     for (var i = 0; i < blockIds.length; i++) {
       final blockId = blockIds[i];
-      final block = blocks.firstWhere((b) => b.id == blockId);
-      newBlocks.add(block.copyWith(order: i));
+      try {
+        final block = blocks.firstWhere((b) => b.id == blockId);
+        newBlocks.add(block.copyWith(order: i));
+      } catch (e) {
+        // Block not found in blocks, skip
+      }
     }
     final newDraftLayout = <BuilderBlock>[];
     for (var i = 0; i < blockIds.length; i++) {
@@ -436,7 +440,7 @@ class BuilderPage {
       }
     }
     return copyWith(
-      blocks: newBlocks,
+      blocks: newBlocks.isEmpty ? null : newBlocks,
       draftLayout: newDraftLayout.isEmpty ? null : newDraftLayout,
       hasUnpublishedChanges: true,
       updatedAt: DateTime.now(),
@@ -449,8 +453,12 @@ class BuilderPage {
     final newDraftLayout = <BuilderBlock>[];
     for (var i = 0; i < blockIds.length; i++) {
       final blockId = blockIds[i];
-      final block = draftLayout.firstWhere((b) => b.id == blockId);
-      newDraftLayout.add(block.copyWith(order: i));
+      try {
+        final block = draftLayout.firstWhere((b) => b.id == blockId);
+        newDraftLayout.add(block.copyWith(order: i));
+      } catch (e) {
+        // Block not found in draftLayout, skip
+      }
     }
     return copyWith(
       draftLayout: newDraftLayout,
