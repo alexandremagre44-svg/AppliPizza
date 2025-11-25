@@ -8,3 +8,4 @@ export 'builder_autoinit_service.dart';
 export 'dynamic_page_resolver.dart';
 export 'default_page_creator.dart';
 export 'system_pages_initializer.dart';
+export 'builder_page_service.dart';

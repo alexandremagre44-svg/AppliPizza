@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'models/models.dart';
-import 'editor/editor.dart';
+import 'page_list/page_list.dart';
 import 'utils/utils.dart';
 
 /// Builder Studio Screen - Main entry point for the B3 Builder interface
@@ -101,25 +101,34 @@ class _BuilderStudioScreenState extends ConsumerState<BuilderStudioScreen> {
           _buildRestaurantInfo(appContext),
           const SizedBox(height: 24),
           
-          // Pages list
-          const Text(
-            'Pages disponibles',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          // Pages list button - navigate to new page list screen
+          Card(
+            child: ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.pages, color: Colors.blue),
+              ),
+              title: const Text(
+                'Gérer les pages',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: const Text('Voir, créer et éditer les pages'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BuilderPageListScreen(
+                      appId: appContext.currentAppId,
+                    ),
+                  ),
+                );
+              },
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Sélectionnez une page à éditer',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ...BuilderPageId.values.map(
-            (pageId) => _buildPageCard(pageId, appContext.currentAppId),
           ),
           
           // System info
@@ -274,44 +283,6 @@ class _BuilderStudioScreenState extends ConsumerState<BuilderStudioScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPageCard(BuilderPageId pageId, String appId) {
-    final metadata = BuilderPagesRegistry.getMetadata(pageId);
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.blue.shade100,
-          child: Text(
-            metadata.icon,
-            style: const TextStyle(fontSize: 20),
-          ),
-        ),
-        title: Text(
-          metadata.name,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(metadata.description),
-        trailing: ElevatedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BuilderPageEditorScreen(
-                  appId: appId,
-                  pageId: pageId,
-                ),
-              ),
-            );
-          },
-          icon: const Icon(Icons.edit, size: 18),
-          label: const Text('Éditer'),
         ),
       ),
     );

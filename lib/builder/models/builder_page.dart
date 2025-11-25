@@ -11,8 +11,9 @@ import '../../src/core/firestore_paths.dart';
 /// Supports:
 /// - Multi-page: Different pages (home, menu, promo, etc.)
 /// - Multi-resto: Different configurations per restaurant (appId)
-/// - Draft/Published: Separate draft and published versions
+/// - Draft/Published: Separate draft and published layouts per page
 /// - Version control: Track changes over time
+/// - Modules: Attach modules (menu, cart, profile, roulette) to pages
 class BuilderPage {
   /// Unique page identifier (home, menu, promo, etc.)
   final BuilderPageId pageId;
@@ -32,6 +33,12 @@ class BuilderPage {
   final String route;
 
   /// List of blocks on this page, ordered by block.order
+  /// 
+  /// @deprecated This field is maintained for backward compatibility.
+  /// Use [draftLayout] for editor changes and [publishedLayout] for runtime.
+  /// Will be removed in a future version. Migration:
+  /// - Editor: Read/write [draftLayout] instead of [blocks]
+  /// - Runtime: Read [publishedLayout] instead of [blocks]
   final List<BuilderBlock> blocks;
 
   /// Whether this page is currently enabled/published
@@ -76,6 +83,35 @@ class BuilderPage {
   /// System pages cannot be deleted or have their pageId changed
   final bool isSystemPage;
 
+  // ==================== NEW FIELDS FOR ENHANCED DRAFT/PUBLISH ====================
+
+  /// Type of page (template, blank, system, custom)
+  final BuilderPageType pageType;
+
+  /// Whether the page is active (visible in navigation/app)
+  /// Different from isEnabled which controls if page is published
+  final bool isActive;
+
+  /// Index for bottom navigation bar ordering
+  /// More explicit than 'order' field for bottomNav specifically
+  final int bottomNavIndex;
+
+  /// List of module IDs attached to this page
+  /// Modules: menu_catalog, cart_module, profile_module, roulette_module
+  final List<String> modules;
+
+  /// Whether there are unpublished changes in draftLayout
+  /// Computed from comparing draftLayout to publishedLayout
+  final bool hasUnpublishedChanges;
+
+  /// Draft layout blocks (modified in real-time in the editor)
+  /// This is the working copy that admins edit
+  final List<BuilderBlock> draftLayout;
+
+  /// Published layout blocks (visible to clients)
+  /// This is the live version shown to end users
+  final List<BuilderBlock> publishedLayout;
+
   BuilderPage({
     required this.pageId,
     required this.appId,
@@ -95,9 +131,21 @@ class BuilderPage {
     this.icon = 'help_outline',
     this.order = 999,
     bool? isSystemPage,
+    // New fields
+    BuilderPageType? pageType,
+    this.isActive = true,
+    this.bottomNavIndex = 999,
+    this.modules = const [],
+    bool? hasUnpublishedChanges,
+    List<BuilderBlock>? draftLayout,
+    List<BuilderBlock>? publishedLayout,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
-        isSystemPage = isSystemPage ?? pageId.isSystemPage;
+        isSystemPage = isSystemPage ?? pageId.isSystemPage,
+        pageType = pageType ?? (pageId.isSystemPage ? BuilderPageType.system : BuilderPageType.custom),
+        draftLayout = draftLayout ?? blocks,
+        publishedLayout = publishedLayout ?? const [],
+        hasUnpublishedChanges = hasUnpublishedChanges ?? (draftLayout != null && draftLayout.isNotEmpty && (publishedLayout == null || publishedLayout.isEmpty));
 
   /// Create a copy with modified fields
   BuilderPage copyWith({
@@ -119,6 +167,14 @@ class BuilderPage {
     String? icon,
     int? order,
     bool? isSystemPage,
+    // New fields
+    BuilderPageType? pageType,
+    bool? isActive,
+    int? bottomNavIndex,
+    List<String>? modules,
+    bool? hasUnpublishedChanges,
+    List<BuilderBlock>? draftLayout,
+    List<BuilderBlock>? publishedLayout,
   }) {
     return BuilderPage(
       pageId: pageId ?? this.pageId,
@@ -139,6 +195,14 @@ class BuilderPage {
       icon: icon ?? this.icon,
       order: order ?? this.order,
       isSystemPage: isSystemPage ?? this.isSystemPage,
+      // New fields
+      pageType: pageType ?? this.pageType,
+      isActive: isActive ?? this.isActive,
+      bottomNavIndex: bottomNavIndex ?? this.bottomNavIndex,
+      modules: modules ?? List<String>.from(this.modules),
+      hasUnpublishedChanges: hasUnpublishedChanges ?? this.hasUnpublishedChanges,
+      draftLayout: draftLayout ?? List<BuilderBlock>.from(this.draftLayout),
+      publishedLayout: publishedLayout ?? List<BuilderBlock>.from(this.publishedLayout),
     );
   }
 
@@ -163,22 +227,52 @@ class BuilderPage {
       'icon': icon,
       'order': order,
       'isSystemPage': isSystemPage,
+      // New fields
+      'pageType': pageType.toJson(),
+      'isActive': isActive,
+      'bottomNavIndex': bottomNavIndex,
+      'modules': modules,
+      'hasUnpublishedChanges': hasUnpublishedChanges,
+      'draftLayout': draftLayout.map((b) => b.toJson()).toList(),
+      'publishedLayout': publishedLayout.map((b) => b.toJson()).toList(),
     };
   }
 
   /// Create from Firestore JSON
   factory BuilderPage.fromJson(Map<String, dynamic> json) {
     final pageId = BuilderPageId.fromJson(json['pageId'] as String? ?? 'home');
+    
+    // Parse blocks (legacy field)
+    final blocks = (json['blocks'] as List<dynamic>?)
+            ?.map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
+            .toList() ??
+        [];
+    
+    // Parse draftLayout (new field, fallback to blocks for backward compatibility)
+    final draftLayout = (json['draftLayout'] as List<dynamic>?)
+            ?.map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
+            .toList() ??
+        blocks;
+    
+    // Parse publishedLayout (new field)
+    final publishedLayout = (json['publishedLayout'] as List<dynamic>?)
+            ?.map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
+            .toList() ??
+        [];
+    
+    // Parse modules list
+    final modules = (json['modules'] as List<dynamic>?)
+            ?.map((m) => m as String)
+            .toList() ??
+        [];
+    
     return BuilderPage(
       pageId: pageId,
       appId: json['appId'] as String? ?? kRestaurantId,
       name: json['name'] as String? ?? 'Page',
       description: json['description'] as String? ?? '',
       route: json['route'] as String? ?? '/',
-      blocks: (json['blocks'] as List<dynamic>?)
-              ?.map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
-              .toList() ??
-          [],
+      blocks: blocks,
       isEnabled: json['isEnabled'] as bool? ?? true,
       isDraft: json['isDraft'] as bool? ?? false,
       metadata: json['metadata'] != null
@@ -199,12 +293,35 @@ class BuilderPage {
       icon: json['icon'] as String? ?? 'help_outline',
       order: json['order'] as int? ?? 999,
       isSystemPage: json['isSystemPage'] as bool? ?? pageId.isSystemPage,
+      // New fields
+      pageType: BuilderPageType.fromJson(json['pageType'] as String? ?? 'custom'),
+      isActive: json['isActive'] as bool? ?? true,
+      bottomNavIndex: json['bottomNavIndex'] as int? ?? (json['order'] as int? ?? 999),
+      modules: modules,
+      hasUnpublishedChanges: json['hasUnpublishedChanges'] as bool? ?? false,
+      draftLayout: draftLayout,
+      publishedLayout: publishedLayout,
     );
   }
 
   /// Get blocks sorted by order
+  /// Uses draftLayout for editor, publishedLayout for runtime
   List<BuilderBlock> get sortedBlocks {
     final sorted = List<BuilderBlock>.from(blocks);
+    sorted.sort((a, b) => a.order.compareTo(b.order));
+    return sorted;
+  }
+
+  /// Get draft blocks sorted by order (for editor)
+  List<BuilderBlock> get sortedDraftBlocks {
+    final sorted = List<BuilderBlock>.from(draftLayout);
+    sorted.sort((a, b) => a.order.compareTo(b.order));
+    return sorted;
+  }
+
+  /// Get published blocks sorted by order (for runtime)
+  List<BuilderBlock> get sortedPublishedBlocks {
+    final sorted = List<BuilderBlock>.from(publishedLayout);
     sorted.sort((a, b) => a.order.compareTo(b.order));
     return sorted;
   }
@@ -214,61 +331,153 @@ class BuilderPage {
     return sortedBlocks.where((b) => b.isActive).toList();
   }
 
-  /// Add a block to this page
+  /// Get only active/visible draft blocks (for editor)
+  List<BuilderBlock> get activeDraftBlocks {
+    return sortedDraftBlocks.where((b) => b.isActive).toList();
+  }
+
+  /// Get only active/visible published blocks (for runtime)
+  List<BuilderBlock> get activePublishedBlocks {
+    return sortedPublishedBlocks.where((b) => b.isActive).toList();
+  }
+
+  /// Add a block to this page (draft layout)
   BuilderPage addBlock(BuilderBlock block) {
     final newBlocks = List<BuilderBlock>.from(blocks);
     newBlocks.add(block);
+    final newDraftLayout = List<BuilderBlock>.from(draftLayout);
+    newDraftLayout.add(block);
     return copyWith(
       blocks: newBlocks,
+      draftLayout: newDraftLayout,
+      hasUnpublishedChanges: true,
       updatedAt: DateTime.now(),
       version: version + 1,
     );
   }
 
-  /// Remove a block from this page
+  /// Add a block to draft layout only
+  BuilderPage addBlockToDraft(BuilderBlock block) {
+    final newDraftLayout = List<BuilderBlock>.from(draftLayout);
+    newDraftLayout.add(block);
+    return copyWith(
+      draftLayout: newDraftLayout,
+      hasUnpublishedChanges: true,
+      updatedAt: DateTime.now(),
+      version: version + 1,
+    );
+  }
+
+  /// Remove a block from this page (draft layout)
   BuilderPage removeBlock(String blockId) {
     final newBlocks = blocks.where((b) => b.id != blockId).toList();
+    final newDraftLayout = draftLayout.where((b) => b.id != blockId).toList();
     return copyWith(
       blocks: newBlocks,
+      draftLayout: newDraftLayout,
+      hasUnpublishedChanges: true,
       updatedAt: DateTime.now(),
       version: version + 1,
     );
   }
 
-  /// Update a block on this page
+  /// Remove a block from draft layout only
+  BuilderPage removeBlockFromDraft(String blockId) {
+    final newDraftLayout = draftLayout.where((b) => b.id != blockId).toList();
+    return copyWith(
+      draftLayout: newDraftLayout,
+      hasUnpublishedChanges: true,
+      updatedAt: DateTime.now(),
+      version: version + 1,
+    );
+  }
+
+  /// Update a block on this page (draft layout)
   BuilderPage updateBlock(BuilderBlock updatedBlock) {
     final newBlocks = blocks.map((b) {
       return b.id == updatedBlock.id ? updatedBlock : b;
     }).toList();
+    final newDraftLayout = draftLayout.map((b) {
+      return b.id == updatedBlock.id ? updatedBlock : b;
+    }).toList();
     return copyWith(
       blocks: newBlocks,
+      draftLayout: newDraftLayout,
+      hasUnpublishedChanges: true,
       updatedAt: DateTime.now(),
       version: version + 1,
     );
   }
 
-  /// Reorder blocks
+  /// Update a block in draft layout only
+  BuilderPage updateBlockInDraft(BuilderBlock updatedBlock) {
+    final newDraftLayout = draftLayout.map((b) {
+      return b.id == updatedBlock.id ? updatedBlock : b;
+    }).toList();
+    return copyWith(
+      draftLayout: newDraftLayout,
+      hasUnpublishedChanges: true,
+      updatedAt: DateTime.now(),
+      version: version + 1,
+    );
+  }
+
+  /// Reorder blocks (draft layout)
   BuilderPage reorderBlocks(List<String> blockIds) {
     final newBlocks = <BuilderBlock>[];
     for (var i = 0; i < blockIds.length; i++) {
       final blockId = blockIds[i];
-      final block = blocks.firstWhere((b) => b.id == blockId);
-      newBlocks.add(block.copyWith(order: i));
+      final matchingBlocks = blocks.where((b) => b.id == blockId);
+      if (matchingBlocks.isNotEmpty) {
+        newBlocks.add(matchingBlocks.first.copyWith(order: i));
+      }
+    }
+    final newDraftLayout = <BuilderBlock>[];
+    for (var i = 0; i < blockIds.length; i++) {
+      final blockId = blockIds[i];
+      final matchingBlocks = draftLayout.where((b) => b.id == blockId);
+      if (matchingBlocks.isNotEmpty) {
+        newDraftLayout.add(matchingBlocks.first.copyWith(order: i));
+      }
     }
     return copyWith(
-      blocks: newBlocks,
+      blocks: newBlocks.isEmpty ? null : newBlocks,
+      draftLayout: newDraftLayout.isEmpty ? null : newDraftLayout,
+      hasUnpublishedChanges: true,
+      updatedAt: DateTime.now(),
+      version: version + 1,
+    );
+  }
+
+  /// Reorder blocks in draft layout only
+  BuilderPage reorderDraftBlocks(List<String> blockIds) {
+    final newDraftLayout = <BuilderBlock>[];
+    for (var i = 0; i < blockIds.length; i++) {
+      final blockId = blockIds[i];
+      final matchingBlocks = draftLayout.where((b) => b.id == blockId);
+      if (matchingBlocks.isNotEmpty) {
+        newDraftLayout.add(matchingBlocks.first.copyWith(order: i));
+      }
+    }
+    return copyWith(
+      draftLayout: newDraftLayout,
+      hasUnpublishedChanges: true,
       updatedAt: DateTime.now(),
       version: version + 1,
     );
   }
 
   /// Create a published version from draft
+  /// Copies draftLayout to publishedLayout
   BuilderPage publish({required String userId}) {
     return copyWith(
       isDraft: false,
       publishedAt: DateTime.now(),
       lastModifiedBy: userId,
       updatedAt: DateTime.now(),
+      // Copy draft layout to published layout
+      publishedLayout: List<BuilderBlock>.from(draftLayout),
+      hasUnpublishedChanges: false,
     );
   }
 
@@ -281,9 +490,54 @@ class BuilderPage {
     );
   }
 
+  /// Update the draft layout with new blocks
+  BuilderPage updateDraftLayout(List<BuilderBlock> layout) {
+    return copyWith(
+      draftLayout: layout,
+      hasUnpublishedChanges: true,
+      updatedAt: DateTime.now(),
+      version: version + 1,
+    );
+  }
+
+  /// Discard draft changes and revert to published layout
+  BuilderPage discardDraftChanges() {
+    return copyWith(
+      draftLayout: List<BuilderBlock>.from(publishedLayout),
+      hasUnpublishedChanges: false,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// Add a module to this page
+  BuilderPage addModule(String moduleId) {
+    if (modules.contains(moduleId)) return this;
+    final newModules = List<String>.from(modules);
+    newModules.add(moduleId);
+    return copyWith(
+      modules: newModules,
+      updatedAt: DateTime.now(),
+      version: version + 1,
+    );
+  }
+
+  /// Remove a module from this page
+  BuilderPage removeModule(String moduleId) {
+    if (!modules.contains(moduleId)) return this;
+    final newModules = modules.where((m) => m != moduleId).toList();
+    return copyWith(
+      modules: newModules,
+      updatedAt: DateTime.now(),
+      version: version + 1,
+    );
+  }
+
+  /// Check if this page has a specific module
+  bool hasModule(String moduleId) => modules.contains(moduleId);
+
   @override
   String toString() {
-    return 'BuilderPage(pageId: ${pageId.value}, appId: $appId, blocks: ${blocks.length}, draft: $isDraft)';
+    return 'BuilderPage(pageId: ${pageId.value}, appId: $appId, blocks: ${blocks.length}, draft: $isDraft, draftBlocks: ${draftLayout.length}, publishedBlocks: ${publishedLayout.length}, hasUnpublished: $hasUnpublishedChanges)';
   }
 }
 

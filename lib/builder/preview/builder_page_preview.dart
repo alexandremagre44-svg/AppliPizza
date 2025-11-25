@@ -1,28 +1,34 @@
 // lib/builder/preview/builder_page_preview.dart
 // Preview widget that renders a list of blocks visually
 // MOBILE RESPONSIVE: Fixed sizing and zoom issues on mobile
+// Enhanced with draftLayout support and module placeholders
 
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../blocks/blocks.dart';
 import '../utils/responsive.dart';
+import '../utils/builder_modules.dart';
 
 /// Builder Page Preview Widget
 /// 
 /// Displays a visual preview of a page based on its blocks.
-/// Does not depend on runtime providers - uses only block data.
+/// Now supports:
+/// - draftLayout for editor preview
+/// - Module placeholders for attached modules
 /// 
 /// Usage:
 /// ```dart
-/// BuilderPagePreview(blocks: page.blocks)
+/// BuilderPagePreview(blocks: page.draftLayout, modules: page.modules)
 /// ```
 class BuilderPagePreview extends StatelessWidget {
   final List<BuilderBlock> blocks;
+  final List<String>? modules;
   final Color? backgroundColor;
 
   const BuilderPagePreview({
     super.key,
     required this.blocks,
+    this.modules,
     this.backgroundColor,
   });
 
@@ -35,7 +41,11 @@ class BuilderPagePreview extends StatelessWidget {
     // Filter only active blocks
     final activeBlocks = sortedBlocks.where((b) => b.isActive).toList();
 
-    if (activeBlocks.isEmpty) {
+    // Check if we have any content
+    final hasBlocks = activeBlocks.isNotEmpty;
+    final hasModules = modules != null && modules!.isNotEmpty;
+
+    if (!hasBlocks && !hasModules) {
       return _buildEmptyState();
     }
 
@@ -60,7 +70,16 @@ class BuilderPagePreview extends StatelessWidget {
                   vertical: responsive.verticalPadding,
                 ),
                 child: Column(
-                  children: activeBlocks.map((block) => _buildBlock(block)).toList(),
+                  children: [
+                    // Render blocks
+                    ...activeBlocks.map((block) => _buildBlock(block)),
+                    
+                    // Render module placeholders
+                    if (hasModules) ...[
+                      const SizedBox(height: 16),
+                      ...modules!.map((moduleId) => _buildModulePlaceholder(moduleId)),
+                    ],
+                  ],
                 ),
               ),
             ),
@@ -94,6 +113,108 @@ class BuilderPagePreview extends StatelessWidget {
         return HtmlBlockPreview(block: block);
       case BlockType.system:
         return SystemBlockPreview(block: block);
+    }
+  }
+
+  /// Build a placeholder for a module
+  Widget _buildModulePlaceholder(String moduleId) {
+    final config = getModuleConfig(moduleId);
+    final name = config?.name ?? moduleId;
+    final icon = _getModuleIcon(moduleId);
+    final color = _getModuleColor(moduleId);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withOpacity(0.5),
+          width: 2,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Module: $name',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Ce module sera rendu au runtime',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Text(
+              'Placeholder',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getModuleIcon(String moduleId) {
+    switch (moduleId) {
+      case 'menu_catalog':
+        return Icons.restaurant_menu;
+      case 'cart_module':
+        return Icons.shopping_cart;
+      case 'profile_module':
+        return Icons.person;
+      case 'roulette_module':
+        return Icons.casino;
+      default:
+        return Icons.extension;
+    }
+  }
+
+  Color _getModuleColor(String moduleId) {
+    switch (moduleId) {
+      case 'menu_catalog':
+        return Colors.orange;
+      case 'cart_module':
+        return Colors.purple;
+      case 'profile_module':
+        return Colors.indigo;
+      case 'roulette_module':
+        return Colors.amber;
+      default:
+        return Colors.teal;
     }
   }
 
@@ -136,11 +257,13 @@ class BuilderPagePreview extends StatelessWidget {
 /// Full-screen preview dialog
 class BuilderFullScreenPreview extends StatelessWidget {
   final List<BuilderBlock> blocks;
+  final List<String>? modules;
   final String pageTitle;
 
   const BuilderFullScreenPreview({
     super.key,
     required this.blocks,
+    this.modules,
     required this.pageTitle,
   });
 
@@ -156,7 +279,7 @@ class BuilderFullScreenPreview extends StatelessWidget {
           ),
         ],
       ),
-      body: BuilderPagePreview(blocks: blocks),
+      body: BuilderPagePreview(blocks: blocks, modules: modules),
     );
   }
 
@@ -164,6 +287,7 @@ class BuilderFullScreenPreview extends StatelessWidget {
   static void show(
     BuildContext context, {
     required List<BuilderBlock> blocks,
+    List<String>? modules,
     required String pageTitle,
   }) {
     Navigator.push(
@@ -171,6 +295,7 @@ class BuilderFullScreenPreview extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => BuilderFullScreenPreview(
           blocks: blocks,
+          modules: modules,
           pageTitle: pageTitle,
         ),
         fullscreenDialog: true,

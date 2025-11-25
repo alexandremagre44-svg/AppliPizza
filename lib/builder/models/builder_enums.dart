@@ -171,3 +171,39 @@ enum BlockVisibility {
   String toJson() => value;
   static BlockVisibility fromJson(String json) => fromString(json);
 }
+
+/// Page type enum for distinguishing templates from blank pages
+/// 
+/// Used to identify the origin/type of a page:
+/// - template: Created from a predefined template (template A)
+/// - blank: Created as an empty page (template B)
+/// - system: System page (profile, cart, rewards, roulette)
+/// - custom: Custom page created by user
+enum BuilderPageType {
+  /// Page created from a predefined template
+  template('template', 'Template'),
+  
+  /// Blank/empty page
+  blank('blank', 'Page Vierge'),
+  
+  /// System page (profile, cart, rewards, roulette)
+  system('system', 'Page Système'),
+  
+  /// Custom page created by user
+  custom('custom', 'Page Personnalisée');
+
+  const BuilderPageType(this.value, this.label);
+  
+  final String value;
+  final String label;
+
+  static BuilderPageType fromString(String value) {
+    return BuilderPageType.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => BuilderPageType.custom,
+    );
+  }
+
+  String toJson() => value;
+  static BuilderPageType fromJson(String json) => fromString(json);
+}
