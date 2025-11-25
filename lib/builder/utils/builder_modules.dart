@@ -37,7 +37,7 @@ typedef ModuleWidgetBuilder = Widget Function(BuildContext context);
 /// Replace with actual widget implementations in runtime.
 Widget _placeholderModule(BuildContext context, String moduleName) {
   return Center(
-    child: Text('Module: $moduleName (à implémenter)'),
+    child: Text('Module: $moduleName (to implement)'),
   );
 }
 
@@ -171,5 +171,5 @@ Widget renderModule(BuildContext context, String moduleId) {
   if (builder != null) {
     return builder(context);
   }
-  return _placeholderModule(context, 'Module inconnu: $moduleId');
+  return _placeholderModule(context, 'Unknown module: $moduleId');
 }

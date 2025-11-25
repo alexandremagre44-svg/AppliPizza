@@ -33,7 +33,12 @@ class BuilderPage {
   final String route;
 
   /// List of blocks on this page, ordered by block.order
-  /// @deprecated Use draftLayout/publishedLayout for per-page draft support
+  /// 
+  /// @deprecated This field is maintained for backward compatibility.
+  /// Use [draftLayout] for editor changes and [publishedLayout] for runtime.
+  /// Will be removed in a future version. Migration:
+  /// - Editor: Read/write [draftLayout] instead of [blocks]
+  /// - Runtime: Read [publishedLayout] instead of [blocks]
   final List<BuilderBlock> blocks;
 
   /// Whether this page is currently enabled/published
@@ -422,21 +427,17 @@ class BuilderPage {
     final newBlocks = <BuilderBlock>[];
     for (var i = 0; i < blockIds.length; i++) {
       final blockId = blockIds[i];
-      try {
-        final block = blocks.firstWhere((b) => b.id == blockId);
-        newBlocks.add(block.copyWith(order: i));
-      } catch (e) {
-        // Block not found in blocks, skip
+      final matchingBlocks = blocks.where((b) => b.id == blockId);
+      if (matchingBlocks.isNotEmpty) {
+        newBlocks.add(matchingBlocks.first.copyWith(order: i));
       }
     }
     final newDraftLayout = <BuilderBlock>[];
     for (var i = 0; i < blockIds.length; i++) {
       final blockId = blockIds[i];
-      try {
-        final block = draftLayout.firstWhere((b) => b.id == blockId);
-        newDraftLayout.add(block.copyWith(order: i));
-      } catch (e) {
-        // Block not found in draftLayout, skip
+      final matchingBlocks = draftLayout.where((b) => b.id == blockId);
+      if (matchingBlocks.isNotEmpty) {
+        newDraftLayout.add(matchingBlocks.first.copyWith(order: i));
       }
     }
     return copyWith(
@@ -453,11 +454,9 @@ class BuilderPage {
     final newDraftLayout = <BuilderBlock>[];
     for (var i = 0; i < blockIds.length; i++) {
       final blockId = blockIds[i];
-      try {
-        final block = draftLayout.firstWhere((b) => b.id == blockId);
-        newDraftLayout.add(block.copyWith(order: i));
-      } catch (e) {
-        // Block not found in draftLayout, skip
+      final matchingBlocks = draftLayout.where((b) => b.id == blockId);
+      if (matchingBlocks.isNotEmpty) {
+        newDraftLayout.add(matchingBlocks.first.copyWith(order: i));
       }
     }
     return copyWith(
