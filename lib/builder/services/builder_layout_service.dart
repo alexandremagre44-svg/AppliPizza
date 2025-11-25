@@ -451,6 +451,126 @@ class BuilderLayoutService {
 
     return published;
   }
+
+  // ==================== SYSTEM PAGES OPERATIONS ====================
+
+  /// Load all system pages from pages_system collection
+  /// 
+  /// System pages define the navigation structure:
+  /// - home, cart, contact, about (order fixed)
+  /// 
+  /// Returns list of BuilderPage sorted by order
+  Future<List<BuilderPage>> loadSystemPages() async {
+    try {
+      final snapshot = await FirestorePaths.pagesSystem().get();
+      
+      final pages = <BuilderPage>[];
+      for (final doc in snapshot.docs) {
+        try {
+          final data = doc.data();
+          data['id'] = doc.id;
+          
+          // Ensure pageId is set correctly
+          if (data['pageId'] == null) {
+            data['pageId'] = doc.id;
+          }
+          
+          pages.add(BuilderPage.fromJson(data));
+        } catch (e) {
+          debugPrint('Error parsing system page ${doc.id}: $e');
+        }
+      }
+      
+      // Sort by order
+      pages.sort((a, b) => a.order.compareTo(b.order));
+      
+      return pages;
+    } catch (e) {
+      debugPrint('Error loading system pages: $e');
+      return [];
+    }
+  }
+
+  /// Load a specific system page by pageId
+  /// 
+  /// Path: restaurants/{restaurantId}/pages_system/{pageId}
+  Future<BuilderPage?> loadSystemPage(BuilderPageId pageId) async {
+    try {
+      final docRef = FirestorePaths.systemPageDoc(pageId.value);
+      final snapshot = await docRef.get();
+      
+      if (!snapshot.exists || snapshot.data() == null) {
+        return null;
+      }
+      
+      return BuilderPage.fromJson(snapshot.data()!);
+    } catch (e) {
+      debugPrint('Error loading system page ${pageId.value}: $e');
+      return null;
+    }
+  }
+
+  /// Watch system pages for real-time updates
+  Stream<List<BuilderPage>> watchSystemPages() {
+    return FirestorePaths.pagesSystem().snapshots().map((snapshot) {
+      final pages = <BuilderPage>[];
+      
+      for (final doc in snapshot.docs) {
+        try {
+          final data = doc.data();
+          data['id'] = doc.id;
+          
+          if (data['pageId'] == null) {
+            data['pageId'] = doc.id;
+          }
+          
+          pages.add(BuilderPage.fromJson(data));
+        } catch (e) {
+          debugPrint('Error parsing system page ${doc.id}: $e');
+        }
+      }
+      
+      // Sort by order
+      pages.sort((a, b) => a.order.compareTo(b.order));
+      
+      return pages;
+    });
+  }
+
+  /// Get pages for bottom navigation bar
+  /// 
+  /// Combines system pages (order fixed) with published pages (order from Firestore)
+  /// Returns pages where displayLocation == 'bottomBar' and isEnabled == true
+  Future<List<BuilderPage>> getBottomBarPages() async {
+    try {
+      // Load system pages first
+      final systemPages = await loadSystemPages();
+      
+      // Filter for bottomBar pages
+      final bottomBarPages = systemPages.where((page) => 
+        page.displayLocation == 'bottomBar' && page.isEnabled
+      ).toList();
+      
+      // If we have system pages, return them
+      if (bottomBarPages.isNotEmpty) {
+        return bottomBarPages;
+      }
+      
+      // Fallback: Load from published pages if no system pages
+      final publishedPages = await loadAllPublishedPages(kRestaurantId);
+      
+      final publishedBottomBar = publishedPages.values
+        .where((page) => page.displayLocation == 'bottomBar' && page.isEnabled)
+        .toList();
+      
+      publishedBottomBar.sort((a, b) => a.order.compareTo(b.order));
+      
+      return publishedBottomBar;
+    } catch (e) {
+      debugPrint('Error loading bottom bar pages: $e');
+      return [];
+    }
+  }
 }
 
 /// Page status information

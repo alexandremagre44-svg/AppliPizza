@@ -114,6 +114,16 @@ class FirestorePaths {
 
   // ==================== SPECIFIC DOCUMENT REFERENCES ====================
 
+  /// Get document reference within pages_system
+  ///
+  /// Path: restaurants/{restaurantId}/pages_system/{docId}
+  static DocumentReference<Map<String, dynamic>> systemPageDoc(
+    String docId, [
+    String? restaurantId,
+  ]) {
+    return pagesSystem(restaurantId).doc(docId);
+  }
+
   /// Get document reference within pages_draft
   ///
   /// Path: restaurants/{restaurantId}/pages_draft/{docId}
