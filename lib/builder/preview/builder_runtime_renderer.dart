@@ -1,5 +1,6 @@
 // lib/builder/preview/builder_runtime_renderer.dart
 // Renders builder blocks using runtime widgets (with real providers and data)
+// Phase 5: Layout logic centralized, all styling via BlockConfigHelper
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,9 +27,16 @@ import '../blocks/system_block_runtime.dart';
 /// - Handles unknown block types gracefully
 /// - Optional ScrollView wrapper for proper scrolling
 /// - Error handling for individual blocks
+/// - Phase 5 compliant: centralized layout logic
+/// - maxContentWidth support for constrained layouts
 class BuilderRuntimeRenderer extends ConsumerWidget {
   final List<BuilderBlock> blocks;
   final Color? backgroundColor;
+  
+  /// Maximum content width in pixels (optional constraint)
+  /// Useful for desktop layouts with centered content
+  /// Example: 600.0 for a 600px max width
+  final double? maxContentWidth;
   
   /// Whether to wrap content in SingleChildScrollView
   /// Set to false if parent already provides scrolling
@@ -38,6 +46,7 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
     super.key,
     required this.blocks,
     this.backgroundColor,
+    this.maxContentWidth,
     this.wrapInScrollView = true,
   });
 
@@ -69,18 +78,28 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
     }
 
     // Build column of blocks with spacing
-    final blocksColumn = Column(
+    Widget blocksColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Render each block with error handling and spacing
         for (int i = 0; i < activeBlocks.length; i++) ...[
-          _buildBlockSafe(activeBlocks[i]),
+          _buildBlockSafe(activeBlocks[i], context),
           // Add spacing between blocks (except after last block)
           if (i < activeBlocks.length - 1)
             const SizedBox(height: 16),
         ],
       ],
     );
+    
+    // Apply max content width constraint if specified
+    if (maxContentWidth != null) {
+      blocksColumn = Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxContentWidth!),
+          child: blocksColumn,
+        ),
+      );
+    }
 
     // Wrap in ScrollView if requested
     return Container(
@@ -94,10 +113,10 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
   /// Safely builds a block with error handling and generic config support
   /// Applies padding, margin, and other generic styles from config
   /// Returns SizedBox.shrink() if block fails to render
-  Widget _buildBlockSafe(BuilderBlock block) {
+  Widget _buildBlockSafe(BuilderBlock block, BuildContext context) {
     try {
       // Build the core block widget
-      Widget blockWidget = _buildBlock(block);
+      Widget blockWidget = _buildBlock(block, context);
       
       // Apply generic config: padding, margin, styles
       blockWidget = _applyGenericConfig(block, blockWidget);
@@ -110,9 +129,47 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
         debugPrint('Stack trace: $stackTrace');
       }
       
-      // Return empty widget instead of crashing the page
-      return const SizedBox.shrink();
+      // Return fallback error widget instead of crashing the page
+      return _buildErrorFallback(block, e.toString());
     }
+  }
+  
+  /// Build error fallback widget for failed blocks
+  Widget _buildErrorFallback(BuilderBlock block, String errorMessage) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.error_outline, color: Colors.red.shade400, size: 32),
+          const SizedBox(height: 8),
+          Text(
+            'Erreur de rendu: ${block.type.label}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.red.shade700,
+            ),
+          ),
+          if (kDebugMode) ...[
+            const SizedBox(height: 4),
+            Text(
+              errorMessage,
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.red.shade500,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   /// Apply generic configuration to a block widget
@@ -232,7 +289,7 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
   }
 
   /// Maps block type to corresponding runtime widget
-  Widget _buildBlock(BuilderBlock block) {
+  Widget _buildBlock(BuilderBlock block, BuildContext context) {
     switch (block.type) {
       case BlockType.hero:
         return HeroBlockRuntime(block: block);
@@ -265,7 +322,21 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
         return HtmlBlockRuntime(block: block);
       
       case BlockType.system:
-        return SystemBlockRuntime(block: block);
+        return buildSystemBlock(block, context);
     }
+  }
+  
+  /// Build a SystemBlock with proper error handling and config application
+  /// 
+  /// This method:
+  /// - Reads block.config['moduleType']
+  /// - Applies visual properties via BlockConfigHelper (padding, margin, backgroundColor, height)
+  /// - Returns the corresponding system widget
+  /// - Handles unknown module types gracefully
+  Widget buildSystemBlock(BuilderBlock block, BuildContext context) {
+    return SystemBlockRuntime(
+      block: block,
+      maxContentWidth: maxContentWidth,
+    );
   }
 }
