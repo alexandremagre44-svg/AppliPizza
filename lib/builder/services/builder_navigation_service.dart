@@ -91,83 +91,42 @@ class BuilderNavigationService {
       debugPrint('[BuilderNavigationService] 🚀 Creating default navigation pages');
 
       final now = DateTime.now();
-      final defaultPages = <BuilderPage>[];
       
-      // Create home page
-      final homePage = BuilderPage(
-        pageId: BuilderPageId.home,
-        appId: appId,
-        name: 'Accueil',
-        description: 'Page d\'accueil',
-        route: '/home',
-        blocks: [],
-        isEnabled: true,
-        isDraft: false,
-        displayLocation: 'bottomBar',
-        icon: 'home',
-        order: 1,
-        isSystemPage: true,
-        createdAt: now,
-        updatedAt: now,
-      );
-      defaultPages.add(homePage);
-      
-      // Create menu page
-      final menuPage = BuilderPage(
-        pageId: BuilderPageId.menu,
-        appId: appId,
-        name: 'Menu',
-        description: 'Catalogue de produits',
-        route: '/menu',
-        blocks: [],
-        isEnabled: true,
-        isDraft: false,
-        displayLocation: 'bottomBar',
-        icon: 'restaurant_menu',
-        order: 2,
-        isSystemPage: false,
-        createdAt: now,
-        updatedAt: now,
-      );
-      defaultPages.add(menuPage);
-      
-      // Create cart page
-      final cartPage = BuilderPage(
-        pageId: BuilderPageId.cart,
-        appId: appId,
-        name: 'Panier',
-        description: 'Votre panier',
-        route: '/cart',
-        blocks: [],
-        isEnabled: true,
-        isDraft: false,
-        displayLocation: 'bottomBar',
-        icon: 'shopping_cart',
-        order: 3,
-        isSystemPage: true,
-        createdAt: now,
-        updatedAt: now,
-      );
-      defaultPages.add(cartPage);
-      
-      // Create profile page
-      final profilePage = BuilderPage(
-        pageId: BuilderPageId.profile,
-        appId: appId,
-        name: 'Profil',
-        description: 'Votre profil',
-        route: '/profile',
-        blocks: [],
-        isEnabled: true,
-        isDraft: false,
-        displayLocation: 'bottomBar',
-        icon: 'person',
-        order: 4,
-        isSystemPage: true,
-        createdAt: now,
-        updatedAt: now,
-      );
-      defaultPages.add(profilePage);
+      // Create default navigation pages using helper
+      final defaultPages = [
+        _createDefaultPage(
+          pageId: BuilderPageId.home,
+          name: 'Accueil',
+          description: 'Page d\'accueil',
+          icon: 'home',
+          order: 1,
+          now: now,
+        ),
+        _createDefaultPage(
+          pageId: BuilderPageId.menu,
+          name: 'Menu',
+          description: 'Catalogue de produits',
+          icon: 'restaurant_menu',
+          order: 2,
+          now: now,
+        ),
+        _createDefaultPage(
+          pageId: BuilderPageId.cart,
+          name: 'Panier',
+          description: 'Votre panier',
+          icon: 'shopping_cart',
+          order: 3,
+          now: now,
+        ),
+        _createDefaultPage(
+          pageId: BuilderPageId.profile,
+          name: 'Profil',
+          description: 'Votre profil',
+          icon: 'person',
+          order: 4,
+          now: now,
+        ),
+      ];
       
       // Publish all default pages
       for (final page in defaultPages) {
@@ -186,6 +145,33 @@ class BuilderNavigationService {
       }
       return currentPages;
     }
+  }
+
+  /// Helper to create a default BuilderPage with common parameters
+  BuilderPage _createDefaultPage({
+    required BuilderPageId pageId,
+    required String name,
+    required String description,
+    required String icon,
+    required int order,
+    required DateTime now,
+  }) {
+    return BuilderPage(
+      pageId: pageId,
+      appId: appId,
+      name: name,
+      description: description,
+      route: '/${pageId.value}',
+      blocks: [],
+      isEnabled: true,
+      isDraft: false,
+      displayLocation: 'bottomBar',
+      icon: icon,
+      order: order,
+      isSystemPage: pageId.isSystemPage, // Use enum definition
+      createdAt: now,
+      updatedAt: now,
+    );
   }
 
   /// Get all hidden pages
