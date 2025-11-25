@@ -3,3 +3,4 @@
 // Export all editor classes for easy importing
 
 export 'builder_page_editor_screen.dart';
+export 'new_page_dialog.dart';
