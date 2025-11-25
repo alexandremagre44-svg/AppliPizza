@@ -126,9 +126,9 @@ class ProfileModuleWidget extends ConsumerWidget {
                     
                     return appTextsAsync.when(
                       data: (appTexts) {
-                        final loyaltyPoints = loyaltyInfo['loyaltyPoints'] as int;
-                        final lifetimePoints = loyaltyInfo['lifetimePoints'] as int;
-                        final vipTier = loyaltyInfo['vipTier'] as String;
+                        final loyaltyPoints = loyaltyInfo['loyaltyPoints'] as int? ?? 0;
+                        final lifetimePoints = loyaltyInfo['lifetimePoints'] as int? ?? 0;
+                        final vipTier = loyaltyInfo['vipTier'] as String? ?? 'bronze';
                         
                         return LoyaltySectionWidget(
                           loyaltyPoints: loyaltyPoints,
