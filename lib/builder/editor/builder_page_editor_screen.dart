@@ -646,54 +646,91 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   Widget _buildBlocksList() {
     final blocks = _page!.sortedBlocks;
 
-    if (blocks.isEmpty) {
-      return const Center(
-        child: Text(
-          'Aucun bloc.\nAppuyez sur + pour en ajouter.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-      );
-    }
-
-    return ReorderableListView.builder(
-      onReorder: _reorderBlocks,
-      itemCount: blocks.length,
-      itemBuilder: (context, index) {
-        final block = blocks[index];
-        final isSelected = _selectedBlock?.id == block.id;
-
-        return Card(
-          key: ValueKey(block.id),
-          margin: const EdgeInsets.all(8),
-          color: isSelected ? Colors.blue.shade50 : null,
-          elevation: isSelected ? 4 : 1,
-          child: ListTile(
-            leading: Text(
-              block.type.icon,
-              style: const TextStyle(fontSize: 24),
+    return Column(
+      children: [
+        // System page protection banner
+        if (_page!.isSystemPage)
+          Container(
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(left: 8, right: 8, top: 8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue.shade200),
             ),
-            title: Text(
-              block.type.label,
-              style: TextStyle(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            subtitle: Text(_getBlockSummary(block)),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _removeBlock(block.id),
+                Icon(Icons.shield, color: Colors.blue.shade700, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Page système protégée',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.blue.shade800,
+                    ),
+                  ),
                 ),
-                const Icon(Icons.drag_handle),
+                Tooltip(
+                  message: 'Cette page ne peut pas être supprimée.\nVous pouvez modifier les blocs.',
+                  child: Icon(Icons.info_outline, color: Colors.blue.shade400, size: 18),
+                ),
               ],
             ),
-            onTap: () => _selectBlock(block),
           ),
-        );
-      },
+        
+        // Blocks list
+        Expanded(
+          child: blocks.isEmpty
+              ? const Center(
+                  child: Text(
+                    'Aucun bloc.\nAppuyez sur + pour en ajouter.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                )
+              : ReorderableListView.builder(
+                  onReorder: _reorderBlocks,
+                  itemCount: blocks.length,
+                  itemBuilder: (context, index) {
+                    final block = blocks[index];
+                    final isSelected = _selectedBlock?.id == block.id;
+
+                    return Card(
+                      key: ValueKey(block.id),
+                      margin: const EdgeInsets.all(8),
+                      color: isSelected ? Colors.blue.shade50 : null,
+                      elevation: isSelected ? 4 : 1,
+                      child: ListTile(
+                        leading: Text(
+                          block.type.icon,
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                        title: Text(
+                          block.type.label,
+                          style: TextStyle(
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        subtitle: Text(_getBlockSummary(block)),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _removeBlock(block.id),
+                            ),
+                            const Icon(Icons.drag_handle),
+                          ],
+                        ),
+                        onTap: () => _selectBlock(block),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 

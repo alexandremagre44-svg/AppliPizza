@@ -193,6 +193,15 @@ class DynamicPageResolver {
         return BuilderPageId.about;
       case '/contact':
         return BuilderPageId.contact;
+      // System pages
+      case '/profile':
+        return BuilderPageId.profile;
+      case '/cart':
+        return BuilderPageId.cart;
+      case '/rewards':
+        return BuilderPageId.rewards;
+      case '/roulette':
+        return BuilderPageId.roulette;
       default:
         return null;
     }
@@ -213,6 +222,18 @@ class DynamicPageResolver {
         return BuilderPageId.about;
       case 'contact':
         return BuilderPageId.contact;
+      // System pages
+      case 'profile':
+      case 'profil':
+        return BuilderPageId.profile;
+      case 'cart':
+      case 'panier':
+        return BuilderPageId.cart;
+      case 'rewards':
+      case 'recompenses':
+        return BuilderPageId.rewards;
+      case 'roulette':
+        return BuilderPageId.roulette;
       default:
         return null;
     }

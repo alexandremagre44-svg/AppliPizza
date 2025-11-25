@@ -19,7 +19,21 @@ enum BuilderPageId {
   about('about', 'À propos'),
   
   /// Contact page
-  contact('contact', 'Contact');
+  contact('contact', 'Contact'),
+  
+  // ==================== SYSTEM PAGES ====================
+  
+  /// User profile page (system page)
+  profile('profile', 'Profil'),
+  
+  /// Shopping cart page (system page)
+  cart('cart', 'Panier'),
+  
+  /// Rewards page (system page)
+  rewards('rewards', 'Récompenses'),
+  
+  /// Roulette game page (system page)
+  roulette('roulette', 'Roulette');
 
   const BuilderPageId(this.value, this.label);
   
@@ -39,6 +53,12 @@ enum BuilderPageId {
 
   /// Create from JSON
   static BuilderPageId fromJson(String json) => fromString(json);
+  
+  /// List of system page IDs that cannot be manually created
+  static const List<String> systemPageIds = ['profile', 'cart', 'rewards', 'roulette'];
+  
+  /// Check if this is a system page
+  bool get isSystemPage => systemPageIds.contains(value);
 }
 
 /// Block types for different content components

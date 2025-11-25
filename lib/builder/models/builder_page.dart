@@ -70,6 +70,10 @@ class BuilderPage {
 
   /// Order in bottom navigation bar (lower = appears first)
   final int order;
+  
+  /// Whether this is a system page (profile, cart, rewards, roulette)
+  /// System pages cannot be deleted or have their pageId changed
+  final bool isSystemPage;
 
   BuilderPage({
     required this.pageId,
@@ -89,8 +93,10 @@ class BuilderPage {
     this.displayLocation = 'hidden',
     this.icon = 'help_outline',
     this.order = 999,
+    bool? isSystemPage,
   })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+        updatedAt = updatedAt ?? DateTime.now(),
+        isSystemPage = isSystemPage ?? pageId.isSystemPage;
 
   /// Create a copy with modified fields
   BuilderPage copyWith({
@@ -111,6 +117,7 @@ class BuilderPage {
     String? displayLocation,
     String? icon,
     int? order,
+    bool? isSystemPage,
   }) {
     return BuilderPage(
       pageId: pageId ?? this.pageId,
@@ -130,6 +137,7 @@ class BuilderPage {
       displayLocation: displayLocation ?? this.displayLocation,
       icon: icon ?? this.icon,
       order: order ?? this.order,
+      isSystemPage: isSystemPage ?? this.isSystemPage,
     );
   }
 
@@ -153,13 +161,15 @@ class BuilderPage {
       'displayLocation': displayLocation,
       'icon': icon,
       'order': order,
+      'isSystemPage': isSystemPage,
     };
   }
 
   /// Create from Firestore JSON
   factory BuilderPage.fromJson(Map<String, dynamic> json) {
+    final pageId = BuilderPageId.fromJson(json['pageId'] as String? ?? 'home');
     return BuilderPage(
-      pageId: BuilderPageId.fromJson(json['pageId'] as String? ?? 'home'),
+      pageId: pageId,
       appId: json['appId'] as String? ?? 'pizza_delizza',
       name: json['name'] as String? ?? 'Page',
       description: json['description'] as String? ?? '',
@@ -187,6 +197,7 @@ class BuilderPage {
       displayLocation: json['displayLocation'] as String? ?? 'hidden',
       icon: json['icon'] as String? ?? 'help_outline',
       order: json['order'] as int? ?? 999,
+      isSystemPage: json['isSystemPage'] as bool? ?? pageId.isSystemPage,
     );
   }
 
