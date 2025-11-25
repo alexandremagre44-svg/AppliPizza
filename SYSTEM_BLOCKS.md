@@ -82,6 +82,88 @@ Affiche les statistiques du compte :
 - Nombre de commandes avec lien
 - Nombre de favoris avec lien
 
+## Intégration dans l'éditeur
+
+### Comment ajouter un module système
+
+1. Ouvrez l'éditeur de page Builder B3
+2. Cliquez sur le bouton **+ Ajouter un bloc**
+3. Dans la boîte de dialogue, faites défiler jusqu'à la section **"Modules système"** (en bleu)
+4. Quatre boutons sont disponibles avec leurs icônes Material :
+   - 🎰 **Ajouter module Roulette** (`Icons.casino`) - Roue de la chance
+   - 🎁 **Ajouter module Fidélité** (`Icons.card_giftcard`) - Points et progression
+   - ⭐ **Ajouter module Récompenses** (`Icons.stars`) - Tickets et bons
+   - 📊 **Ajouter module Activité du compte** (`Icons.history`) - Commandes et favoris
+
+5. Le module apparaîtra dans la liste des blocs et peut être repositionné par glisser-déposer
+
+### Comment fonctionne leur panneau
+
+Lorsqu'un SystemBlock est sélectionné dans l'éditeur, le panneau de configuration affiche :
+
+```
+┌─────────────────────────────────────────┐
+│  🎰  [Module: Roulette]                 │
+│       Type: roulette                    │
+│                                         │
+│  ℹ️  Ce module système ne possède pas   │
+│      de configuration.                  │
+└─────────────────────────────────────────┘
+```
+
+**Caractéristiques du panneau :**
+- Affiche l'icône Material et le nom du module au format `[Module: Nom]`
+- Affiche le type technique du module
+- Message informatif : "Ce module système ne possède pas de configuration."
+- Aucune option de personnalisation disponible
+
+### Comment ils sont stockés dans Firestore
+
+Les SystemBlocks sont stockés dans Firestore comme tout autre bloc :
+
+```json
+{
+  "id": "block_1234567890",
+  "type": "system",
+  "order": 2,
+  "config": {
+    "moduleType": "roulette"
+  },
+  "isActive": true,
+  "visibility": "visible",
+  "createdAt": "2024-01-15T10:30:00.000Z",
+  "updatedAt": "2024-01-15T10:30:00.000Z"
+}
+```
+
+**Points importants :**
+- La création fonctionne depuis un brouillon
+- La sauvegarde automatique conserve les SystemBlocks
+- La publication vers Firestore fonctionne normalement
+- Le rechargement d'un brouillon charge correctement les SystemBlocks
+- Aucun plantage si un module système est supprimé
+
+### Preview vs Runtime
+
+| Aspect | Preview (Éditeur) | Runtime (Application) |
+|--------|-------------------|----------------------|
+| **Hauteur** | Fixe 120px | Variable selon contenu |
+| **Contenu** | Placeholder gris avec nom | Widget réel du module |
+| **Bordure** | Bleue en mode debug | Selon configuration |
+| **Exécution** | Aucune | Widgets système actifs |
+| **Format nom** | `[Module: Roulette]` | Contenu réel |
+
+**Preview dans l'éditeur :**
+```
+┌─────────────────────────────────────────┐
+│  🎰  [Module: Roulette]                 │
+│       Prévisualisation uniquement       │
+└─────────────────────────────────────────┘
+```
+
+**Runtime dans l'application :**
+Le widget système réel est affiché avec toutes ses fonctionnalités.
+
 ## Ajouter un module dans une page
 
 ### Via l'interface d'édition

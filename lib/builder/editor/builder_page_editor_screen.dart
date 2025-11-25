@@ -800,7 +800,31 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   List<Widget> _buildSystemConfig(BuilderBlock block) {
     final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
     final moduleLabel = SystemBlock.getModuleLabel(moduleType);
-    final moduleIcon = SystemBlock.getModuleIcon(moduleType);
+    
+    // Get the appropriate icon for the module type
+    IconData moduleIcon;
+    Color iconColor;
+    switch (moduleType) {
+      case 'roulette':
+        moduleIcon = Icons.casino;
+        iconColor = Colors.purple.shade600;
+        break;
+      case 'loyalty':
+        moduleIcon = Icons.card_giftcard;
+        iconColor = Colors.amber.shade600;
+        break;
+      case 'rewards':
+        moduleIcon = Icons.stars;
+        iconColor = Colors.orange.shade600;
+        break;
+      case 'accountActivity':
+        moduleIcon = Icons.history;
+        iconColor = Colors.blue.shade600;
+        break;
+      default:
+        moduleIcon = Icons.help_outline;
+        iconColor = Colors.grey.shade600;
+    }
     
     return [
       Container(
@@ -815,14 +839,14 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           children: [
             Row(
               children: [
-                Text(moduleIcon, style: const TextStyle(fontSize: 32)),
+                Icon(moduleIcon, size: 32, color: iconColor),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Module $moduleLabel',
+                        '[Module: $moduleLabel]',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -845,20 +869,19 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.amber.shade50,
+                color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 20, color: Colors.amber.shade700),
+                  Icon(Icons.info_outline, size: 20, color: Colors.grey.shade600),
                   const SizedBox(width: 8),
-                  Expanded(
+                  const Expanded(
                     child: Text(
-                      'Les modules système ne sont pas configurables. '
-                      'Ils affichent des fonctionnalités de l\'application avec leurs paramètres par défaut.',
+                      'Ce module système ne possède pas de configuration.',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.amber.shade800,
+                        fontSize: 13,
+                        color: Colors.black87,
                       ),
                     ),
                   ),
@@ -1504,7 +1527,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                 ),
                 const Divider(color: Colors.blue),
                 ListTile(
-                  leading: const Text('🎰', style: TextStyle(fontSize: 24)),
+                  leading: Icon(Icons.casino, size: 28, color: Colors.purple.shade600),
                   title: const Text('Ajouter module Roulette'),
                   subtitle: const Text('Roue de la chance'),
                   onTap: () {
@@ -1513,7 +1536,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                   },
                 ),
                 ListTile(
-                  leading: const Text('⭐', style: TextStyle(fontSize: 24)),
+                  leading: Icon(Icons.card_giftcard, size: 28, color: Colors.amber.shade600),
                   title: const Text('Ajouter module Fidélité'),
                   subtitle: const Text('Points et progression'),
                   onTap: () {
@@ -1522,7 +1545,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                   },
                 ),
                 ListTile(
-                  leading: const Text('🎁', style: TextStyle(fontSize: 24)),
+                  leading: Icon(Icons.stars, size: 28, color: Colors.orange.shade600),
                   title: const Text('Ajouter module Récompenses'),
                   subtitle: const Text('Tickets et bons'),
                   onTap: () {
@@ -1531,7 +1554,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                   },
                 ),
                 ListTile(
-                  leading: const Text('📊', style: TextStyle(fontSize: 24)),
+                  leading: Icon(Icons.history, size: 28, color: Colors.blue.shade600),
                   title: const Text('Ajouter module Activité du compte'),
                   subtitle: const Text('Commandes et favoris'),
                   onTap: () {
