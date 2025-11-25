@@ -10,6 +10,7 @@ import '../models/models.dart';
 import '../services/dynamic_page_resolver.dart';
 import '../../src/core/firestore_paths.dart';
 import '../preview/builder_runtime_renderer.dart';
+import 'dynamic_page_router.dart';
 
 /// Widget that loads a Builder page with fallback to legacy screen
 /// 
@@ -61,17 +62,13 @@ class BuilderPageLoader extends ConsumerWidget {
           );
         }
         
-        // If Builder page exists and has blocks, render it
+        // If Builder page exists, render it using dynamic router
         if (snapshot.hasData && snapshot.data != null) {
           final builderPage = snapshot.data!;
           
           return Scaffold(
             appBar: _buildAppBar(context, builderPage),
-            body: BuilderRuntimeRenderer(
-              blocks: builderPage.blocks,
-              backgroundColor: backgroundColor,
-              wrapInScrollView: true,
-            ),
+            body: buildPageFromBuilder(context, builderPage),
           );
         }
         

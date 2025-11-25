@@ -5,6 +5,7 @@
 // The runtime will use this mapping to render the appropriate widgets.
 
 import 'package:flutter/widgets.dart';
+import '../runtime/modules/menu_catalog_runtime_widget.dart';
 
 /// Builder modules configuration
 /// 
@@ -41,22 +42,34 @@ Widget _placeholderModule(BuildContext context, String moduleName) {
   );
 }
 
+/// Get actual module widget based on moduleId
+/// 
+/// Returns actual runtime widgets for modules.
+/// Falls back to placeholder if widget not available.
+Widget _getModuleWidget(BuildContext context, String moduleId) {
+  switch (moduleId) {
+    case 'menu_catalog':
+      return const MenuCatalogRuntimeWidget();
+    case 'profile_module':
+      return _placeholderModule(context, 'Module Profil');
+    case 'roulette_module':
+      return _placeholderModule(context, 'Module Roulette');
+    default:
+      return _placeholderModule(context, moduleId);
+  }
+}
+
 /// Builder modules mapping
 /// 
 /// Maps module IDs to their widget builders.
 /// 
-/// The runtime should replace these placeholders with actual implementations:
-/// ```dart
-/// builderModules['menu_catalog'] = (context) => MenuCatalogWidget();
-/// builderModules['cart_module'] = (context) => CartWidget();
-/// builderModules['profile_module'] = (context) => ProfileWidget();
-/// builderModules['roulette_module'] = (context) => RouletteWidget();
-/// ```
+/// Runtime modules are loaded lazily to avoid circular dependencies.
+/// The actual widgets are imported when needed via _getModuleWidget().
 final Map<String, ModuleWidgetBuilder> builderModules = {
-  'menu_catalog': (context) => _placeholderModule(context, 'Menu Catalogue'),
+  'menu_catalog': (context) => _getModuleWidget(context, 'menu_catalog'),
   'cart_module': (context) => const CartModuleWidget(),
-  'profile_module': (context) => _placeholderModule(context, 'Profil'),
-  'roulette_module': (context) => _placeholderModule(context, 'Roulette'),
+  'profile_module': (context) => _getModuleWidget(context, 'profile_module'),
+  'roulette_module': (context) => _getModuleWidget(context, 'roulette_module'),
 };
 
 /// Module configuration
