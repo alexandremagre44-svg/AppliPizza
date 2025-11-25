@@ -63,14 +63,15 @@ import '../../services/roulette_service.dart';
 import '../../services/roulette_rules_service.dart';
 import '../../widgets/pizza_roulette_wheel.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../design_system/app_theme.dart';
 import '../../core/constants.dart';
 import '../../utils/roulette_reward_mapper.dart';
 
 class RouletteScreen extends ConsumerStatefulWidget {
-  final String userId;
+  final String? userId;
   
-  const RouletteScreen({super.key, required this.userId});
+  const RouletteScreen({super.key, this.userId});
 
   @override
   ConsumerState<RouletteScreen> createState() => _RouletteScreenState();
@@ -89,6 +90,13 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   RouletteSegment? _lastResult;
   RouletteStatus? _eligibilityStatus;
   
+  /// Get the effective userId - from parameter or auth provider
+  String get _effectiveUserId {
+    if (widget.userId != null) return widget.userId!;
+    final authState = ref.read(authProvider);
+    return authState.userId ?? 'guest';
+  }
+  
   @override
   void initState() {
     super.initState();
@@ -100,7 +108,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
     
     try {
       final segments = await _segmentService.getActiveSegments();
-      final status = await _rulesService.checkEligibility(widget.userId);
+      final status = await _rulesService.checkEligibility(_effectiveUserId);
       
       // DEBUG LOG: Segments loaded
       print('📋 [ROULETTE SCREEN] Loaded ${segments.length} active segments:');
@@ -167,7 +175,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
     print('  - RewardValue: ${result.rewardValue}');
     
     // Record the spin in Firestore
-    await _rouletteService.recordSpin(widget.userId, result);
+    await _rouletteService.recordSpin(_effectiveUserId, result);
     
     setState(() {
       _lastResult = result;
@@ -198,7 +206,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
 
       // Create ticket using the mapper utility
       await createTicketFromRouletteSegment(
-        userId: widget.userId,
+        userId: _effectiveUserId,
         segment: segment,
       );
       
