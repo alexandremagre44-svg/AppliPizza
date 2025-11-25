@@ -32,6 +32,7 @@ class ProfileModuleWidget extends ConsumerWidget {
     final loyaltyInfoAsync = ref.watch(loyaltyInfoProvider);
     final activeTicketsAsync = ref.watch(activeRewardTicketsProvider);
     final appTextsAsync = ref.watch(appTextsConfigProvider);
+    final userId = authState.userId ?? 'guest';
 
     // Return just the body content - BuilderPageLoader provides the Scaffold
     return SingleChildScrollView(
@@ -108,12 +109,38 @@ class ProfileModuleWidget extends ConsumerWidget {
             child: Column(
               children: [
                 // Roulette Card
-                const RouletteCardWidget(),
+                appTextsAsync.when(
+                  data: (appTexts) => RouletteCardWidget(
+                    texts: appTexts.roulette,
+                    userId: userId,
+                  ),
+                  loading: () => const SizedBox(height: 150),
+                  error: (_, __) => const SizedBox(),
+                ),
                 const SizedBox(height: 16),
                 
                 // Loyalty Section
                 loyaltyInfoAsync.when(
-                  data: (info) => LoyaltySectionWidget(loyaltyInfo: info),
+                  data: (loyaltyInfo) {
+                    if (loyaltyInfo == null) return const SizedBox.shrink();
+                    
+                    return appTextsAsync.when(
+                      data: (appTexts) {
+                        final loyaltyPoints = loyaltyInfo['loyaltyPoints'] as int? ?? 0;
+                        final lifetimePoints = loyaltyInfo['lifetimePoints'] as int? ?? 0;
+                        final vipTier = loyaltyInfo['vipTier'] as String? ?? 'bronze';
+                        
+                        return LoyaltySectionWidget(
+                          loyaltyPoints: loyaltyPoints,
+                          lifetimePoints: lifetimePoints,
+                          vipTier: vipTier,
+                          texts: appTexts.profile,
+                        );
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    );
+                  },
                   loading: () => const SizedBox(height: 150),
                   error: (_, __) => const SizedBox(),
                 ),
@@ -121,16 +148,35 @@ class ProfileModuleWidget extends ConsumerWidget {
                 
                 // Rewards Tickets
                 activeTicketsAsync.when(
-                  data: (tickets) => RewardsTicketsWidget(tickets: tickets),
+                  data: (activeTickets) {
+                    if (activeTickets.isEmpty) return const SizedBox.shrink();
+                    
+                    return appTextsAsync.when(
+                      data: (appTexts) {
+                        return RewardsTicketsWidget(
+                          activeTickets: activeTickets,
+                          profileTexts: appTexts.profile,
+                          rewardsTexts: appTexts.rewards,
+                        );
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (_, __) => const SizedBox.shrink(),
+                    );
+                  },
                   loading: () => const SizedBox(height: 150),
                   error: (_, __) => const SizedBox(),
                 ),
                 const SizedBox(height: 16),
                 
                 // Account Activity
-                AccountActivityWidget(
-                  orderHistory: history,
-                  favoriteProducts: userProfile.favoriteProducts,
+                appTextsAsync.when(
+                  data: (appTexts) => AccountActivityWidget(
+                    ordersCount: history.length,
+                    favoritesCount: userProfile.favoriteProducts.length,
+                    texts: appTexts.profile,
+                  ),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
                 ),
                 const SizedBox(height: 32),
 

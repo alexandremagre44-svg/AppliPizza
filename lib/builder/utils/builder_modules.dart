@@ -4,7 +4,7 @@
 // This file defines the available modules that can be attached to pages.
 // The runtime will use this mapping to render the appropriate widgets.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import '../runtime/modules/menu_catalog_runtime_widget.dart';
 import '../runtime/modules/profile_module_widget.dart';
 import '../runtime/modules/roulette_module_widget.dart';

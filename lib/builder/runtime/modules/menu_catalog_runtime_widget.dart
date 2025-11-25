@@ -201,13 +201,20 @@ class _MenuCatalogRuntimeWidgetState extends ConsumerState<MenuCatalogRuntimeWid
                         final product = filteredProducts[index];
                         return ProductCard(
                           product: product,
-                          onTap: () {
+                          onAddToCart: () {
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
                               backgroundColor: Colors.transparent,
                               builder: (context) => ProductDetailModal(
                                 product: product,
+                                onAddToCart: (customDescription) {
+                                  // Add to cart with custom description
+                                  ref.read(cartProvider.notifier).addItem(
+                                    product: product,
+                                    customDescription: customDescription,
+                                  );
+                                },
                               ),
                             );
                           },
