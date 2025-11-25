@@ -238,27 +238,48 @@ class BuilderPage {
     };
   }
 
+  /// Helper to safely parse layout field from Firestore
+  /// Handles legacy string values like "none" or empty strings
+  static List<BuilderBlock> _safeLayoutParse(dynamic value) {
+    // If null, return empty list
+    if (value == null) return [];
+    
+    // If already a List, try to parse it
+    if (value is List<dynamic>) {
+      try {
+        return value
+            .map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        // Log parsing errors for debugging
+        print('⚠️ Error parsing layout blocks: $e. Value type: ${value.runtimeType}');
+        return [];
+      }
+    }
+    
+    // For any other type (String like "none", etc.), return empty list
+    // This handles legacy data where draftLayout/publishedLayout might be stored as strings
+    if (value is String) {
+      print('⚠️ Legacy string value found in layout field: "$value". Returning empty list.');
+    }
+    return [];
+  }
+
   /// Create from Firestore JSON
   factory BuilderPage.fromJson(Map<String, dynamic> json) {
     final pageId = BuilderPageId.fromJson(json['pageId'] as String? ?? 'home');
     
     // Parse blocks (legacy field)
-    final blocks = (json['blocks'] as List<dynamic>?)
-            ?.map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
-            .toList() ??
-        [];
+    final blocks = _safeLayoutParse(json['blocks']);
     
     // Parse draftLayout (new field, fallback to blocks for backward compatibility)
-    final draftLayout = (json['draftLayout'] as List<dynamic>?)
-            ?.map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
-            .toList() ??
-        blocks;
+    final draftLayoutRaw = json['draftLayout'];
+    final draftLayout = draftLayoutRaw != null 
+        ? _safeLayoutParse(draftLayoutRaw)
+        : blocks;
     
     // Parse publishedLayout (new field)
-    final publishedLayout = (json['publishedLayout'] as List<dynamic>?)
-            ?.map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
-            .toList() ??
-        [];
+    final publishedLayout = _safeLayoutParse(json['publishedLayout']);
     
     // Parse modules list
     final modules = (json['modules'] as List<dynamic>?)

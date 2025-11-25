@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/builder_block.dart';
 import '../utils/block_config_helper.dart';
+import '../utils/builder_modules.dart' as builder_modules;
 
 /// System Block Runtime Widget
 /// 
@@ -125,6 +126,13 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Routes to the appropriate module builder based on type
   Widget _buildModuleWidget(BuildContext context, String moduleType) {
+    // First check if it's a new-style module from builder_modules
+    // These are: menu_catalog, cart_module, profile_module, roulette_module
+    if (_isBuilderModule(moduleType)) {
+      return _buildBuilderModule(context, moduleType);
+    }
+    
+    // Legacy module types (for backward compatibility)
     switch (moduleType) {
       case 'roulette':
         return _buildRouletteModule(context);
@@ -136,6 +144,64 @@ class SystemBlockRuntime extends StatelessWidget {
         return _buildAccountActivityModule(context);
       default:
         return _buildUnknownModule(moduleType);
+    }
+  }
+  
+  /// Check if moduleType is a builder module (from builder_modules.dart)
+  bool _isBuilderModule(String moduleType) {
+    const builderModules = [
+      'menu_catalog',
+      'cart_module',
+      'profile_module',
+      'roulette_module',
+    ];
+    return builderModules.contains(moduleType);
+  }
+  
+  /// Build a module from builder_modules.dart
+  /// Uses the renderModule function which properly displays CartModuleWidget and others
+  Widget _buildBuilderModule(BuildContext context, String moduleType) {
+    try {
+      // Use the renderModule function from builder_modules.dart
+      // This renders the actual module widgets (CartModuleWidget, etc.)
+      return builder_modules.renderModule(context, moduleType);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error rendering builder module "$moduleType": $e');
+      }
+      return _buildUnknownModule(moduleType);
+    }
+  }
+  
+  /// Get icon for builder module
+  IconData _getModuleIcon(String moduleType) {
+    switch (moduleType) {
+      case 'menu_catalog':
+        return Icons.restaurant_menu;
+      case 'cart_module':
+        return Icons.shopping_cart;
+      case 'profile_module':
+        return Icons.person;
+      case 'roulette_module':
+        return Icons.casino;
+      default:
+        return Icons.extension;
+    }
+  }
+  
+  /// Get name for builder module
+  String _getModuleName(String moduleType) {
+    switch (moduleType) {
+      case 'menu_catalog':
+        return 'Catalogue Menu';
+      case 'cart_module':
+        return 'Module Panier';
+      case 'profile_module':
+        return 'Profil';
+      case 'roulette_module':
+        return 'Roulette';
+      default:
+        return 'Module inconnu';
     }
   }
 
@@ -449,7 +515,7 @@ class SystemBlockRuntime extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Module système introuvable',
+            'Module inconnu',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -474,7 +540,7 @@ class SystemBlockRuntime extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Les modules disponibles sont:\nroulette, loyalty, rewards, accountActivity',
+            'Modules disponibles:\nmenu_catalog, cart_module, profile_module, roulette_module\nroulette, loyalty, rewards, accountActivity',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 11,

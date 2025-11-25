@@ -546,6 +546,88 @@ class BuilderPageService {
     }
   }
 
+  // ==================== SYSTEM PAGE FIXES ====================
+
+  /// Fix system pages with empty layouts by injecting their default modules
+  /// 
+  /// This method scans active system pages (cart, menu, profile, roulette)
+  /// and injects their default module if both draftLayout and publishedLayout are empty.
+  /// 
+  /// Returns the number of pages fixed.
+  /// 
+  /// Example:
+  /// ```dart
+  /// final fixed = await service.fixEmptySystemPages('delizza');
+  /// print('Fixed $fixed system pages');
+  /// ```
+  Future<int> fixEmptySystemPages(String appId) async {
+    try {
+      int fixedCount = 0;
+      
+      // Load all system pages
+      final systemPages = await _layoutService.loadSystemPages();
+      
+      for (final page in systemPages) {
+        // Only fix active system pages with empty layouts
+        if (!page.isActive) continue;
+        if (page.draftLayout.isNotEmpty || page.publishedLayout.isNotEmpty) continue;
+        
+        // Determine which module to inject based on page ID
+        String? moduleType;
+        switch (page.pageId) {
+          case BuilderPageId.cart:
+            moduleType = 'cart_module';
+            break;
+          case BuilderPageId.menu:
+            moduleType = 'menu_catalog';
+            break;
+          case BuilderPageId.profile:
+            moduleType = 'profile_module';
+            break;
+          case BuilderPageId.roulette:
+            moduleType = 'roulette_module';
+            break;
+          default:
+            continue; // Skip non-applicable system pages
+        }
+        
+        // Create a module block
+        final moduleBlock = SystemBlock(
+          id: '${moduleType}_auto_${DateTime.now().millisecondsSinceEpoch}',
+          moduleType: moduleType,
+          order: 0,
+        );
+        
+        // Update the page with the module
+        final updatedPage = page.copyWith(
+          draftLayout: [moduleBlock],
+          hasUnpublishedChanges: true,
+          updatedAt: DateTime.now(),
+        );
+        
+        // Save the updated page
+        await _layoutService.saveDraft(updatedPage);
+        
+        fixedCount++;
+        debugPrint('[BuilderPageService] ✅ Fixed empty system page: ${page.pageId.value} with $moduleType');
+      }
+      
+      if (fixedCount > 0) {
+        debugPrint('[BuilderPageService] ✅ Fixed $fixedCount system pages with empty layouts');
+      } else {
+        debugPrint('[BuilderPageService] ℹ️ No system pages need fixing');
+      }
+      
+      return fixedCount;
+    } catch (e, stackTrace) {
+      debugPrint('[BuilderPageService] ❌ Error fixing empty system pages: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
+      return 0;
+    }
+  }
+
   // ==================== PRIVATE HELPERS ====================
 
   /// Generate a unique pageId from a name
@@ -563,7 +645,17 @@ class BuilderPageService {
       case 'home_template':
         return _buildHomeTemplateBlocks();
       case 'menu_template':
+      case 'menu':
         return _buildMenuTemplateBlocks();
+      case 'cart':
+      case 'cart_template':
+        return _buildCartTemplateBlocks();
+      case 'profile':
+      case 'profile_template':
+        return _buildProfileTemplateBlocks();
+      case 'roulette':
+      case 'roulette_template':
+        return _buildRouletteTemplateBlocks();
       case 'promo_template':
         return _buildPromoTemplateBlocks();
       case 'about_template':
@@ -617,35 +709,43 @@ class BuilderPageService {
   /// Menu template blocks
   List<BuilderBlock> _buildMenuTemplateBlocks() {
     return [
-      BuilderBlock(
-        id: 'text-1',
-        type: BlockType.text,
+      SystemBlock(
+        id: 'menu-module-1',
+        moduleType: 'menu_catalog',
         order: 0,
-        config: {
-          'content': 'Notre Menu',
-          'fontSize': 28.0,
-          'fontWeight': 'bold',
-          'textAlign': 'center',
-        },
       ),
-      BuilderBlock(
-        id: 'category-list-1',
-        type: BlockType.categoryList,
-        order: 1,
-        config: {
-          'layout': 'horizontal',
-          'showIcons': true,
-        },
+    ];
+  }
+  
+  /// Cart template blocks
+  List<BuilderBlock> _buildCartTemplateBlocks() {
+    return [
+      SystemBlock(
+        id: 'cart-module-1',
+        moduleType: 'cart_module',
+        order: 0,
       ),
-      BuilderBlock(
-        id: 'product-list-1',
-        type: BlockType.productList,
-        order: 2,
-        config: {
-          'mode': 'all',
-          'layout': 'grid',
-          'showFilters': true,
-        },
+    ];
+  }
+  
+  /// Profile template blocks
+  List<BuilderBlock> _buildProfileTemplateBlocks() {
+    return [
+      SystemBlock(
+        id: 'profile-module-1',
+        moduleType: 'profile_module',
+        order: 0,
+      ),
+    ];
+  }
+  
+  /// Roulette template blocks
+  List<BuilderBlock> _buildRouletteTemplateBlocks() {
+    return [
+      SystemBlock(
+        id: 'roulette-module-1',
+        moduleType: 'roulette_module',
+        order: 0,
       ),
     ];
   }
