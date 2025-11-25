@@ -211,7 +211,7 @@ class _MenuCatalogRuntimeWidgetState extends ConsumerState<MenuCatalogRuntimeWid
                                 onAddToCart: (customDescription) {
                                   // Add to cart with custom description
                                   ref.read(cartProvider.notifier).addItem(
-                                    product: product,
+                                    product,
                                     customDescription: customDescription,
                                   );
                                 },
