@@ -25,6 +25,9 @@ import '../../src/core/firestore_paths.dart';
 /// - Real-time updates via streams
 class BuilderLayoutService {
   final FirebaseFirestore _firestore;
+  
+  /// Maximum valid bottomNavIndex value (values >= this are considered "not in bottom bar")
+  static const int _maxBottomNavIndex = 999;
 
   BuilderLayoutService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -537,6 +540,21 @@ class BuilderLayoutService {
     });
   }
 
+  /// Helper to check if a page should appear in bottom navigation bar
+  /// Returns true if page is active and has a valid bottomNavIndex
+  bool _isBottomBarPage(BuilderPage page) {
+    return page.isActive && 
+           page.bottomNavIndex != null && 
+           page.bottomNavIndex < _maxBottomNavIndex;
+  }
+  
+  /// Helper to sort pages by bottomNavIndex
+  void _sortByBottomNavIndex(List<BuilderPage> pages) {
+    pages.sort((a, b) => 
+      (a.bottomNavIndex ?? _maxBottomNavIndex).compareTo(
+        b.bottomNavIndex ?? _maxBottomNavIndex));
+  }
+
   /// Get pages for bottom navigation bar
   /// 
   /// Returns pages where isActive == true and bottomNavIndex != null
@@ -549,16 +567,13 @@ class BuilderLayoutService {
       // Load system pages first
       final systemPages = await loadSystemPages();
       
-      // Filter for active pages with bottomNavIndex
-      // NEW LOGIC: isActive + bottomNavIndex != null
-      final bottomBarPages = systemPages.where((page) => 
-        page.isActive && page.bottomNavIndex != null && page.bottomNavIndex < 999
-      ).toList();
+      // Filter for active pages with valid bottomNavIndex
+      // NEW LOGIC: isActive + bottomNavIndex < 999
+      final bottomBarPages = systemPages.where(_isBottomBarPage).toList();
       
       // If we have system pages, sort and return them
       if (bottomBarPages.isNotEmpty) {
-        bottomBarPages.sort((a, b) => 
-          (a.bottomNavIndex ?? 999).compareTo(b.bottomNavIndex ?? 999));
+        _sortByBottomNavIndex(bottomBarPages);
         return bottomBarPages;
       }
       
@@ -566,11 +581,10 @@ class BuilderLayoutService {
       final publishedPages = await loadAllPublishedPages(kRestaurantId);
       
       final publishedBottomBar = publishedPages.values
-        .where((page) => page.isActive && page.bottomNavIndex != null && page.bottomNavIndex < 999)
+        .where(_isBottomBarPage)
         .toList();
       
-      publishedBottomBar.sort((a, b) => 
-        (a.bottomNavIndex ?? 999).compareTo(b.bottomNavIndex ?? 999));
+      _sortByBottomNavIndex(publishedBottomBar);
       
       return publishedBottomBar;
     } catch (e) {

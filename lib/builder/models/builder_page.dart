@@ -251,13 +251,17 @@ class BuilderPage {
             .map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
             .toList();
       } catch (e) {
-        // If parsing fails, return empty list
+        // Log parsing errors for debugging
+        print('⚠️ Error parsing layout blocks: $e. Value type: ${value.runtimeType}');
         return [];
       }
     }
     
     // For any other type (String like "none", etc.), return empty list
     // This handles legacy data where draftLayout/publishedLayout might be stored as strings
+    if (value is String) {
+      print('⚠️ Legacy string value found in layout field: "$value". Returning empty list.');
+    }
     return [];
   }
 
