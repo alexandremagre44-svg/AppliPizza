@@ -1,5 +1,5 @@
 // lib/builder/blocks/product_list_block_runtime.dart
-// Runtime version of ProductListBlock - Phase 5 enhanced
+// Runtime version of ProductListBlock - Phase 6F enhanced
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,8 +9,6 @@ import '../utils/action_helper.dart';
 import '../../src/models/product.dart';
 import '../../src/providers/product_provider.dart';
 import '../../src/providers/cart_provider.dart';
-import '../../src/widgets/product_card.dart';
-import '../../src/widgets/home/promo_card_compact.dart';
 import '../../src/screens/home/pizza_customization_modal.dart';
 import '../../src/screens/menu/menu_customization_modal.dart';
 
@@ -18,25 +16,32 @@ import '../../src/screens/menu/menu_customization_modal.dart';
 /// 
 /// Configuration:
 /// - title: Section title (default: '')
-/// - layout: Display layout - grid, carousel, list (default: grid)
-/// - columns: Grid columns (default: 2 mobile, 4 desktop)
-/// - showPrices: Display prices (default: true)
-/// - showBadges: Display product badges (default: true)
-/// - category: Filter by category (default: null = all products)
+/// - titleAlignment: Title alignment - left, center, right (default: left)
+/// - titleSize: Title size - small, medium, large (default: medium)
+/// - categoryId: Filter by category ID (default: '' = all products)
+/// - layout: Display layout - grid, list, carousel (default: grid)
 /// - limit: Maximum products to show (default: null = unlimited)
 /// - padding: Padding around container (default: 12)
 /// - margin: Margin around container (default: 0)
 /// - backgroundColor: Background color in hex (default: transparent)
-/// - borderRadius: Corner radius (default: 0)
-/// - tapAction: Custom action on product tap (optional)
+/// - textColor: Text color in hex (default: #000000)
+/// - borderRadius: Corner radius (default: 8)
+/// - elevation: Card elevation (default: 2)
+/// - actionOnProductTap: Action type - openPage, openProductDetail (default: openProductDetail)
 /// 
-/// Responsive: Grid adapts columns based on screen size
+/// Responsive: 
+/// - Mobile: 2 columns grid, full width list
+/// - Tablet: 3 columns grid
+/// - Desktop: 4 columns grid
+/// - Carousel: min height 260px
 class ProductListBlockRuntime extends ConsumerWidget {
   final BuilderBlock block;
 
   // Responsive breakpoints
   static const double _mobileBreakpoint = 600.0;
-  static const double _desktopBreakpoint = 800.0;
+  static const double _tabletBreakpoint = 900.0;
+  static const double _desktopBreakpoint = 1200.0;
+  static const double _carouselMinHeight = 260.0;
 
   const ProductListBlockRuntime({
     super.key,
@@ -45,121 +50,113 @@ class ProductListBlockRuntime extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    return _buildContent(context, ref);
+  }
+
+  /// Main content builder - all logic extracted from build()
+  Widget _buildContent(BuildContext context, WidgetRef ref) {
     final helper = BlockConfigHelper(block.config, blockId: block.id);
+    final productsAsync = ref.watch(productListProvider);
     
-    // Get configuration with defaults
+    // Extract all config values
+    final config = _extractConfig(helper, context);
+
+    return productsAsync.when(
+      data: (allProducts) => _buildDataState(context, ref, allProducts, config),
+      loading: () => _buildLoadingState(config),
+      error: (error, stack) => _buildErrorState(error, config),
+    );
+  }
+
+  /// Extract all configuration values with safe defaults
+  _ProductListConfig _extractConfig(BlockConfigHelper helper, BuildContext context) {
     final title = helper.getString('title', defaultValue: '');
+    final titleAlignment = helper.getString('titleAlignment', defaultValue: 'left');
+    final titleSize = helper.getString('titleSize', defaultValue: 'medium');
+    final categoryId = helper.getString('categoryId', defaultValue: '');
     final layout = helper.getString('layout', defaultValue: 'grid');
-    final columns = _calculateColumns(helper, context);
-    final showPrices = helper.getBool('showPrices', defaultValue: true);
-    final showBadges = helper.getBool('showBadges', defaultValue: true);
-    final category = helper.getString('category', defaultValue: '');
     final limitValue = helper.has('limit') ? helper.getInt('limit') : null;
     final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
     final margin = helper.getEdgeInsets('margin');
     final backgroundColor = helper.getColor('backgroundColor');
-    final borderRadius = helper.getDouble('borderRadius', defaultValue: 0.0);
-    final tapActionConfig = block.config['tapAction'] as Map<String, dynamic>?;
+    final textColor = helper.getColor('textColor', defaultValue: Colors.black87);
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
+    final elevation = helper.getDouble('elevation', defaultValue: 2.0);
+    final actionOnProductTap = helper.getString('actionOnProductTap', defaultValue: 'openProductDetail');
+    final actionConfig = block.config['action'] as Map<String, dynamic>?;
 
-    final productsAsync = ref.watch(productListProvider);
+    // Calculate responsive columns
+    final columns = _calculateResponsiveColumns(context);
 
-    return productsAsync.when(
-      data: (allProducts) {
-        final products = _filterProducts(allProducts, category, limitValue);
-
-        if (products.isEmpty) {
-          return _buildPlaceholder(padding, margin, backgroundColor, borderRadius);
-        }
-
-        Widget content = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (title.isNotEmpty) ...[
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            _buildLayout(
-              context,
-              ref,
-              products,
-              layout,
-              columns,
-              showPrices,
-              showBadges,
-              tapActionConfig,
-            ),
-          ],
-        );
-
-        // Apply padding
-        content = Padding(
-          padding: padding,
-          child: content,
-        );
-
-        // Apply background color and border radius
-        if (backgroundColor != null || borderRadius > 0) {
-          content = Container(
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
-            ),
-            child: content,
-          );
-        }
-
-        // Apply margin
-        if (margin != EdgeInsets.zero) {
-          content = Padding(
-            padding: margin,
-            child: content,
-          );
-        }
-
-        return content;
-      },
-      loading: () => _buildLoadingPlaceholder(padding, margin),
-      error: (error, stack) {
-        debugPrint('Error loading products: $error');
-        return _buildErrorPlaceholder(padding, margin, backgroundColor, borderRadius);
-      },
+    return _ProductListConfig(
+      title: title,
+      titleAlignment: titleAlignment,
+      titleSize: titleSize,
+      categoryId: categoryId,
+      layout: layout,
+      limit: limitValue,
+      padding: padding,
+      margin: margin,
+      backgroundColor: backgroundColor,
+      textColor: textColor,
+      borderRadius: borderRadius,
+      elevation: elevation,
+      actionOnProductTap: actionOnProductTap,
+      actionConfig: actionConfig,
+      columns: columns,
     );
   }
 
-  /// Calculate grid columns based on screen size and config
-  int _calculateColumns(BlockConfigHelper helper, BuildContext context) {
+  /// Calculate responsive grid columns based on screen width
+  int _calculateResponsiveColumns(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < _mobileBreakpoint;
     
-    // Use config value if provided, otherwise use responsive defaults
-    if (helper.has('columns')) {
-      return helper.getInt('columns', defaultValue: isMobile ? 2 : 4);
+    if (screenWidth < _mobileBreakpoint) {
+      return 2; // Mobile: 2 columns
+    } else if (screenWidth < _tabletBreakpoint) {
+      return 3; // Tablet: 3 columns
+    } else {
+      return 4; // Desktop: 4 columns
     }
-    
-    return isMobile ? 2 : 4;
   }
 
-  /// Filter products by category and limit
-  List<Product> _filterProducts(List<Product> allProducts, String category, int? limit) {
-    // Filter by category if specified
+  /// Build widget when data is loaded successfully
+  Widget _buildDataState(
+    BuildContext context,
+    WidgetRef ref,
+    List<Product> allProducts,
+    _ProductListConfig config,
+  ) {
+    final products = _filterProducts(allProducts, config.categoryId, config.limit);
+
+    if (products.isEmpty) {
+      return _buildEmptyState(config);
+    }
+
+    return _buildProductContainer(context, ref, products, config);
+  }
+
+  /// Filter products by categoryId and limit
+  List<Product> _filterProducts(List<Product> allProducts, String categoryId, int? limit) {
     List<Product> filtered = allProducts.where((p) => p.isActive).toList();
     
-    if (category.isNotEmpty) {
-      try {
-        final categoryEnum = ProductCategory.values.firstWhere(
-          (c) => c.value == category,
-          orElse: () => ProductCategory.values.first,
-        );
-        filtered = filtered.where((p) => p.category == categoryEnum).toList();
-      } catch (e) {
-        debugPrint('Invalid category: $category');
+    // Filter by categoryId if specified (match against enum value only for simplicity)
+    if (categoryId.isNotEmpty) {
+      final normalizedCategoryId = categoryId.trim().toLowerCase();
+      
+      // Find matching category by value field
+      ProductCategory? matchedCategory;
+      for (final category in ProductCategory.values) {
+        if (category.value.toLowerCase() == normalizedCategoryId) {
+          matchedCategory = category;
+          break;
+        }
+      }
+      
+      if (matchedCategory != null) {
+        filtered = filtered.where((p) => p.category == matchedCategory).toList();
+      } else {
+        debugPrint('ProductListBlock: Invalid categoryId "$categoryId", showing all products');
       }
     }
     
@@ -171,147 +168,504 @@ class ProductListBlockRuntime extends ConsumerWidget {
     return filtered;
   }
 
-  /// Build layout based on configuration
+  /// Build the main product container with title and layout
+  Widget _buildProductContainer(
+    BuildContext context,
+    WidgetRef ref,
+    List<Product> products,
+    _ProductListConfig config,
+  ) {
+    Widget content = Column(
+      crossAxisAlignment: _getTitleCrossAxisAlignment(config.titleAlignment),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Title section
+        if (config.title.isNotEmpty) ...[
+          _buildTitle(config),
+          const SizedBox(height: 16),
+        ],
+        // Product layout
+        _buildLayout(context, ref, products, config),
+      ],
+    );
+
+    // Apply padding
+    content = Padding(
+      padding: config.padding,
+      child: content,
+    );
+
+    // Apply background color and border radius
+    if (config.backgroundColor != null || config.borderRadius > 0) {
+      content = Container(
+        decoration: BoxDecoration(
+          color: config.backgroundColor,
+          borderRadius: config.borderRadius > 0 
+              ? BorderRadius.circular(config.borderRadius) 
+              : null,
+        ),
+        child: content,
+      );
+    }
+
+    // Apply margin
+    if (config.margin != EdgeInsets.zero) {
+      content = Padding(
+        padding: config.margin,
+        child: content,
+      );
+    }
+
+    return content;
+  }
+
+  /// Build title widget with alignment and size
+  Widget _buildTitle(_ProductListConfig config) {
+    final fontSize = _getTitleFontSize(config.titleSize);
+    
+    return Text(
+      config.title,
+      textAlign: _getTitleTextAlign(config.titleAlignment),
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+        color: config.textColor,
+      ),
+    );
+  }
+
+  /// Get title font size based on titleSize config
+  double _getTitleFontSize(String titleSize) {
+    switch (titleSize.toLowerCase()) {
+      case 'small':
+        return 18.0;
+      case 'large':
+        return 28.0;
+      case 'medium':
+      default:
+        return 24.0;
+    }
+  }
+
+  /// Get TextAlign from titleAlignment string
+  TextAlign _getTitleTextAlign(String alignment) {
+    switch (alignment.toLowerCase()) {
+      case 'center':
+        return TextAlign.center;
+      case 'right':
+        return TextAlign.right;
+      case 'left':
+      default:
+        return TextAlign.left;
+    }
+  }
+
+  /// Get CrossAxisAlignment from titleAlignment string
+  CrossAxisAlignment _getTitleCrossAxisAlignment(String alignment) {
+    switch (alignment.toLowerCase()) {
+      case 'center':
+        return CrossAxisAlignment.center;
+      case 'right':
+        return CrossAxisAlignment.end;
+      case 'left':
+      default:
+        return CrossAxisAlignment.start;
+    }
+  }
+
+  /// Build layout based on configuration (grid, list, carousel)
   Widget _buildLayout(
     BuildContext context,
     WidgetRef ref,
     List<Product> products,
-    String layout,
-    int columns,
-    bool showPrices,
-    bool showBadges,
-    Map<String, dynamic>? tapActionConfig,
+    _ProductListConfig config,
   ) {
-    switch (layout.toLowerCase()) {
+    switch (config.layout.toLowerCase()) {
       case 'carousel':
-        return _buildCarousel(context, ref, products, tapActionConfig);
+        return _buildCarousel(context, ref, products, config);
       case 'list':
-        return _buildList(context, ref, products, showPrices, showBadges, tapActionConfig);
+        return _buildList(context, ref, products, config);
       case 'grid':
       default:
-        return _buildGrid(context, ref, products, columns, showPrices, showBadges, tapActionConfig);
+        return _buildGrid(context, ref, products, config);
     }
   }
 
-  /// Build grid layout
+  /// Build grid layout with responsive columns
   Widget _buildGrid(
     BuildContext context,
     WidgetRef ref,
     List<Product> products,
-    int columns,
-    bool showPrices,
-    bool showBadges,
-    Map<String, dynamic>? tapActionConfig,
+    _ProductListConfig config,
   ) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columns,
+        crossAxisCount: config.columns,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
         childAspectRatio: 0.75,
       ),
       itemCount: products.length,
-      itemBuilder: (context, index) => _buildProductCard(
+      itemBuilder: (context, index) => _buildGridProductCard(
         context,
         ref,
         products[index],
-        showPrices,
-        showBadges,
-        tapActionConfig,
+        config,
       ),
     );
   }
 
-  /// Build carousel layout
+  /// Build list layout with image left, text right
+  Widget _buildList(
+    BuildContext context,
+    WidgetRef ref,
+    List<Product> products,
+    _ProductListConfig config,
+  ) {
+    return Column(
+      children: products
+          .map((product) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildListProductCard(context, ref, product, config),
+              ))
+          .toList(),
+    );
+  }
+
+  /// Build carousel layout with PageView and snap effect
   Widget _buildCarousel(
     BuildContext context,
     WidgetRef ref,
     List<Product> products,
-    Map<String, dynamic>? tapActionConfig,
+    _ProductListConfig config,
   ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth * 0.7; // 70% of screen width
+    
     return SizedBox(
-      height: 200,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
+      height: _carouselMinHeight,
+      child: PageView.builder(
+        controller: PageController(viewportFraction: 0.75),
         itemCount: products.length,
         itemBuilder: (context, index) {
           final product = products[index];
           return Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: PromoCardCompact(
-              product: product,
-              onTap: () => _handleProductTap(context, ref, product, tapActionConfig),
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: _buildCarouselProductCard(context, ref, product, config, cardWidth),
           );
         },
       ),
     );
   }
 
-  /// Build list layout
-  Widget _buildList(
-    BuildContext context,
-    WidgetRef ref,
-    List<Product> products,
-    bool showPrices,
-    bool showBadges,
-    Map<String, dynamic>? tapActionConfig,
-  ) {
-    return Column(
-      children: products
-          .map((product) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildProductCard(
-                  context,
-                  ref,
-                  product,
-                  showPrices,
-                  showBadges,
-                  tapActionConfig,
-                ),
-              ))
-          .toList(),
-    );
-  }
-
-  /// Build product card
-  Widget _buildProductCard(
+  /// Build product card for grid layout
+  Widget _buildGridProductCard(
     BuildContext context,
     WidgetRef ref,
     Product product,
-    bool showPrices,
-    bool showBadges,
-    Map<String, dynamic>? tapActionConfig,
+    _ProductListConfig config,
   ) {
-    final cart = ref.watch(cartProvider);
-    final cartItem = cart.items.cast<CartItem?>().firstWhere(
-      (item) => item?.productId == product.id,
-      orElse: () => null,
-    );
-
-    return ProductCard(
-      product: product,
-      onAddToCart: () => _handleProductTap(context, ref, product, tapActionConfig),
-      cartQuantity: cartItem?.quantity,
+    return GestureDetector(
+      onTap: () => _handleProductTap(context, ref, product, config),
+      child: Card(
+        elevation: config.elevation,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(config.borderRadius),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Product image
+            Expanded(
+              flex: 3,
+              child: ClipRRect(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(config.borderRadius),
+                ),
+                child: _buildProductImage(product.imageUrl),
+              ),
+            ),
+            // Product info
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      product.name,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: config.textColor,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${product.price.toStringAsFixed(2)} €',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  /// Handle product tap with custom action or default behavior
+  /// Build product card for list layout (image left, text right)
+  Widget _buildListProductCard(
+    BuildContext context,
+    WidgetRef ref,
+    Product product,
+    _ProductListConfig config,
+  ) {
+    return GestureDetector(
+      onTap: () => _handleProductTap(context, ref, product, config),
+      child: Card(
+        elevation: config.elevation,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(config.borderRadius),
+        ),
+        child: SizedBox(
+          height: 100,
+          child: Row(
+            children: [
+              // Product image (left)
+              ClipRRect(
+                borderRadius: BorderRadius.horizontal(
+                  left: Radius.circular(config.borderRadius),
+                ),
+                child: SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: _buildProductImage(product.imageUrl),
+                ),
+              ),
+              // Product info (right)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        product.name,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: config.textColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        product.description,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: config.textColor?.withOpacity(0.7),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${product.price.toStringAsFixed(2)} €',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Add button
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: IconButton(
+                  icon: const Icon(Icons.add_circle, color: Color(0xFFD32F2F)),
+                  onPressed: () => _handleProductTap(context, ref, product, config),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build product card for carousel layout
+  Widget _buildCarouselProductCard(
+    BuildContext context,
+    WidgetRef ref,
+    Product product,
+    _ProductListConfig config,
+    double cardWidth,
+  ) {
+    return GestureDetector(
+      onTap: () => _handleProductTap(context, ref, product, config),
+      child: Card(
+        elevation: config.elevation,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(config.borderRadius),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Product image
+            Expanded(
+              flex: 3,
+              child: ClipRRect(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(config.borderRadius),
+                ),
+                child: _buildProductImage(product.imageUrl),
+              ),
+            ),
+            // Product info
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      product.name,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: config.textColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      product.description,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: config.textColor?.withOpacity(0.7),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${product.price.toStringAsFixed(2)} €',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red.shade700,
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: config.textColor?.withOpacity(0.5),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build product image with placeholder
+  Widget _buildProductImage(String imageUrl) {
+    if (imageUrl.isEmpty) {
+      return _buildImagePlaceholder();
+    }
+
+    return Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => _buildImagePlaceholder(),
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: Colors.grey.shade200,
+          child: const Center(
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Build image placeholder
+  Widget _buildImagePlaceholder() {
+    return Container(
+      color: Colors.grey.shade200,
+      child: Center(
+        child: Icon(
+          Icons.local_pizza,
+          size: 48,
+          color: Colors.grey.shade400,
+        ),
+      ),
+    );
+  }
+
+  /// Handle product tap with action support
   void _handleProductTap(
     BuildContext context,
     WidgetRef ref,
     Product product,
-    Map<String, dynamic>? tapActionConfig,
+    _ProductListConfig config,
   ) {
-    // If custom tap action is configured, use ActionHelper
-    if (tapActionConfig != null && tapActionConfig.isNotEmpty) {
-      ActionHelper.execute(context, BlockAction.fromConfig(tapActionConfig));
+    // Check for custom action config first
+    if (config.actionConfig != null && config.actionConfig!.isNotEmpty) {
+      ActionHelper.execute(context, BlockAction.fromConfig(config.actionConfig));
       return;
     }
 
-    // Default behavior: show customization or add to cart
+    // Handle based on actionOnProductTap setting
+    switch (config.actionOnProductTap.toLowerCase()) {
+      case 'openpage':
+        // Navigate to a page (would need page pk in config)
+        final pagePk = config.actionConfig?['pk'] as String?;
+        if (pagePk != null && pagePk.isNotEmpty) {
+          ActionHelper.execute(context, BlockAction(
+            type: BlockActionType.openPage,
+            value: pagePk,
+          ));
+        }
+        break;
+      case 'openproductdetail':
+      default:
+        _openProductDetail(context, ref, product);
+        break;
+    }
+  }
+
+  /// Open product detail with customization modal
+  void _openProductDetail(BuildContext context, WidgetRef ref, Product product) {
     final cartNotifier = ref.read(cartProvider.notifier);
     
     if (product.isMenu) {
@@ -341,19 +695,42 @@ class ProductListBlockRuntime extends ConsumerWidget {
     }
   }
 
-  /// Build placeholder when no products available
-  Widget _buildPlaceholder(
-    EdgeInsets padding,
-    EdgeInsets margin,
-    Color? backgroundColor,
-    double borderRadius,
-  ) {
+  /// Build loading state widget
+  Widget _buildLoadingState(_ProductListConfig config) {
+    Widget placeholder = Padding(
+      padding: config.padding,
+      child: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 12),
+            Text(
+              'Loading products...',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (config.margin != EdgeInsets.zero) {
+      placeholder = Padding(padding: config.margin, child: placeholder);
+    }
+
+    return placeholder;
+  }
+
+  /// Build empty state widget
+  Widget _buildEmptyState(_ProductListConfig config) {
     Widget placeholder = Container(
-      padding: padding,
+      padding: config.padding,
       decoration: BoxDecoration(
-        color: backgroundColor ?? Colors.grey.shade100,
-        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
-        border: Border.all(color: Colors.grey.shade300, width: 2),
+        color: config.backgroundColor ?? Colors.grey.shade100,
+        borderRadius: config.borderRadius > 0 
+            ? BorderRadius.circular(config.borderRadius) 
+            : null,
+        border: Border.all(color: Colors.grey.shade300, width: 1),
       ),
       child: Center(
         child: Column(
@@ -365,49 +742,43 @@ class ProductListBlockRuntime extends ConsumerWidget {
               'No products available',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: config.textColor ?? Colors.grey.shade600,
               ),
             ),
+            if (config.categoryId.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Category: ${config.categoryId}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
 
-    if (margin != EdgeInsets.zero) {
-      placeholder = Padding(padding: margin, child: placeholder);
+    if (config.margin != EdgeInsets.zero) {
+      placeholder = Padding(padding: config.margin, child: placeholder);
     }
 
     return placeholder;
   }
 
-  /// Build loading placeholder
-  Widget _buildLoadingPlaceholder(EdgeInsets padding, EdgeInsets margin) {
-    Widget placeholder = Padding(
-      padding: padding,
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-
-    if (margin != EdgeInsets.zero) {
-      placeholder = Padding(padding: margin, child: placeholder);
-    }
-
-    return placeholder;
-  }
-
-  /// Build error placeholder
-  Widget _buildErrorPlaceholder(
-    EdgeInsets padding,
-    EdgeInsets margin,
-    Color? backgroundColor,
-    double borderRadius,
-  ) {
+  /// Build error state widget
+  Widget _buildErrorState(Object error, _ProductListConfig config) {
+    debugPrint('ProductListBlock: Error loading products: $error');
+    
     Widget placeholder = Container(
-      padding: padding,
+      padding: config.padding,
       decoration: BoxDecoration(
-        color: backgroundColor ?? Colors.grey.shade100,
-        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
+        color: config.backgroundColor ?? Colors.grey.shade100,
+        borderRadius: config.borderRadius > 0 
+            ? BorderRadius.circular(config.borderRadius) 
+            : null,
       ),
       child: Center(
         child: Column(
@@ -415,19 +786,59 @@ class ProductListBlockRuntime extends ConsumerWidget {
           children: [
             const Icon(Icons.error_outline, size: 48, color: Colors.red),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Error loading products',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 14,
+                color: config.textColor ?? Colors.grey,
+              ),
             ),
           ],
         ),
       ),
     );
 
-    if (margin != EdgeInsets.zero) {
-      placeholder = Padding(padding: margin, child: placeholder);
+    if (config.margin != EdgeInsets.zero) {
+      placeholder = Padding(padding: config.margin, child: placeholder);
     }
 
     return placeholder;
   }
+}
+
+/// Internal configuration class for ProductListBlock
+class _ProductListConfig {
+  final String title;
+  final String titleAlignment;
+  final String titleSize;
+  final String categoryId;
+  final String layout;
+  final int? limit;
+  final EdgeInsets padding;
+  final EdgeInsets margin;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final double borderRadius;
+  final double elevation;
+  final String actionOnProductTap;
+  final Map<String, dynamic>? actionConfig;
+  final int columns;
+
+  const _ProductListConfig({
+    required this.title,
+    required this.titleAlignment,
+    required this.titleSize,
+    required this.categoryId,
+    required this.layout,
+    required this.limit,
+    required this.padding,
+    required this.margin,
+    required this.backgroundColor,
+    required this.textColor,
+    required this.borderRadius,
+    required this.elevation,
+    required this.actionOnProductTap,
+    required this.actionConfig,
+    required this.columns,
+  });
 }

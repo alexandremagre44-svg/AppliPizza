@@ -14,6 +14,9 @@ class ResponsiveBreakpoints {
   
   // Desktop: >= 1024px (desktops, large tablets in landscape)
   static const double desktop = 1024;
+  
+  // Max content width for centering on wide screens
+  static const double maxContentWidth = 1200;
 }
 
 /// Responsive builder helper
@@ -33,7 +36,7 @@ class ResponsiveBuilder {
   
   /// Check if current width is tablet (>=600px and <1024px)
   bool get isTablet => width >= ResponsiveBreakpoints.mobile && 
-                       width < ResponsiveBreakpoints.tablet;
+                       width < ResponsiveBreakpoints.desktop;
   
   /// Check if current width is desktop (>=1024px)
   bool get isDesktop => width >= ResponsiveBreakpoints.desktop;
@@ -73,11 +76,19 @@ class ResponsiveBuilder {
     return 320.0; // Fixed 320px on desktop
   }
   
-  /// Get preview max width
+  /// Get preview max width (respects maxContentWidth)
   double get previewMaxWidth {
     if (isMobile) return width;
     if (isTablet) return width * 0.6;
-    return width - editorPanelWidth;
+    // On desktop, use max content width
+    final contentArea = width - editorPanelWidth;
+    return contentArea.clamp(0.0, ResponsiveBreakpoints.maxContentWidth);
+  }
+  
+  /// Get content max width for runtime (centered on wide screens)
+  double get contentMaxWidth {
+    if (isMobile) return width;
+    return width.clamp(0.0, ResponsiveBreakpoints.maxContentWidth);
   }
 }
 

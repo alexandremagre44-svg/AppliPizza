@@ -9,8 +9,39 @@ import 'package:url_launcher/url_launcher.dart' as url_launcher;
 enum BlockActionType {
   none,
   openPage,
+  openLegacyPage,
   openUrl,
   scrollToBlock,
+}
+
+/// List of legacy app routes for the route picker
+class LegacyRoutes {
+  static const List<Map<String, String>> routes = [
+    {'value': '/home', 'label': 'Accueil'},
+    {'value': '/menu', 'label': 'Menu'},
+    {'value': '/cart', 'label': 'Panier'},
+    {'value': '/profile', 'label': 'Profil'},
+    {'value': '/orders', 'label': 'Mes commandes'},
+    {'value': '/roulette', 'label': 'Roulette'},
+    {'value': '/rewards', 'label': 'Récompenses'},
+    {'value': '/checkout', 'label': 'Paiement'},
+    {'value': '/login', 'label': 'Connexion'},
+    {'value': '/register', 'label': 'Inscription'},
+    {'value': '/settings', 'label': 'Paramètres'},
+    {'value': '/about', 'label': 'À propos'},
+    {'value': '/contact', 'label': 'Contact'},
+  ];
+  
+  static List<String> get values => routes.map((r) => r['value']!).toList();
+  static List<String> get labels => routes.map((r) => r['label']!).toList();
+  
+  static String getLabelFor(String value) {
+    final route = routes.firstWhere(
+      (r) => r['value'] == value,
+      orElse: () => {'value': value, 'label': value},
+    );
+    return route['label']!;
+  }
 }
 
 /// Configuration for a block action
@@ -36,6 +67,9 @@ class BlockAction {
       case 'openpage':
       case 'navigate':
         return BlockAction(type: BlockActionType.openPage, value: value);
+      case 'openlegacypage':
+      case 'legacy':
+        return BlockAction(type: BlockActionType.openLegacyPage, value: value);
       case 'openurl':
       case 'url':
         return BlockAction(type: BlockActionType.openUrl, value: value);
@@ -59,6 +93,9 @@ class ActionHelper {
 
     switch (action.type) {
       case BlockActionType.openPage:
+        await _openPage(context, action.value!);
+        break;
+      case BlockActionType.openLegacyPage:
         await _openPage(context, action.value!);
         break;
       case BlockActionType.openUrl:

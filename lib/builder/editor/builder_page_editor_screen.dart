@@ -1,12 +1,16 @@
 // lib/builder/editor/builder_page_editor_screen.dart
 // Page editor screen for Builder B3 system
 // MOBILE RESPONSIVE: Adapts layout for mobile (<600px), tablet, and desktop
+// PHASE 7: Enhanced with all block fields, tap actions, auto-save, and page creation
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 import '../preview/preview.dart';
 import '../utils/responsive.dart';
+import '../utils/action_helper.dart';
+import 'new_page_dialog.dart';
 
 /// Builder Page Editor Screen
 /// 
@@ -33,6 +37,7 @@ class BuilderPageEditorScreen extends StatefulWidget {
 
 class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with SingleTickerProviderStateMixin {
   static const double _mobileEditorPanelHeight = 60.0;
+  static const Duration _autoSaveDelay = Duration(seconds: 2);
   
   final BuilderLayoutService _service = BuilderLayoutService();
   BuilderPage? _page;
@@ -41,6 +46,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   bool _hasChanges = false;
   bool _showPreviewInMobile = false;
   late TabController _tabController;
+  Timer? _autoSaveTimer;
+  bool _isSaving = false;
   
   /// Whether to show the mobile editor panel at the bottom
   /// Panel is shown when a block is selected AND we're showing the blocks list (not preview)
@@ -55,8 +62,38 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
 
   @override
   void dispose() {
+    _autoSaveTimer?.cancel();
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// Schedule auto-save after changes
+  void _scheduleAutoSave() {
+    _autoSaveTimer?.cancel();
+    _autoSaveTimer = Timer(_autoSaveDelay, () {
+      if (_hasChanges && _page != null) {
+        _autoSaveDraft();
+      }
+    });
+  }
+
+  /// Auto-save draft without user confirmation
+  Future<void> _autoSaveDraft() async {
+    if (_page == null || _isSaving) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      await _service.saveDraft(_page!);
+      setState(() {
+        _hasChanges = false;
+        _isSaving = false;
+      });
+      debugPrint('✅ Auto-saved draft');
+    } catch (e) {
+      setState(() => _isSaving = false);
+      debugPrint('❌ Auto-save failed: $e');
+    }
   }
 
   Future<void> _loadPage() async {
@@ -170,6 +207,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       _hasChanges = true;
       _selectedBlock = newBlock;
     });
+    _scheduleAutoSave();
   }
 
   Map<String, dynamic> _getDefaultConfig(BlockType type) {
@@ -181,28 +219,100 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           'imageUrl': '',
           'backgroundColor': '#D32F2F',
           'buttonLabel': 'En savoir plus',
+          'alignment': 'center',
+          'heightPreset': 'normal',
+          'tapAction': 'none',
+          'tapActionTarget': '',
         };
       case BlockType.text:
         return {
           'content': 'Nouveau texte',
           'alignment': 'left',
           'size': 'normal',
+          'bold': false,
+          'color': '',
+          'padding': 16,
+          'tapAction': 'none',
+          'tapActionTarget': '',
         };
       case BlockType.productList:
         return {
+          'title': '',
+          'titleAlignment': 'left',
+          'titleSize': 'medium',
           'mode': 'featured',
+          'categoryId': '',
           'productIds': '',
           'layout': 'grid',
           'limit': 6,
+          'backgroundColor': '',
+          'textColor': '',
+          'borderRadius': 8,
+          'elevation': 2,
+          'actionOnProductTap': 'openProductDetail',
         };
       case BlockType.banner:
         return {
-          'text': 'Nouvelle bannière',
+          'title': 'Nouvelle bannière',
+          'subtitle': '',
+          'text': '',
+          'imageUrl': '',
           'backgroundColor': '#2196F3',
           'textColor': '#FFFFFF',
+          'style': 'info',
+          'ctaLabel': '',
+          'ctaAction': '',
+          'tapAction': 'none',
+          'tapActionTarget': '',
         };
-      default:
-        return {};
+      case BlockType.button:
+        return {
+          'label': 'Bouton',
+          'style': 'primary',
+          'alignment': 'center',
+          'backgroundColor': '',
+          'textColor': '',
+          'borderRadius': 8,
+          'tapAction': 'none',
+          'tapActionTarget': '',
+        };
+      case BlockType.image:
+        return {
+          'imageUrl': '',
+          'caption': '',
+          'alignment': 'center',
+          'height': 300,
+          'fit': 'cover',
+          'borderRadius': 0,
+          'tapAction': 'none',
+          'tapActionTarget': '',
+        };
+      case BlockType.spacer:
+        return {
+          'height': 24,
+        };
+      case BlockType.info:
+        return {
+          'title': 'Information',
+          'content': '',
+          'icon': 'info',
+          'highlight': false,
+          'actionType': 'none',
+          'actionValue': '',
+          'backgroundColor': '',
+        };
+      case BlockType.categoryList:
+        return {
+          'title': '',
+          'mode': 'auto',
+          'layout': 'horizontal',
+          'tapAction': 'none',
+          'tapActionTarget': '',
+        };
+      case BlockType.html:
+        return {
+          'htmlContent': '<p>Contenu HTML</p>',
+        };
     }
   }
 
@@ -216,6 +326,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         _selectedBlock = null;
       }
     });
+    _scheduleAutoSave();
   }
 
   void _reorderBlocks(int oldIndex, int newIndex) {
@@ -236,6 +347,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       _page = _page!.reorderBlocks(blockIds);
       _hasChanges = true;
     });
+    _scheduleAutoSave();
   }
 
   void _selectBlock(BuilderBlock block) {
@@ -254,6 +366,24 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       _selectedBlock = updatedBlock;
       _hasChanges = true;
     });
+    _scheduleAutoSave();
+  }
+
+  /// Update multiple config values at once
+  void _updateBlockConfigMultiple(Map<String, dynamic> updates) {
+    if (_page == null || _selectedBlock == null) return;
+
+    var updatedBlock = _selectedBlock!;
+    for (final entry in updates.entries) {
+      updatedBlock = updatedBlock.updateConfig(entry.key, entry.value);
+    }
+
+    setState(() {
+      _page = _page!.updateBlock(updatedBlock);
+      _selectedBlock = updatedBlock;
+      _hasChanges = true;
+    });
+    _scheduleAutoSave();
   }
 
   @override
@@ -684,9 +814,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         helperText: 'URL de l\'image de fond',
       ),
       _buildDropdown<String>(
-        label: 'Alignement',
-        value: block.getConfig<String>('alignment', 'left') ?? 'left',
-        items: const ['left', 'center'],
+        label: 'Alignement du texte',
+        value: block.getConfig<String>('alignment', 'center') ?? 'center',
+        items: const ['left', 'center', 'right'],
         onChanged: (v) => _updateBlockConfig('alignment', v),
       ),
       _buildDropdown<String>(
@@ -700,6 +830,13 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         value: block.getConfig<String>('backgroundColor', '') ?? '',
         onChanged: (v) => _updateBlockConfig('backgroundColor', v),
       ),
+      _buildColorPicker(
+        label: 'Couleur du texte',
+        value: block.getConfig<String>('textColor', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('textColor', v),
+      ),
+      // Tap action fields
+      ..._buildTapActionFields(block),
     ];
   }
 
@@ -721,7 +858,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       _buildDropdown<String>(
         label: 'Taille',
         value: block.getConfig<String>('size', 'normal') ?? 'normal',
-        items: const ['small', 'normal', 'large'],
+        items: const ['small', 'normal', 'large', 'title', 'heading'],
         onChanged: (v) => _updateBlockConfig('size', v),
       ),
       _buildCheckbox(
@@ -734,6 +871,20 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         value: block.getConfig<String>('color', '') ?? '',
         onChanged: (v) => _updateBlockConfig('color', v),
       ),
+      _buildNumberField(
+        label: 'Padding',
+        value: block.getConfig<int>('padding', 16) ?? 16,
+        onChanged: (v) => _updateBlockConfig('padding', v),
+        helperText: 'Espacement intérieur',
+      ),
+      _buildNumberField(
+        label: 'Nombre de lignes max',
+        value: block.getConfig<int>('maxLines', 0) ?? 0,
+        onChanged: (v) => _updateBlockConfig('maxLines', v),
+        helperText: '0 = illimité',
+      ),
+      // Tap action fields
+      ..._buildTapActionFields(block),
     ];
   }
 
@@ -748,10 +899,28 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         helperText: 'Titre de la section de produits',
       ),
       _buildDropdown<String>(
+        label: 'Alignement du titre',
+        value: block.getConfig<String>('titleAlignment', 'left') ?? 'left',
+        items: const ['left', 'center', 'right'],
+        onChanged: (v) => _updateBlockConfig('titleAlignment', v),
+      ),
+      _buildDropdown<String>(
+        label: 'Taille du titre',
+        value: block.getConfig<String>('titleSize', 'medium') ?? 'medium',
+        items: const ['small', 'medium', 'large'],
+        onChanged: (v) => _updateBlockConfig('titleSize', v),
+      ),
+      _buildDropdown<String>(
         label: 'Mode',
         value: block.getConfig<String>('mode', 'featured') ?? 'featured',
         items: const ['featured', 'manual', 'top_selling', 'promo'],
         onChanged: (v) => _updateBlockConfig('mode', v),
+      ),
+      _buildTextField(
+        label: 'Catégorie',
+        value: block.getConfig<String>('categoryId', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('categoryId', v),
+        helperText: 'ID de la catégorie (Pizza, Boissons, etc.)',
       ),
       _buildDropdown<String>(
         label: 'Layout',
@@ -766,14 +935,40 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         helperText: 'Séparés par virgule. Ex: prod1,prod2,prod3',
         maxLines: 2,
       ),
-      _buildTextField(
+      _buildNumberField(
         label: 'Limite',
-        value: (block.getConfig<int>('limit', 6) ?? 6).toString(),
-        onChanged: (v) {
-          final limit = int.tryParse(v) ?? 6;
-          _updateBlockConfig('limit', limit);
-        },
+        value: block.getConfig<int>('limit', 6) ?? 6,
+        onChanged: (v) => _updateBlockConfig('limit', v),
         helperText: 'Nombre maximum de produits à afficher',
+      ),
+      _buildColorPicker(
+        label: 'Couleur de fond',
+        value: block.getConfig<String>('backgroundColor', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('backgroundColor', v),
+      ),
+      _buildColorPicker(
+        label: 'Couleur du texte',
+        value: block.getConfig<String>('textColor', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('textColor', v),
+      ),
+      _buildNumberField(
+        label: 'Border Radius',
+        value: block.getConfig<int>('borderRadius', 8) ?? 8,
+        onChanged: (v) => _updateBlockConfig('borderRadius', v),
+        helperText: 'Arrondi des coins',
+      ),
+      _buildNumberField(
+        label: 'Élévation',
+        value: block.getConfig<int>('elevation', 2) ?? 2,
+        onChanged: (v) => _updateBlockConfig('elevation', v),
+        helperText: 'Ombre portée',
+        max: 24,
+      ),
+      _buildDropdown<String>(
+        label: 'Action au clic sur produit',
+        value: block.getConfig<String>('actionOnProductTap', 'openProductDetail') ?? 'openProductDetail',
+        items: const ['openProductDetail', 'openPage'],
+        onChanged: (v) => _updateBlockConfig('actionOnProductTap', v),
       ),
     ];
   }
@@ -827,6 +1022,13 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         value: block.getConfig<String>('backgroundColor', '') ?? '',
         onChanged: (v) => _updateBlockConfig('backgroundColor', v),
       ),
+      _buildColorPicker(
+        label: 'Couleur du texte',
+        value: block.getConfig<String>('textColor', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('textColor', v),
+      ),
+      // Tap action fields
+      ..._buildTapActionFields(block),
     ];
   }
 
@@ -856,6 +1058,11 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         value: block.getConfig<bool>('highlight', false) ?? false,
         onChanged: (v) => _updateBlockConfig('highlight', v),
       ),
+      _buildColorPicker(
+        label: 'Couleur de fond',
+        value: block.getConfig<String>('backgroundColor', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('backgroundColor', v),
+      ),
       _buildDropdown<String>(
         label: 'Type d\'action',
         value: block.getConfig<String>('actionType', 'none') ?? 'none',
@@ -879,24 +1086,36 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         onChanged: (v) => _updateBlockConfig('label', v),
         helperText: 'Texte du bouton',
       ),
-      _buildTextField(
-        label: 'Action',
-        value: block.getConfig<String>('action', '') ?? '',
-        onChanged: (v) => _updateBlockConfig('action', v),
-        helperText: 'Route ex: /menu',
-      ),
       _buildDropdown<String>(
         label: 'Style',
         value: block.getConfig<String>('style', 'primary') ?? 'primary',
-        items: const ['primary', 'secondary', 'outline'],
+        items: const ['primary', 'secondary', 'outline', 'text'],
         onChanged: (v) => _updateBlockConfig('style', v),
       ),
       _buildDropdown<String>(
         label: 'Alignement',
         value: block.getConfig<String>('alignment', 'center') ?? 'center',
-        items: const ['left', 'center', 'right'],
+        items: const ['left', 'center', 'right', 'stretch'],
         onChanged: (v) => _updateBlockConfig('alignment', v),
       ),
+      _buildColorPicker(
+        label: 'Couleur du bouton',
+        value: block.getConfig<String>('backgroundColor', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('backgroundColor', v),
+      ),
+      _buildColorPicker(
+        label: 'Couleur du texte',
+        value: block.getConfig<String>('textColor', '') ?? '',
+        onChanged: (v) => _updateBlockConfig('textColor', v),
+      ),
+      _buildNumberField(
+        label: 'Border Radius',
+        value: block.getConfig<int>('borderRadius', 8) ?? 8,
+        onChanged: (v) => _updateBlockConfig('borderRadius', v),
+        helperText: 'Arrondi des coins',
+      ),
+      // Tap action fields
+      ..._buildTapActionFields(block),
     ];
   }
 
@@ -920,27 +1139,35 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         items: const ['left', 'center', 'right'],
         onChanged: (v) => _updateBlockConfig('alignment', v),
       ),
-      _buildTextField(
+      _buildDropdown<String>(
+        label: 'Ajustement de l\'image',
+        value: block.getConfig<String>('fit', 'cover') ?? 'cover',
+        items: const ['cover', 'contain', 'fill', 'fitWidth', 'fitHeight'],
+        onChanged: (v) => _updateBlockConfig('fit', v),
+      ),
+      _buildNumberField(
         label: 'Hauteur',
-        value: (block.getConfig<int>('height', 300) ?? 300).toString(),
-        onChanged: (v) {
-          final height = int.tryParse(v) ?? 300;
-          _updateBlockConfig('height', height);
-        },
+        value: block.getConfig<int>('height', 300) ?? 300,
+        onChanged: (v) => _updateBlockConfig('height', v),
         helperText: 'Hauteur en pixels',
       ),
+      _buildNumberField(
+        label: 'Border Radius',
+        value: block.getConfig<int>('borderRadius', 0) ?? 0,
+        onChanged: (v) => _updateBlockConfig('borderRadius', v),
+        helperText: 'Arrondi des coins',
+      ),
+      // Tap action fields
+      ..._buildTapActionFields(block),
     ];
   }
 
   List<Widget> _buildSpacerConfig(BuilderBlock block) {
     return [
-      _buildTextField(
+      _buildNumberField(
         label: 'Hauteur',
-        value: (block.getConfig<int>('height', 24) ?? 24).toString(),
-        onChanged: (v) {
-          final height = int.tryParse(v) ?? 24;
-          _updateBlockConfig('height', height);
-        },
+        value: block.getConfig<int>('height', 24) ?? 24,
+        onChanged: (v) => _updateBlockConfig('height', v),
         helperText: 'Hauteur de l\'espace en pixels',
       ),
     ];
@@ -963,9 +1190,11 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       _buildDropdown<String>(
         label: 'Layout',
         value: block.getConfig<String>('layout', 'horizontal') ?? 'horizontal',
-        items: const ['horizontal', 'grid'],
+        items: const ['horizontal', 'grid', 'carousel'],
         onChanged: (v) => _updateBlockConfig('layout', v),
       ),
+      // Tap action fields
+      ..._buildTapActionFields(block),
     ];
   }
 
@@ -990,9 +1219,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: TextField(
-        controller: TextEditingController(text: value)
-          ..selection = TextSelection.collapsed(offset: value.length),
+      child: TextFormField(
+        key: ValueKey('${label}_$value'), // Unique key for rebuild
+        initialValue: value,
         decoration: InputDecoration(
           labelText: label,
           helperText: helperText,
@@ -1173,6 +1402,95 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
             child: const Text('Annuler'),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Build tap action configuration fields
+  /// 
+  /// Shows:
+  /// - Action type dropdown (none, openPage, openLegacyPage, openUrl)
+  /// - Conditional target field based on action type
+  List<Widget> _buildTapActionFields(BuilderBlock block) {
+    final tapAction = block.getConfig<String>('tapAction', 'none') ?? 'none';
+    final tapActionTarget = block.getConfig<String>('tapActionTarget', '') ?? '';
+
+    return [
+      const Divider(height: 32),
+      const Text(
+        '🔗 Action au clic',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.blue,
+        ),
+      ),
+      const SizedBox(height: 12),
+      _buildDropdown<String>(
+        label: 'Type d\'action',
+        value: tapAction,
+        items: const ['none', 'openPage', 'openLegacyPage', 'openUrl'],
+        onChanged: (v) {
+          _updateBlockConfigMultiple({
+            'tapAction': v,
+            'tapActionTarget': '', // Reset target when action type changes
+          });
+        },
+      ),
+      // Show target field based on action type
+      if (tapAction == 'openPage')
+        _buildTextField(
+          label: 'ID de la page Builder',
+          value: tapActionTarget,
+          onChanged: (v) => _updateBlockConfig('tapActionTarget', v),
+          helperText: 'Ex: promo, menu, about',
+        ),
+      if (tapAction == 'openLegacyPage' && LegacyRoutes.values.isNotEmpty)
+        _buildDropdown<String>(
+          label: 'Route de l\'application',
+          value: LegacyRoutes.values.contains(tapActionTarget) 
+              ? tapActionTarget 
+              : LegacyRoutes.values.first,
+          items: LegacyRoutes.values,
+          onChanged: (v) => _updateBlockConfig('tapActionTarget', v),
+        ),
+      if (tapAction == 'openUrl')
+        _buildTextField(
+          label: 'URL externe',
+          value: tapActionTarget,
+          onChanged: (v) => _updateBlockConfig('tapActionTarget', v),
+          helperText: 'Ex: https://example.com',
+        ),
+    ];
+  }
+
+  /// Build padding/margin/spacing fields
+  Widget _buildNumberField({
+    required String label,
+    required int value,
+    required Function(int) onChanged,
+    String? helperText,
+    int min = 0,
+    int max = 999,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        key: ValueKey('${label}_$value'), // Unique key for rebuild
+        initialValue: value.toString(),
+        decoration: InputDecoration(
+          labelText: label,
+          helperText: helperText,
+          border: const OutlineInputBorder(),
+          filled: true,
+          fillColor: Colors.white,
+          suffixText: 'px',
+        ),
+        keyboardType: TextInputType.number,
+        onChanged: (v) {
+          final parsed = int.tryParse(v) ?? value;
+          onChanged(parsed.clamp(min, max));
+        },
       ),
     );
   }
