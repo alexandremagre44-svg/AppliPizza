@@ -6,6 +6,8 @@
 
 import 'package:flutter/widgets.dart';
 import '../runtime/modules/menu_catalog_runtime_widget.dart';
+import '../runtime/modules/profile_module_widget.dart';
+import '../runtime/modules/roulette_module_widget.dart';
 
 /// Builder modules configuration
 /// 
@@ -51,9 +53,9 @@ Widget _getModuleWidget(BuildContext context, String moduleId) {
     case 'menu_catalog':
       return const MenuCatalogRuntimeWidget();
     case 'profile_module':
-      return _placeholderModule(context, 'Module Profil');
+      return const ProfileModuleWidget();
     case 'roulette_module':
-      return _placeholderModule(context, 'Module Roulette');
+      return const RouletteModuleWidget();
     default:
       return _placeholderModule(context, moduleId);
   }
