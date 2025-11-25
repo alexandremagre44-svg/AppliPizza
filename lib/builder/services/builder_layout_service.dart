@@ -539,20 +539,26 @@ class BuilderLayoutService {
 
   /// Get pages for bottom navigation bar
   /// 
-  /// Combines system pages (order fixed) with published pages (order from Firestore)
-  /// Returns pages where displayLocation == 'bottomBar' and isEnabled == true
+  /// Returns pages where isActive == true and bottomNavIndex != null
+  /// Sorted by bottomNavIndex ASC
+  /// 
+  /// This is the NEW B3 logic that uses isActive + bottomNavIndex fields
+  /// instead of the old displayLocation + order fields
   Future<List<BuilderPage>> getBottomBarPages() async {
     try {
       // Load system pages first
       final systemPages = await loadSystemPages();
       
-      // Filter for bottomBar pages
+      // Filter for active pages with bottomNavIndex
+      // NEW LOGIC: isActive + bottomNavIndex != null
       final bottomBarPages = systemPages.where((page) => 
-        page.displayLocation == 'bottomBar' && page.isEnabled
+        page.isActive && page.bottomNavIndex != null && page.bottomNavIndex < 999
       ).toList();
       
-      // If we have system pages, return them
+      // If we have system pages, sort and return them
       if (bottomBarPages.isNotEmpty) {
+        bottomBarPages.sort((a, b) => 
+          (a.bottomNavIndex ?? 999).compareTo(b.bottomNavIndex ?? 999));
         return bottomBarPages;
       }
       
@@ -560,10 +566,11 @@ class BuilderLayoutService {
       final publishedPages = await loadAllPublishedPages(kRestaurantId);
       
       final publishedBottomBar = publishedPages.values
-        .where((page) => page.displayLocation == 'bottomBar' && page.isEnabled)
+        .where((page) => page.isActive && page.bottomNavIndex != null && page.bottomNavIndex < 999)
         .toList();
       
-      publishedBottomBar.sort((a, b) => a.order.compareTo(b.order));
+      publishedBottomBar.sort((a, b) => 
+        (a.bottomNavIndex ?? 999).compareTo(b.bottomNavIndex ?? 999));
       
       return publishedBottomBar;
     } catch (e) {

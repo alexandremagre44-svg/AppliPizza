@@ -54,16 +54,54 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
         if (snapshot.hasData && snapshot.data != null) {
           final builderPage = snapshot.data!;
           
+          // Check if the page has content (published layout or legacy blocks)
+          final hasContent = builderPage.publishedLayout.isNotEmpty || 
+                            builderPage.blocks.isNotEmpty;
+          
           return Scaffold(
             appBar: AppBar(
               title: Text(builderPage.name),
               backgroundColor: Theme.of(context).colorScheme.surface,
               elevation: 0,
             ),
-            body: BuilderRuntimeRenderer(
-              blocks: builderPage.blocks,
-              wrapInScrollView: true,
-            ),
+            body: hasContent
+              ? BuilderRuntimeRenderer(
+                  blocks: builderPage.publishedLayout.isNotEmpty 
+                      ? builderPage.publishedLayout 
+                      : builderPage.blocks,
+                  wrapInScrollView: true,
+                )
+              : Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.construction_outlined,
+                          size: 80,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Aucun contenu configuré',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Cette page n\'a pas encore de contenu publié.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
           );
         }
         

@@ -238,27 +238,44 @@ class BuilderPage {
     };
   }
 
+  /// Helper to safely parse layout field from Firestore
+  /// Handles legacy string values like "none" or empty strings
+  static List<BuilderBlock> _safeLayoutParse(dynamic value) {
+    // If null, return empty list
+    if (value == null) return [];
+    
+    // If already a List, try to parse it
+    if (value is List<dynamic>) {
+      try {
+        return value
+            .map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        // If parsing fails, return empty list
+        return [];
+      }
+    }
+    
+    // For any other type (String like "none", etc.), return empty list
+    // This handles legacy data where draftLayout/publishedLayout might be stored as strings
+    return [];
+  }
+
   /// Create from Firestore JSON
   factory BuilderPage.fromJson(Map<String, dynamic> json) {
     final pageId = BuilderPageId.fromJson(json['pageId'] as String? ?? 'home');
     
     // Parse blocks (legacy field)
-    final blocks = (json['blocks'] as List<dynamic>?)
-            ?.map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
-            .toList() ??
-        [];
+    final blocks = _safeLayoutParse(json['blocks']);
     
     // Parse draftLayout (new field, fallback to blocks for backward compatibility)
-    final draftLayout = (json['draftLayout'] as List<dynamic>?)
-            ?.map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
-            .toList() ??
-        blocks;
+    final draftLayoutRaw = json['draftLayout'];
+    final draftLayout = draftLayoutRaw != null 
+        ? _safeLayoutParse(draftLayoutRaw)
+        : blocks;
     
     // Parse publishedLayout (new field)
-    final publishedLayout = (json['publishedLayout'] as List<dynamic>?)
-            ?.map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
-            .toList() ??
-        [];
+    final publishedLayout = _safeLayoutParse(json['publishedLayout']);
     
     // Parse modules list
     final modules = (json['modules'] as List<dynamic>?)

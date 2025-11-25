@@ -52,6 +52,35 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             totalItems,
           );
           
+          // Fallback: If no navigation items, show minimal navigation
+          if (navItems.items.isEmpty) {
+            debugPrint('⚠️ No bottom bar pages found, showing fallback navigation');
+            return Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                currentIndex: 0,
+                onTap: (index) {
+                  if (index == 0) context.go('/home');
+                },
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home_outlined),
+                    label: 'Accueil',
+                  ),
+                ],
+              ),
+            );
+          }
+          
           // Calculate current index based on location
           final currentIndex = _calculateSelectedIndex(
             context,
