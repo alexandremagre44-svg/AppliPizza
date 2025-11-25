@@ -313,6 +313,11 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         return {
           'htmlContent': '<p>Contenu HTML</p>',
         };
+      case BlockType.system:
+        // System blocks use moduleType, not through _addBlock
+        return {
+          'moduleType': 'unknown',
+        };
     }
   }
 
@@ -704,6 +709,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         return '${ids.length} produit(s)';
       case BlockType.banner:
         return block.getConfig<String>('text', 'Bannière') ?? 'Bannière';
+      case BlockType.system:
+        final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
+        return 'Module ${SystemBlock.getModuleLabel(moduleType)}';
       default:
         return 'Bloc ${block.type.value}';
     }
@@ -782,9 +790,85 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         return _buildCategoryListConfig(block);
       case BlockType.html:
         return _buildHtmlConfig(block);
-      default:
-        return [const Text('Configuration non disponible pour ce type')];
+      case BlockType.system:
+        return _buildSystemConfig(block);
     }
+  }
+
+  /// Build configuration fields for system blocks
+  /// System blocks are non-configurable, so we just show info about the module
+  List<Widget> _buildSystemConfig(BuilderBlock block) {
+    final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
+    final moduleLabel = SystemBlock.getModuleLabel(moduleType);
+    final moduleIcon = SystemBlock.getModuleIcon(moduleType);
+    
+    return [
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.blue.shade200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(moduleIcon, style: const TextStyle(fontSize: 32)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Module $moduleLabel',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Type: $moduleType',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, size: 20, color: Colors.amber.shade700),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Les modules système ne sont pas configurables. '
+                      'Ils affichent des fonctionnalités de l\'application avec leurs paramètres par défaut.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.amber.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 
   List<Widget> _buildHeroConfig(BuilderBlock block) {
@@ -1371,29 +1455,92 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   void _showAddBlockDialog() {
+    // Filter out system type from regular blocks
+    final regularBlocks = BlockType.values.where((t) => t != BlockType.system).toList();
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ajouter un bloc'),
         content: SizedBox(
           width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: BlockType.values.length,
-            itemBuilder: (context, index) {
-              final type = BlockType.values[index];
-              return ListTile(
-                leading: Text(
-                  type.icon,
-                  style: const TextStyle(fontSize: 24),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Regular blocks section
+                const Text(
+                  'Blocs de contenu',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
                 ),
-                title: Text(type.label),
-                onTap: () {
-                  Navigator.pop(context);
-                  _addBlock(type);
-                },
-              );
-            },
+                const Divider(),
+                ...regularBlocks.map((type) => ListTile(
+                  leading: Text(
+                    type.icon,
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  title: Text(type.label),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addBlock(type);
+                  },
+                )),
+                
+                const SizedBox(height: 16),
+                
+                // System modules section
+                const Text(
+                  'Modules système',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+                const Divider(color: Colors.blue),
+                ListTile(
+                  leading: const Text('🎰', style: TextStyle(fontSize: 24)),
+                  title: const Text('Ajouter module Roulette'),
+                  subtitle: const Text('Roue de la chance'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addSystemBlock('roulette');
+                  },
+                ),
+                ListTile(
+                  leading: const Text('⭐', style: TextStyle(fontSize: 24)),
+                  title: const Text('Ajouter module Fidélité'),
+                  subtitle: const Text('Points et progression'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addSystemBlock('loyalty');
+                  },
+                ),
+                ListTile(
+                  leading: const Text('🎁', style: TextStyle(fontSize: 24)),
+                  title: const Text('Ajouter module Récompenses'),
+                  subtitle: const Text('Tickets et bons'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addSystemBlock('rewards');
+                  },
+                ),
+                ListTile(
+                  leading: const Text('📊', style: TextStyle(fontSize: 24)),
+                  title: const Text('Ajouter module Activité du compte'),
+                  subtitle: const Text('Commandes et favoris'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addSystemBlock('accountActivity');
+                  },
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
@@ -1404,6 +1551,24 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         ],
       ),
     );
+  }
+
+  /// Add a system block with the specified module type
+  void _addSystemBlock(String moduleType) {
+    if (_page == null) return;
+
+    final newBlock = SystemBlock(
+      id: 'block_${DateTime.now().millisecondsSinceEpoch}',
+      moduleType: moduleType,
+      order: _page!.blocks.length,
+    );
+
+    setState(() {
+      _page = _page!.addBlock(newBlock);
+      _hasChanges = true;
+      _selectedBlock = newBlock;
+    });
+    _scheduleAutoSave();
   }
 
   /// Build tap action configuration fields

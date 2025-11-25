@@ -15,6 +15,7 @@ import '../blocks/image_block_runtime.dart';
 import '../blocks/button_block_runtime.dart';
 import '../blocks/category_list_block_runtime.dart';
 import '../blocks/html_block_runtime.dart';
+import '../blocks/system_block_runtime.dart';
 
 /// Renders a list of BuilderBlocks using runtime widgets
 /// These widgets can access providers, services, and real data
@@ -263,12 +264,8 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
       case BlockType.html:
         return HtmlBlockRuntime(block: block);
       
-      // Unknown block types are silently ignored
-      default:
-        if (kDebugMode) {
-          debugPrint('Unknown block type: ${block.type.value} for block ${block.id}');
-        }
-        return const SizedBox.shrink();
+      case BlockType.system:
+        return SystemBlockRuntime(block: block);
     }
   }
 }

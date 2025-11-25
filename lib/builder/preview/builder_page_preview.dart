@@ -92,6 +92,8 @@ class BuilderPagePreview extends StatelessWidget {
         return CategoryListBlockPreview(block: block);
       case BlockType.html:
         return HtmlBlockPreview(block: block);
+      case BlockType.system:
+        return SystemBlockPreview(block: block);
     }
   }
 

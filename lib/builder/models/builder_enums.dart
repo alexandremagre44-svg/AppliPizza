@@ -74,7 +74,10 @@ enum BlockType {
   categoryList('category_list', 'Catégories', '📂'),
   
   /// Custom HTML block
-  html('html', 'HTML Personnalisé', '💻');
+  html('html', 'HTML Personnalisé', '💻'),
+  
+  /// System module block (non-configurable, positionable modules)
+  system('system', 'Module Système', '⚙️');
 
   const BlockType(this.value, this.label, this.icon);
   
