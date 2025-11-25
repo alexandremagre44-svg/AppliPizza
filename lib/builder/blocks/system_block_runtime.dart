@@ -125,6 +125,13 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Routes to the appropriate module builder based on type
   Widget _buildModuleWidget(BuildContext context, String moduleType) {
+    // First check if it's a new-style module from builder_modules
+    // These are: menu_catalog, cart_module, profile_module, roulette_module
+    if (_isBuilderModule(moduleType)) {
+      return _buildBuilderModule(context, moduleType);
+    }
+    
+    // Legacy module types (for backward compatibility)
     switch (moduleType) {
       case 'roulette':
         return _buildRouletteModule(context);
@@ -136,6 +143,96 @@ class SystemBlockRuntime extends StatelessWidget {
         return _buildAccountActivityModule(context);
       default:
         return _buildUnknownModule(moduleType);
+    }
+  }
+  
+  /// Check if moduleType is a builder module (from builder_modules.dart)
+  bool _isBuilderModule(String moduleType) {
+    const builderModules = [
+      'menu_catalog',
+      'cart_module',
+      'profile_module',
+      'roulette_module',
+    ];
+    return builderModules.contains(moduleType);
+  }
+  
+  /// Build a module from builder_modules.dart
+  Widget _buildBuilderModule(BuildContext context, String moduleType) {
+    // Import builder_modules at the top of the file
+    // and use renderModule function
+    try {
+      // For now, return a placeholder that shows the module is recognized
+      // The actual rendering will be done by importing builder_modules
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.blue.shade200),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _getModuleIcon(moduleType),
+              size: 64,
+              color: Colors.blue.shade600,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _getModuleName(moduleType),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue.shade800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Module Builder',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.blue.shade600,
+              ),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      return _buildUnknownModule(moduleType);
+    }
+  }
+  
+  /// Get icon for builder module
+  IconData _getModuleIcon(String moduleType) {
+    switch (moduleType) {
+      case 'menu_catalog':
+        return Icons.restaurant_menu;
+      case 'cart_module':
+        return Icons.shopping_cart;
+      case 'profile_module':
+        return Icons.person;
+      case 'roulette_module':
+        return Icons.casino;
+      default:
+        return Icons.extension;
+    }
+  }
+  
+  /// Get name for builder module
+  String _getModuleName(String moduleType) {
+    switch (moduleType) {
+      case 'menu_catalog':
+        return 'Catalogue Menu';
+      case 'cart_module':
+        return 'Module Panier';
+      case 'profile_module':
+        return 'Profil';
+      case 'roulette_module':
+        return 'Roulette';
+      default:
+        return 'Module inconnu';
     }
   }
 
@@ -449,7 +546,7 @@ class SystemBlockRuntime extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Module système introuvable',
+            'Module inconnu',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -474,7 +571,7 @@ class SystemBlockRuntime extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Les modules disponibles sont:\nroulette, loyalty, rewards, accountActivity',
+            'Modules disponibles:\nmenu_catalog, cart_module, profile_module, roulette_module\nroulette, loyalty, rewards, accountActivity',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 11,

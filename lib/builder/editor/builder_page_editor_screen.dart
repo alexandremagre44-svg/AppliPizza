@@ -1929,6 +1929,15 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                 ),
                 const Divider(color: Colors.blue),
                 ListTile(
+                  leading: Icon(Icons.shopping_cart, size: 28, color: Colors.green.shade600),
+                  title: const Text('Ajouter module Panier'),
+                  subtitle: const Text('Panier et validation'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _addSystemBlock('cart_module');
+                  },
+                ),
+                ListTile(
                   leading: Icon(Icons.casino, size: 28, color: Colors.purple.shade600),
                   title: const Text('Ajouter module Roulette'),
                   subtitle: const Text('Roue de la chance'),

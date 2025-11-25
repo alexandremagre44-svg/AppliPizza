@@ -563,7 +563,17 @@ class BuilderPageService {
       case 'home_template':
         return _buildHomeTemplateBlocks();
       case 'menu_template':
+      case 'menu':
         return _buildMenuTemplateBlocks();
+      case 'cart':
+      case 'cart_template':
+        return _buildCartTemplateBlocks();
+      case 'profile':
+      case 'profile_template':
+        return _buildProfileTemplateBlocks();
+      case 'roulette':
+      case 'roulette_template':
+        return _buildRouletteTemplateBlocks();
       case 'promo_template':
         return _buildPromoTemplateBlocks();
       case 'about_template':
@@ -617,35 +627,43 @@ class BuilderPageService {
   /// Menu template blocks
   List<BuilderBlock> _buildMenuTemplateBlocks() {
     return [
-      BuilderBlock(
-        id: 'text-1',
-        type: BlockType.text,
+      SystemBlock(
+        id: 'menu-module-1',
+        moduleType: 'menu_catalog',
         order: 0,
-        config: {
-          'content': 'Notre Menu',
-          'fontSize': 28.0,
-          'fontWeight': 'bold',
-          'textAlign': 'center',
-        },
       ),
-      BuilderBlock(
-        id: 'category-list-1',
-        type: BlockType.categoryList,
-        order: 1,
-        config: {
-          'layout': 'horizontal',
-          'showIcons': true,
-        },
+    ];
+  }
+  
+  /// Cart template blocks
+  List<BuilderBlock> _buildCartTemplateBlocks() {
+    return [
+      SystemBlock(
+        id: 'cart-module-1',
+        moduleType: 'cart_module',
+        order: 0,
       ),
-      BuilderBlock(
-        id: 'product-list-1',
-        type: BlockType.productList,
-        order: 2,
-        config: {
-          'mode': 'all',
-          'layout': 'grid',
-          'showFilters': true,
-        },
+    ];
+  }
+  
+  /// Profile template blocks
+  List<BuilderBlock> _buildProfileTemplateBlocks() {
+    return [
+      SystemBlock(
+        id: 'profile-module-1',
+        moduleType: 'profile_module',
+        order: 0,
+      ),
+    ];
+  }
+  
+  /// Roulette template blocks
+  List<BuilderBlock> _buildRouletteTemplateBlocks() {
+    return [
+      SystemBlock(
+        id: 'roulette-module-1',
+        moduleType: 'roulette_module',
+        order: 0,
       ),
     ];
   }

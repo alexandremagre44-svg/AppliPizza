@@ -54,7 +54,7 @@ Widget _placeholderModule(BuildContext context, String moduleName) {
 /// ```
 final Map<String, ModuleWidgetBuilder> builderModules = {
   'menu_catalog': (context) => _placeholderModule(context, 'Menu Catalogue'),
-  'cart_module': (context) => _placeholderModule(context, 'Panier'),
+  'cart_module': (context) => const CartModuleWidget(),
   'profile_module': (context) => _placeholderModule(context, 'Profil'),
   'roulette_module': (context) => _placeholderModule(context, 'Roulette'),
 };
@@ -92,7 +92,7 @@ const List<ModuleConfig> availableModules = [
   ModuleConfig(
     id: 'cart_module',
     name: 'Panier',
-    description: 'Widget du panier d\'achat avec résumé des articles',
+    description: 'Panier et validation de commande',
     icon: 'shopping_cart',
     isSystemModule: true,
   ),
@@ -171,5 +171,65 @@ Widget renderModule(BuildContext context, String moduleId) {
   if (builder != null) {
     return builder(context);
   }
-  return _placeholderModule(context, 'Unknown module: $moduleId');
+  return _placeholderModule(context, 'Module inconnu: $moduleId');
+}
+
+/// Future-proof cart module widget with payment callbacks
+/// 
+/// This widget is designed to be extended with payment integrations (Stripe, PayPal)
+/// Callbacks are optional and not used yet, but ready for future implementation
+class CartModuleWidget extends StatelessWidget {
+  /// Called when user requests checkout (optional, for future use)
+  final VoidCallback? onCheckoutRequested;
+  
+  /// Called when user selects a payment method (optional, for future use)
+  /// paymentMethod can be: 'stripe', 'paypal', 'cash', etc.
+  final void Function(String paymentMethod)? onPaymentSelected;
+  
+  const CartModuleWidget({
+    super.key,
+    this.onCheckoutRequested,
+    this.onPaymentSelected,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.shopping_cart,
+              size: 64,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Module Panier',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Widget du panier d\'achat',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Future-proof pour Stripe/PayPal',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.blue[600],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
