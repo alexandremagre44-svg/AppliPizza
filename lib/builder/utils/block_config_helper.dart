@@ -242,8 +242,17 @@ class BlockConfigHelper {
       return null;
     }
     
+    // Define which action types require a target value
+    const actionsRequiringTarget = {
+      'openPage',
+      'openLegacyPage',
+      'openSystemPage',
+      'openUrl',
+      'scrollToBlock',
+    };
+    
     // Return null if action requires a target but none provided
-    if (target.isEmpty && actionType != 'none') {
+    if (actionsRequiringTarget.contains(actionType) && target.isEmpty) {
       return null;
     }
     
