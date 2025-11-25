@@ -192,6 +192,42 @@ class DefaultPageCreator {
           'icon': 'contact_page',
           'order': 30,
         };
+      case BuilderPageId.profile:
+        return {
+          'name': 'Profil',
+          'description': 'Page profil utilisateur (système)',
+          'route': '/profile',
+          'displayLocation': 'bottomBar',
+          'icon': 'person',
+          'order': 4,
+        };
+      case BuilderPageId.cart:
+        return {
+          'name': 'Panier',
+          'description': 'Page panier (système)',
+          'route': '/cart',
+          'displayLocation': 'bottomBar',
+          'icon': 'shopping_cart',
+          'order': 3,
+        };
+      case BuilderPageId.rewards:
+        return {
+          'name': 'Récompenses',
+          'description': 'Page récompenses (système)',
+          'route': '/rewards',
+          'displayLocation': 'hidden',
+          'icon': 'card_giftcard',
+          'order': 40,
+        };
+      case BuilderPageId.roulette:
+        return {
+          'name': 'Roulette',
+          'description': 'Page roulette (système)',
+          'route': '/roulette',
+          'displayLocation': 'hidden',
+          'icon': 'casino',
+          'order': 50,
+        };
     }
   }
 
@@ -208,6 +244,18 @@ class DefaultPageCreator {
         return _buildAboutBlocks();
       case BuilderPageId.contact:
         return _buildContactBlocks();
+      case BuilderPageId.profile:
+        // System page - uses legacy screen, return empty blocks
+        return [];
+      case BuilderPageId.cart:
+        // System page - uses legacy screen, return empty blocks
+        return [];
+      case BuilderPageId.rewards:
+        // System page - uses legacy screen, return empty blocks
+        return [];
+      case BuilderPageId.roulette:
+        // System page - uses legacy screen, return empty blocks
+        return [];
     }
   }
 
