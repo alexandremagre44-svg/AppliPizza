@@ -359,6 +359,106 @@ class BuilderPageService {
     }
   }
 
+  // ==================== NAVIGATION PARAMETERS ====================
+
+  /// Update page navigation parameters (isActive and bottomNavIndex)
+  /// 
+  /// This method allows updating navigation settings without affecting
+  /// draftLayout, publishedLayout, or modules.
+  /// 
+  /// Validation:
+  /// - If isActive is true, bottomNavIndex must be between 0 and 4
+  /// - No duplicate bottomNavIndex allowed for active pages
+  /// - Updates both draft and published versions
+  /// 
+  /// Example:
+  /// ```dart
+  /// await service.updatePageNavigation(
+  ///   pageId: BuilderPageId.promo,
+  ///   appId: 'delizza',
+  ///   isActive: true,
+  ///   bottomNavIndex: 2,
+  /// );
+  /// ```
+  Future<BuilderPage?> updatePageNavigation({
+    required BuilderPageId pageId,
+    required String appId,
+    required bool isActive,
+    required int? bottomNavIndex,
+  }) async {
+    try {
+      // Validation: if active, bottomNavIndex must be provided and valid
+      if (isActive) {
+        if (bottomNavIndex == null) {
+          debugPrint('[BuilderPageService] ❌ bottomNavIndex required when isActive is true');
+          return null;
+        }
+        
+        if (bottomNavIndex < 0 || bottomNavIndex > 4) {
+          debugPrint('[BuilderPageService] ❌ bottomNavIndex must be between 0 and 4');
+          return null;
+        }
+      }
+      
+      // Check for duplicate bottomNavIndex among active pages
+      if (isActive && bottomNavIndex != null) {
+        final allDraftPages = await _layoutService.loadAllDraftPages(appId);
+        
+        // Check for duplicates (excluding current page)
+        for (final entry in allDraftPages.entries) {
+          final otherPage = entry.value;
+          if (otherPage.pageId != pageId && 
+              otherPage.isActive && 
+              otherPage.bottomNavIndex == bottomNavIndex) {
+            debugPrint('[BuilderPageService] ❌ Duplicate bottomNavIndex $bottomNavIndex found on page ${otherPage.pageId.value}');
+            return null;
+          }
+        }
+      }
+      
+      // Load page
+      var page = await _layoutService.loadDraft(appId, pageId);
+      page ??= await _layoutService.loadPublished(appId, pageId);
+      
+      if (page == null) {
+        debugPrint('[BuilderPageService] ⚠️ Page not found: ${pageId.value}');
+        return null;
+      }
+      
+      // Update navigation parameters
+      // Note: We keep order in sync with bottomNavIndex for backward compatibility
+      // with legacy code that might still use the order field for navigation
+      // When isActive is false, we set a high order value to move it out of bottom bar
+      final finalBottomNavIndex = isActive ? (bottomNavIndex ?? page.bottomNavIndex) : 999;
+      final updatedPage = page.copyWith(
+        isActive: isActive,
+        bottomNavIndex: finalBottomNavIndex,
+        order: finalBottomNavIndex, // Keep in sync for compatibility
+        updatedAt: DateTime.now(),
+      );
+      
+      // Save to both draft and published if published exists
+      await _layoutService.saveDraft(updatedPage.copyWith(isDraft: true));
+      
+      if (await _layoutService.hasPublished(appId, pageId)) {
+        await _layoutService.publishPage(
+          updatedPage,
+          userId: 'system',
+          shouldDeleteDraft: false,
+        );
+      }
+      
+      debugPrint('[BuilderPageService] ✅ Updated navigation for ${pageId.value}: isActive=$isActive, index=$bottomNavIndex');
+      return updatedPage;
+    } catch (e, stackTrace) {
+      debugPrint('[BuilderPageService] ❌ Error updating page navigation: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
+      return null;
+    }
+  }
+
   // ==================== MODULES ====================
 
   /// Add a module to a page

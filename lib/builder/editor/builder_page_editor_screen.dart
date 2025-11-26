@@ -42,6 +42,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   static const Duration _autoSaveDelay = Duration(seconds: 2);
   
   final BuilderLayoutService _service = BuilderLayoutService();
+  final BuilderPageService _pageService = BuilderPageService();
   BuilderPage? _page;
   bool _isLoading = true;
   BuilderBlock? _selectedBlock;
@@ -50,6 +51,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   late TabController _tabController;
   Timer? _autoSaveTimer;
   bool _isSaving = false;
+  String? _duplicateIndexWarning; // Cached duplicate check result
   
   /// Whether to show the mobile editor panel at the bottom
   /// Panel is shown when a block is selected AND we're showing the blocks list (not preview)
@@ -120,6 +122,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         _page = page;
         _isLoading = false;
       });
+      
+      // Check for duplicate index after loading
+      _checkDuplicateIndex();
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -588,22 +593,12 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   Future<void> _toggleActive() async {
     if (_page == null) return;
     
-    setState(() {
-      _page = _page!.copyWith(isActive: !_page!.isActive);
-      _hasChanges = true;
-    });
-    _scheduleAutoSave();
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_page!.isActive ? '✅ Page activée' : '✅ Page désactivée'),
-        ),
-      );
-    }
+    // Use the new service-based method
+    await _updateNavigationParams(isActive: !_page!.isActive);
   }
 
-  /// Show bottom nav order dialog
+  /// Show bottom nav order dialog (deprecated - now handled in navigation panel)
+  /// Kept for backward compatibility with AppBar button
   Future<void> _showBottomNavOrderDialog() async {
     if (_page == null) return;
     
@@ -614,16 +609,33 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     final result = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Ordre dans la navigation'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Position',
-            hintText: '1, 2, 3...',
-            border: OutlineInputBorder(),
-            helperText: 'Plus petit = apparaît en premier',
-          ),
+        title: const Text('Position dans la navigation'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Position (0-4)',
+                hintText: '0, 1, 2, 3, 4',
+                border: OutlineInputBorder(),
+                helperText: 'Position dans la barre de navigation',
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Vous pouvez aussi modifier cette valeur dans le panneau "Paramètres de navigation" ci-dessous.',
+                style: TextStyle(fontSize: 11),
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -633,7 +645,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           ElevatedButton(
             onPressed: () {
               final value = int.tryParse(controller.text);
-              if (value != null) {
+              if (value != null && value >= 0 && value <= 4) {
                 Navigator.pop(context, value);
               }
             },
@@ -644,20 +656,101 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     );
     
     if (result != null) {
-      setState(() {
-        _page = _page!.copyWith(
-          bottomNavIndex: result,
-          order: result,
+      await _updateNavigationParams(bottomNavIndex: result);
+    }
+  }
+
+  /// Update navigation parameters using BuilderPageService
+  Future<void> _updateNavigationParams({bool? isActive, int? bottomNavIndex}) async {
+    if (_page == null) return;
+    
+    // Determine final values
+    final finalIsActive = isActive ?? _page!.isActive;
+    final finalBottomNavIndex = bottomNavIndex ?? _page!.bottomNavIndex;
+    
+    // Validate: if active, bottomNavIndex must be 0-4
+    if (finalIsActive && (finalBottomNavIndex < 0 || finalBottomNavIndex > 4)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ La position doit être entre 0 et 4 pour une page active'),
+            backgroundColor: Colors.red,
+          ),
         );
-        _hasChanges = true;
+      }
+      return;
+    }
+    
+    // Update via service
+    final updatedPage = await _pageService.updatePageNavigation(
+      pageId: _page!.pageId,
+      appId: widget.appId,
+      isActive: finalIsActive,
+      bottomNavIndex: finalIsActive ? finalBottomNavIndex : null,
+    );
+    
+    if (updatedPage != null) {
+      setState(() {
+        _page = updatedPage;
+        _hasChanges = false; // Already saved by service
       });
-      _scheduleAutoSave();
+      
+      // Check for duplicates after update
+      _checkDuplicateIndex();
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ Ordre mis à jour: $result')),
+          SnackBar(
+            content: Text(
+              finalIsActive 
+                ? '✅ Page activée (position $finalBottomNavIndex)' 
+                : '✅ Page désactivée'
+            ),
+            backgroundColor: Colors.green,
+          ),
         );
       }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Erreur lors de la mise à jour (index peut-être déjà utilisé)'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+  
+  /// Check if another page is using the same bottomNavIndex
+  /// Updates the cached _duplicateIndexWarning state
+  Future<void> _checkDuplicateIndex() async {
+    if (_page == null || !_page!.isActive) {
+      if (_duplicateIndexWarning != null) {
+        setState(() => _duplicateIndexWarning = null);
+      }
+      return;
+    }
+    
+    try {
+      final allPages = await _service.loadAllDraftPages(widget.appId);
+      String? warning;
+      
+      for (final entry in allPages.entries) {
+        final otherPage = entry.value;
+        if (otherPage.pageId != _page!.pageId && 
+            otherPage.isActive && 
+            otherPage.bottomNavIndex == _page!.bottomNavIndex) {
+          warning = 'La page "${otherPage.name}" utilise déjà cette position';
+          break;
+        }
+      }
+      
+      if (warning != _duplicateIndexWarning) {
+        setState(() => _duplicateIndexWarning = warning);
+      }
+    } catch (e) {
+      debugPrint('Error checking duplicate index: $e');
     }
   }
 
@@ -897,6 +990,153 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
               ],
             ),
           ),
+        
+        // Navigation parameters panel
+        Container(
+          padding: const EdgeInsets.all(12),
+          margin: const EdgeInsets.only(left: 8, right: 8, top: 8),
+          decoration: BoxDecoration(
+            color: Colors.green.shade50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.green.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.navigation, color: Colors.green.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Paramètres de navigation',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.green.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              
+              // Switch: Afficher dans la bottom bar
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Afficher dans la barre du bas',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                  ),
+                  Switch(
+                    value: _page!.isActive,
+                    onChanged: (value) => _updateNavigationParams(isActive: value),
+                    activeColor: Colors.green.shade600,
+                  ),
+                ],
+              ),
+              
+              // Dropdown/Slider: Position dans la barre
+              if (_page!.isActive) ...[
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Position (0-4)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                          // Show warning if invalid value
+                          if (_page!.bottomNavIndex < 0 || _page!.bottomNavIndex > 4)
+                            Text(
+                              'Valeur invalide: ${_page!.bottomNavIndex}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.red.shade700,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: (_page!.bottomNavIndex >= 0 && _page!.bottomNavIndex <= 4) 
+                              ? Colors.green.shade300 
+                              : Colors.red.shade300,
+                        ),
+                      ),
+                      child: DropdownButton<int>(
+                        value: (_page!.bottomNavIndex >= 0 && _page!.bottomNavIndex <= 4) 
+                            ? _page!.bottomNavIndex 
+                            : null, // Show hint if invalid
+                        hint: const Text('Choisir'),
+                        underline: const SizedBox(),
+                        items: List.generate(5, (i) => i).map((index) {
+                          return DropdownMenuItem<int>(
+                            value: index,
+                            child: Text('$index'),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            _updateNavigationParams(bottomNavIndex: value);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                
+                // Warning for duplicate index (cached)
+                if (_duplicateIndexWarning != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.orange.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning, size: 16, color: Colors.orange.shade700),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Attention: $_duplicateIndexWarning',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.orange.shade800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ],
+          ),
+        ),
         
         // Blocks list
         Expanded(
