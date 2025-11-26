@@ -338,13 +338,18 @@ class BuilderPage {
   /// Helper to convert IconData to icon name string
   static String? _getIconName(IconData? iconData) {
     if (iconData == null) return null;
-    if (iconData == Icons.home) return 'home';
-    if (iconData == Icons.restaurant_menu) return 'restaurant_menu';
-    if (iconData == Icons.shopping_cart) return 'shopping_cart';
-    if (iconData == Icons.person) return 'person';
-    if (iconData == Icons.card_giftcard) return 'card_giftcard';
-    if (iconData == Icons.casino) return 'casino';
-    return null;
+    
+    // Map of IconData to string names for system pages
+    const iconMap = {
+      58332: 'home',            // Icons.home.codePoint
+      58732: 'restaurant_menu', // Icons.restaurant_menu.codePoint
+      59688: 'shopping_cart',   // Icons.shopping_cart.codePoint
+      59603: 'person',          // Icons.person.codePoint
+      57445: 'card_giftcard',   // Icons.card_giftcard.codePoint
+      57372: 'casino',          // Icons.casino.codePoint
+    };
+    
+    return iconMap[iconData.codePoint];
   }
 
   /// Get blocks sorted by order
