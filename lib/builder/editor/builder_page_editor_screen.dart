@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../services/services.dart';
+import '../exceptions/builder_exceptions.dart';
 import '../preview/preview.dart';
 import '../utils/responsive.dart';
 import '../utils/action_helper.dart';
@@ -664,6 +665,10 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   Future<void> _updateNavigationParams({bool? isActive, int? bottomNavIndex}) async {
     if (_page == null) return;
     
+    // Store old values for potential revert
+    final oldIsActive = _page!.isActive;
+    final oldBottomNavIndex = _page!.bottomNavIndex;
+    
     // Determine final values
     final finalIsActive = isActive ?? _page!.isActive;
     final finalBottomNavIndex = bottomNavIndex ?? _page!.bottomNavIndex;
@@ -681,15 +686,15 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       return;
     }
     
-    // Update via service
-    final updatedPage = await _pageService.updatePageNavigation(
-      pageId: _page!.pageId,
-      appId: widget.appId,
-      isActive: finalIsActive,
-      bottomNavIndex: finalIsActive ? finalBottomNavIndex : null,
-    );
-    
-    if (updatedPage != null) {
+    try {
+      // Update via service
+      final updatedPage = await _pageService.updatePageNavigation(
+        pageId: _page!.pageId,
+        appId: widget.appId,
+        isActive: finalIsActive,
+        bottomNavIndex: finalIsActive ? finalBottomNavIndex : null,
+      );
+      
       setState(() {
         _page = updatedPage;
         _hasChanges = false; // Already saved by service
@@ -710,11 +715,55 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           ),
         );
       }
-    } else {
+    } on MinimumBottomNavItemsException catch (e) {
+      // Revert UI to old values
+      setState(() {
+        if (_page != null) {
+          _page = _page!.copyWith(
+            isActive: oldIsActive,
+            bottomNavIndex: oldBottomNavIndex,
+          );
+        }
+      });
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Erreur lors de la mise à jour (index peut-être déjà utilisé)'),
+          SnackBar(
+            content: Text('⚠️ ${e.message}'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } on BottomNavIndexConflictException catch (e) {
+      // Don't apply the change - keep current values
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('⚠️ ${e.message}'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      // General error handling
+      debugPrint('[BuilderPageEditorScreen] Error updating navigation: $e');
+      
+      // Revert UI to old values
+      setState(() {
+        if (_page != null) {
+          _page = _page!.copyWith(
+            isActive: oldIsActive,
+            bottomNavIndex: oldBottomNavIndex,
+          );
+        }
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Erreur: $e'),
             backgroundColor: Colors.red,
           ),
         );

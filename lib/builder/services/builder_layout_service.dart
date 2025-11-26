@@ -541,18 +541,42 @@ class BuilderLayoutService {
   }
 
   /// Helper to check if a page should appear in bottom navigation bar
-  /// Returns true if page is active and has a valid bottomNavIndex
+  /// 
+  /// NEW LOGIC (B3):
+  /// - isActive == true
+  /// - bottomNavIndex != null
+  /// - bottomNavIndex >= 0 and <= 4
+  /// 
+  /// FALLBACK (backward compatibility):
+  /// - displayLocation == "bottomBar"
+  /// - order != null
+  /// - order >= 0 and <= 4
   bool _isBottomBarPage(BuilderPage page) {
-    return page.isActive && 
-           page.bottomNavIndex != null && 
-           page.bottomNavIndex < _maxBottomNavIndex;
+    // Primary logic: Use isActive + bottomNavIndex
+    if (page.isActive &&
+        page.bottomNavIndex != null &&
+        page.bottomNavIndex >= 0 &&
+        page.bottomNavIndex <= 4) {
+      return true;
+    }
+
+    // Fallback for backward compatibility with old schema
+    if (page.displayLocation == 'bottomBar' &&
+        page.order >= 0 &&
+        page.order <= 4) {
+      return true;
+    }
+
+    return false;
   }
   
-  /// Helper to sort pages by bottomNavIndex
+  /// Helper to sort pages by bottomNavIndex (with fallback to order field)
   void _sortByBottomNavIndex(List<BuilderPage> pages) {
-    pages.sort((a, b) => 
-      (a.bottomNavIndex ?? _maxBottomNavIndex).compareTo(
-        b.bottomNavIndex ?? _maxBottomNavIndex));
+    pages.sort((a, b) {
+      final aIndex = a.bottomNavIndex ?? a.order;
+      final bIndex = b.bottomNavIndex ?? b.order;
+      return aIndex.compareTo(bIndex);
+    });
   }
 
   /// Get pages for bottom navigation bar

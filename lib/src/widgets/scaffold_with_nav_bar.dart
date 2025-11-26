@@ -52,9 +52,10 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             totalItems,
           );
           
-          // Fallback: If no navigation items, show minimal navigation
-          if (navItems.items.isEmpty) {
-            debugPrint('⚠️ No bottom bar pages found, showing fallback navigation');
+          // Runtime safety: If less than 2 items, show fallback navigation
+          // This prevents Flutter crash: 'items.length >= 2' assertion
+          if (navItems.items.length < 2) {
+            debugPrint('⚠️ Bottom bar has < 2 items (${navItems.items.length}), showing fallback navigation');
             return Container(
               decoration: BoxDecoration(
                 boxShadow: [
@@ -70,11 +71,16 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                 currentIndex: 0,
                 onTap: (index) {
                   if (index == 0) context.go('/home');
+                  if (index == 1) context.go('/menu');
                 },
                 items: const [
                   BottomNavigationBarItem(
                     icon: Icon(Icons.home_outlined),
                     label: 'Accueil',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.restaurant_menu_outlined),
+                    label: 'Menu',
                   ),
                 ],
               ),
