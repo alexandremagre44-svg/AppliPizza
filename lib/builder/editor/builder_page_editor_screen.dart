@@ -51,6 +51,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   late TabController _tabController;
   Timer? _autoSaveTimer;
   bool _isSaving = false;
+  String? _duplicateIndexWarning; // Cached duplicate check result
   
   /// Whether to show the mobile editor panel at the bottom
   /// Panel is shown when a block is selected AND we're showing the blocks list (not preview)
@@ -121,6 +122,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         _page = page;
         _isLoading = false;
       });
+      
+      // Check for duplicate index after loading
+      _checkDuplicateIndex();
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -691,6 +695,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         _hasChanges = false; // Already saved by service
       });
       
+      // Check for duplicates after update
+      _checkDuplicateIndex();
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -716,25 +723,35 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
   
   /// Check if another page is using the same bottomNavIndex
-  Future<String?> _checkDuplicateIndex(int index) async {
-    if (_page == null || !_page!.isActive) return null;
+  /// Updates the cached _duplicateIndexWarning state
+  Future<void> _checkDuplicateIndex() async {
+    if (_page == null || !_page!.isActive) {
+      if (_duplicateIndexWarning != null) {
+        setState(() => _duplicateIndexWarning = null);
+      }
+      return;
+    }
     
     try {
       final allPages = await _service.loadAllDraftPages(widget.appId);
+      String? warning;
       
       for (final entry in allPages.entries) {
         final otherPage = entry.value;
         if (otherPage.pageId != _page!.pageId && 
             otherPage.isActive && 
-            otherPage.bottomNavIndex == index) {
-          return 'La page "${otherPage.name}" utilise déjà cette position';
+            otherPage.bottomNavIndex == _page!.bottomNavIndex) {
+          warning = 'La page "${otherPage.name}" utilise déjà cette position';
+          break;
         }
+      }
+      
+      if (warning != _duplicateIndexWarning) {
+        setState(() => _duplicateIndexWarning = warning);
       }
     } catch (e) {
       debugPrint('Error checking duplicate index: $e');
     }
-    
-    return null;
   }
 
   Widget _buildEditorTab(ResponsiveBuilder responsive) {
@@ -1048,7 +1065,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                         border: Border.all(color: Colors.green.shade300),
                       ),
                       child: DropdownButton<int>(
-                        value: _page!.bottomNavIndex.clamp(0, 4),
+                        value: (_page!.bottomNavIndex >= 0 && _page!.bottomNavIndex <= 4) 
+                            ? _page!.bottomNavIndex 
+                            : 0, // Default to 0 if invalid
                         underline: const SizedBox(),
                         items: List.generate(5, (i) => i).map((index) {
                           return DropdownMenuItem<int>(
@@ -1066,41 +1085,34 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                   ],
                 ),
                 
-                // Warning for duplicate index
-                FutureBuilder<String?>(
-                  future: _checkDuplicateIndex(_page!.bottomNavIndex),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && snapshot.data != null) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.shade50,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: Colors.orange.shade300),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.warning, size: 16, color: Colors.orange.shade700),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Attention: ${snapshot.data}',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.orange.shade800,
-                                  ),
-                                ),
+                // Warning for duplicate index (cached)
+                if (_duplicateIndexWarning != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.orange.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning, size: 16, color: Colors.orange.shade700),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Attention: $_duplicateIndexWarning',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.orange.shade800,
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ],
           ),
