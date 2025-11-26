@@ -221,8 +221,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       // Try to get system page configuration for this page
       final systemConfig = SystemPages.getConfig(page.pageId);
       
-      // Use page name if available, otherwise use system default or pageId label
-      final displayName = page.name.isNotEmpty 
+      // Use page name if available and not generic, otherwise use system default or pageId label
+      final displayName = (page.name.isNotEmpty && page.name != 'Page')
           ? page.name 
           : (systemConfig?.defaultName ?? page.pageId.label);
       

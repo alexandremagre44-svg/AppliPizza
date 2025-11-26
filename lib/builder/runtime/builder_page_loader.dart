@@ -70,7 +70,7 @@ class BuilderPageLoader extends ConsumerWidget {
           final systemConfig = SystemPages.getConfig(pageId);
           
           // Ensure page has proper name and icon from system config if it's a system page
-          final displayName = builderPage.name.isNotEmpty 
+          final displayName = (builderPage.name.isNotEmpty && builderPage.name != 'Page')
               ? builderPage.name 
               : (systemConfig?.defaultName ?? pageId.label);
           

@@ -1,8 +1,10 @@
 // lib/builder/models/builder_page.dart
 // Page model for Builder B3 system
 
+import 'package:flutter/material.dart';
 import 'builder_enums.dart';
 import 'builder_block.dart';
+import 'system_pages.dart';
 import '../../src/core/firestore_paths.dart';
 
 /// Page model for multi-page builder system
@@ -269,6 +271,9 @@ class BuilderPage {
   factory BuilderPage.fromJson(Map<String, dynamic> json) {
     final pageId = BuilderPageId.fromJson(json['pageId'] as String? ?? 'home');
     
+    // Get system page config for proper defaults
+    final systemConfig = SystemPages.getConfig(pageId);
+    
     // Parse blocks (legacy field)
     final blocks = _safeLayoutParse(json['blocks']);
     
@@ -287,12 +292,17 @@ class BuilderPage {
             .toList() ??
         [];
     
+    // Use proper defaults from SystemPages registry when available
+    final defaultName = systemConfig?.defaultName ?? 'Page';
+    final defaultIcon = _getIconName(systemConfig?.defaultIcon) ?? 'help_outline';
+    final defaultRoute = systemConfig?.route ?? '/';
+    
     return BuilderPage(
       pageId: pageId,
       appId: json['appId'] as String? ?? kRestaurantId,
-      name: json['name'] as String? ?? 'Page',
+      name: json['name'] as String? ?? defaultName,
       description: json['description'] as String? ?? '',
-      route: json['route'] as String? ?? '/',
+      route: json['route'] as String? ?? defaultRoute,
       blocks: blocks,
       isEnabled: json['isEnabled'] as bool? ?? true,
       isDraft: json['isDraft'] as bool? ?? false,
@@ -311,7 +321,7 @@ class BuilderPage {
           : null,
       lastModifiedBy: json['lastModifiedBy'] as String?,
       displayLocation: json['displayLocation'] as String? ?? 'hidden',
-      icon: json['icon'] as String? ?? 'help_outline',
+      icon: json['icon'] as String? ?? defaultIcon,
       order: json['order'] as int? ?? 999,
       isSystemPage: json['isSystemPage'] as bool? ?? pageId.isSystemPage,
       // New fields
@@ -323,6 +333,18 @@ class BuilderPage {
       draftLayout: draftLayout,
       publishedLayout: publishedLayout,
     );
+  }
+  
+  /// Helper to convert IconData to icon name string
+  static String? _getIconName(IconData? iconData) {
+    if (iconData == null) return null;
+    if (iconData == Icons.home) return 'home';
+    if (iconData == Icons.restaurant_menu) return 'restaurant_menu';
+    if (iconData == Icons.shopping_cart) return 'shopping_cart';
+    if (iconData == Icons.person) return 'person';
+    if (iconData == Icons.card_giftcard) return 'card_giftcard';
+    if (iconData == Icons.casino) return 'casino';
+    return null;
   }
 
   /// Get blocks sorted by order
