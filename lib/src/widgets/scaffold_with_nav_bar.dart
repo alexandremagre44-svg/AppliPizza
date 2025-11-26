@@ -14,7 +14,7 @@ import '../providers/cart_provider.dart';
 import '../providers/auth_provider.dart';
 import '../core/firestore_paths.dart';
 import '../core/constants.dart';
-import '../../builder/models/builder_page.dart';
+import '../../builder/models/models.dart';
 import '../../builder/services/builder_navigation_service.dart';
 import '../../builder/utils/icon_helper.dart';
 
