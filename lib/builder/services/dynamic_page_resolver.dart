@@ -201,20 +201,22 @@ class DynamicPageResolver {
     }
   }
   
-  /// Map string system page ID to BuilderPageId
+  /// Map string system page ID to BuilderPageId using SystemPages registry
   BuilderPageId? _systemPageIdToBuilderPageId(String pageId) {
+    // Try direct mapping from Firestore ID
+    final pageIdFromFirestore = SystemPages.getPageIdFromFirestoreId(pageId.toLowerCase());
+    if (pageIdFromFirestore != null) {
+      return pageIdFromFirestore;
+    }
+    
+    // Fallback for French names
     switch (pageId.toLowerCase()) {
-      case 'profile':
       case 'profil':
         return BuilderPageId.profile;
-      case 'cart':
       case 'panier':
         return BuilderPageId.cart;
-      case 'rewards':
       case 'recompenses':
         return BuilderPageId.rewards;
-      case 'roulette':
-        return BuilderPageId.roulette;
       default:
         return null;
     }
@@ -235,28 +237,22 @@ class DynamicPageResolver {
     return withoutQuery;
   }
 
-  /// Map route path to BuilderPageId
+  /// Map route path to BuilderPageId using SystemPages registry
   BuilderPageId? _routeToPageId(String route) {
+    // Use SystemPages registry for consistent mapping
+    final config = SystemPages.getConfigByRoute(route);
+    if (config != null) {
+      return config.pageId;
+    }
+    
+    // Fallback for custom pages not in system registry
     switch (route) {
-      case '/home':
-        return BuilderPageId.home;
-      case '/menu':
-        return BuilderPageId.menu;
       case '/promo':
         return BuilderPageId.promo;
       case '/about':
         return BuilderPageId.about;
       case '/contact':
         return BuilderPageId.contact;
-      // System pages
-      case '/profile':
-        return BuilderPageId.profile;
-      case '/cart':
-        return BuilderPageId.cart;
-      case '/rewards':
-        return BuilderPageId.rewards;
-      case '/roulette':
-        return BuilderPageId.roulette;
       default:
         return null;
     }

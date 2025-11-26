@@ -205,6 +205,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 
   /// Build navigation items from Builder pages
   /// Injects admin page if user is admin
+  /// Uses SystemPages registry for consistent icon and label handling
   _NavigationItemsResult _buildNavigationItems(
     BuildContext context,
     WidgetRef ref,
@@ -217,13 +218,26 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 
     // Add builder pages first
     for (final page in builderPages) {
+      // Try to get system page configuration for this page
+      final systemConfig = SystemPages.getConfig(page.pageId);
+      
+      // Use page name if available, otherwise use system default or pageId label
+      final displayName = page.name.isNotEmpty 
+          ? page.name 
+          : (systemConfig?.defaultName ?? page.pageId.label);
+      
       // Get icon (with outlined/filled versions)
-      final iconPair = IconHelper.getIconPair(page.icon);
+      // If icon is empty or invalid, use system default
+      final iconPair = page.icon.isNotEmpty 
+          ? IconHelper.getIconPair(page.icon)
+          : (systemConfig != null 
+              ? IconHelper.getIconPair(_getIconNameFromIconData(systemConfig.defaultIcon))
+              : IconHelper.getIconPair('help_outline'));
       final outlinedIcon = iconPair.$1;
       final filledIcon = iconPair.$2;
 
       // Special handling for cart page - add badge
-      if (page.route == '/cart') {
+      if (page.route == '/cart' || page.pageId == BuilderPageId.cart) {
         items.add(
           BottomNavigationBarItem(
             icon: badges.Badge(
@@ -235,7 +249,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               child: Icon(outlinedIcon),
             ),
             activeIcon: Icon(filledIcon),
-            label: page.name,
+            label: displayName,
           ),
         );
       } else {
@@ -243,12 +257,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           BottomNavigationBarItem(
             icon: Icon(outlinedIcon),
             activeIcon: Icon(filledIcon),
-            label: page.name,
+            label: displayName,
           ),
         );
       }
 
-      pages.add(_NavPage(route: page.route, name: page.name));
+      pages.add(_NavPage(route: page.route, name: displayName));
     }
 
     // Add admin tab at the end if user is admin
@@ -263,6 +277,18 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     }
 
     return _NavigationItemsResult(items: items, pages: pages);
+  }
+  
+  /// Helper to convert IconData to icon name string
+  /// This is a workaround since we need string names for IconHelper
+  String _getIconNameFromIconData(IconData iconData) {
+    if (iconData == Icons.home) return 'home';
+    if (iconData == Icons.restaurant_menu) return 'restaurant_menu';
+    if (iconData == Icons.shopping_cart) return 'shopping_cart';
+    if (iconData == Icons.person) return 'person';
+    if (iconData == Icons.card_giftcard) return 'card_giftcard';
+    if (iconData == Icons.casino) return 'casino';
+    return 'help_outline';
   }
 
   /// Calculate selected index based on current location
