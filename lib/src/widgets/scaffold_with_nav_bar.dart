@@ -218,11 +218,17 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 
     // Add builder pages first
     for (final page in builderPages) {
+      // Safety check: Skip pages with invalid routes
+      if (page.route.isEmpty || page.route == '/') {
+        debugPrint('⚠️ Skipping page ${page.pageId.value} with invalid route: "${page.route}"');
+        continue;
+      }
+      
       // Try to get system page configuration for this page
       final systemConfig = SystemPages.getConfig(page.pageId);
       
-      // Use page name if available, otherwise use system default or pageId label
-      final displayName = page.name.isNotEmpty 
+      // Use page name if available and not generic, otherwise use system default or pageId label
+      final displayName = (page.name.isNotEmpty && page.name != 'Page')
           ? page.name 
           : (systemConfig?.defaultName ?? page.pageId.label);
       
@@ -322,7 +328,16 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     
     // Otherwise -> normal behavior
     if (index >= 0 && index < pages.length) {
-      context.go(pages[index].route);
+      final route = pages[index].route;
+      
+      // Safety check: never navigate to root '/' as it triggers login redirect
+      if (route.isEmpty || route == '/') {
+        debugPrint('⚠️ Attempted navigation to invalid route: "$route". Navigating to /home instead.');
+        context.go(AppRoutes.home);
+        return;
+      }
+      
+      context.go(route);
     }
   }
 }

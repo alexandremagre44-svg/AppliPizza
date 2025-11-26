@@ -546,12 +546,21 @@ class BuilderLayoutService {
   /// - isActive == true
   /// - bottomNavIndex != null
   /// - bottomNavIndex >= 0 and <= 4
+  /// - route is valid (not '/' or empty)
   /// 
   /// FALLBACK (backward compatibility):
   /// - displayLocation == "bottomBar"
   /// - order != null
   /// - order >= 0 and <= 4
+  /// - route is valid (not '/' or empty)
   bool _isBottomBarPage(BuilderPage page) {
+    // Safety check: filter out pages with invalid routes
+    // Route must not be '/' (root) or empty, as these can cause navigation issues
+    if (page.route.isEmpty || page.route == '/') {
+      debugPrint('⚠️ Filtering out page ${page.pageId.value} with invalid route: "${page.route}"');
+      return false;
+    }
+    
     // Primary logic: Use isActive + bottomNavIndex
     if (page.isActive &&
         page.bottomNavIndex != null &&

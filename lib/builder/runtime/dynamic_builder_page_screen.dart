@@ -57,8 +57,8 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
           // Try to get system page config for proper naming
           final systemConfig = SystemPages.getConfigByFirestoreId(pageKey);
           
-          // Use proper display name - prefer page name, fallback to system default
-          final displayName = builderPage.name.isNotEmpty 
+          // Use proper display name - prefer page name (if not generic), fallback to system default
+          final displayName = (builderPage.name.isNotEmpty && builderPage.name != 'Page')
               ? builderPage.name 
               : (systemConfig?.defaultName ?? 'Page');
           

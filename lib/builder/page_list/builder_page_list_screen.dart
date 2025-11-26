@@ -268,7 +268,7 @@ class _BuilderPageListScreenState extends State<BuilderPageListScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        page.name,
+                        _getDisplayName(page),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -485,6 +485,22 @@ class _BuilderPageListScreenState extends State<BuilderPageListScreen> {
       case BuilderPageType.custom:
         return Icons.brush;
     }
+  }
+
+  String _getDisplayName(BuilderPage page) {
+    // If page has a name, use it
+    if (page.name.isNotEmpty && page.name != 'Page') {
+      return page.name;
+    }
+    
+    // Try to get system page default name
+    final systemConfig = SystemPages.getConfig(page.pageId);
+    if (systemConfig != null) {
+      return systemConfig.defaultName;
+    }
+    
+    // Fallback to pageId label
+    return page.pageId.label;
   }
 
   // ==================== ACTIONS ====================
