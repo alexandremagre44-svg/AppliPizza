@@ -1049,12 +1049,27 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        'Position (0-4)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade800,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Position (0-4)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                          // Show warning if invalid value
+                          if (_page!.bottomNavIndex < 0 || _page!.bottomNavIndex > 4)
+                            Text(
+                              'Valeur invalide: ${_page!.bottomNavIndex}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.red.shade700,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     Container(
@@ -1062,12 +1077,17 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.green.shade300),
+                        border: Border.all(
+                          color: (_page!.bottomNavIndex >= 0 && _page!.bottomNavIndex <= 4) 
+                              ? Colors.green.shade300 
+                              : Colors.red.shade300,
+                        ),
                       ),
                       child: DropdownButton<int>(
                         value: (_page!.bottomNavIndex >= 0 && _page!.bottomNavIndex <= 4) 
                             ? _page!.bottomNavIndex 
-                            : 0, // Default to 0 if invalid
+                            : null, // Show hint if invalid
+                        hint: const Text('Choisir'),
                         underline: const SizedBox(),
                         items: List.generate(5, (i) => i).map((index) {
                           return DropdownMenuItem<int>(

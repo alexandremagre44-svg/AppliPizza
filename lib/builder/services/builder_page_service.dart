@@ -428,10 +428,12 @@ class BuilderPageService {
       // Update navigation parameters
       // Note: We keep order in sync with bottomNavIndex for backward compatibility
       // with legacy code that might still use the order field for navigation
+      // When isActive is false, we set a high order value to move it out of bottom bar
+      final finalBottomNavIndex = isActive ? (bottomNavIndex ?? page.bottomNavIndex) : 999;
       final updatedPage = page.copyWith(
         isActive: isActive,
-        bottomNavIndex: bottomNavIndex ?? page.bottomNavIndex,
-        order: bottomNavIndex ?? page.order, // Keep in sync for compatibility
+        bottomNavIndex: finalBottomNavIndex,
+        order: finalBottomNavIndex, // Keep in sync for compatibility
         updatedAt: DateTime.now(),
       );
       
