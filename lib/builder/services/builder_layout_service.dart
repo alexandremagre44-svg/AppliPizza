@@ -555,8 +555,8 @@ class BuilderLayoutService {
     // Primary logic: Use isActive + bottomNavIndex
     if (page.isActive &&
         page.bottomNavIndex != null &&
-        page.bottomNavIndex >= 0 &&
-        page.bottomNavIndex <= 4) {
+        page.bottomNavIndex! >= 0 &&
+        page.bottomNavIndex! <= 4) {
       return true;
     }
 
@@ -573,8 +573,8 @@ class BuilderLayoutService {
   /// Helper to sort pages by bottomNavIndex (with fallback to order field)
   void _sortByBottomNavIndex(List<BuilderPage> pages) {
     pages.sort((a, b) {
-      final aIndex = a.bottomNavIndex ?? a.order;
-      final bIndex = b.bottomNavIndex ?? b.order;
+      final aIndex = a.bottomNavIndex ?? a.order ?? _maxBottomNavIndex;
+      final bIndex = b.bottomNavIndex ?? b.order ?? _maxBottomNavIndex;
       return aIndex.compareTo(bIndex);
     });
   }
