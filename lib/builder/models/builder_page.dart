@@ -1,11 +1,42 @@
 // lib/builder/models/builder_page.dart
 // Page model for Builder B3 system
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'builder_enums.dart';
 import 'builder_block.dart';
 import 'system_pages.dart';
 import '../../src/core/firestore_paths.dart';
+
+// TODO(builder-b3-safe-parsing) Helper to safely parse DateTime from Firestore
+// Handles: Timestamp, String (ISO 8601), int (milliseconds), or null
+DateTime? _safeParseDateTime(dynamic value) {
+  if (value == null) return null;
+  
+  // Handle Firestore Timestamp
+  if (value is Timestamp) {
+    return value.toDate();
+  }
+  
+  // Handle String (ISO 8601 format)
+  if (value is String) {
+    try {
+      return DateTime.parse(value);
+    } catch (e) {
+      print('⚠️ Warning: Could not parse date string: "$value". Error: $e');
+      return null;
+    }
+  }
+  
+  // Handle int (milliseconds since epoch)
+  if (value is int) {
+    return DateTime.fromMillisecondsSinceEpoch(value);
+  }
+  
+  // Unknown type - log warning and return null
+  print('⚠️ Warning: Unknown date type ${value.runtimeType} for value: $value');
+  return null;
+}
 
 /// Page model for multi-page builder system
 /// 
@@ -241,28 +272,60 @@ class BuilderPage {
   }
 
   /// Helper to safely parse layout field from Firestore
-  /// Handles legacy string values like "none" or empty strings
+  /// 
+  /// TODO(builder-b3-safe-parsing) Handles:
+  /// - Null values → empty list
+  /// - Legacy string values like "none" → empty list
+  /// - List of blocks → parses each individually, skipping malformed ones
+  /// - Individual block parsing errors → logs warning and skips block
   static List<BuilderBlock> _safeLayoutParse(dynamic value) {
     // If null, return empty list
     if (value == null) return [];
     
-    // If already a List, try to parse it
+    // If already a List, parse each block individually
     if (value is List<dynamic>) {
-      try {
-        return value
-            .map((b) => BuilderBlock.fromJson(b as Map<String, dynamic>))
-            .toList();
-      } catch (e) {
-        // Log parsing errors for debugging
-        print('⚠️ Error parsing layout blocks: $e. Value type: ${value.runtimeType}');
-        return [];
+      final validBlocks = <BuilderBlock>[];
+      
+      for (int i = 0; i < value.length; i++) {
+        try {
+          final item = value[i];
+          
+          // Skip null items
+          if (item == null) {
+            print('⚠️ Warning: Skipping null block at index $i');
+            continue;
+          }
+          
+          // Verify item is a Map
+          if (item is! Map<String, dynamic>) {
+            // Try to cast if it's a Map with different type params
+            if (item is Map) {
+              final blockData = Map<String, dynamic>.from(item);
+              validBlocks.add(BuilderBlock.fromJson(blockData));
+            } else {
+              print('⚠️ Warning: Skipping block at index $i - expected Map, got ${item.runtimeType}');
+            }
+            continue;
+          }
+          
+          // Parse the block
+          validBlocks.add(BuilderBlock.fromJson(item));
+        } catch (e) {
+          // TODO(builder-b3-safe-parsing) Skip malformed blocks with warning, don't crash
+          print('⚠️ Warning: Skipping malformed block at index $i. Error: $e');
+          continue;
+        }
       }
+      
+      return validBlocks;
     }
     
     // For any other type (String like "none", etc.), return empty list
     // This handles legacy data where draftLayout/publishedLayout might be stored as strings
     if (value is String) {
       print('⚠️ Legacy string value found in layout field: "$value". Returning empty list.');
+    } else {
+      print('⚠️ Warning: Unexpected layout field type: ${value.runtimeType}. Returning empty list.');
     }
     return [];
   }
@@ -286,11 +349,18 @@ class BuilderPage {
     // Parse publishedLayout (new field)
     final publishedLayout = _safeLayoutParse(json['publishedLayout']);
     
-    // Parse modules list
-    final modules = (json['modules'] as List<dynamic>?)
-            ?.map((m) => m as String)
-            .toList() ??
-        [];
+    // TODO(builder-b3-safe-parsing) Parse modules list safely - skip non-string items
+    final List<String> modules = [];
+    final rawModules = json['modules'];
+    if (rawModules is List<dynamic>) {
+      for (final m in rawModules) {
+        if (m is String) {
+          modules.add(m);
+        } else if (m != null) {
+          print('⚠️ Warning: Skipping non-string module value: $m (${m.runtimeType})');
+        }
+      }
+    }
     
     // Use proper defaults from SystemPages registry when available
     final defaultName = systemConfig?.defaultName ?? 'Page';
@@ -310,15 +380,10 @@ class BuilderPage {
           ? PageMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
           : null,
       version: json['version'] as int? ?? 1,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : DateTime.now(),
-      publishedAt: json['publishedAt'] != null
-          ? DateTime.parse(json['publishedAt'] as String)
-          : null,
+      // TODO(builder-b3-safe-parsing) Use safe DateTime parsing for Firestore Timestamp/String/null
+      createdAt: _safeParseDateTime(json['createdAt']) ?? DateTime.now(),
+      updatedAt: _safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
+      publishedAt: _safeParseDateTime(json['publishedAt']),
       lastModifiedBy: json['lastModifiedBy'] as String?,
       displayLocation: json['displayLocation'] as String? ?? 'hidden',
       icon: json['icon'] as String? ?? defaultIcon,
