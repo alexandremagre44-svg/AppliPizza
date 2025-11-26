@@ -337,10 +337,13 @@ class BuilderPage {
     final defaultIcon = _getIconName(systemConfig?.defaultIcon) ?? 'help_outline';
     final defaultRoute = systemConfig?.route ?? '/';
     
+    // P2 fix: fallback title -> name if name is missing (Firestore may use 'title' field)
+    final pageName = json['name'] as String? ?? json['title'] as String? ?? defaultName;
+    
     return BuilderPage(
       pageId: pageId,
       appId: json['appId'] as String? ?? kRestaurantId,
-      name: json['name'] as String? ?? defaultName,
+      name: pageName,
       description: json['description'] as String? ?? '',
       route: json['route'] as String? ?? defaultRoute,
       blocks: blocks,

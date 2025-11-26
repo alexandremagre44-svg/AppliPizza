@@ -5,6 +5,7 @@
 // Handles modules (cart_module, menu_catalog, profile_module, roulette_module)
 // and dynamic layouts (publishedLayout blocks)
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../preview/builder_runtime_renderer.dart';
@@ -14,7 +15,8 @@ import '../utils/builder_modules.dart' as builder_modules;
 /// 
 /// This function routes Builder pages to their runtime representations:
 /// - If page has publishedLayout blocks → render with BuilderRuntimeRenderer
-/// - If page has SystemBlock modules → render via builder_modules
+/// - Fallback to draftLayout if publishedLayout is empty
+/// - Fallback to blocks (legacy) if draftLayout is also empty
 /// - If page is empty → show "Page vide / non configurée" message
 /// 
 /// Example:
@@ -22,17 +24,30 @@ import '../utils/builder_modules.dart' as builder_modules;
 /// final widget = buildPageFromBuilder(builderPage);
 /// ```
 Widget buildPageFromBuilder(BuildContext context, BuilderPage page) {
-  // Check if page has published content
+  // Determine which layout to render (priority: published > draft > blocks legacy)
+  List<BuilderBlock> blocksToRender = [];
+  
   if (page.publishedLayout.isNotEmpty) {
-    // Render page with BuilderRuntimeRenderer
-    // This handles all blocks including SystemBlocks with modules
+    blocksToRender = page.publishedLayout;
+    debugPrint('📄 [PageRouter] ${page.pageId.value}: using publishedLayout (${blocksToRender.length} blocks)');
+  } else if (page.draftLayout.isNotEmpty) {
+    blocksToRender = page.draftLayout;
+    debugPrint('📄 [PageRouter] ${page.pageId.value}: using draftLayout fallback (${blocksToRender.length} blocks)');
+  } else if (page.blocks.isNotEmpty) {
+    blocksToRender = page.blocks;
+    debugPrint('📄 [PageRouter] ${page.pageId.value}: using blocks legacy fallback (${blocksToRender.length} blocks)');
+  }
+  
+  // Render blocks if we have any
+  if (blocksToRender.isNotEmpty) {
     return BuilderRuntimeRenderer(
-      blocks: page.publishedLayout,
+      blocks: blocksToRender,
       wrapInScrollView: true,
     );
   }
   
   // No content - show empty state
+  debugPrint('📄 [PageRouter] ${page.pageId.value}: no blocks found, showing empty state');
   return _buildEmptyPageState(context, page.name);
 }
 
