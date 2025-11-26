@@ -1,42 +1,12 @@
 // lib/builder/models/builder_page.dart
 // Page model for Builder B3 system
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'builder_enums.dart';
 import 'builder_block.dart';
 import 'system_pages.dart';
 import '../../src/core/firestore_paths.dart';
-
-// TODO(builder-b3-safe-parsing) Helper to safely parse DateTime from Firestore
-// Handles: Timestamp, String (ISO 8601), int (milliseconds), or null
-DateTime? _safeParseDateTime(dynamic value) {
-  if (value == null) return null;
-  
-  // Handle Firestore Timestamp
-  if (value is Timestamp) {
-    return value.toDate();
-  }
-  
-  // Handle String (ISO 8601 format)
-  if (value is String) {
-    try {
-      return DateTime.parse(value);
-    } catch (e) {
-      print('⚠️ Warning: Could not parse date string: "$value". Error: $e');
-      return null;
-    }
-  }
-  
-  // Handle int (milliseconds since epoch)
-  if (value is int) {
-    return DateTime.fromMillisecondsSinceEpoch(value);
-  }
-  
-  // Unknown type - log warning and return null
-  print('⚠️ Warning: Unknown date type ${value.runtimeType} for value: $value');
-  return null;
-}
+import '../utils/firestore_parsing_helpers.dart';
 
 /// Page model for multi-page builder system
 /// 
@@ -381,9 +351,9 @@ class BuilderPage {
           : null,
       version: json['version'] as int? ?? 1,
       // TODO(builder-b3-safe-parsing) Use safe DateTime parsing for Firestore Timestamp/String/null
-      createdAt: _safeParseDateTime(json['createdAt']) ?? DateTime.now(),
-      updatedAt: _safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
-      publishedAt: _safeParseDateTime(json['publishedAt']),
+      createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
+      updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
+      publishedAt: safeParseDateTime(json['publishedAt']),
       lastModifiedBy: json['lastModifiedBy'] as String?,
       displayLocation: json['displayLocation'] as String? ?? 'hidden',
       icon: json['icon'] as String? ?? defaultIcon,

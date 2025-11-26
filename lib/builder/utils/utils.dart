@@ -8,3 +8,4 @@ export 'icon_helper.dart';
 export 'block_config_helper.dart';
 export 'action_helper.dart';
 export 'builder_modules.dart';
+export 'firestore_parsing_helpers.dart';
