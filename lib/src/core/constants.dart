@@ -17,6 +17,7 @@ class AppRoutes {
   
   // Admin entry point
   static const String adminStudio = '/admin/studio';
+  static const String adminTab = '/adminTab';
   
   // Admin management routes
   static const String adminProducts = '/admin/products';

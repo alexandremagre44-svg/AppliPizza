@@ -13,6 +13,7 @@ import 'package:badges/badges.dart' as badges;
 import '../providers/cart_provider.dart';
 import '../providers/auth_provider.dart';
 import '../core/firestore_paths.dart';
+import '../core/constants.dart';
 import '../../builder/models/builder_page.dart';
 import '../../builder/services/builder_navigation_service.dart';
 import '../../builder/utils/icon_helper.dart';
@@ -112,7 +113,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               unselectedFontSize: 12,
               selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800),
               unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
-              onTap: (int index) => _onItemTapped(context, index, navItems.pages),
+              onTap: (int index) => _onItemTapped(context, index, navItems.pages, navItems.items, isAdmin),
               items: navItems.items,
             ),
           );
@@ -214,19 +215,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final items = <BottomNavigationBarItem>[];
     final pages = <_NavPage>[];
 
-    // Inject admin page first if user is admin
-    if (isAdmin) {
-      items.add(
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.admin_panel_settings_outlined),
-          activeIcon: Icon(Icons.admin_panel_settings),
-          label: 'Admin',
-        ),
-      );
-      pages.add(_NavPage(route: '/admin/studio', name: 'Admin'));
-    }
-
-    // Add builder pages
+    // Add builder pages first
     for (final page in builderPages) {
       // Get icon (with outlined/filled versions)
       final iconPair = IconHelper.getIconPair(page.icon);
@@ -262,6 +251,17 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       pages.add(_NavPage(route: page.route, name: page.name));
     }
 
+    // Add admin tab at the end if user is admin
+    if (isAdmin) {
+      items.add(
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.admin_panel_settings),
+          label: 'Admin',
+        ),
+      );
+      pages.add(_NavPage(route: AppRoutes.adminStudio, name: 'Admin'));
+    }
+
     return _NavigationItemsResult(items: items, pages: pages);
   }
 
@@ -281,7 +281,20 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   }
 
   /// Handle navigation tap
-  void _onItemTapped(BuildContext context, int index, List<_NavPage> pages) {
+  void _onItemTapped(
+    BuildContext context, 
+    int index, 
+    List<_NavPage> pages,
+    List<BottomNavigationBarItem> items,
+    bool isAdmin,
+  ) {
+    // If it's the last item AND user is admin -> open AdminStudio
+    if (isAdmin && index == items.length - 1) {
+      context.go(AppRoutes.adminStudio);
+      return;
+    }
+    
+    // Otherwise -> normal behavior
     if (index >= 0 && index < pages.length) {
       context.go(pages[index].route);
     }
