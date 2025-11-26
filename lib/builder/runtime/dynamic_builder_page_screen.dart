@@ -54,21 +54,36 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
         if (snapshot.hasData && snapshot.data != null) {
           final builderPage = snapshot.data!;
           
-          // Check if the page has content (published layout or legacy blocks)
+          // Try to get system page config for proper naming
+          final systemConfig = SystemPages.getConfigByFirestoreId(pageKey);
+          
+          // Use proper display name - prefer page name, fallback to system default
+          final displayName = builderPage.name.isNotEmpty 
+              ? builderPage.name 
+              : (systemConfig?.defaultName ?? 'Page');
+          
+          // Check if the page has content (published layout, draft layout, or legacy blocks)
+          // IMPORTANT: Check all possible sources of content
           final hasContent = builderPage.publishedLayout.isNotEmpty || 
+                            builderPage.draftLayout.isNotEmpty ||
                             builderPage.blocks.isNotEmpty;
+          
+          // Select content to display - prefer published, then draft, then legacy blocks
+          final blocksToRender = builderPage.publishedLayout.isNotEmpty
+              ? builderPage.publishedLayout
+              : (builderPage.draftLayout.isNotEmpty 
+                  ? builderPage.draftLayout 
+                  : builderPage.blocks);
           
           return Scaffold(
             appBar: AppBar(
-              title: Text(builderPage.name),
+              title: Text(displayName),
               backgroundColor: Theme.of(context).colorScheme.surface,
               elevation: 0,
             ),
             body: hasContent
               ? BuilderRuntimeRenderer(
-                  blocks: builderPage.publishedLayout.isNotEmpty 
-                      ? builderPage.publishedLayout 
-                      : builderPage.blocks,
+                  blocks: blocksToRender,
                   wrapInScrollView: true,
                 )
               : Center(

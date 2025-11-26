@@ -62,17 +62,26 @@ class BuilderPageLoader extends ConsumerWidget {
           );
         }
         
-        // If Builder page exists, render it using dynamic router
+        // If Builder page exists and is enabled, render it
         if (snapshot.hasData && snapshot.data != null) {
           final builderPage = snapshot.data!;
           
+          // Get system page config for proper naming and icons
+          final systemConfig = SystemPages.getConfig(pageId);
+          
+          // Ensure page has proper name and icon from system config if it's a system page
+          final displayName = builderPage.name.isNotEmpty 
+              ? builderPage.name 
+              : (systemConfig?.defaultName ?? pageId.label);
+          
           return Scaffold(
-            appBar: _buildAppBar(context, builderPage),
+            appBar: _buildAppBar(context, builderPage, displayName),
             body: buildPageFromBuilder(context, builderPage),
           );
         }
         
         // Fallback to legacy screen
+        // IMPORTANT: Never redirect or disconnect user, just show fallback
         return fallback;
       },
     );
@@ -80,14 +89,15 @@ class BuilderPageLoader extends ConsumerWidget {
 
   /// Build AppBar with page title
   /// Returns null if no title should be shown
-  AppBar? _buildAppBar(BuildContext context, BuilderPage page) {
-    // Don't show AppBar if page has no name or if it's the home page
-    if (page.name.isEmpty || pageId == BuilderPageId.home) {
+  AppBar? _buildAppBar(BuildContext context, BuilderPage page, String displayName) {
+    // Don't show AppBar if it's the home page
+    if (pageId == BuilderPageId.home) {
       return null;
     }
     
+    // Show AppBar with proper name
     return AppBar(
-      title: Text(page.name),
+      title: Text(displayName),
       backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
     );
