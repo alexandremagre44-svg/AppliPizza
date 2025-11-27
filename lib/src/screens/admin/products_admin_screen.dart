@@ -21,12 +21,13 @@ class ProductsAdminScreen extends ConsumerStatefulWidget {
 
 class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final FirestoreProductService _firestoreService = createFirestoreProductService();
+  late FirestoreProductService _firestoreService;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _firestoreService = ref.read(firestoreProductServiceProvider);
   }
 
   @override

@@ -4,10 +4,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product.dart';
 import '../services/firestore_ingredient_service.dart';
+import './restaurant_provider.dart';
 
-/// Provider du service Firestore pour les ingrédients
+/// Provider du service Firestore pour les ingrédients (scoped to current restaurant)
 final ingredientServiceProvider = Provider<FirestoreIngredientService>((ref) {
-  return createFirestoreIngredientService();
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return createFirestoreIngredientService(appId: appId);
 });
 
 /// Provider pour charger tous les ingrédients (mode snapshot, non recommandé)
