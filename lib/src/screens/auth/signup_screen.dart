@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../services/firebase_auth_service.dart';
+import '../../providers/auth_provider.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 
@@ -46,7 +46,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       final displayName = _displayNameController.text.trim();
       final role = UserRole.client;
 
-      final authService = FirebaseAuthService();
+      final authService = ref.read(firebaseAuthServiceProvider);
       final result = await authService.signUp(
         email,
         password,

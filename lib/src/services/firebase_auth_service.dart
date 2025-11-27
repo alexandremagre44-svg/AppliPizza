@@ -6,18 +6,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../core/constants.dart';
+import '../core/firestore_paths.dart';
 import 'loyalty_service.dart';
 import 'user_profile_service.dart';
 
 class FirebaseAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final UserProfileService _profileService = UserProfileService();
+  final String appId;
+  
+  // UserProfileService instance initialized with appId
+  late final UserProfileService _profileService;
 
-  // Singleton
-  static final FirebaseAuthService _instance = FirebaseAuthService._internal();
-  factory FirebaseAuthService() => _instance;
-  FirebaseAuthService._internal();
+  // Constructor with required appId for multi-tenant isolation
+  FirebaseAuthService({required this.appId}) {
+    _profileService = UserProfileService(appId: appId);
+  }
 
   // Stream de l'état d'authentification
   Stream<User?> get authStateChanges => _auth.authStateChanges();

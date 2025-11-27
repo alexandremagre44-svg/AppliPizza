@@ -6,10 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_auth_service.dart';
 import '../core/constants.dart';
+import 'restaurant_provider.dart';
 
 /// Provider pour le service d'authentification Firebase
+/// Watches currentRestaurantProvider to inject the appId for multi-tenant isolation
 final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
-  return FirebaseAuthService();
+  final config = ref.watch(currentRestaurantProvider);
+  return FirebaseAuthService(appId: config.id);
 });
 
 /// Provider pour l'état d'authentification

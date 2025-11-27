@@ -5,18 +5,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:developer' as developer;
 import '../models/user_profile.dart';
 import '../models/order.dart';
+import '../core/firestore_paths.dart';
 
 /// Service pour gérer les profils utilisateurs dans Firestore
+/// 
+/// Multi-tenant architecture: Requires an appId parameter to scope
+/// all Firestore operations to a specific restaurant.
 class UserProfileService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String appId;
   
-  // Singleton
-  static final UserProfileService _instance = UserProfileService._internal();
-  factory UserProfileService() => _instance;
-  UserProfileService._internal();
+  // Constructor with required appId for multi-tenant isolation
+  UserProfileService({required this.appId});
 
-  /// Collection des profils utilisateurs
-  CollectionReference get _profilesCollection => _firestore.collection('user_profiles');
+  /// Collection des profils utilisateurs scoped to the current restaurant
+  CollectionReference get _profilesCollection => FirestorePaths.userProfiles(appId);
 
   /// Créer ou mettre à jour un profil utilisateur complet
   Future<bool> saveUserProfile(UserProfile profile) async {
