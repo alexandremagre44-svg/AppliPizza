@@ -11,6 +11,7 @@ import '../../../src/providers/auth_provider.dart';
 import '../../../src/providers/loyalty_provider.dart';
 import '../../../src/providers/reward_tickets_provider.dart';
 import '../../../src/models/app_texts_config.dart';
+import '../../../src/providers/app_texts_provider.dart';
 import '../../../src/theme/app_theme.dart';
 import '../../../src/core/constants.dart';
 import '../../../src/screens/profile/widgets/loyalty_section_widget.dart';
