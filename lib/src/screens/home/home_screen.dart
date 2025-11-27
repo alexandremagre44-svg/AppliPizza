@@ -43,7 +43,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(productListProvider);
     final homeConfigAsync = ref.watch(homeConfigProvider);
-    final appTextsAsync = ref.watch(appTextsConfigProvider);
+    final appTextsAsync = ref.watch(appTextsProvider);
 
     return Scaffold(
       appBar: appTextsAsync.when(

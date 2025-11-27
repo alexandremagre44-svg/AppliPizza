@@ -34,7 +34,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final userId = authState.userId ?? 'guest';
-    final appTextsAsync = ref.watch(appTextsConfigProvider);
+    final appTextsAsync = ref.watch(appTextsProvider);
     
     return Scaffold(
       appBar: AppBar(

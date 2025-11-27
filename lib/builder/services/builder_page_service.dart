@@ -325,26 +325,39 @@ class BuilderPageService {
   /// Updates the bottomNavIndex and order fields to move the page
   /// to a new position in the bottom nav.
   /// 
+  /// Accepts either a [BuilderPageId] enum for system pages or a String
+  /// pageKey for custom pages.
+  /// 
   /// Example:
   /// ```dart
+  /// // Using BuilderPageId for system pages:
   /// await service.reorderBottomNav(
   ///   BuilderPageId.menu,
   ///   'delizza',
-  ///   newIndex: 2, // Move to 3rd position (0-indexed)
+  ///   2, // Move to 3rd position (0-indexed)
+  /// );
+  /// // Or using String pageKey for custom pages:
+  /// await service.reorderBottomNav(
+  ///   'promo_noel',
+  ///   'delizza',
+  ///   3,
   /// );
   /// ```
   Future<BuilderPage?> reorderBottomNav(
-    BuilderPageId pageId,
+    dynamic pageId,
     String appId,
     int newIndex,
   ) async {
     try {
+      // Determine the page key for logging
+      final pageIdStr = pageId is BuilderPageId ? pageId.value : pageId.toString();
+      
       // Load page
       var page = await _layoutService.loadDraft(appId, pageId);
       page ??= await _layoutService.loadPublished(appId, pageId);
       
       if (page == null) {
-        debugPrint('[BuilderPageService] ⚠️ Page not found: ${pageId.value}');
+        debugPrint('[BuilderPageService] ⚠️ Page not found: $pageIdStr');
         return null;
       }
       
@@ -366,7 +379,7 @@ class BuilderPageService {
         );
       }
       
-      debugPrint('[BuilderPageService] ✅ Reordered ${pageId.value} to index $newIndex');
+      debugPrint('[BuilderPageService] ✅ Reordered $pageIdStr to index $newIndex');
       return updatedPage;
     } catch (e, stackTrace) {
       debugPrint('[BuilderPageService] ❌ Error reordering bottom nav: $e');

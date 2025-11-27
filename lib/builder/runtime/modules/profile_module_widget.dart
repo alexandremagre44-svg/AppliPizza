@@ -32,7 +32,7 @@ class ProfileModuleWidget extends ConsumerWidget {
     final history = userProfile.orderHistory;
     final loyaltyInfoAsync = ref.watch(loyaltyInfoProvider);
     final activeTicketsAsync = ref.watch(activeRewardTicketsProvider);
-    final appTextsAsync = ref.watch(appTextsConfigProvider);
+    final appTextsAsync = ref.watch(appTextsProvider);
     final userId = authState.userId ?? 'guest';
 
     // Return just the body content - BuilderPageLoader provides the Scaffold

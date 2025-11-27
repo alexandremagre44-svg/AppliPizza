@@ -19,7 +19,7 @@ class CartScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartState = ref.watch(cartProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
-    final appTextsAsync = ref.watch(appTextsConfigProvider);
+    final appTextsAsync = ref.watch(appTextsProvider);
 
     return appTextsAsync.when(
       data: (appTexts) => Scaffold(
