@@ -12,13 +12,30 @@ import '../utils/firestore_parsing_helpers.dart';
 /// 
 /// Represents a complete page configuration with all its blocks.
 /// Supports:
-/// - Multi-page: Different pages (home, menu, promo, etc.)
+/// - Multi-page: Different pages (home, menu, promo, custom, etc.)
 /// - Multi-resto: Different configurations per restaurant (appId)
 /// - Draft/Published: Separate draft and published layouts per page
 /// - Version control: Track changes over time
 /// - Modules: Attach modules (menu, cart, profile, roulette) to pages
+/// - Custom pages: Unlimited custom pages with any pageKey
 class BuilderPage {
+  /// Primary page identifier as string (source of truth)
+  /// 
+  /// This is the Firestore document ID or the explicit pageId field.
+  /// For system pages, this matches BuilderPageId.value (e.g., 'home', 'menu').
+  /// For custom pages, this can be any string (e.g., 'promo_noel', 'special_offer').
+  final String pageKey;
+  
+  /// System page identifier (nullable)
+  /// 
+  /// Only set if [pageKey] matches a known system page (BuilderPageId).
+  /// Use this to access system page configurations from SystemPages.
+  /// For custom pages, this is null.
+  final BuilderPageId? systemId;
+
   /// Unique page identifier (home, menu, promo, etc.)
+  /// @deprecated Use [pageKey] for the string identifier and [systemId] for system pages.
+  /// This is kept for backward compatibility and defaults to home for custom pages.
   final BuilderPageId pageId;
 
   /// Restaurant/app identifier for multi-resto support
@@ -116,7 +133,9 @@ class BuilderPage {
   final List<BuilderBlock> publishedLayout;
 
   BuilderPage({
-    required this.pageId,
+    String? pageKey,
+    this.systemId,
+    BuilderPageId? pageId,
     required this.appId,
     required this.name,
     this.description = '',
@@ -142,16 +161,22 @@ class BuilderPage {
     bool? hasUnpublishedChanges,
     List<BuilderBlock>? draftLayout,
     List<BuilderBlock>? publishedLayout,
-  })  : createdAt = createdAt ?? DateTime.now(),
+  })  : // Compute pageKey: explicit parameter > systemId > pageId > 'custom'
+        pageKey = pageKey ?? systemId?.value ?? pageId?.value ?? 'custom',
+        // Compute pageId for backward compatibility: systemId > explicit pageId > derived from pageKey > home
+        pageId = systemId ?? pageId ?? BuilderPageId.tryFromString(pageKey ?? '') ?? BuilderPageId.home,
+        createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
-        isSystemPage = isSystemPage ?? pageId.isSystemPage,
-        pageType = pageType ?? (pageId.isSystemPage ? BuilderPageType.system : BuilderPageType.custom),
+        isSystemPage = isSystemPage ?? (systemId != null ? systemId.isSystemPage : (pageId?.isSystemPage ?? false)),
+        pageType = pageType ?? ((systemId != null || (pageId?.isSystemPage ?? false)) ? BuilderPageType.system : BuilderPageType.custom),
         draftLayout = draftLayout ?? blocks,
         publishedLayout = publishedLayout ?? const [],
         hasUnpublishedChanges = hasUnpublishedChanges ?? (draftLayout != null && draftLayout.isNotEmpty && (publishedLayout == null || publishedLayout.isEmpty));
 
   /// Create a copy with modified fields
   BuilderPage copyWith({
+    String? pageKey,
+    BuilderPageId? systemId,
     BuilderPageId? pageId,
     String? appId,
     String? name,
@@ -180,6 +205,8 @@ class BuilderPage {
     List<BuilderBlock>? publishedLayout,
   }) {
     return BuilderPage(
+      pageKey: pageKey ?? this.pageKey,
+      systemId: systemId ?? this.systemId,
       pageId: pageId ?? this.pageId,
       appId: appId ?? this.appId,
       name: name ?? this.name,
@@ -212,7 +239,8 @@ class BuilderPage {
   /// Convert to JSON for Firestore
   Map<String, dynamic> toJson() {
     return {
-      'pageId': pageId.toJson(),
+      'pageKey': pageKey,
+      'pageId': pageId.toJson(), // Keep for backward compatibility
       'appId': appId,
       'name': name,
       'description': description,
@@ -302,10 +330,18 @@ class BuilderPage {
 
   /// Create from Firestore JSON
   factory BuilderPage.fromJson(Map<String, dynamic> json) {
-    final pageId = BuilderPageId.fromJson(json['pageId'] as String? ?? 'home');
+    // Extract pageKey (source of truth) - prefer explicit pageKey, then pageId, then doc id
+    final rawPageId = json['pageId'] as String? ?? json['pageKey'] as String? ?? 'home';
+    final pageKey = json['pageKey'] as String? ?? rawPageId;
     
-    // Get system page config for proper defaults
-    final systemConfig = SystemPages.getConfig(pageId);
+    // Try to get system page ID (nullable for custom pages)
+    final systemId = BuilderPageId.tryFromString(rawPageId);
+    
+    // For backward compatibility, compute pageId (will be home for unknown custom pages)
+    final pageId = systemId ?? BuilderPageId.home;
+    
+    // Get system page config for proper defaults (only if this is a system page)
+    final systemConfig = systemId != null ? SystemPages.getConfig(systemId) : null;
     
     // Parse blocks (legacy field)
     final blocks = _safeLayoutParse(json['blocks']);
@@ -332,20 +368,36 @@ class BuilderPage {
       }
     }
     
-    // Use proper defaults from SystemPages registry when available
+    // Use proper defaults from SystemPages registry when available (only for system pages)
     final defaultName = systemConfig?.defaultName ?? 'Page';
     final defaultIcon = _getIconName(systemConfig?.defaultIcon) ?? 'help_outline';
-    final defaultRoute = systemConfig?.route ?? '/';
+    
+    // Route logic: use explicit route, or system route, or generate custom page route
+    String defaultRoute;
+    if (systemConfig != null) {
+      defaultRoute = systemConfig.route;
+    } else {
+      // Custom page: use /page/<pageKey> route
+      defaultRoute = '/page/$pageKey';
+    }
     
     // P2 fix: fallback title -> name if name is missing (Firestore may use 'title' field)
     final pageName = json['name'] as String? ?? json['title'] as String? ?? defaultName;
     
+    // Determine route: prefer explicit, fallback to default
+    final rawRoute = json['route'] as String?;
+    final route = (rawRoute != null && rawRoute.isNotEmpty && rawRoute != '/') 
+        ? rawRoute 
+        : defaultRoute;
+    
     return BuilderPage(
+      pageKey: pageKey,
+      systemId: systemId,
       pageId: pageId,
       appId: json['appId'] as String? ?? kRestaurantId,
       name: pageName,
       description: json['description'] as String? ?? '',
-      route: json['route'] as String? ?? defaultRoute,
+      route: route,
       blocks: blocks,
       isEnabled: json['isEnabled'] as bool? ?? true,
       isDraft: json['isDraft'] as bool? ?? false,
@@ -361,9 +413,9 @@ class BuilderPage {
       displayLocation: json['displayLocation'] as String? ?? 'hidden',
       icon: json['icon'] as String? ?? defaultIcon,
       order: json['order'] as int? ?? 999,
-      isSystemPage: json['isSystemPage'] as bool? ?? pageId.isSystemPage,
+      isSystemPage: json['isSystemPage'] as bool? ?? (systemId?.isSystemPage ?? false),
       // New fields
-      pageType: BuilderPageType.fromJson(json['pageType'] as String? ?? 'custom'),
+      pageType: BuilderPageType.fromJson(json['pageType'] as String? ?? (systemId != null ? 'system' : 'custom')),
       isActive: json['isActive'] as bool? ?? true,
       bottomNavIndex: json['bottomNavIndex'] as int? ?? (json['order'] as int? ?? 999),
       modules: modules,
@@ -620,10 +672,13 @@ class BuilderPage {
 
   /// Check if this page has a specific module
   bool hasModule(String moduleId) => modules.contains(moduleId);
+  
+  /// Check if this is a custom page (not a system page)
+  bool get isCustomPage => systemId == null;
 
   @override
   String toString() {
-    return 'BuilderPage(pageId: ${pageId.value}, appId: $appId, blocks: ${blocks.length}, draft: $isDraft, draftBlocks: ${draftLayout.length}, publishedBlocks: ${publishedLayout.length}, hasUnpublished: $hasUnpublishedChanges)';
+    return 'BuilderPage(pageKey: $pageKey, systemId: ${systemId?.value ?? 'null'}, appId: $appId, blocks: ${blocks.length}, draft: $isDraft, draftBlocks: ${draftLayout.length}, publishedBlocks: ${publishedLayout.length}, hasUnpublished: $hasUnpublishedChanges)';
   }
 }
 

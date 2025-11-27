@@ -2,14 +2,19 @@
 /**
  * normalize_builder_firestore.mjs
  * 
- * Script to normalize Builder B3 Firestore data for restaurants/{restaurantId}/pages_system
- * and restaurants/{restaurantId}/pages_published collections.
+ * Script to normalize Builder B3 Firestore data for restaurants/{restaurantId}.
+ * 
+ * Collections processed:
+ * - pages_system (navigation config)
+ * - pages_published (runtime page content)
+ * - pages_draft (editor page content)
  * 
  * Usage:
  *   node scripts/normalize_builder_firestore.mjs [--dry-run]
  * 
  * Options:
- *   --dry-run   Preview changes without writing to Firestore
+ *   --dry-run   Preview changes without writing to Firestore (default)
+ *   --apply     Apply changes to Firestore (use with caution)
  * 
  * Prerequisites:
  *   - Firebase Admin SDK: npm install firebase-admin
@@ -17,10 +22,21 @@
  *     OR set GOOGLE_APPLICATION_CREDENTIALS environment variable
  * 
  * What this script does:
- *   1. Normalizes pages_system documents (navigation config)
- *   2. Normalizes pages_published documents (page content)
- *   3. Ensures system pages have minimal publishedLayout
- *   4. Logs all changes (before/after)
+ *   1. pages_system:
+ *      - If name absent and title present: copy title → name
+ *      - If route absent/empty/'/': set correct route
+ *        - System pages: /home, /menu, /cart, /profile, /rewards, /roulette
+ *        - Custom pages: /page/<docId>
+ *      - If bottomNavIndex absent: use order if 0-4, else null
+ *      - Ensure pageId and pageKey are set
+ *   
+ *   2. pages_published / pages_draft:
+ *      - Ensure draftLayout/publishedLayout are arrays (not null/string)
+ *      - Ensure each block has an 'id' field (generate if missing)
+ *      - Ensure pageId and pageKey are set
+ *      - Ensure route follows correct format
+ *   
+ *   3. Logs all changes clearly (before/after)
  */
 
 import { initializeApp, cert } from 'firebase-admin/app';
@@ -28,15 +44,16 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { randomUUID } from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Configuration
 const RESTAURANT_ID = 'delizza';
-const DRY_RUN = process.argv.includes('--dry-run');
+const DRY_RUN = !process.argv.includes('--apply');
 
-// System pages configuration
+// Known system pages configuration
 const SYSTEM_PAGES = {
   home: {
     name: 'Accueil',
@@ -70,14 +87,14 @@ const SYSTEM_PAGES = {
     name: 'Roulette',
     route: '/roulette',
     icon: 'casino',
-    bottomNavIndex: null, // Not in bottom nav by default
+    bottomNavIndex: null,
     order: 10,
   },
   rewards: {
     name: 'Récompenses',
     route: '/rewards',
     icon: 'card_giftcard',
-    bottomNavIndex: null, // Not in bottom nav by default
+    bottomNavIndex: null,
     order: 11,
   },
 };
@@ -208,6 +225,49 @@ function logChange(docId, field, before, after) {
 }
 
 /**
+ * Generate a unique block ID
+ */
+function generateBlockId() {
+  return `block_${Date.now()}_${randomUUID().substring(0, 8)}`;
+}
+
+/**
+ * Normalize layout array and ensure blocks have IDs
+ */
+function normalizeLayout(layout, docId, layoutName) {
+  if (!layout) {
+    return { normalized: [], changed: false };
+  }
+  
+  // If not an array, convert to empty array
+  if (!Array.isArray(layout)) {
+    console.log(`  ⚠️ ${docId}.${layoutName}: Converting non-array to empty array`);
+    return { normalized: [], changed: true };
+  }
+  
+  let changed = false;
+  const normalized = layout.map((block, index) => {
+    if (!block || typeof block !== 'object') {
+      console.log(`  ⚠️ ${docId}.${layoutName}[${index}]: Skipping invalid block`);
+      changed = true;
+      return null;
+    }
+    
+    // Ensure block has an id
+    if (!block.id) {
+      const newId = generateBlockId();
+      console.log(`  🔧 ${docId}.${layoutName}[${index}]: Generating block id: ${newId}`);
+      changed = true;
+      return { ...block, id: newId };
+    }
+    
+    return block;
+  }).filter(Boolean);
+  
+  return { normalized, changed };
+}
+
+/**
  * Normalize a pages_system document
  */
 function normalizeSystemPage(docId, data) {
@@ -216,18 +276,37 @@ function normalizeSystemPage(docId, data) {
 
   // Get system config if this is a known system page
   const systemConfig = SYSTEM_PAGES[docId];
+  const isSystemPage = !!systemConfig;
 
-  // Normalize name (fallback: title → system default → docId)
-  const currentName = data.name || data.title;
-  const expectedName = systemConfig?.name || currentName || docId;
-  if (currentName !== expectedName) {
-    hasChanges = logChange(docId, 'name', currentName, expectedName) || hasChanges;
+  // Add pageKey if missing (source of truth = docId)
+  if (!data.pageKey) {
+    hasChanges = logChange(docId, 'pageKey', undefined, docId) || hasChanges;
+    changes.pageKey = docId;
+  }
+
+  // Normalize name: if name absent and title present, copy title → name
+  if (!data.name && data.title) {
+    hasChanges = logChange(docId, 'name', data.name, data.title) || hasChanges;
+    changes.name = data.title;
+  } else if (!data.name) {
+    const expectedName = systemConfig?.name || docId;
+    hasChanges = logChange(docId, 'name', undefined, expectedName) || hasChanges;
     changes.name = expectedName;
   }
 
-  // Normalize route (must not be '/' or empty)
+  // Normalize route
   const currentRoute = data.route;
-  const expectedRoute = systemConfig?.route || (currentRoute && currentRoute !== '/' ? currentRoute : `/${docId}`);
+  let expectedRoute;
+  if (isSystemPage) {
+    // System page: use known route
+    expectedRoute = systemConfig.route;
+  } else if (!currentRoute || currentRoute === '/' || currentRoute === '') {
+    // Custom page: use /page/<docId>
+    expectedRoute = `/page/${docId}`;
+  } else {
+    expectedRoute = currentRoute;
+  }
+  
   if (currentRoute !== expectedRoute) {
     hasChanges = logChange(docId, 'route', currentRoute, expectedRoute) || hasChanges;
     changes.route = expectedRoute;
@@ -236,105 +315,25 @@ function normalizeSystemPage(docId, data) {
   // Normalize icon
   const currentIcon = data.icon;
   const expectedIcon = systemConfig?.icon || currentIcon || 'help_outline';
-  if (currentIcon !== expectedIcon) {
+  if (!currentIcon) {
     hasChanges = logChange(docId, 'icon', currentIcon, expectedIcon) || hasChanges;
     changes.icon = expectedIcon;
   }
 
-  // Normalize bottomNavIndex (0-4 for visible, null/999 for hidden)
-  const currentBottomNavIndex = data.bottomNavIndex;
-  const expectedBottomNavIndex = systemConfig?.bottomNavIndex ?? currentBottomNavIndex;
-  if (currentBottomNavIndex !== expectedBottomNavIndex && expectedBottomNavIndex !== undefined) {
-    hasChanges = logChange(docId, 'bottomNavIndex', currentBottomNavIndex, expectedBottomNavIndex) || hasChanges;
-    changes.bottomNavIndex = expectedBottomNavIndex;
-  }
-
-  // Normalize order
-  const currentOrder = data.order;
-  const expectedOrder = systemConfig?.order ?? currentOrder ?? 999;
-  if (currentOrder !== expectedOrder) {
-    hasChanges = logChange(docId, 'order', currentOrder, expectedOrder) || hasChanges;
-    changes.order = expectedOrder;
-  }
-
-  // Normalize isActive (default true for system pages)
-  const currentIsActive = data.isActive;
-  const expectedIsActive = systemConfig ? true : (currentIsActive ?? true);
-  if (currentIsActive !== expectedIsActive) {
-    hasChanges = logChange(docId, 'isActive', currentIsActive, expectedIsActive) || hasChanges;
-    changes.isActive = expectedIsActive;
-  }
-
-  // Normalize displayLocation (bottomBar for nav items, hidden otherwise)
-  const currentDisplayLocation = data.displayLocation;
-  const expectedDisplayLocation = (expectedBottomNavIndex !== null && expectedBottomNavIndex >= 0 && expectedBottomNavIndex <= 4) 
-    ? 'bottomBar' 
-    : (currentDisplayLocation || 'hidden');
-  if (currentDisplayLocation !== expectedDisplayLocation) {
-    hasChanges = logChange(docId, 'displayLocation', currentDisplayLocation, expectedDisplayLocation) || hasChanges;
-    changes.displayLocation = expectedDisplayLocation;
-  }
-
-  // Ensure isSystemPage is true for known system pages
-  if (systemConfig && data.isSystemPage !== true) {
-    hasChanges = logChange(docId, 'isSystemPage', data.isSystemPage, true) || hasChanges;
-    changes.isSystemPage = true;
-  }
-
-  // Add pageId if missing
-  if (!data.pageId) {
-    hasChanges = logChange(docId, 'pageId', undefined, docId) || hasChanges;
-    changes.pageId = docId;
-  }
-
-  // Add updatedAt timestamp
-  if (hasChanges) {
-    changes.updatedAt = Timestamp.now();
-  }
-
-  return { hasChanges, changes };
-}
-
-/**
- * Normalize a pages_published document
- */
-function normalizePublishedPage(docId, data) {
-  const changes = {};
-  let hasChanges = false;
-
-  // Get system config if this is a known system page
-  const systemConfig = SYSTEM_PAGES[docId];
-
-  // Normalize name (same logic as system page)
-  const currentName = data.name || data.title;
-  const expectedName = systemConfig?.name || currentName || docId;
-  if (currentName !== expectedName) {
-    hasChanges = logChange(docId, 'name', currentName, expectedName) || hasChanges;
-    changes.name = expectedName;
-  }
-
-  // Normalize route
-  const currentRoute = data.route;
-  const expectedRoute = systemConfig?.route || (currentRoute && currentRoute !== '/' ? currentRoute : `/${docId}`);
-  if (currentRoute !== expectedRoute) {
-    hasChanges = logChange(docId, 'route', currentRoute, expectedRoute) || hasChanges;
-    changes.route = expectedRoute;
-  }
-
-  // Check publishedLayout for system pages
-  const currentLayout = data.publishedLayout;
-  const minimalLayout = MINIMAL_SYSTEM_BLOCKS[docId];
-  
-  if (systemConfig && minimalLayout) {
-    // If publishedLayout is empty or missing, add minimal system blocks
-    if (!currentLayout || !Array.isArray(currentLayout) || currentLayout.length === 0) {
-      console.log(`  📦 ${docId}: Adding minimal publishedLayout (${minimalLayout.length} blocks)`);
-      hasChanges = true;
-      changes.publishedLayout = minimalLayout.map(block => ({
-        ...block,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      }));
+  // Normalize bottomNavIndex: if absent, use order if 0-4, else null
+  if (data.bottomNavIndex === undefined || data.bottomNavIndex === null) {
+    let expectedBottomNavIndex;
+    if (systemConfig?.bottomNavIndex !== undefined) {
+      expectedBottomNavIndex = systemConfig.bottomNavIndex;
+    } else if (data.order !== undefined && data.order >= 0 && data.order <= 4) {
+      expectedBottomNavIndex = data.order;
+    } else {
+      expectedBottomNavIndex = null;
+    }
+    
+    if (expectedBottomNavIndex !== null) {
+      hasChanges = logChange(docId, 'bottomNavIndex', data.bottomNavIndex, expectedBottomNavIndex) || hasChanges;
+      changes.bottomNavIndex = expectedBottomNavIndex;
     }
   }
 
@@ -353,6 +352,72 @@ function normalizePublishedPage(docId, data) {
 }
 
 /**
+ * Normalize a pages_published or pages_draft document
+ */
+function normalizePageContent(docId, data, collectionName) {
+  const changes = {};
+  let hasChanges = false;
+
+  // Get system config if this is a known system page
+  const systemConfig = SYSTEM_PAGES[docId];
+  const isSystemPage = !!systemConfig;
+
+  // Add pageKey if missing (source of truth = docId)
+  if (!data.pageKey) {
+    hasChanges = logChange(docId, 'pageKey', undefined, docId) || hasChanges;
+    changes.pageKey = docId;
+  }
+
+  // Add pageId if missing
+  if (!data.pageId) {
+    hasChanges = logChange(docId, 'pageId', undefined, docId) || hasChanges;
+    changes.pageId = docId;
+  }
+
+  // Normalize name: if name absent and title present, copy title → name
+  if (!data.name && data.title) {
+    hasChanges = logChange(docId, 'name', data.name, data.title) || hasChanges;
+    changes.name = data.title;
+  }
+
+  // Normalize route for custom pages
+  const currentRoute = data.route;
+  if (!isSystemPage && (!currentRoute || currentRoute === '/' || currentRoute === '')) {
+    const expectedRoute = `/page/${docId}`;
+    hasChanges = logChange(docId, 'route', currentRoute, expectedRoute) || hasChanges;
+    changes.route = expectedRoute;
+  }
+
+  // Normalize draftLayout (ensure it's an array with block IDs)
+  const draftResult = normalizeLayout(data.draftLayout, docId, 'draftLayout');
+  if (draftResult.changed) {
+    hasChanges = true;
+    changes.draftLayout = draftResult.normalized;
+  }
+
+  // Normalize publishedLayout (ensure it's an array with block IDs)
+  const publishedResult = normalizeLayout(data.publishedLayout, docId, 'publishedLayout');
+  if (publishedResult.changed) {
+    hasChanges = true;
+    changes.publishedLayout = publishedResult.normalized;
+  }
+
+  // Normalize legacy 'blocks' field
+  const blocksResult = normalizeLayout(data.blocks, docId, 'blocks');
+  if (blocksResult.changed) {
+    hasChanges = true;
+    changes.blocks = blocksResult.normalized;
+  }
+
+  // Add updatedAt timestamp
+  if (hasChanges) {
+    changes.updatedAt = Timestamp.now();
+  }
+
+  return { hasChanges, changes };
+}
+
+/**
  * Main function
  */
 async function main() {
@@ -360,7 +425,7 @@ async function main() {
   console.log('  BUILDER B3 FIRESTORE NORMALIZATION SCRIPT');
   console.log('═══════════════════════════════════════════════════════════════');
   console.log(`  Restaurant ID: ${RESTAURANT_ID}`);
-  console.log(`  Mode: ${DRY_RUN ? '🔍 DRY RUN (no writes)' : '✏️ LIVE (will write to Firestore)'}`);
+  console.log(`  Mode: ${DRY_RUN ? '🔍 DRY RUN (preview only)' : '✏️ APPLY (will write to Firestore)'}`);
   console.log('═══════════════════════════════════════════════════════════════\n');
 
   const db = initFirebase();
@@ -368,6 +433,7 @@ async function main() {
   let totalChanges = 0;
   let systemPagesProcessed = 0;
   let publishedPagesProcessed = 0;
+  let draftPagesProcessed = 0;
 
   // Process pages_system
   console.log('\n📂 Processing pages_system...\n');
@@ -406,7 +472,7 @@ async function main() {
     publishedPagesProcessed++;
 
     console.log(`\n🔧 pages_published/${docId}:`);
-    const { hasChanges, changes } = normalizePublishedPage(docId, data);
+    const { hasChanges, changes } = normalizePageContent(docId, data, 'pages_published');
 
     if (hasChanges) {
       totalChanges++;
@@ -421,40 +487,29 @@ async function main() {
     }
   }
 
-  // Create missing system pages in pages_published if they don't exist
-  console.log('\n\n📂 Checking for missing system pages in pages_published...\n');
-  for (const [pageId, config] of Object.entries(SYSTEM_PAGES)) {
-    const docRef = publishedPagesRef.doc(pageId);
-    const doc = await docRef.get();
+  // Process pages_draft
+  console.log('\n\n📂 Processing pages_draft...\n');
+  const draftPagesRef = db.collection('restaurants').doc(RESTAURANT_ID).collection('pages_draft');
+  const draftSnapshot = await draftPagesRef.get();
 
-    if (!doc.exists) {
-      console.log(`\n🆕 Creating pages_published/${pageId}:`);
-      const newDoc = {
-        pageId,
-        name: config.name,
-        route: config.route,
-        icon: config.icon,
-        order: config.order,
-        bottomNavIndex: config.bottomNavIndex,
-        isActive: true,
-        isSystemPage: true,
-        displayLocation: config.bottomNavIndex !== null ? 'bottomBar' : 'hidden',
-        publishedLayout: (MINIMAL_SYSTEM_BLOCKS[pageId] || []).map(block => ({
-          ...block,
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-        })),
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      };
+  for (const doc of draftSnapshot.docs) {
+    const docId = doc.id;
+    const data = doc.data();
+    draftPagesProcessed++;
 
+    console.log(`\n🔧 pages_draft/${docId}:`);
+    const { hasChanges, changes } = normalizePageContent(docId, data, 'pages_draft');
+
+    if (hasChanges) {
       totalChanges++;
       if (!DRY_RUN) {
-        await docRef.set(newDoc);
-        console.log(`  ✅ Created with minimal layout`);
+        await doc.ref.update(changes);
+        console.log(`  ✅ Updated`);
       } else {
-        console.log(`  🔍 Would create (dry-run)`);
+        console.log(`  🔍 Would update (dry-run)`);
       }
+    } else {
+      console.log(`  ✅ Already normalized`);
     }
   }
 
@@ -464,13 +519,14 @@ async function main() {
   console.log('═══════════════════════════════════════════════════════════════');
   console.log(`  System pages processed: ${systemPagesProcessed}`);
   console.log(`  Published pages processed: ${publishedPagesProcessed}`);
+  console.log(`  Draft pages processed: ${draftPagesProcessed}`);
   console.log(`  Total changes: ${totalChanges}`);
-  console.log(`  Mode: ${DRY_RUN ? '🔍 DRY RUN (no writes made)' : '✅ LIVE (changes applied)'}`);
+  console.log(`  Mode: ${DRY_RUN ? '🔍 DRY RUN (no writes made)' : '✅ APPLY (changes applied)'}`);
   console.log('═══════════════════════════════════════════════════════════════\n');
 
   if (DRY_RUN && totalChanges > 0) {
-    console.log('💡 To apply these changes, run without --dry-run flag:');
-    console.log('   node scripts/normalize_builder_firestore.mjs\n');
+    console.log('💡 To apply these changes, run with --apply flag:');
+    console.log('   node scripts/normalize_builder_firestore.mjs --apply\n');
   }
 }
 

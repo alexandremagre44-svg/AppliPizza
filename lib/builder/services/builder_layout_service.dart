@@ -240,6 +240,37 @@ class BuilderLayoutService {
     }
   }
 
+  /// Load published page by Firestore document ID (for custom pages)
+  /// 
+  /// This method loads a page directly by its Firestore document ID,
+  /// which is useful for custom pages that don't have a BuilderPageId enum value.
+  /// 
+  /// Returns null if no published version exists.
+  Future<BuilderPage?> loadPublishedByDocId(String appId, String docId) async {
+    try {
+      final ref = FirestorePaths.publishedDoc(docId);
+      final snapshot = await ref.get();
+
+      if (!snapshot.exists || snapshot.data() == null) {
+        return null;
+      }
+
+      final data = snapshot.data()!;
+      // Ensure pageKey is set from docId if not present
+      if (data['pageKey'] == null) {
+        data['pageKey'] = docId;
+      }
+      if (data['pageId'] == null) {
+        data['pageId'] = docId;
+      }
+      
+      return BuilderPage.fromJson(data);
+    } catch (e) {
+      print('Error loading published page by docId $docId: $e');
+      return null;
+    }
+  }
+
   /// Watch published page changes in real-time
   /// 
   /// Example:
@@ -473,9 +504,12 @@ class BuilderLayoutService {
           final data = doc.data();
           data['id'] = doc.id;
           
-          // Ensure pageId is set correctly
+          // Ensure pageId and pageKey are set correctly from doc.id
           if (data['pageId'] == null) {
             data['pageId'] = doc.id;
+          }
+          if (data['pageKey'] == null) {
+            data['pageKey'] = doc.id;
           }
           
           pages.add(BuilderPage.fromJson(data));
@@ -506,7 +540,13 @@ class BuilderLayoutService {
         return null;
       }
       
-      return BuilderPage.fromJson(snapshot.data()!);
+      final data = snapshot.data()!;
+      // Ensure pageKey is set from docId
+      if (data['pageKey'] == null) {
+        data['pageKey'] = pageId.value;
+      }
+      
+      return BuilderPage.fromJson(data);
     } catch (e) {
       debugPrint('Error loading system page ${pageId.value}: $e');
       return null;
@@ -523,8 +563,12 @@ class BuilderLayoutService {
           final data = doc.data();
           data['id'] = doc.id;
           
+          // Ensure pageId and pageKey are set correctly from doc.id
           if (data['pageId'] == null) {
             data['pageId'] = doc.id;
+          }
+          if (data['pageKey'] == null) {
+            data['pageKey'] = doc.id;
           }
           
           pages.add(BuilderPage.fromJson(data));

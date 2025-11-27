@@ -2,6 +2,80 @@
 
 This directory contains utility scripts for managing the AppliPizza application.
 
+## normalize_builder_firestore.mjs
+
+Script to normalize Builder B3 Firestore data for the `delizza` restaurant.
+
+### What it does
+
+1. **pages_system** (navigation config):
+   - If `name` absent and `title` present: copy `title` → `name`
+   - If `route` absent/empty/`'/'`: set correct route
+     - System pages: `/home`, `/menu`, `/cart`, `/profile`, `/rewards`, `/roulette`
+     - Custom pages: `/page/<docId>`
+   - If `bottomNavIndex` absent: use `order` if 0-4, else `null`
+   - Ensures `pageId` and `pageKey` are set
+
+2. **pages_published / pages_draft** (page content):
+   - Ensures `draftLayout` and `publishedLayout` are arrays (not null/string)
+   - Ensures each block has an `id` field (generates if missing)
+   - Ensures `pageId` and `pageKey` are set
+   - Ensures custom pages use `/page/<pageKey>` route format
+
+### Prerequisites
+
+1. Install Firebase Admin SDK:
+   ```bash
+   npm install firebase-admin
+   ```
+
+2. Download service account key:
+   - Go to Firebase Console → Project Settings → Service Accounts
+   - Click "Generate New Private Key"
+   - Save the JSON file as `firebase/service-account-key.json`
+
+   OR set environment variable:
+   ```bash
+   export GOOGLE_APPLICATION_CREDENTIALS="./path/to/serviceAccountKey.json"
+   ```
+
+### Usage
+
+**Preview changes (dry-run, default):**
+```bash
+node scripts/normalize_builder_firestore.mjs
+# or explicitly:
+node scripts/normalize_builder_firestore.mjs --dry-run
+```
+
+**Apply changes to Firestore:**
+```bash
+node scripts/normalize_builder_firestore.mjs --apply
+```
+
+### Example Output
+
+```
+═══════════════════════════════════════════════════════════════
+  BUILDER B3 FIRESTORE NORMALIZATION SCRIPT
+═══════════════════════════════════════════════════════════════
+  Restaurant ID: delizza
+  Mode: 🔍 DRY RUN (preview only)
+═══════════════════════════════════════════════════════════════
+
+📂 Processing pages_system...
+
+🔧 pages_system/home:
+  ✅ Already normalized
+
+🔧 pages_system/promo_noel:
+  📝 promo_noel.route: "/" → "/page/promo_noel"
+  📝 promo_noel.pageKey: undefined → "promo_noel"
+  🔍 Would update (dry-run)
+```
+
+---
+
 ## set_admin_claim.js
 
 Script to set Firebase Auth custom claims for admin users.

@@ -54,13 +54,15 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
         if (snapshot.hasData && snapshot.data != null) {
           final builderPage = snapshot.data!;
           
-          // Try to get system page config for proper naming
-          final systemConfig = SystemPages.getConfigByFirestoreId(pageKey);
+          // Use systemId to get system page config (only for system pages)
+          final systemConfig = builderPage.systemId != null 
+              ? SystemPages.getConfig(builderPage.systemId!) 
+              : null;
           
-          // Use proper display name - prefer page name (if not generic), fallback to system default
+          // Use proper display name - prefer page name (if not generic), fallback to system default or pageKey
           final displayName = (builderPage.name.isNotEmpty && builderPage.name != 'Page')
               ? builderPage.name 
-              : (systemConfig?.defaultName ?? 'Page');
+              : (systemConfig?.defaultName ?? builderPage.pageKey);
           
           // Check if the page has content (published layout, draft layout, or legacy blocks)
           // IMPORTANT: Check all possible sources of content

@@ -44,8 +44,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       body: child,
       bottomNavigationBar: bottomBarPagesAsync.when(
         data: (builderPages) {
-          // Debug: trace loaded pages
-          debugPrint('📱 [BottomNav] Loaded ${builderPages.length} pages: ${builderPages.map((p) => "${p.pageId.value}(route:${p.route})").join(", ")}');
+          // Debug: trace loaded pages (using pageKey instead of pageId)
+          debugPrint('📱 [BottomNav] Loaded ${builderPages.length} pages: ${builderPages.map((p) => "${p.pageKey}(route:${p.route}, system:${p.systemId?.value ?? 'null'})").join(", ")}');
           
           // Build navigation items dynamically
           final navItems = _buildNavigationItems(
@@ -221,19 +221,36 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 
     // Add builder pages first
     for (final page in builderPages) {
-      // Safety check: Skip pages with invalid routes
-      if (page.route.isEmpty || page.route == '/') {
-        debugPrint('⚠️ Skipping page ${page.pageId.value} with invalid route: "${page.route}"');
+      // Determine the correct route for this page
+      // System pages use their defined routes, custom pages use /page/<pageKey>
+      String effectiveRoute = page.route;
+      
+      // Fix: If route is empty or '/', generate appropriate route
+      if (effectiveRoute.isEmpty || effectiveRoute == '/') {
+        if (page.systemId != null) {
+          // System page: use system route
+          final systemConfig = SystemPages.getConfig(page.systemId!);
+          effectiveRoute = systemConfig?.route ?? '/${page.pageKey}';
+        } else {
+          // Custom page: always use /page/<pageKey>
+          effectiveRoute = '/page/${page.pageKey}';
+        }
+        debugPrint('🔧 [BottomNav] Generated route for ${page.pageKey}: $effectiveRoute');
+      }
+      
+      // Safety check: Skip pages with still-invalid routes
+      if (effectiveRoute.isEmpty || effectiveRoute == '/') {
+        debugPrint('⚠️ Skipping page ${page.pageKey} with invalid route: "$effectiveRoute"');
         continue;
       }
       
-      // Try to get system page configuration for this page
-      final systemConfig = SystemPages.getConfig(page.pageId);
+      // Try to get system page configuration for this page (only for system pages)
+      final systemConfig = page.systemId != null ? SystemPages.getConfig(page.systemId!) : null;
       
-      // Use page name if available and not generic, otherwise use system default or pageId label
+      // Use page name if available and not generic, otherwise use system default or pageKey
       final displayName = (page.name.isNotEmpty && page.name != 'Page')
           ? page.name 
-          : (systemConfig?.defaultName ?? page.pageId.label);
+          : (systemConfig?.defaultName ?? page.pageKey);
       
       // Get icon (with outlined/filled versions)
       // If icon is empty or invalid, use system default
@@ -246,7 +263,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       final filledIcon = iconPair.$2;
 
       // Special handling for cart page - add badge
-      if (page.route == '/cart' || page.pageId == BuilderPageId.cart) {
+      if (effectiveRoute == '/cart' || page.pageId == BuilderPageId.cart) {
         items.add(
           BottomNavigationBarItem(
             icon: badges.Badge(
@@ -271,7 +288,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         );
       }
 
-      pages.add(_NavPage(route: page.route, name: displayName));
+      pages.add(_NavPage(route: effectiveRoute, name: displayName));
     }
 
     // Add admin tab at the end if user is admin
