@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'builder_enums.dart';
 import 'builder_block.dart';
 import 'system_pages.dart';
-import '../../src/core/firestore_paths.dart';
 import '../utils/firestore_parsing_helpers.dart';
+
+/// Default restaurant ID for backwards compatibility when parsing pages
+const String _defaultAppId = 'delizza';
 
 /// Page model for multi-page builder system
 /// 
@@ -400,7 +402,7 @@ class BuilderPage {
       pageKey: pageKey,
       systemId: systemId,
       pageId: pageId,
-      appId: json['appId'] as String? ?? kRestaurantId,
+      appId: json['appId'] as String? ?? _defaultAppId,
       name: pageName,
       description: json['description'] as String? ?? '',
       route: route,

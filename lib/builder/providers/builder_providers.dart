@@ -4,7 +4,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/services.dart';
-import '../../src/core/firestore_paths.dart';
+import '../../src/providers/restaurant_provider.dart';
 
 /// Service provider for BuilderLayoutService
 /// Provides singleton instance of the layout service
@@ -26,19 +26,22 @@ final builderLayoutServiceProvider = Provider<BuilderLayoutService>((ref) {
 /// ```
 final homePagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
   final service = ref.watch(builderLayoutServiceProvider);
-  return await service.loadPublished(kRestaurantId, BuilderPageId.home);
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return await service.loadPublished(appId, BuilderPageId.home);
 });
 
 /// Provider for published menu page layout
 final menuPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
   final service = ref.watch(builderLayoutServiceProvider);
-  return await service.loadPublished(kRestaurantId, BuilderPageId.menu);
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return await service.loadPublished(appId, BuilderPageId.menu);
 });
 
 /// Provider for published promo page layout
 final promoPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
   final service = ref.watch(builderLayoutServiceProvider);
-  return await service.loadPublished(kRestaurantId, BuilderPageId.promo);
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return await service.loadPublished(appId, BuilderPageId.promo);
 });
 
 /// Generic family provider for any page
@@ -51,7 +54,8 @@ final promoPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
 final publishedPageProvider = FutureProvider.family<BuilderPage?, BuilderPageId>(
   (ref, pageId) async {
     final service = ref.watch(builderLayoutServiceProvider);
-    return await service.loadPublished(kRestaurantId, pageId);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return await service.loadPublished(appId, pageId);
   },
 );
 
@@ -59,5 +63,6 @@ final publishedPageProvider = FutureProvider.family<BuilderPage?, BuilderPageId>
 /// Use this if you need live updates when layout changes in Firestore
 final homePagePublishedStreamProvider = StreamProvider<BuilderPage?>((ref) {
   final service = ref.watch(builderLayoutServiceProvider);
-  return service.watchPublished(kRestaurantId, BuilderPageId.home);
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return service.watchPublished(appId, BuilderPageId.home);
 });

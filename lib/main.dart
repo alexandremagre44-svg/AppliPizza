@@ -45,9 +45,11 @@ import 'src/staff_tablet/providers/staff_tablet_auth_provider.dart';
 // Importez le composant de barre de navigation
 import 'src/widgets/scaffold_with_nav_bar.dart'; 
 import 'src/models/product.dart';
+import 'src/models/restaurant_config.dart';
 import 'src/theme/app_theme.dart';
 import 'src/core/constants.dart';
 import 'src/providers/auth_provider.dart';
+import 'src/providers/restaurant_provider.dart';
 
 // Builder B3 imports for dynamic pages
 import 'builder/models/models.dart';
@@ -55,6 +57,10 @@ import 'builder/runtime/runtime.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Read APP_ID from environment variable with default fallback
+  const appId = String.fromEnvironment('APP_ID', defaultValue: 'delizza');
+  const appName = String.fromEnvironment('APP_NAME', defaultValue: 'Delizza Default');
   
   // Initialiser Firebase
   await Firebase.initializeApp(
@@ -96,8 +102,17 @@ void main() async {
   }
   
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    ProviderScope(
+      overrides: [
+        // Override the restaurant provider with environment-configured value
+        currentRestaurantProvider.overrideWithValue(
+          RestaurantConfig(
+            id: appId,
+            name: appName,
+          ),
+        ),
+      ],
+      child: const MyApp(),
     ),
   );
 }
