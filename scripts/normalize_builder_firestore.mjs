@@ -10,11 +10,17 @@
  * - pages_draft (editor page content)
  * 
  * Usage:
- *   node scripts/normalize_builder_firestore.mjs [--dry-run]
+ *   node scripts/normalize_builder_firestore.mjs [options]
  * 
  * Options:
- *   --dry-run   Preview changes without writing to Firestore (default)
- *   --apply     Apply changes to Firestore (use with caution)
+ *   --dry-run              Preview changes without writing to Firestore (default)
+ *   --apply                Apply changes to Firestore (use with caution)
+ *   --restaurant=<id>      Target restaurant ID (default: delizza)
+ * 
+ * Examples:
+ *   node scripts/normalize_builder_firestore.mjs                           # Dry run for delizza
+ *   node scripts/normalize_builder_firestore.mjs --apply                   # Apply to delizza
+ *   node scripts/normalize_builder_firestore.mjs --restaurant=pizza_roma   # Dry run for pizza_roma
  * 
  * Prerequisites:
  *   - Firebase Admin SDK: npm install firebase-admin
@@ -50,7 +56,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Configuration
-const RESTAURANT_ID = 'delizza';
+// Restaurant ID can be set via --restaurant=<id> argument, defaults to 'delizza'
+const restaurantArg = process.argv.find(arg => arg.startsWith('--restaurant='));
+const RESTAURANT_ID = restaurantArg ? restaurantArg.split('=')[1] : 'delizza';
 const DRY_RUN = !process.argv.includes('--apply');
 
 // Known system pages configuration

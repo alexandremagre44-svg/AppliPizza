@@ -41,7 +41,7 @@ Script to normalize Builder B3 Firestore data for the `delizza` restaurant.
 
 ### Usage
 
-**Preview changes (dry-run, default):**
+**Preview changes (dry-run, default for 'delizza'):**
 ```bash
 node scripts/normalize_builder_firestore.mjs
 # or explicitly:
@@ -51,6 +51,12 @@ node scripts/normalize_builder_firestore.mjs --dry-run
 **Apply changes to Firestore:**
 ```bash
 node scripts/normalize_builder_firestore.mjs --apply
+```
+
+**Target a different restaurant:**
+```bash
+node scripts/normalize_builder_firestore.mjs --restaurant=pizza_roma
+node scripts/normalize_builder_firestore.mjs --restaurant=pizza_roma --apply
 ```
 
 ### Example Output
