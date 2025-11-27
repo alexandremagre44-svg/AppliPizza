@@ -2,23 +2,24 @@
 // Formulaire de création/modification de promotion
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../design_system/app_theme.dart';
 import '../../models/promotion.dart';
-import '../../services/promotion_service.dart';
+import '../../providers/promotion_provider.dart';
 
 /// Écran de formulaire pour créer ou modifier une promotion
-class PromotionFormScreen extends StatefulWidget {
+class PromotionFormScreen extends ConsumerStatefulWidget {
   final Promotion? promotion;
 
   const PromotionFormScreen({super.key, this.promotion});
 
   @override
-  State<PromotionFormScreen> createState() => _PromotionFormScreenState();
+  ConsumerState<PromotionFormScreen> createState() => _PromotionFormScreenState();
 }
 
-class _PromotionFormScreenState extends State<PromotionFormScreen> {
+class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -26,7 +27,6 @@ class _PromotionFormScreenState extends State<PromotionFormScreen> {
   final _discountValueController = TextEditingController();
   final _minOrderAmountController = TextEditingController();
   
-  final PromotionService _promotionService = PromotionService();
   final _uuid = const Uuid();
   
   String _discountType = 'percentage';
@@ -382,9 +382,10 @@ class _PromotionFormScreenState extends State<PromotionFormScreen> {
         updatedAt: DateTime.now(),
       );
 
+      final promotionService = ref.read(promotionServiceProvider);
       final success = widget.promotion != null
-          ? await _promotionService.updatePromotion(promotion)
-          : await _promotionService.createPromotion(promotion);
+          ? await promotionService.updatePromotion(promotion)
+          : await promotionService.createPromotion(promotion);
 
       if (mounted) {
         if (success) {

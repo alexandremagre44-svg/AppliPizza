@@ -9,9 +9,13 @@ import '../models/promotion.dart';
 import '../core/firestore_paths.dart';
 
 class PromotionService {
+  final String appId;
+
+  PromotionService({required this.appId});
+
   /// Get collection reference for promotions
   CollectionReference<Map<String, dynamic>> get _promotionsCollection =>
-      FirestorePaths.promotions();
+      FirestorePaths.promotions(appId);
 
   // Get all promotions
   Future<List<Promotion>> getAllPromotions() async {

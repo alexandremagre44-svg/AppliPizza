@@ -2,23 +2,23 @@
 // Écran d'administration du module promotions
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../design_system/app_theme.dart';
 import '../../models/promotion.dart';
-import '../../services/promotion_service.dart';
+import '../../providers/promotion_provider.dart';
 import 'promotion_form_screen.dart';
 
 /// Écran d'administration pour gérer les promotions
-class PromotionsAdminScreen extends StatefulWidget {
+class PromotionsAdminScreen extends ConsumerStatefulWidget {
   const PromotionsAdminScreen({super.key});
 
   @override
-  State<PromotionsAdminScreen> createState() => _PromotionsAdminScreenState();
+  ConsumerState<PromotionsAdminScreen> createState() => _PromotionsAdminScreenState();
 }
 
-class _PromotionsAdminScreenState extends State<PromotionsAdminScreen> {
-  final PromotionService _promotionService = PromotionService();
+class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
   List<Promotion> _promotions = [];
   bool _isLoading = true;
 
@@ -30,7 +30,8 @@ class _PromotionsAdminScreenState extends State<PromotionsAdminScreen> {
 
   Future<void> _loadPromotions() async {
     setState(() => _isLoading = true);
-    final promotions = await _promotionService.getAllPromotions();
+    final promotionService = ref.read(promotionServiceProvider);
+    final promotions = await promotionService.getAllPromotions();
     setState(() {
       _promotions = promotions;
       _isLoading = false;
@@ -369,7 +370,8 @@ class _PromotionsAdminScreenState extends State<PromotionsAdminScreen> {
   }
 
   Future<void> _togglePromotionStatus(Promotion promotion) async {
-    final success = await _promotionService.togglePromotionStatus(promotion.id);
+    final promotionService = ref.read(promotionServiceProvider);
+    final success = await promotionService.togglePromotionStatus(promotion.id);
     if (success && mounted) {
       _loadPromotions();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -406,7 +408,8 @@ class _PromotionsAdminScreenState extends State<PromotionsAdminScreen> {
   }
 
   Future<void> _deletePromotion(Promotion promotion) async {
-    final success = await _promotionService.deletePromotion(promotion.id);
+    final promotionService = ref.read(promotionServiceProvider);
+    final success = await promotionService.deletePromotion(promotion.id);
     if (success && mounted) {
       _loadPromotions();
       ScaffoldMessenger.of(context).showSnackBar(

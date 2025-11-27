@@ -697,6 +697,20 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   Future<void> _updateNavigationParams({bool? isActive, int? bottomNavIndex}) async {
     if (_page == null) return;
     
+    // Ensure we have a valid pageId
+    final pageId = _page!.pageId ?? _page!.systemId;
+    if (pageId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Impossible de modifier une page personnalisée sans pageId'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+    
     // Store old values for potential revert
     final oldIsActive = _page!.isActive;
     final oldBottomNavIndex = _page!.bottomNavIndex;
@@ -721,7 +735,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     try {
       // Update via service
       final updatedPage = await _pageService.updatePageNavigation(
-        pageId: _page!.pageId,
+        pageId: pageId,
         appId: widget.appId,
         isActive: finalIsActive,
         bottomNavIndex: finalIsActive ? finalBottomNavIndex : null,
@@ -819,7 +833,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       
       for (final entry in allPages.entries) {
         final otherPage = entry.value;
-        if (otherPage.pageId != _page!.pageId && 
+        // Use pageKey for comparison since it's always non-null
+        if (otherPage.pageKey != _page!.pageKey && 
             otherPage.isActive && 
             otherPage.bottomNavIndex == _page!.bottomNavIndex) {
           warning = 'La page "${otherPage.name}" utilise déjà cette position';

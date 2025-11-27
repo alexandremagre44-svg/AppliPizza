@@ -4,10 +4,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/app_texts_config.dart';
 import '../services/app_texts_service.dart';
+import 'restaurant_provider.dart';
 
 /// Provider for AppTextsService
 final appTextsServiceProvider = Provider<AppTextsService>((ref) {
-  return AppTextsService();
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return AppTextsService(appId: appId);
 });
 
 /// Stream provider for real-time app texts configuration

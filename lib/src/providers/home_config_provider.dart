@@ -4,10 +4,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/home_config.dart';
 import '../services/home_config_service.dart';
+import 'restaurant_provider.dart';
 
 // Service provider
 final homeConfigServiceProvider = Provider<HomeConfigService>((ref) {
-  return HomeConfigService();
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return HomeConfigService(appId: appId);
 });
 
 // Home config provider

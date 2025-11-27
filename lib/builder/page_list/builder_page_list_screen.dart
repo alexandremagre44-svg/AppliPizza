@@ -59,11 +59,11 @@ class _BuilderPageListScreenState extends State<BuilderPageListScreen> {
       final mergedPages = <String, BuilderPage>{};
       
       for (final entry in publishedPages.entries) {
-        mergedPages[entry.key.value] = entry.value;
+        mergedPages[entry.key] = entry.value; // entry.key is already a String
       }
       
       for (final entry in draftPages.entries) {
-        mergedPages[entry.key.value] = entry.value;
+        mergedPages[entry.key] = entry.value; // entry.key is already a String
       }
       
       setState(() {
@@ -586,8 +586,10 @@ class _BuilderPageListScreenState extends State<BuilderPageListScreen> {
     
     if (result != null) {
       try {
+        // Use pageId if available, otherwise use pageKey
+        final pageIdentifier = page.pageId ?? page.pageKey;
         await _pageService.reorderBottomNav(
-          page.pageId,
+          pageIdentifier,
           widget.appId,
           result,
         );
@@ -663,8 +665,9 @@ class _BuilderPageListScreenState extends State<BuilderPageListScreen> {
     
     if (confirm == true) {
       try {
-        await _layoutService.deleteDraft(widget.appId, page.pageId);
-        await _layoutService.deletePublished(widget.appId, page.pageId);
+        // Use pageKey which is always non-null
+        await _layoutService.deleteDraft(widget.appId, page.pageKey);
+        await _layoutService.deletePublished(widget.appId, page.pageKey);
         _loadPages();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

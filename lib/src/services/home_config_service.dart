@@ -9,10 +9,14 @@ import '../models/home_config.dart';
 import '../core/firestore_paths.dart';
 
 class HomeConfigService {
+  final String appId;
+
+  HomeConfigService({required this.appId});
+
   // Get home configuration
   Future<HomeConfig?> getHomeConfig() async {
     try {
-      final doc = await FirestorePaths.homeConfigDoc().get();
+      final doc = await FirestorePaths.homeConfigDoc(appId).get();
       if (doc.exists && doc.data() != null) {
         return HomeConfig.fromJson(doc.data()!);
       }
@@ -30,7 +34,7 @@ class HomeConfigService {
       final jsonData = config.toJson();
       print('HomeConfigService: JSON blocks: ${jsonData['blocks']}');
       
-      await FirestorePaths.homeConfigDoc().set(
+      await FirestorePaths.homeConfigDoc(appId).set(
             jsonData,
             SetOptions(merge: true),
           );
@@ -46,7 +50,7 @@ class HomeConfigService {
   // Update hero configuration
   Future<bool> updateHeroConfig(HeroConfig hero) async {
     try {
-      await FirestorePaths.homeConfigDoc().update({
+      await FirestorePaths.homeConfigDoc(appId).update({
         'hero': hero.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -60,7 +64,7 @@ class HomeConfigService {
   // Update promo banner configuration
   Future<bool> updatePromoBanner(PromoBannerConfig banner) async {
     try {
-      await FirestorePaths.homeConfigDoc().update({
+      await FirestorePaths.homeConfigDoc(appId).update({
         'promoBanner': banner.toJson(),
         'updatedAt': DateTime.now().toIso8601String(),
       });
@@ -194,7 +198,7 @@ class HomeConfigService {
 
   // Stream for real-time updates
   Stream<HomeConfig?> watchHomeConfig() {
-    return FirestorePaths.homeConfigDoc()
+    return FirestorePaths.homeConfigDoc(appId)
         .snapshots()
         .map((snapshot) {
       if (snapshot.exists && snapshot.data() != null) {
