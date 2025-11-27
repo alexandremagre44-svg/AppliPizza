@@ -29,9 +29,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 ///     builder_settings/
 /// ```
 ///
-/// Example usage:
+/// Example usage in a widget or service with Riverpod access:
 /// ```dart
+/// // First get the appId from the provider
 /// final appId = ref.read(currentRestaurantProvider).id;
+/// 
+/// // Then use it with FirestorePaths static methods
 /// final settingsRef = FirestorePaths.builderSettings(appId);
 /// final pagesRef = FirestorePaths.pagesDraft(appId);
 /// ```
