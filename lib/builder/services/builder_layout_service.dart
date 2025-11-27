@@ -48,24 +48,18 @@ class BuilderLayoutService {
   /// Path: restaurants/{restaurantId}/pages_draft/{pageId}
   /// 
   /// Accepts dynamic pageId (String or BuilderPageId enum).
-  /// Note: The appId parameter is currently ignored and kRestaurantId is used.
-  /// This maintains backward compatibility while multi-resto is implemented in a future phase.
   DocumentReference _getDraftRef(String appId, dynamic pageId) {
     final pageIdStr = _toPageIdString(pageId);
-    // TODO: In multi-resto phase, use: FirestorePaths.draftDoc(pageIdStr, appId)
-    return FirestorePaths.draftDoc(pageIdStr);
+    return FirestorePaths.draftDoc(pageIdStr, appId);
   }
 
   /// Get document reference for published page
   /// Path: restaurants/{restaurantId}/pages_published/{pageId}
   /// 
   /// Accepts dynamic pageId (String or BuilderPageId enum).
-  /// Note: The appId parameter is currently ignored and kRestaurantId is used.
-  /// This maintains backward compatibility while multi-resto is implemented in a future phase.
   DocumentReference _getPublishedRef(String appId, dynamic pageId) {
     final pageIdStr = _toPageIdString(pageId);
-    // TODO: In multi-resto phase, use: FirestorePaths.publishedDoc(pageIdStr, appId)
-    return FirestorePaths.publishedDoc(pageIdStr);
+    return FirestorePaths.publishedDoc(pageIdStr, appId);
   }
 
   // ==================== DRAFT OPERATIONS ====================
@@ -281,7 +275,7 @@ class BuilderLayoutService {
   /// Returns null if no published version exists.
   Future<BuilderPage?> loadPublishedByDocId(String appId, String docId) async {
     try {
-      final ref = FirestorePaths.publishedDoc(docId);
+      final ref = FirestorePaths.publishedDoc(docId, appId);
       final snapshot = await ref.get();
 
       if (!snapshot.exists || snapshot.data() == null) {
@@ -430,7 +424,7 @@ class BuilderLayoutService {
 
     try {
       // Query all documents in pages_published collection
-      final snapshot = await FirestorePaths.pagesPublished().get();
+      final snapshot = await FirestorePaths.pagesPublished(appId).get();
       
       for (final doc in snapshot.docs) {
         try {
@@ -466,7 +460,7 @@ class BuilderLayoutService {
 
     try {
       // Query all documents in pages_draft collection
-      final snapshot = await FirestorePaths.pagesDraft().get();
+      final snapshot = await FirestorePaths.pagesDraft(appId).get();
       
       for (final doc in snapshot.docs) {
         try {
@@ -583,9 +577,9 @@ class BuilderLayoutService {
   /// - home, cart, contact, about (order fixed)
   /// 
   /// Returns list of BuilderPage sorted by order
-  Future<List<BuilderPage>> loadSystemPages() async {
+  Future<List<BuilderPage>> loadSystemPages(String appId) async {
     try {
-      final snapshot = await FirestorePaths.pagesSystem().get();
+      final snapshot = await FirestorePaths.pagesSystem(appId).get();
       
       final pages = <BuilderPage>[];
       for (final doc in snapshot.docs) {
@@ -620,9 +614,9 @@ class BuilderLayoutService {
   /// Load a specific system page by pageId
   /// 
   /// Path: restaurants/{restaurantId}/pages_system/{pageId}
-  Future<BuilderPage?> loadSystemPage(BuilderPageId pageId) async {
+  Future<BuilderPage?> loadSystemPage(String appId, BuilderPageId pageId) async {
     try {
-      final docRef = FirestorePaths.systemPageDoc(pageId.value);
+      final docRef = FirestorePaths.systemPageDoc(pageId.value, appId);
       final snapshot = await docRef.get();
       
       if (!snapshot.exists || snapshot.data() == null) {
@@ -643,8 +637,8 @@ class BuilderLayoutService {
   }
 
   /// Watch system pages for real-time updates
-  Stream<List<BuilderPage>> watchSystemPages() {
-    return FirestorePaths.pagesSystem().snapshots().map((snapshot) {
+  Stream<List<BuilderPage>> watchSystemPages(String appId) {
+    return FirestorePaths.pagesSystem(appId).snapshots().map((snapshot) {
       final pages = <BuilderPage>[];
       
       for (final doc in snapshot.docs) {
@@ -728,10 +722,10 @@ class BuilderLayoutService {
   /// 
   /// This is the NEW B3 logic that uses isActive + bottomNavIndex fields
   /// instead of the old displayLocation + order fields
-  Future<List<BuilderPage>> getBottomBarPages() async {
+  Future<List<BuilderPage>> getBottomBarPages(String appId) async {
     try {
       // Load system pages first
-      final systemPages = await loadSystemPages();
+      final systemPages = await loadSystemPages(appId);
       
       // Filter for active pages with valid bottomNavIndex
       // NEW LOGIC: isActive + bottomNavIndex < 999
@@ -744,7 +738,7 @@ class BuilderLayoutService {
       }
       
       // Fallback: Load from published pages if no system pages
-      final publishedPages = await loadAllPublishedPages(kRestaurantId);
+      final publishedPages = await loadAllPublishedPages(appId);
       
       final publishedBottomBar = publishedPages.values
         .where(_isBottomBarPage)

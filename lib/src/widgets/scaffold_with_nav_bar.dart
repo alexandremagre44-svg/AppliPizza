@@ -12,7 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:badges/badges.dart' as badges;
 import '../providers/cart_provider.dart';
 import '../providers/auth_provider.dart';
-import '../core/firestore_paths.dart';
+import '../providers/restaurant_provider.dart';
 import '../core/constants.dart';
 import '../../builder/models/models.dart';
 import '../../builder/services/builder_navigation_service.dart';
@@ -20,9 +20,10 @@ import '../../builder/utils/icon_helper.dart';
 
 /// Provider for bottom bar pages
 /// Loads pages dynamically from Builder B3
-/// Uses kRestaurantId for consistent restaurant scoping
+/// Uses currentRestaurantProvider for consistent restaurant scoping
 final bottomBarPagesProvider = FutureProvider.autoDispose<List<BuilderPage>>((ref) async {
-  final service = BuilderNavigationService(kRestaurantId);
+  final appId = ref.watch(currentRestaurantProvider).id;
+  final service = BuilderNavigationService(appId);
   return await service.getBottomBarPages();
 });
 

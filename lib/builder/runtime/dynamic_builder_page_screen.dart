@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/dynamic_page_resolver.dart';
-import '../../src/core/firestore_paths.dart';
+import '../../src/providers/restaurant_provider.dart';
 import '../preview/builder_runtime_renderer.dart';
 
 /// Screen that displays a dynamic Builder page
@@ -27,8 +27,8 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Use kRestaurantId from FirestorePaths for consistent restaurant scoping
-    final appId = kRestaurantId;
+    // Read appId from the restaurant provider
+    final appId = ref.watch(currentRestaurantProvider).id;
     
     // Resolver instance - could be optimized with a provider if needed
     final resolver = DynamicPageResolver();

@@ -51,7 +51,7 @@ class BuilderNavigationService {
     try {
       // Use the layout service's new getBottomBarPages method
       // which loads from pages_system first, then fallback to pages_published
-      final pages = await _layoutService.getBottomBarPages();
+      final pages = await _layoutService.getBottomBarPages(appId);
       
       // Ensure we have at least 2 items (requirement)
       if (pages.length < 2) {
