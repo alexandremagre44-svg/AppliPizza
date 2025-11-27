@@ -10,6 +10,7 @@ import '../../providers/reward_tickets_provider.dart';
 import '../../models/order.dart';
 import '../../models/loyalty_reward.dart';
 import '../../models/app_texts_config.dart';
+import '../../providers/app_texts_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../services/loyalty_service.dart';
 import '../../core/constants.dart';
