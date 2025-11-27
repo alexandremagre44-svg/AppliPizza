@@ -34,9 +34,13 @@ class BuilderPage {
   final BuilderPageId? systemId;
 
   /// Unique page identifier (home, menu, promo, etc.)
+  /// 
+  /// This is nullable for custom pages that don't have a matching Enum value.
+  /// For system pages, this will match [systemId].
+  /// For custom pages, this will be null.
+  /// 
   /// @deprecated Use [pageKey] for the string identifier and [systemId] for system pages.
-  /// This is kept for backward compatibility and defaults to home for custom pages.
-  final BuilderPageId pageId;
+  final BuilderPageId? pageId;
 
   /// Restaurant/app identifier for multi-resto support
   /// Example: 'delizza', 'pizza_express', etc.
@@ -163,8 +167,9 @@ class BuilderPage {
     List<BuilderBlock>? publishedLayout,
   })  : // Compute pageKey: explicit parameter > systemId > pageId > 'custom'
         pageKey = pageKey ?? systemId?.value ?? pageId?.value ?? 'custom',
-        // Compute pageId for backward compatibility: systemId > explicit pageId > derived from pageKey > home
-        pageId = systemId ?? pageId ?? BuilderPageId.tryFromString(pageKey ?? '') ?? BuilderPageId.home,
+        // Compute pageId: systemId > explicit pageId > derived from pageKey (nullable for custom pages)
+        // Note: Does NOT default to home anymore - custom pages will have null pageId
+        pageId = systemId ?? pageId ?? BuilderPageId.tryFromString(pageKey ?? ''),
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now(),
         isSystemPage = isSystemPage ?? (systemId != null ? systemId.isSystemPage : (pageId?.isSystemPage ?? false)),
@@ -240,7 +245,7 @@ class BuilderPage {
   Map<String, dynamic> toJson() {
     return {
       'pageKey': pageKey,
-      'pageId': pageId.toJson(), // Keep for backward compatibility
+      'pageId': pageId?.toJson() ?? pageKey, // Use pageKey as fallback for custom pages
       'appId': appId,
       'name': name,
       'description': description,
@@ -337,8 +342,9 @@ class BuilderPage {
     // Try to get system page ID (nullable for custom pages)
     final systemId = BuilderPageId.tryFromString(rawPageId);
     
-    // For backward compatibility, compute pageId (will be home for unknown custom pages)
-    final pageId = systemId ?? BuilderPageId.home;
+    // pageId is now nullable - don't default to home for custom pages
+    // systemId is the same as pageId for system pages, null for custom pages
+    final BuilderPageId? pageId = systemId;
     
     // Get system page config for proper defaults (only if this is a system page)
     final systemConfig = systemId != null ? SystemPages.getConfig(systemId) : null;

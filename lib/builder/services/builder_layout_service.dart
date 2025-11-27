@@ -32,24 +32,40 @@ class BuilderLayoutService {
   BuilderLayoutService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
+  /// Convert a dynamic pageId (String or BuilderPageId enum) to String
+  /// 
+  /// This allows methods to accept either format for flexibility.
+  /// - String: returned as-is
+  /// - BuilderPageId enum: returns the .value property
+  /// - Other: converts to string using toString()
+  String _toPageIdString(dynamic pageId) {
+    if (pageId is String) return pageId;
+    if (pageId is BuilderPageId) return pageId.value;
+    return pageId.toString();
+  }
+
   /// Get document reference for draft page
   /// Path: restaurants/{restaurantId}/pages_draft/{pageId}
   /// 
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
   /// Note: The appId parameter is currently ignored and kRestaurantId is used.
   /// This maintains backward compatibility while multi-resto is implemented in a future phase.
-  DocumentReference _getDraftRef(String appId, BuilderPageId pageId) {
-    // TODO: In multi-resto phase, use: FirestorePaths.draftDoc(pageId.value, appId)
-    return FirestorePaths.draftDoc(pageId.value);
+  DocumentReference _getDraftRef(String appId, dynamic pageId) {
+    final pageIdStr = _toPageIdString(pageId);
+    // TODO: In multi-resto phase, use: FirestorePaths.draftDoc(pageIdStr, appId)
+    return FirestorePaths.draftDoc(pageIdStr);
   }
 
   /// Get document reference for published page
   /// Path: restaurants/{restaurantId}/pages_published/{pageId}
   /// 
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
   /// Note: The appId parameter is currently ignored and kRestaurantId is used.
   /// This maintains backward compatibility while multi-resto is implemented in a future phase.
-  DocumentReference _getPublishedRef(String appId, BuilderPageId pageId) {
-    // TODO: In multi-resto phase, use: FirestorePaths.publishedDoc(pageId.value, appId)
-    return FirestorePaths.publishedDoc(pageId.value);
+  DocumentReference _getPublishedRef(String appId, dynamic pageId) {
+    final pageIdStr = _toPageIdString(pageId);
+    // TODO: In multi-resto phase, use: FirestorePaths.publishedDoc(pageIdStr, appId)
+    return FirestorePaths.publishedDoc(pageIdStr);
   }
 
   // ==================== DRAFT OPERATIONS ====================
@@ -60,6 +76,8 @@ class BuilderLayoutService {
   /// - System pages retain isSystemPage = true
   /// - SystemBlocks retain type = system
   /// - System page pageId cannot be changed
+  /// 
+  /// Uses page.pageKey as the Firestore document ID (supports custom pages).
   /// 
   /// Example:
   /// ```dart
@@ -74,7 +92,8 @@ class BuilderLayoutService {
     // Apply system page protections
     final protectedPage = _applySystemProtections(page);
 
-    final ref = _getDraftRef(protectedPage.appId, protectedPage.pageId);
+    // Use pageKey as the document ID (supports custom pages)
+    final ref = _getDraftRef(protectedPage.appId, protectedPage.pageKey);
     final data = protectedPage.toJson();
     
     await ref.set(data, SetOptions(merge: true));
@@ -90,8 +109,10 @@ class BuilderLayoutService {
     var protectedPage = page;
     
     // Ensure system pages retain their isSystemPage flag
-    if (page.pageId.isSystemPage && !page.isSystemPage) {
-      debugPrint('⚠️ Warning: Correcting isSystemPage for system page ${page.pageId.value}');
+    // Use systemId (which is always set for system pages) or check pageId if set
+    final isSystemPageById = page.systemId?.isSystemPage ?? page.pageId?.isSystemPage ?? false;
+    if (isSystemPageById && !page.isSystemPage) {
+      debugPrint('⚠️ Warning: Correcting isSystemPage for system page ${page.pageKey}');
       protectedPage = protectedPage.copyWith(isSystemPage: true);
     }
     
@@ -99,7 +120,7 @@ class BuilderLayoutService {
     if (protectedPage.isSystemPage) {
       final validLocations = ['bottomBar', 'hidden'];
       if (!validLocations.contains(protectedPage.displayLocation)) {
-        debugPrint('⚠️ Warning: Correcting displayLocation for system page ${page.pageId.value}');
+        debugPrint('⚠️ Warning: Correcting displayLocation for system page ${page.pageKey}');
         protectedPage = protectedPage.copyWith(displayLocation: 'hidden');
       }
     }
@@ -133,8 +154,9 @@ class BuilderLayoutService {
 
   /// Load draft page
   /// 
-  /// Returns null if no draft exists
-  Future<BuilderPage?> loadDraft(String appId, BuilderPageId pageId) async {
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
+  /// Returns null if no draft exists.
+  Future<BuilderPage?> loadDraft(String appId, dynamic pageId) async {
     try {
       final ref = _getDraftRef(appId, pageId);
       final snapshot = await ref.get();
@@ -152,6 +174,8 @@ class BuilderLayoutService {
 
   /// Watch draft page changes in real-time
   /// 
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
+  /// 
   /// Example:
   /// ```dart
   /// service.watchDraft('pizza_delizza', BuilderPageId.home).listen((page) {
@@ -159,8 +183,10 @@ class BuilderLayoutService {
   ///     print('Draft updated: ${page.version}');
   ///   }
   /// });
+  /// // Or with string pageId for custom pages:
+  /// service.watchDraft('pizza_delizza', 'promo_noel').listen((page) { ... });
   /// ```
-  Stream<BuilderPage?> watchDraft(String appId, BuilderPageId pageId) {
+  Stream<BuilderPage?> watchDraft(String appId, dynamic pageId) {
     return _getDraftRef(appId, pageId).snapshots().map((snapshot) {
       if (!snapshot.exists || snapshot.data() == null) {
         return null;
@@ -176,13 +202,17 @@ class BuilderLayoutService {
   }
 
   /// Delete draft page
-  Future<void> deleteDraft(String appId, BuilderPageId pageId) async {
+  /// 
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
+  Future<void> deleteDraft(String appId, dynamic pageId) async {
     final ref = _getDraftRef(appId, pageId);
     await ref.delete();
   }
 
   /// Check if draft exists
-  Future<bool> hasDraft(String appId, BuilderPageId pageId) async {
+  /// 
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
+  Future<bool> hasDraft(String appId, dynamic pageId) async {
     final ref = _getDraftRef(appId, pageId);
     final snapshot = await ref.get();
     return snapshot.exists && snapshot.data() != null;
@@ -198,6 +228,8 @@ class BuilderLayoutService {
   /// 3. Set publishedAt timestamp
   /// 4. Optionally delete draft
   /// 
+  /// Uses page.pageKey as the Firestore document ID (supports custom pages).
+  /// 
   /// Example:
   /// ```dart
   /// final draft = await service.loadDraft('pizza_delizza', BuilderPageId.home);
@@ -211,20 +243,21 @@ class BuilderLayoutService {
     // Create published version
     final publishedPage = page.publish(userId: userId);
 
-    // Save to published collection
-    final ref = _getPublishedRef(page.appId, page.pageId);
+    // Save to published collection using pageKey (supports custom pages)
+    final ref = _getPublishedRef(page.appId, page.pageKey);
     await ref.set(publishedPage.toJson());
 
     // Optionally delete draft
     if (shouldDeleteDraft) {
-      await deleteDraft(page.appId, page.pageId);
+      await deleteDraft(page.appId, page.pageKey);
     }
   }
 
   /// Load published page
   /// 
-  /// Returns null if no published version exists
-  Future<BuilderPage?> loadPublished(String appId, BuilderPageId pageId) async {
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
+  /// Returns null if no published version exists.
+  Future<BuilderPage?> loadPublished(String appId, dynamic pageId) async {
     try {
       final ref = _getPublishedRef(appId, pageId);
       final snapshot = await ref.get();
@@ -273,6 +306,8 @@ class BuilderLayoutService {
 
   /// Watch published page changes in real-time
   /// 
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
+  /// 
   /// Example:
   /// ```dart
   /// service.watchPublished('pizza_delizza', BuilderPageId.home).listen((page) {
@@ -280,8 +315,10 @@ class BuilderLayoutService {
   ///     // Update UI with published page
   ///   }
   /// });
+  /// // Or with string pageId for custom pages:
+  /// service.watchPublished('pizza_delizza', 'promo_noel').listen((page) { ... });
   /// ```
-  Stream<BuilderPage?> watchPublished(String appId, BuilderPageId pageId) {
+  Stream<BuilderPage?> watchPublished(String appId, dynamic pageId) {
     return _getPublishedRef(appId, pageId).snapshots().map((snapshot) {
       if (!snapshot.exists || snapshot.data() == null) {
         return null;
@@ -297,13 +334,17 @@ class BuilderLayoutService {
   }
 
   /// Delete published page
-  Future<void> deletePublished(String appId, BuilderPageId pageId) async {
+  /// 
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
+  Future<void> deletePublished(String appId, dynamic pageId) async {
     final ref = _getPublishedRef(appId, pageId);
     await ref.delete();
   }
 
   /// Check if published version exists
-  Future<bool> hasPublished(String appId, BuilderPageId pageId) async {
+  /// 
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
+  Future<bool> hasPublished(String appId, dynamic pageId) async {
     final ref = _getPublishedRef(appId, pageId);
     final snapshot = await ref.get();
     return snapshot.exists && snapshot.data() != null;
@@ -316,9 +357,11 @@ class BuilderLayoutService {
   /// 2. Convert to draft
   /// 3. Save as draft
   /// 4. Optionally delete published version
+  /// 
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
   Future<void> unpublishPage(
     String appId,
-    BuilderPageId pageId, {
+    dynamic pageId, {
     bool deletePublished = true,
   }) async {
     final published = await loadPublished(appId, pageId);
@@ -342,8 +385,9 @@ class BuilderLayoutService {
 
   /// Load page (prefers draft, falls back to published)
   /// 
-  /// Useful for editor: always show latest version
-  Future<BuilderPage?> loadPage(String appId, BuilderPageId pageId) async {
+  /// Useful for editor: always show latest version.
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
+  Future<BuilderPage?> loadPage(String appId, dynamic pageId) async {
     // Try draft first
     final draft = await loadDraft(appId, pageId);
     if (draft != null) return draft;
@@ -354,8 +398,9 @@ class BuilderLayoutService {
 
   /// Watch page (prefers draft, falls back to published)
   /// 
-  /// Returns a stream that emits the most recent version
-  Stream<BuilderPage?> watchPage(String appId, BuilderPageId pageId) async* {
+  /// Returns a stream that emits the most recent version.
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
+  Stream<BuilderPage?> watchPage(String appId, dynamic pageId) async* {
     // First try to load draft
     final draft = await loadDraft(appId, pageId);
     if (draft != null) {
@@ -376,33 +421,71 @@ class BuilderLayoutService {
 
   /// Load all published pages for an app
   /// 
-  /// Returns a map of pageId -> BuilderPage
-  Future<Map<BuilderPageId, BuilderPage>> loadAllPublishedPages(
+  /// Returns a map of pageKey (String) -> BuilderPage
+  /// This includes both system pages (with BuilderPageId enum) and custom pages.
+  Future<Map<String, BuilderPage>> loadAllPublishedPages(
     String appId,
   ) async {
-    final result = <BuilderPageId, BuilderPage>{};
+    final result = <String, BuilderPage>{};
 
-    for (final pageId in BuilderPageId.values) {
-      final page = await loadPublished(appId, pageId);
-      if (page != null) {
-        result[pageId] = page;
+    try {
+      // Query all documents in pages_published collection
+      final snapshot = await FirestorePaths.pagesPublished().get();
+      
+      for (final doc in snapshot.docs) {
+        try {
+          final data = doc.data();
+          // Ensure pageKey is set from doc.id if not present
+          // Note: We only set pageKey, not pageId. fromJson will derive pageId
+          // from pageKey if it matches a known system page.
+          if (data['pageKey'] == null) {
+            data['pageKey'] = doc.id;
+          }
+          
+          final page = BuilderPage.fromJson(data);
+          result[page.pageKey] = page;
+        } catch (e) {
+          debugPrint('Error parsing published page ${doc.id}: $e');
+        }
       }
+    } catch (e) {
+      debugPrint('Error loading all published pages: $e');
     }
 
     return result;
   }
 
   /// Load all draft pages for an app
-  Future<Map<BuilderPageId, BuilderPage>> loadAllDraftPages(
+  /// 
+  /// Returns a map of pageKey (String) -> BuilderPage
+  /// This includes both system pages (with BuilderPageId enum) and custom pages.
+  Future<Map<String, BuilderPage>> loadAllDraftPages(
     String appId,
   ) async {
-    final result = <BuilderPageId, BuilderPage>{};
+    final result = <String, BuilderPage>{};
 
-    for (final pageId in BuilderPageId.values) {
-      final page = await loadDraft(appId, pageId);
-      if (page != null) {
-        result[pageId] = page;
+    try {
+      // Query all documents in pages_draft collection
+      final snapshot = await FirestorePaths.pagesDraft().get();
+      
+      for (final doc in snapshot.docs) {
+        try {
+          final data = doc.data();
+          // Ensure pageKey is set from doc.id if not present
+          // Note: We only set pageKey, not pageId. fromJson will derive pageId
+          // from pageKey if it matches a known system page.
+          if (data['pageKey'] == null) {
+            data['pageKey'] = doc.id;
+          }
+          
+          final page = BuilderPage.fromJson(data);
+          result[page.pageKey] = page;
+        } catch (e) {
+          debugPrint('Error parsing draft page ${doc.id}: $e');
+        }
       }
+    } catch (e) {
+      debugPrint('Error loading all draft pages: $e');
     }
 
     return result;
@@ -439,10 +522,11 @@ class BuilderLayoutService {
 
   /// Copy published to draft (create draft from published)
   /// 
-  /// Useful for starting to edit a published page
+  /// Useful for starting to edit a published page.
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
   Future<BuilderPage?> copyPublishedToDraft(
     String appId,
-    BuilderPageId pageId,
+    dynamic pageId,
   ) async {
     final published = await loadPublished(appId, pageId);
     if (published == null) return null;
@@ -454,9 +538,11 @@ class BuilderLayoutService {
   }
 
   /// Get page status (draft exists? published exists?)
+  /// 
+  /// Accepts dynamic pageId (String or BuilderPageId enum).
   Future<PageStatus> getPageStatus(
     String appId,
-    BuilderPageId pageId,
+    dynamic pageId,
   ) async {
     final hasDraftVersion = await hasDraft(appId, pageId);
     final hasPublishedVersion = await hasPublished(appId, pageId);
@@ -468,19 +554,22 @@ class BuilderLayoutService {
   }
 
   /// Batch operation: Publish all drafts for an app
-  Future<List<BuilderPageId>> publishAllDrafts(
+  /// 
+  /// Returns a list of pageKey strings (for both system and custom pages).
+  Future<List<String>> publishAllDrafts(
     String appId, {
     required String userId,
     bool deleteDrafts = false,
   }) async {
-    final published = <BuilderPageId>[];
+    final published = <String>[];
 
-    for (final pageId in BuilderPageId.values) {
-      final draft = await loadDraft(appId, pageId);
-      if (draft != null) {
-        await publishPage(draft, userId: userId, shouldDeleteDraft: deleteDrafts);
-        published.add(pageId);
-      }
+    // Load all drafts (including custom pages)
+    final allDrafts = await loadAllDraftPages(appId);
+    
+    for (final entry in allDrafts.entries) {
+      final draft = entry.value;
+      await publishPage(draft, userId: userId, shouldDeleteDraft: deleteDrafts);
+      published.add(entry.key);
     }
 
     return published;
@@ -601,7 +690,7 @@ class BuilderLayoutService {
     // Safety check: filter out pages with invalid routes
     // Route must not be '/' (root) or empty, as these can cause navigation issues
     if (page.route.isEmpty || page.route == '/') {
-      debugPrint('⚠️ Filtering out page ${page.pageId.value} with invalid route: "${page.route}"');
+      debugPrint('⚠️ Filtering out page ${page.pageKey} with invalid route: "${page.route}"');
       return false;
     }
     

@@ -493,14 +493,16 @@ class _BuilderPageListScreenState extends State<BuilderPageListScreen> {
       return page.name;
     }
     
-    // Try to get system page default name
-    final systemConfig = SystemPages.getConfig(page.pageId);
-    if (systemConfig != null) {
-      return systemConfig.defaultName;
+    // Try to get system page default name using systemId
+    if (page.systemId != null) {
+      final systemConfig = SystemPages.getConfig(page.systemId!);
+      if (systemConfig != null) {
+        return systemConfig.defaultName;
+      }
     }
     
-    // Fallback to pageId label
-    return page.pageId.label;
+    // Fallback to pageId label if available, otherwise use pageKey
+    return page.pageId?.label ?? page.pageKey;
   }
 
   // ==================== ACTIONS ====================
@@ -511,7 +513,8 @@ class _BuilderPageListScreenState extends State<BuilderPageListScreen> {
       MaterialPageRoute(
         builder: (_) => BuilderPageEditorScreen(
           appId: widget.appId,
-          pageId: page.pageId,
+          pageId: page.systemId ?? page.pageId, // Use systemId or pageId for system pages
+          pageKey: page.pageKey, // Pass pageKey for custom pages
         ),
       ),
     ).then((_) => _loadPages());
@@ -520,7 +523,7 @@ class _BuilderPageListScreenState extends State<BuilderPageListScreen> {
   Future<void> _toggleActive(BuilderPage page) async {
     try {
       await _pageService.toggleActiveStatus(
-        page.pageId,
+        page.pageKey, // Use pageKey for toggling
         widget.appId,
         !page.isActive,
       );

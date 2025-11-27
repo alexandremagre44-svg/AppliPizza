@@ -350,6 +350,8 @@ void main() {
       expect(page.pageKey, equals('promo_noel'));
       // systemId should be null for unknown pages
       expect(page.systemId, isNull);
+      // pageId should be null for custom pages (not defaulting to home)
+      expect(page.pageId, isNull);
       // isCustomPage should be true
       expect(page.isCustomPage, isTrue);
       // Route should be preserved
@@ -368,6 +370,8 @@ void main() {
       
       // Route should be auto-generated for custom page
       expect(page.route, equals('/page/special_offer'));
+      // pageId should be null for custom pages
+      expect(page.pageId, isNull);
     });
     
     test('fromJson should correctly identify system pages', () {
@@ -383,6 +387,8 @@ void main() {
       // Menu is a known system page
       expect(page.pageKey, equals('menu'));
       expect(page.systemId, equals(BuilderPageId.menu));
+      // pageId should equal systemId for system pages
+      expect(page.pageId, equals(BuilderPageId.menu));
       expect(page.isCustomPage, isFalse);
     });
   });
