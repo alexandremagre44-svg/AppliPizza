@@ -436,11 +436,10 @@ class BuilderLayoutService {
         try {
           final data = doc.data();
           // Ensure pageKey is set from doc.id if not present
+          // Note: We only set pageKey, not pageId. fromJson will derive pageId
+          // from pageKey if it matches a known system page.
           if (data['pageKey'] == null) {
             data['pageKey'] = doc.id;
-          }
-          if (data['pageId'] == null) {
-            data['pageId'] = doc.id;
           }
           
           final page = BuilderPage.fromJson(data);
@@ -473,11 +472,10 @@ class BuilderLayoutService {
         try {
           final data = doc.data();
           // Ensure pageKey is set from doc.id if not present
+          // Note: We only set pageKey, not pageId. fromJson will derive pageId
+          // from pageKey if it matches a known system page.
           if (data['pageKey'] == null) {
             data['pageKey'] = doc.id;
-          }
-          if (data['pageId'] == null) {
-            data['pageId'] = doc.id;
           }
           
           final page = BuilderPage.fromJson(data);

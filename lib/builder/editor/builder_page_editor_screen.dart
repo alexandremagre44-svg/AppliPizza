@@ -34,7 +34,10 @@ class BuilderPageEditorScreen extends StatefulWidget {
     required this.appId,
     this.pageId,
     this.pageKey,
-  }) : assert(pageId != null || pageKey != null, 'Either pageId or pageKey must be provided');
+  }) : assert(
+         pageId != null || pageKey != null,
+         'Either pageId (for system pages) or pageKey (for custom pages) must be provided',
+       );
 
   @override
   State<BuilderPageEditorScreen> createState() => _BuilderPageEditorScreenState();
