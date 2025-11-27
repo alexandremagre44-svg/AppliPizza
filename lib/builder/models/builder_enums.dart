@@ -40,25 +40,37 @@ enum BuilderPageId {
   final String value;
   final String label;
 
-  /// Get BuilderPageId from string value
+  /// Get BuilderPageId from string value (nullable)
   /// 
-  /// If the value doesn't match any known pageId, logs a warning and returns home.
-  /// This prevents crashes but alerts developers to unrecognized custom page IDs.
-  static BuilderPageId fromString(String value) {
+  /// Returns null if the value doesn't match any known system page.
+  /// This allows custom pages to be handled properly without forcing
+  /// them to fallback to home.
+  static BuilderPageId? tryFromString(String value) {
     final found = BuilderPageId.values.where((e) => e.value == value);
     if (found.isNotEmpty) {
       return found.first;
     }
-    // Log warning for unknown pageId - helps identify custom pages that need handling
-    print('⚠️ [BuilderPageId] Unknown pageId: "$value". Falling back to home. '
-        'If this is a custom page, ensure it has a valid route.');
-    return BuilderPageId.home;
+    return null;
+  }
+
+  /// Get BuilderPageId from string value
+  /// 
+  /// If the value doesn't match any known pageId, returns home.
+  /// @deprecated Use [tryFromString] for custom page support.
+  /// This method exists for backward compatibility.
+  static BuilderPageId fromString(String value) {
+    return tryFromString(value) ?? BuilderPageId.home;
   }
 
   /// Convert to JSON
   String toJson() => value;
 
+  /// Create from JSON (nullable version for custom pages)
+  /// Returns null if the value doesn't match a known system page
+  static BuilderPageId? tryFromJson(String json) => tryFromString(json);
+
   /// Create from JSON
+  /// @deprecated Use [tryFromJson] for custom page support.
   static BuilderPageId fromJson(String json) => fromString(json);
   
   /// List of system page IDs that cannot be manually created

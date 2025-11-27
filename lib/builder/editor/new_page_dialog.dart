@@ -136,17 +136,22 @@ class _NewPageDialogState extends State<NewPageDialog> {
     setState(() => _isCreating = true);
 
     try {
-      final pageId = _pageIdController.text.trim();
+      final pageKey = _pageIdController.text.trim();
       final title = _titleController.text.trim();
       final order = int.tryParse(_orderController.text) ?? 10;
 
+      // Try to get system page ID (null for custom pages)
+      final systemId = BuilderPageId.tryFromString(pageKey);
+
       // Create the page with empty blocks
+      // Custom pages use /page/<pageKey> route format
       final page = BuilderPage(
-        pageId: BuilderPageId.fromString(pageId),
+        pageKey: pageKey,
+        systemId: systemId,
         appId: widget.appId,
         name: title,
         description: 'Page créée depuis le Builder',
-        route: '/$pageId',
+        route: systemId != null ? '/${pageKey}' : '/page/$pageKey',
         blocks: [],
         isDraft: true,
         isEnabled: true,

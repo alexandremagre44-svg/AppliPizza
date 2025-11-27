@@ -30,13 +30,13 @@ Widget buildPageFromBuilder(BuildContext context, BuilderPage page) {
   
   if (page.publishedLayout.isNotEmpty) {
     blocksToRender = page.publishedLayout;
-    debugPrint('📄 [PageRouter] ${page.pageId.value}: using publishedLayout (${blocksToRender.length} blocks)');
+    debugPrint('📄 [PageRouter] ${page.pageKey}: using publishedLayout (${blocksToRender.length} blocks)');
   } else if (page.draftLayout.isNotEmpty) {
     blocksToRender = page.draftLayout;
-    debugPrint('📄 [PageRouter] ${page.pageId.value}: using draftLayout fallback (${blocksToRender.length} blocks)');
+    debugPrint('📄 [PageRouter] ${page.pageKey}: using draftLayout fallback (${blocksToRender.length} blocks)');
   } else if (page.blocks.isNotEmpty) {
     blocksToRender = page.blocks;
-    debugPrint('📄 [PageRouter] ${page.pageId.value}: using blocks legacy fallback (${blocksToRender.length} blocks)');
+    debugPrint('📄 [PageRouter] ${page.pageKey}: using blocks legacy fallback (${blocksToRender.length} blocks)');
   }
   
   // Render blocks if we have any
@@ -47,15 +47,17 @@ Widget buildPageFromBuilder(BuildContext context, BuilderPage page) {
     );
   }
   
-  // No blocks found - check if we can use a system module fallback
-  final systemModuleFallback = _getSystemModuleFallback(page.pageId);
-  if (systemModuleFallback != null) {
-    debugPrint('📄 [PageRouter] ${page.pageId.value}: no blocks, using system module fallback');
-    return builder_modules.renderModule(context, systemModuleFallback);
+  // No blocks found - check if we can use a system module fallback (only for system pages)
+  if (page.systemId != null) {
+    final systemModuleFallback = _getSystemModuleFallback(page.systemId!);
+    if (systemModuleFallback != null) {
+      debugPrint('📄 [PageRouter] ${page.pageKey}: no blocks, using system module fallback');
+      return builder_modules.renderModule(context, systemModuleFallback);
+    }
   }
   
   // No content - show empty state
-  debugPrint('📄 [PageRouter] ${page.pageId.value}: no blocks found, showing empty state');
+  debugPrint('📄 [PageRouter] ${page.pageKey}: no blocks found, showing empty state');
   return _buildEmptyPageState(context, page.name);
 }
 

@@ -334,6 +334,57 @@ void main() {
       // Should have a generated fallback ID starting with 'block_'
       expect(page.publishedLayout[0].id, startsWith('block_'));
     });
+    
+    // Custom page tests
+    test('fromJson should handle custom page with unknown pageId', () {
+      final json = {
+        'pageId': 'promo_noel',
+        'appId': 'test_app',
+        'name': 'Promo Noël',
+        'route': '/page/promo_noel',
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      // Custom page should have pageKey set
+      expect(page.pageKey, equals('promo_noel'));
+      // systemId should be null for unknown pages
+      expect(page.systemId, isNull);
+      // isCustomPage should be true
+      expect(page.isCustomPage, isTrue);
+      // Route should be preserved
+      expect(page.route, equals('/page/promo_noel'));
+    });
+    
+    test('fromJson should generate /page/<pageKey> route for custom pages with invalid route', () {
+      final json = {
+        'pageId': 'special_offer',
+        'appId': 'test_app',
+        'name': 'Special Offer',
+        'route': '/',  // Invalid route
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      // Route should be auto-generated for custom page
+      expect(page.route, equals('/page/special_offer'));
+    });
+    
+    test('fromJson should correctly identify system pages', () {
+      final json = {
+        'pageId': 'menu',
+        'appId': 'test_app',
+        'name': 'Menu Test',
+        'route': '/menu',
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      // Menu is a known system page
+      expect(page.pageKey, equals('menu'));
+      expect(page.systemId, equals(BuilderPageId.menu));
+      expect(page.isCustomPage, isFalse);
+    });
   });
   
   group('BuilderBlock Parsing Tests', () {

@@ -101,37 +101,54 @@ class DynamicPageResolver {
   /// Resolve a BuilderPage by custom page key
   /// 
   /// For dynamic pages like /page/:pageKey, this method attempts to find
-  /// a published page with a matching route or pageId value.
+  /// a published page with a matching pageKey, route, or Firestore doc ID.
+  /// 
+  /// Priority:
+  /// 1. Try to resolve as a system page (if pageKey matches BuilderPageId)
+  /// 2. Try to load directly from Firestore by docId (pageKey)
+  /// 3. Try to find by pageKey field in all published pages
+  /// 4. Try to find by route /page/:pageKey in all published pages
   /// 
   /// Example:
   /// ```dart
-  /// final page = await resolver.resolveByKey('promo-du-jour', 'pizza_delizza');
+  /// final page = await resolver.resolveByKey('promo_noel', 'pizza_delizza');
   /// ```
   Future<BuilderPage?> resolveByKey(String pageKey, String appId) async {
     try {
-      // Try to match key to a BuilderPageId
-      final pageId = _keyToPageId(pageKey);
-      if (pageId != null) {
-        return await resolve(pageId, appId);
+      // 1. Try to match key to a known system page BuilderPageId
+      final systemPageId = BuilderPageId.tryFromString(pageKey);
+      if (systemPageId != null) {
+        final resolved = await resolve(systemPageId, appId);
+        if (resolved != null) {
+          return resolved;
+        }
+      }
+      
+      // 2. Try to load directly from Firestore by docId
+      final directPage = await _layoutService.loadPublishedByDocId(appId, pageKey);
+      if (directPage != null && directPage.isEnabled) {
+        return directPage;
+      }
+      
+      // 3. Fallback: search in all published pages by pageKey or route
+      final allPages = await _layoutService.loadAllPublishedPages(appId);
+      
+      // Try to find by pageKey field
+      for (final page in allPages.values) {
+        if (page.pageKey == pageKey && page.isEnabled) {
+          return page;
+        }
       }
       
       // Try to find by route /page/:pageKey
       final route = '/page/$pageKey';
-      final allPages = await _layoutService.loadAllPublishedPages(appId);
-      
       for (final page in allPages.values) {
         if (page.route == route && page.isEnabled) {
           return page;
         }
       }
       
-      // Try to match by pageId value
-      for (final page in allPages.values) {
-        if (page.pageId.value == pageKey && page.isEnabled) {
-          return page;
-        }
-      }
-      
+      debugPrint('⚠️ [DynamicPageResolver] Page not found by key: $pageKey');
       return null;
     } catch (e, stackTrace) {
       debugPrint('Error resolving page by key $pageKey for app $appId: $e');

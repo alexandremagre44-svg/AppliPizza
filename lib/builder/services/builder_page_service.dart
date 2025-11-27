@@ -62,16 +62,20 @@ class BuilderPageService {
     // Get template blocks based on templateId
     final templateBlocks = _getTemplateBlocks(templateId);
     
-    // Generate unique pageId for custom pages
-    final pageIdValue = _generatePageId(name);
-    final pageId = BuilderPageId.fromString(pageIdValue);
+    // Generate unique pageKey for custom pages (this is the Firestore doc ID)
+    final pageKeyValue = _generatePageId(name);
+    
+    // Try to get system page ID (null for custom pages)
+    final systemId = BuilderPageId.tryFromString(pageKeyValue);
     
     final page = BuilderPage(
-      pageId: pageId,
+      pageKey: pageKeyValue,
+      systemId: systemId,
       appId: appId,
       name: name,
       description: description ?? 'Page créée depuis le template $templateId',
-      route: route ?? '/${pageIdValue}',
+      // Custom pages MUST use /page/<pageKey> route format
+      route: route ?? '/page/$pageKeyValue',
       blocks: templateBlocks,
       isEnabled: true,
       isDraft: true,
@@ -91,7 +95,7 @@ class BuilderPageService {
     // Save as draft
     await _layoutService.saveDraft(page);
     
-    debugPrint('[BuilderPageService] ✅ Created page from template: $templateId → ${page.name}');
+    debugPrint('[BuilderPageService] ✅ Created page from template: $templateId → ${page.name} (pageKey: $pageKeyValue)');
     return page;
   }
 
@@ -115,16 +119,20 @@ class BuilderPageService {
     String icon = 'description',
     int order = 999,
   }) async {
-    // Generate unique pageId for custom pages
-    final pageIdValue = _generatePageId(name);
-    final pageId = BuilderPageId.fromString(pageIdValue);
+    // Generate unique pageKey for custom pages (this is the Firestore doc ID)
+    final pageKeyValue = _generatePageId(name);
+    
+    // Try to get system page ID (null for custom pages)
+    final systemId = BuilderPageId.tryFromString(pageKeyValue);
     
     final page = BuilderPage(
-      pageId: pageId,
+      pageKey: pageKeyValue,
+      systemId: systemId,
       appId: appId,
       name: name,
       description: description ?? 'Page vierge',
-      route: route ?? '/${pageIdValue}',
+      // Custom pages MUST use /page/<pageKey> route format
+      route: route ?? '/page/$pageKeyValue',
       blocks: [],
       isEnabled: true,
       isDraft: true,
@@ -144,7 +152,7 @@ class BuilderPageService {
     // Save as draft
     await _layoutService.saveDraft(page);
     
-    debugPrint('[BuilderPageService] ✅ Created blank page: ${page.name}');
+    debugPrint('[BuilderPageService] ✅ Created blank page: ${page.name} (pageKey: $pageKeyValue)');
     return page;
   }
 
