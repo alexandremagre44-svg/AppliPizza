@@ -630,7 +630,7 @@ class BuilderPageService {
       
       // Process draft pages - remove duplicates
       for (final entry in draftPages.entries) {
-        final pageIdStr = entry.key.value;
+        final pageIdStr = entry.key; // entry.key is already a String
         
         if (seenPageIds.contains(pageIdStr)) {
           // This is a duplicate, remove it
@@ -647,7 +647,7 @@ class BuilderPageService {
       
       // Process published pages - remove duplicates
       for (final entry in publishedPages.entries) {
-        final pageIdStr = entry.key.value;
+        final pageIdStr = entry.key; // entry.key is already a String
         
         if (seenPageIds.contains(pageIdStr)) {
           // This is a duplicate, remove it
@@ -713,7 +713,7 @@ class BuilderPageService {
       int fixedCount = 0;
       
       // Load all system pages
-      final systemPages = await _layoutService.loadSystemPages();
+      final systemPages = await _layoutService.loadSystemPages(appId);
       
       for (final page in systemPages) {
         // Only fix active system pages with empty layouts

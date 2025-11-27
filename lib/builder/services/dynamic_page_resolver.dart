@@ -169,8 +169,8 @@ class DynamicPageResolver {
 
   /// Get all published pages for an app
   /// 
-  /// Returns a map of pageId → BuilderPage for all published pages.
-  Future<Map<BuilderPageId, BuilderPage>> getAllPublishedPages(String appId) async {
+  /// Returns a map of pageKey (String) → BuilderPage for all published pages.
+  Future<Map<String, BuilderPage>> getAllPublishedPages(String appId) async {
     try {
       return await _layoutService.loadAllPublishedPages(appId);
     } catch (e, stackTrace) {

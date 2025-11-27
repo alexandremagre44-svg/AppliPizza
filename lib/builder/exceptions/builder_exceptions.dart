@@ -1,6 +1,17 @@
 // lib/builder/exceptions/builder_exceptions.dart
 // Custom exceptions for Builder B3 system
 
+/// Exception thrown when a page cannot be found or loaded
+class BuilderPageException implements Exception {
+  final String message;
+  final String? pageId;
+
+  BuilderPageException(this.message, {this.pageId});
+
+  @override
+  String toString() => 'BuilderPageException: $message${pageId != null ? ' (pageId: $pageId)' : ''}';
+}
+
 /// Exception thrown when trying to configure less than 2 pages in bottom bar
 class MinimumBottomNavItemsException implements Exception {
   final String message;
