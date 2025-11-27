@@ -17,7 +17,8 @@ import '../utils/builder_modules.dart' as builder_modules;
 /// - If page has publishedLayout blocks → render with BuilderRuntimeRenderer
 /// - Fallback to draftLayout if publishedLayout is empty
 /// - Fallback to blocks (legacy) if draftLayout is also empty
-/// - If page is empty → show "Page vide / non configurée" message
+/// - For system pages with no blocks → render default module (menu_catalog, cart_module, etc.)
+/// - If page is empty and not a system page → show "Page vide / non configurée" message
 /// 
 /// Example:
 /// ```dart
@@ -46,9 +47,35 @@ Widget buildPageFromBuilder(BuildContext context, BuilderPage page) {
     );
   }
   
+  // No blocks found - check if we can use a system module fallback
+  final systemModuleFallback = _getSystemModuleFallback(page.pageId);
+  if (systemModuleFallback != null) {
+    debugPrint('📄 [PageRouter] ${page.pageId.value}: no blocks, using system module fallback');
+    return builder_modules.renderModule(context, systemModuleFallback);
+  }
+  
   // No content - show empty state
   debugPrint('📄 [PageRouter] ${page.pageId.value}: no blocks found, showing empty state');
   return _buildEmptyPageState(context, page.name);
+}
+
+/// Get the default module ID for system pages
+/// 
+/// Returns the module that should be rendered when a system page has no blocks.
+/// This ensures system pages always have content even if the Builder page is empty.
+String? _getSystemModuleFallback(BuilderPageId pageId) {
+  switch (pageId) {
+    case BuilderPageId.menu:
+      return 'menu_catalog';
+    case BuilderPageId.cart:
+      return 'cart_module';
+    case BuilderPageId.profile:
+      return 'profile_module';
+    case BuilderPageId.roulette:
+      return 'roulette_module';
+    default:
+      return null; // Non-system pages don't have a fallback
+  }
 }
 
 /// Build empty page state when page has no content

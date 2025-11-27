@@ -41,11 +41,18 @@ enum BuilderPageId {
   final String label;
 
   /// Get BuilderPageId from string value
+  /// 
+  /// If the value doesn't match any known pageId, logs a warning and returns home.
+  /// This prevents crashes but alerts developers to unrecognized custom page IDs.
   static BuilderPageId fromString(String value) {
-    return BuilderPageId.values.firstWhere(
-      (e) => e.value == value,
-      orElse: () => BuilderPageId.home,
-    );
+    final found = BuilderPageId.values.where((e) => e.value == value);
+    if (found.isNotEmpty) {
+      return found.first;
+    }
+    // Log warning for unknown pageId - helps identify custom pages that need handling
+    print('⚠️ [BuilderPageId] Unknown pageId: "$value". Falling back to home. '
+        'If this is a custom page, ensure it has a valid route.');
+    return BuilderPageId.home;
   }
 
   /// Convert to JSON
