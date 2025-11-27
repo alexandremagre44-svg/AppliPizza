@@ -44,6 +44,9 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       body: child,
       bottomNavigationBar: bottomBarPagesAsync.when(
         data: (builderPages) {
+          // Debug: trace loaded pages
+          debugPrint('📱 [BottomNav] Loaded ${builderPages.length} pages: ${builderPages.map((p) => "${p.pageId.value}(route:${p.route})").join(", ")}');
+          
           // Build navigation items dynamically
           final navItems = _buildNavigationItems(
             context,

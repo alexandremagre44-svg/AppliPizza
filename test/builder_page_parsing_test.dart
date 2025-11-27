@@ -3,7 +3,23 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pizza_delizza/builder/models/builder_page.dart';
+import 'package:pizza_delizza/builder/models/builder_block.dart';
 import 'package:pizza_delizza/builder/models/builder_enums.dart';
+
+/// Mock Timestamp class to simulate Firestore Timestamp in tests
+/// This mimics the structure of cloud_firestore Timestamp
+class MockTimestamp {
+  final int seconds;
+  final int nanoseconds;
+  
+  MockTimestamp(this.seconds, this.nanoseconds);
+  
+  DateTime toDate() {
+    return DateTime.fromMillisecondsSinceEpoch(
+      seconds * 1000 + nanoseconds ~/ 1000000,
+    );
+  }
+}
 
 void main() {
   group('BuilderPage Parsing Tests', () {
@@ -98,15 +114,19 @@ void main() {
         'route': '/home',
         'draftLayout': [
           'invalid_block',  // Not a Map, should be skipped
-          {'invalid': 'block'},  // Missing required fields
+          {'invalid': 'block'},  // Missing standard fields but parseable with defaults
         ],
         'publishedLayout': [],
       };
 
-      // Should not throw, should return empty list
+      // Should not throw
       final page = BuilderPage.fromJson(json);
       
-      expect(page.draftLayout, isEmpty);
+      // 'invalid_block' string should be skipped
+      // {'invalid': 'block'} will be parsed with fallback defaults (id generated, type=text, etc.)
+      expect(page.draftLayout.length, equals(1));
+      expect(page.draftLayout[0].id, startsWith('block_'));  // Fallback ID
+      expect(page.draftLayout[0].type, equals(BlockType.text));  // Default type
       expect(page.publishedLayout, isEmpty);
     });
 
@@ -118,8 +138,9 @@ void main() {
 
       final page = BuilderPage.fromJson(json);
       
-      expect(page.name, equals('Page'));
-      expect(page.route, equals('/'));
+      // For 'home' page, systemConfig provides defaults
+      expect(page.name, equals('Accueil'));  // From SystemPages.getConfig(home)
+      expect(page.route, equals('/home'));   // From SystemPages.getConfig(home)
       expect(page.isActive, isTrue);
       expect(page.bottomNavIndex, equals(999));
       expect(page.draftLayout, isEmpty);
@@ -193,6 +214,192 @@ void main() {
       expect(activeBlocks.length, equals(2));
       expect(activeBlocks[0].id, equals('block1'));
       expect(activeBlocks[1].id, equals('block3'));
+    });
+    
+    // TODO(builder-b3-safe-parsing) New tests for Timestamp and safe parsing
+    
+    test('fromJson should handle string dates in createdAt/updatedAt', () {
+      final json = {
+        'pageId': 'home',
+        'appId': 'test_app',
+        'name': 'Home',
+        'route': '/home',
+        'createdAt': '2024-01-15T10:30:00.000Z',
+        'updatedAt': '2024-01-16T15:45:00.000Z',
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      expect(page.createdAt, isNotNull);
+      expect(page.updatedAt, isNotNull);
+      expect(page.createdAt.year, equals(2024));
+      expect(page.createdAt.month, equals(1));
+      expect(page.createdAt.day, equals(15));
+    });
+    
+    test('fromJson should handle null dates with fallback to DateTime.now()', () {
+      final beforeTest = DateTime.now();
+      
+      final json = {
+        'pageId': 'home',
+        'appId': 'test_app',
+        'name': 'Home',
+        'route': '/home',
+        'createdAt': null,
+        'updatedAt': null,
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      final afterTest = DateTime.now();
+      
+      expect(page.createdAt, isNotNull);
+      expect(page.updatedAt, isNotNull);
+      // The fallback date should be between beforeTest and afterTest
+      expect(page.createdAt.isAfter(beforeTest.subtract(Duration(seconds: 1))), isTrue);
+      expect(page.createdAt.isBefore(afterTest.add(Duration(seconds: 1))), isTrue);
+    });
+    
+    test('fromJson should handle integer milliseconds in dates', () {
+      // 1705315800000 = 2024-01-15T10:30:00.000Z
+      final json = {
+        'pageId': 'home',
+        'appId': 'test_app',
+        'name': 'Home',
+        'route': '/home',
+        'createdAt': 1705315800000,
+        'updatedAt': 1705320300000,
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      expect(page.createdAt, isNotNull);
+      expect(page.createdAt.year, equals(2024));
+    });
+    
+    test('fromJson should skip malformed blocks and keep valid ones', () {
+      final json = {
+        'pageId': 'home',
+        'appId': 'test_app',
+        'name': 'Home',
+        'route': '/home',
+        'publishedLayout': [
+          {
+            'id': 'valid_block',
+            'type': 'hero',
+            'order': 0,
+            'isActive': true,
+            'config': {},
+          },
+          'not_a_map',  // Should be skipped
+          null,  // Should be skipped
+          {
+            'id': 'another_valid',
+            'type': 'text',
+            'order': 1,
+            'isActive': true,
+            'config': {},
+          },
+        ],
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      // Should have 2 valid blocks, 2 invalid ones skipped
+      expect(page.publishedLayout.length, equals(2));
+      expect(page.publishedLayout[0].id, equals('valid_block'));
+      expect(page.publishedLayout[1].id, equals('another_valid'));
+    });
+    
+    test('fromJson should handle blocks with missing id by generating fallback', () {
+      final json = {
+        'pageId': 'home',
+        'appId': 'test_app',
+        'name': 'Home',
+        'route': '/home',
+        'publishedLayout': [
+          {
+            'type': 'hero',
+            'order': 0,
+            'isActive': true,
+            'config': {},
+            // id is missing - should generate fallback
+          },
+        ],
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      expect(page.publishedLayout.length, equals(1));
+      // Should have a generated fallback ID starting with 'block_'
+      expect(page.publishedLayout[0].id, startsWith('block_'));
+    });
+  });
+  
+  group('BuilderBlock Parsing Tests', () {
+    test('fromJson should handle string dates', () {
+      final json = {
+        'id': 'block1',
+        'type': 'hero',
+        'order': 0,
+        'isActive': true,
+        'config': {},
+        'createdAt': '2024-01-15T10:30:00.000Z',
+        'updatedAt': '2024-01-16T15:45:00.000Z',
+      };
+
+      final block = BuilderBlock.fromJson(json);
+      
+      expect(block.createdAt, isNotNull);
+      expect(block.updatedAt, isNotNull);
+      expect(block.createdAt.year, equals(2024));
+    });
+    
+    test('fromJson should handle null dates with fallback', () {
+      final json = {
+        'id': 'block1',
+        'type': 'hero',
+        'order': 0,
+        'isActive': true,
+        'config': {},
+        'createdAt': null,
+        'updatedAt': null,
+      };
+
+      final block = BuilderBlock.fromJson(json);
+      
+      expect(block.createdAt, isNotNull);
+      expect(block.updatedAt, isNotNull);
+    });
+    
+    test('fromJson should handle missing id with fallback', () {
+      final json = {
+        'type': 'hero',
+        'order': 0,
+        'isActive': true,
+        'config': {},
+      };
+
+      final block = BuilderBlock.fromJson(json);
+      
+      expect(block.id, isNotEmpty);
+      expect(block.id, startsWith('block_'));
+    });
+    
+    test('fromJson should handle integer milliseconds dates', () {
+      final json = {
+        'id': 'block1',
+        'type': 'hero',
+        'order': 0,
+        'isActive': true,
+        'config': {},
+        'createdAt': 1705315800000,
+        'updatedAt': 1705320300000,
+      };
+
+      final block = BuilderBlock.fromJson(json);
+      
+      expect(block.createdAt.year, equals(2024));
     });
   });
 }

@@ -2,6 +2,7 @@
 // Base block model for Builder B3 system
 
 import 'builder_enums.dart';
+import '../utils/firestore_parsing_helpers.dart';
 
 /// Base block class for all content blocks
 /// 
@@ -101,9 +102,22 @@ class BuilderBlock {
   }
 
   /// Create from Firestore JSON
+  /// 
+  /// TODO(builder-b3-safe-parsing) This method now handles:
+  /// - Timestamp, String, int, or null for createdAt/updatedAt
+  /// - Missing or null 'id' field (generates fallback ID)
+  /// - Missing or null 'type' field (defaults to 'text')
   factory BuilderBlock.fromJson(Map<String, dynamic> json) {
+    // TODO(builder-b3-safe-parsing) Handle missing 'id' gracefully
+    final String blockId = json['id'] as String? ?? 
+        'block_${DateTime.now().millisecondsSinceEpoch}_${json.hashCode.abs()}';
+    
+    if (json['id'] == null) {
+      print('⚠️ Warning: Block missing id field, generated fallback: $blockId');
+    }
+    
     return BuilderBlock(
-      id: json['id'] as String,
+      id: blockId,
       type: BlockType.fromJson(json['type'] as String? ?? 'text'),
       order: json['order'] as int? ?? 0,
       config: (json['config'] as Map<String, dynamic>?) ?? {},
@@ -112,12 +126,9 @@ class BuilderBlock {
         json['visibility'] as String? ?? 'visible',
       ),
       customStyles: json['customStyles'] as String?,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : DateTime.now(),
+      // TODO(builder-b3-safe-parsing) Use safe DateTime parsing for Firestore types
+      createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
+      updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
     );
   }
 
@@ -271,10 +282,23 @@ class SystemBlock extends BuilderBlock {
   }
 
   /// Create from Firestore JSON
+  /// 
+  /// TODO(builder-b3-safe-parsing) This method now handles:
+  /// - Timestamp, String, int, or null for createdAt/updatedAt
+  /// - Missing or null 'id' field (generates fallback ID)
   factory SystemBlock.fromJson(Map<String, dynamic> json) {
     final config = (json['config'] as Map<String, dynamic>?) ?? {};
+    
+    // TODO(builder-b3-safe-parsing) Handle missing 'id' gracefully
+    final String blockId = json['id'] as String? ?? 
+        'sysblock_${DateTime.now().millisecondsSinceEpoch}_${json.hashCode.abs()}';
+    
+    if (json['id'] == null) {
+      print('⚠️ Warning: SystemBlock missing id field, generated fallback: $blockId');
+    }
+    
     return SystemBlock(
-      id: json['id'] as String,
+      id: blockId,
       moduleType: config['moduleType'] as String? ?? 'unknown',
       order: json['order'] as int? ?? 0,
       config: config,
@@ -283,12 +307,9 @@ class SystemBlock extends BuilderBlock {
         json['visibility'] as String? ?? 'visible',
       ),
       customStyles: json['customStyles'] as String?,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : DateTime.now(),
+      // TODO(builder-b3-safe-parsing) Use safe DateTime parsing for Firestore types
+      createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
+      updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
     );
   }
 
