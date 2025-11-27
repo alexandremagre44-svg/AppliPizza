@@ -224,4 +224,30 @@ class FirestorePaths {
   static CollectionReference<Map<String, dynamic>> promotions(String appId) {
     return builderSettings(appId).doc('promotions').collection('items');
   }
+
+  // ==================== DATA COLLECTIONS ====================
+
+  /// Get orders collection reference
+  ///
+  /// Path: restaurants/{appId}/orders
+  /// Used for: Restaurant orders
+  static CollectionReference<Map<String, dynamic>> orders(String appId) {
+    return restaurantDoc(appId).collection('orders');
+  }
+
+  /// Get user_profiles collection reference
+  ///
+  /// Path: restaurants/{appId}/user_profiles
+  /// Used for: User profiles scoped to restaurant
+  static CollectionReference<Map<String, dynamic>> userProfiles(String appId) {
+    return restaurantDoc(appId).collection('user_profiles');
+  }
+
+  /// Get order_rate_limit collection reference
+  ///
+  /// Path: restaurants/{appId}/order_rate_limit
+  /// Used for: Rate limiting order creation per user
+  static CollectionReference<Map<String, dynamic>> orderRateLimit(String appId) {
+    return restaurantDoc(appId).collection('order_rate_limit');
+  }
 }

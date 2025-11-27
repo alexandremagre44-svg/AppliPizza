@@ -7,6 +7,15 @@ import '../services/firebase_order_service.dart';
 import '../services/user_profile_service.dart';
 import 'cart_provider.dart';
 import 'auth_provider.dart';
+import 'restaurant_provider.dart';
+import 'order_provider.dart';
+
+/// Provider for the UserProfileService
+/// Watches currentRestaurantProvider to inject the appId for multi-tenant isolation
+final userProfileServiceProvider = Provider<UserProfileService>((ref) {
+  final config = ref.watch(currentRestaurantProvider);
+  return UserProfileService(appId: config.id);
+});
 
 final userProvider =
     StateNotifierProvider<UserProfileNotifier, UserProfile>((ref) {
@@ -15,9 +24,11 @@ final userProvider =
 
 class UserProfileNotifier extends StateNotifier<UserProfile> {
   final Ref _ref;
-  final UserProfileService _profileService = UserProfileService();
 
   UserProfileNotifier(this._ref) : super(UserProfile.initial());
+
+  /// Get the UserProfileService instance from the provider
+  UserProfileService get _profileService => _ref.read(userProfileServiceProvider);
 
   /// Charger le profil utilisateur depuis Firestore
   Future<void> loadProfile(String userId) async {
@@ -78,9 +89,10 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     final authState = _ref.read(authProvider);
     final email = customerEmail ?? authState.userEmail;
 
-    // Créer la commande dans Firebase
+    // Créer la commande dans Firebase using the provider for multi-tenant isolation
     try {
-      await FirebaseOrderService().createOrder(
+      final orderService = _ref.read(firebaseOrderServiceProvider);
+      await orderService.createOrder(
         items: cartState.items,
         total: cartState.total,
         customerName: customerName,

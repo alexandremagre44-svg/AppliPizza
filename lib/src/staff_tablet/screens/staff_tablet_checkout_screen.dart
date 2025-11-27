@@ -8,7 +8,7 @@ import '../../design_system/app_theme.dart';
 import '../../models/order.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/firebase_order_service.dart';
+import '../../providers/order_provider.dart';
 import '../providers/staff_tablet_cart_provider.dart';
 
 class StaffTabletCheckoutScreen extends ConsumerStatefulWidget {
@@ -62,8 +62,8 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
         pickupTimeSlot = _selectedTimeSlot;
       }
 
-      // Create order
-      final orderService = FirebaseOrderService();
+      // Create order using the provider for multi-tenant isolation
+      final orderService = ref.read(firebaseOrderServiceProvider);
       final orderId = await orderService.createOrder(
         items: cart.items,
         total: cart.total,

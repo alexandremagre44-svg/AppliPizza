@@ -5,10 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/order.dart';
 import '../services/firebase_order_service.dart';
 import 'auth_provider.dart';
+import 'restaurant_provider.dart';
 
 /// Provider pour le service de commandes Firebase
+/// Watches currentRestaurantProvider to inject the appId for multi-tenant isolation
 final firebaseOrderServiceProvider = Provider<FirebaseOrderService>((ref) {
-  return FirebaseOrderService();
+  final config = ref.watch(currentRestaurantProvider);
+  return FirebaseOrderService(appId: config.id);
 });
 
 /// Provider pour le stream des commandes (temps réel)

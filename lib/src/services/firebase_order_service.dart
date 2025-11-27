@@ -5,19 +5,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/order.dart' as app_models;
 import '../providers/cart_provider.dart';
+import '../core/firestore_paths.dart';
 import 'loyalty_service.dart';
 
 class FirebaseOrderService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final String appId;
 
-  // Singleton
-  static final FirebaseOrderService _instance = FirebaseOrderService._internal();
-  factory FirebaseOrderService() => _instance;
-  FirebaseOrderService._internal();
+  // Constructor with required appId for multi-tenant isolation
+  FirebaseOrderService({required this.appId});
 
-  /// Collection de commandes
-  CollectionReference get _ordersCollection => _firestore.collection('orders');
+  /// Collection de commandes scoped to the current restaurant
+  CollectionReference get _ordersCollection => FirestorePaths.orders(appId);
 
   /// Créer une nouvelle commande
   Future<String> createOrder({
@@ -39,7 +39,8 @@ class FirebaseOrderService {
 
     // CLIENT-SIDE RATE LIMITING: Prevent order spam (only for client orders, not caisse)
     if (source == 'client') {
-      final rateLimitDoc = _firestore.collection('order_rate_limit').doc(user.uid);
+      // Rate limit is scoped to restaurant
+      final rateLimitDoc = FirestorePaths.orderRateLimit(appId).doc(user.uid);
       final rateLimitData = await rateLimitDoc.get();
       
       if (rateLimitData.exists) {
