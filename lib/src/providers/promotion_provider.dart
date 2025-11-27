@@ -8,7 +8,9 @@ import 'restaurant_provider.dart';
 
 /// Provider for PromotionService
 final promotionServiceProvider = Provider<PromotionService>((ref) {
-  final appId = ref.watch(currentRestaurantProvider).id;
+  final config = ref.watch(currentRestaurantProvider);
+  // Use default 'delizza' if config is invalid (should not happen in normal usage)
+  final appId = config.isValid ? config.id : 'delizza';
   return PromotionService(appId: appId);
 });
 
