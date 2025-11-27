@@ -21,6 +21,10 @@ final appTextsConfigProvider = StreamProvider<AppTextsConfig>((ref) {
   return service.watchAppTextsConfig();
 });
 
+/// Alias for appTextsConfigProvider for backward compatibility
+/// Use this provider for multi-tenant compatibility
+final appTextsProvider = appTextsConfigProvider;
+
 /// AsyncValue provider for one-time fetch of app texts
 /// Useful for initialization or when stream is not needed
 final appTextsConfigFutureProvider = FutureProvider<AppTextsConfig>((ref) async {

@@ -586,10 +586,9 @@ class _BuilderPageListScreenState extends State<BuilderPageListScreen> {
     
     if (result != null) {
       try {
-        // Use pageId if available, otherwise use pageKey
-        final pageIdentifier = page.pageId ?? page.pageKey;
+        // Use pageKey (String) for all pages - the service accepts both BuilderPageId and String
         await _pageService.reorderBottomNav(
-          pageIdentifier,
+          page.pageKey,
           widget.appId,
           result,
         );

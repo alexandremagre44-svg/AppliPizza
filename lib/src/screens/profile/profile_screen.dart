@@ -30,7 +30,7 @@ class ProfileScreen extends ConsumerWidget {
     final history = userProfile.orderHistory;
     final loyaltyInfoAsync = ref.watch(loyaltyInfoProvider);
     final activeTicketsAsync = ref.watch(activeRewardTicketsProvider);
-    final appTextsAsync = ref.watch(appTextsConfigProvider);
+    final appTextsAsync = ref.watch(appTextsProvider);
 
     return Scaffold(
       appBar: AppBar(
