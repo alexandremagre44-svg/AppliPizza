@@ -26,13 +26,15 @@ import 'new_page_dialog.dart';
 /// - Preview page (tab view or full-screen)
 class BuilderPageEditorScreen extends StatefulWidget {
   final String appId;
-  final BuilderPageId pageId;
+  final BuilderPageId? pageId;
+  final String? pageKey;
 
   const BuilderPageEditorScreen({
     super.key,
     required this.appId,
-    required this.pageId,
-  });
+    this.pageId,
+    this.pageKey,
+  }) : assert(pageId != null || pageKey != null, 'Either pageId or pageKey must be provided');
 
   @override
   State<BuilderPageEditorScreen> createState() => _BuilderPageEditorScreenState();
@@ -105,14 +107,26 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     setState(() => _isLoading = true);
 
     try {
-      // Load draft, or create default if none exists
-      var page = await _service.loadDraft(widget.appId, widget.pageId);
+      // Determine the page identifier to use
+      final pageIdentifier = widget.pageId ?? widget.pageKey!;
       
-      if (page == null) {
+      // Load draft, or create default if none exists
+      var page = await _service.loadDraft(widget.appId, pageIdentifier);
+      
+      if (page == null && widget.pageId != null) {
+        // Only auto-create for system pages (those with BuilderPageId)
         page = await _service.createDefaultPage(
           widget.appId,
-          widget.pageId,
+          widget.pageId!,
           isDraft: true,
+        );
+      }
+      
+      if (page == null) {
+        // Custom page not found
+        throw BuilderPageException(
+          'Page not found: ${widget.pageKey ?? widget.pageId?.value}',
+          pageId: widget.pageKey ?? widget.pageId?.value,
         );
       }
       
@@ -147,8 +161,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     bool needsCorrection = false;
     
     // Check if this should be a system page but isn't marked as such
-    if (page.pageId.isSystemPage && !page.isSystemPage) {
-      debugPrint('⚠️ Correcting isSystemPage for ${page.pageId.value}');
+    final isSystemPageById = page.systemId?.isSystemPage ?? page.pageId?.isSystemPage ?? false;
+    if (isSystemPageById && !page.isSystemPage) {
+      debugPrint('⚠️ Correcting isSystemPage for ${page.pageKey}');
       correctedPage = correctedPage.copyWith(isSystemPage: true);
       needsCorrection = true;
     }
@@ -157,7 +172,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     if (correctedPage.isSystemPage) {
       final validLocations = ['bottomBar', 'hidden'];
       if (!validLocations.contains(correctedPage.displayLocation)) {
-        debugPrint('⚠️ Correcting displayLocation for ${page.pageId.value}');
+        debugPrint('⚠️ Correcting displayLocation for ${page.pageKey}');
         correctedPage = correctedPage.copyWith(displayLocation: 'hidden');
         needsCorrection = true;
       }
@@ -166,21 +181,26 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     // Set default icon for system pages if missing
     if (correctedPage.isSystemPage && (correctedPage.icon.isEmpty || correctedPage.icon == 'help_outline')) {
       String defaultIcon;
-      switch (page.pageId) {
-        case BuilderPageId.profile:
-          defaultIcon = 'person';
-          break;
-        case BuilderPageId.cart:
-          defaultIcon = 'shopping_cart';
-          break;
-        case BuilderPageId.rewards:
-          defaultIcon = 'card_giftcard';
-          break;
-        case BuilderPageId.roulette:
-          defaultIcon = 'casino';
-          break;
-        default:
-          defaultIcon = 'help_outline';
+      final sysId = page.systemId;
+      if (sysId != null) {
+        switch (sysId) {
+          case BuilderPageId.profile:
+            defaultIcon = 'person';
+            break;
+          case BuilderPageId.cart:
+            defaultIcon = 'shopping_cart';
+            break;
+          case BuilderPageId.rewards:
+            defaultIcon = 'card_giftcard';
+            break;
+          case BuilderPageId.roulette:
+            defaultIcon = 'casino';
+            break;
+          default:
+            defaultIcon = 'help_outline';
+        }
+      } else {
+        defaultIcon = 'help_outline';
       }
       if (correctedPage.icon != defaultIcon) {
         correctedPage = correctedPage.copyWith(icon: defaultIcon);
@@ -190,7 +210,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     
     // Auto-save corrected page if changes were made
     if (needsCorrection) {
-      debugPrint('✅ Auto-correcting system page ${page.pageId.value}');
+      debugPrint('✅ Auto-correcting system page ${page.pageKey}');
       _service.saveDraft(correctedPage);
     }
     
@@ -463,6 +483,15 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     _scheduleAutoSave();
   }
 
+  /// Get the display label for the current page
+  String get _pageLabel {
+    if (widget.pageId != null) {
+      return widget.pageId!.label;
+    }
+    // For custom pages, use the pageKey or get the name from loaded page
+    return _page?.name ?? widget.pageKey ?? 'Page';
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -475,8 +504,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(responsive.isMobile 
-                  ? widget.pageId.label 
-                  : 'Éditeur: ${widget.pageId.label}'
+                  ? _pageLabel 
+                  : 'Éditeur: $_pageLabel'
                 ),
                 if (_page != null && _page!.hasUnpublishedChanges) ...[
                   const SizedBox(width: 8),
@@ -983,7 +1012,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       context,
       blocks: _page!.draftLayout.isNotEmpty ? _page!.draftLayout : _page!.blocks,
       modules: _page!.modules,
-      pageTitle: widget.pageId.label,
+      pageTitle: _pageLabel,
     );
   }
 

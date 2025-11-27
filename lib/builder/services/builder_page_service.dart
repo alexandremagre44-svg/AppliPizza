@@ -265,19 +265,28 @@ class BuilderPageService {
   ///   'delizza',
   ///   isActive: false, // Hide from nav
   /// );
+  /// // Or with string pageId for custom pages:
+  /// final page = await service.toggleActiveStatus(
+  ///   'promo_noel',
+  ///   'delizza',
+  ///   isActive: true,
+  /// );
   /// ```
   Future<BuilderPage?> toggleActiveStatus(
-    BuilderPageId pageId,
+    dynamic pageId,
     String appId,
     bool isActive,
   ) async {
     try {
+      // Determine the page key for logging
+      final pageIdStr = pageId is BuilderPageId ? pageId.value : pageId.toString();
+      
       // Load page (draft first, then published)
       var page = await _layoutService.loadDraft(appId, pageId);
       page ??= await _layoutService.loadPublished(appId, pageId);
       
       if (page == null) {
-        debugPrint('[BuilderPageService] ⚠️ Page not found: ${pageId.value}');
+        debugPrint('[BuilderPageService] ⚠️ Page not found: $pageIdStr');
         return null;
       }
       
@@ -298,7 +307,7 @@ class BuilderPageService {
         );
       }
       
-      debugPrint('[BuilderPageService] ✅ Set active=$isActive for: ${pageId.value}');
+      debugPrint('[BuilderPageService] ✅ Set active=$isActive for: $pageIdStr');
       return updatedPage;
     } catch (e, stackTrace) {
       debugPrint('[BuilderPageService] ❌ Error toggling active status: $e');
@@ -711,9 +720,12 @@ class BuilderPageService {
         if (!page.isActive) continue;
         if (page.draftLayout.isNotEmpty || page.publishedLayout.isNotEmpty) continue;
         
-        // Determine which module to inject based on page ID
+        // Determine which module to inject based on systemId (for system pages)
         String? moduleType;
-        switch (page.pageId) {
+        final sysId = page.systemId;
+        if (sysId == null) continue; // Skip custom pages
+        
+        switch (sysId) {
           case BuilderPageId.cart:
             moduleType = 'cart_module';
             break;
@@ -748,7 +760,7 @@ class BuilderPageService {
         await _layoutService.saveDraft(updatedPage);
         
         fixedCount++;
-        debugPrint('[BuilderPageService] ✅ Fixed empty system page: ${page.pageId.value} with $moduleType');
+        debugPrint('[BuilderPageService] ✅ Fixed empty system page: ${page.pageKey} with $moduleType');
       }
       
       if (fixedCount > 0) {
