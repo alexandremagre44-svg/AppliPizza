@@ -125,22 +125,25 @@ restaurants/{restaurantId}/
 
 **The service ACCEPTS STRINGS as document IDs, not strictly enums.**
 
+> **Note:** The `BuilderPageId` enum has a `.value` property that returns the string representation (e.g., `BuilderPageId.home.value` returns `'home'`). This string value is what gets used as the Firestore document ID.
+
 From `builder_layout_service.dart`:
 
 ```dart
 // Draft document reference
+// BuilderPageId.value returns the string representation of the enum (e.g., 'home', 'menu', 'cart')
 DocumentReference _getDraftRef(String appId, BuilderPageId pageId) {
-  return FirestorePaths.draftDoc(pageId.value);  // pageId.value is a String
+  return FirestorePaths.draftDoc(pageId.value);  // pageId.value → 'home', 'menu', etc.
 }
 
 // Published document reference  
 DocumentReference _getPublishedRef(String appId, BuilderPageId pageId) {
-  return FirestorePaths.publishedDoc(pageId.value);  // pageId.value is a String
+  return FirestorePaths.publishedDoc(pageId.value);  // pageId.value → 'home', 'menu', etc.
 }
 
 // Direct document access by string ID (for custom pages)
 Future<BuilderPage?> loadPublishedByDocId(String appId, String docId) async {
-  final ref = FirestorePaths.publishedDoc(docId);  // docId is any String
+  final ref = FirestorePaths.publishedDoc(docId);  // docId is any String (e.g., 'promo_noel')
   // ...
 }
 ```
