@@ -33,8 +33,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   final _imageUrlController = TextEditingController();
   final _orderController = TextEditingController();
   
-  late FirestoreProductService _firestoreService;
   final _uuid = const Uuid();
+  
+  // Use getter to access service when needed (avoids initState ref.read issue)
+  FirestoreProductService get _firestoreService => ref.read(firestoreProductServiceProvider);
   
   late ProductCategory _selectedCategory;
   late DisplaySpot _selectedDisplaySpot;
@@ -57,7 +59,6 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   void initState() {
     super.initState();
     _selectedCategory = widget.initialCategory;
-    _firestoreService = ref.read(firestoreProductServiceProvider);
     
     if (widget.product != null) {
       // Mode modification

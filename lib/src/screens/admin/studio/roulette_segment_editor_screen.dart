@@ -26,7 +26,9 @@ class RouletteSegmentEditorScreen extends ConsumerStatefulWidget {
 class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   final RouletteSegmentService _service = RouletteSegmentService();
-  late FirestoreProductService _productService;
+  
+  // Use getter to access service when needed (avoids initState ref.read issue)
+  FirestoreProductService get _productService => ref.read(firestoreProductServiceProvider);
 
   // Form controllers
   late TextEditingController _labelController;
@@ -77,7 +79,6 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
   @override
   void initState() {
     super.initState();
-    _productService = ref.read(firestoreProductServiceProvider);
     _initializeControllers();
     _loadProducts();
   }

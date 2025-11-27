@@ -27,8 +27,10 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
   final _priceController = TextEditingController();
   final _orderController = TextEditingController();
   
-  late FirestoreIngredientService _firestoreService;
   final _uuid = const Uuid();
+  
+  // Use getter to access service when needed (avoids initState ref.read issue)
+  FirestoreIngredientService get _firestoreService => ref.read(firestoreIngredientServiceProvider);
   
   late IngredientCategory _selectedCategory;
   bool _isActive = true;
@@ -37,7 +39,6 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
   @override
   void initState() {
     super.initState();
-    _firestoreService = ref.read(firestoreIngredientServiceProvider);
     
     if (widget.ingredient != null) {
       // Mode modification

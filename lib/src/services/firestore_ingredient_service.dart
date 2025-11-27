@@ -256,5 +256,5 @@ FirestoreIngredientService createFirestoreIngredientService({required String app
 /// Provider for FirestoreIngredientService scoped to the current restaurant
 final firestoreIngredientServiceProvider = Provider<FirestoreIngredientService>((ref) {
   final appId = ref.watch(currentRestaurantProvider).id;
-  return RealFirestoreIngredientService(appId: appId);
+  return createFirestoreIngredientService(appId: appId);
 });
