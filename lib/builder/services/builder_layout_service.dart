@@ -722,7 +722,7 @@ class BuilderLayoutService {
   /// 
   /// This is the NEW B3 logic that uses isActive + bottomNavIndex fields
   /// instead of the old displayLocation + order fields
-  Future<List<BuilderPage>> getBottomBarPages(String appId) async {
+  Future<List<BuilderPage>> getBottomBarPages({required String appId}) async {
     try {
       // Load system pages first
       final systemPages = await loadSystemPages(appId);

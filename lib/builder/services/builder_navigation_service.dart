@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import '../models/models.dart';
 import 'builder_layout_service.dart';
 import 'builder_autoinit_service.dart';
+import 'builder_page_service.dart';
 
 /// Service for managing dynamic navigation based on Builder B3 pages
 /// 
@@ -24,13 +25,16 @@ class BuilderNavigationService {
   final String appId;
   final BuilderLayoutService _layoutService;
   final BuilderAutoInitService _autoInitService;
+  final BuilderPageService _pageService;
 
   BuilderNavigationService(
     this.appId, {
     BuilderLayoutService? layoutService,
     BuilderAutoInitService? autoInitService,
+    BuilderPageService? pageService,
   })  : _layoutService = layoutService ?? BuilderLayoutService(),
-        _autoInitService = autoInitService ?? BuilderAutoInitService();
+        _autoInitService = autoInitService ?? BuilderAutoInitService(),
+        _pageService = pageService ?? BuilderPageService();
 
   /// Get all pages for bottom navigation bar
   /// 
@@ -49,18 +53,21 @@ class BuilderNavigationService {
   /// ```
   Future<List<BuilderPage>> getBottomBarPages() async {
     try {
-      // Use the layout service's new getBottomBarPages method
-      // which loads from pages_system first, then fallback to pages_published
-      final pages = await _layoutService.getBottomBarPages(appId);
+      // Step 1: Load current pages from layout service
+      var pages = await _layoutService.getBottomBarPages(appId: appId);
       
-      // Ensure we have at least 2 items (requirement)
+      // Step 2: Ensure minimum pages exist (creates defaults if needed)
+      pages = await _ensureMinimumPages(pages);
+      
+      // Step 3: Fix empty system pages by injecting default content
+      await _pageService.fixEmptySystemPages(appId);
+      
+      // Step 4: Reload pages to get fresh content/order after fixes
+      pages = await _layoutService.getBottomBarPages(appId: appId);
+      
+      // Log warning if still less than 2 pages
       if (pages.length < 2) {
-        debugPrint('[BuilderNavigationService] ⚠️ Less than 2 bottomBar pages found');
-        // Try auto-create fallback if needed
-        final fallbackPages = await _ensureMinimumPages(pages);
-        if (fallbackPages.isNotEmpty) {
-          return fallbackPages;
-        }
+        debugPrint('[BuilderNavigationService] ⚠️ Less than 2 bottomBar pages found after fixes');
       }
       
       return pages;
