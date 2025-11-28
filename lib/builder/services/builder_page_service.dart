@@ -714,6 +714,9 @@ class BuilderPageService {
   /// This method scans active system pages (cart, menu, profile, roulette)
   /// and injects their default module if both draftLayout and publishedLayout are empty.
   /// 
+  /// It checks both pages_system AND pages_published collections to handle
+  /// pages created during auto-initialization.
+  /// 
   /// Returns the number of pages fixed.
   /// 
   /// Example:
@@ -725,55 +728,135 @@ class BuilderPageService {
     try {
       int fixedCount = 0;
       
-      // Load all system pages
-      final systemPages = await _layoutService.loadSystemPages(appId);
+      // Collect all pages to check from both collections
+      final pagesToCheck = <BuilderPage>[];
       
-      for (final page in systemPages) {
+      // Load from pages_system collection
+      final systemPages = await _layoutService.loadSystemPages(appId);
+      pagesToCheck.addAll(systemPages);
+      
+      // Also load from pages_published collection (for auto-initialized pages)
+      final publishedPages = await _layoutService.loadAllPublishedPages(appId);
+      
+      // Add published pages that are system pages and not already in the list
+      for (final page in publishedPages.values) {
+        if (page.systemId != null) {
+          // Check if this page is already in pagesToCheck (by pageKey)
+          final alreadyExists = pagesToCheck.any((p) => p.pageKey == page.pageKey);
+          if (!alreadyExists) {
+            pagesToCheck.add(page);
+          }
+        }
+      }
+      
+      for (final page in pagesToCheck) {
         // Only fix active system pages with empty layouts
         if (!page.isActive) continue;
-        if (page.draftLayout.isNotEmpty || page.publishedLayout.isNotEmpty) continue;
         
-        // Determine which module to inject based on systemId (for system pages)
-        String? moduleType;
+        // Check if page has content - use blocks field too for legacy pages
+        final hasContent = page.draftLayout.isNotEmpty || 
+                          page.publishedLayout.isNotEmpty ||
+                          page.blocks.isNotEmpty;
+        if (hasContent) continue;
+        
+        // Determine which module/blocks to inject based on systemId (for system pages)
+        // Note: This block generation is similar to BuilderNavigationService._getDefaultBlocksForPage
+        // but serves a different purpose - fixing existing empty pages vs creating new pages.
+        // Both include SystemBlock modules for proper runtime rendering.
         final sysId = page.systemId;
         if (sysId == null) continue; // Skip custom pages
         
+        List<BuilderBlock> defaultBlocks;
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        
         switch (sysId) {
+          case BuilderPageId.home:
+            // Home page gets hero and product list blocks
+            defaultBlocks = [
+              BuilderBlock(
+                id: 'hero_fix_$timestamp',
+                type: BlockType.hero,
+                order: 0,
+                config: {
+                  'title': 'Bienvenue',
+                  'subtitle': 'Découvrez nos délicieuses pizzas',
+                  'imageUrl': '',
+                  'ctaText': 'Voir le menu',
+                  'ctaAction': {'type': 'navigate', 'target': '/menu'},
+                },
+              ),
+              BuilderBlock(
+                id: 'product_list_fix_$timestamp',
+                type: BlockType.productList,
+                order: 1,
+                config: {
+                  'mode': 'featured',
+                  'layout': 'horizontal',
+                  'title': 'Nos spécialités',
+                  'limit': 4,
+                },
+              ),
+            ];
+            break;
           case BuilderPageId.cart:
-            moduleType = 'cart_module';
+            defaultBlocks = [
+              SystemBlock(
+                id: 'cart_module_fix_$timestamp',
+                moduleType: 'cart_module',
+                order: 0,
+              ),
+            ];
             break;
           case BuilderPageId.menu:
-            moduleType = 'menu_catalog';
+            defaultBlocks = [
+              SystemBlock(
+                id: 'menu_catalog_fix_$timestamp',
+                moduleType: 'menu_catalog',
+                order: 0,
+              ),
+            ];
             break;
           case BuilderPageId.profile:
-            moduleType = 'profile_module';
+            defaultBlocks = [
+              SystemBlock(
+                id: 'profile_module_fix_$timestamp',
+                moduleType: 'profile_module',
+                order: 0,
+              ),
+            ];
             break;
           case BuilderPageId.roulette:
-            moduleType = 'roulette_module';
+            defaultBlocks = [
+              SystemBlock(
+                id: 'roulette_module_fix_$timestamp',
+                moduleType: 'roulette_module',
+                order: 0,
+              ),
+            ];
             break;
           default:
             continue; // Skip non-applicable system pages
         }
         
-        // Create a module block
-        final moduleBlock = SystemBlock(
-          id: '${moduleType}_auto_${DateTime.now().millisecondsSinceEpoch}',
-          moduleType: moduleType,
-          order: 0,
-        );
-        
-        // Update the page with the module
+        // Update the page with the default blocks in all layout fields
         final updatedPage = page.copyWith(
-          draftLayout: [moduleBlock],
-          hasUnpublishedChanges: true,
+          blocks: defaultBlocks,
+          draftLayout: defaultBlocks,
+          publishedLayout: defaultBlocks,
+          hasUnpublishedChanges: false,
           updatedAt: DateTime.now(),
         );
         
-        // Save the updated page
-        await _layoutService.saveDraft(updatedPage);
+        // Save to both draft and published collections to ensure content is available
+        await _layoutService.saveDraft(updatedPage.copyWith(isDraft: true));
+        await _layoutService.publishPage(
+          updatedPage,
+          userId: 'system_fix',
+          shouldDeleteDraft: false,
+        );
         
         fixedCount++;
-        debugPrint('[BuilderPageService] ✅ Fixed empty system page: ${page.pageKey} with $moduleType');
+        debugPrint('[BuilderPageService] ✅ Fixed empty system page: ${page.pageKey} with ${defaultBlocks.length} default blocks');
       }
       
       if (fixedCount > 0) {
