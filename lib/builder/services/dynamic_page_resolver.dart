@@ -43,7 +43,16 @@ class DynamicPageResolver {
       }
       
       return null;
+    } on FormatException catch (e) {
+      // Handle unknown page ID format exceptions safely
+      debugPrint('FormatException resolving page $pageId for app $appId: $e');
+      return null;
+    } on StateError catch (e) {
+      // Handle state errors (e.g., page not found in Firestore)
+      debugPrint('StateError resolving page $pageId for app $appId: $e');
+      return null;
     } catch (e, stackTrace) {
+      // Catch any other unexpected errors to prevent crashes
       debugPrint('Error resolving page $pageId for app $appId: $e');
       if (kDebugMode) {
         debugPrint('Stack trace: $stackTrace');
