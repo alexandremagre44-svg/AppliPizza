@@ -1,6 +1,22 @@
 // lib/builder/exceptions/builder_exceptions.dart
 // Custom exceptions for Builder B3 system
 
+/// Exception thrown when a page cannot be found
+/// 
+/// This exception is used when:
+/// - Unknown pageKey is passed to BuilderPageId.fromString()
+/// - Page doesn't exist in Firestore
+/// - Page should fallback to legacy screen
+class PageNotFoundException implements Exception {
+  final String message;
+  final String? pageKey;
+
+  PageNotFoundException(this.message, {this.pageKey});
+
+  @override
+  String toString() => 'PageNotFoundException: $message${pageKey != null ? ' (pageKey: $pageKey)' : ''}';
+}
+
 /// Exception thrown when a page cannot be found or loaded
 class BuilderPageException implements Exception {
   final String message;
