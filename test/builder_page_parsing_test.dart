@@ -391,6 +391,94 @@ void main() {
       expect(page.pageId, equals(BuilderPageId.menu));
       expect(page.isCustomPage, isFalse);
     });
+    
+    // Test for Ghost Content fix: sync draftLayout from publishedLayout when draft is empty
+    test('fromJson should sync empty draftLayout from publishedLayout (Ghost Content fix)', () {
+      final json = {
+        'pageId': 'home',
+        'appId': 'test_app',
+        'name': 'Home',
+        'route': '/home',
+        'draftLayout': [], // Empty draft
+        'publishedLayout': [
+          {
+            'id': 'hero_block',
+            'type': 'hero',
+            'order': 0,
+            'isActive': true,
+            'config': {'title': 'Welcome'},
+          },
+          {
+            'id': 'text_block',
+            'type': 'text',
+            'order': 1,
+            'isActive': true,
+            'config': {'content': 'Hello World'},
+          },
+        ],
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      // draftLayout should be synced from publishedLayout
+      expect(page.draftLayout.length, equals(2));
+      expect(page.draftLayout[0].id, equals('hero_block'));
+      expect(page.draftLayout[1].id, equals('text_block'));
+      // publishedLayout should remain unchanged
+      expect(page.publishedLayout.length, equals(2));
+    });
+    
+    test('fromJson should NOT sync when draftLayout has content', () {
+      final json = {
+        'pageId': 'home',
+        'appId': 'test_app',
+        'name': 'Home',
+        'route': '/home',
+        'draftLayout': [
+          {
+            'id': 'draft_block',
+            'type': 'banner',
+            'order': 0,
+            'isActive': true,
+            'config': {},
+          },
+        ],
+        'publishedLayout': [
+          {
+            'id': 'published_block',
+            'type': 'hero',
+            'order': 0,
+            'isActive': true,
+            'config': {},
+          },
+        ],
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      // draftLayout should keep its own content, not sync from published
+      expect(page.draftLayout.length, equals(1));
+      expect(page.draftLayout[0].id, equals('draft_block'));
+      expect(page.publishedLayout.length, equals(1));
+      expect(page.publishedLayout[0].id, equals('published_block'));
+    });
+    
+    test('fromJson should NOT sync when publishedLayout is empty', () {
+      final json = {
+        'pageId': 'home',
+        'appId': 'test_app',
+        'name': 'Home',
+        'route': '/home',
+        'draftLayout': [],
+        'publishedLayout': [],
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      // Both should remain empty
+      expect(page.draftLayout, isEmpty);
+      expect(page.publishedLayout, isEmpty);
+    });
   });
   
   group('BuilderBlock Parsing Tests', () {
