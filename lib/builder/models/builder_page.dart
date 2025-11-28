@@ -371,7 +371,7 @@ class BuilderPage {
     
     // Fix 'Ghost Content': If draft is empty but published has content, sync them to avoid blank editor
     if (draftLayout.isEmpty && publishedLayout.isNotEmpty) {
-      draftLayout = List.from(publishedLayout);
+      draftLayout = List<BuilderBlock>.from(publishedLayout);
     }
     
     // TODO(builder-b3-safe-parsing) Parse modules list safely - skip non-string items
