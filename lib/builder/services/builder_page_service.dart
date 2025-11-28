@@ -781,8 +781,8 @@ class BuilderPageService {
                   'title': 'Bienvenue',
                   'subtitle': 'Découvrez nos délicieuses pizzas',
                   'imageUrl': '',
-                  'ctaText': 'Voir le menu',
-                  'ctaAction': {'type': 'navigate', 'target': '/menu'},
+                  'buttonLabel': 'Voir le menu',
+                  'tapAction': 'openPage',
                 },
               ),
               BuilderBlock(
@@ -790,10 +790,11 @@ class BuilderPageService {
                 type: BlockType.productList,
                 order: 1,
                 config: {
-                  'mode': 'featured',
-                  'layout': 'horizontal',
                   'title': 'Nos spécialités',
+                  'mode': 'featured',
+                  'layout': 'grid',
                   'limit': 4,
+                  'columns': 2,
                 },
               ),
             ];
@@ -926,8 +927,8 @@ class BuilderPageService {
           'title': 'Bienvenue',
           'subtitle': 'Découvrez nos délicieuses pizzas',
           'imageUrl': '',
-          'ctaText': 'Voir le menu',
-          'ctaAction': {'type': 'navigate', 'target': '/menu'},
+          'buttonLabel': 'Voir le menu',
+          'tapAction': 'openPage',
         },
       ),
       BuilderBlock(
@@ -935,10 +936,11 @@ class BuilderPageService {
         type: BlockType.productList,
         order: 1,
         config: {
-          'mode': 'featured',
-          'layout': 'horizontal',
           'title': 'Nos spécialités',
+          'mode': 'featured',
+          'layout': 'grid',
           'limit': 4,
+          'columns': 2,
         },
       ),
       BuilderBlock(
@@ -946,8 +948,8 @@ class BuilderPageService {
         type: BlockType.info,
         order: 2,
         config: {
-          'message': 'Livraison gratuite à partir de 25€',
-          'type': 'info',
+          'title': 'Livraison gratuite à partir de 25€',
+          'subtitle': '',
         },
       ),
     ];
@@ -1088,8 +1090,8 @@ class BuilderPageService {
         type: BlockType.info,
         order: 1,
         config: {
-          'message': '📍 Adresse: Votre adresse ici\n📞 Téléphone: +33 X XX XX XX XX\n✉️ Email: contact@example.com',
-          'type': 'info',
+          'title': 'Nos coordonnées',
+          'subtitle': '📍 Adresse: Votre adresse ici\n📞 Téléphone: +33 X XX XX XX XX\n✉️ Email: contact@example.com',
         },
       ),
       BuilderBlock(

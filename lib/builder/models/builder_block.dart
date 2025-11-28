@@ -108,32 +108,45 @@ class BuilderBlock {
   /// - Missing or null 'id' field (generates fallback ID)
   /// - Missing or null 'type' field (defaults to 'text')
   /// - Config as Map, JSON-encoded String, or null
+  /// - Try/catch for parsing errors to prevent 'Ghost Block' crashes
   factory BuilderBlock.fromJson(Map<String, dynamic> json) {
-    // TODO(builder-b3-safe-parsing) Handle missing 'id' gracefully
-    final String blockId = json['id'] as String? ?? 
-        'block_${DateTime.now().millisecondsSinceEpoch}_${json.hashCode.abs()}';
-    
-    if (json['id'] == null) {
-      print('⚠️ Warning: Block missing id field, generated fallback: $blockId');
+    try {
+      // TODO(builder-b3-safe-parsing) Handle missing 'id' gracefully
+      final String blockId = json['id'] as String? ?? 
+          'block_${DateTime.now().millisecondsSinceEpoch}_${json.hashCode.abs()}';
+      
+      if (json['id'] == null) {
+        print('⚠️ Warning: Block missing id field, generated fallback: $blockId');
+      }
+      
+      // Parse config safely using shared utility
+      final parsedConfig = safeParseConfig(json['config']);
+      
+      return BuilderBlock(
+        id: blockId,
+        type: BlockType.fromJson(json['type'] as String? ?? 'text'),
+        order: json['order'] as int? ?? 0,
+        config: parsedConfig,
+        isActive: json['isActive'] as bool? ?? true,
+        visibility: BlockVisibility.fromJson(
+          json['visibility'] as String? ?? 'visible',
+        ),
+        customStyles: json['customStyles'] as String?,
+        // TODO(builder-b3-safe-parsing) Use safe DateTime parsing for Firestore types
+        createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
+        updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
+      );
+    } catch (e) {
+      // Log warning but return a valid Block with empty config to prevent crashes
+      print('⚠️ Warning: Error parsing block config, returning fallback block: $e');
+      final fallbackId = 'block_fallback_${DateTime.now().millisecondsSinceEpoch}';
+      return BuilderBlock(
+        id: fallbackId,
+        type: BlockType.text,
+        order: 0,
+        config: {},
+      );
     }
-    
-    // Parse config safely using shared utility
-    final parsedConfig = safeParseConfig(json['config']);
-    
-    return BuilderBlock(
-      id: blockId,
-      type: BlockType.fromJson(json['type'] as String? ?? 'text'),
-      order: json['order'] as int? ?? 0,
-      config: parsedConfig,
-      isActive: json['isActive'] as bool? ?? true,
-      visibility: BlockVisibility.fromJson(
-        json['visibility'] as String? ?? 'visible',
-      ),
-      customStyles: json['customStyles'] as String?,
-      // TODO(builder-b3-safe-parsing) Use safe DateTime parsing for Firestore types
-      createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
-      updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
-    );
   }
 
   /// Helper: Get a config value with type safety
@@ -291,32 +304,45 @@ class SystemBlock extends BuilderBlock {
   /// - Timestamp, String, int, or null for createdAt/updatedAt
   /// - Missing or null 'id' field (generates fallback ID)
   /// - Config as Map, JSON-encoded String, or null
+  /// - Try/catch for parsing errors to prevent 'Ghost Block' crashes
   factory SystemBlock.fromJson(Map<String, dynamic> json) {
-    // Parse config safely using shared utility
-    final config = safeParseConfig(json['config']);
-    
-    // TODO(builder-b3-safe-parsing) Handle missing 'id' gracefully
-    final String blockId = json['id'] as String? ?? 
-        'sysblock_${DateTime.now().millisecondsSinceEpoch}_${json.hashCode.abs()}';
-    
-    if (json['id'] == null) {
-      print('⚠️ Warning: SystemBlock missing id field, generated fallback: $blockId');
+    try {
+      // Parse config safely using shared utility
+      final config = safeParseConfig(json['config']);
+      
+      // TODO(builder-b3-safe-parsing) Handle missing 'id' gracefully
+      final String blockId = json['id'] as String? ?? 
+          'sysblock_${DateTime.now().millisecondsSinceEpoch}_${json.hashCode.abs()}';
+      
+      if (json['id'] == null) {
+        print('⚠️ Warning: SystemBlock missing id field, generated fallback: $blockId');
+      }
+      
+      return SystemBlock(
+        id: blockId,
+        moduleType: config['moduleType'] as String? ?? 'unknown',
+        order: json['order'] as int? ?? 0,
+        config: config,
+        isActive: json['isActive'] as bool? ?? true,
+        visibility: BlockVisibility.fromJson(
+          json['visibility'] as String? ?? 'visible',
+        ),
+        customStyles: json['customStyles'] as String?,
+        // TODO(builder-b3-safe-parsing) Use safe DateTime parsing for Firestore types
+        createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
+        updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
+      );
+    } catch (e) {
+      // Log warning but return a valid SystemBlock with empty config to prevent crashes
+      print('⚠️ Warning: Error parsing SystemBlock config, returning fallback block: $e');
+      final fallbackId = 'sysblock_fallback_${DateTime.now().millisecondsSinceEpoch}';
+      return SystemBlock(
+        id: fallbackId,
+        moduleType: 'unknown',
+        order: 0,
+        config: {},
+      );
     }
-    
-    return SystemBlock(
-      id: blockId,
-      moduleType: config['moduleType'] as String? ?? 'unknown',
-      order: json['order'] as int? ?? 0,
-      config: config,
-      isActive: json['isActive'] as bool? ?? true,
-      visibility: BlockVisibility.fromJson(
-        json['visibility'] as String? ?? 'visible',
-      ),
-      customStyles: json['customStyles'] as String?,
-      // TODO(builder-b3-safe-parsing) Use safe DateTime parsing for Firestore types
-      createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
-      updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
-    );
   }
 
   @override
