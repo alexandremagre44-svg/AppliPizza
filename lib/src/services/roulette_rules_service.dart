@@ -2,6 +2,8 @@
 // Service for managing roulette eligibility rules and validation
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/restaurant_provider.dart';
 
 /// Status result for roulette eligibility check
 class RouletteStatus {
@@ -138,18 +140,34 @@ class RouletteRules {
 /// Service for managing roulette rules and eligibility
 class RouletteRulesService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String appId;
+
+  RouletteRulesService({required this.appId});
+
+  /// Scoped collection for config
+  DocumentReference get _rulesDoc => 
+      _firestore.collection('restaurants').doc(appId).collection('config').doc('roulette_rules');
+
+  /// Scoped collection for users
+  CollectionReference get _usersCollection =>
+      _firestore.collection('restaurants').doc(appId).collection('users');
+
+  /// Scoped collection for roulette history
+  CollectionReference get _rouletteHistoryCollection =>
+      _firestore.collection('restaurants').doc(appId).collection('roulette_history');
+
+  /// Scoped collection for user roulette spins (legacy)
+  CollectionReference get _userRouletteSpinsCollection =>
+      _firestore.collection('restaurants').doc(appId).collection('user_roulette_spins');
 
   /// Get current roulette rules from Firestore
   /// Returns null if document doesn't exist (not configured)
   Future<RouletteRules?> getRules() async {
     try {
-      final doc = await _firestore
-          .collection('config')
-          .doc('roulette_rules')
-          .get();
+      final doc = await _rulesDoc.get();
       
       if (doc.exists && doc.data() != null) {
-        return RouletteRules.fromMap(doc.data()!);
+        return RouletteRules.fromMap(doc.data() as Map<String, dynamic>);
       }
       
       // Return null if not configured (document doesn't exist)
@@ -163,10 +181,7 @@ class RouletteRulesService {
   /// Save roulette rules to Firestore
   Future<void> saveRules(RouletteRules rules) async {
     try {
-      await _firestore
-          .collection('config')
-          .doc('roulette_rules')
-          .set(rules.toMap(), SetOptions(merge: true));
+      await _rulesDoc.set(rules.toMap(), SetOptions(merge: true));
     } catch (e) {
       print('Error saving roulette rules: $e');
       rethrow;
@@ -201,17 +216,14 @@ class RouletteRulesService {
         );
       }
       
-      // Get user document
-      final userDoc = await _firestore
-          .collection('users')
-          .doc(userId)
-          .get();
+      // Get user document (scoped)
+      final userDoc = await _usersCollection.doc(userId).get();
       
       if (!userDoc.exists) {
         return RouletteStatus.denied('Utilisateur non trouvé');
       }
       
-      final userData = userDoc.data() ?? {};
+      final userData = userDoc.data() as Map<String, dynamic>? ?? {};
       
       // Check if user is banned
       if (userData['isBanned'] == true) {
@@ -292,9 +304,8 @@ class RouletteRulesService {
       final now = DateTime.now();
       final dateKey = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
       
-      // Create entry in audit trail
-      await _firestore
-          .collection('roulette_history')
+      // Create entry in audit trail (scoped)
+      await _rouletteHistoryCollection
           .doc(userId)
           .collection(dateKey)
           .add({
@@ -308,11 +319,8 @@ class RouletteRulesService {
         'createdAt': now.toIso8601String(),
       });
       
-      // Update user's lastSpinAt
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .set({
+      // Update user's lastSpinAt (scoped)
+      await _usersCollection.doc(userId).set({
         'lastSpinAt': now.toIso8601String(),
       }, SetOptions(merge: true));
     } catch (e) {
@@ -325,21 +333,18 @@ class RouletteRulesService {
     try {
       final sinceStr = since.toIso8601String();
       
-      // Count from roulette_history collections
+      // Count from roulette_history collections (scoped)
       // This is a simplified approach - in production you might want to use aggregation
-      final userHistoryRef = _firestore
-          .collection('roulette_history')
-          .doc(userId);
+      final userHistoryRef = _rouletteHistoryCollection.doc(userId);
       
       final snapshot = await userHistoryRef
           .collection('_count')
           .where('timestamp', isGreaterThanOrEqualTo: sinceStr)
           .get();
       
-      // Fallback: count from user_roulette_spins (legacy)
+      // Fallback: count from user_roulette_spins (legacy, scoped)
       if (snapshot.docs.isEmpty) {
-        final legacySnapshot = await _firestore
-            .collection('user_roulette_spins')
+        final legacySnapshot = await _userRouletteSpinsCollection
             .where('userId', isEqualTo: userId)
             .where('spunAt', isGreaterThanOrEqualTo: sinceStr)
             .get();
@@ -349,10 +354,9 @@ class RouletteRulesService {
       return snapshot.docs.length;
     } catch (e) {
       print('Error getting spin count: $e');
-      // Fallback to checking user_roulette_spins
+      // Fallback to checking user_roulette_spins (scoped)
       try {
-        final snapshot = await _firestore
-            .collection('user_roulette_spins')
+        final snapshot = await _userRouletteSpinsCollection
             .where('userId', isEqualTo: userId)
             .where('spunAt', isGreaterThanOrEqualTo: since.toIso8601String())
             .get();
@@ -447,15 +451,17 @@ class RouletteRulesService {
   /// Watch rules in real-time
   /// Emits null if document doesn't exist (not configured)
   Stream<RouletteRules?> watchRules() {
-    return _firestore
-        .collection('config')
-        .doc('roulette_rules')
-        .snapshots()
-        .map((snapshot) {
+    return _rulesDoc.snapshots().map((snapshot) {
       if (snapshot.exists && snapshot.data() != null) {
-        return RouletteRules.fromMap(snapshot.data()!);
+        return RouletteRules.fromMap(snapshot.data() as Map<String, dynamic>);
       }
       return null;
     });
   }
 }
+
+/// Provider for RouletteRulesService scoped to the current restaurant
+final rouletteRulesServiceProvider = Provider<RouletteRulesService>((ref) {
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return RouletteRulesService(appId: appId);
+});
