@@ -12,9 +12,14 @@ class FirebaseOrderService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final String appId;
+  
+  // LoyaltyService instance initialized with appId
+  late final LoyaltyService _loyaltyService;
 
   // Constructor with required appId for multi-tenant isolation
-  FirebaseOrderService({required this.appId});
+  FirebaseOrderService({required this.appId}) {
+    _loyaltyService = LoyaltyService(appId: appId);
+  }
 
   /// Collection de commandes scoped to the current restaurant
   CollectionReference get _ordersCollection => FirestorePaths.orders(appId);
@@ -118,7 +123,7 @@ class FirebaseOrderService {
     
     // Ajouter les points de fidélité après la commande (only for client orders)
     if (source == 'client') {
-      await LoyaltyService().addPointsFromOrder(user.uid, total);
+      await _loyaltyService.addPointsFromOrder(user.uid, total);
     }
     
     return docRef.id;

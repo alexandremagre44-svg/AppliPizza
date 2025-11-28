@@ -17,10 +17,14 @@ class FirebaseAuthService {
   
   // UserProfileService instance initialized with appId
   late final UserProfileService _profileService;
+  
+  // LoyaltyService instance initialized with appId
+  late final LoyaltyService _loyaltyService;
 
   // Constructor with required appId for multi-tenant isolation
   FirebaseAuthService({required this.appId}) {
     _profileService = UserProfileService(appId: appId);
+    _loyaltyService = LoyaltyService(appId: appId);
   }
 
   // Stream de l'état d'authentification
@@ -66,7 +70,7 @@ class FirebaseAuthService {
       }
 
       // Initialiser le système de fidélité
-      await LoyaltyService().initializeLoyalty(credential.user!.uid);
+      await _loyaltyService.initializeLoyalty(credential.user!.uid);
 
       // Set user identifier for Crashlytics (for better crash tracking)
       // Only on non-web platforms (Crashlytics not supported on Web)
@@ -161,7 +165,7 @@ class FirebaseAuthService {
       );
 
       // Initialiser le système de fidélité
-      await LoyaltyService().initializeLoyalty(credential.user!.uid);
+      await _loyaltyService.initializeLoyalty(credential.user!.uid);
 
       // Set user identifier for Crashlytics (for better crash tracking)
       // Only on non-web platforms (Crashlytics not supported on Web)

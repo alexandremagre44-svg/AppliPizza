@@ -8,10 +8,11 @@ import 'auth_provider.dart';
 final loyaltyInfoProvider = StreamProvider.autoDispose<Map<String, dynamic>?>((ref) {
   final authState = ref.watch(authProvider);
   final uid = authState.userId;
+  final loyaltyService = ref.watch(loyaltyServiceProvider);
   
   if (uid == null) {
     return Stream.value(null);
   }
   
-  return LoyaltyService().watchLoyaltyInfo(uid);
+  return loyaltyService.watchLoyaltyInfo(uid);
 });

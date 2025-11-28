@@ -85,16 +85,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       // Marquer les récompenses comme utilisées
       final authState = ref.read(authProvider);
       final uid = authState.userId;
+      final loyaltyService = ref.read(loyaltyServiceProvider);
       
       if (uid != null) {
         if (_selectedFreePizzaRewardType != null) {
-          await LoyaltyService().useReward(uid, RewardType.freePizza);
+          await loyaltyService.useReward(uid, RewardType.freePizza);
         }
         if (_selectedFreeDrinkRewardType != null) {
-          await LoyaltyService().useReward(uid, RewardType.freeDrink);
+          await loyaltyService.useReward(uid, RewardType.freeDrink);
         }
         if (_selectedFreeDessertRewardType != null) {
-          await LoyaltyService().useReward(uid, RewardType.freeDessert);
+          await loyaltyService.useReward(uid, RewardType.freeDessert);
         }
       }
 
