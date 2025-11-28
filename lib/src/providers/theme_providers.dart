@@ -269,7 +269,7 @@ ThemeData _buildThemeData(ThemeConfig config) {
     
     // === Typography ===
     fontFamily: fontFamily,
-    fontFamilyFallback: [fontFamily, 'Roboto'],
+    fontFamilyFallback: const ['Roboto', 'sans-serif'],
     
     // === Colors ===
     splashColor: primary.withOpacity(0.1),

@@ -4,6 +4,7 @@
 // Firestore path: restaurants/{appId}/config/theme
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/theme_config.dart';
 import '../providers/restaurant_provider.dart';
@@ -36,7 +37,7 @@ class ThemeService {
       // Return default Delizza theme if document doesn't exist
       return ThemeConfig.defaultConfig();
     } catch (e) {
-      print('Error loading theme config: $e');
+      debugPrint('ThemeService: Error loading theme config: $e');
       return ThemeConfig.defaultConfig();
     }
   }
@@ -46,7 +47,7 @@ class ThemeService {
     try {
       await _themeDoc.set(config.toMap(), SetOptions(merge: true));
     } catch (e) {
-      print('Error saving theme config: $e');
+      debugPrint('ThemeService: Error saving theme config: $e');
       rethrow;
     }
   }
@@ -57,7 +58,7 @@ class ThemeService {
       final defaultConfig = ThemeConfig.defaultConfig();
       await saveTheme(defaultConfig);
     } catch (e) {
-      print('Error resetting theme to defaults: $e');
+      debugPrint('ThemeService: Error resetting theme to defaults: $e');
       rethrow;
     }
   }

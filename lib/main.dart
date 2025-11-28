@@ -153,7 +153,7 @@ class MyApp extends ConsumerWidget {
       },
       // Theme loading failed - use default static theme
       error: (error, stack) {
-        print('Error loading theme: $error');
+        debugPrint('MyApp: Error loading theme: $error');
         return MaterialApp.router(
           title: 'Pizza Deli\'Zza',
           theme: AppTheme.lightTheme,

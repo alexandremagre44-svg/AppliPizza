@@ -123,8 +123,13 @@ class ThemeConfig {
       if (hex.length == 6) {
         hex = 'FF$hex'; // Add alpha if not present
       }
+      if (hex.length != 8) {
+        debugPrint('ThemeConfig: Invalid hex color format "$hexString", using fallback');
+        return fallback;
+      }
       return Color(int.parse(hex, radix: 16));
     } catch (e) {
+      debugPrint('ThemeConfig: Error parsing hex color "$hexString": $e, using fallback');
       return fallback;
     }
   }
