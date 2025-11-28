@@ -458,5 +458,66 @@ void main() {
       
       expect(block.createdAt.year, equals(2024));
     });
+    
+    // Tests for Fix 1: Config as String handling
+    test('fromJson should handle config as JSON-encoded string', () {
+      final json = {
+        'id': 'block1',
+        'type': 'hero',
+        'order': 0,
+        'isActive': true,
+        'config': '{"title": "Hello", "subtitle": "World"}',
+      };
+
+      final block = BuilderBlock.fromJson(json);
+      
+      expect(block.config['title'], equals('Hello'));
+      expect(block.config['subtitle'], equals('World'));
+    });
+    
+    test('fromJson should handle config as invalid JSON string gracefully', () {
+      final json = {
+        'id': 'block1',
+        'type': 'hero',
+        'order': 0,
+        'isActive': true,
+        'config': 'not valid json',
+      };
+
+      // Should not throw, should default to empty config
+      final block = BuilderBlock.fromJson(json);
+      
+      expect(block.config, isEmpty);
+    });
+    
+    test('fromJson should handle config as null', () {
+      final json = {
+        'id': 'block1',
+        'type': 'hero',
+        'order': 0,
+        'isActive': true,
+        'config': null,
+      };
+
+      final block = BuilderBlock.fromJson(json);
+      
+      expect(block.config, isEmpty);
+    });
+    
+    test('fromJson should handle config as Map with different type params', () {
+      final Map<Object?, Object?> rawMap = {'key': 'value', 'count': 42};
+      final json = <String, dynamic>{
+        'id': 'block1',
+        'type': 'hero',
+        'order': 0,
+        'isActive': true,
+        'config': rawMap,
+      };
+
+      final block = BuilderBlock.fromJson(json);
+      
+      expect(block.config['key'], equals('value'));
+      expect(block.config['count'], equals(42));
+    });
   });
 }
