@@ -760,6 +760,9 @@ class BuilderPageService {
         if (hasContent) continue;
         
         // Determine which module/blocks to inject based on systemId (for system pages)
+        // Note: This block generation is similar to BuilderNavigationService._getDefaultBlocksForPage
+        // but serves a different purpose - fixing existing empty pages vs creating new pages.
+        // Both include SystemBlock modules for proper runtime rendering.
         final sysId = page.systemId;
         if (sysId == null) continue; // Skip custom pages
         

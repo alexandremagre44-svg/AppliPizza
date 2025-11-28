@@ -191,6 +191,11 @@ class BuilderNavigationService {
   
   /// Get default content blocks for a page based on its type
   /// This ensures pages are never empty when auto-initialized
+  /// 
+  /// Note: This is similar to DefaultPageCreator._buildDefaultBlocks but 
+  /// specifically includes SystemBlock modules for system pages (cart, profile, etc.)
+  /// which are required for proper runtime rendering. DefaultPageCreator returns
+  /// empty blocks for system pages as they were originally meant to use legacy screens.
   List<BuilderBlock> _getDefaultBlocksForPage(BuilderPageId pageId) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     
