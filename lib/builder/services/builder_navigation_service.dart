@@ -223,7 +223,7 @@ class BuilderNavigationService {
               'subtitle': 'Découvrez nos délicieuses pizzas',
               'imageUrl': '',
               'buttonLabel': 'Voir le menu',
-              'tapAction': 'openPage',
+              'tapAction': {'type': 'openPage', 'value': '/menu'},
             },
           ),
           BuilderBlock(

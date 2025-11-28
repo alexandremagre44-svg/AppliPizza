@@ -782,7 +782,7 @@ class BuilderPageService {
                   'subtitle': 'Découvrez nos délicieuses pizzas',
                   'imageUrl': '',
                   'buttonLabel': 'Voir le menu',
-                  'tapAction': 'openPage',
+                  'tapAction': {'type': 'openPage', 'value': '/menu'},
                 },
               ),
               BuilderBlock(
@@ -928,7 +928,7 @@ class BuilderPageService {
           'subtitle': 'Découvrez nos délicieuses pizzas',
           'imageUrl': '',
           'buttonLabel': 'Voir le menu',
-          'tapAction': 'openPage',
+          'tapAction': {'type': 'openPage', 'value': '/menu'},
         },
       ),
       BuilderBlock(
