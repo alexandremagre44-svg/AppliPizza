@@ -155,6 +155,7 @@ class BuilderNavigationService {
   }
 
   /// Helper to create a default BuilderPage with common parameters
+  /// Includes default content modules for system pages to prevent empty pages
   BuilderPage _createDefaultPage({
     required BuilderPageId pageId,
     required String name,
@@ -163,22 +164,100 @@ class BuilderNavigationService {
     required int order,
     required DateTime now,
   }) {
+    // Generate default content blocks based on page type
+    final defaultBlocks = _getDefaultBlocksForPage(pageId);
+    
     return BuilderPage(
       pageId: pageId,
       appId: appId,
       name: name,
       description: description,
       route: '/${pageId.value}',
-      blocks: [],
+      blocks: defaultBlocks,
+      draftLayout: defaultBlocks,
+      publishedLayout: defaultBlocks,
       isEnabled: true,
       isDraft: false,
       displayLocation: 'bottomBar',
       icon: icon,
       order: order,
-      isSystemPage: pageId.isSystemPage, // Use enum definition
+      isSystemPage: pageId.isSystemPage,
+      isActive: true,
+      bottomNavIndex: order,
       createdAt: now,
       updatedAt: now,
     );
+  }
+  
+  /// Get default content blocks for a page based on its type
+  /// This ensures pages are never empty when auto-initialized
+  List<BuilderBlock> _getDefaultBlocksForPage(BuilderPageId pageId) {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    
+    switch (pageId) {
+      case BuilderPageId.home:
+        // Home page gets a hero block and product list
+        return [
+          BuilderBlock(
+            id: 'hero_auto_$timestamp',
+            type: BlockType.hero,
+            order: 0,
+            config: {
+              'title': 'Bienvenue',
+              'subtitle': 'Découvrez nos délicieuses pizzas',
+              'imageUrl': '',
+              'ctaText': 'Voir le menu',
+              'ctaAction': {'type': 'navigate', 'target': '/menu'},
+            },
+          ),
+          BuilderBlock(
+            id: 'product_list_auto_$timestamp',
+            type: BlockType.productList,
+            order: 1,
+            config: {
+              'mode': 'featured',
+              'layout': 'horizontal',
+              'title': 'Nos spécialités',
+              'limit': 4,
+            },
+          ),
+        ];
+      case BuilderPageId.menu:
+        return [
+          SystemBlock(
+            id: 'menu_catalog_auto_$timestamp',
+            moduleType: 'menu_catalog',
+            order: 0,
+          ),
+        ];
+      case BuilderPageId.cart:
+        return [
+          SystemBlock(
+            id: 'cart_module_auto_$timestamp',
+            moduleType: 'cart_module',
+            order: 0,
+          ),
+        ];
+      case BuilderPageId.profile:
+        return [
+          SystemBlock(
+            id: 'profile_module_auto_$timestamp',
+            moduleType: 'profile_module',
+            order: 0,
+          ),
+        ];
+      case BuilderPageId.roulette:
+        return [
+          SystemBlock(
+            id: 'roulette_module_auto_$timestamp',
+            moduleType: 'roulette_module',
+            order: 0,
+          ),
+        ];
+      default:
+        // For other pages, return empty (they can be customized later)
+        return [];
+    }
   }
 
   /// Get all hidden pages
