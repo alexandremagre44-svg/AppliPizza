@@ -283,6 +283,7 @@ class BuilderPage {
   /// - Legacy string values like "none" → empty list
   /// - List of blocks → parses each individually, skipping malformed ones
   /// - Individual block parsing errors → logs warning and skips block
+  /// - Any unexpected error → returns valid blocks parsed so far, never crashes
   static List<BuilderBlock> _safeLayoutParse(dynamic value) {
     // If null, return empty list
     if (value == null) return [];
@@ -305,8 +306,12 @@ class BuilderPage {
           if (item is! Map<String, dynamic>) {
             // Try to cast if it's a Map with different type params
             if (item is Map) {
-              final blockData = Map<String, dynamic>.from(item);
-              validBlocks.add(BuilderBlock.fromJson(blockData));
+              try {
+                final blockData = Map<String, dynamic>.from(item);
+                validBlocks.add(BuilderBlock.fromJson(blockData));
+              } catch (parseError) {
+                print('⚠️ Warning: Failed to parse block at index $i after cast: $parseError');
+              }
             } else {
               print('⚠️ Warning: Skipping block at index $i - expected Map, got ${item.runtimeType}');
             }
@@ -315,9 +320,10 @@ class BuilderPage {
           
           // Parse the block
           validBlocks.add(BuilderBlock.fromJson(item));
-        } catch (e) {
-          // TODO(builder-b3-safe-parsing) Skip malformed blocks with warning, don't crash
+        } catch (e, stackTrace) {
+          // Catch ALL exceptions during block parsing - skip bad block, keep others
           print('⚠️ Warning: Skipping malformed block at index $i. Error: $e');
+          print('  Stack trace: $stackTrace');
           continue;
         }
       }

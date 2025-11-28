@@ -676,6 +676,7 @@ class BuilderLayoutService {
   /// - route is valid (not '/' or empty)
   /// 
   /// FALLBACK (backward compatibility):
+  /// - isActive == true
   /// - displayLocation == "bottomBar"
   /// - order != null
   /// - order >= 0 and <= 4
@@ -688,15 +689,20 @@ class BuilderLayoutService {
       return false;
     }
     
-    // Primary logic: Use isActive + bottomNavIndex
-    if (page.isActive &&
-        page.bottomNavIndex != null &&
+    // Strict filter: page must be active to appear in bottom bar
+    // This respects admin visibility choices (e.g. hiding Menu or Cart for maintenance)
+    if (!page.isActive) {
+      return false;
+    }
+    
+    // Primary logic: Check bottomNavIndex (isActive already verified above)
+    if (page.bottomNavIndex != null &&
         page.bottomNavIndex! >= 0 &&
         page.bottomNavIndex! <= 4) {
       return true;
     }
 
-    // Fallback for backward compatibility with old schema
+    // Fallback for backward compatibility with old schema (isActive already verified above)
     if (page.displayLocation == 'bottomBar' &&
         page.order >= 0 &&
         page.order <= 4) {
