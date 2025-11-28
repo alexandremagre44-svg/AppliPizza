@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/roulette_config.dart';
 import '../../../models/product.dart';
@@ -13,19 +14,21 @@ import '../../../design_system/app_theme.dart';
 
 /// Screen to create or edit a roulette segment
 /// Follows Material 3 and Pizza Deli'Zza Brand Guidelines
-class RouletteSegmentEditorScreen extends StatefulWidget {
+class RouletteSegmentEditorScreen extends ConsumerStatefulWidget {
   final RouletteSegment? segment;
 
   const RouletteSegmentEditorScreen({super.key, this.segment});
 
   @override
-  State<RouletteSegmentEditorScreen> createState() => _RouletteSegmentEditorScreenState();
+  ConsumerState<RouletteSegmentEditorScreen> createState() => _RouletteSegmentEditorScreenState();
 }
 
-class _RouletteSegmentEditorScreenState extends State<RouletteSegmentEditorScreen> {
+class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEditorScreen> {
   final _formKey = GlobalKey<FormState>();
-  final RouletteSegmentService _service = RouletteSegmentService();
-  final FirestoreProductService _productService = createFirestoreProductService();
+  
+  // Use getters to access services via providers (avoids initState ref.read issue)
+  RouletteSegmentService get _service => ref.read(rouletteSegmentServiceProvider);
+  FirestoreProductService get _productService => ref.read(firestoreProductServiceProvider);
 
   // Form controllers
   late TextEditingController _labelController;

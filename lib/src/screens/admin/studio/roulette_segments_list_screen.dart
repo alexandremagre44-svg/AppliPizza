@@ -2,6 +2,7 @@
 // List screen for managing roulette segments - Material 3 + Pizza Deli'Zza
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/roulette_config.dart';
 import '../../../services/roulette_segment_service.dart';
 import '../../../design_system/app_theme.dart';
@@ -9,15 +10,16 @@ import 'roulette_segment_editor_screen.dart';
 
 /// Screen to list and manage all roulette segments
 /// Follows Material 3 and Pizza Deli'Zza Brand Guidelines
-class RouletteSegmentsListScreen extends StatefulWidget {
+class RouletteSegmentsListScreen extends ConsumerStatefulWidget {
   const RouletteSegmentsListScreen({super.key});
 
   @override
-  State<RouletteSegmentsListScreen> createState() => _RouletteSegmentsListScreenState();
+  ConsumerState<RouletteSegmentsListScreen> createState() => _RouletteSegmentsListScreenState();
 }
 
-class _RouletteSegmentsListScreenState extends State<RouletteSegmentsListScreen> {
-  final RouletteSegmentService _service = RouletteSegmentService();
+class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsListScreen> {
+  // Use getter to access service via provider
+  RouletteSegmentService get _service => ref.read(rouletteSegmentServiceProvider);
   List<RouletteSegment> _segments = [];
   bool _isLoading = true;
 

@@ -6,7 +6,9 @@
 
 import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product.dart';
+import '../providers/restaurant_provider.dart';
 
 // Interface abstraite pour permettre la compatibilité avec/sans Firebase
 abstract class FirestoreProductService {
@@ -141,6 +143,19 @@ class MockFirestoreProductService implements FirestoreProductService {
 // Implémentation réelle avec Firestore
 class FirestoreProductServiceImpl implements FirestoreProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String appId;
+
+  FirestoreProductServiceImpl({required this.appId});
+  
+  // ===============================================
+  // Helper: Get scoped collection reference
+  // ===============================================
+  CollectionReference<Map<String, dynamic>> _scopedCollection(String collectionName) {
+    return _firestore
+        .collection('restaurants')
+        .doc(appId)
+        .collection(collectionName);
+  }
   
   // ===============================================
   // FONCTION CENTRALISÉE: Mapper le nom de collection
@@ -167,11 +182,9 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
   Future<List<Product>> loadProductsByCategory(String category) async {
     try {
       final collectionName = _getCollectionName(category);
-      developer.log('🔥 FirestoreProductService: Chargement de $category depuis Firestore ($collectionName)...');
+      developer.log('🔥 FirestoreProductService: Chargement de $category depuis Firestore (restaurants/$appId/$collectionName)...');
       
-      final snapshot = await _firestore
-          .collection(collectionName)
-          .get();
+      final snapshot = await _scopedCollection(collectionName).get();
       
       final products = snapshot.docs.map((doc) {
         final data = doc.data();
@@ -207,10 +220,9 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
   @override
   Stream<List<Product>> watchProductsByCategory(String category) {
     final collectionName = _getCollectionName(category);
-    developer.log('🔄 FirestoreProductService: Écoute en temps réel de $category ($collectionName)...');
+    developer.log('🔄 FirestoreProductService: Écoute en temps réel de $category (restaurants/$appId/$collectionName)...');
     
-    return _firestore
-        .collection(collectionName)
+    return _scopedCollection(collectionName)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
@@ -301,12 +313,11 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
       // Préparer les données avec valeurs par défaut si nécessaire
       final data = product.toJson();
       
-      await _firestore
-          .collection(collectionName)
+      await _scopedCollection(collectionName)
           .doc(product.id)
           .set(data, SetOptions(merge: true)); // merge pour ne pas écraser tout
       
-      developer.log('✅ Produit "${product.name}" sauvegardé dans Firestore ($collectionName)');
+      developer.log('✅ Produit "${product.name}" sauvegardé dans Firestore (restaurants/$appId/$collectionName)');
       return true;
     } catch (e) {
       developer.log('❌ Erreur lors de la sauvegarde du produit "${product.name}": $e');
@@ -339,12 +350,11 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
   // ===============================================
   Future<bool> _deleteProduct(String productId, String collectionName) async {
     try {
-      await _firestore
-          .collection(collectionName)
+      await _scopedCollection(collectionName)
           .doc(productId)
           .delete();
       
-      developer.log('✅ Produit "$productId" supprimé de Firestore ($collectionName)');
+      developer.log('✅ Produit "$productId" supprimé de Firestore (restaurants/$appId/$collectionName)');
       return true;
     } catch (e) {
       developer.log('❌ Erreur lors de la suppression du produit "$productId": $e');
@@ -374,7 +384,13 @@ class FirestoreProductServiceImpl implements FirestoreProductService {
 }
 
 // Factory pour créer le bon service selon la configuration
-FirestoreProductService createFirestoreProductService() {
+FirestoreProductService createFirestoreProductService({required String appId}) {
   // Firestore est maintenant activé
-  return FirestoreProductServiceImpl();
+  return FirestoreProductServiceImpl(appId: appId);
 }
+
+/// Provider for FirestoreProductService scoped to the current restaurant
+final firestoreProductServiceProvider = Provider<FirestoreProductService>((ref) {
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return createFirestoreProductService(appId: appId);
+});

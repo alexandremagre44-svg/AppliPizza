@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../design_system/app_theme.dart';
 import '../../../services/roulette_rules_service.dart';
 import '../../../services/roulette_settings_service.dart';
@@ -16,17 +17,19 @@ import '../../../services/roulette_settings_service.dart';
 /// - Allowed time slots (start/end hours)
 /// 
 /// Firestore storage: config/roulette_rules
-class RouletteAdminSettingsScreen extends StatefulWidget {
+class RouletteAdminSettingsScreen extends ConsumerStatefulWidget {
   const RouletteAdminSettingsScreen({super.key});
 
   @override
-  State<RouletteAdminSettingsScreen> createState() => _RouletteAdminSettingsScreenState();
+  ConsumerState<RouletteAdminSettingsScreen> createState() => _RouletteAdminSettingsScreenState();
 }
 
-class _RouletteAdminSettingsScreenState extends State<RouletteAdminSettingsScreen> {
-  final RouletteRulesService _service = RouletteRulesService();
-  final RouletteSettingsService _settingsService = RouletteSettingsService();
+class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSettingsScreen> {
   final _formKey = GlobalKey<FormState>();
+  
+  // Use getters to access services via providers
+  RouletteRulesService get _service => ref.read(rouletteRulesServiceProvider);
+  RouletteSettingsService get _settingsService => ref.read(rouletteSettingsServiceProvider);
   
   bool _isLoading = true;
   bool _isSaving = false;

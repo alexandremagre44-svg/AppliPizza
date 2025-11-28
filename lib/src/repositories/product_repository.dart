@@ -6,6 +6,7 @@ import '../models/product.dart';
 import '../data/mock_data.dart';
 import '../services/product_crud_service.dart';
 import '../services/firestore_product_service.dart';
+import '../providers/restaurant_provider.dart';
 
 // Définition de l'interface (contrat) pour le Repository
 abstract class ProductRepository {
@@ -17,7 +18,10 @@ abstract class ProductRepository {
 // Renamed from MockProductRepository to better reflect its combined data source functionality
 class CombinedProductRepository implements ProductRepository {
   final ProductCrudService _crudService = ProductCrudService();
-  final FirestoreProductService _firestoreService = createFirestoreProductService();
+  final FirestoreProductService _firestoreService;
+
+  CombinedProductRepository({required String appId})
+      : _firestoreService = createFirestoreProductService(appId: appId);
 
   // Simule un délai réseau pour les appels asynchrones
   Future<T> _simulateDelay<T>(T result) {
@@ -206,5 +210,6 @@ class CombinedProductRepository implements ProductRepository {
 
 // Le provider pour fournir l'instance du Repository
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
-  return CombinedProductRepository();
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return CombinedProductRepository(appId: appId);
 });

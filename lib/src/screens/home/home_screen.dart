@@ -477,8 +477,9 @@ class HomeScreen extends ConsumerWidget {
   /// Build the roulette promotional banner
   /// Only displayed when roulette is enabled and all conditions are met
   Widget _buildRouletteBanner(BuildContext context, WidgetRef ref) {
+    final rulesService = ref.read(rouletteRulesServiceProvider);
     return FutureBuilder<RouletteRules?>(
-      future: RouletteRulesService().getRules(),
+      future: rulesService.getRules(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data == null) {
           return const SizedBox.shrink();

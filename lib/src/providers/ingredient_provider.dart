@@ -5,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/product.dart';
 import '../services/firestore_ingredient_service.dart';
 
-/// Provider du service Firestore pour les ingrédients
-final ingredientServiceProvider = Provider<FirestoreIngredientService>((ref) {
-  return createFirestoreIngredientService();
-});
+// Re-export the service provider for convenience
+// The actual provider is defined in firestore_ingredient_service.dart
+// We alias it here to maintain backward compatibility with 'ingredientServiceProvider' name
+final ingredientServiceProvider = firestoreIngredientServiceProvider;
 
 /// Provider pour charger tous les ingrédients (mode snapshot, non recommandé)
 /// ⚠️ Utilisez ingredientStreamProvider pour des mises à jour en temps réel

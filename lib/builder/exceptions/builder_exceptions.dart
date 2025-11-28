@@ -1,12 +1,40 @@
 // lib/builder/exceptions/builder_exceptions.dart
 // Custom exceptions for Builder B3 system
 
-/// Exception thrown when a page cannot be found or loaded
+/// Exception thrown when a page cannot be found
+/// 
+/// Use this exception when:
+/// - Unknown pageKey is passed to BuilderPageId.fromString()
+/// - Page doesn't exist in Firestore  
+/// - Page should fallback to legacy screen (widget fallback)
+/// 
+/// This exception is specifically for page resolution failures where
+/// the caller should handle by showing a fallback widget.
+/// 
+/// See also: [BuilderPageException] for general Builder errors
+class PageNotFoundException implements Exception {
+  final String message;
+  final String? pageKey;
+
+  const PageNotFoundException(this.message, {this.pageKey});
+
+  @override
+  String toString() => 'PageNotFoundException: $message${pageKey != null ? ' (pageKey: $pageKey)' : ''}';
+}
+
+/// Exception thrown when a Builder page operation fails
+/// 
+/// Use this exception for general Builder errors such as:
+/// - Failed to load page from Firestore (network/permission issues)
+/// - Failed to save page configuration
+/// - Failed to publish page
+/// 
+/// For page resolution failures (page not found), use [PageNotFoundException] instead.
 class BuilderPageException implements Exception {
   final String message;
   final String? pageId;
 
-  BuilderPageException(this.message, {this.pageId});
+  const BuilderPageException(this.message, {this.pageId});
 
   @override
   String toString() => 'BuilderPageException: $message${pageId != null ? ' (pageId: $pageId)' : ''}';
@@ -16,7 +44,7 @@ class BuilderPageException implements Exception {
 class MinimumBottomNavItemsException implements Exception {
   final String message;
 
-  MinimumBottomNavItemsException([
+  const MinimumBottomNavItemsException([
     this.message = 'Il doit y avoir au moins 2 pages dans la barre inférieure.',
   ]);
 

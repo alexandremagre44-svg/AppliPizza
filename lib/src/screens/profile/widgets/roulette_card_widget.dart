@@ -2,6 +2,7 @@
 // Roulette card for profile screen (Material 3)
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../design_system/app_theme.dart';
 import '../../../core/constants.dart';
 import '../../../models/app_texts_config.dart';
@@ -22,7 +23,7 @@ enum RouletteWidgetState {
 
 /// Dedicated card for roulette access
 /// Shows icon, configurable title/description, and CTA button
-class RouletteCardWidget extends StatefulWidget {
+class RouletteCardWidget extends ConsumerStatefulWidget {
   final RouletteTexts texts;
   final String userId;
 
@@ -33,12 +34,13 @@ class RouletteCardWidget extends StatefulWidget {
   });
 
   @override
-  State<RouletteCardWidget> createState() => _RouletteCardWidgetState();
+  ConsumerState<RouletteCardWidget> createState() => _RouletteCardWidgetState();
 }
 
-class _RouletteCardWidgetState extends State<RouletteCardWidget> {
-  final RouletteRulesService _rulesService = RouletteRulesService();
-  final RouletteSegmentService _segmentService = RouletteSegmentService();
+class _RouletteCardWidgetState extends ConsumerState<RouletteCardWidget> {
+  // Use getters to access services via providers
+  RouletteRulesService get _rulesService => ref.read(rouletteRulesServiceProvider);
+  RouletteSegmentService get _segmentService => ref.read(rouletteSegmentServiceProvider);
   
   RouletteWidgetState _state = RouletteWidgetState.loading;
   String _statusMessage = '';

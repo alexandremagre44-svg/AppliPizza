@@ -28,7 +28,9 @@ class RewardsScreen extends ConsumerStatefulWidget {
 
 class _RewardsScreenState extends ConsumerState<RewardsScreen> {
   final RewardService _rewardService = RewardService();
-  final RouletteRulesService _rulesService = RouletteRulesService();
+  
+  // Use getter to access service via provider
+  RouletteRulesService get _rulesService => ref.read(rouletteRulesServiceProvider);
 
   @override
   Widget build(BuildContext context) {

@@ -2,19 +2,20 @@
 // Service de gestion du système de fidélité
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math';
 import '../models/loyalty_reward.dart';
+import '../providers/restaurant_provider.dart';
 
 class LoyaltyService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String appId;
 
-  // Singleton
-  static final LoyaltyService _instance = LoyaltyService._internal();
-  factory LoyaltyService() => _instance;
-  LoyaltyService._internal();
+  LoyaltyService({required this.appId});
 
-  /// Collection des utilisateurs
-  CollectionReference get _usersCollection => _firestore.collection('users');
+  /// Collection des utilisateurs scoped to restaurant
+  CollectionReference get _usersCollection => 
+      _firestore.collection('restaurants').doc(appId).collection('users');
 
   /// Initialiser le profil de fidélité d'un utilisateur
   Future<void> initializeLoyalty(String uid) async {
@@ -345,3 +346,9 @@ class LoyaltyService {
     });
   }
 }
+
+/// Provider for LoyaltyService scoped to the current restaurant
+final loyaltyServiceProvider = Provider<LoyaltyService>((ref) {
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return LoyaltyService(appId: appId);
+});

@@ -2,13 +2,14 @@
 // Formulaire de création/modification d'ingrédient
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../design_system/app_theme.dart';
 import '../../models/product.dart';
 import '../../services/firestore_ingredient_service.dart';
 
 /// Écran de formulaire pour créer ou modifier un ingrédient
-class IngredientFormScreen extends StatefulWidget {
+class IngredientFormScreen extends ConsumerStatefulWidget {
   final Ingredient? ingredient; // null si création, non-null si modification
 
   const IngredientFormScreen({
@@ -17,17 +18,19 @@ class IngredientFormScreen extends StatefulWidget {
   });
 
   @override
-  State<IngredientFormScreen> createState() => _IngredientFormScreenState();
+  ConsumerState<IngredientFormScreen> createState() => _IngredientFormScreenState();
 }
 
-class _IngredientFormScreenState extends State<IngredientFormScreen> {
+class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   final _orderController = TextEditingController();
   
-  final FirestoreIngredientService _firestoreService = createFirestoreIngredientService();
   final _uuid = const Uuid();
+  
+  // Use getter to access service when needed (avoids initState ref.read issue)
+  FirestoreIngredientService get _firestoreService => ref.read(firestoreIngredientServiceProvider);
   
   late IngredientCategory _selectedCategory;
   bool _isActive = true;

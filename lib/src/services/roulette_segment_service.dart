@@ -4,10 +4,12 @@
 import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/roulette_config.dart';
+import '../providers/restaurant_provider.dart';
 
 /// Service for CRUD operations on roulette segments
-/// Uses a dedicated Firestore collection 'roulette_segments'
+/// Uses a scoped Firestore collection 'restaurants/{appId}/roulette_segments'
 /// 
 /// This service manages roulette wheel segments with consistent Firestore structure:
 /// - Generates default segments ONLY if collection is empty
@@ -16,7 +18,13 @@ import '../models/roulette_config.dart';
 /// - Never uses "none" except for "nothing" type segments
 class RouletteSegmentService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static const String _collection = 'roulette_segments';
+  final String appId;
+
+  RouletteSegmentService({required this.appId});
+
+  /// Get the scoped collection for roulette segments
+  CollectionReference get _segmentsCollection =>
+      _firestore.collection('restaurants').doc(appId).collection('roulette_segments');
 
   /// Get all segments ordered by position
   /// 
@@ -27,12 +35,10 @@ class RouletteSegmentService {
   /// - Sorts by position ASCENDING to ensure consistent order
   Future<List<RouletteSegment>> getAllSegments() async {
     try {
-      final snapshot = await _firestore
-          .collection(_collection)
-          .get();
+      final snapshot = await _segmentsCollection.get();
 
       final List<RouletteSegment> segments = snapshot.docs
-          .map((doc) => RouletteSegment.fromMap(doc.data()))
+          .map((doc) => RouletteSegment.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
 
       // Assign fallback position based on Firebase order (for position == 0 or null)
@@ -64,13 +70,12 @@ class RouletteSegmentService {
   /// - Sorts by position ASCENDING to ensure consistent order
   Future<List<RouletteSegment>> getActiveSegments() async {
     try {
-      final snapshot = await _firestore
-          .collection(_collection)
+      final snapshot = await _segmentsCollection
           .where('isActive', isEqualTo: true)
           .get();
 
       final List<RouletteSegment> segments = snapshot.docs
-          .map((doc) => RouletteSegment.fromMap(doc.data()))
+          .map((doc) => RouletteSegment.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
 
       // Assign fallback position based on Firebase order (for position == 0 or null)
@@ -96,9 +101,9 @@ class RouletteSegmentService {
   /// Get segment by ID
   Future<RouletteSegment?> getSegmentById(String id) async {
     try {
-      final doc = await _firestore.collection(_collection).doc(id).get();
+      final doc = await _segmentsCollection.doc(id).get();
       if (doc.exists && doc.data() != null) {
-        return RouletteSegment.fromMap(doc.data()!);
+        return RouletteSegment.fromMap(doc.data() as Map<String, dynamic>);
       }
       return null;
     } catch (e) {
@@ -118,10 +123,7 @@ class RouletteSegmentService {
   Future<bool> createSegment(RouletteSegment segment) async {
     try {
       // Check if segment already exists
-      final docSnapshot = await _firestore
-          .collection(_collection)
-          .doc(segment.id)
-          .get();
+      final docSnapshot = await _segmentsCollection.doc(segment.id).get();
       
       if (docSnapshot.exists) {
         print('Segment ${segment.id} already exists, skipping creation');
@@ -130,10 +132,7 @@ class RouletteSegmentService {
       
       // Validate and normalize segment before saving
       final normalizedSegment = _normalizeSegment(segment);
-      await _firestore
-          .collection(_collection)
-          .doc(normalizedSegment.id)
-          .set(normalizedSegment.toMap());
+      await _segmentsCollection.doc(normalizedSegment.id).set(normalizedSegment.toMap());
       return true;
     } catch (e) {
       print('Error creating segment: $e');
@@ -146,10 +145,7 @@ class RouletteSegmentService {
     try {
       // Validate and normalize segment before updating
       final normalizedSegment = _normalizeSegment(segment);
-      await _firestore
-          .collection(_collection)
-          .doc(normalizedSegment.id)
-          .update(normalizedSegment.toMap());
+      await _segmentsCollection.doc(normalizedSegment.id).update(normalizedSegment.toMap());
       return true;
     } catch (e) {
       print('Error updating segment: $e');
@@ -177,7 +173,7 @@ class RouletteSegmentService {
   /// Delete a segment
   Future<bool> deleteSegment(String id) async {
     try {
-      await _firestore.collection(_collection).doc(id).delete();
+      await _segmentsCollection.doc(id).delete();
       return true;
     } catch (e) {
       print('Error deleting segment: $e');
@@ -190,12 +186,9 @@ class RouletteSegmentService {
   /// CRITICAL FIX: This stream ensures segments are ALWAYS sorted by position
   /// to prevent desync between wheel display and reward selection.
   Stream<List<RouletteSegment>> watchSegments() {
-    return _firestore
-        .collection(_collection)
-        .snapshots()
-        .map((snapshot) {
+    return _segmentsCollection.snapshots().map((snapshot) {
       final List<RouletteSegment> segments = snapshot.docs
-          .map((doc) => RouletteSegment.fromMap(doc.data()))
+          .map((doc) => RouletteSegment.fromMap(doc.data() as Map<String, dynamic>))
           .toList();
 
       // Assign fallback position based on Firebase order (for position == 0 or null)
@@ -449,7 +442,7 @@ class RouletteSegmentService {
     try {
       final batch = _firestore.batch();
       for (int i = 0; i < segments.length; i++) {
-        final segmentRef = _firestore.collection(_collection).doc(segments[i].id);
+        final segmentRef = _segmentsCollection.doc(segments[i].id);
         batch.update(segmentRef, {'position': i + 1});
       }
       await batch.commit();
@@ -521,3 +514,9 @@ class RouletteSegmentService {
     return segments[index];
   }
 }
+
+/// Provider for RouletteSegmentService scoped to the current restaurant
+final rouletteSegmentServiceProvider = Provider<RouletteSegmentService>((ref) {
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return RouletteSegmentService(appId: appId);
+});

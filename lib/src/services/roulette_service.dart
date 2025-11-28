@@ -3,7 +3,9 @@
 // Uses the unified Firestore structure: config/roulette_rules + roulette_segments
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/roulette_config.dart';
+import '../providers/restaurant_provider.dart';
 import 'roulette_rules_service.dart';
 import 'roulette_segment_service.dart';
 import 'dart:math';
@@ -17,8 +19,22 @@ import 'dart:math';
 /// Use RouletteRulesService and RouletteSegmentService directly instead.
 class RouletteService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final RouletteRulesService _rulesService = RouletteRulesService();
-  final RouletteSegmentService _segmentService = RouletteSegmentService();
+  final String appId;
+  late final RouletteRulesService _rulesService;
+  late final RouletteSegmentService _segmentService;
+
+  RouletteService({required this.appId}) {
+    _rulesService = RouletteRulesService(appId: appId);
+    _segmentService = RouletteSegmentService(appId: appId);
+  }
+
+  /// Scoped collection for user roulette spins
+  CollectionReference get _userRouletteSpinsCollection =>
+      _firestore.collection('restaurants').doc(appId).collection('user_roulette_spins');
+
+  /// Scoped collection for roulette rate limit
+  CollectionReference get _rouletteRateLimitCollection =>
+      _firestore.collection('restaurants').doc(appId).collection('roulette_rate_limit');
 
   // Record a spin (stores in user_roulette_spins)
   // Rate limiting is enforced server-side by Firestore security rules
@@ -30,7 +46,7 @@ class RouletteService {
       // IMPORTANT: Create the spin document FIRST
       // The Firestore security rule checks the OLD timestamp in roulette_rate_limit
       // If we update rate limit first, the rule would see the new timestamp and reject
-      await _firestore.collection('user_roulette_spins').add({
+      await _userRouletteSpinsCollection.add({
         'userId': userId,
         'segmentId': segment.id,
         'segmentType': segment.type ?? segment.rewardId,
@@ -41,7 +57,7 @@ class RouletteService {
       
       // Update rate limit tracker AFTER successful spin creation
       // This timestamp will be checked on the NEXT spin attempt
-      final rateLimitDoc = _firestore.collection('roulette_rate_limit').doc(userId);
+      final rateLimitDoc = _rouletteRateLimitCollection.doc(userId);
       await rateLimitDoc.set({
         'lastActionAt': FieldValue.serverTimestamp(),
       });
@@ -59,14 +75,13 @@ class RouletteService {
     int limit = 10,
   }) async {
     try {
-      final snapshot = await _firestore
-          .collection('user_roulette_spins')
+      final snapshot = await _userRouletteSpinsCollection
           .where('userId', isEqualTo: userId)
           .orderBy('spunAt', descending: true)
           .limit(limit)
           .get();
 
-      return snapshot.docs.map((doc) => doc.data()).toList();
+      return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
     } catch (e) {
       print('Error getting user spin history: $e');
       return [];
@@ -98,3 +113,9 @@ class RouletteService {
     return segments.last;
   }
 }
+
+/// Provider for RouletteService scoped to the current restaurant
+final rouletteServiceProvider = Provider<RouletteService>((ref) {
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return RouletteService(appId: appId);
+});

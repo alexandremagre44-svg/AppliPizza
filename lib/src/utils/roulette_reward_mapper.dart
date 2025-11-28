@@ -86,20 +86,21 @@ RewardAction mapSegmentToRewardAction(roulette.RouletteSegment segment) {
 /// - [userId]: The user who won
 /// - [segment]: The winning segment
 /// - [validity]: How long the ticket is valid (default: 7 days for roulette)
+/// - [rulesService]: The roulette rules service (scoped to appId)
+/// - [loyaltyService]: The loyalty service (scoped to appId)
 /// 
 /// Returns the created ticket
 Future<RewardTicket?> createTicketFromRouletteSegment({
   required String userId,
   required roulette.RouletteSegment segment,
+  required RouletteRulesService rulesService,
+  required LoyaltyService loyaltyService,
   Duration? validity,
 }) async {
   try {
     print('🔄 [MAPPER] Processing segment: ${segment.id} (${segment.label})');
     print('  - RewardType: ${segment.rewardType}');
     print('  - RewardValue: ${segment.rewardValue}');
-    
-    // Record in audit trail first
-    final rulesService = RouletteRulesService();
     
     // Handle "nothing" segments
     if (segment.rewardType == roulette.RewardType.none) {
@@ -119,7 +120,6 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
       final points = segment.rewardValue?.toInt() ?? segment.value ?? 0;
       print('  ➜ Bonus points: adding $points points to user $userId');
       
-      final loyaltyService = LoyaltyService();
       await loyaltyService.addBonusPoints(userId, points);
       
       await rulesService.recordSpinAudit(

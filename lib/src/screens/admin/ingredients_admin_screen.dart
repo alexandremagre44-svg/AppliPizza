@@ -21,7 +21,9 @@ class IngredientsAdminScreen extends ConsumerStatefulWidget {
 class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen> 
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final FirestoreIngredientService _firestoreService = createFirestoreIngredientService();
+  
+  // Use getter to access service when needed (avoids initState ref.read issue)
+  FirestoreIngredientService get _firestoreService => ref.read(firestoreIngredientServiceProvider);
 
   @override
   void initState() {

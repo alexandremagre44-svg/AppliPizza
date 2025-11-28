@@ -61,6 +61,7 @@ import '../../models/roulette_config.dart';
 import '../../services/roulette_segment_service.dart';
 import '../../services/roulette_service.dart';
 import '../../services/roulette_rules_service.dart';
+import '../../services/loyalty_service.dart';
 import '../../widgets/pizza_roulette_wheel.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -78,10 +79,13 @@ class RouletteScreen extends ConsumerStatefulWidget {
 }
 
 class _RouletteScreenState extends ConsumerState<RouletteScreen> {
-  final RouletteSegmentService _segmentService = RouletteSegmentService();
-  final RouletteService _rouletteService = RouletteService();
-  final RouletteRulesService _rulesService = RouletteRulesService();
   final GlobalKey<PizzaRouletteWheelState> _wheelKey = GlobalKey<PizzaRouletteWheelState>();
+  
+  // Use getters to access services via providers (avoids initState ref.read issues)
+  RouletteSegmentService get _segmentService => ref.read(rouletteSegmentServiceProvider);
+  RouletteService get _rouletteService => ref.read(rouletteServiceProvider);
+  RouletteRulesService get _rulesService => ref.read(rouletteRulesServiceProvider);
+  LoyaltyService get _loyaltyService => ref.read(loyaltyServiceProvider);
   
   List<RouletteSegment> _segments = [];
   bool _isLoading = true;
@@ -208,6 +212,8 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       await createTicketFromRouletteSegment(
         userId: _effectiveUserId,
         segment: segment,
+        rulesService: _rulesService,
+        loyaltyService: _loyaltyService,
       );
       
       print('  ➜ Reward ticket created successfully for: ${segment.label}');
