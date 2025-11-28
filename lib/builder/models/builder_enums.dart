@@ -1,8 +1,6 @@
 // lib/builder/models/builder_enums.dart
 // Enums for Builder B3 system
 
-import '../exceptions/builder_exceptions.dart';
-
 /// Page identifiers for different app pages
 /// 
 /// Extensible enum for multi-page support.
@@ -57,21 +55,22 @@ enum BuilderPageId {
 
   /// Get BuilderPageId from string value
   /// 
-  /// IMPORTANT: Throws [PageNotFoundException] if the value doesn't match
+  /// @deprecated Use [tryFromString] instead for safe nullable result.
+  /// 
+  /// IMPORTANT: Throws [FormatException] if the value doesn't match
   /// any known pageId. This prevents unknown pages from silently falling
   /// back to home (which would cause page context mismatch).
   /// 
   /// Use [tryFromString] for safe fallback to null instead.
   /// 
-  /// Throws: [PageNotFoundException] if value is not a known page ID
+  /// Throws: [FormatException] if value is not a known page ID
   static BuilderPageId fromString(String value) {
     final found = tryFromString(value);
     if (found != null) {
       return found;
     }
-    throw PageNotFoundException(
-      'Unknown page ID: $value',
-      pageKey: value,
+    throw const FormatException(
+      'Unknown page ID. Use BuilderPageId.tryFromString for nullable result.',
     );
   }
 
@@ -83,7 +82,10 @@ enum BuilderPageId {
   static BuilderPageId? tryFromJson(String json) => tryFromString(json);
 
   /// Create from JSON
-  /// Throws: [PageNotFoundException] if value is not a known page ID
+  /// 
+  /// @deprecated Use [tryFromJson] instead for safe nullable result.
+  /// 
+  /// Throws: [FormatException] if value is not a known page ID
   static BuilderPageId fromJson(String json) => fromString(json);
   
   /// List of system page IDs that cannot be manually created

@@ -4,9 +4,11 @@
 /// Exception thrown when a page cannot be found
 /// 
 /// Use this exception when:
-/// - Unknown pageKey is passed to BuilderPageId.fromString()
 /// - Page doesn't exist in Firestore  
 /// - Page should fallback to legacy screen (widget fallback)
+/// 
+/// Note: [BuilderPageId.fromString] now throws [FormatException] instead
+/// for unknown pageKeys. Use [BuilderPageId.tryFromString] for nullable result.
 /// 
 /// This exception is specifically for page resolution failures where
 /// the caller should handle by showing a fallback widget.
