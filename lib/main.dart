@@ -50,6 +50,7 @@ import 'src/theme/app_theme.dart';
 import 'src/core/constants.dart';
 import 'src/providers/auth_provider.dart';
 import 'src/providers/restaurant_provider.dart';
+import 'src/providers/theme_providers.dart';
 
 // Builder B3 imports for dynamic pages
 import 'builder/models/models.dart';
@@ -122,11 +123,44 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp.router(
-      title: 'Pizza Deli\'Zza',
-      theme: AppTheme.lightTheme,
-      debugShowCheckedModeBanner: false,
-      routerConfig: _buildRouter(ref),
+    // Watch the theme configuration from Firestore
+    final themeAsync = ref.watch(themeConfigProvider);
+    
+    return themeAsync.when(
+      // Theme loaded successfully - use dynamic theme
+      data: (themeConfig) {
+        final themeData = ref.watch(currentThemeDataProvider(themeConfig));
+        return MaterialApp.router(
+          title: 'Pizza Deli\'Zza',
+          theme: themeData,
+          debugShowCheckedModeBanner: false,
+          routerConfig: _buildRouter(ref),
+        );
+      },
+      // Theme loading - show white splash screen
+      loading: () {
+        return MaterialApp(
+          title: 'Pizza Deli\'Zza',
+          theme: ThemeData.light(),
+          debugShowCheckedModeBanner: false,
+          home: const Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        );
+      },
+      // Theme loading failed - use default static theme
+      error: (error, stack) {
+        print('Error loading theme: $error');
+        return MaterialApp.router(
+          title: 'Pizza Deli\'Zza',
+          theme: AppTheme.lightTheme,
+          debugShowCheckedModeBanner: false,
+          routerConfig: _buildRouter(ref),
+        );
+      },
     );
   }
 

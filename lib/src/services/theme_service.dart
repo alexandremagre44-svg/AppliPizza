@@ -1,45 +1,52 @@
 // lib/src/services/theme_service.dart
-// Service for managing theme configuration in Firestore
+// Service for loading theme configuration from Firestore
 //
-// New Firestore structure:
-// restaurants/{restaurantId}/builder_settings/theme
+// Firestore path: restaurants/{appId}/config/theme
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/theme_config.dart';
-import '../core/firestore_paths.dart';
+import '../providers/restaurant_provider.dart';
 
-/// Service for managing theme configuration
+/// Service for loading theme configuration from Firestore
 /// 
-/// Stores theme configuration in Firestore at:
-/// restaurants/{restaurantId}/builder_settings/theme
+/// Loads theme from: restaurants/{appId}/config/theme
+/// Returns default Delizza theme if document doesn't exist
 class ThemeService {
-  /// Get current theme configuration
-  /// Returns default config if document doesn't exist
-  Future<ThemeConfig> getThemeConfig() async {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String appId;
+
+  ThemeService({required this.appId});
+
+  /// Get the scoped theme document reference
+  /// Path: restaurants/{appId}/config/theme
+  DocumentReference get _themeDoc =>
+      _firestore.collection('restaurants').doc(appId).collection('config').doc('theme');
+
+  /// Load theme configuration from Firestore
+  /// Returns ThemeConfig.defaultConfig() if document doesn't exist
+  Future<ThemeConfig> loadTheme() async {
     try {
-      final doc = await FirestorePaths.themeDoc().get();
+      final doc = await _themeDoc.get();
 
       if (doc.exists && doc.data() != null) {
-        return ThemeConfig.fromMap(doc.data()!);
+        return ThemeConfig.fromMap(doc.data() as Map<String, dynamic>);
       }
       
-      // Return default config if document doesn't exist
+      // Return default Delizza theme if document doesn't exist
       return ThemeConfig.defaultConfig();
     } catch (e) {
-      print('Error getting theme config: $e');
+      print('Error loading theme config: $e');
       return ThemeConfig.defaultConfig();
     }
   }
 
-  /// Update theme configuration
-  Future<void> updateThemeConfig(ThemeConfig config) async {
+  /// Save theme configuration to Firestore
+  Future<void> saveTheme(ThemeConfig config) async {
     try {
-      final updatedConfig = config.copyWith(updatedAt: DateTime.now());
-      
-      await FirestorePaths.themeDoc()
-          .set(updatedConfig.toMap(), SetOptions(merge: true));
+      await _themeDoc.set(config.toMap(), SetOptions(merge: true));
     } catch (e) {
-      print('Error updating theme config: $e');
+      print('Error saving theme config: $e');
       rethrow;
     }
   }
@@ -48,39 +55,26 @@ class ThemeService {
   Future<void> resetToDefaults() async {
     try {
       final defaultConfig = ThemeConfig.defaultConfig();
-      await updateThemeConfig(defaultConfig);
+      await saveTheme(defaultConfig);
     } catch (e) {
       print('Error resetting theme to defaults: $e');
       rethrow;
     }
   }
 
-  /// Initialize theme config if missing
-  Future<void> initIfMissing() async {
-    try {
-      final doc = await FirestorePaths.themeDoc().get();
-
-      if (!doc.exists) {
-        final defaultConfig = ThemeConfig.defaultConfig();
-        await FirestorePaths.themeDoc()
-            .set(defaultConfig.toMap());
-        print('Theme config initialized with defaults');
-      }
-    } catch (e) {
-      print('Error initializing theme config: $e');
-      rethrow;
-    }
-  }
-
   /// Stream for real-time theme updates
-  Stream<ThemeConfig> watchThemeConfig() {
-    return FirestorePaths.themeDoc()
-        .snapshots()
-        .map((snapshot) {
+  Stream<ThemeConfig> watchTheme() {
+    return _themeDoc.snapshots().map((snapshot) {
       if (snapshot.exists && snapshot.data() != null) {
-        return ThemeConfig.fromMap(snapshot.data()!);
+        return ThemeConfig.fromMap(snapshot.data() as Map<String, dynamic>);
       }
       return ThemeConfig.defaultConfig();
     });
   }
 }
+
+/// Provider for ThemeService scoped to the current restaurant
+final themeServiceProvider = Provider<ThemeService>((ref) {
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return ThemeService(appId: appId);
+});

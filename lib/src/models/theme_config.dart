@@ -1,377 +1,172 @@
 // lib/src/models/theme_config.dart
-// Theme configuration model for global app customization
+// Theme configuration model for dynamic Server-Driven UI theme
+//
+// Stores theme configuration loaded from Firestore:
+// restaurants/{appId}/config/theme
 
 import 'package:flutter/material.dart';
 
-/// Configuration for app theme colors
-class ThemeColorsConfig {
-  final Color primary;
-  final Color secondary;
-  final Color background;
-  final Color surface;
-  final Color textPrimary;
-  final Color textSecondary;
-  final Color success;
-  final Color warning;
-  final Color error;
-
-  const ThemeColorsConfig({
-    required this.primary,
-    required this.secondary,
-    required this.background,
-    required this.surface,
-    required this.textPrimary,
-    required this.textSecondary,
-    required this.success,
-    required this.warning,
-    required this.error,
-  });
-
-  factory ThemeColorsConfig.defaultConfig() {
-    return const ThemeColorsConfig(
-      primary: Color(0xFFD32F2F),
-      secondary: Color(0xFF8E4C4C),
-      background: Color(0xFFF5F5F5),
-      surface: Color(0xFFFFFFFF),
-      textPrimary: Color(0xFF323232),
-      textSecondary: Color(0xFF5A5A5A),
-      success: Color(0xFF4CAF50),
-      warning: Color(0xFFFF9800),
-      error: Color(0xFFC62828),
-    );
-  }
-
-  factory ThemeColorsConfig.fromMap(Map<String, dynamic> map) {
-    return ThemeColorsConfig(
-      primary: Color(map['primary'] ?? 0xFFD32F2F),
-      secondary: Color(map['secondary'] ?? 0xFF8E4C4C),
-      background: Color(map['background'] ?? 0xFFF5F5F5),
-      surface: Color(map['surface'] ?? 0xFFFFFFFF),
-      textPrimary: Color(map['textPrimary'] ?? 0xFF323232),
-      textSecondary: Color(map['textSecondary'] ?? 0xFF5A5A5A),
-      success: Color(map['success'] ?? 0xFF4CAF50),
-      warning: Color(map['warning'] ?? 0xFFFF9800),
-      error: Color(map['error'] ?? 0xFFC62828),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'primary': primary.value,
-      'secondary': secondary.value,
-      'background': background.value,
-      'surface': surface.value,
-      'textPrimary': textPrimary.value,
-      'textSecondary': textSecondary.value,
-      'success': success.value,
-      'warning': warning.value,
-      'error': error.value,
-    };
-  }
-
-  ThemeColorsConfig copyWith({
-    Color? primary,
-    Color? secondary,
-    Color? background,
-    Color? surface,
-    Color? textPrimary,
-    Color? textSecondary,
-    Color? success,
-    Color? warning,
-    Color? error,
-  }) {
-    return ThemeColorsConfig(
-      primary: primary ?? this.primary,
-      secondary: secondary ?? this.secondary,
-      background: background ?? this.background,
-      surface: surface ?? this.surface,
-      textPrimary: textPrimary ?? this.textPrimary,
-      textSecondary: textSecondary ?? this.textSecondary,
-      success: success ?? this.success,
-      warning: warning ?? this.warning,
-      error: error ?? this.error,
-    );
-  }
-}
-
-/// Configuration for typography
-class TypographyConfig {
-  final double baseSize;
-  final double scaleFactor;
-  final String fontFamily;
-
-  const TypographyConfig({
-    required this.baseSize,
-    required this.scaleFactor,
-    required this.fontFamily,
-  });
-
-  factory TypographyConfig.defaultConfig() {
-    return const TypographyConfig(
-      baseSize: 14.0,
-      scaleFactor: 1.2,
-      fontFamily: 'Roboto',
-    );
-  }
-
-  factory TypographyConfig.fromMap(Map<String, dynamic> map) {
-    return TypographyConfig(
-      baseSize: (map['baseSize'] ?? 14.0).toDouble(),
-      scaleFactor: (map['scaleFactor'] ?? 1.2).toDouble(),
-      fontFamily: map['fontFamily'] ?? 'Roboto',
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'baseSize': baseSize,
-      'scaleFactor': scaleFactor,
-      'fontFamily': fontFamily,
-    };
-  }
-
-  TypographyConfig copyWith({
-    double? baseSize,
-    double? scaleFactor,
-    String? fontFamily,
-  }) {
-    return TypographyConfig(
-      baseSize: baseSize ?? this.baseSize,
-      scaleFactor: scaleFactor ?? this.scaleFactor,
-      fontFamily: fontFamily ?? this.fontFamily,
-    );
-  }
-}
-
-/// Configuration for border radius
-class RadiusConfig {
-  final double small;
-  final double medium;
-  final double large;
-  final double full;
-
-  const RadiusConfig({
-    required this.small,
-    required this.medium,
-    required this.large,
-    required this.full,
-  });
-
-  factory RadiusConfig.defaultConfig() {
-    return const RadiusConfig(
-      small: 8.0,
-      medium: 12.0,
-      large: 16.0,
-      full: 9999.0,
-    );
-  }
-
-  factory RadiusConfig.fromMap(Map<String, dynamic> map) {
-    return RadiusConfig(
-      small: (map['small'] ?? 8.0).toDouble(),
-      medium: (map['medium'] ?? 12.0).toDouble(),
-      large: (map['large'] ?? 16.0).toDouble(),
-      full: (map['full'] ?? 9999.0).toDouble(),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'small': small,
-      'medium': medium,
-      'large': large,
-      'full': full,
-    };
-  }
-
-  RadiusConfig copyWith({
-    double? small,
-    double? medium,
-    double? large,
-    double? full,
-  }) {
-    return RadiusConfig(
-      small: small ?? this.small,
-      medium: medium ?? this.medium,
-      large: large ?? this.large,
-      full: full ?? this.full,
-    );
-  }
-}
-
-/// Configuration for shadows
-class ShadowsConfig {
-  final double card;
-  final double modal;
-  final double navbar;
-
-  const ShadowsConfig({
-    required this.card,
-    required this.modal,
-    required this.navbar,
-  });
-
-  factory ShadowsConfig.defaultConfig() {
-    return const ShadowsConfig(
-      card: 2.0,
-      modal: 8.0,
-      navbar: 4.0,
-    );
-  }
-
-  factory ShadowsConfig.fromMap(Map<String, dynamic> map) {
-    return ShadowsConfig(
-      card: (map['card'] ?? 2.0).toDouble(),
-      modal: (map['modal'] ?? 8.0).toDouble(),
-      navbar: (map['navbar'] ?? 4.0).toDouble(),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'card': card,
-      'modal': modal,
-      'navbar': navbar,
-    };
-  }
-
-  ShadowsConfig copyWith({
-    double? card,
-    double? modal,
-    double? navbar,
-  }) {
-    return ShadowsConfig(
-      card: card ?? this.card,
-      modal: modal ?? this.modal,
-      navbar: navbar ?? this.navbar,
-    );
-  }
-}
-
-/// Configuration for spacing
-class SpacingConfig {
-  final double paddingSmall;
-  final double paddingMedium;
-  final double paddingLarge;
-
-  const SpacingConfig({
-    required this.paddingSmall,
-    required this.paddingMedium,
-    required this.paddingLarge,
-  });
-
-  factory SpacingConfig.defaultConfig() {
-    return const SpacingConfig(
-      paddingSmall: 8.0,
-      paddingMedium: 16.0,
-      paddingLarge: 24.0,
-    );
-  }
-
-  factory SpacingConfig.fromMap(Map<String, dynamic> map) {
-    return SpacingConfig(
-      paddingSmall: (map['paddingSmall'] ?? 8.0).toDouble(),
-      paddingMedium: (map['paddingMedium'] ?? 16.0).toDouble(),
-      paddingLarge: (map['paddingLarge'] ?? 24.0).toDouble(),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'paddingSmall': paddingSmall,
-      'paddingMedium': paddingMedium,
-      'paddingLarge': paddingLarge,
-    };
-  }
-
-  SpacingConfig copyWith({
-    double? paddingSmall,
-    double? paddingMedium,
-    double? paddingLarge,
-  }) {
-    return SpacingConfig(
-      paddingSmall: paddingSmall ?? this.paddingSmall,
-      paddingMedium: paddingMedium ?? this.paddingMedium,
-      paddingLarge: paddingLarge ?? this.paddingLarge,
-    );
-  }
-}
-
-/// Complete theme configuration model
+/// Theme configuration model for dynamic theming
+/// 
+/// Supports loading theme colors, radius, and fonts from Firestore
+/// Uses hex color strings for easy configuration in Firebase Console
 class ThemeConfig {
-  final ThemeColorsConfig colors;
-  final TypographyConfig typography;
-  final RadiusConfig radius;
-  final ShadowsConfig shadows;
-  final SpacingConfig spacing;
-  final bool darkMode;
-  final DateTime updatedAt;
+  /// Primary color (hex string, e.g., "#D32F2F")
+  final String primaryColor;
+  
+  /// Secondary color (hex string, e.g., "#8E4C4C")
+  final String secondaryColor;
+  
+  /// Default border radius for UI components
+  final double borderRadius;
+  
+  /// Font family name
+  final String fontFamily;
+  
+  /// Additional optional colors
+  final String? backgroundColor;
+  final String? surfaceColor;
+  final String? errorColor;
+  final String? successColor;
+  final String? warningColor;
 
   const ThemeConfig({
-    required this.colors,
-    required this.typography,
-    required this.radius,
-    required this.shadows,
-    required this.spacing,
-    required this.darkMode,
-    required this.updatedAt,
+    required this.primaryColor,
+    required this.secondaryColor,
+    required this.borderRadius,
+    required this.fontFamily,
+    this.backgroundColor,
+    this.surfaceColor,
+    this.errorColor,
+    this.successColor,
+    this.warningColor,
   });
 
+  /// Default Delizza theme (Red/White)
   factory ThemeConfig.defaultConfig() {
-    return ThemeConfig(
-      colors: ThemeColorsConfig.defaultConfig(),
-      typography: TypographyConfig.defaultConfig(),
-      radius: RadiusConfig.defaultConfig(),
-      shadows: ShadowsConfig.defaultConfig(),
-      spacing: SpacingConfig.defaultConfig(),
-      darkMode: false,
-      updatedAt: DateTime.now(),
+    return const ThemeConfig(
+      primaryColor: '#D32F2F',
+      secondaryColor: '#8E4C4C',
+      borderRadius: 12.0,
+      fontFamily: 'Inter',
+      backgroundColor: '#FAFAFA',
+      surfaceColor: '#FFFFFF',
+      errorColor: '#C62828',
+      successColor: '#4CAF50',
+      warningColor: '#FF9800',
     );
   }
 
+  /// Create from Firestore document data
   factory ThemeConfig.fromMap(Map<String, dynamic> map) {
     return ThemeConfig(
-      colors: ThemeColorsConfig.fromMap(map['colors'] ?? {}),
-      typography: TypographyConfig.fromMap(map['typography'] ?? {}),
-      radius: RadiusConfig.fromMap(map['radius'] ?? {}),
-      shadows: ShadowsConfig.fromMap(map['shadows'] ?? {}),
-      spacing: SpacingConfig.fromMap(map['spacing'] ?? {}),
-      darkMode: map['darkMode'] ?? false,
-      updatedAt: map['updatedAt'] != null 
-          ? DateTime.parse(map['updatedAt'])
-          : DateTime.now(),
+      primaryColor: map['primaryColor'] as String? ?? '#D32F2F',
+      secondaryColor: map['secondaryColor'] as String? ?? '#8E4C4C',
+      borderRadius: (map['borderRadius'] as num?)?.toDouble() ?? 12.0,
+      fontFamily: map['fontFamily'] as String? ?? 'Inter',
+      backgroundColor: map['backgroundColor'] as String?,
+      surfaceColor: map['surfaceColor'] as String?,
+      errorColor: map['errorColor'] as String?,
+      successColor: map['successColor'] as String?,
+      warningColor: map['warningColor'] as String?,
     );
   }
 
+  /// Convert to Firestore document data
   Map<String, dynamic> toMap() {
     return {
-      'colors': colors.toMap(),
-      'typography': typography.toMap(),
-      'radius': radius.toMap(),
-      'shadows': shadows.toMap(),
-      'spacing': spacing.toMap(),
-      'darkMode': darkMode,
-      'updatedAt': updatedAt.toIso8601String(),
+      'primaryColor': primaryColor,
+      'secondaryColor': secondaryColor,
+      'borderRadius': borderRadius,
+      'fontFamily': fontFamily,
+      if (backgroundColor != null) 'backgroundColor': backgroundColor,
+      if (surfaceColor != null) 'surfaceColor': surfaceColor,
+      if (errorColor != null) 'errorColor': errorColor,
+      if (successColor != null) 'successColor': successColor,
+      if (warningColor != null) 'warningColor': warningColor,
     };
   }
 
   ThemeConfig copyWith({
-    ThemeColorsConfig? colors,
-    TypographyConfig? typography,
-    RadiusConfig? radius,
-    ShadowsConfig? shadows,
-    SpacingConfig? spacing,
-    bool? darkMode,
-    DateTime? updatedAt,
+    String? primaryColor,
+    String? secondaryColor,
+    double? borderRadius,
+    String? fontFamily,
+    String? backgroundColor,
+    String? surfaceColor,
+    String? errorColor,
+    String? successColor,
+    String? warningColor,
   }) {
     return ThemeConfig(
-      colors: colors ?? this.colors,
-      typography: typography ?? this.typography,
-      radius: radius ?? this.radius,
-      shadows: shadows ?? this.shadows,
-      spacing: spacing ?? this.spacing,
-      darkMode: darkMode ?? this.darkMode,
-      updatedAt: updatedAt ?? this.updatedAt,
+      primaryColor: primaryColor ?? this.primaryColor,
+      secondaryColor: secondaryColor ?? this.secondaryColor,
+      borderRadius: borderRadius ?? this.borderRadius,
+      fontFamily: fontFamily ?? this.fontFamily,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      surfaceColor: surfaceColor ?? this.surfaceColor,
+      errorColor: errorColor ?? this.errorColor,
+      successColor: successColor ?? this.successColor,
+      warningColor: warningColor ?? this.warningColor,
     );
   }
+
+  // ═══════════════════════════════════════════════════════════════
+  // COLOR PARSING HELPERS
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Parse hex color string to Color object
+  /// Supports formats: "#RRGGBB", "#AARRGGBB", "RRGGBB"
+  static Color parseHexColor(String hexString, {Color fallback = Colors.grey}) {
+    try {
+      String hex = hexString.replaceAll('#', '');
+      if (hex.length == 6) {
+        hex = 'FF$hex'; // Add alpha if not present
+      }
+      return Color(int.parse(hex, radix: 16));
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  /// Get primary color as Color object
+  Color get primary => parseHexColor(primaryColor, fallback: const Color(0xFFD32F2F));
+
+  /// Get secondary color as Color object
+  Color get secondary => parseHexColor(secondaryColor, fallback: const Color(0xFF8E4C4C));
+
+  /// Get background color as Color object
+  Color get background => parseHexColor(
+    backgroundColor ?? '#FAFAFA',
+    fallback: const Color(0xFFFAFAFA),
+  );
+
+  /// Get surface color as Color object
+  Color get surface => parseHexColor(
+    surfaceColor ?? '#FFFFFF',
+    fallback: const Color(0xFFFFFFFF),
+  );
+
+  /// Get error color as Color object
+  Color get error => parseHexColor(
+    errorColor ?? '#C62828',
+    fallback: const Color(0xFFC62828),
+  );
+
+  /// Get success color as Color object
+  Color get success => parseHexColor(
+    successColor ?? '#4CAF50',
+    fallback: const Color(0xFF4CAF50),
+  );
+
+  /// Get warning color as Color object
+  Color get warning => parseHexColor(
+    warningColor ?? '#FF9800',
+    fallback: const Color(0xFFFF9800),
+  );
+
+  /// Get border radius as BorderRadius
+  BorderRadius get radiusMedium => BorderRadius.circular(borderRadius);
+  BorderRadius get radiusSmall => BorderRadius.circular(borderRadius * 0.67);
+  BorderRadius get radiusLarge => BorderRadius.circular(borderRadius * 1.33);
 }
