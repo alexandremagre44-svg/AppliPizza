@@ -46,6 +46,10 @@ class BuilderNavigationService {
   /// The pages_system collection defines the navigation structure,
   /// while pages_published provides the actual content for each page.
   /// 
+  /// **Important:** This method checks total page count (active + inactive)
+  /// to decide if auto-init is needed, respecting admin choices to deactivate
+  /// pages like "Menu" or "Cart" without recreating them.
+  /// 
   /// Example:
   /// ```dart
   /// final service = BuilderNavigationService('delizza');
@@ -53,21 +57,28 @@ class BuilderNavigationService {
   /// ```
   Future<List<BuilderPage>> getBottomBarPages() async {
     try {
-      // Step 1: Load current pages from layout service
-      var pages = await _layoutService.getBottomBarPages(appId: appId);
+      // Step 1: Load ALL system pages (active AND inactive)
+      // This ensures we check total page existence, not just active ones
+      final allSystemPages = await _layoutService.loadSystemPages(appId);
       
-      // Step 2: Ensure minimum pages exist (creates defaults if needed)
-      pages = await _ensureMinimumPages(pages);
+      // Step 2: Check if we need to create default pages
+      // Only trigger auto-init if total pages < 2 (not filtered count)
+      // This respects admin choices to deactivate pages
+      // Note: We don't use the return value since we reload fresh data in Step 4
+      if (allSystemPages.length < 2) {
+        await _ensureMinimumPages(allSystemPages);
+      }
       
       // Step 3: Fix empty system pages by injecting default content
       await _pageService.fixEmptySystemPages(appId);
       
-      // Step 4: Reload pages to get fresh content/order after fixes
-      pages = await _layoutService.getBottomBarPages(appId: appId);
+      // Step 4: Reload and filter for active bottomBar pages only
+      // Now apply the isActive filter for the final result
+      final pages = await _layoutService.getBottomBarPages(appId: appId);
       
-      // Log warning if still less than 2 pages
-      if (pages.length < 2) {
-        debugPrint('[BuilderNavigationService] ⚠️ Less than 2 bottomBar pages found after fixes');
+      // Log warning if no active pages (admin may have deactivated all)
+      if (pages.isEmpty) {
+        debugPrint('[BuilderNavigationService] ⚠️ No active bottomBar pages found');
       }
       
       return pages;
