@@ -69,8 +69,8 @@ enum BuilderPageId {
     if (found != null) {
       return found;
     }
-    throw const FormatException(
-      'Unknown page ID. Use BuilderPageId.tryFromString for nullable result.',
+    throw FormatException(
+      'Unknown page ID: $value. Use BuilderPageId.tryFromString for nullable result.',
     );
   }
 
