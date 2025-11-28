@@ -695,14 +695,14 @@ class BuilderLayoutService {
       return false;
     }
     
-    // Primary logic: Use isActive + bottomNavIndex
+    // Primary logic: Check bottomNavIndex (isActive already verified above)
     if (page.bottomNavIndex != null &&
         page.bottomNavIndex! >= 0 &&
         page.bottomNavIndex! <= 4) {
       return true;
     }
 
-    // Fallback for backward compatibility with old schema
+    // Fallback for backward compatibility with old schema (isActive already verified above)
     if (page.displayLocation == 'bottomBar' &&
         page.order >= 0 &&
         page.order <= 4) {

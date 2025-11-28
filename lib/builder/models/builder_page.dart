@@ -309,8 +309,8 @@ class BuilderPage {
               try {
                 final blockData = Map<String, dynamic>.from(item);
                 validBlocks.add(BuilderBlock.fromJson(blockData));
-              } catch (castError) {
-                print('⚠️ Warning: Failed to parse block at index $i after cast: $castError');
+              } catch (parseError) {
+                print('⚠️ Warning: Failed to parse block at index $i after cast: $parseError');
               }
             } else {
               print('⚠️ Warning: Skipping block at index $i - expected Map, got ${item.runtimeType}');

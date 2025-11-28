@@ -3,7 +3,52 @@
 //
 // TODO(builder-b3-safe-parsing) Shared parsing utilities
 
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+/// Helper to safely parse a Map<String, dynamic> config field from Firestore
+/// 
+/// Handles multiple formats:
+/// - Map<String, dynamic>: returned as-is
+/// - Map (with different type params): converted to Map<String, dynamic>
+/// - String: JSON-decoded if valid JSON, otherwise returns empty Map
+/// - null or other types: returns empty Map
+/// 
+/// Example:
+/// ```dart
+/// final config = safeParseConfig(json['config']);
+/// ```
+Map<String, dynamic> safeParseConfig(dynamic value) {
+  if (value is Map<String, dynamic>) {
+    return value;
+  }
+  
+  if (value is Map) {
+    // Handle Map with different type params
+    return Map<String, dynamic>.from(value);
+  }
+  
+  if (value is String) {
+    // Try to decode JSON string
+    try {
+      final decoded = jsonDecode(value);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      } else if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
+      } else {
+        print('⚠️ Warning: Config JSON decoded to non-Map: ${decoded.runtimeType}');
+        return {};
+      }
+    } catch (e) {
+      print('⚠️ Warning: Failed to decode config from JSON string: $e');
+      return {};
+    }
+  }
+  
+  // null or other type - return empty Map
+  return {};
+}
 
 /// Helper to safely parse DateTime from Firestore
 /// 

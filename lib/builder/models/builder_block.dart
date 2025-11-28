@@ -1,7 +1,6 @@
 // lib/builder/models/builder_block.dart
 // Base block model for Builder B3 system
 
-import 'dart:convert';
 import 'builder_enums.dart';
 import '../utils/firestore_parsing_helpers.dart';
 
@@ -118,34 +117,8 @@ class BuilderBlock {
       print('⚠️ Warning: Block missing id field, generated fallback: $blockId');
     }
     
-    // Parse config safely: handle Map, String (JSON), or null
-    final configValue = json['config'];
-    Map<String, dynamic> parsedConfig;
-    if (configValue is Map<String, dynamic>) {
-      parsedConfig = configValue;
-    } else if (configValue is Map) {
-      // Handle Map with different type params
-      parsedConfig = Map<String, dynamic>.from(configValue);
-    } else if (configValue is String) {
-      // Try to decode JSON string
-      try {
-        final decoded = jsonDecode(configValue);
-        if (decoded is Map<String, dynamic>) {
-          parsedConfig = decoded;
-        } else if (decoded is Map) {
-          parsedConfig = Map<String, dynamic>.from(decoded);
-        } else {
-          print('⚠️ Warning: Block config JSON decoded to non-Map: ${decoded.runtimeType}');
-          parsedConfig = {};
-        }
-      } catch (e) {
-        print('⚠️ Warning: Failed to decode block config from JSON string: $e');
-        parsedConfig = {};
-      }
-    } else {
-      // null or other type
-      parsedConfig = {};
-    }
+    // Parse config safely using shared utility
+    final parsedConfig = safeParseConfig(json['config']);
     
     return BuilderBlock(
       id: blockId,
@@ -319,34 +292,8 @@ class SystemBlock extends BuilderBlock {
   /// - Missing or null 'id' field (generates fallback ID)
   /// - Config as Map, JSON-encoded String, or null
   factory SystemBlock.fromJson(Map<String, dynamic> json) {
-    // Parse config safely: handle Map, String (JSON), or null
-    final configValue = json['config'];
-    Map<String, dynamic> config;
-    if (configValue is Map<String, dynamic>) {
-      config = configValue;
-    } else if (configValue is Map) {
-      // Handle Map with different type params
-      config = Map<String, dynamic>.from(configValue);
-    } else if (configValue is String) {
-      // Try to decode JSON string
-      try {
-        final decoded = jsonDecode(configValue);
-        if (decoded is Map<String, dynamic>) {
-          config = decoded;
-        } else if (decoded is Map) {
-          config = Map<String, dynamic>.from(decoded);
-        } else {
-          print('⚠️ Warning: SystemBlock config JSON decoded to non-Map: ${decoded.runtimeType}');
-          config = {};
-        }
-      } catch (e) {
-        print('⚠️ Warning: Failed to decode SystemBlock config from JSON string: $e');
-        config = {};
-      }
-    } else {
-      // null or other type
-      config = {};
-    }
+    // Parse config safely using shared utility
+    final config = safeParseConfig(json['config']);
     
     // TODO(builder-b3-safe-parsing) Handle missing 'id' gracefully
     final String blockId = json['id'] as String? ?? 
