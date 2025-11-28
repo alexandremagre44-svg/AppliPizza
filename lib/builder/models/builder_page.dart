@@ -362,12 +362,17 @@ class BuilderPage {
     
     // Parse draftLayout (new field, fallback to blocks for backward compatibility)
     final draftLayoutRaw = json['draftLayout'];
-    final draftLayout = draftLayoutRaw != null 
+    var draftLayout = draftLayoutRaw != null 
         ? _safeLayoutParse(draftLayoutRaw)
         : blocks;
     
     // Parse publishedLayout (new field)
     final publishedLayout = _safeLayoutParse(json['publishedLayout']);
+    
+    // Fix 'Ghost Content': If draft is empty but published has content, sync them to avoid blank editor
+    if (draftLayout.isEmpty && publishedLayout.isNotEmpty) {
+      draftLayout = List<BuilderBlock>.from(publishedLayout);
+    }
     
     // TODO(builder-b3-safe-parsing) Parse modules list safely - skip non-string items
     final List<String> modules = [];
