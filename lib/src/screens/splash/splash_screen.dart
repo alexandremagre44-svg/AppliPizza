@@ -1,17 +1,20 @@
 // lib/src/screens/splash/splash_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/restaurant_provider.dart';
+import '../../../builder/services/builder_navigation_service.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -41,12 +44,47 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     
     _controller.forward();
     
-    // Navigate to login after animation
+    // Navigate using smart routing after animation
     Future.delayed(const Duration(milliseconds: 2500), () {
+      if (mounted) {
+        _handleSmartNavigation();
+      }
+    });
+  }
+
+  /// Smart navigation logic to prevent navigating to disabled pages
+  Future<void> _handleSmartNavigation() async {
+    // Check authentication state
+    final auth = ref.read(authProvider);
+    
+    if (!auth.isLoggedIn) {
+      // Not logged in - go to login page
       if (mounted) {
         context.go('/login');
       }
-    });
+      return;
+    }
+    
+    // User is logged in - determine the best page to navigate to
+    try {
+      final appId = ref.read(currentRestaurantProvider).id;
+      final pages = await BuilderNavigationService(appId).getBottomBarPages();
+      
+      if (!mounted) return;
+      
+      if (pages.isNotEmpty) {
+        // Navigate to the first available page's route
+        context.go(pages.first.route);
+      } else {
+        // Fallback: no active pages found (rare case)
+        context.go('/home');
+      }
+    } catch (e) {
+      // Error fetching pages - fallback to home
+      if (mounted) {
+        context.go('/home');
+      }
+    }
   }
 
   @override
@@ -57,11 +95,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    // Get restaurant name dynamically for de-branding
+    final restaurantName = ref.read(currentRestaurantProvider).name;
+    // Use theme's primary color instead of hardcoded AppColors.primaryRed
+    final primaryColor = Theme.of(context).primaryColor;
+    
     return Scaffold(
-      // refactor splash screen → app_theme standard (solid red, no gradient)
+      // refactor splash screen → app_theme standard (solid color, no gradient)
       body: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.primaryRed,
+        decoration: BoxDecoration(
+          color: primaryColor,
         ),
         child: Center(
           child: FadeTransition(
@@ -86,17 +129,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         ),
                       ],
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.local_pizza,
                       size: 90,
-                      color: AppColors.primaryRed,
+                      color: primaryColor,
                     ),
                   ),
                   const SizedBox(height: 40),
-                  // App Name with shadow
-                  const Text(
-                    'Pizza Deli\'Zza',
-                    style: TextStyle(
+                  // App Name with shadow - dynamically uses restaurant name
+                  Text(
+                    restaurantName,
+                    style: const TextStyle(
                       fontSize: 42,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
