@@ -2,6 +2,7 @@
 // Base block model for Builder B3 system
 
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'builder_enums.dart';
 import '../utils/firestore_parsing_helpers.dart';
 
@@ -104,11 +105,12 @@ class BuilderBlock {
 
   /// Create from Firestore JSON
   /// 
-  /// This method is self-contained and crash-proof:
+  /// FIX B3-LAYOUT-PARSE: Enhanced with better logging and field validation
   /// - Handles Timestamp, String, int, or null for createdAt/updatedAt
   /// - Handles missing or null 'id' field (generates fallback ID)
   /// - Handles missing or null 'type' field (defaults to 'text')
   /// - Handles Config as Map, JSON-encoded String, or null
+  /// - Validates required fields: id, type, config, isActive, order
   /// - Never throws - catches all parsing errors to prevent 'Ghost Block' crashes
   factory BuilderBlock.fromJson(Map<String, dynamic> json) {
     // Self-contained config parsing - bulletproof against nested maps
@@ -120,26 +122,46 @@ class BuilderBlock {
       } else if (raw is String) {
         configMap = Map<String, dynamic>.from(jsonDecode(raw));
       }
-    } catch (e) {
-      print('⚠️ Config parsing error: $e');
+    } catch (e, stack) {
+      debugPrint('❌ [BuilderBlock.fromJson] Config parsing FAILED: $e');
+      debugPrint('$stack');
       // Do not throw, keep empty configMap
     }
     
     try {
-      // Handle missing 'id' gracefully
-      final String blockId = json['id'] as String? ?? 
+      // FIX B3-LAYOUT-PARSE: Validate and log missing required fields
+      final String? rawId = json['id'] as String?;
+      final String? rawType = json['type'] as String?;
+      final int? rawOrder = json['order'] as int?;
+      final bool? rawIsActive = json['isActive'] as bool?;
+      
+      // Generate fallback ID if missing
+      final String blockId = rawId ?? 
           'block_${DateTime.now().millisecondsSinceEpoch}_${json.hashCode.abs()}';
       
-      if (json['id'] == null) {
-        print('⚠️ Warning: Block missing id field, generated fallback: $blockId');
+      // Log warnings for missing fields
+      if (rawId == null) {
+        debugPrint('⚠️ [BuilderBlock.fromJson] Block missing id field, generated fallback: $blockId');
+      }
+      if (rawType == null) {
+        debugPrint('⚠️ [BuilderBlock.fromJson] Block $blockId missing type field, defaulting to "text"');
+      }
+      if (rawOrder == null) {
+        debugPrint('⚠️ [BuilderBlock.fromJson] Block $blockId missing order field, defaulting to 0');
+      }
+      if (rawIsActive == null) {
+        debugPrint('ℹ️ [BuilderBlock.fromJson] Block $blockId missing isActive field, defaulting to true');
+      }
+      if (configMap.isEmpty && json['config'] != null) {
+        debugPrint('⚠️ [BuilderBlock.fromJson] Block $blockId has config but parsing returned empty');
       }
       
       return BuilderBlock(
         id: blockId,
-        type: BlockType.fromJson(json['type'] as String? ?? 'text'),
-        order: json['order'] as int? ?? 0,
+        type: BlockType.fromJson(rawType ?? 'text'),
+        order: rawOrder ?? 0,
         config: configMap,
-        isActive: json['isActive'] as bool? ?? true,
+        isActive: rawIsActive ?? true,
         visibility: BlockVisibility.fromJson(
           json['visibility'] as String? ?? 'visible',
         ),
@@ -148,9 +170,12 @@ class BuilderBlock {
         createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
         updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
       );
-    } catch (e) {
-      // Log warning but return a valid Block with empty config to prevent crashes
-      print('⚠️ Warning: Error parsing block, returning fallback block: $e');
+    } catch (e, stack) {
+      // FIX B3-LAYOUT-PARSE: Log full stack trace, never swallow errors silently
+      debugPrint('❌ [BuilderBlock.fromJson] Block parse FAILED: $e');
+      debugPrint('$stack');
+      
+      // Return a valid Block with empty config to prevent crashes
       final fallbackId = 'block_fallback_${DateTime.now().millisecondsSinceEpoch}';
       return BuilderBlock(
         id: fallbackId,
@@ -346,7 +371,7 @@ class SystemBlock extends BuilderBlock {
 
   /// Create from Firestore JSON
   /// 
-  /// This method is self-contained and crash-proof:
+  /// FIX B3-LAYOUT-PARSE: Enhanced with better logging and field validation
   /// - Handles Timestamp, String, int, or null for createdAt/updatedAt
   /// - Handles missing or null 'id' field (generates fallback ID)
   /// - Handles Config as Map, JSON-encoded String, or null
@@ -361,8 +386,9 @@ class SystemBlock extends BuilderBlock {
       } else if (raw is String) {
         configMap = Map<String, dynamic>.from(jsonDecode(raw));
       }
-    } catch (e) {
-      print('⚠️ Config parsing error: $e');
+    } catch (e, stack) {
+      debugPrint('❌ [SystemBlock.fromJson] Config parsing FAILED: $e');
+      debugPrint('$stack');
       // Do not throw, keep empty configMap
     }
     
@@ -372,12 +398,17 @@ class SystemBlock extends BuilderBlock {
           'sysblock_${DateTime.now().millisecondsSinceEpoch}_${json.hashCode.abs()}';
       
       if (json['id'] == null) {
-        print('⚠️ Warning: SystemBlock missing id field, generated fallback: $blockId');
+        debugPrint('⚠️ [SystemBlock.fromJson] SystemBlock missing id field, generated fallback: $blockId');
+      }
+      
+      final moduleType = configMap['moduleType'] as String? ?? 'unknown';
+      if (moduleType == 'unknown') {
+        debugPrint('⚠️ [SystemBlock.fromJson] SystemBlock $blockId missing moduleType, defaulting to "unknown"');
       }
       
       return SystemBlock(
         id: blockId,
-        moduleType: configMap['moduleType'] as String? ?? 'unknown',
+        moduleType: moduleType,
         order: json['order'] as int? ?? 0,
         config: configMap,
         isActive: json['isActive'] as bool? ?? true,
@@ -389,9 +420,11 @@ class SystemBlock extends BuilderBlock {
         createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
         updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
       );
-    } catch (e) {
-      // Log warning but return a valid SystemBlock with empty config to prevent crashes
-      print('⚠️ Warning: Error parsing SystemBlock, returning fallback block: $e');
+    } catch (e, stack) {
+      // FIX B3-LAYOUT-PARSE: Log full stack trace, never swallow errors silently
+      debugPrint('❌ [SystemBlock.fromJson] Block parse FAILED: $e');
+      debugPrint('$stack');
+      
       final fallbackId = 'sysblock_fallback_${DateTime.now().millisecondsSinceEpoch}';
       return SystemBlock(
         id: fallbackId,

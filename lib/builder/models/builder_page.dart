@@ -281,19 +281,60 @@ class BuilderPage {
 
   /// Helper to safely parse layout field from Firestore
   /// 
-  /// TODO(builder-b3-safe-parsing) Handles:
+  /// FIX B3-LAYOUT-PARSE: Enhanced to support multiple Firestore formats:
   /// - Null values → empty list
+  /// - List<dynamic> → parse each block individually
+  /// - Map with numeric keys ("0", "1", "2") → reconstruct as list (Firestore array format)
+  /// - Map with non-numeric keys → ignore (not a layout)
   /// - Legacy string values like "none" → empty list
-  /// - List of blocks → parses each individually, skipping malformed ones
-  /// - Individual block parsing errors → logs warning and skips block
-  /// - Any unexpected error → returns valid blocks parsed so far, never crashes
+  /// 
+  /// Never returns silently - always logs issues.
+  /// Never swallows errors in try/catch - logs full stack trace.
   static List<BuilderBlock> _safeLayoutParse(dynamic value) {
-    // If null, return empty list
-    if (value == null) return [];
+    // If null, return empty list (this is expected for new pages)
+    if (value == null) {
+      debugPrint('ℹ️ [_safeLayoutParse] value is null, returning empty list');
+      return [];
+    }
+    
+    // FIX B3-LAYOUT-PARSE: Support Map with numeric keys (Firestore array format)
+    // Firestore sometimes stores arrays as {0: {...}, 1: {...}, 2: {...}}
+    if (value is Map) {
+      final mapKeys = value.keys.toList();
+      
+      // Check if all keys are numeric strings (Firestore array format)
+      final numericKeys = mapKeys.where((k) => k is String && int.tryParse(k) != null).toList();
+      
+      if (numericKeys.isNotEmpty && numericKeys.length == mapKeys.length) {
+        // All keys are numeric - this is a Firestore array stored as Map
+        debugPrint('📋 [_safeLayoutParse] Detected Map with ${numericKeys.length} numeric keys, converting to List');
+        
+        // Sort keys numerically and reconstruct as list
+        numericKeys.sort((a, b) => int.parse(a as String).compareTo(int.parse(b as String)));
+        
+        final List<dynamic> reconstructedList = [];
+        for (final key in numericKeys) {
+          reconstructedList.add(value[key]);
+        }
+        
+        // Recursively call with the reconstructed list
+        return _safeLayoutParse(reconstructedList);
+      } else if (mapKeys.isNotEmpty) {
+        // Map with non-numeric keys - not a layout, log and return empty
+        debugPrint('❌ [_safeLayoutParse] Map has non-numeric keys (${mapKeys.take(3).join(", ")}...), not a valid layout format');
+        return [];
+      } else {
+        // Empty map
+        debugPrint('ℹ️ [_safeLayoutParse] Empty Map, returning empty list');
+        return [];
+      }
+    }
     
     // If already a List, parse each block individually
     if (value is List<dynamic>) {
       final validBlocks = <BuilderBlock>[];
+      
+      debugPrint('📋 [_safeLayoutParse] Parsing List with ${value.length} items');
       
       for (int i = 0; i < value.length; i++) {
         try {
@@ -301,7 +342,7 @@ class BuilderPage {
           
           // Skip null items
           if (item == null) {
-            print('⚠️ Warning: Skipping null block at index $i');
+            debugPrint('⚠️ [_safeLayoutParse] Skipping null block at index $i');
             continue;
           }
           
@@ -312,34 +353,37 @@ class BuilderPage {
               try {
                 final blockData = Map<String, dynamic>.from(item);
                 validBlocks.add(BuilderBlock.fromJson(blockData));
-              } catch (parseError) {
-                print('⚠️ Warning: Failed to parse block at index $i after cast: $parseError');
+              } catch (parseError, stack) {
+                debugPrint('❌ [_safeLayoutParse] Block parse FAILED at index $i after cast: $parseError');
+                debugPrint('$stack');
               }
             } else {
-              print('⚠️ Warning: Skipping block at index $i - expected Map, got ${item.runtimeType}');
+              debugPrint('⚠️ [_safeLayoutParse] Skipping block at index $i - expected Map, got ${item.runtimeType}');
             }
             continue;
           }
           
           // Parse the block
           validBlocks.add(BuilderBlock.fromJson(item));
-        } catch (e, stackTrace) {
+        } catch (e, stack) {
           // Catch ALL exceptions during block parsing - skip bad block, keep others
-          print('⚠️ Warning: Skipping malformed block at index $i. Error: $e');
-          print('  Stack trace: $stackTrace');
+          // FIX: Never swallow errors silently - always log full stack trace
+          debugPrint('❌ [_safeLayoutParse] Block parse FAILED at index $i: $e');
+          debugPrint('$stack');
           continue;
         }
       }
       
+      debugPrint('✅ [_safeLayoutParse] Successfully parsed ${validBlocks.length}/${value.length} blocks');
       return validBlocks;
     }
     
     // For any other type (String like "none", etc.), return empty list
     // This handles legacy data where draftLayout/publishedLayout might be stored as strings
     if (value is String) {
-      print('⚠️ Legacy string value found in layout field: "$value". Returning empty list.');
+      debugPrint('⚠️ [_safeLayoutParse] Legacy string value found: "$value". Returning empty list.');
     } else {
-      print('⚠️ Warning: Unexpected layout field type: ${value.runtimeType}. Returning empty list.');
+      debugPrint('❌ [_safeLayoutParse] Unsupported format: ${value.runtimeType}. Returning empty list.');
     }
     return [];
   }
@@ -410,40 +454,43 @@ class BuilderPage {
     }
     
     if (legacySource.isNotEmpty && legacySource != 'blocks') {
-      // Using assert for debug-only logging to avoid production overhead
-      assert(() {
-        print('📋 [B3-LAYOUT-MIGRATION] Found ${bestLegacyBlocks.length} blocks in $legacySource for pageKey: $pageKey');
-        return true;
-      }());
+      // FIX B3-LAYOUT-PARSE: Use debugPrint for consistent logging
+      debugPrint('📋 [B3-LAYOUT-MIGRATION] Found ${bestLegacyBlocks.length} blocks in $legacySource for pageKey: $pageKey');
     }
     
-    // Parse draftLayout (new field, fallback to best legacy blocks for backward compatibility)
+    // FIX B3-LAYOUT-PARSE: Enhanced fallback chain with proper logging
+    // Priority: draftLayout → publishedLayout → blocks (legacy) → empty
     final draftLayoutRaw = json['draftLayout'];
     var draftLayout = draftLayoutRaw != null 
         ? _safeLayoutParse(draftLayoutRaw)
-        : bestLegacyBlocks;
+        : <BuilderBlock>[];
     
     // Parse publishedLayout (new field)
     final publishedLayout = _safeLayoutParse(json['publishedLayout']);
     
-    // FIX B3-LAYOUT-MAPPING: Ghost Content fix with extended fallback chain
-    // If draft is empty but published has content, sync them to avoid blank editor
+    // FIX B3-LAYOUT-PARSE: Enhanced fallback chain
+    // 1. If draftLayout is empty, try publishedLayout
+    // 2. If publishedLayout is also empty, try legacy blocks
+    // 3. Log which fallback was used
+    String usedFallback = '';
+    
     if (draftLayout.isEmpty && publishedLayout.isNotEmpty) {
+      // Fallback 1: Use publishedLayout
       draftLayout = List<BuilderBlock>.from(publishedLayout);
-      assert(() {
-        print('📋 [B3-LAYOUT-MAPPING] Synced publishedLayout (${publishedLayout.length} blocks) to draftLayout for pageKey: $pageKey');
-        return true;
-      }());
+      usedFallback = 'publishedLayout';
+      debugPrint('ℹ️ [B3-LAYOUT-PARSE] Using fallback layout (published) for pageKey: $pageKey - ${publishedLayout.length} blocks');
     } else if (draftLayout.isEmpty && bestLegacyBlocks.isNotEmpty) {
-      // Fallback for legacy data: if both draft and published are empty but legacy field has content
+      // Fallback 2: Use legacy blocks
       draftLayout = List<BuilderBlock>.from(bestLegacyBlocks);
-      assert(() {
-        print('📋 [B3-LAYOUT-MAPPING] Migrated $legacySource (${bestLegacyBlocks.length} blocks) to draftLayout for pageKey: $pageKey');
-        return true;
-      }());
+      usedFallback = legacySource;
+      debugPrint('ℹ️ [B3-LAYOUT-PARSE] Using fallback layout ($legacySource) for pageKey: $pageKey - ${bestLegacyBlocks.length} blocks');
+    } else if (draftLayout.isNotEmpty) {
+      debugPrint('✅ [B3-LAYOUT-PARSE] draftLayout loaded for pageKey: $pageKey - ${draftLayout.length} blocks');
+    } else {
+      debugPrint('⚠️ [B3-LAYOUT-PARSE] No layout found for pageKey: $pageKey - page will be empty');
     }
     
-    // TODO(builder-b3-safe-parsing) Parse modules list safely - skip non-string items
+    // Parse modules list safely - skip non-string items
     final List<String> modules = [];
     final rawModules = json['modules'];
     if (rawModules is List<dynamic>) {
@@ -451,7 +498,7 @@ class BuilderPage {
         if (m is String) {
           modules.add(m);
         } else if (m != null) {
-          print('⚠️ Warning: Skipping non-string module value: $m (${m.runtimeType})');
+          debugPrint('⚠️ [B3-LAYOUT-PARSE] Skipping non-string module value: $m (${m.runtimeType})');
         }
       }
     }
