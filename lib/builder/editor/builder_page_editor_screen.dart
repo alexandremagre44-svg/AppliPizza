@@ -708,22 +708,18 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   /// Update navigation parameters using BuilderPageService
+  /// 
+  /// FIX M1: Handles both system pages (with pageId) and custom pages (with pageKey)
+  /// Custom pages no longer require a BuilderPageId enum to be modified.
   Future<void> _updateNavigationParams({bool? isActive, int? bottomNavIndex}) async {
     if (_page == null) return;
     
-    // Ensure we have a valid pageId
-    final pageId = _page!.pageId ?? _page!.systemId;
-    if (pageId == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Impossible de modifier une page personnalisée sans pageId'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      return;
-    }
+    // FIX M1: Use pageKey for all pages (custom and system)
+    // pageKey is ALWAYS non-null, unlike pageId/systemId which are null for custom pages
+    final pageKey = _page!.pageKey;
+    
+    // Determine if this is a system page (has a valid systemId)
+    final systemPageId = _page!.systemId ?? _page!.pageId;
     
     // Store old values for potential revert
     final oldIsActive = _page!.isActive;
@@ -747,17 +743,50 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     }
     
     try {
-      // Update via service
-      final updatedPage = await _pageService.updatePageNavigation(
-        pageId: pageId,
-        appId: widget.appId,
-        isActive: finalIsActive,
-        bottomNavIndex: finalIsActive ? finalBottomNavIndex : null,
-      );
+      BuilderPage updatedPage;
+      
+      // FIX M1: For system pages, use the enum-based method
+      // For custom pages, use pageKey-based approach
+      if (systemPageId != null) {
+        // System page: use existing service method
+        updatedPage = await _pageService.updatePageNavigation(
+          pageId: systemPageId,
+          appId: widget.appId,
+          isActive: finalIsActive,
+          bottomNavIndex: finalIsActive ? finalBottomNavIndex : null,
+        );
+      } else {
+        // FIX M1: Custom page: update via layout service directly using pageKey
+        // This is the key fix - custom pages work without requiring a BuilderPageId enum
+        final displayLocation = finalIsActive ? 'bottomBar' : 'hidden';
+        final finalOrder = finalIsActive ? finalBottomNavIndex : 999;
+        final finalNavIndex = finalIsActive ? finalBottomNavIndex : null;
+        
+        updatedPage = _page!.copyWith(
+          isActive: finalIsActive,
+          bottomNavIndex: finalNavIndex,
+          displayLocation: displayLocation,
+          order: finalOrder,
+          updatedAt: DateTime.now(),
+        );
+        
+        // Save to both draft and published
+        await _service.saveDraft(updatedPage.copyWith(isDraft: true));
+        
+        if (await _service.hasPublished(widget.appId, pageKey)) {
+          await _service.publishPage(
+            updatedPage,
+            userId: 'editor',
+            shouldDeleteDraft: false,
+          );
+        }
+        
+        debugPrint('[BuilderPageEditorScreen] ✅ Updated custom page navigation: $pageKey');
+      }
       
       setState(() {
         _page = updatedPage;
-        _hasChanges = false; // Already saved by service
+        _hasChanges = false; // Already saved
       });
       
       // Check for duplicates after update
