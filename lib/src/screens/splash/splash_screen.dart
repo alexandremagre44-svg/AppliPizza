@@ -52,7 +52,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
     });
   }
 
-  /// Smart navigation logic to prevent navigating to disabled pages
+  /// Smart navigation logic to prevent navigating to disabled pages.
+  /// 
+  /// Navigation decision flow:
+  /// 1. Check auth state - if not logged in, navigate to '/login'
+  /// 2. If logged in, fetch enabled bottom bar pages from Firestore
+  /// 3. If pages exist and first page has a valid route, navigate there
+  /// 4. Fallback to '/home' if no active pages or on error
   Future<void> _handleSmartNavigation() async {
     // Check authentication state
     final auth = ref.read(authProvider);
@@ -73,8 +79,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
       if (!mounted) return;
       
       if (pages.isNotEmpty) {
-        // Navigate to the first available page's route
-        context.go(pages.first.route);
+        // Validate the route before navigation
+        final firstRoute = pages.first.route;
+        if (firstRoute.isNotEmpty && firstRoute.startsWith('/')) {
+          // Navigate to the first available page's route
+          context.go(firstRoute);
+        } else {
+          // Invalid route format - fallback to home
+          context.go('/home');
+        }
       } else {
         // Fallback: no active pages found (rare case)
         context.go('/home');
@@ -96,7 +109,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     // Get restaurant name dynamically for de-branding
-    final restaurantName = ref.read(currentRestaurantProvider).name;
+    // Using ref.watch to ensure UI rebuilds if restaurant config changes
+    final restaurantName = ref.watch(currentRestaurantProvider).name;
     // Use theme's primary color instead of hardcoded AppColors.primaryRed
     final primaryColor = Theme.of(context).primaryColor;
     
