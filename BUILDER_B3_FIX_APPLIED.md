@@ -265,12 +265,176 @@ After applying these fixes, verify:
 
 ---
 
+## 4️⃣ FIX PAGES FANTÔMES / IDS / ROUTES / DRAFT-PUBLISHED
+
+**Date:** 2025-11-29  
+**Based on:** User feedback about ghost pages and draft/published desync
+
+### Problem Summary
+
+Users reported:
+1. **Ghost pages**: Client shows correct content, Builder shows empty/default template
+2. **Draft/Published desync**: Editor loading wrong data despite Firestore having correct content
+3. **Empty publish overwrites**: Publishing empty layouts was silently replacing real content
+
+### Root Cause Analysis
+
+The `loadDraft()` method wasn't robust enough:
+- Only checked `draftLayout` being non-empty, not `blocks` (legacy field)
+- Self-heal from published only worked for `publishedLayout`, not `blocks`
+- No migration from legacy `blocks` to new `draftLayout` field
+
+### Solution Applied
+
+#### 4.1 Enhanced `loadDraft()` with Robust Self-Healing
+
+**File:** `lib/builder/services/builder_layout_service.dart`
+
+**Changes:**
+```dart
+Future<BuilderPage?> loadDraft(String appId, dynamic pageId) async {
+  // Priority order:
+  // 1. If draft exists with draftLayout → use it
+  // 2. If draft exists with blocks but empty draftLayout → migrate blocks to draftLayout
+  // 3. If published exists with publishedLayout → create draft from it (self-heal)
+  // 4. If published exists with blocks → create draft from blocks
+  // 5. Otherwise → return empty draft or null
+  
+  // Detailed logging for every case
+  debugPrint('📖 [loadDraft] Loading draft for appId=$appId, pageId=$pageIdStr');
+  
+  // Case 1b: Migrate legacy blocks to draftLayout
+  if (draftPage.blocks.isNotEmpty) {
+    debugPrint('📋 [loadDraft] Migrating ${draftPage.blocks.length} legacy blocks to draftLayout');
+    final migratedPage = draftPage.copyWith(
+      draftLayout: draftPage.blocks.toList(),
+      hasUnpublishedChanges: true,
+    );
+    await saveDraft(migratedPage);
+    return migratedPage;
+  }
+  // ... more cases
+}
+```
+
+#### 4.2 Safe Publication with Empty Layout Protection
+
+**File:** `lib/builder/services/builder_layout_service.dart`
+
+**Changes:**
+```dart
+Future<void> publishPage(
+  BuilderPage page, {
+  required String userId,
+  bool shouldDeleteDraft = false,
+  bool allowEmptyPublish = false, // NEW: explicit flag for empty publish
+}) async {
+  // SAFETY CHECK: Prevent accidental empty publish
+  if (!allowEmptyPublish && page.draftLayout.isEmpty) {
+    final existingPublished = await loadPublished(page.appId, pageKey);
+    if (existingPublished != null && existingPublished.publishedLayout.isNotEmpty) {
+      throw StateError(
+        'Cannot publish empty layout - would overwrite existing content. '
+        'Set allowEmptyPublish=true to force empty publish.'
+      );
+    }
+  }
+  // ... rest of method
+}
+```
+
+#### 4.3 Enhanced Editor Loading with Debug Logs
+
+**File:** `lib/builder/editor/builder_page_editor_screen.dart`
+
+**Changes:**
+```dart
+Future<void> _loadPage() async {
+  debugPrint('📖 [EditorScreen] Loading page: $pageIdStr (appId: ${widget.appId})');
+  
+  if (page != null) {
+    debugPrint('📖 [EditorScreen] Page loaded: ${page.name}');
+    debugPrint('   - pageKey: ${page.pageKey}');
+    debugPrint('   - systemId: ${page.systemId?.value ?? 'null (custom page)'}');
+    debugPrint('   - route: ${page.route}');
+    debugPrint('   - draftLayout: ${page.draftLayout.length} blocks');
+    debugPrint('   - publishedLayout: ${page.publishedLayout.length} blocks');
+    debugPrint('   - blocks (legacy): ${page.blocks.length} blocks');
+    debugPrint('   - isSystemPage: ${page.isSystemPage}');
+  }
+  // ... rest of method
+}
+```
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `lib/builder/services/builder_layout_service.dart` | Enhanced `loadDraft()` with robust self-healing; Added `allowEmptyPublish` flag to `publishPage()`; Enhanced logging in `saveDraft()` and `loadPublished()` |
+| `lib/builder/editor/builder_page_editor_screen.dart` | Enhanced `_loadPage()` with comprehensive debug logging |
+
+### ID and Route Canonical Mapping
+
+The following canonical mapping is enforced:
+
+| Page Type | BuilderPageId | pageId (Firestore) | Firestore Doc ID | route |
+|-----------|---------------|-------------------|------------------|-------|
+| HOME | `BuilderPageId.home` | `"home"` | `pages_draft/home` | `/home` |
+| MENU | `BuilderPageId.menu` | `"menu"` | `pages_draft/menu` | `/menu` |
+| CART | `BuilderPageId.cart` | `"cart"` | `pages_draft/cart` | `/cart` |
+| PROFILE | `BuilderPageId.profile` | `"profile"` | `pages_draft/profile` | `/profile` |
+| CUSTOM | `null` | `"promo_noel"` | `pages_draft/promo_noel` | `/page/promo_noel` |
+
+### How the Fix Resolves Each Issue
+
+| Issue | Resolution |
+|-------|------------|
+| Ghost pages | Self-heal now handles both `publishedLayout` AND legacy `blocks` field |
+| Empty editor | Migration from `blocks` to `draftLayout` is now automatic |
+| Wrong content | Priority loading order ensures correct source is always used |
+| Empty publish overwrites | New `allowEmptyPublish` flag prevents accidental data loss |
+
+---
+
+## Testing Checklist - Pages Fantômes Fix
+
+After applying these fixes, verify:
+
+### Draft/Published Sync
+- [ ] **Open Home in Builder** → shows same content as client sees
+- [ ] **Open Menu in Builder** → shows same content as client sees
+- [ ] **Edit + Publish + Reopen** → same edited content persists
+- [ ] **Empty draft + Published exists** → editor loads from published (self-heal)
+
+### Detailed Logging
+- [ ] Console shows `📖 [loadDraft]` when loading a page
+- [ ] Console shows `💾 [saveDraft]` when saving
+- [ ] Console shows `📤 [publishPage]` when publishing
+- [ ] Console shows `✅ [SELF-HEAL]` if draft is created from published
+
+### System Page Routes
+- [ ] /home → loads system home page
+- [ ] /menu → loads system menu page
+- [ ] /cart → loads system cart page
+- [ ] /profile → loads system profile page
+
+### Custom Page Routes
+- [ ] /page/{custom_key} → loads custom page correctly
+- [ ] Creating "Menu" custom → creates `custom_menu_XXXXX` (not `/menu`)
+
+### Empty Publish Protection
+- [ ] Publishing empty layout on page with content → shows error (blocked)
+- [ ] Publishing empty layout with `allowEmptyPublish=true` → succeeds
+
+---
+
 ## Security Summary
 
 No security vulnerabilities were introduced by these changes. The fixes are defensive in nature:
 - Collision prevention adds safety, not removes it
 - Explicit systemId handling prevents unintended privilege escalation
 - pageKey-based operations are properly validated
+- Empty publish protection prevents accidental data loss
 
 ---
 

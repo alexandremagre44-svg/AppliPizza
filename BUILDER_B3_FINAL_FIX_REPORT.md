@@ -187,6 +187,46 @@ The `pages_system` collection is being phased out. All page data now lives in `p
 
 ---
 
+### ✅ FIX PAGES FANTÔMES: Enhanced Draft/Published Sync (NEW)
+**Files:** 
+- `lib/builder/services/builder_layout_service.dart`
+- `lib/builder/editor/builder_page_editor_screen.dart`
+
+**Problem:** Users reported "ghost pages" where client shows correct content but Builder shows empty/template.
+
+**Root Cause:** `loadDraft()` wasn't robust enough - only checked `draftLayout`, not legacy `blocks` field.
+
+**Changes:**
+
+1. **Enhanced `loadDraft()` with priority loading:**
+   - If draft has `draftLayout` → use it
+   - If draft has `blocks` but empty `draftLayout` → migrate blocks to draftLayout
+   - If published has `publishedLayout` → create draft from it (self-heal)
+   - If published has `blocks` → create draft from blocks
+
+2. **Safe publication with empty layout protection:**
+   - New `allowEmptyPublish` parameter (default: false)
+   - Prevents accidental overwrite of existing content with empty layout
+   - Throws `StateError` if would overwrite content
+
+3. **Comprehensive debug logging:**
+   - `📖 [loadDraft]` - when loading
+   - `💾 [saveDraft]` - when saving
+   - `📤 [publishPage]` - when publishing
+   - `✅ [SELF-HEAL]` - when creating draft from published
+
+```dart
+// Example of new loadDraft priority logic
+if (draftPage.blocks.isNotEmpty && draftPage.draftLayout.isEmpty) {
+  debugPrint('📋 [loadDraft] Migrating legacy blocks to draftLayout');
+  final migratedPage = draftPage.copyWith(draftLayout: draftPage.blocks.toList());
+  await saveDraft(migratedPage);
+  return migratedPage;
+}
+```
+
+---
+
 ## Files Modified
 
 | File | Changes |
@@ -195,7 +235,8 @@ The `pages_system` collection is being phased out. All page data now lives in `p
 | `lib/builder/models/builder_block.dart` | FIX M2/N2: Added missing modules to availableModules |
 | `lib/builder/models/builder_enums.dart` | FIX M3: Updated isSystemPage to use SystemPages registry |
 | `lib/builder/models/system_pages.dart` | FIX M3: Added promo, about, contact pages to registry |
-| `lib/builder/services/builder_layout_service.dart` | FIX M4: Deprecated legacy pages_system methods |
+| `lib/builder/services/builder_layout_service.dart` | FIX M4: Deprecated legacy methods; FIX PAGES FANTÔMES: Enhanced loadDraft, saveDraft, publishPage with logging |
+| `lib/builder/editor/builder_page_editor_screen.dart` | FIX PAGES FANTÔMES: Enhanced _loadPage with detailed debug logging |
 
 ---
 
@@ -206,7 +247,7 @@ The `pages_system` collection is being phased out. All page data now lives in `p
 | F1: Custom page name collision | `_generatePageId()` adds unique suffix | Custom pages "Menu" → "custom_menu_12345", never overwrite system pages |
 | F2: systemId incorrectly inferred | `fromJson()` uses explicit systemId field only | Custom pages remain custom even if pageKey matches system page name |
 | F3: No reserved ID validation | Removed system templates + info note | Prevents confusion; collision is handled by F1 at service layer |
-| S1: Draft/Published sync | Self-heal persists to Firestore | No more "Home empty in builder but ok in client" |
+| S1: Draft/Published sync | **Enhanced loadDraft with legacy blocks migration** | No more "Home empty in builder but ok in client" |
 | S2/S4: Multiple sources of truth | pageKey as primary, systemId only when explicit | Consistent route resolution: system → `/menu`, custom → `/page/custom_menu_12345` |
 | S3: Profile/Cart showing same content | F1 + F2 combined | No more collision between system and custom pages |
 | M1: Editor failing on custom pages | `_updateNavigationParams()` uses pageKey for custom pages | No more "Impossible de modifier" error |
@@ -214,6 +255,7 @@ The `pages_system` collection is being phased out. All page data now lives in `p
 | M3: isSystemPage mismatch | Aligned with SystemPages registry | Single source of truth for isSystemPage check |
 | M4: Legacy pages_system usage | Deprecated loadSystemPage/watchSystemPages | Clear migration path to pages_published |
 | N1: System templates visible | Removed cart/profile/roulette templates | Users can't accidentally create system pages from templates |
+| **PAGES FANTÔMES** | Enhanced loadDraft with priority loading and migration | Editor always loads correct data from best available source |
 
 ---
 

@@ -112,26 +112,41 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     try {
       // Determine the page identifier to use
       final pageIdentifier = widget.pageId ?? widget.pageKey!;
+      final pageIdStr = widget.pageId?.value ?? widget.pageKey!;
+      
+      debugPrint('📖 [EditorScreen] Loading page: $pageIdStr (appId: ${widget.appId})');
       
       // Load draft, or create default if none exists
       var page = await _service.loadDraft(widget.appId, pageIdentifier);
       
+      if (page != null) {
+        debugPrint('📖 [EditorScreen] Page loaded: ${page.name}');
+        debugPrint('   - pageKey: ${page.pageKey}');
+        debugPrint('   - systemId: ${page.systemId?.value ?? 'null (custom page)'}');
+        debugPrint('   - route: ${page.route}');
+        debugPrint('   - draftLayout: ${page.draftLayout.length} blocks');
+        debugPrint('   - publishedLayout: ${page.publishedLayout.length} blocks');
+        debugPrint('   - blocks (legacy): ${page.blocks.length} blocks');
+        debugPrint('   - isSystemPage: ${page.isSystemPage}');
+      }
+      
       // SURGICAL FIX: For system pages with empty draft, try to initialize with default content
       // This only triggers if BOTH draft AND published are empty (checked in initializeSpecificPageDraft)
       if (page != null && page.draftLayout.isEmpty && widget.pageId != null) {
-        debugPrint('[EditorScreen] 📋 System page ${widget.pageId!.value} has empty draft, attempting initialization...');
+        debugPrint('📋 [EditorScreen] System page ${widget.pageId!.value} has empty draft, attempting initialization...');
         final initializedPage = await _pageService.initializeSpecificPageDraft(
           widget.appId,
           widget.pageId!,
         );
         if (initializedPage != null) {
           page = initializedPage;
-          debugPrint('[EditorScreen] ✅ Page initialized with default content');
+          debugPrint('✅ [EditorScreen] Page initialized with ${page.draftLayout.length} default blocks');
         }
       }
       
       if (page == null && widget.pageId != null) {
         // Only auto-create for system pages (those with BuilderPageId)
+        debugPrint('📋 [EditorScreen] Creating default page for system page: ${widget.pageId!.value}');
         page = await _service.createDefaultPage(
           widget.appId,
           widget.pageId!,
@@ -141,6 +156,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       
       if (page == null) {
         // Custom page not found
+        debugPrint('❌ [EditorScreen] Page not found: $pageIdStr');
         throw BuilderPageException(
           'Page not found: ${widget.pageKey ?? widget.pageId?.value}',
           pageId: widget.pageKey ?? widget.pageId?.value,
@@ -149,6 +165,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       
       // Verify and correct system page flag if needed
       page = _verifySystemPageIntegrity(page);
+      
+      debugPrint('✅ [EditorScreen] Page ready for editing: ${page.name} with ${page.draftLayout.length} blocks');
 
       setState(() {
         _page = page;
@@ -157,7 +175,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       
       // Check for duplicate index after loading
       _checkDuplicateIndex();
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('❌ [EditorScreen] Error loading page: $e');
+      debugPrint('Stack trace: $stackTrace');
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
