@@ -479,6 +479,68 @@ void main() {
       expect(page.draftLayout, isEmpty);
       expect(page.publishedLayout, isEmpty);
     });
+    
+    test('fromJson should sync empty draftLayout from legacy blocks field (Ghost Content legacy fallback)', () {
+      final json = {
+        'pageId': 'home',
+        'appId': 'test_app',
+        'name': 'Home',
+        'route': '/home',
+        'blocks': [
+          {
+            'id': 'legacy_block',
+            'type': 'hero',
+            'order': 0,
+            'isActive': true,
+            'config': {'title': 'Legacy Content'},
+          },
+        ],
+        'draftLayout': [], // Empty draft
+        'publishedLayout': [], // Empty published
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      // draftLayout should be synced from legacy blocks field
+      expect(page.draftLayout.length, equals(1));
+      expect(page.draftLayout[0].id, equals('legacy_block'));
+      // blocks field should also have the content
+      expect(page.blocks.length, equals(1));
+    });
+    
+    test('fromJson should prefer publishedLayout over blocks for sync', () {
+      final json = {
+        'pageId': 'home',
+        'appId': 'test_app',
+        'name': 'Home',
+        'route': '/home',
+        'blocks': [
+          {
+            'id': 'legacy_block',
+            'type': 'banner',
+            'order': 0,
+            'isActive': true,
+            'config': {},
+          },
+        ],
+        'draftLayout': [], // Empty draft
+        'publishedLayout': [
+          {
+            'id': 'published_block',
+            'type': 'hero',
+            'order': 0,
+            'isActive': true,
+            'config': {},
+          },
+        ],
+      };
+
+      final page = BuilderPage.fromJson(json);
+      
+      // draftLayout should be synced from publishedLayout, not blocks
+      expect(page.draftLayout.length, equals(1));
+      expect(page.draftLayout[0].id, equals('published_block'));
+    });
   });
   
   group('BuilderBlock Parsing Tests', () {
