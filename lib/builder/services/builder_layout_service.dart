@@ -176,12 +176,41 @@ class BuilderLayoutService {
 
       // Case 1: Draft document exists
       if (snapshot.exists && snapshot.data() != null) {
-        final draftPage = BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
+        final rawData = snapshot.data() as Map<String, dynamic>;
+        
+        // B3-LAYOUT-MIGRATION: Log which fields exist in the Firestore document
+        final existingFields = <String>[];
+        if (rawData['draftLayout'] != null) existingFields.add('draftLayout');
+        if (rawData['publishedLayout'] != null) existingFields.add('publishedLayout');
+        if (rawData['blocks'] != null) existingFields.add('blocks');
+        if (rawData['layout'] != null) existingFields.add('layout (legacy)');
+        if (rawData['content'] != null) existingFields.add('content (legacy)');
+        if (rawData['sections'] != null) existingFields.add('sections (legacy)');
+        if (rawData['pageBlocks'] != null) existingFields.add('pageBlocks (legacy)');
+        debugPrint('📖 [loadDraft] Firestore fields found: ${existingFields.join(', ')}');
+        
+        final draftPage = BuilderPage.fromJson(rawData);
         debugPrint('📖 [loadDraft] Draft found: ${draftPage.name} (draftLayout=${draftPage.draftLayout.length}, publishedLayout=${draftPage.publishedLayout.length}, blocks=${draftPage.blocks.length})');
         
         // Case 1a: Draft has draftLayout content → use it
         if (draftPage.draftLayout.isNotEmpty) {
           debugPrint('✅ [loadDraft] Using draftLayout with ${draftPage.draftLayout.length} blocks');
+          
+          // B3-LAYOUT-MIGRATION: If data was migrated from legacy fields, persist the migration
+          final hasLegacyFields = rawData['layout'] != null || rawData['content'] != null || 
+                                  rawData['sections'] != null || rawData['pageBlocks'] != null;
+          final needsMigrationSave = hasLegacyFields || rawData['draftLayout'] == null;
+          
+          if (needsMigrationSave) {
+            debugPrint('📋 [B3-LAYOUT-MIGRATION] Persisting migrated data for $pageIdStr');
+            try {
+              await saveDraft(draftPage);
+              debugPrint('✅ [B3-LAYOUT-MIGRATION] Migration saved to pages_draft/$pageIdStr');
+            } catch (saveError) {
+              debugPrint('⚠️ [B3-LAYOUT-MIGRATION] Migration save failed: $saveError');
+            }
+          }
+          
           return draftPage;
         }
         
