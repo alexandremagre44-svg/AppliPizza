@@ -303,14 +303,16 @@ class BuilderPage {
       final mapKeys = value.keys.toList();
       
       // Check if all keys are numeric strings (Firestore array format)
-      final numericKeys = mapKeys.where((k) => k is String && int.tryParse(k) != null).toList();
+      // First filter for String keys, then check if they're numeric
+      final stringKeys = mapKeys.whereType<String>().toList();
+      final numericKeys = stringKeys.where((k) => int.tryParse(k) != null).toList();
       
       if (numericKeys.isNotEmpty && numericKeys.length == mapKeys.length) {
-        // All keys are numeric - this is a Firestore array stored as Map
+        // All keys are numeric strings - this is a Firestore array stored as Map
         debugPrint('📋 [_safeLayoutParse] Detected Map with ${numericKeys.length} numeric keys, converting to List');
         
         // Sort keys numerically and reconstruct as list
-        numericKeys.sort((a, b) => int.parse(a as String).compareTo(int.parse(b as String)));
+        numericKeys.sort((a, b) => int.parse(a).compareTo(int.parse(b)));
         
         final List<dynamic> reconstructedList = [];
         for (final key in numericKeys) {
@@ -472,17 +474,14 @@ class BuilderPage {
     // 1. If draftLayout is empty, try publishedLayout
     // 2. If publishedLayout is also empty, try legacy blocks
     // 3. Log which fallback was used
-    String usedFallback = '';
     
     if (draftLayout.isEmpty && publishedLayout.isNotEmpty) {
       // Fallback 1: Use publishedLayout
       draftLayout = List<BuilderBlock>.from(publishedLayout);
-      usedFallback = 'publishedLayout';
       debugPrint('ℹ️ [B3-LAYOUT-PARSE] Using fallback layout (published) for pageKey: $pageKey - ${publishedLayout.length} blocks');
     } else if (draftLayout.isEmpty && bestLegacyBlocks.isNotEmpty) {
       // Fallback 2: Use legacy blocks
       draftLayout = List<BuilderBlock>.from(bestLegacyBlocks);
-      usedFallback = legacySource;
       debugPrint('ℹ️ [B3-LAYOUT-PARSE] Using fallback layout ($legacySource) for pageKey: $pageKey - ${bestLegacyBlocks.length} blocks');
     } else if (draftLayout.isNotEmpty) {
       debugPrint('✅ [B3-LAYOUT-PARSE] draftLayout loaded for pageKey: $pageKey - ${draftLayout.length} blocks');

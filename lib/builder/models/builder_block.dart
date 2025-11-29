@@ -401,8 +401,9 @@ class SystemBlock extends BuilderBlock {
         debugPrint('⚠️ [SystemBlock.fromJson] SystemBlock missing id field, generated fallback: $blockId');
       }
       
-      final moduleType = configMap['moduleType'] as String? ?? 'unknown';
-      if (moduleType == 'unknown') {
+      final rawModuleType = configMap['moduleType'] as String?;
+      final moduleType = rawModuleType ?? 'unknown';
+      if (rawModuleType == null) {
         debugPrint('⚠️ [SystemBlock.fromJson] SystemBlock $blockId missing moduleType, defaulting to "unknown"');
       }
       
