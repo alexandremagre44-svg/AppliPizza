@@ -146,20 +146,52 @@ class BuilderLayoutService {
     }());
   }
 
-  /// Load draft page
+  /// Load draft page with fallback to published content
+  /// 
+  /// **Fix for 'Ghost Content' Bug:**
+  /// If the draft document is missing or has empty draftLayout, this method
+  /// automatically loads the published version and creates a fresh draft from it.
+  /// This ensures the editor never opens on a blank page if published content exists.
   /// 
   /// Accepts dynamic pageId (String or BuilderPageId enum).
-  /// Returns null if no draft exists.
+  /// Returns null only if both draft and published versions don't exist.
   Future<BuilderPage?> loadDraft(String appId, dynamic pageId) async {
     try {
       final ref = _getDraftRef(appId, pageId);
       final snapshot = await ref.get();
 
-      if (!snapshot.exists || snapshot.data() == null) {
-        return null;
+      // Case 1: Draft exists and has content
+      if (snapshot.exists && snapshot.data() != null) {
+        final draftPage = BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
+        
+        // Check if draft has meaningful content in draftLayout
+        if (draftPage.draftLayout.isNotEmpty) {
+          return draftPage;
+        }
+        
+        // Draft exists but draftLayout is empty - try to sync from published
+        debugPrint('⚠️ Draft exists but draftLayout is empty for $pageId, checking published...');
       }
 
-      return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
+      // Case 2: Draft doesn't exist or has empty draftLayout - try published version
+      final publishedPage = await loadPublished(appId, pageId);
+      if (publishedPage != null && publishedPage.publishedLayout.isNotEmpty) {
+        debugPrint('📋 Creating draft from published content for $pageId');
+        // Create a fresh draft by copying publishedLayout into draftLayout
+        return publishedPage.copyWith(
+          isDraft: true,
+          draftLayout: List.from(publishedPage.publishedLayout),
+          hasUnpublishedChanges: false,
+        );
+      }
+
+      // Case 3: Neither draft nor published have content
+      // Return the original draft if it exists (even if empty), otherwise null
+      if (snapshot.exists && snapshot.data() != null) {
+        return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
+      }
+      
+      return null;
     } catch (e) {
       print('Error loading draft: $e');
       return null;
@@ -571,40 +603,31 @@ class BuilderLayoutService {
 
   // ==================== SYSTEM PAGES OPERATIONS ====================
 
-  /// Load all system pages from pages_system collection
+  /// Load all system pages from published pages collection
+  /// 
+  /// **Fix for 'Zombie Pages' Bug:**
+  /// Now queries loadAllPublishedPages instead of pages_system collection.
+  /// This ensures real-time updates (like isActive: false) are reflected immediately.
+  /// pages_published becomes the Single Source of Truth for navigation status.
   /// 
   /// System pages define the navigation structure:
   /// - home, cart, contact, about (order fixed)
   /// 
-  /// Returns list of BuilderPage sorted by order
+  /// Returns list of BuilderPage where isSystemPage == true, sorted by order
   Future<List<BuilderPage>> loadSystemPages(String appId) async {
     try {
-      final snapshot = await FirestorePaths.pagesSystem(appId).get();
+      // Query from published pages - the source of truth
+      final publishedPages = await loadAllPublishedPages(appId);
       
-      final pages = <BuilderPage>[];
-      for (final doc in snapshot.docs) {
-        try {
-          final data = doc.data();
-          data['id'] = doc.id;
-          
-          // Ensure pageId and pageKey are set correctly from doc.id
-          if (data['pageId'] == null) {
-            data['pageId'] = doc.id;
-          }
-          if (data['pageKey'] == null) {
-            data['pageKey'] = doc.id;
-          }
-          
-          pages.add(BuilderPage.fromJson(data));
-        } catch (e) {
-          debugPrint('Error parsing system page ${doc.id}: $e');
-        }
-      }
+      // Filter to return only pages where isSystemPage == true
+      final systemPages = publishedPages.values
+          .where((page) => page.isSystemPage)
+          .toList();
       
       // Sort by order
-      pages.sort((a, b) => a.order.compareTo(b.order));
+      systemPages.sort((a, b) => a.order.compareTo(b.order));
       
-      return pages;
+      return systemPages;
     } catch (e) {
       debugPrint('Error loading system pages: $e');
       return [];

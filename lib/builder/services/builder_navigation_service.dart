@@ -38,17 +38,18 @@ class BuilderNavigationService {
 
   /// Get all pages for bottom navigation bar
   /// 
-  /// Returns pages from pages_system where:
+  /// Returns pages from pages_published where:
   /// - displayLocation == 'bottomBar'
   /// - isEnabled == true
   /// - Sorted by order ASC
   /// 
-  /// The pages_system collection defines the navigation structure,
-  /// while pages_published provides the actual content for each page.
+  /// **Fix for Navigation Loop Bug:**
+  /// - Loads ALL system pages (active AND inactive) first
+  /// - Uses strict empty check (allSystemPages.isEmpty) before auto-init
+  /// - Always calls _pageService.fixEmptySystemPages to fix content
+  /// - Finally filters for active pages using _layoutService.getBottomBarPages
   /// 
-  /// **Important:** This method checks total page count (active + inactive)
-  /// to decide if auto-init is needed, respecting admin choices to deactivate
-  /// pages like "Menu" or "Cart" without recreating them.
+  /// This prevents recreating disabled pages by checking existence before filtering.
   /// 
   /// Example:
   /// ```dart
@@ -58,22 +59,20 @@ class BuilderNavigationService {
   Future<List<BuilderPage>> getBottomBarPages() async {
     try {
       // Step 1: Load ALL system pages (active AND inactive)
-      // This ensures we check total page existence, not just active ones
+      // This now correctly returns from pages_published with isSystemPage filter
       final allSystemPages = await _layoutService.loadSystemPages(appId);
       
-      // Step 2: Check if we need to create default pages
-      // Only trigger auto-init if total pages < 2 (not filtered count)
-      // This respects admin choices to deactivate pages
-      // Note: We don't use the return value since we reload fresh data in Step 4
-      if (allSystemPages.length < 2) {
+      // Step 2: Strict check - only trigger auto-init if truly empty
+      // This respects admin choices to deactivate pages without recreating them
+      if (allSystemPages.isEmpty) {
         await _ensureMinimumPages(allSystemPages);
       }
       
-      // Step 3: Fix empty system pages by injecting default content
+      // Step 3: Always fix empty system pages by injecting default content
       await _pageService.fixEmptySystemPages(appId);
       
-      // Step 4: Reload and filter for active bottomBar pages only
-      // Now apply the isActive filter for the final result
+      // Step 4: Return ONLY active pages for the UI
+      // getBottomBarPages applies isActive filter and bottomNavIndex validation
       final pages = await _layoutService.getBottomBarPages(appId: appId);
       
       // Log warning if no active pages (admin may have deactivated all)
