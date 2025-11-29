@@ -1027,8 +1027,91 @@ class BuilderPageService {
             order: 0,
           ),
         ];
-      default:
-        return [];
+      case BuilderPageId.promo:
+        return [
+          BuilderBlock(
+            id: 'banner_init_$timestamp',
+            type: BlockType.banner,
+            order: 0,
+            config: {
+              'title': 'Offres spéciales',
+              'subtitle': 'Découvrez nos promotions',
+              'backgroundColor': '#FF5722',
+              'textColor': '#FFFFFF',
+              'style': 'promo',
+            },
+          ),
+          BuilderBlock(
+            id: 'product_list_init_$timestamp',
+            type: BlockType.productList,
+            order: 1,
+            config: {
+              'title': 'En promotion',
+              'mode': 'promo',
+              'layout': 'grid',
+              'limit': 6,
+              'columns': 2,
+            },
+          ),
+        ];
+      case BuilderPageId.about:
+        return [
+          BuilderBlock(
+            id: 'text_title_init_$timestamp',
+            type: BlockType.text,
+            order: 0,
+            config: {
+              'content': 'À propos de nous',
+              'size': 'heading',
+              'bold': true,
+              'alignment': 'center',
+            },
+          ),
+          BuilderBlock(
+            id: 'text_content_init_$timestamp',
+            type: BlockType.text,
+            order: 1,
+            config: {
+              'content': 'Notre histoire commence ici. Ajoutez votre texte personnalisé pour présenter votre restaurant.',
+              'size': 'normal',
+              'alignment': 'left',
+            },
+          ),
+        ];
+      case BuilderPageId.contact:
+        return [
+          BuilderBlock(
+            id: 'text_title_init_$timestamp',
+            type: BlockType.text,
+            order: 0,
+            config: {
+              'content': 'Contactez-nous',
+              'size': 'heading',
+              'bold': true,
+              'alignment': 'center',
+            },
+          ),
+          BuilderBlock(
+            id: 'info_init_$timestamp',
+            type: BlockType.info,
+            order: 1,
+            config: {
+              'title': 'Nos coordonnées',
+              'content': '📍 Adresse: Votre adresse ici\n📞 Téléphone: +33 X XX XX XX XX\n✉️ Email: contact@example.com',
+              'icon': 'location',
+              'highlight': true,
+            },
+          ),
+        ];
+      case BuilderPageId.rewards:
+        return [
+          SystemBlock(
+            id: 'rewards_module_init_$timestamp',
+            moduleType: 'rewards',
+            order: 0,
+          ),
+        ];
+      // No default case needed - all BuilderPageId enum values are handled
     }
   }
 
