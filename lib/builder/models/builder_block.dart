@@ -1,6 +1,7 @@
 // lib/builder/models/builder_block.dart
 // Base block model for Builder B3 system
 
+import 'dart:convert';
 import 'builder_enums.dart';
 import '../utils/firestore_parsing_helpers.dart';
 
@@ -27,10 +28,10 @@ class BuilderBlock {
   /// Configuration data specific to this block type
   /// 
   /// Examples:
-  /// - Hero: {title, subtitle, imageUrl, ctaText, ctaAction}
+  /// - Hero: {title, subtitle, imageUrl, buttonLabel, tapAction, tapActionTarget}
   /// - Banner: {text, backgroundColor, textColor}
   /// - Text: {content, fontSize, color, alignment}
-  /// - ProductList: {category, limit, layout}
+  /// - ProductList: {mode, layout, limit, columns}
   final Map<String, dynamic> config;
 
   /// Whether this block is currently active/visible
@@ -103,15 +104,29 @@ class BuilderBlock {
 
   /// Create from Firestore JSON
   /// 
-  /// TODO(builder-b3-safe-parsing) This method now handles:
-  /// - Timestamp, String, int, or null for createdAt/updatedAt
-  /// - Missing or null 'id' field (generates fallback ID)
-  /// - Missing or null 'type' field (defaults to 'text')
-  /// - Config as Map, JSON-encoded String, or null
-  /// - Try/catch for parsing errors to prevent 'Ghost Block' crashes
+  /// This method is self-contained and crash-proof:
+  /// - Handles Timestamp, String, int, or null for createdAt/updatedAt
+  /// - Handles missing or null 'id' field (generates fallback ID)
+  /// - Handles missing or null 'type' field (defaults to 'text')
+  /// - Handles Config as Map, JSON-encoded String, or null
+  /// - Never throws - catches all parsing errors to prevent 'Ghost Block' crashes
   factory BuilderBlock.fromJson(Map<String, dynamic> json) {
+    // Self-contained config parsing - bulletproof against nested maps
+    Map<String, dynamic> configMap = {};
     try {
-      // TODO(builder-b3-safe-parsing) Handle missing 'id' gracefully
+      final raw = json['config'];
+      if (raw is Map) {
+        configMap = Map<String, dynamic>.from(raw);
+      } else if (raw is String) {
+        configMap = Map<String, dynamic>.from(jsonDecode(raw));
+      }
+    } catch (e) {
+      print('⚠️ Config parsing error: $e');
+      // Do not throw, keep empty configMap
+    }
+    
+    try {
+      // Handle missing 'id' gracefully
       final String blockId = json['id'] as String? ?? 
           'block_${DateTime.now().millisecondsSinceEpoch}_${json.hashCode.abs()}';
       
@@ -119,32 +134,29 @@ class BuilderBlock {
         print('⚠️ Warning: Block missing id field, generated fallback: $blockId');
       }
       
-      // Parse config safely using shared utility
-      final parsedConfig = safeParseConfig(json['config']);
-      
       return BuilderBlock(
         id: blockId,
         type: BlockType.fromJson(json['type'] as String? ?? 'text'),
         order: json['order'] as int? ?? 0,
-        config: parsedConfig,
+        config: configMap,
         isActive: json['isActive'] as bool? ?? true,
         visibility: BlockVisibility.fromJson(
           json['visibility'] as String? ?? 'visible',
         ),
         customStyles: json['customStyles'] as String?,
-        // TODO(builder-b3-safe-parsing) Use safe DateTime parsing for Firestore types
+        // Use safe DateTime parsing for Firestore types
         createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
         updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
       );
     } catch (e) {
       // Log warning but return a valid Block with empty config to prevent crashes
-      print('⚠️ Warning: Error parsing block config, returning fallback block: $e');
+      print('⚠️ Warning: Error parsing block, returning fallback block: $e');
       final fallbackId = 'block_fallback_${DateTime.now().millisecondsSinceEpoch}';
       return BuilderBlock(
         id: fallbackId,
         type: BlockType.text,
         order: 0,
-        config: {},
+        config: configMap, // Use whatever config we managed to parse
       );
     }
   }
@@ -300,17 +312,28 @@ class SystemBlock extends BuilderBlock {
 
   /// Create from Firestore JSON
   /// 
-  /// TODO(builder-b3-safe-parsing) This method now handles:
-  /// - Timestamp, String, int, or null for createdAt/updatedAt
-  /// - Missing or null 'id' field (generates fallback ID)
-  /// - Config as Map, JSON-encoded String, or null
-  /// - Try/catch for parsing errors to prevent 'Ghost Block' crashes
+  /// This method is self-contained and crash-proof:
+  /// - Handles Timestamp, String, int, or null for createdAt/updatedAt
+  /// - Handles missing or null 'id' field (generates fallback ID)
+  /// - Handles Config as Map, JSON-encoded String, or null
+  /// - Never throws - catches all parsing errors to prevent 'Ghost Block' crashes
   factory SystemBlock.fromJson(Map<String, dynamic> json) {
+    // Self-contained config parsing - bulletproof against nested maps
+    Map<String, dynamic> configMap = {};
     try {
-      // Parse config safely using shared utility
-      final config = safeParseConfig(json['config']);
-      
-      // TODO(builder-b3-safe-parsing) Handle missing 'id' gracefully
+      final raw = json['config'];
+      if (raw is Map) {
+        configMap = Map<String, dynamic>.from(raw);
+      } else if (raw is String) {
+        configMap = Map<String, dynamic>.from(jsonDecode(raw));
+      }
+    } catch (e) {
+      print('⚠️ Config parsing error: $e');
+      // Do not throw, keep empty configMap
+    }
+    
+    try {
+      // Handle missing 'id' gracefully
       final String blockId = json['id'] as String? ?? 
           'sysblock_${DateTime.now().millisecondsSinceEpoch}_${json.hashCode.abs()}';
       
@@ -320,27 +343,27 @@ class SystemBlock extends BuilderBlock {
       
       return SystemBlock(
         id: blockId,
-        moduleType: config['moduleType'] as String? ?? 'unknown',
+        moduleType: configMap['moduleType'] as String? ?? 'unknown',
         order: json['order'] as int? ?? 0,
-        config: config,
+        config: configMap,
         isActive: json['isActive'] as bool? ?? true,
         visibility: BlockVisibility.fromJson(
           json['visibility'] as String? ?? 'visible',
         ),
         customStyles: json['customStyles'] as String?,
-        // TODO(builder-b3-safe-parsing) Use safe DateTime parsing for Firestore types
+        // Use safe DateTime parsing for Firestore types
         createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
         updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
       );
     } catch (e) {
       // Log warning but return a valid SystemBlock with empty config to prevent crashes
-      print('⚠️ Warning: Error parsing SystemBlock config, returning fallback block: $e');
+      print('⚠️ Warning: Error parsing SystemBlock, returning fallback block: $e');
       final fallbackId = 'sysblock_fallback_${DateTime.now().millisecondsSinceEpoch}';
       return SystemBlock(
         id: fallbackId,
         moduleType: 'unknown',
         order: 0,
-        config: {},
+        config: configMap, // Use whatever config we managed to parse
       );
     }
   }
