@@ -239,17 +239,36 @@ class SystemBlock extends BuilderBlock {
   }
 
   /// Available system module types
+  /// 
+  /// FIX M2/N2: Updated to be consistent with builder_modules.dart
+  /// Includes all modules defined in the builderModules map:
+  /// - roulette (same as roulette_module)
+  /// - loyalty
+  /// - rewards
+  /// - accountActivity
+  /// - menu_catalog (new)
+  /// - cart_module (new)
+  /// - profile_module (new)
+  /// - roulette_module (alias for roulette)
   static const List<String> availableModules = [
     'roulette',
     'loyalty',
     'rewards',
     'accountActivity',
+    // FIX M2/N2: Added modules that are defined in builder_modules.dart
+    'menu_catalog',
+    'cart_module',
+    'profile_module',
+    'roulette_module', // Alias for 'roulette' for consistency
   ];
 
   /// Get display label for a module type
+  /// 
+  /// FIX M2/N2: Added labels for new module types
   static String getModuleLabel(String moduleType) {
     switch (moduleType) {
       case 'roulette':
+      case 'roulette_module':
         return 'Roulette';
       case 'loyalty':
         return 'Fidélité';
@@ -257,15 +276,24 @@ class SystemBlock extends BuilderBlock {
         return 'Récompenses';
       case 'accountActivity':
         return 'Activité du compte';
+      case 'menu_catalog':
+        return 'Catalogue Menu';
+      case 'cart_module':
+        return 'Panier';
+      case 'profile_module':
+        return 'Profil';
       default:
         return 'Module inconnu';
     }
   }
 
   /// Get icon for a module type
+  /// 
+  /// FIX M2/N2: Added icons for new module types
   static String getModuleIcon(String moduleType) {
     switch (moduleType) {
       case 'roulette':
+      case 'roulette_module':
         return '🎰';
       case 'loyalty':
         return '⭐';
@@ -273,6 +301,12 @@ class SystemBlock extends BuilderBlock {
         return '🎁';
       case 'accountActivity':
         return '📊';
+      case 'menu_catalog':
+        return '🍕';
+      case 'cart_module':
+        return '🛒';
+      case 'profile_module':
+        return '👤';
       default:
         return '❓';
     }

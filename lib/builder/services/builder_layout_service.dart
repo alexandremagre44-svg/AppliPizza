@@ -66,6 +66,8 @@ class BuilderLayoutService {
 
   /// Save a draft page with system page protections
   /// 
+  /// **FIX PAGES FANTÔMES: Enhanced logging for draft saves**
+  /// 
   /// Protections:
   /// - System pages retain isSystemPage = true
   /// - SystemBlocks retain type = system
@@ -82,6 +84,9 @@ class BuilderLayoutService {
     if (!page.isDraft) {
       throw ArgumentError('Page must be marked as draft (isDraft: true)');
     }
+    
+    final pageKey = page.pageKey;
+    debugPrint('💾 [saveDraft] Saving draft: $pageKey (draftLayout=${page.draftLayout.length}, blocks=${page.blocks.length})');
 
     // Apply system page protections
     final protectedPage = _applySystemProtections(page);
@@ -91,6 +96,7 @@ class BuilderLayoutService {
     final data = protectedPage.toJson();
     
     await ref.set(data, SetOptions(merge: true));
+    debugPrint('✅ [saveDraft] Draft saved to pages_draft/$pageKey');
   }
   
   /// Apply protection rules to a page before saving
@@ -148,67 +154,174 @@ class BuilderLayoutService {
 
   /// Load draft page with fallback to published content
   /// 
-  /// **Fix for 'Ghost Content' Bug:**
-  /// If the draft document is missing or has empty draftLayout, this method
-  /// automatically loads the published version and creates a fresh draft from it.
-  /// This ensures the editor never opens on a blank page if published content exists.
+  /// **FIX PAGES FANTÔMES / DRAFT-PUBLISHED SYNC**
+  /// This method ensures the editor always loads the correct content:
+  /// 
+  /// Priority order:
+  /// 1. If draft exists with draftLayout → use it
+  /// 2. If draft exists with blocks but empty draftLayout → migrate blocks to draftLayout
+  /// 3. If published exists with publishedLayout → create draft from it (self-heal)
+  /// 4. If published exists with blocks → create draft from blocks
+  /// 5. Otherwise → return empty draft or null
   /// 
   /// Accepts dynamic pageId (String or BuilderPageId enum).
-  /// Returns null only if both draft and published versions don't exist.
+  /// Returns null only if no page exists at all.
   Future<BuilderPage?> loadDraft(String appId, dynamic pageId) async {
+    final pageIdStr = _toPageIdString(pageId);
+    debugPrint('📖 [loadDraft] Loading draft for appId=$appId, pageId=$pageIdStr');
+    
     try {
       final ref = _getDraftRef(appId, pageId);
       final snapshot = await ref.get();
 
-      // Case 1: Draft exists and has content
+      // Case 1: Draft document exists
       if (snapshot.exists && snapshot.data() != null) {
-        final draftPage = BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
+        final rawData = snapshot.data() as Map<String, dynamic>;
         
-        // Check if draft has meaningful content in draftLayout
+        // B3-LAYOUT-MIGRATION: Log which fields exist in the Firestore document
+        final existingFields = <String>[];
+        if (rawData['draftLayout'] != null) existingFields.add('draftLayout');
+        if (rawData['publishedLayout'] != null) existingFields.add('publishedLayout');
+        if (rawData['blocks'] != null) existingFields.add('blocks');
+        if (rawData['layout'] != null) existingFields.add('layout (legacy)');
+        if (rawData['content'] != null) existingFields.add('content (legacy)');
+        if (rawData['sections'] != null) existingFields.add('sections (legacy)');
+        if (rawData['pageBlocks'] != null) existingFields.add('pageBlocks (legacy)');
+        debugPrint('📖 [loadDraft] Firestore fields found: ${existingFields.join(', ')}');
+        
+        final draftPage = BuilderPage.fromJson(rawData);
+        debugPrint('📖 [loadDraft] Draft found: ${draftPage.name} (draftLayout=${draftPage.draftLayout.length}, publishedLayout=${draftPage.publishedLayout.length}, blocks=${draftPage.blocks.length})');
+        
+        // Case 1a: Draft has draftLayout content → use it
         if (draftPage.draftLayout.isNotEmpty) {
+          debugPrint('✅ [loadDraft] Using draftLayout with ${draftPage.draftLayout.length} blocks');
+          
+          // B3-LAYOUT-MIGRATION: If data was migrated from legacy fields, persist the migration
+          final hasLegacyFields = rawData['layout'] != null || rawData['content'] != null || 
+                                  rawData['sections'] != null || rawData['pageBlocks'] != null;
+          final needsMigrationSave = hasLegacyFields || rawData['draftLayout'] == null;
+          
+          if (needsMigrationSave) {
+            debugPrint('📋 [B3-LAYOUT-MIGRATION] Persisting migrated data for $pageIdStr');
+            try {
+              await saveDraft(draftPage);
+              debugPrint('✅ [B3-LAYOUT-MIGRATION] Migration saved to pages_draft/$pageIdStr');
+            } catch (saveError) {
+              debugPrint('⚠️ [B3-LAYOUT-MIGRATION] Migration save failed: $saveError');
+            }
+          }
+          
           return draftPage;
         }
         
-        // Draft exists but draftLayout is empty - try to sync from published
-        final pageIdStr = _toPageIdString(pageId);
-        debugPrint('⚠️ Draft exists but draftLayout is empty for $pageIdStr, checking published...');
+        // Case 1b: Draft has empty draftLayout but has legacy blocks → migrate
+        // Note: This preserves existing published state - migration is just moving data between fields
+        if (draftPage.blocks.isNotEmpty) {
+          debugPrint('📋 [loadDraft] Migrating ${draftPage.blocks.length} legacy blocks to draftLayout');
+          
+          // Compare blocks with publishedLayout to determine if there are real changes
+          final hasRealChanges = draftPage.publishedLayout.isEmpty || 
+                                 draftPage.blocks.length != draftPage.publishedLayout.length;
+          
+          final migratedPage = draftPage.copyWith(
+            draftLayout: draftPage.blocks.toList(),
+            hasUnpublishedChanges: hasRealChanges, // Only mark as changed if truly different from published
+          );
+          try {
+            await saveDraft(migratedPage);
+            debugPrint('✅ [loadDraft] Migration persisted to pages_draft/$pageIdStr');
+          } catch (saveError) {
+            // Log the failure but continue - the in-memory page is still valid for editing
+            debugPrint('⚠️ [loadDraft] Migration save failed (will retry on next save): $saveError');
+          }
+          return migratedPage;
+        }
+        
+        // Case 1c: Draft is truly empty but has publishedLayout → use publishedLayout
+        if (draftPage.publishedLayout.isNotEmpty) {
+          debugPrint('📋 [loadDraft] Draft empty but has publishedLayout, syncing...');
+          final syncedPage = draftPage.copyWith(
+            draftLayout: draftPage.publishedLayout.toList(),
+            hasUnpublishedChanges: false,
+          );
+          try {
+            await saveDraft(syncedPage);
+            debugPrint('✅ [loadDraft] Synced publishedLayout to draftLayout');
+          } catch (saveError) {
+            debugPrint('⚠️ [loadDraft] Sync save failed: $saveError');
+          }
+          return syncedPage;
+        }
+        
+        // Case 1d: Draft truly empty - check if published exists separately
+        debugPrint('⚠️ [loadDraft] Draft is empty for $pageIdStr, checking pages_published...');
+      } else {
+        debugPrint('ℹ️ [loadDraft] No draft document found for $pageIdStr, checking pages_published...');
       }
 
       // Case 2: Draft doesn't exist or has empty draftLayout - try published version
       // SELF-HEAL FIX: Persist the draft to Firestore so editor always has content
       final publishedPage = await loadPublished(appId, pageId);
-      if (publishedPage != null && publishedPage.publishedLayout.isNotEmpty) {
-        final pageIdStr = _toPageIdString(pageId);
-        debugPrint('📋 [SELF-HEAL] Creating and PERSISTING draft from published for $pageIdStr');
+      if (publishedPage != null) {
+        debugPrint('📖 [loadDraft] Published found: ${publishedPage.name} (publishedLayout=${publishedPage.publishedLayout.length}, blocks=${publishedPage.blocks.length})');
         
-        // Create a fresh draft by copying publishedLayout into draftLayout
-        final newDraft = publishedPage.copyWith(
-          isDraft: true,
-          draftLayout: publishedPage.publishedLayout.toList(),
-          hasUnpublishedChanges: false,
-        );
+        // Determine which layout to use for self-heal
+        List<BuilderBlock> layoutToUse = [];
+        String source = '';
         
-        // CRITICAL: Persist to Firestore immediately (draft only, NEVER publish)
-        // This ensures the editor won't load stale/empty data on next access
-        try {
-          await saveDraft(newDraft);
-          debugPrint('✅ [SELF-HEAL] Draft persisted to pages_draft/$pageIdStr');
-        } catch (saveError) {
-          debugPrint('⚠️ [SELF-HEAL] Failed to persist draft: $saveError (returning in-memory copy)');
+        if (publishedPage.publishedLayout.isNotEmpty) {
+          layoutToUse = publishedPage.publishedLayout.toList();
+          source = 'publishedLayout';
+        } else if (publishedPage.blocks.isNotEmpty) {
+          layoutToUse = publishedPage.blocks.toList();
+          source = 'blocks (legacy)';
         }
         
-        return newDraft;
+        if (layoutToUse.isNotEmpty) {
+          debugPrint('📋 [SELF-HEAL] Creating draft from $source (${layoutToUse.length} blocks) for $pageIdStr');
+          
+          // Create a fresh draft by copying the layout
+          // Note: We also update legacy `blocks` field for backward compatibility
+          // This duplication will be removed in a future version when blocks field is fully deprecated
+          final newDraft = publishedPage.copyWith(
+            isDraft: true,
+            draftLayout: layoutToUse,
+            blocks: layoutToUse, // Legacy field - kept for backward compatibility during migration period
+            hasUnpublishedChanges: false,
+          );
+          
+          // CRITICAL: Persist to Firestore immediately (draft only, NEVER publish)
+          try {
+            await saveDraft(newDraft);
+            debugPrint('✅ [SELF-HEAL] Draft persisted to pages_draft/$pageIdStr with ${layoutToUse.length} blocks');
+          } catch (saveError) {
+            debugPrint('⚠️ [SELF-HEAL] Failed to persist draft: $saveError (returning in-memory copy)');
+          }
+          
+          return newDraft;
+        }
+        
+        // Published exists but is empty - create draft from it anyway
+        debugPrint('⚠️ [loadDraft] Published page exists but has no content');
+        final emptyDraft = publishedPage.copyWith(
+          isDraft: true,
+          hasUnpublishedChanges: false,
+        );
+        return emptyDraft;
       }
 
-      // Case 3: Neither draft nor published have content
-      // Return the original draft if it exists (even if empty), otherwise null
+      // Case 3: Neither draft nor published exist
       if (snapshot.exists && snapshot.data() != null) {
+        // Return the empty draft if it exists
+        debugPrint('⚠️ [loadDraft] Returning empty draft for $pageIdStr');
         return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
       }
       
+      debugPrint('❌ [loadDraft] No page found for $pageIdStr');
       return null;
-    } catch (e) {
-      print('Error loading draft: $e');
+    } catch (e, stackTrace) {
+      debugPrint('❌ [loadDraft] Error loading draft for $pageIdStr: $e');
+      debugPrint('Stack trace: $stackTrace');
       return null;
     }
   }
@@ -263,13 +376,19 @@ class BuilderLayoutService {
 
   /// Publish a page
   /// 
+  /// **FIX PAGES FANTÔMES: Safe publication with empty layout protection**
+  /// 
   /// This will:
-  /// 1. Save to published collection
-  /// 2. Mark as published (isDraft: false)
-  /// 3. Set publishedAt timestamp
-  /// 4. Optionally delete draft
+  /// 1. Validate that draftLayout is not empty (unless explicitly allowed)
+  /// 2. Save to published collection
+  /// 3. Mark as published (isDraft: false)
+  /// 4. Set publishedAt timestamp
+  /// 5. Optionally delete draft
   /// 
   /// Uses page.pageKey as the Firestore document ID (supports custom pages).
+  /// 
+  /// **SAFETY**: Will NOT overwrite a published page with empty layout unless
+  /// the `allowEmptyPublish` parameter is set to true.
   /// 
   /// Example:
   /// ```dart
@@ -280,36 +399,65 @@ class BuilderLayoutService {
     BuilderPage page, {
     required String userId,
     bool shouldDeleteDraft = false,
+    bool allowEmptyPublish = false,
   }) async {
+    final pageKey = page.pageKey;
+    debugPrint('📤 [publishPage] Publishing page: $pageKey (draftLayout=${page.draftLayout.length}, publishedLayout=${page.publishedLayout.length})');
+    
+    // SAFETY CHECK: Prevent accidental empty publish
+    if (!allowEmptyPublish && page.draftLayout.isEmpty) {
+      // Check if there's existing published content that would be lost
+      final existingPublished = await loadPublished(page.appId, pageKey);
+      if (existingPublished != null && existingPublished.publishedLayout.isNotEmpty) {
+        debugPrint('⚠️ [publishPage] BLOCKED: Would overwrite ${existingPublished.publishedLayout.length} blocks with empty layout');
+        debugPrint('⚠️ [publishPage] Set allowEmptyPublish=true to force empty publish');
+        throw StateError(
+          'Cannot publish empty layout - would overwrite existing content. '
+          'Set allowEmptyPublish=true to force empty publish.'
+        );
+      }
+    }
+    
     // Create published version
     final publishedPage = page.publish(userId: userId);
+    debugPrint('📤 [publishPage] Created published version: publishedLayout=${publishedPage.publishedLayout.length}');
 
     // Save to published collection using pageKey (supports custom pages)
     final ref = _getPublishedRef(page.appId, page.pageKey);
     await ref.set(publishedPage.toJson());
+    debugPrint('✅ [publishPage] Saved to pages_published/$pageKey');
 
     // Optionally delete draft
     if (shouldDeleteDraft) {
       await deleteDraft(page.appId, page.pageKey);
+      debugPrint('🗑️ [publishPage] Deleted draft for $pageKey');
     }
   }
 
   /// Load published page
   /// 
+  /// **FIX PAGES FANTÔMES: Enhanced logging for published loads**
+  /// 
   /// Accepts dynamic pageId (String or BuilderPageId enum).
   /// Returns null if no published version exists.
   Future<BuilderPage?> loadPublished(String appId, dynamic pageId) async {
+    final pageIdStr = _toPageIdString(pageId);
+    
     try {
       final ref = _getPublishedRef(appId, pageId);
       final snapshot = await ref.get();
 
       if (!snapshot.exists || snapshot.data() == null) {
+        debugPrint('ℹ️ [loadPublished] No published page found: $pageIdStr');
         return null;
       }
 
-      return BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
-    } catch (e) {
-      print('Error loading published page: $e');
+      final page = BuilderPage.fromJson(snapshot.data() as Map<String, dynamic>);
+      debugPrint('📗 [loadPublished] Loaded: $pageIdStr (publishedLayout=${page.publishedLayout.length}, blocks=${page.blocks.length})');
+      return page;
+    } catch (e, stackTrace) {
+      debugPrint('❌ [loadPublished] Error loading $pageIdStr: $e');
+      debugPrint('Stack trace: $stackTrace');
       return null;
     }
   }
@@ -652,6 +800,11 @@ class BuilderLayoutService {
   /// Load a specific system page by pageId
   /// 
   /// Path: restaurants/{restaurantId}/pages_system/{pageId}
+  /// 
+  /// @deprecated Use [loadPublished] instead. The pages_system collection is legacy
+  /// and being phased out. All page data now lives in pages_published collection.
+  /// This method is maintained for backward compatibility during transition.
+  @Deprecated('Use loadPublished() instead. pages_system collection is legacy.')
   Future<BuilderPage?> loadSystemPage(String appId, BuilderPageId pageId) async {
     try {
       final docRef = FirestorePaths.systemPageDoc(pageId.value, appId);
@@ -675,6 +828,11 @@ class BuilderLayoutService {
   }
 
   /// Watch system pages for real-time updates
+  /// 
+  /// @deprecated Use pages_published collection instead. The pages_system collection is legacy
+  /// and being phased out. Consider watching pages_published and filtering by isSystemPage.
+  /// This method is maintained for backward compatibility during transition.
+  @Deprecated('Use pages_published collection instead. pages_system is legacy.')
   Stream<List<BuilderPage>> watchSystemPages(String appId) {
     return FirestorePaths.pagesSystem(appId).snapshots().map((snapshot) {
       final pages = <BuilderPage>[];

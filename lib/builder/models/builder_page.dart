@@ -378,24 +378,69 @@ class BuilderPage {
     // Get system page config for proper defaults (only if this is a system page)
     final systemConfig = systemId != null ? SystemPages.getConfig(systemId) : null;
     
-    // Parse blocks (legacy field)
+    // FIX B3-LAYOUT-MAPPING: Parse all possible legacy field names
+    // Priority: draftLayout > blocks > layout > content > sections > pageBlocks
     final blocks = _safeLayoutParse(json['blocks']);
     
-    // Parse draftLayout (new field, fallback to blocks for backward compatibility)
+    // Check for legacy field names that might contain block data
+    // B3-LAYOUT-MIGRATION: These are legacy field names from older versions
+    final legacyLayout = _safeLayoutParse(json['layout']);
+    final legacyContent = _safeLayoutParse(json['content']);
+    final legacySections = _safeLayoutParse(json['sections']);
+    final legacyPageBlocks = _safeLayoutParse(json['pageBlocks']);
+    
+    // Determine the best source for blocks - use first non-empty one
+    List<BuilderBlock> bestLegacyBlocks = [];
+    String legacySource = '';
+    if (blocks.isNotEmpty) {
+      bestLegacyBlocks = blocks;
+      legacySource = 'blocks';
+    } else if (legacyLayout.isNotEmpty) {
+      bestLegacyBlocks = legacyLayout;
+      legacySource = 'layout (legacy)';
+    } else if (legacyContent.isNotEmpty) {
+      bestLegacyBlocks = legacyContent;
+      legacySource = 'content (legacy)';
+    } else if (legacySections.isNotEmpty) {
+      bestLegacyBlocks = legacySections;
+      legacySource = 'sections (legacy)';
+    } else if (legacyPageBlocks.isNotEmpty) {
+      bestLegacyBlocks = legacyPageBlocks;
+      legacySource = 'pageBlocks (legacy)';
+    }
+    
+    if (legacySource.isNotEmpty && legacySource != 'blocks') {
+      // Using assert for debug-only logging to avoid production overhead
+      assert(() {
+        print('📋 [B3-LAYOUT-MIGRATION] Found ${bestLegacyBlocks.length} blocks in $legacySource for pageKey: $pageKey');
+        return true;
+      }());
+    }
+    
+    // Parse draftLayout (new field, fallback to best legacy blocks for backward compatibility)
     final draftLayoutRaw = json['draftLayout'];
     var draftLayout = draftLayoutRaw != null 
         ? _safeLayoutParse(draftLayoutRaw)
-        : blocks;
+        : bestLegacyBlocks;
     
     // Parse publishedLayout (new field)
     final publishedLayout = _safeLayoutParse(json['publishedLayout']);
     
-    // Fix 'Ghost Content': If draft is empty but published has content, sync them to avoid blank editor
+    // FIX B3-LAYOUT-MAPPING: Ghost Content fix with extended fallback chain
+    // If draft is empty but published has content, sync them to avoid blank editor
     if (draftLayout.isEmpty && publishedLayout.isNotEmpty) {
       draftLayout = List<BuilderBlock>.from(publishedLayout);
-    } else if (draftLayout.isEmpty && blocks.isNotEmpty) {
-      // Fallback for legacy data: if both draft and published are empty but blocks has content
-      draftLayout = List<BuilderBlock>.from(blocks);
+      assert(() {
+        print('📋 [B3-LAYOUT-MAPPING] Synced publishedLayout (${publishedLayout.length} blocks) to draftLayout for pageKey: $pageKey');
+        return true;
+      }());
+    } else if (draftLayout.isEmpty && bestLegacyBlocks.isNotEmpty) {
+      // Fallback for legacy data: if both draft and published are empty but legacy field has content
+      draftLayout = List<BuilderBlock>.from(bestLegacyBlocks);
+      assert(() {
+        print('📋 [B3-LAYOUT-MAPPING] Migrated $legacySource (${bestLegacyBlocks.length} blocks) to draftLayout for pageKey: $pageKey');
+        return true;
+      }());
     }
     
     // TODO(builder-b3-safe-parsing) Parse modules list safely - skip non-string items

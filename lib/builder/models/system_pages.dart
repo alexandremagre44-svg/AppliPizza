@@ -30,6 +30,8 @@ class SystemPageConfig {
 /// 
 /// This is the SINGLE SOURCE OF TRUTH for system page mappings.
 /// All services, loaders, and routers should use this registry.
+/// 
+/// FIX M3: Added promo, about, contact to complete the registry for all BuilderPageId values.
 class SystemPages {
   SystemPages._(); // Private constructor to prevent instantiation
 
@@ -41,7 +43,7 @@ class SystemPages {
       firestoreId: 'home',
       defaultName: 'Accueil',
       defaultIcon: Icons.home,
-      isSystemPage: false, // home is not protected
+      isSystemPage: false, // home is not protected - can be freely edited
     ),
     BuilderPageId.menu: SystemPageConfig(
       pageId: BuilderPageId.menu,
@@ -49,15 +51,41 @@ class SystemPages {
       firestoreId: 'menu',
       defaultName: 'Menu',
       defaultIcon: Icons.restaurant_menu,
-      isSystemPage: false, // menu is not protected
+      isSystemPage: false, // menu is not protected - can be freely edited
     ),
+    // FIX M3: Added promo, about, contact pages
+    BuilderPageId.promo: SystemPageConfig(
+      pageId: BuilderPageId.promo,
+      route: '/promo',
+      firestoreId: 'promo',
+      defaultName: 'Promotions',
+      defaultIcon: Icons.local_offer,
+      isSystemPage: false, // promo is not protected - can be freely edited
+    ),
+    BuilderPageId.about: SystemPageConfig(
+      pageId: BuilderPageId.about,
+      route: '/about',
+      firestoreId: 'about',
+      defaultName: 'À propos',
+      defaultIcon: Icons.info,
+      isSystemPage: false, // about is not protected - can be freely edited
+    ),
+    BuilderPageId.contact: SystemPageConfig(
+      pageId: BuilderPageId.contact,
+      route: '/contact',
+      firestoreId: 'contact',
+      defaultName: 'Contact',
+      defaultIcon: Icons.contact_mail,
+      isSystemPage: false, // contact is not protected - can be freely edited
+    ),
+    // Protected system pages (cannot be deleted, pageId cannot be changed)
     BuilderPageId.cart: SystemPageConfig(
       pageId: BuilderPageId.cart,
       route: '/cart',
       firestoreId: 'cart',
       defaultName: 'Panier',
       defaultIcon: Icons.shopping_cart,
-      isSystemPage: true,
+      isSystemPage: true, // Protected: cart functionality
     ),
     BuilderPageId.profile: SystemPageConfig(
       pageId: BuilderPageId.profile,
@@ -65,7 +93,7 @@ class SystemPages {
       firestoreId: 'profile',
       defaultName: 'Profil',
       defaultIcon: Icons.person,
-      isSystemPage: true,
+      isSystemPage: true, // Protected: user profile functionality
     ),
     BuilderPageId.rewards: SystemPageConfig(
       pageId: BuilderPageId.rewards,
@@ -73,7 +101,7 @@ class SystemPages {
       firestoreId: 'rewards',
       defaultName: 'Récompenses',
       defaultIcon: Icons.card_giftcard,
-      isSystemPage: true,
+      isSystemPage: true, // Protected: rewards functionality
     ),
     BuilderPageId.roulette: SystemPageConfig(
       pageId: BuilderPageId.roulette,
@@ -81,7 +109,7 @@ class SystemPages {
       firestoreId: 'roulette',
       defaultName: 'Roulette',
       defaultIcon: Icons.casino,
-      isSystemPage: true,
+      isSystemPage: true, // Protected: roulette game functionality
     ),
   };
 
