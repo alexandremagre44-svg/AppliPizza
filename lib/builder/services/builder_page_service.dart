@@ -63,18 +63,11 @@ class BuilderPageService {
     final templateBlocks = _getTemplateBlocks(templateId);
     
     // Generate unique pageKey for custom pages (this is the Firestore doc ID)
+    // FIX F1: _generatePageId now prevents collision with system page IDs
     final pageKeyValue = _generatePageId(name);
     
-    // IMPORTANT: Custom pages must NEVER be linked to a BuilderPageId enum.
-    // Even if the generated pageKey matches a system page name (e.g., "menu", "home"),
-    // we explicitly set systemId: null to ensure proper separation.
-    // Defensive check: warn if the custom page name collides with a system page ID (debug only)
-    if (kDebugMode) {
-      final potentialCollision = BuilderPageId.tryFromString(pageKeyValue);
-      if (potentialCollision != null) {
-        debugPrint('[BuilderPageService] ⚠️ Custom page name collides with system page id: $pageKeyValue (treating as custom)');
-      }
-    }
+    // IMPORTANT: Custom pages NEVER have a systemId - this is ensured by _generatePageId
+    // which adds a unique suffix if the name would collide with a system page
     
     final page = BuilderPage(
       pageKey: pageKeyValue,
@@ -130,18 +123,11 @@ class BuilderPageService {
     int order = 999,
   }) async {
     // Generate unique pageKey for custom pages (this is the Firestore doc ID)
+    // FIX F1: _generatePageId now prevents collision with system page IDs
     final pageKeyValue = _generatePageId(name);
     
-    // IMPORTANT: Custom pages must NEVER be linked to a BuilderPageId enum.
-    // Even if the generated pageKey matches a system page name (e.g., "menu", "home"),
-    // we explicitly set systemId: null to ensure proper separation.
-    // Defensive check: warn if the custom page name collides with a system page ID (debug only)
-    if (kDebugMode) {
-      final potentialCollision = BuilderPageId.tryFromString(pageKeyValue);
-      if (potentialCollision != null) {
-        debugPrint('[BuilderPageService] ⚠️ Custom page name collides with system page id: $pageKeyValue (treating as custom)');
-      }
-    }
+    // IMPORTANT: Custom pages NEVER have a systemId - this is ensured by _generatePageId
+    // which adds a unique suffix if the name would collide with a system page
     
     final page = BuilderPage(
       pageKey: pageKeyValue,
@@ -1138,13 +1124,29 @@ class BuilderPageService {
   // ==================== PRIVATE HELPERS ====================
 
   /// Generate a unique pageId from a name
+  /// 
+  /// FIX F1: Prevents collision with system page IDs by adding unique suffix
+  /// If a generated ID matches a system page (home, menu, cart, profile, etc.),
+  /// we append a unique timestamp-based suffix to ensure no collision.
   String _generatePageId(String name) {
-    final processed = name
+    var processed = name
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
         .replaceAll(RegExp(r'^_|_$'), '');
     // Truncate to max 20 characters, using processed string length to avoid IndexError
-    return processed.substring(0, processed.length > 20 ? 20 : processed.length);
+    processed = processed.substring(0, processed.length > 20 ? 20 : processed.length);
+    
+    // FIX F1: COLLISION PREVENTION - Never allow custom pages to use system page IDs
+    // Check if generated ID matches any system page
+    final potentialCollision = BuilderPageId.tryFromString(processed);
+    if (potentialCollision != null) {
+      // Add unique suffix to prevent collision with system pages
+      final suffix = DateTime.now().millisecondsSinceEpoch % 100000;
+      processed = 'custom_${processed}_$suffix';
+      debugPrint('[BuilderPageService] ⚠️ Collision prevention: renamed to $processed');
+    }
+    
+    return processed;
   }
 
   /// Get template blocks based on template ID

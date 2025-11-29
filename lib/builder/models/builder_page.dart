@@ -244,10 +244,13 @@ class BuilderPage {
   }
 
   /// Convert to JSON for Firestore
+  /// 
+  /// FIX F2: Explicitly stores systemId field for proper round-trip
   Map<String, dynamic> toJson() {
     return {
       'pageKey': pageKey,
       'pageId': pageId?.toJson() ?? pageKey, // Use pageKey as fallback for custom pages
+      'systemId': systemId?.toJson(), // FIX F2: Explicitly store systemId (null for custom pages)
       'appId': appId,
       'name': name,
       'description': description,
@@ -342,16 +345,34 @@ class BuilderPage {
   }
 
   /// Create from Firestore JSON
+  /// 
+  /// FIX F2: systemId is NEVER inferred from pageKey
+  /// Only use explicit systemId field from Firestore. If missing, treat as custom page.
   factory BuilderPage.fromJson(Map<String, dynamic> json) {
-    // Extract pageKey (source of truth) - prefer explicit pageKey, then pageId, then doc id
-    final rawPageId = json['pageId'] as String? ?? json['pageKey'] as String? ?? 'home';
-    final pageKey = json['pageKey'] as String? ?? rawPageId;
+    // FIX F2: Extract pageKey (source of truth) - prefer explicit pageKey, then generate fallback
+    final rawPageKey = json['pageKey'] as String? ?? json['pageId'] as String?;
+    final pageKey = rawPageKey ?? 'unknown_${DateTime.now().millisecondsSinceEpoch}';
     
-    // Try to get system page ID (nullable for custom pages)
-    final systemId = BuilderPageId.tryFromString(rawPageId);
+    // FIX F2: NEVER derive systemId from pageKey
+    // Only use EXPLICIT systemId field from Firestore
+    // This prevents custom pages named "menu" or "home" from becoming system pages
+    BuilderPageId? systemId;
+    final explicitSystemId = json['systemId'] as String?;
+    if (explicitSystemId != null && explicitSystemId.isNotEmpty) {
+      // Only set systemId if it was EXPLICITLY stored in Firestore
+      systemId = BuilderPageId.tryFromString(explicitSystemId);
+    } else {
+      // Check if isSystemPage is explicitly true AND pageKey matches a known system page
+      // This handles legacy data where systemId wasn't stored but page is marked as system
+      final isExplicitlySystemPage = json['isSystemPage'] as bool? ?? false;
+      if (isExplicitlySystemPage) {
+        systemId = BuilderPageId.tryFromString(pageKey);
+      }
+      // If not explicitly marked as system page, systemId stays null (custom page)
+    }
     
     // pageId is now nullable - don't default to home for custom pages
-    // systemId is the same as pageId for system pages, null for custom pages
+    // For backward compatibility, pageId mirrors systemId
     final BuilderPageId? pageId = systemId;
     
     // Get system page config for proper defaults (only if this is a system page)
