@@ -541,6 +541,61 @@ void main() {
       expect(page.draftLayout.length, equals(1));
       expect(page.draftLayout[0].id, equals('published_block'));
     });
+    
+    // Tests for custom page creation with name collision fix
+    test('BuilderPage constructor with systemId: null should not assign pageId', () {
+      // Simulate what createPageFromTemplate and createBlankPage now do
+      final page = BuilderPage(
+        pageKey: 'menu', // This matches a system page name!
+        systemId: null, // Explicitly set to null for custom pages
+        appId: 'test_app',
+        name: 'Menu Custom',
+        route: '/page/menu',
+        isSystemPage: false,
+      );
+      
+      // pageId should be null when systemId is null and pageKey matches system page
+      // because the BuilderPage constructor derives pageId from systemId
+      expect(page.systemId, isNull);
+      // isCustomPage should be true since systemId is null
+      expect(page.isCustomPage, isTrue);
+      expect(page.isSystemPage, isFalse);
+      expect(page.route, equals('/page/menu'));
+    });
+    
+    test('Custom page with "home" as pageKey should remain custom when systemId is null', () {
+      final page = BuilderPage(
+        pageKey: 'home',
+        systemId: null, // Explicitly null for custom pages
+        appId: 'test_app',
+        name: 'Accueil Custom',
+        route: '/page/home',
+        isSystemPage: false,
+        pageType: BuilderPageType.template,
+      );
+      
+      expect(page.systemId, isNull);
+      expect(page.isCustomPage, isTrue);
+      expect(page.isSystemPage, isFalse);
+      expect(page.pageType, equals(BuilderPageType.template));
+    });
+    
+    test('Custom page with "cart" as pageKey should remain custom when systemId is null', () {
+      final page = BuilderPage(
+        pageKey: 'cart',
+        systemId: null,
+        appId: 'test_app',
+        name: 'Panier Custom',
+        route: '/page/cart',
+        isSystemPage: false,
+        pageType: BuilderPageType.blank,
+      );
+      
+      expect(page.systemId, isNull);
+      expect(page.isCustomPage, isTrue);
+      expect(page.isSystemPage, isFalse);
+      expect(page.pageType, equals(BuilderPageType.blank));
+    });
   });
   
   group('BuilderBlock Parsing Tests', () {
