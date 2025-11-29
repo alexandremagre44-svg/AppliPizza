@@ -88,8 +88,22 @@ enum BuilderPageId {
   /// Throws: [FormatException] if value is not a known page ID
   static BuilderPageId fromJson(String json) => fromString(json);
   
-  /// List of system page IDs that cannot be manually created
-  static const List<String> systemPageIds = ['profile', 'cart', 'rewards', 'roulette'];
+  /// List of system page IDs that are initialized with default blocks
+  /// 
+  /// Includes all pages that Firestore marks as isSystemPage: true:
+  /// - home, menu, promo, about, contact (content pages)
+  /// - profile, cart, rewards, roulette (functional pages)
+  static const List<String> systemPageIds = [
+    'home',
+    'menu', 
+    'promo',
+    'about',
+    'contact',
+    'profile',
+    'cart',
+    'rewards',
+    'roulette',
+  ];
   
   /// Check if this is a system page
   bool get isSystemPage => systemPageIds.contains(value);
