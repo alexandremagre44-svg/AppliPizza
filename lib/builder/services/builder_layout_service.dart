@@ -723,36 +723,31 @@ class BuilderLayoutService {
 
   /// Get pages for bottom navigation bar
   /// 
-  /// Returns pages where isActive == true and bottomNavIndex != null
+  /// Returns pages where isActive == true and bottomNavIndex is valid
   /// Sorted by bottomNavIndex ASC
   /// 
-  /// This is the NEW B3 logic that uses isActive + bottomNavIndex fields
-  /// instead of the old displayLocation + order fields
+  /// This is the NEW B3 logic that uses:
+  /// 1. loadAllPublishedPages as the source of truth
+  /// 2. _isBottomBarPage filter (strictly checks isActive == true)
+  /// 3. _sortByBottomNavIndex for ordering
+  /// 
+  /// Fix for 'Zombie Pages': Uses published pages as source of truth instead of
+  /// the stale pages_system collection, ensuring the admin 'Active' toggle works immediately.
   Future<List<BuilderPage>> getBottomBarPages({required String appId}) async {
     try {
-      // Load system pages first
-      final systemPages = await loadSystemPages(appId);
-      
-      // Filter for active pages with valid bottomNavIndex
-      // NEW LOGIC: isActive + bottomNavIndex < 999
-      final bottomBarPages = systemPages.where(_isBottomBarPage).toList();
-      
-      // If we have system pages, sort and return them
-      if (bottomBarPages.isNotEmpty) {
-        _sortByBottomNavIndex(bottomBarPages);
-        return bottomBarPages;
-      }
-      
-      // Fallback: Load from published pages if no system pages
+      // Load from published pages - the source of truth
+      // This ensures admin changes (like isActive=false) are reflected immediately
       final publishedPages = await loadAllPublishedPages(appId);
       
-      final publishedBottomBar = publishedPages.values
-        .where(_isBottomBarPage)
-        .toList();
+      // Filter using _isBottomBarPage which strictly checks isActive == true
+      final bottomBarPages = publishedPages.values
+          .where(_isBottomBarPage)
+          .toList();
       
-      _sortByBottomNavIndex(publishedBottomBar);
+      // Sort by bottomNavIndex
+      _sortByBottomNavIndex(bottomBarPages);
       
-      return publishedBottomBar;
+      return bottomBarPages;
     } catch (e) {
       debugPrint('Error loading bottom bar pages: $e');
       return [];
