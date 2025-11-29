@@ -170,7 +170,13 @@ String _generatePageId(String name) {
 
 **Problem:** `_generatePageId(name)` generates slugs that can match system page IDs.
 
-**Example:** User creates custom page "Menu" → pageKey="menu" → stored in pages_draft/menu → **OVERWRITES system menu page!**
+**Example:** User creates custom page "Menu" → pageKey="menu" → stored in pages_draft/menu → **collides with the system menu page document, replacing its content!**
+
+**Detailed collision behavior:**
+1. Both system and custom pages use pageKey as Firestore document ID
+2. If custom page has same pageKey as system page, they write to the same document
+3. The second write replaces all fields (except merge fields)
+4. Result: System page content is lost, replaced by custom page content
 
 **Current Mitigation Attempt (Insufficient):**
 ```dart
@@ -468,8 +474,11 @@ Missing: `menu_catalog`, `cart_module`, `profile_module` in SystemBlock.availabl
 **Flow:**
 1. Admin creates custom page "Profile" → pageKey="profile"
 2. `fromJson()` sets systemId = BuilderPageId.profile (incorrectly)
-3. Stored as pages_published/profile, overwriting actual profile page
-4. Same blocks now appear for both profile and cart (if cart was similarly affected)
+3. Stored as pages_published/profile, **replacing** the actual system profile page document
+4. This single document now has custom page content but system page properties
+5. If cart page was similarly affected (custom "Panier" → pageKey="cart" on French systems), both profile and cart could display similar corrupted content patterns
+
+**Important clarification:** There's only one document at pages_published/profile - the custom page replaces it entirely. The "same content" symptom occurs when both pages inherit the same corrupted template/blocks due to the collision.
 
 **Code Path:**
 - `builder_page_service.dart:66-76` _generatePageId
@@ -573,6 +582,7 @@ Missing: `menu_catalog`, `cart_module`, `profile_module` in SystemBlock.availabl
 
 1. **In _generatePageId() (line ~1141):**
    - Add suffix if generated ID matches system page
+   - Use unique suffix to avoid secondary collisions
    ```dart
    String _generatePageId(String name) {
      var processed = name
@@ -581,11 +591,36 @@ Missing: `menu_catalog`, `cart_module`, `profile_module` in SystemBlock.availabl
          .replaceAll(RegExp(r'^_|_$'), '');
      processed = processed.substring(0, processed.length > 20 ? 20 : processed.length);
      
-     // COLLISION PREVENTION: Add suffix if matches system page
+     // COLLISION PREVENTION: Add unique suffix if matches system page
+     if (BuilderPageId.tryFromString(processed) != null) {
+       // Use timestamp to guarantee uniqueness
+       final suffix = DateTime.now().millisecondsSinceEpoch % 10000;
+       processed = 'custom_${processed}_$suffix';
+     }
+     return processed;
+   }
+   ```
+   
+   **Alternative approach (check database):**
+   ```dart
+   // If you want to check for existing pages too:
+   Future<String> _generateUniquePageId(String name, String appId) async {
+     var processed = _sanitizeName(name);
+     
+     // Check for system page collision
      if (BuilderPageId.tryFromString(processed) != null) {
        processed = 'custom_$processed';
      }
-     return processed;
+     
+     // Check for existing custom page with same key
+     var attempt = 0;
+     var candidate = processed;
+     while (await _layoutService.hasDraft(appId, candidate) ||
+            await _layoutService.hasPublished(appId, candidate)) {
+       attempt++;
+       candidate = '${processed}_$attempt';
+     }
+     return candidate;
    }
    ```
 
@@ -616,8 +651,16 @@ Missing: `menu_catalog`, `cart_module`, `profile_module` in SystemBlock.availabl
 **Changes required (line ~346-355):**
 ```dart
 factory BuilderPage.fromJson(Map<String, dynamic> json) {
-  // 1. Extract explicit systemId if stored (should be stored as string)
-  final storedSystemId = json['systemId'] as String?;
+  // 1. Extract explicit systemId if stored
+  // Handle multiple storage formats: String, Map, or null
+  String? storedSystemId;
+  final rawSystemId = json['systemId'];
+  if (rawSystemId is String) {
+    storedSystemId = rawSystemId;
+  } else if (rawSystemId is Map && rawSystemId['value'] != null) {
+    storedSystemId = rawSystemId['value'] as String?;
+  }
+  // Note: If storedSystemId is null, the page is treated as custom
   
   // 2. Only set systemId if it was EXPLICITLY stored, not derived from pageKey
   final BuilderPageId? systemId = storedSystemId != null 
@@ -634,9 +677,19 @@ factory BuilderPage.fromJson(Map<String, dynamic> json) {
 }
 ```
 
-**Impact:** Custom pages no longer incorrectly marked as system
-**Backward Compatibility:** ⚠️ Requires adding explicit `systemId` field to toJson()
-**Firestore Cleanup:** Run migration to add explicit systemId field to existing documents
+**Migration strategy:**
+1. **Query phase:** Identify all documents in pages_draft and pages_published
+2. **Classification phase:** For each document:
+   - If `systemId` field exists and is valid → system page (no change needed)
+   - If `systemId` field is null but `pageKey` matches BuilderPageId enum → **infer** it's a system page and add explicit `systemId`
+   - If `pageKey` doesn't match any enum → custom page, ensure `systemId` stays null
+3. **Write phase:** Update documents with explicit `systemId` field
+4. **Rollback strategy:** Keep backup of original documents before migration; if errors occur, restore from backup
+
+**Edge case handling:**
+- Documents with corrupted `systemId` values: Set to null and log warning
+- Documents missing both `pageKey` and `pageId`: Generate fallback ID from document path
+- Type conversion errors: Wrap in try-catch, log, and skip with warning
 
 **Testing Checklist:**
 - [ ] Load existing system page → systemId correctly set
@@ -768,14 +821,34 @@ Option B: Align both sources
 - `lib/builder/page_list/new_page_dialog_v2.dart`
 
 **Changes required:**
-Remove templates: `cart_template`, `profile_template`, `roulette_template`
+Filter templates to keep only content-focused templates, remove system page templates:
 
 ```dart
 const List<PageTemplate> availableTemplates = [
-  // Keep: home_template, menu_template, promo_template, about_template, contact_template
-  // Remove: cart_template, profile_template, roulette_template
+  // KEEP: Content templates (these generate custom pages with unique pageKeys)
+  PageTemplate(id: 'home_template', ...),   // Creates custom landing page, NOT system /home
+  PageTemplate(id: 'menu_template', ...),   // Creates custom menu page, NOT system /menu
+  PageTemplate(id: 'promo_template', ...),
+  PageTemplate(id: 'about_template', ...),
+  PageTemplate(id: 'contact_template', ...),
+  
+  // REMOVE: System page templates (these suggest creating system pages)
+  // - cart_template (remove)
+  // - profile_template (remove)
+  // - roulette_template (remove)
 ];
 ```
+
+**Clarification on home_template and menu_template:**
+- These templates are **safe** because they generate **content blocks** (hero, product list, etc.)
+- The generated pageKey will be derived from the user-provided name, NOT "home" or "menu"
+- Example: User picks "home_template", names it "Landing Page" → pageKey="landing_page"
+- The collision prevention fix (Fix 1) ensures even if they name it "Home", it becomes "custom_home_12345"
+
+**Why system templates should be removed:**
+- cart_template, profile_template, roulette_template suggest creating these system pages
+- They would generate pageKey "panier", "profil", "roulette" which could collide
+- These pages should only be edited via the existing system page editor, not created from templates
 
 **Impact:** Users can't accidentally create system pages from templates
 **Backward Compatibility:** ✅ Only removes options
