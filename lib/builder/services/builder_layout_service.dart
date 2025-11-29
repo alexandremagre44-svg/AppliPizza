@@ -170,17 +170,19 @@ class BuilderLayoutService {
         }
         
         // Draft exists but draftLayout is empty - try to sync from published
-        debugPrint('⚠️ Draft exists but draftLayout is empty for $pageId, checking published...');
+        final pageIdStr = _toPageIdString(pageId);
+        debugPrint('⚠️ Draft exists but draftLayout is empty for $pageIdStr, checking published...');
       }
 
       // Case 2: Draft doesn't exist or has empty draftLayout - try published version
       final publishedPage = await loadPublished(appId, pageId);
       if (publishedPage != null && publishedPage.publishedLayout.isNotEmpty) {
-        debugPrint('📋 Creating draft from published content for $pageId');
+        final pageIdStr = _toPageIdString(pageId);
+        debugPrint('📋 Creating draft from published content for $pageIdStr');
         // Create a fresh draft by copying publishedLayout into draftLayout
         return publishedPage.copyWith(
           isDraft: true,
-          draftLayout: List.from(publishedPage.publishedLayout),
+          draftLayout: publishedPage.publishedLayout.toList(),
           hasUnpublishedChanges: false,
         );
       }
