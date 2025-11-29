@@ -68,10 +68,12 @@ class BuilderPageService {
     // IMPORTANT: Custom pages must NEVER be linked to a BuilderPageId enum.
     // Even if the generated pageKey matches a system page name (e.g., "menu", "home"),
     // we explicitly set systemId: null to ensure proper separation.
-    // Defensive check: warn if the custom page name collides with a system page ID
-    final potentialCollision = BuilderPageId.tryFromString(pageKeyValue);
-    if (potentialCollision != null) {
-      debugPrint('[BuilderPageService] ⚠️ Custom page name collides with system page id: $pageKeyValue (treating as custom)');
+    // Defensive check: warn if the custom page name collides with a system page ID (debug only)
+    if (kDebugMode) {
+      final potentialCollision = BuilderPageId.tryFromString(pageKeyValue);
+      if (potentialCollision != null) {
+        debugPrint('[BuilderPageService] ⚠️ Custom page name collides with system page id: $pageKeyValue (treating as custom)');
+      }
     }
     
     final page = BuilderPage(
@@ -133,10 +135,12 @@ class BuilderPageService {
     // IMPORTANT: Custom pages must NEVER be linked to a BuilderPageId enum.
     // Even if the generated pageKey matches a system page name (e.g., "menu", "home"),
     // we explicitly set systemId: null to ensure proper separation.
-    // Defensive check: warn if the custom page name collides with a system page ID
-    final potentialCollision = BuilderPageId.tryFromString(pageKeyValue);
-    if (potentialCollision != null) {
-      debugPrint('[BuilderPageService] ⚠️ Custom page name collides with system page id: $pageKeyValue (treating as custom)');
+    // Defensive check: warn if the custom page name collides with a system page ID (debug only)
+    if (kDebugMode) {
+      final potentialCollision = BuilderPageId.tryFromString(pageKeyValue);
+      if (potentialCollision != null) {
+        debugPrint('[BuilderPageService] ⚠️ Custom page name collides with system page id: $pageKeyValue (treating as custom)');
+      }
     }
     
     final page = BuilderPage(
@@ -1135,11 +1139,12 @@ class BuilderPageService {
 
   /// Generate a unique pageId from a name
   String _generatePageId(String name) {
-    return name
+    final processed = name
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
-        .replaceAll(RegExp(r'^_|_$'), '')
-        .substring(0, name.length > 20 ? 20 : name.length);
+        .replaceAll(RegExp(r'^_|_$'), '');
+    // Truncate to max 20 characters, using processed string length to avoid IndexError
+    return processed.substring(0, processed.length > 20 ? 20 : processed.length);
   }
 
   /// Get template blocks based on template ID
