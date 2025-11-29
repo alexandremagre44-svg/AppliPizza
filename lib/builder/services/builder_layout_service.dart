@@ -175,16 +175,29 @@ class BuilderLayoutService {
       }
 
       // Case 2: Draft doesn't exist or has empty draftLayout - try published version
+      // SELF-HEAL FIX: Persist the draft to Firestore so editor always has content
       final publishedPage = await loadPublished(appId, pageId);
       if (publishedPage != null && publishedPage.publishedLayout.isNotEmpty) {
         final pageIdStr = _toPageIdString(pageId);
-        debugPrint('📋 Creating draft from published content for $pageIdStr');
+        debugPrint('📋 [SELF-HEAL] Creating and PERSISTING draft from published for $pageIdStr');
+        
         // Create a fresh draft by copying publishedLayout into draftLayout
-        return publishedPage.copyWith(
+        final newDraft = publishedPage.copyWith(
           isDraft: true,
           draftLayout: publishedPage.publishedLayout.toList(),
           hasUnpublishedChanges: false,
         );
+        
+        // CRITICAL: Persist to Firestore immediately (draft only, NEVER publish)
+        // This ensures the editor won't load stale/empty data on next access
+        try {
+          await saveDraft(newDraft);
+          debugPrint('✅ [SELF-HEAL] Draft persisted to pages_draft/$pageIdStr');
+        } catch (saveError) {
+          debugPrint('⚠️ [SELF-HEAL] Failed to persist draft: $saveError (returning in-memory copy)');
+        }
+        
+        return newDraft;
       }
 
       // Case 3: Neither draft nor published have content
