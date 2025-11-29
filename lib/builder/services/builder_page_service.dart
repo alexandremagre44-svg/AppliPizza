@@ -65,12 +65,18 @@ class BuilderPageService {
     // Generate unique pageKey for custom pages (this is the Firestore doc ID)
     final pageKeyValue = _generatePageId(name);
     
-    // Try to get system page ID (null for custom pages)
-    final systemId = BuilderPageId.tryFromString(pageKeyValue);
+    // IMPORTANT: Custom pages must NEVER be linked to a BuilderPageId enum.
+    // Even if the generated pageKey matches a system page name (e.g., "menu", "home"),
+    // we explicitly set systemId: null to ensure proper separation.
+    // Defensive check: warn if the custom page name collides with a system page ID
+    final potentialCollision = BuilderPageId.tryFromString(pageKeyValue);
+    if (potentialCollision != null) {
+      debugPrint('[BuilderPageService] ⚠️ Custom page name collides with system page id: $pageKeyValue (treating as custom)');
+    }
     
     final page = BuilderPage(
       pageKey: pageKeyValue,
-      systemId: systemId,
+      systemId: null, // Custom pages NEVER have a systemId
       appId: appId,
       name: name,
       description: description ?? 'Page créée depuis le template $templateId',
@@ -85,6 +91,7 @@ class BuilderPageService {
       // New fields
       pageType: BuilderPageType.template,
       isActive: true,
+      isSystemPage: false, // Explicitly mark as custom page
       bottomNavIndex: order,
       modules: [],
       draftLayout: templateBlocks,
@@ -95,7 +102,8 @@ class BuilderPageService {
     // Save as draft
     await _layoutService.saveDraft(page);
     
-    debugPrint('[BuilderPageService] ✅ Created page from template: $templateId → ${page.name} (pageKey: $pageKeyValue)');
+    debugPrint('[BuilderPageService] ✅ Created CUSTOM page: ${page.name} '
+        '(pageKey: ${page.pageKey}, route: ${page.route}, systemId: ${page.systemId})');
     return page;
   }
 
@@ -122,12 +130,18 @@ class BuilderPageService {
     // Generate unique pageKey for custom pages (this is the Firestore doc ID)
     final pageKeyValue = _generatePageId(name);
     
-    // Try to get system page ID (null for custom pages)
-    final systemId = BuilderPageId.tryFromString(pageKeyValue);
+    // IMPORTANT: Custom pages must NEVER be linked to a BuilderPageId enum.
+    // Even if the generated pageKey matches a system page name (e.g., "menu", "home"),
+    // we explicitly set systemId: null to ensure proper separation.
+    // Defensive check: warn if the custom page name collides with a system page ID
+    final potentialCollision = BuilderPageId.tryFromString(pageKeyValue);
+    if (potentialCollision != null) {
+      debugPrint('[BuilderPageService] ⚠️ Custom page name collides with system page id: $pageKeyValue (treating as custom)');
+    }
     
     final page = BuilderPage(
       pageKey: pageKeyValue,
-      systemId: systemId,
+      systemId: null, // Custom pages NEVER have a systemId
       appId: appId,
       name: name,
       description: description ?? 'Page vierge',
@@ -142,6 +156,7 @@ class BuilderPageService {
       // New fields
       pageType: BuilderPageType.blank,
       isActive: true,
+      isSystemPage: false, // Explicitly mark as custom page
       bottomNavIndex: order,
       modules: [],
       draftLayout: [],
@@ -152,7 +167,8 @@ class BuilderPageService {
     // Save as draft
     await _layoutService.saveDraft(page);
     
-    debugPrint('[BuilderPageService] ✅ Created blank page: ${page.name} (pageKey: $pageKeyValue)');
+    debugPrint('[BuilderPageService] ✅ Created CUSTOM blank page: ${page.name} '
+        '(pageKey: ${page.pageKey}, route: ${page.route}, systemId: ${page.systemId})');
     return page;
   }
 
