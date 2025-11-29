@@ -222,8 +222,8 @@ class BuilderNavigationService {
               'title': 'Bienvenue',
               'subtitle': 'Découvrez nos délicieuses pizzas',
               'imageUrl': '',
-              'ctaText': 'Voir le menu',
-              'ctaAction': {'type': 'navigate', 'target': '/menu'},
+              'buttonLabel': 'Voir le menu',
+              'tapAction': {'type': 'openPage', 'value': '/menu'},
             },
           ),
           BuilderBlock(
@@ -231,10 +231,11 @@ class BuilderNavigationService {
             type: BlockType.productList,
             order: 1,
             config: {
-              'mode': 'featured',
-              'layout': 'horizontal',
               'title': 'Nos spécialités',
+              'mode': 'featured',
+              'layout': 'grid',
               'limit': 4,
+              'columns': 2,
             },
           ),
         ];
