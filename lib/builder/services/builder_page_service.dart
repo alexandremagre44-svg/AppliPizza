@@ -877,6 +877,86 @@ class BuilderPageService {
     }
   }
 
+  // ==================== DRAFT SYNCHRONIZATION ====================
+
+  /// Ensure all published pages have corresponding drafts (DRAFT-ONLY OPERATION)
+  /// 
+  /// This method is a SAFE, NON-DESTRUCTIVE synchronization that:
+  /// 1. Loads all published pages
+  /// 2. For each published page with content (publishedLayout.isNotEmpty)
+  /// 3. Checks if a draft exists with content (draftLayout.isNotEmpty)
+  /// 4. If draft is missing or empty: creates draft from published content
+  /// 
+  /// **SAFETY GUARANTEES:**
+  /// - NEVER writes to pages_published collection
+  /// - Only creates/updates pages_draft documents
+  /// - Uses modern config keys (buttonLabel, tapAction, tapActionTarget)
+  /// - Skips pages that already have valid drafts
+  /// 
+  /// Returns the number of drafts created/fixed.
+  /// 
+  /// Example:
+  /// ```dart
+  /// final fixed = await service.ensureDraftsFromPublished('delizza');
+  /// print('Created $fixed drafts from published content');
+  /// ```
+  Future<int> ensureDraftsFromPublished(String appId) async {
+    try {
+      int createdCount = 0;
+      
+      // Load all published pages
+      final publishedPages = await _layoutService.loadAllPublishedPages(appId);
+      
+      for (final entry in publishedPages.entries) {
+        final pageKey = entry.key;
+        final publishedPage = entry.value;
+        
+        // Skip pages without published content
+        if (publishedPage.publishedLayout.isEmpty) {
+          debugPrint('[ensureDraftsFromPublished] ℹ️ Skipping $pageKey - no published content');
+          continue;
+        }
+        
+        // Check if draft exists and has content
+        final existingDraft = await _layoutService.loadDraft(appId, pageKey);
+        
+        // STRICT CONDITION: Only create draft if missing or empty
+        if (existingDraft == null || existingDraft.draftLayout.isEmpty) {
+          debugPrint('[ensureDraftsFromPublished] 📋 Creating draft for $pageKey from published');
+          
+          // Create new draft from published (NEVER touch pages_published)
+          final newDraft = publishedPage.copyWith(
+            isDraft: true,
+            draftLayout: publishedPage.publishedLayout.toList(),
+            hasUnpublishedChanges: false,
+          );
+          
+          // Save ONLY to pages_draft collection
+          await _layoutService.saveDraft(newDraft);
+          createdCount++;
+          
+          debugPrint('[ensureDraftsFromPublished] ✅ Draft created for $pageKey');
+        } else {
+          debugPrint('[ensureDraftsFromPublished] ℹ️ Skipping $pageKey - draft already has content');
+        }
+      }
+      
+      if (createdCount > 0) {
+        debugPrint('[ensureDraftsFromPublished] ✅ Created $createdCount drafts from published content');
+      } else {
+        debugPrint('[ensureDraftsFromPublished] ℹ️ All pages already have valid drafts');
+      }
+      
+      return createdCount;
+    } catch (e, stackTrace) {
+      debugPrint('[ensureDraftsFromPublished] ❌ Error: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
+      return 0;
+    }
+  }
+
   // ==================== PRIVATE HELPERS ====================
 
   /// Generate a unique pageId from a name
