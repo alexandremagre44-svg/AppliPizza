@@ -116,6 +116,20 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       // Load draft, or create default if none exists
       var page = await _service.loadDraft(widget.appId, pageIdentifier);
       
+      // SURGICAL FIX: For system pages with empty draft, try to initialize with default content
+      // This only triggers if BOTH draft AND published are empty (checked in initializeSpecificPageDraft)
+      if (page != null && page.draftLayout.isEmpty && widget.pageId != null) {
+        debugPrint('[EditorScreen] 📋 System page ${widget.pageId!.value} has empty draft, attempting initialization...');
+        final initializedPage = await _pageService.initializeSpecificPageDraft(
+          widget.appId,
+          widget.pageId!,
+        );
+        if (initializedPage != null) {
+          page = initializedPage;
+          debugPrint('[EditorScreen] ✅ Page initialized with default content');
+        }
+      }
+      
       if (page == null && widget.pageId != null) {
         // Only auto-create for system pages (those with BuilderPageId)
         page = await _service.createDefaultPage(

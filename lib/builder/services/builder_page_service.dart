@@ -877,83 +877,158 @@ class BuilderPageService {
     }
   }
 
-  // ==================== DRAFT SYNCHRONIZATION ====================
+  // ==================== SPECIFIC PAGE INITIALIZATION ====================
 
-  /// Ensure all published pages have corresponding drafts (DRAFT-ONLY OPERATION)
+  /// Initialize a SPECIFIC system page's draft when both draft and published are empty
   /// 
-  /// This method is a SAFE, NON-DESTRUCTIVE synchronization that:
-  /// 1. Loads all published pages
-  /// 2. For each published page with content (publishedLayout.isNotEmpty)
-  /// 3. Checks if a draft exists with content (draftLayout.isNotEmpty)
-  /// 4. If draft is missing or empty: creates draft from published content
+  /// This method is a SURGICAL, SINGLE-PAGE operation that:
+  /// 1. Checks if this specific page has empty draft AND empty published layouts
+  /// 2. If both are empty: creates a draft with default system module blocks
+  /// 3. Saves ONLY to pages_draft collection
   /// 
   /// **SAFETY GUARANTEES:**
   /// - NEVER writes to pages_published collection
-  /// - Only creates/updates pages_draft documents
+  /// - Only initializes the SINGLE page specified by pageId
+  /// - Only triggers if BOTH draftLayout AND publishedLayout are empty
   /// - Uses modern config keys (buttonLabel, tapAction, tapActionTarget)
-  /// - Skips pages that already have valid drafts
+  /// - Does NOT scan or modify any other pages
   /// 
-  /// Returns the number of drafts created/fixed.
+  /// Returns the initialized page, or null if initialization was not needed.
   /// 
   /// Example:
   /// ```dart
-  /// final fixed = await service.ensureDraftsFromPublished('delizza');
-  /// print('Created $fixed drafts from published content');
+  /// final page = await service.initializeSpecificPageDraft('delizza', BuilderPageId.cart);
+  /// if (page != null) print('Page initialized');
   /// ```
-  Future<int> ensureDraftsFromPublished(String appId) async {
+  Future<BuilderPage?> initializeSpecificPageDraft(String appId, BuilderPageId pageId) async {
     try {
-      int createdCount = 0;
+      // Load ONLY this specific page's draft
+      final existingDraft = await _layoutService.loadDraft(appId, pageId);
       
-      // Load all published pages
-      final publishedPages = await _layoutService.loadAllPublishedPages(appId);
+      // Load ONLY this specific page's published version
+      final publishedPage = await _layoutService.loadPublished(appId, pageId);
       
-      for (final entry in publishedPages.entries) {
-        final pageKey = entry.key;
-        final publishedPage = entry.value;
-        
-        // Skip pages without published content
-        if (publishedPage.publishedLayout.isEmpty) {
-          debugPrint('[ensureDraftsFromPublished] ℹ️ Skipping $pageKey - no published content');
-          continue;
-        }
-        
-        // Check if draft exists and has content
-        final existingDraft = await _layoutService.loadDraft(appId, pageKey);
-        
-        // STRICT CONDITION: Only create draft if missing or empty
-        if (existingDraft == null || existingDraft.draftLayout.isEmpty) {
-          debugPrint('[ensureDraftsFromPublished] 📋 Creating draft for $pageKey from published');
-          
-          // Create new draft from published (NEVER touch pages_published)
-          final newDraft = publishedPage.copyWith(
-            isDraft: true,
-            draftLayout: publishedPage.publishedLayout.toList(),
-            hasUnpublishedChanges: false,
-          );
-          
-          // Save ONLY to pages_draft collection
-          await _layoutService.saveDraft(newDraft);
-          createdCount++;
-          
-          debugPrint('[ensureDraftsFromPublished] ✅ Draft created for $pageKey');
-        } else {
-          debugPrint('[ensureDraftsFromPublished] ℹ️ Skipping $pageKey - draft already has content');
-        }
+      // Check if draft already has content
+      final draftHasContent = existingDraft != null && existingDraft.draftLayout.isNotEmpty;
+      
+      // Check if published has content
+      final publishedHasContent = publishedPage != null && publishedPage.publishedLayout.isNotEmpty;
+      
+      // STRICT CONDITION: Only initialize if BOTH are empty
+      if (draftHasContent || publishedHasContent) {
+        debugPrint('[initializeSpecificPageDraft] ℹ️ Skipping ${pageId.value} - already has content');
+        return null;
       }
       
-      if (createdCount > 0) {
-        debugPrint('[ensureDraftsFromPublished] ✅ Created $createdCount drafts from published content');
-      } else {
-        debugPrint('[ensureDraftsFromPublished] ℹ️ All pages already have valid drafts');
+      // Get default blocks for this specific system page
+      final defaultBlocks = _getDefaultBlocksForSystemPage(pageId);
+      
+      if (defaultBlocks.isEmpty) {
+        debugPrint('[initializeSpecificPageDraft] ℹ️ No default blocks for ${pageId.value}');
+        return null;
       }
       
-      return createdCount;
+      // Create the draft page with default content
+      final newDraft = BuilderPage(
+        pageKey: pageId.value,
+        systemId: pageId,
+        appId: appId,
+        name: pageId.label,
+        route: '/${pageId.value}',
+        blocks: defaultBlocks.toList(), // Create independent copy
+        draftLayout: defaultBlocks.toList(), // Create independent copy
+        publishedLayout: const [], // DO NOT POPULATE - draft only
+        isEnabled: true,
+        isDraft: true,
+        isActive: true,
+        isSystemPage: pageId.isSystemPage,
+        hasUnpublishedChanges: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      
+      // Save ONLY to pages_draft collection (NEVER to pages_published)
+      await _layoutService.saveDraft(newDraft);
+      
+      debugPrint('[initializeSpecificPageDraft] ✅ Initialized draft for ${pageId.value}');
+      return newDraft;
     } catch (e, stackTrace) {
-      debugPrint('[ensureDraftsFromPublished] ❌ Error: $e');
+      debugPrint('[initializeSpecificPageDraft] ❌ Error for ${pageId.value}: $e');
       if (kDebugMode) {
         debugPrint('Stack trace: $stackTrace');
       }
-      return 0;
+      return null;
+    }
+  }
+
+  /// Get default blocks for a specific system page
+  /// Uses modern config keys (buttonLabel, tapAction, tapActionTarget)
+  List<BuilderBlock> _getDefaultBlocksForSystemPage(BuilderPageId pageId) {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    
+    switch (pageId) {
+      case BuilderPageId.home:
+        return [
+          BuilderBlock(
+            id: 'hero_init_$timestamp',
+            type: BlockType.hero,
+            order: 0,
+            config: {
+              'title': 'Bienvenue',
+              'subtitle': 'Découvrez nos délicieuses pizzas',
+              'imageUrl': '',
+              'buttonLabel': 'Voir le menu',
+              'tapAction': 'openPage',
+              'tapActionTarget': '/menu',
+            },
+          ),
+          BuilderBlock(
+            id: 'product_list_init_$timestamp',
+            type: BlockType.productList,
+            order: 1,
+            config: {
+              'title': 'Nos spécialités',
+              'mode': 'featured',
+              'layout': 'grid',
+              'limit': 4,
+              'columns': 2,
+            },
+          ),
+        ];
+      case BuilderPageId.cart:
+        return [
+          SystemBlock(
+            id: 'cart_module_init_$timestamp',
+            moduleType: 'cart_module',
+            order: 0,
+          ),
+        ];
+      case BuilderPageId.menu:
+        return [
+          SystemBlock(
+            id: 'menu_catalog_init_$timestamp',
+            moduleType: 'menu_catalog',
+            order: 0,
+          ),
+        ];
+      case BuilderPageId.profile:
+        return [
+          SystemBlock(
+            id: 'profile_module_init_$timestamp',
+            moduleType: 'profile_module',
+            order: 0,
+          ),
+        ];
+      case BuilderPageId.roulette:
+        return [
+          SystemBlock(
+            id: 'roulette_module_init_$timestamp',
+            moduleType: 'roulette_module',
+            order: 0,
+          ),
+        ];
+      default:
+        return [];
     }
   }
 
