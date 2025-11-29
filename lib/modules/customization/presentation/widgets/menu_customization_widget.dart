@@ -1,7 +1,12 @@
-// lib/src/screens/menu/menu_customization_modal.dart
-// TODO: Uses legacy version. Bridge to new module under construction.
-// Nouveau module: lib/modules/customization/presentation/widgets/menu_customization_widget.dart
-// Ce fichier reste la source ACTIVE pour l'instant. Ne pas modifier sans coordination.
+// lib/modules/customization/presentation/widgets/menu_customization_widget.dart
+// TODO: migration future — ce fichier est une copie, le code original reste la source active.
+// Source originale: lib/src/screens/menu/menu_customization_modal.dart
+//
+// Ce widget gère la personnalisation d'un menu avec :
+// - Sélection des pizzas (selon le nombre dans le menu)
+// - Sélection des boissons (selon le nombre dans le menu)
+// - Validation que toutes les sélections sont complètes
+// - Ajout au panier avec description personnalisée
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

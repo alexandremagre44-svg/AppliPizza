@@ -1,4 +1,8 @@
 // lib/src/providers/ingredient_provider.dart
+// TODO: Uses legacy version. Bridge to new module under construction.
+// Nouveau module: lib/modules/customization/data/providers/customization_providers.dart
+// Ce fichier reste la source ACTIVE pour l'instant. Ne pas modifier sans coordination.
+// 
 // Provider pour gérer l'état des ingrédients
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
