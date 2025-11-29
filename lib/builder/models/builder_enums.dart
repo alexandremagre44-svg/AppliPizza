@@ -1,6 +1,8 @@
 // lib/builder/models/builder_enums.dart
 // Enums for Builder B3 system
 
+import 'system_pages.dart';
+
 /// Page identifiers for different app pages
 /// 
 /// Extensible enum for multi-page support.
@@ -88,11 +90,14 @@ enum BuilderPageId {
   /// Throws: [FormatException] if value is not a known page ID
   static BuilderPageId fromJson(String json) => fromString(json);
   
-  /// List of system page IDs that are initialized with default blocks
+  /// List of known page IDs for the Builder system
   /// 
-  /// Includes all pages that Firestore marks as isSystemPage: true:
-  /// - home, menu, promo, about, contact (content pages)
-  /// - profile, cart, rewards, roulette (functional pages)
+  /// This list includes all BuilderPageId values:
+  /// - home, menu, promo, about, contact (content pages, isSystemPage: false)
+  /// - profile, cart, rewards, roulette (protected functional pages, isSystemPage: true)
+  /// 
+  /// Note: The isSystemPage property is determined by the SystemPages registry,
+  /// not by membership in this list. This list is primarily used for ID validation.
   static const List<String> systemPageIds = [
     'home',
     'menu', 
@@ -105,8 +110,25 @@ enum BuilderPageId {
     'roulette',
   ];
   
-  /// Check if this is a system page
-  bool get isSystemPage => systemPageIds.contains(value);
+  /// Check if this is a protected system page
+  /// 
+  /// FIX M3: Aligned with SystemPages registry to use a single source of truth.
+  /// This getter now delegates to SystemPages.isSystemPage() when the config exists.
+  /// 
+  /// Protected system pages (cart, profile, rewards, roulette) return true.
+  /// Content pages (home, menu, promo, about, contact) return false per SystemPages config.
+  /// 
+  /// Note: "protected" means the page cannot be deleted and its pageId cannot be changed.
+  bool get isSystemPage {
+    // Check if this page is in the SystemPages registry
+    final config = SystemPages.getConfig(this);
+    if (config != null) {
+      return config.isSystemPage;
+    }
+    // All BuilderPageId values should be in the registry
+    // If not found, default to false (not protected)
+    return false;
+  }
 }
 
 /// Block types for different content components

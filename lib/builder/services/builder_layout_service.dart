@@ -652,6 +652,11 @@ class BuilderLayoutService {
   /// Load a specific system page by pageId
   /// 
   /// Path: restaurants/{restaurantId}/pages_system/{pageId}
+  /// 
+  /// @deprecated Use [loadPublished] instead. The pages_system collection is legacy
+  /// and being phased out. All page data now lives in pages_published collection.
+  /// This method is maintained for backward compatibility during transition.
+  @Deprecated('Use loadPublished() instead. pages_system collection is legacy.')
   Future<BuilderPage?> loadSystemPage(String appId, BuilderPageId pageId) async {
     try {
       final docRef = FirestorePaths.systemPageDoc(pageId.value, appId);
@@ -675,6 +680,11 @@ class BuilderLayoutService {
   }
 
   /// Watch system pages for real-time updates
+  /// 
+  /// @deprecated Use pages_published collection instead. The pages_system collection is legacy
+  /// and being phased out. Consider watching pages_published and filtering by isSystemPage.
+  /// This method is maintained for backward compatibility during transition.
+  @Deprecated('Use pages_published collection instead. pages_system is legacy.')
   Stream<List<BuilderPage>> watchSystemPages(String appId) {
     return FirestorePaths.pagesSystem(appId).snapshots().map((snapshot) {
       final pages = <BuilderPage>[];

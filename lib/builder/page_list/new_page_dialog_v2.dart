@@ -24,6 +24,13 @@ class PageTemplate {
 }
 
 /// Available templates for page creation
+/// 
+/// FIX N1 / Fix 6: Removed system page templates (cart_template, profile_template, roulette_template)
+/// These templates were removed because:
+/// - They suggest creating system pages which could cause collision/confusion
+/// - System pages (cart, profile, roulette) should only be edited, not created from templates
+/// - The remaining templates (home, menu, promo, about, contact) generate CUSTOM pages
+///   with unique pageKeys derived from user-provided names, never matching system pages
 const List<PageTemplate> availableTemplates = [
   PageTemplate(
     id: 'home_template',
@@ -60,27 +67,8 @@ const List<PageTemplate> availableTemplates = [
     icon: Icons.contact_mail,
     color: Colors.green,
   ),
-  PageTemplate(
-    id: 'cart_template',
-    name: 'Panier',
-    description: 'Page panier (système)',
-    icon: Icons.shopping_cart,
-    color: Colors.purple,
-  ),
-  PageTemplate(
-    id: 'roulette_template',
-    name: 'Roulette',
-    description: 'Roue de la chance (système)',
-    icon: Icons.casino,
-    color: Colors.amber,
-  ),
-  PageTemplate(
-    id: 'profile_template',
-    name: 'Profil',
-    description: 'Page profil utilisateur (système)',
-    icon: Icons.person,
-    color: Colors.indigo,
-  ),
+  // FIX N1: Removed cart_template, roulette_template, profile_template
+  // These system pages should be edited via the system page editor, not created from templates
 ];
 
 /// Enhanced dialog for creating new Builder pages
@@ -410,7 +398,36 @@ class _NewPageDialogV2State extends State<NewPageDialogV2> {
           ),
           textCapitalization: TextCapitalization.sentences,
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
+        // FIX F3: Informational note about reserved page IDs
+        // Note: The actual collision prevention is handled by _generatePageId() in BuilderPageService (FIX F1)
+        // which adds a unique suffix (custom_xxx_12345) when the name matches a system page
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.amber.shade50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.amber.shade200),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.info_outline, color: Colors.amber.shade700, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Note: Si vous nommez votre page "Menu", "Home", "Cart", "Profile", etc., '
+                  'l\'ID sera automatiquement modifié pour éviter les conflits avec les pages système.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.amber.shade800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
