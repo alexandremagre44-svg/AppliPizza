@@ -1107,10 +1107,11 @@ class BuilderPageService {
         return [
           SystemBlock(
             id: 'rewards_module_init_$timestamp',
-            moduleType: 'rewards_module',
+            moduleType: 'rewards',
             order: 0,
           ),
         ];
+      // No default case needed - all BuilderPageId enum values are handled
     }
   }
 
