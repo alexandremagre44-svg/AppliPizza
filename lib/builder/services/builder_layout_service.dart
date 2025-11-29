@@ -723,12 +723,12 @@ class BuilderLayoutService {
 
   /// Get pages for bottom navigation bar
   /// 
-  /// Returns pages where isActive == true and bottomNavIndex is valid
+  /// Returns pages where isActive == true and bottomNavIndex is valid (>= 0 and <= 4)
   /// Sorted by bottomNavIndex ASC
   /// 
   /// This is the NEW B3 logic that uses:
   /// 1. loadAllPublishedPages as the source of truth
-  /// 2. _isBottomBarPage filter (strictly checks isActive == true)
+  /// 2. _isBottomBarPage filter (strictly checks isActive == true and bottomNavIndex 0-4)
   /// 3. _sortByBottomNavIndex for ordering
   /// 
   /// Fix for 'Zombie Pages': Uses published pages as source of truth instead of
