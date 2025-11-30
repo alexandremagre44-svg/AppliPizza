@@ -254,7 +254,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       }
 
       // Publish the theme
-      await _themeService.publishTheme(widget.appId, userId: 'admin');
+      await _themeService.publishTheme(widget.appId, userId: 'admin'); // TODO: Get from auth
 
       if (mounted) {
         setState(() {
@@ -278,7 +278,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   /// Reset theme to default values
   Future<void> _onThemeResetToDefaults() async {
     try {
-      await _themeService.resetToDefaults(widget.appId, userId: 'admin');
+      await _themeService.resetToDefaults(widget.appId, userId: 'admin'); // TODO: Get from auth
       await _loadDraftTheme();
       
       if (mounted) {
