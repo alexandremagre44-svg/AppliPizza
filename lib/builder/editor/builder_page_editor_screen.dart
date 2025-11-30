@@ -4,12 +4,20 @@
 // PHASE 7: Enhanced with all block fields, tap actions, auto-save, and page creation
 // PHASE 8E: System page protections and SystemBlock protections
 // PHASE 9: Modern UI redesign with Material 3 components
+//
+// GLOBAL THEME SELECTION MODE:
+// The editor now supports a "theme selection" mode where:
+// - _isThemeSelected == true: Right panel shows only ThemePropertiesPanel
+// - _isThemeSelected == false: Normal mode with Page/Bloc/Nav tabs
+// This is triggered by clicking the "🎨 Thème de l'application" button in the left sidebar.
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/models.dart';
+import '../models/theme_config.dart';
 import '../services/services.dart';
+import '../services/theme_service.dart';
 import '../exceptions/builder_exceptions.dart';
 import '../preview/preview.dart';
 import '../utils/responsive.dart';
@@ -17,6 +25,8 @@ import '../utils/action_helper.dart';
 import '../utils/icon_helper.dart';
 import 'new_page_dialog.dart';
 import 'widgets/icon_picker_dialog.dart';
+import 'widgets/builder_properties_panel.dart';
+import 'panels/theme_properties_panel.dart';
 
 /// Builder Page Editor Screen
 /// 
@@ -52,6 +62,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   
   final BuilderLayoutService _service = BuilderLayoutService();
   final BuilderPageService _pageService = BuilderPageService();
+  final ThemeService _themeService = ThemeService();
   BuilderPage? _page;
   bool _isLoading = true;
   BuilderBlock? _selectedBlock;
@@ -71,6 +82,23 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   BuilderPage? _publishedPage;
   bool _isLoadingPublished = false;
   
+  // ==================== GLOBAL THEME SELECTION STATE ====================
+  
+  /// Whether the global theme is currently selected
+  /// 
+  /// When true, the right panel shows only ThemePropertiesPanel
+  /// and the page/block selection is cleared.
+  bool _isThemeSelected = false;
+  
+  /// Draft theme configuration
+  ThemeConfig? _draftTheme;
+  
+  /// Whether the theme has unsaved changes
+  bool _themeHasChanges = false;
+  
+  /// Timer for auto-saving theme changes
+  Timer? _themeAutoSaveTimer;
+  
   /// Whether to show the mobile editor panel at the bottom
   /// Panel is shown when a block is selected AND we're showing the blocks list (not preview)
   bool get _shouldShowMobileEditorPanel => _selectedBlock != null && !_showPreviewInMobile;
@@ -80,11 +108,13 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _loadPage();
+    _loadDraftTheme();
   }
 
   @override
   void dispose() {
     _autoSaveTimer?.cancel();
+    _themeAutoSaveTimer?.cancel();
     _tabController.dispose();
     super.dispose();
   }
@@ -115,6 +145,158 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     } catch (e) {
       setState(() => _isSaving = false);
       debugPrint('❌ Auto-save failed: $e');
+    }
+  }
+
+  // ==================== THEME MANAGEMENT METHODS ====================
+
+  /// Load the draft theme from Firestore
+  Future<void> _loadDraftTheme() async {
+    try {
+      final theme = await _themeService.loadDraftTheme(widget.appId);
+      if (mounted) {
+        setState(() {
+          _draftTheme = theme;
+        });
+      }
+      debugPrint('🎨 [EditorScreen] Draft theme loaded');
+    } catch (e) {
+      debugPrint('❌ [EditorScreen] Error loading draft theme: $e');
+      if (mounted) {
+        setState(() {
+          _draftTheme = ThemeConfig.defaultConfig;
+        });
+      }
+    }
+  }
+
+  /// Handler called when user clicks on the "🎨 Thème de l'application" button
+  /// 
+  /// This switches the editor to "theme selection" mode where:
+  /// - The right panel shows only ThemePropertiesPanel
+  /// - Page and block selection is cleared
+  /// - Preview stays on the current page
+  void _onThemeEntrySelected() {
+    setState(() {
+      _isThemeSelected = true;
+      _selectedBlock = null;
+      // Note: We don't clear _page to keep the preview showing
+    });
+    debugPrint('🎨 [EditorScreen] Theme entry selected');
+  }
+
+  /// Update theme configuration with partial updates
+  void _onThemeChanged(Map<String, dynamic> updates) {
+    if (_draftTheme == null) return;
+
+    setState(() {
+      _draftTheme = _draftTheme!.mergeForPreview(updates);
+      _themeHasChanges = true;
+    });
+
+    // Auto-save theme changes
+    _scheduleThemeAutoSave();
+  }
+
+  /// Schedule auto-save for theme changes
+  void _scheduleThemeAutoSave() {
+    _themeAutoSaveTimer?.cancel();
+    _themeAutoSaveTimer = Timer(_autoSaveDelay, () {
+      if (_themeHasChanges && _draftTheme != null) {
+        _saveThemeDraft();
+      }
+    });
+  }
+
+  /// Save the current draft theme to Firestore
+  Future<void> _saveThemeDraft() async {
+    if (_draftTheme == null) return;
+
+    try {
+      await _themeService.saveDraftTheme(widget.appId, _draftTheme!);
+      if (mounted) {
+        setState(() {
+          _themeHasChanges = false;
+        });
+      }
+      debugPrint('✅ [EditorScreen] Draft theme saved');
+    } catch (e) {
+      debugPrint('❌ [EditorScreen] Error saving draft theme: $e');
+    }
+  }
+
+  /// Publish the theme to make it visible to clients
+  Future<void> _onThemePublish() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Publier le thème'),
+        content: const Text('Voulez-vous publier le thème ? Les modifications seront visibles par tous les utilisateurs de l\'application.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Publier'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      // Save any pending changes first
+      if (_themeHasChanges && _draftTheme != null) {
+        await _themeService.saveDraftTheme(widget.appId, _draftTheme!);
+      }
+
+      // Publish the theme
+      await _themeService.publishTheme(widget.appId, userId: 'admin'); // TODO: Get from auth
+
+      if (mounted) {
+        setState(() {
+          _themeHasChanges = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('✅ Thème publié avec succès')),
+        );
+      }
+      debugPrint('✅ [EditorScreen] Theme published');
+    } catch (e) {
+      debugPrint('❌ [EditorScreen] Error publishing theme: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('❌ Erreur: $e')),
+        );
+      }
+    }
+  }
+
+  /// Reset theme to default values
+  Future<void> _onThemeResetToDefaults() async {
+    try {
+      await _themeService.resetToDefaults(widget.appId, userId: 'admin'); // TODO: Get from auth
+      await _loadDraftTheme();
+      
+      if (mounted) {
+        setState(() {
+          _themeHasChanges = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('✅ Thème réinitialisé aux valeurs par défaut')),
+        );
+      }
+      debugPrint('✅ [EditorScreen] Theme reset to defaults');
+    } catch (e) {
+      debugPrint('❌ [EditorScreen] Error resetting theme: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('❌ Erreur: $e')),
+        );
+      }
     }
   }
 
@@ -601,6 +783,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   void _selectBlock(BuilderBlock block) {
     setState(() {
       _selectedBlock = block;
+      // Exit theme selection mode when a block is selected
+      _isThemeSelected = false;
     });
   }
 
@@ -971,6 +1155,12 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
             child: _buildBlocksListContent(),
           ),
           
+          // Separator
+          Divider(height: 1, color: Theme.of(context).dividerColor),
+          
+          // 🎨 Theme button - GLOBAL THEME SELECTION
+          _buildThemeEntryButton(),
+          
           // Add block button
           Container(
             padding: const EdgeInsets.all(12),
@@ -990,6 +1180,71 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Build the theme entry button for global theme selection
+  /// 
+  /// This button appears in the left sidebar and allows the user to
+  /// switch to "theme selection" mode where the right panel shows
+  /// only the ThemePropertiesPanel.
+  Widget _buildThemeEntryButton() {
+    final isSelected = _isThemeSelected;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Material(
+        color: isSelected 
+            ? Theme.of(context).colorScheme.primaryContainer 
+            : Theme.of(context).colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          onTap: _onThemeEntrySelected,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: isSelected 
+                  ? Border.all(color: Theme.of(context).colorScheme.primary, width: 1.5)
+                  : Border.all(color: Theme.of(context).dividerColor, width: 1),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.palette_outlined,
+                  size: 20,
+                  color: isSelected 
+                      ? Theme.of(context).colorScheme.primary 
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '🎨 Thème de l\'application',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.primary 
+                          : Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                if (_themeHasChanges)
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.orange,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1078,7 +1333,25 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
 
   /// Build the properties column (right sidebar)
   /// Uses Material 3 surface colors and independent tab-based scroll
+  /// 
+  /// GLOBAL THEME SELECTION MODE:
+  /// When _isThemeSelected is true, displays BuilderPropertiesPanel with
+  /// showThemeOnly=true, which shows only the ThemePropertiesPanel.
   Widget _buildPropertiesColumn() {
+    // GLOBAL THEME SELECTION MODE:
+    // When theme is selected, use BuilderPropertiesPanel in theme-only mode
+    if (_isThemeSelected) {
+      return BuilderPropertiesPanel(
+        showThemeOnly: true,
+        theme: _draftTheme,
+        onThemeChanged: _onThemeChanged,
+        onThemePublish: _onThemePublish,
+        onThemeResetToDefaults: _onThemeResetToDefaults,
+        themeHasChanges: _themeHasChanges,
+      );
+    }
+    
+    // Standard mode: display tabbed interface
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,

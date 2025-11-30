@@ -1,6 +1,11 @@
 // lib/builder/editor/widgets/builder_properties_panel.dart
 // Properties panel widget for Builder B3 page editor
 // Displays configuration options for pages, blocks, navigation, and theme
+//
+// GLOBAL THEME SELECTION MODE:
+// When [showThemeOnly] is true, the panel displays ONLY the ThemePropertiesPanel
+// without Page/Block/Nav tabs. This mode is activated when user clicks on the
+// "🎨 Thème de l'application" button in the left sidebar.
 
 import 'package:flutter/material.dart';
 import '../../models/models.dart';
@@ -21,6 +26,7 @@ const int kMaxPageNameLength = 6;
 /// - Navigation settings
 /// - Theme customization
 /// - Responsive width handling
+/// - Global theme mode (showThemeOnly): displays only theme panel when activated
 class BuilderPropertiesPanel extends StatefulWidget {
   /// The page being edited
   final BuilderPage? page;
@@ -66,6 +72,13 @@ class BuilderPropertiesPanel extends StatefulWidget {
   
   /// Whether the theme has unsaved changes
   final bool themeHasChanges;
+  
+  /// Whether to show ONLY the theme panel (global theme selection mode)
+  /// 
+  /// When true, the panel displays only the ThemePropertiesPanel without
+  /// the Page/Block/Nav tabs. This is used when user clicks the global
+  /// "🎨 Thème de l'application" button in the left sidebar.
+  final bool showThemeOnly;
 
   const BuilderPropertiesPanel({
     super.key,
@@ -84,6 +97,7 @@ class BuilderPropertiesPanel extends StatefulWidget {
     this.onThemePublish,
     this.onThemeResetToDefaults,
     this.themeHasChanges = false,
+    this.showThemeOnly = false,
   });
 
   @override
@@ -123,6 +137,14 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
 
   @override
   Widget build(BuildContext context) {
+    // GLOBAL THEME SELECTION MODE:
+    // When showThemeOnly is true, display only the theme panel
+    // without the Page/Block/Nav tabs
+    if (widget.showThemeOnly) {
+      return _buildThemeOnlyMode();
+    }
+    
+    // Standard mode: display tabbed interface
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
@@ -147,6 +169,96 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
                 _buildThemeTab(),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build the theme-only mode for global theme selection
+  /// 
+  /// This mode is activated when user clicks the "🎨 Thème de l'application"
+  /// button in the left sidebar. It shows only the ThemePropertiesPanel
+  /// without the Page/Block/Nav tabs.
+  Widget _buildThemeOnlyMode() {
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          // Theme header (without tabs)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).dividerColor,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.palette,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Thème de l\'application',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Configuration globale du thème',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (widget.themeHasChanges)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Modifié',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          
+          // Theme panel content
+          Expanded(
+            child: _buildThemeTab(),
           ),
         ],
       ),
