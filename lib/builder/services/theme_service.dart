@@ -259,11 +259,4 @@ class ThemeService {
       rethrow;
     }
   }
-
-  /// Debug print helper
-  void debugPrint(String message) {
-    if (kDebugMode) {
-      print(message);
-    }
-  }
 }

@@ -290,7 +290,6 @@ class BuilderPageService {
       // Optionally publish the theme
       if (publishTheme) {
         try {
-          // Import ThemeService dynamically to avoid circular dependency
           final themeService = ThemeService();
           await themeService.publishTheme(appId, userId: userId);
           debugPrint('[BuilderPageService] ✅ Theme also published for: $appId');
