@@ -247,7 +247,9 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       final requiredModule = _getRequiredModuleForRoute(page.route);
       if (requiredModule != null && flags != null) {
         if (!flags.has(requiredModule)) {
-          debugPrint('🚫 [BottomNav] Skipping ${page.pageKey} - module ${requiredModule.code} is disabled');
+          if (kDebugMode) {
+            debugPrint('🚫 [BottomNav] Skipping ${page.pageKey} - module ${requiredModule.code} is disabled');
+          }
           continue;
         }
       }
