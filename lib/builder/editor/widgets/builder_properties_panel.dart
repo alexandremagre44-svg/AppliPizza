@@ -1008,7 +1008,6 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
-        key: ValueKey('${label}_$value'),
         initialValue: value,
         decoration: InputDecoration(
           labelText: label,
