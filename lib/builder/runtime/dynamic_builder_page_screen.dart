@@ -108,7 +108,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                 ? BuilderRuntimeRenderer(
                     blocks: blocksToRender,
                     wrapInScrollView: true,
-                    themeConfig: publishedTheme,
+                    // No need to pass themeConfig since BuilderThemeProvider provides it via context
                   )
                 : Center(
                     child: Padding(

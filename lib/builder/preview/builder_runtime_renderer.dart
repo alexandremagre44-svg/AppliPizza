@@ -55,8 +55,13 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Use provided theme or default
-    final theme = themeConfig ?? ThemeConfig.defaultConfig;
+    // THEME RESOLUTION:
+    // 1. Use explicitly provided themeConfig (highest priority)
+    // 2. Try to get theme from context (if parent provides BuilderThemeProvider)
+    // 3. Fall back to ThemeConfig.defaultConfig
+    // 
+    // Note: context.builderTheme already returns defaultConfig if no provider found
+    final theme = themeConfig ?? context.builderTheme;
     final blockSpacing = theme.spacing;
     
     // Use theme background color if not explicitly set
