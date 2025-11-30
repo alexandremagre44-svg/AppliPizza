@@ -4,6 +4,10 @@
 // Routes pages from Builder to runtime widgets
 // Handles modules (cart_module, menu_catalog, profile_module, roulette_module)
 // and dynamic layouts (publishedLayout blocks)
+//
+// WHITE-LABEL FIX (November 2024):
+// Client runtime now uses ONLY publishedLayout as the source of truth.
+// draftLayout is NEVER used for client runtime - only for editor preview.
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,37 +17,41 @@ import '../utils/builder_modules.dart' as builder_modules;
 
 /// Build a page from a BuilderPage configuration
 /// 
-/// RUNTIME FIX: publishedLayout is the ONLY source of truth for runtime display.
+/// WHITE-LABEL FIX: publishedLayout is the ONLY source of truth for client runtime.
 /// 
 /// This function routes Builder pages to their runtime representations:
 /// - If page has publishedLayout blocks → render with BuilderRuntimeRenderer
-/// - Fallback to draftLayout if publishedLayout is empty (editor preview mode)
-/// - Fallback to blocks (LEGACY) if draftLayout is also empty (backward compatibility only)
-/// - For system pages with no blocks → render default module (menu_catalog, cart_module, etc.)
-/// - If page is empty and not a system page → show "Page vide / non configurée" message
+/// - If publishedLayout is empty → use legacy blocks field as migration fallback
+/// - NEVER uses draftLayout for client runtime (draft is for editor only)
+/// - For system pages with no published content → render default module
+/// - If page is empty and not a system page → show "Page non publiée" message
 /// 
-/// IMPORTANT: The "blocks" field is DEPRECATED and maintained only for migration.
-/// New code should NEVER write to "blocks", only to draftLayout/publishedLayout.
+/// IMPORTANT: 
+/// - The "blocks" field is DEPRECATED and used only as migration fallback
+/// - The "draftLayout" field is NEVER used here - only in editor preview
+/// - New pages must be published to be visible to clients
 /// 
 /// Example:
 /// ```dart
 /// final widget = buildPageFromBuilder(builderPage);
 /// ```
 Widget buildPageFromBuilder(BuildContext context, BuilderPage page) {
-  // RUNTIME FIX: Determine which layout to render 
-  // Priority: publishedLayout (runtime) → draftLayout (preview) → blocks (legacy migration only)
+  // WHITE-LABEL FIX: Only use publishedLayout for client runtime
+  // Never fall back to draftLayout - that's for editor preview only
   List<BuilderBlock> blocksToRender = [];
   
   if (page.publishedLayout.isNotEmpty) {
+    // Primary source: publishedLayout (the only correct source for runtime)
     blocksToRender = page.publishedLayout;
     debugPrint('📄 [PageRouter] ${page.pageKey}: using publishedLayout (${blocksToRender.length} blocks)');
-  } else if (page.draftLayout.isNotEmpty) {
-    blocksToRender = page.draftLayout;
-    debugPrint('📄 [PageRouter] ${page.pageKey}: using draftLayout fallback (${blocksToRender.length} blocks)');
   } else if (page.blocks.isNotEmpty) {
-    // LEGACY FALLBACK: Only used for old data that hasn't been migrated yet
+    // LEGACY MIGRATION FALLBACK: Only used for old data that hasn't been migrated
+    // This is the ONLY fallback - we never use draftLayout for runtime
     blocksToRender = page.blocks;
-    debugPrint('⚠️ [PageRouter] ${page.pageKey}: using LEGACY blocks fallback (${blocksToRender.length} blocks) - migration needed');
+    debugPrint('⚠️ [PageRouter] ${page.pageKey}: using LEGACY blocks fallback (${blocksToRender.length} blocks) - page needs to be published');
+  } else {
+    // No published content - log clearly for debugging
+    debugPrint('⚠️ [PageRouter] ${page.pageKey}: no publishedLayout - page has not been published yet');
   }
   
   // Render blocks if we have any
@@ -54,18 +62,18 @@ Widget buildPageFromBuilder(BuildContext context, BuilderPage page) {
     );
   }
   
-  // No blocks found - check if we can use a system module fallback (only for system pages)
+  // No published blocks found - check if we can use a system module fallback (only for system pages)
   if (page.systemId != null) {
     final systemModuleFallback = _getSystemModuleFallback(page.systemId!);
     if (systemModuleFallback != null) {
-      debugPrint('📄 [PageRouter] ${page.pageKey}: no blocks, using system module fallback');
+      debugPrint('📄 [PageRouter] ${page.pageKey}: no published blocks, using system module fallback');
       return builder_modules.renderModule(context, systemModuleFallback);
     }
   }
   
-  // No content - show empty state
-  debugPrint('📄 [PageRouter] ${page.pageKey}: no blocks found, showing empty state');
-  return _buildEmptyPageState(context, page.name);
+  // No content - show "not published" state for client
+  debugPrint('📄 [PageRouter] ${page.pageKey}: showing "not published" state');
+  return _buildNotPublishedState(context, page.name);
 }
 
 /// Get the default module ID for system pages
@@ -87,8 +95,11 @@ String? _getSystemModuleFallback(BuilderPageId pageId) {
   }
 }
 
-/// Build empty page state when page has no content
-Widget _buildEmptyPageState(BuildContext context, String pageName) {
+/// Build "not published" state when page has no published content
+/// 
+/// WHITE-LABEL FIX: This is shown when publishedLayout is empty.
+/// The page exists but needs to be published before clients can see it.
+Widget _buildNotPublishedState(BuildContext context, String pageName) {
   return Center(
     child: Padding(
       padding: const EdgeInsets.all(32.0),
@@ -96,20 +107,20 @@ Widget _buildEmptyPageState(BuildContext context, String pageName) {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.construction_outlined,
+            Icons.visibility_off_outlined,
             size: 80,
             color: Colors.grey[400],
           ),
           const SizedBox(height: 24),
           Text(
-            'Page vide',
+            'Page non publiée',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            'La page "$pageName" n\'a pas encore de contenu publié.',
+            'La page "$pageName" n\'a pas encore été publiée.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
