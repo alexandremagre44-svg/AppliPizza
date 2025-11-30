@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/restaurant_provider.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../../builder/services/builder_navigation_service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -50,6 +52,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     super.dispose();
   }
 
+  /// Navigate to the first page in bottom navigation (dynamic landing page)
+  /// Uses the same logic as SplashScreen for consistency
+  Future<void> _navigateToDynamicLandingPage() async {
+    try {
+      final appId = ref.read(currentRestaurantProvider).id;
+      final pages = await BuilderNavigationService(appId).getBottomBarPages();
+      
+      if (!mounted) return;
+      
+      if (pages.isNotEmpty) {
+        final firstRoute = pages.first.route;
+        if (firstRoute.isNotEmpty && firstRoute.startsWith('/')) {
+          debugPrint('[Landing] Initial route = $firstRoute (from pages.first after login)');
+          context.go(firstRoute);
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('[Landing] Error loading dynamic landing page: $e');
+    }
+    
+    // Fallback to /menu if no valid pages found
+    if (mounted) {
+      debugPrint('[Landing] Initial route = /menu (fallback after login)');
+      context.go(AppRoutes.menu);
+    }
+  }
+
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text.trim();
@@ -59,13 +89,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
       if (mounted) {
         if (success) {
-          final authState = ref.read(authProvider);
-          // Redirection selon le rôle
-          if (authState.isAdmin) {
-            context.go(AppRoutes.home); // Admin peut aussi voir l'accueil
-          } else {
-            context.go(AppRoutes.home);
-          }
+          // Navigate to dynamic landing page (first page in bottomNav)
+          await _navigateToDynamicLandingPage();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

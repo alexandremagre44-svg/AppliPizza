@@ -30,7 +30,7 @@ class CartScreen extends ConsumerWidget {
           foregroundColor: AppTheme.surfaceWhite,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go('/home'), 
+            onPressed: () => context.go('/menu'), 
           ),
         ),
         body: cartState.items.isEmpty
@@ -127,7 +127,7 @@ class CartScreen extends ConsumerWidget {
             SizedBox(
               height: 50,
               child: ElevatedButton.icon(
-                onPressed: () => context.go('/home'),
+                onPressed: () => context.go('/menu'),
                 icon: const Icon(Icons.local_pizza, size: 22),
                 label: Text(
                   cartTexts?.ctaViewMenu ?? 'Découvrir le menu',

@@ -75,17 +75,29 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                 type: BottomNavigationBarType.fixed,
                 currentIndex: 0,
                 onTap: (index) {
-                  if (index == 0) context.go('/home');
-                  if (index == 1) context.go('/menu');
+                  if (index == 0) context.go('/menu');
+                  if (index == 1) context.go('/cart');
+                  if (index == 2) context.go('/profile');
                 },
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home_outlined),
-                    label: 'Accueil',
-                  ),
-                  BottomNavigationBarItem(
+                items: [
+                  const BottomNavigationBarItem(
                     icon: Icon(Icons.restaurant_menu_outlined),
                     label: 'Menu',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: badges.Badge(
+                      showBadge: totalItems > 0,
+                      badgeContent: Text(
+                        totalItems.toString(),
+                        style: const TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                      child: const Icon(Icons.shopping_cart_outlined),
+                    ),
+                    label: 'Panier',
+                  ),
+                  const BottomNavigationBarItem(
+                    icon: Icon(Icons.person_outline),
+                    label: 'Profil',
                   ),
                 ],
               ),
@@ -170,16 +182,11 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               type: BottomNavigationBarType.fixed,
               currentIndex: 0,
               onTap: (index) {
-                if (index == 0) context.go('/home');
-                if (index == 1) context.go('/menu');
-                if (index == 2) context.go('/cart');
-                if (index == 3) context.go('/profile');
+                if (index == 0) context.go('/menu');
+                if (index == 1) context.go('/cart');
+                if (index == 2) context.go('/profile');
               },
               items: [
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.home_outlined),
-                  label: 'Accueil',
-                ),
                 const BottomNavigationBarItem(
                   icon: Icon(Icons.restaurant_menu_outlined),
                   label: 'Menu',
@@ -353,8 +360,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       
       // Safety check: never navigate to root '/' as it triggers login redirect
       if (route.isEmpty || route == '/') {
-        debugPrint('⚠️ Attempted navigation to invalid route: "$route". Navigating to /home instead.');
-        context.go(AppRoutes.home);
+        debugPrint('⚠️ Attempted navigation to invalid route: "$route". Navigating to /menu instead.');
+        context.go(AppRoutes.menu);
         return;
       }
       

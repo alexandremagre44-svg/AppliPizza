@@ -260,7 +260,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
                   ),
                   SizedBox(height: AppSpacing.xl),
                   FilledButton.icon(
-                    onPressed: () => context.go('/home'),
+                    onPressed: () => context.go('/menu'),
                     icon: const Icon(Icons.home),
                     label: const Text('Retour à l\'accueil'),
                     style: FilledButton.styleFrom(

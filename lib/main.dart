@@ -270,9 +270,9 @@ class MyApp extends ConsumerWidget {
                 // PROTECTION: Admin menu is reserved for admins
                 final authState = ref.read(authProvider);
                 if (!authState.isAdmin) {
-                  // Redirect to home if not admin
+                  // Redirect to menu if not admin
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
+                    context.go(AppRoutes.menu);
                   });
                   return const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
@@ -290,7 +290,7 @@ class MyApp extends ConsumerWidget {
                 final authState = ref.read(authProvider);
                 if (!authState.isAdmin) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
+                    context.go(AppRoutes.menu);
                   });
                   return const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
@@ -306,7 +306,7 @@ class MyApp extends ConsumerWidget {
                 final authState = ref.read(authProvider);
                 if (!authState.isAdmin) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
+                    context.go(AppRoutes.menu);
                   });
                   return const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
@@ -322,7 +322,7 @@ class MyApp extends ConsumerWidget {
                 final authState = ref.read(authProvider);
                 if (!authState.isAdmin) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
+                    context.go(AppRoutes.menu);
                   });
                   return const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
@@ -338,7 +338,7 @@ class MyApp extends ConsumerWidget {
                 final authState = ref.read(authProvider);
                 if (!authState.isAdmin) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
+                    context.go(AppRoutes.menu);
                   });
                   return const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
@@ -355,7 +355,7 @@ class MyApp extends ConsumerWidget {
                 final authState = ref.read(authProvider);
                 if (!authState.isAdmin) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
+                    context.go(AppRoutes.menu);
                   });
                   return const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
@@ -371,7 +371,7 @@ class MyApp extends ConsumerWidget {
                 final authState = ref.read(authProvider);
                 if (!authState.isAdmin) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    context.go(AppRoutes.home);
+                    context.go(AppRoutes.menu);
                   });
                   return const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
@@ -390,7 +390,7 @@ class MyApp extends ConsumerWidget {
             if (state.extra is! Product) {
               // If invalid data, redirect to home
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.home);
+                context.go(AppRoutes.menu);
               });
               return const Scaffold(
                 body: Center(
@@ -434,9 +434,9 @@ class MyApp extends ConsumerWidget {
             // PROTECTION: Staff tablet (CAISSE) est réservé aux admins
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
-              // Redirect to home if not admin
+              // Redirect to menu if not admin
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.home);
+                context.go(AppRoutes.menu);
               });
               return Scaffold(
                 body: Center(
@@ -461,7 +461,7 @@ class MyApp extends ConsumerWidget {
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.home);
+                context.go(AppRoutes.menu);
               });
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
@@ -489,7 +489,7 @@ class MyApp extends ConsumerWidget {
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.home);
+                context.go(AppRoutes.menu);
               });
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
@@ -517,7 +517,7 @@ class MyApp extends ConsumerWidget {
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.home);
+                context.go(AppRoutes.menu);
               });
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
