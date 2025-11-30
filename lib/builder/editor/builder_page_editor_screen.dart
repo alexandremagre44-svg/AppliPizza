@@ -58,6 +58,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   Timer? _autoSaveTimer;
   bool _isSaving = false;
   String? _duplicateIndexWarning; // Cached duplicate check result
+  bool _isShowingDraft = true; // Toggle for draft/published preview
   
   /// Whether to show the mobile editor panel at the bottom
   /// Panel is shown when a block is selected AND we're showing the blocks list (not preview)
@@ -327,7 +328,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     final newBlock = BuilderBlock(
       id: 'block_${DateTime.now().millisecondsSinceEpoch}',
       type: type,
-      order: _page!.blocks.length,
+      order: _page!.draftLayout.length,
       config: _getDefaultConfig(type),
     );
 
@@ -471,7 +472,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       newIndex -= 1;
     }
 
-    final blocks = _page!.sortedBlocks;
+    final blocks = _page!.sortedDraftBlocks;
     final block = blocks.removeAt(oldIndex);
     blocks.insert(newIndex, block);
 
@@ -1079,26 +1080,85 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       return const Center(child: Text('Aucune page à prévisualiser'));
     }
 
-    // Use draftLayout for preview (editor view)
-    return BuilderPagePreview(
-      blocks: _page!.draftLayout.isNotEmpty ? _page!.draftLayout : _page!.blocks,
-      modules: _page!.modules,
+    // Choose layout based on toggle: draft or published
+    final List<BuilderBlock> layout;
+    if (_isShowingDraft) {
+      // Draft mode: use draftLayout, fallback to publishedLayout if empty
+      layout = _page!.draftLayout.isNotEmpty 
+          ? _page!.draftLayout 
+          : _page!.publishedLayout;
+    } else {
+      // Published mode: use publishedLayout, fallback to draftLayout if empty
+      layout = _page!.publishedLayout.isNotEmpty 
+          ? _page!.publishedLayout 
+          : _page!.draftLayout;
+    }
+
+    // Debug log for preview layout
+    debugPrint('🔍 [_buildPreviewTab] pageKey=${_page!.pageKey}');
+    debugPrint('   - draftLayout.blocks.length=${_page!.draftLayout.length}');
+    debugPrint('   - publishedLayout.blocks.length=${_page!.publishedLayout.length}');
+    debugPrint('   - layout.blocks.length=${layout.length} (mode: ${_isShowingDraft ? "draft" : "published"})');
+
+    return Column(
+      children: [
+        // Toggle between draft and published preview
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: Colors.grey.shade100,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Prévisualiser: ', style: TextStyle(fontWeight: FontWeight.w500)),
+              SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment(value: true, label: Text('Brouillon'), icon: Icon(Icons.edit_note)),
+                  ButtonSegment(value: false, label: Text('Publié'), icon: Icon(Icons.public)),
+                ],
+                selected: {_isShowingDraft},
+                onSelectionChanged: (selection) {
+                  setState(() => _isShowingDraft = selection.first);
+                },
+              ),
+            ],
+          ),
+        ),
+        // Preview content
+        Expanded(
+          child: BuilderPagePreview(
+            blocks: layout,
+            modules: _page!.modules,
+          ),
+        ),
+      ],
     );
   }
 
   void _showFullScreenPreview() {
     if (_page == null) return;
 
+    // Choose layout based on toggle: draft or published (same logic as _buildPreviewTab)
+    final List<BuilderBlock> layout;
+    if (_isShowingDraft) {
+      layout = _page!.draftLayout.isNotEmpty 
+          ? _page!.draftLayout 
+          : _page!.publishedLayout;
+    } else {
+      layout = _page!.publishedLayout.isNotEmpty 
+          ? _page!.publishedLayout 
+          : _page!.draftLayout;
+    }
+
     BuilderFullScreenPreview.show(
       context,
-      blocks: _page!.draftLayout.isNotEmpty ? _page!.draftLayout : _page!.blocks,
+      blocks: layout,
       modules: _page!.modules,
       pageTitle: _pageLabel,
     );
   }
 
   Widget _buildBlocksList() {
-    final blocks = _page!.sortedBlocks;
+    final blocks = _page!.sortedDraftBlocks;
 
     return Column(
       children: [
@@ -2393,7 +2453,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     final newBlock = SystemBlock(
       id: 'block_${DateTime.now().millisecondsSinceEpoch}',
       moduleType: moduleType,
-      order: _page!.blocks.length,
+      order: _page!.draftLayout.length,
     );
 
     setState(() {

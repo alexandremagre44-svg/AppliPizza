@@ -64,18 +64,18 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
               ? builderPage.name 
               : (systemConfig?.defaultName ?? builderPage.pageKey);
           
-          // Check if the page has content (published layout, draft layout, or legacy blocks)
-          // IMPORTANT: Check all possible sources of content
+          // RUNTIME FIX: publishedLayout is the source of truth for runtime display
+          // Check for content in order of priority: publishedLayout → draftLayout → blocks (legacy fallback)
           final hasContent = builderPage.publishedLayout.isNotEmpty || 
                             builderPage.draftLayout.isNotEmpty ||
                             builderPage.blocks.isNotEmpty;
           
-          // Select content to display - prefer published, then draft, then legacy blocks
+          // Select content to display - publishedLayout is primary, others are fallbacks
           final blocksToRender = builderPage.publishedLayout.isNotEmpty
               ? builderPage.publishedLayout
               : (builderPage.draftLayout.isNotEmpty 
                   ? builderPage.draftLayout 
-                  : builderPage.blocks);
+                  : builderPage.blocks); // Legacy fallback only
           
           return Scaffold(
             appBar: AppBar(

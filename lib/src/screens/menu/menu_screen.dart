@@ -68,8 +68,9 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
     
     return menuPageAsync.when(
       data: (builderPage) {
-        // If we have a published layout with blocks, use it
-        if (builderPage != null && builderPage.blocks.isNotEmpty) {
+        // RUNTIME FIX: Use publishedLayout as source of truth (not legacy blocks field)
+        // If we have a published layout, use it
+        if (builderPage != null && builderPage.publishedLayout.isNotEmpty) {
           return Scaffold(
             body: RefreshIndicator(
               onRefresh: () async {
@@ -89,7 +90,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
               },
               color: AppColors.primaryRed,
               child: BuilderRuntimeRenderer(
-                blocks: builderPage.blocks,
+                blocks: builderPage.publishedLayout,
                 backgroundColor: Colors.white,
                 wrapInScrollView: true,
               ),

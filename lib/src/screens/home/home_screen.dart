@@ -124,8 +124,9 @@ class HomeScreen extends ConsumerWidget {
     
     return homePageAsync.when(
       data: (builderPage) {
-        // If we have a published layout with blocks, use it
-        if (builderPage != null && builderPage.blocks.isNotEmpty) {
+        // RUNTIME FIX: Use publishedLayout as source of truth (not legacy blocks field)
+        // If we have a published layout, use it
+        if (builderPage != null && builderPage.publishedLayout.isNotEmpty) {
           return TweenAnimationBuilder<double>(
             duration: const Duration(milliseconds: 500),
             tween: Tween(begin: 0.0, end: 1.0),
@@ -147,7 +148,7 @@ class HomeScreen extends ConsumerWidget {
               },
               color: AppColors.primaryRed,
               child: BuilderRuntimeRenderer(
-                blocks: builderPage.blocks,
+                blocks: builderPage.publishedLayout,
                 backgroundColor: Colors.white,
                 wrapInScrollView: true,
               ),
