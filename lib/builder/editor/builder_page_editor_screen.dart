@@ -63,6 +63,14 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   String? _duplicateIndexWarning; // Cached duplicate check result
   bool _isShowingDraft = true; // Toggle for draft/published preview
   
+  /// Published page loaded from pages_published collection
+  /// 
+  /// Used for "Publié" preview to show exactly what the client app sees.
+  /// This is separate from _page (which is from pages_draft) to ensure
+  /// the published preview reflects the actual published content.
+  BuilderPage? _publishedPage;
+  bool _isLoadingPublished = false;
+  
   /// Whether to show the mobile editor panel at the bottom
   /// Panel is shown when a block is selected AND we're showing the blocks list (not preview)
   bool get _shouldShowMobileEditorPanel => _selectedBlock != null && !_showPreviewInMobile;
@@ -258,6 +266,104 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     return correctedPage;
   }
 
+  /// Load published page from pages_published collection for "Publié" preview
+  /// 
+  /// PREVIEW FIX: The "Publié" preview must load from pages_published collection
+  /// (NOT from pages_draft) to show exactly what the client app renders.
+  /// 
+  /// - Brouillon preview: uses pages_draft + draftLayout
+  /// - Publié preview: uses pages_published + publishedLayout (same as client runtime)
+  /// 
+  /// Set [forceRefresh] to true to reload even if already cached.
+  Future<void> _loadPublishedPage({bool forceRefresh = false}) async {
+    if (_isLoadingPublished) return;
+    if (_publishedPage != null && !forceRefresh) return;
+    
+    setState(() => _isLoadingPublished = true);
+    
+    try {
+      final pageIdentifier = widget.pageId ?? widget.pageKey!;
+      debugPrint('📗 [EditorScreen] Loading published page for preview: $pageIdentifier');
+      
+      final publishedPage = await _service.loadPublished(widget.appId, pageIdentifier);
+      
+      if (publishedPage != null) {
+        debugPrint('📗 [EditorScreen] Published page loaded: ${publishedPage.name}');
+        debugPrint('   - publishedLayout: ${publishedPage.publishedLayout.length} blocks');
+      } else {
+        debugPrint('ℹ️ [EditorScreen] No published version found');
+      }
+      
+      if (mounted) {
+        setState(() {
+          _publishedPage = publishedPage;
+          _isLoadingPublished = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ [EditorScreen] Error loading published page: $e');
+      if (mounted) {
+        setState(() => _isLoadingPublished = false);
+      }
+    }
+  }
+  
+  /// Get the layout and modules for the preview based on the current tab selection.
+  /// 
+  /// Returns null if the preview should show a loading or empty state.
+  /// This helper centralizes the logic for determining preview data source:
+  /// - Brouillon: pages_draft + draftLayout
+  /// - Publié: pages_published + publishedLayout
+  ({List<BuilderBlock> layout, List<String> modules})? _getPreviewData() {
+    if (_page == null) return null;
+    
+    if (_isShowingDraft) {
+      // Brouillon preview: uses pages_draft + draftLayout
+      final layout = _page!.draftLayout.isNotEmpty 
+          ? _page!.draftLayout 
+          : _page!.publishedLayout;
+      return (layout: layout, modules: _page!.modules);
+    } else {
+      // Publié preview: uses pages_published + publishedLayout
+      if (_isLoadingPublished || _publishedPage == null) {
+        return null;
+      }
+      return (layout: _publishedPage!.publishedLayout, modules: _publishedPage!.modules);
+    }
+  }
+  
+  /// Build the "no published version" empty state widget
+  Widget _buildNoPublishedVersionState({bool compact = false}) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.unpublished,
+            size: compact ? 40 : 48,
+            color: Theme.of(context).colorScheme.outline,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Aucune version publiée',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
+          if (!compact) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Publiez cette page pour voir la prévisualisation',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Future<void> _saveDraft() async {
     if (_page == null) return;
 
@@ -309,7 +415,11 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         shouldDeleteDraft: false,
       );
       
-      setState(() => _hasChanges = false);
+      setState(() {
+        _hasChanges = false;
+        // Reset cached published page so it will be reloaded from pages_published
+        _publishedPage = null;
+      });
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -937,7 +1047,13 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                   ],
                   selected: {_isShowingDraft},
                   onSelectionChanged: (selection) {
-                    setState(() => _isShowingDraft = selection.first);
+                    final showDraft = selection.first;
+                    setState(() => _isShowingDraft = showDraft);
+                    
+                    // Load published page from pages_published collection when switching to "Publié"
+                    if (!showDraft && _publishedPage == null) {
+                      _loadPublishedPage();
+                    }
                   },
                   style: ButtonStyle(
                     visualDensity: VisualDensity.compact,
@@ -1187,7 +1303,12 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   /// Build preview content
-  /// Centered card with proper elevation and rounded corners
+  /// 
+  /// PREVIEW DATA SOURCES:
+  /// - Brouillon preview: uses pages_draft + draftLayout
+  /// - Publié preview: uses pages_published + publishedLayout (same as client runtime)
+  /// 
+  /// This ensures the "Publié" preview shows exactly what the client app renders.
   Widget _buildPreviewContent() {
     if (_page == null) {
       return Center(
@@ -1200,15 +1321,22 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       );
     }
 
-    final List<BuilderBlock> layout;
-    if (_isShowingDraft) {
-      layout = _page!.draftLayout.isNotEmpty 
-          ? _page!.draftLayout 
-          : _page!.publishedLayout;
-    } else {
-      layout = _page!.publishedLayout.isNotEmpty 
-          ? _page!.publishedLayout 
-          : _page!.draftLayout;
+    // Handle loading state for published preview
+    if (!_isShowingDraft && _isLoadingPublished) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
+    // Get preview data using the centralized helper
+    final previewData = _getPreviewData();
+    
+    // Handle no published version state
+    if (previewData == null && !_isShowingDraft) {
+      return _buildNoPublishedVersionState();
+    }
+    
+    // Fallback for unexpected null (shouldn't happen but be safe)
+    if (previewData == null) {
+      return const Center(child: CircularProgressIndicator());
     }
 
     return Card(
@@ -1219,8 +1347,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       ),
       clipBehavior: Clip.antiAlias,
       child: BuilderPagePreview(
-        blocks: layout,
-        modules: _page!.modules,
+        blocks: previewData.layout,
+        modules: previewData.modules,
         backgroundColor: Theme.of(context).colorScheme.surface,
       ),
     );
@@ -2231,6 +2359,10 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
   
   /// Mobile-optimized preview content with proper padding
+  /// 
+  /// PREVIEW DATA SOURCES:
+  /// - Brouillon preview: uses pages_draft + draftLayout
+  /// - Publié preview: uses pages_published + publishedLayout (same as client runtime)
   Widget _buildMobilePreviewContent() {
     if (_page == null) {
       return Center(
@@ -2243,15 +2375,22 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       );
     }
 
-    final List<BuilderBlock> layout;
-    if (_isShowingDraft) {
-      layout = _page!.draftLayout.isNotEmpty 
-          ? _page!.draftLayout 
-          : _page!.publishedLayout;
-    } else {
-      layout = _page!.publishedLayout.isNotEmpty 
-          ? _page!.publishedLayout 
-          : _page!.draftLayout;
+    // Handle loading state for published preview
+    if (!_isShowingDraft && _isLoadingPublished) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
+    // Get preview data using the centralized helper
+    final previewData = _getPreviewData();
+    
+    // Handle no published version state (compact for mobile)
+    if (previewData == null && !_isShowingDraft) {
+      return _buildNoPublishedVersionState(compact: true);
+    }
+    
+    // Fallback for unexpected null (shouldn't happen but be safe)
+    if (previewData == null) {
+      return const Center(child: CircularProgressIndicator());
     }
 
     return Card(
@@ -2263,8 +2402,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       ),
       clipBehavior: Clip.antiAlias,
       child: BuilderPagePreview(
-        blocks: layout,
-        modules: _page!.modules,
+        blocks: previewData.layout,
+        modules: previewData.modules,
         backgroundColor: Theme.of(context).colorScheme.surface,
       ),
     );
@@ -2370,22 +2509,30 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   void _showFullScreenPreview() {
     if (_page == null) return;
 
-    // Choose layout based on toggle: draft or published
-    final List<BuilderBlock> layout;
-    if (_isShowingDraft) {
-      layout = _page!.draftLayout.isNotEmpty 
-          ? _page!.draftLayout 
-          : _page!.publishedLayout;
-    } else {
-      layout = _page!.publishedLayout.isNotEmpty 
-          ? _page!.publishedLayout 
-          : _page!.draftLayout;
+    // Use the centralized helper for getting preview data
+    // PREVIEW DATA SOURCES:
+    // - Brouillon preview: uses pages_draft + draftLayout
+    // - Publié preview: uses pages_published + publishedLayout (same as client runtime)
+    final previewData = _getPreviewData();
+    
+    if (previewData == null) {
+      // No data available - show consistent error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isShowingDraft 
+                ? 'Aucune page à prévisualiser' 
+                : 'Aucune version publiée disponible'
+          ),
+        ),
+      );
+      return;
     }
 
     BuilderFullScreenPreview.show(
       context,
-      blocks: layout,
-      modules: _page!.modules,
+      blocks: previewData.layout,
+      modules: previewData.modules,
       pageTitle: _pageLabel,
     );
   }

@@ -2,6 +2,13 @@
 // Preview widget that renders a list of blocks visually
 // MOBILE RESPONSIVE: Fixed sizing and zoom issues on mobile
 // Enhanced with draftLayout support and module placeholders
+//
+// PREVIEW DATA SOURCES (Builder Studio):
+// - Brouillon preview: uses pages_draft + draftLayout
+// - Publié preview: uses pages_published + publishedLayout (same as client runtime)
+//
+// This ensures the "Publié" preview in Builder Studio shows exactly what the 
+// client app renders, reading from the same collection and field.
 
 import 'package:flutter/material.dart';
 import '../models/models.dart';
