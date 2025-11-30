@@ -651,9 +651,36 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
     }
 
     // Display the ThemePropertiesPanel with the draft theme
+    // Only render if onThemeChanged is provided, otherwise show an info message
+    if (widget.onThemeChanged == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.palette_outlined,
+                size: 48,
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Configuration du thème non disponible',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return ThemePropertiesPanel(
       theme: widget.theme!,
-      onThemeChanged: widget.onThemeChanged ?? (updates) {},
+      onThemeChanged: widget.onThemeChanged!,
       onPublishTheme: widget.onThemePublish,
       onResetToDefaults: widget.onThemeResetToDefaults,
       hasChanges: widget.themeHasChanges,
