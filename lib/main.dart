@@ -51,6 +51,8 @@ import 'src/core/constants.dart';
 import 'src/providers/auth_provider.dart';
 import 'src/providers/restaurant_provider.dart';
 import 'src/providers/theme_providers.dart';
+import 'src/providers/restaurant_plan_provider.dart';
+import 'white_label/core/module_id.dart';
 
 // Builder B3 imports for dynamic pages
 import 'builder/models/models.dart';
@@ -251,17 +253,31 @@ class MyApp extends ConsumerWidget {
             ),
             GoRoute(
               path: '/rewards',
-              builder: (context, state) => const BuilderPageLoader(
-                pageId: BuilderPageId.rewards,
-                fallback: RewardsScreen(),
-              ),
+              builder: (context, state) {
+                // Module guard: loyalty module required
+                final flags = ref.read(restaurantFeatureFlagsProvider);
+                if (flags != null && !flags.has(ModuleId.loyalty)) {
+                  return const SizedBox.shrink();
+                }
+                return const BuilderPageLoader(
+                  pageId: BuilderPageId.rewards,
+                  fallback: RewardsScreen(),
+                );
+              },
             ),
             GoRoute(
               path: '/roulette',
-              builder: (context, state) => const BuilderPageLoader(
-                pageId: BuilderPageId.roulette,
-                fallback: RouletteScreen(),
-              ),
+              builder: (context, state) {
+                // Module guard: roulette module required
+                final flags = ref.read(restaurantFeatureFlagsProvider);
+                if (flags != null && !flags.has(ModuleId.roulette)) {
+                  return const SizedBox.shrink();
+                }
+                return const BuilderPageLoader(
+                  pageId: BuilderPageId.roulette,
+                  fallback: RouletteScreen(),
+                );
+              },
             ),
             // Admin Menu - Main entry point for all admin tools
             GoRoute(
@@ -410,12 +426,24 @@ class MyApp extends ConsumerWidget {
         // Route Kitchen Mode
         GoRoute(
           path: AppRoutes.kitchen,
-          builder: (context, state) => const KitchenPage(),
+          builder: (context, state) {
+            // Module guard: kitchenTablet module required
+            final flags = ref.read(restaurantFeatureFlagsProvider);
+            if (flags != null && !flags.has(ModuleId.kitchenTablet)) {
+              return const SizedBox.shrink();
+            }
+            return const KitchenPage();
+          },
         ),
         // Route Roulette
         GoRoute(
           path: AppRoutes.roulette,
           builder: (context, state) {
+            // Module guard: roulette module required
+            final flags = ref.read(restaurantFeatureFlagsProvider);
+            if (flags != null && !flags.has(ModuleId.roulette)) {
+              return const SizedBox.shrink();
+            }
             // Get userId from auth state
             final authState = ref.read(authProvider);
             final userId = authState.userId ?? 'guest';
@@ -425,12 +453,24 @@ class MyApp extends ConsumerWidget {
         // Route Rewards
         GoRoute(
           path: AppRoutes.rewards,
-          builder: (context, state) => const RewardsScreen(),
+          builder: (context, state) {
+            // Module guard: loyalty module required
+            final flags = ref.read(restaurantFeatureFlagsProvider);
+            if (flags != null && !flags.has(ModuleId.loyalty)) {
+              return const SizedBox.shrink();
+            }
+            return const RewardsScreen();
+          },
         ),
         // Staff Tablet Routes (CAISSE - Admin Only)
         GoRoute(
           path: AppRoutes.staffTabletPin,
           builder: (context, state) {
+            // Module guard: staffTablet module required
+            final flags = ref.read(restaurantFeatureFlagsProvider);
+            if (flags != null && !flags.has(ModuleId.staffTablet)) {
+              return const SizedBox.shrink();
+            }
             // PROTECTION: Staff tablet (CAISSE) est réservé aux admins
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
@@ -457,6 +497,11 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.staffTabletCatalog,
           builder: (context, state) {
+            // Module guard: staffTablet module required
+            final flags = ref.read(restaurantFeatureFlagsProvider);
+            if (flags != null && !flags.has(ModuleId.staffTablet)) {
+              return const SizedBox.shrink();
+            }
             // PROTECTION: Admin only
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
@@ -485,6 +530,11 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.staffTabletCheckout,
           builder: (context, state) {
+            // Module guard: staffTablet module required
+            final flags = ref.read(restaurantFeatureFlagsProvider);
+            if (flags != null && !flags.has(ModuleId.staffTablet)) {
+              return const SizedBox.shrink();
+            }
             // PROTECTION: Admin only
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
@@ -513,6 +563,11 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.staffTabletHistory,
           builder: (context, state) {
+            // Module guard: staffTablet module required
+            final flags = ref.read(restaurantFeatureFlagsProvider);
+            if (flags != null && !flags.has(ModuleId.staffTablet)) {
+              return const SizedBox.shrink();
+            }
             // PROTECTION: Admin only
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {

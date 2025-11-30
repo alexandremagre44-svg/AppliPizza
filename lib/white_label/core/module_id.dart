@@ -55,6 +55,9 @@ enum ModuleId {
 
   /// Module exports de données
   exports,
+
+  /// Module campagnes marketing
+  campaigns,
 }
 
 /// Extension pour ajouter des métadonnées à chaque identifiant de module.
@@ -96,6 +99,8 @@ extension ModuleIdX on ModuleId {
         return 'reporting';
       case ModuleId.exports:
         return 'exports';
+      case ModuleId.campaigns:
+        return 'campaigns';
     }
   }
 
@@ -136,6 +141,8 @@ extension ModuleIdX on ModuleId {
         return 'Reporting';
       case ModuleId.exports:
         return 'Exports';
+      case ModuleId.campaigns:
+        return 'Campagnes';
     }
   }
 
@@ -165,6 +172,8 @@ extension ModuleIdX on ModuleId {
       case ModuleId.reporting:
       case ModuleId.exports:
         return ModuleCategory.analytics;
+      case ModuleId.campaigns:
+        return ModuleCategory.marketing;
     }
   }
 

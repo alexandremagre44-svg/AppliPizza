@@ -20,6 +20,7 @@ import '../blocks/button_block_runtime.dart';
 import '../blocks/category_list_block_runtime.dart';
 import '../blocks/html_block_runtime.dart';
 import '../blocks/system_block_runtime.dart';
+import '../../white_label/restaurant/restaurant_feature_flags.dart';
 
 /// Typedef for a block runtime builder function.
 /// 
@@ -132,11 +133,20 @@ class BuilderBlockRuntimeRegistry {
   /// [block] - The block to render
   /// [context] - The build context
   /// [maxContentWidth] - Optional max width constraint for responsive layouts
+  /// [featureFlags] - Optional feature flags for module visibility check
   static Widget render(
     BuilderBlock block,
     BuildContext context, {
     double? maxContentWidth,
+    RestaurantFeatureFlags? featureFlags,
   }) {
+    // Module guard: if block requires a module and it's not enabled, hide it
+    if (block.requiredModule != null && featureFlags != null) {
+      if (!featureFlags.has(block.requiredModule!)) {
+        return const SizedBox.shrink();
+      }
+    }
+    
     final builder = _builders[block.type];
     
     if (builder != null) {
@@ -151,15 +161,18 @@ class BuilderBlockRuntimeRegistry {
   /// 
   /// Convenience method for rendering multiple blocks at once.
   /// Each block is rendered using [render].
+  /// [featureFlags] - Optional feature flags for module visibility check
   static List<Widget> renderAll(
     List<BuilderBlock> blocks,
     BuildContext context, {
     double? maxContentWidth,
+    RestaurantFeatureFlags? featureFlags,
   }) {
     return blocks.map((block) => render(
       block,
       context,
       maxContentWidth: maxContentWidth,
+      featureFlags: featureFlags,
     )).toList();
   }
   
