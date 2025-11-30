@@ -7,6 +7,8 @@
 /// Ce modèle est COMPLÉMENTAIRE au modèle User existant.
 library;
 
+import 'package:flutter/foundation.dart';
+
 /// Représente les rôles et permissions d'un utilisateur.
 ///
 /// Les rôles sont hiérarchisés :
@@ -132,19 +134,12 @@ class AuthRoles {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! AuthRoles) return false;
-    if (other.rawRole != rawRole ||
-        other.isSuperAdmin != isSuperAdmin ||
-        other.adminOf.length != adminOf.length ||
-        other.staffOf.length != staffOf.length) {
+    if (other.rawRole != rawRole || other.isSuperAdmin != isSuperAdmin) {
       return false;
     }
-    for (int i = 0; i < adminOf.length; i++) {
-      if (other.adminOf[i] != adminOf[i]) return false;
-    }
-    for (int i = 0; i < staffOf.length; i++) {
-      if (other.staffOf[i] != staffOf[i]) return false;
-    }
-    return true;
+    // Use listEquals for efficient list comparison
+    return listEquals(other.adminOf, adminOf) && 
+           listEquals(other.staffOf, staffOf);
   }
 
   @override

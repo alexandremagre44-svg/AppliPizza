@@ -156,42 +156,75 @@ class UserRolesService {
   }
 
   // =========================================================================
-  // TODO: Méthodes d'écriture à implémenter dans une phase ultérieure
+  // WRITE METHODS - Not yet implemented (Phase 1 base only)
+  // =========================================================================
+  // WARNING: These methods are placeholders and will throw UnimplementedError.
+  // Do NOT call these methods until they are fully implemented.
   // =========================================================================
 
-  /// TODO: Créer ou mettre à jour les rôles d'un utilisateur.
+  /// Creates or updates user roles in Firestore.
+  /// 
+  /// WARNING: NOT YET IMPLEMENTED - Will throw [UnimplementedError].
+  /// This will be implemented in a future phase.
   Future<void> setUserRoles(UserRoleDocument roles) async {
-    // TODO: Implémenter
-    throw UnimplementedError('setUserRoles not yet implemented');
+    throw UnimplementedError(
+      'setUserRoles is not yet implemented. '
+      'This is a Phase 1 placeholder for future development.',
+    );
   }
 
-  /// TODO: Ajouter un utilisateur comme admin d'un restaurant.
+  /// Adds a user as admin of a restaurant.
+  /// 
+  /// WARNING: NOT YET IMPLEMENTED - Will throw [UnimplementedError].
+  /// This will be implemented in a future phase.
   Future<void> addAsAdmin(String userId, String restaurantId) async {
-    // TODO: Implémenter
-    throw UnimplementedError('addAsAdmin not yet implemented');
+    throw UnimplementedError(
+      'addAsAdmin is not yet implemented. '
+      'This is a Phase 1 placeholder for future development.',
+    );
   }
 
-  /// TODO: Ajouter un utilisateur comme staff d'un restaurant.
+  /// Adds a user as staff of a restaurant.
+  /// 
+  /// WARNING: NOT YET IMPLEMENTED - Will throw [UnimplementedError].
+  /// This will be implemented in a future phase.
   Future<void> addAsStaff(String userId, String restaurantId) async {
-    // TODO: Implémenter
-    throw UnimplementedError('addAsStaff not yet implemented');
+    throw UnimplementedError(
+      'addAsStaff is not yet implemented. '
+      'This is a Phase 1 placeholder for future development.',
+    );
   }
 
-  /// TODO: Retirer un utilisateur des admins d'un restaurant.
+  /// Removes a user from admins of a restaurant.
+  /// 
+  /// WARNING: NOT YET IMPLEMENTED - Will throw [UnimplementedError].
+  /// This will be implemented in a future phase.
   Future<void> removeAsAdmin(String userId, String restaurantId) async {
-    // TODO: Implémenter
-    throw UnimplementedError('removeAsAdmin not yet implemented');
+    throw UnimplementedError(
+      'removeAsAdmin is not yet implemented. '
+      'This is a Phase 1 placeholder for future development.',
+    );
   }
 
-  /// TODO: Retirer un utilisateur des staffs d'un restaurant.
+  /// Removes a user from staff of a restaurant.
+  /// 
+  /// WARNING: NOT YET IMPLEMENTED - Will throw [UnimplementedError].
+  /// This will be implemented in a future phase.
   Future<void> removeAsStaff(String userId, String restaurantId) async {
-    // TODO: Implémenter
-    throw UnimplementedError('removeAsStaff not yet implemented');
+    throw UnimplementedError(
+      'removeAsStaff is not yet implemented. '
+      'This is a Phase 1 placeholder for future development.',
+    );
   }
 
-  /// TODO: Supprimer tous les rôles d'un utilisateur.
+  /// Deletes all roles for a user.
+  /// 
+  /// WARNING: NOT YET IMPLEMENTED - Will throw [UnimplementedError].
+  /// This will be implemented in a future phase.
   Future<void> deleteUserRoles(String userId) async {
-    // TODO: Implémenter
-    throw UnimplementedError('deleteUserRoles not yet implemented');
+    throw UnimplementedError(
+      'deleteUserRoles is not yet implemented. '
+      'This is a Phase 1 placeholder for future development.',
+    );
   }
 }
