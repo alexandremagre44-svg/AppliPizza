@@ -13,10 +13,13 @@ import 'package:badges/badges.dart' as badges;
 import '../providers/cart_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/restaurant_provider.dart';
+import '../providers/restaurant_plan_provider.dart';
 import '../core/constants.dart';
 import '../../builder/models/models.dart';
 import '../../builder/services/builder_navigation_service.dart';
 import '../../builder/utils/icon_helper.dart';
+import '../../white_label/core/module_id.dart';
+import '../../white_label/restaurant/restaurant_feature_flags.dart';
 
 /// Provider for bottom bar pages
 /// Loads pages dynamically from Builder B3
@@ -40,6 +43,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final totalItems = ref.watch(cartProvider.select((cart) => cart.totalItems));
     final isAdmin = ref.watch(authProvider.select((auth) => auth.isAdmin));
     final bottomBarPagesAsync = ref.watch(bottomBarPagesProvider);
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
 
     return Scaffold(
       body: child,
@@ -55,6 +59,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             builderPages,
             isAdmin,
             totalItems,
+            flags,
           );
           
           // Runtime safety: If less than 2 items, show fallback navigation
@@ -224,18 +229,29 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   /// Build navigation items from Builder pages
   /// Injects admin page if user is admin
   /// Uses SystemPages registry for consistent icon and label handling
+  /// Module guard: filters pages based on feature flags
   _NavigationItemsResult _buildNavigationItems(
     BuildContext context,
     WidgetRef ref,
     List<BuilderPage> builderPages,
     bool isAdmin,
     int totalItems,
+    RestaurantFeatureFlags? flags,
   ) {
     final items = <BottomNavigationBarItem>[];
     final pages = <_NavPage>[];
 
     // Add builder pages first
     for (final page in builderPages) {
+      // Module guard: Skip pages for disabled modules
+      final requiredModule = _getRequiredModuleForRoute(page.route);
+      if (requiredModule != null && flags != null) {
+        if (!flags.has(requiredModule)) {
+          debugPrint('🚫 [BottomNav] Skipping ${page.pageKey} - module ${requiredModule.code} is disabled');
+          continue;
+        }
+      }
+      
       // Determine the correct route for this page
       // System pages use their defined routes, custom pages use /page/<pageKey>
       String effectiveRoute = page.route;
@@ -332,6 +348,26 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     if (iconData == Icons.card_giftcard) return 'card_giftcard';
     if (iconData == Icons.casino) return 'casino';
     return 'help_outline';
+  }
+
+  /// Get the required module for a specific route
+  /// Returns null if no module is required (always visible)
+  ModuleId? _getRequiredModuleForRoute(String route) {
+    switch (route) {
+      case '/roulette':
+        return ModuleId.roulette;
+      case '/rewards':
+        return ModuleId.loyalty;
+      case '/kitchen':
+        return ModuleId.kitchenTablet;
+      case '/staff-tablet':
+      case '/staff-tablet/catalog':
+      case '/staff-tablet/checkout':
+      case '/staff-tablet/history':
+        return ModuleId.staffTablet;
+      default:
+        return null;
+    }
   }
 
   /// Calculate selected index based on current location
