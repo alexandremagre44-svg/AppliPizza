@@ -7,6 +7,7 @@ import '../../providers/user_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/loyalty_provider.dart';
 import '../../providers/reward_tickets_provider.dart';
+import '../../providers/restaurant_plan_provider.dart';
 import '../../models/order.dart';
 import '../../models/loyalty_reward.dart';
 import '../../models/app_texts_config.dart';
@@ -15,6 +16,7 @@ import '../../providers/cart_provider.dart';
 import '../../services/loyalty_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/core/module_id.dart';
 import 'widgets/loyalty_section_widget.dart';
 import 'widgets/rewards_tickets_widget.dart';
 import 'widgets/roulette_card_widget.dart';
@@ -31,6 +33,7 @@ class ProfileScreen extends ConsumerWidget {
     final loyaltyInfoAsync = ref.watch(loyaltyInfoProvider);
     final activeTicketsAsync = ref.watch(activeRewardTicketsProvider);
     final appTextsAsync = ref.watch(appTextsProvider);
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -156,84 +159,93 @@ class ProfileScreen extends ConsumerWidget {
 
             // ═══════════════════════════════════════════════════════════
             // SECTION 1 — Fidélité (carte compacte)
+            // Module guard: requires loyalty module
             // ═══════════════════════════════════════════════════════════
-            loyaltyInfoAsync.when(
-              data: (loyaltyInfo) {
-                if (loyaltyInfo == null) return const SizedBox.shrink();
-                
-                return appTextsAsync.when(
-                  data: (appTexts) {
-                    final loyaltyPoints = loyaltyInfo['loyaltyPoints'] as int;
-                    final lifetimePoints = loyaltyInfo['lifetimePoints'] as int;
-                    final vipTier = loyaltyInfo['vipTier'] as String;
-                    
-                    return Padding(
-                      padding: AppSpacing.paddingHorizontalLG,
-                      child: LoyaltySectionWidget(
-                        loyaltyPoints: loyaltyPoints,
-                        lifetimePoints: lifetimePoints,
-                        vipTier: vipTier,
-                        texts: appTexts.profile,
-                      ),
-                    );
-                  },
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
+            if (flags?.has(ModuleId.loyalty) ?? false)
+              loyaltyInfoAsync.when(
+                data: (loyaltyInfo) {
+                  if (loyaltyInfo == null) return const SizedBox.shrink();
+                  
+                  return appTextsAsync.when(
+                    data: (appTexts) {
+                      final loyaltyPoints = loyaltyInfo['loyaltyPoints'] as int;
+                      final lifetimePoints = loyaltyInfo['lifetimePoints'] as int;
+                      final vipTier = loyaltyInfo['vipTier'] as String;
+                      
+                      return Padding(
+                        padding: AppSpacing.paddingHorizontalLG,
+                        child: LoyaltySectionWidget(
+                          loyaltyPoints: loyaltyPoints,
+                          lifetimePoints: lifetimePoints,
+                          vipTier: vipTier,
+                          texts: appTexts.profile,
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
 
-            SizedBox(height: AppSpacing.xxl),
+            if (flags?.has(ModuleId.loyalty) ?? false)
+              SizedBox(height: AppSpacing.xxl),
 
             // ═══════════════════════════════════════════════════════════
             // SECTION 2 — Mes récompenses (tickets)
+            // Module guard: requires loyalty module
             // ═══════════════════════════════════════════════════════════
-            activeTicketsAsync.when(
-              data: (activeTickets) {
-                if (activeTickets.isEmpty) return const SizedBox.shrink();
-                
-                return appTextsAsync.when(
-                  data: (appTexts) {
-                    return Padding(
-                      padding: AppSpacing.paddingHorizontalLG,
-                      child: RewardsTicketsWidget(
-                        activeTickets: activeTickets,
-                        profileTexts: appTexts.profile,
-                        rewardsTexts: appTexts.rewards,
-                      ),
-                    );
-                  },
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                );
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
+            if (flags?.has(ModuleId.loyalty) ?? false)
+              activeTicketsAsync.when(
+                data: (activeTickets) {
+                  if (activeTickets.isEmpty) return const SizedBox.shrink();
+                  
+                  return appTextsAsync.when(
+                    data: (appTexts) {
+                      return Padding(
+                        padding: AppSpacing.paddingHorizontalLG,
+                        child: RewardsTicketsWidget(
+                          activeTickets: activeTickets,
+                          profileTexts: appTexts.profile,
+                          rewardsTexts: appTexts.rewards,
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
 
-            SizedBox(height: AppSpacing.xxl),
+            if (flags?.has(ModuleId.loyalty) ?? false)
+              SizedBox(height: AppSpacing.xxl),
 
             // ═══════════════════════════════════════════════════════════
             // SECTION 3 — Roulette de la chance
+            // Module guard: requires roulette module
             // ═══════════════════════════════════════════════════════════
-            appTextsAsync.when(
-              data: (appTexts) {
-                final userId = authState.userId ?? 'guest';
-                return Padding(
-                  padding: AppSpacing.paddingHorizontalLG,
-                  child: RouletteCardWidget(
-                    texts: appTexts.roulette,
-                    userId: userId,
-                  ),
-                );
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
+            if (flags?.has(ModuleId.roulette) ?? false)
+              appTextsAsync.when(
+                data: (appTexts) {
+                  final userId = authState.userId ?? 'guest';
+                  return Padding(
+                    padding: AppSpacing.paddingHorizontalLG,
+                    child: RouletteCardWidget(
+                      texts: appTexts.roulette,
+                      userId: userId,
+                    ),
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
 
-            SizedBox(height: AppSpacing.xxl),
+            if (flags?.has(ModuleId.roulette) ?? false)
+              SizedBox(height: AppSpacing.xxl),
 
             // ═══════════════════════════════════════════════════════════
             // SECTION 4 — Activité du compte
@@ -455,37 +467,41 @@ class ProfileScreen extends ConsumerWidget {
             ],
 
             // Staff Tablet Access (for all staff)
-            Padding(
-              padding: AppSpacing.paddingHorizontalLG,
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => context.go(AppRoutes.staffTabletPin),
-                  icon: const Icon(Icons.tablet_mac, size: 24),
-                  label: const Text(
-                    'MODE CAISSE - TABLETTE',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
+            // Module guard: requires staffTablet module
+            if (flags?.has(ModuleId.staffTablet) ?? false)
+              Padding(
+                padding: AppSpacing.paddingHorizontalLG,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => context.go(AppRoutes.staffTabletPin),
+                    icon: const Icon(Icons.tablet_mac, size: 24),
+                    label: const Text(
+                      'MODE CAISSE - TABLETTE',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange[700],
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange[700],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
 
-            SizedBox(height: AppSpacing.md),
+            if (flags?.has(ModuleId.staffTablet) ?? false)
+              SizedBox(height: AppSpacing.md),
 
             // Kitchen Mode Access (for kitchen role users)
-            if (authState.isKitchen || authState.isAdmin)
+            // Module guard: requires kitchenTablet module
+            if ((authState.isKitchen || authState.isAdmin) && (flags?.has(ModuleId.kitchenTablet) ?? false))
               Padding(
                 padding: AppSpacing.paddingHorizontalLG,
                 child: SizedBox(
@@ -513,7 +529,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
 
-            if (authState.isKitchen || authState.isAdmin)
+            if ((authState.isKitchen || authState.isAdmin) && (flags?.has(ModuleId.kitchenTablet) ?? false))
               SizedBox(height: AppSpacing.md),
 
             SizedBox(height: AppSpacing.xxl),

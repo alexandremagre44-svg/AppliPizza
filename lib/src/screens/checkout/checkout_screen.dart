@@ -8,10 +8,12 @@ import '../../providers/cart_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/loyalty_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/restaurant_plan_provider.dart';
 import '../../services/loyalty_service.dart';
 import '../../models/loyalty_reward.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/core/module_id.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -170,24 +172,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget build(BuildContext context) {
     final cartState = ref.watch(cartProvider);
     final loyaltyInfoAsync = ref.watch(loyaltyInfoProvider);
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
     
     const deliveryFee = 5.00;
     double subtotal = cartState.total;
     
-    // Apply VIP discount
+    // Apply VIP discount (only if loyalty module is enabled)
     String? vipTier;
     double vipDiscount = 0.0;
     
-    loyaltyInfoAsync.whenData((loyaltyInfo) {
-      if (loyaltyInfo != null) {
-        vipTier = loyaltyInfo['vipTier'] as String?;
-        if (vipTier != null) {
-          final discountRate = VipTier.getDiscount(vipTier!);
-          vipDiscount = subtotal * discountRate;
-          subtotal = subtotal - vipDiscount;
+    if (flags?.has(ModuleId.loyalty) ?? false) {
+      loyaltyInfoAsync.whenData((loyaltyInfo) {
+        if (loyaltyInfo != null) {
+          vipTier = loyaltyInfo['vipTier'] as String?;
+          if (vipTier != null) {
+            final discountRate = VipTier.getDiscount(vipTier!);
+            vipDiscount = subtotal * discountRate;
+            subtotal = subtotal - vipDiscount;
+          }
         }
-      }
-    });
+      });
+    }
     
     final total = subtotal + deliveryFee;
 
@@ -217,15 +222,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             
             const SizedBox(height: 32),
             
-            // Loyalty rewards section
-            loyaltyInfoAsync.when(
-              data: (loyaltyInfo) {
-                if (loyaltyInfo == null) return const SizedBox.shrink();
-                return _buildRewardsSection(loyaltyInfo);
-              },
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
+            // Loyalty rewards section (module guard: requires loyalty module)
+            if (flags?.has(ModuleId.loyalty) ?? false)
+              loyaltyInfoAsync.when(
+                data: (loyaltyInfo) {
+                  if (loyaltyInfo == null) return const SizedBox.shrink();
+                  return _buildRewardsSection(loyaltyInfo);
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
             
             const SizedBox(height: 32),
             
