@@ -9,12 +9,19 @@
 //
 // This ensures the "Publié" preview in Builder Studio shows exactly what the 
 // client app renders, reading from the same collection and field.
+//
+// THEME INTEGRATION (Phase 1):
+// - Accepts optional ThemeConfig for preview rendering
+// - Wraps content with BuilderThemeProvider for consistent theming
+// - Block previews can access theme via context.builderTheme
 
 import 'package:flutter/material.dart';
 import '../models/models.dart';
+import '../models/theme_config.dart';
 import '../blocks/blocks.dart';
 import '../utils/responsive.dart';
 import '../utils/builder_modules.dart';
+import '../runtime/builder_theme_resolver.dart';
 
 /// Builder Page Preview Widget
 /// 
@@ -22,21 +29,34 @@ import '../utils/builder_modules.dart';
 /// Now supports:
 /// - draftLayout for editor preview
 /// - Module placeholders for attached modules
+/// - ThemeConfig for consistent styling across blocks
 /// 
 /// Usage:
 /// ```dart
-/// BuilderPagePreview(blocks: page.draftLayout, modules: page.modules)
+/// BuilderPagePreview(
+///   blocks: page.draftLayout, 
+///   modules: page.modules,
+///   themeConfig: draftTheme, // Optional: for live theme preview
+/// )
 /// ```
 class BuilderPagePreview extends StatelessWidget {
   final List<BuilderBlock> blocks;
   final List<String>? modules;
   final Color? backgroundColor;
+  
+  /// Optional theme configuration for preview
+  /// 
+  /// When provided, wraps the preview content with BuilderThemeProvider
+  /// so that blocks can access theme values via context.builderTheme.
+  /// If null, uses ThemeConfig.defaultConfig.
+  final ThemeConfig? themeConfig;
 
   const BuilderPagePreview({
     super.key,
     required this.blocks,
     this.modules,
     this.backgroundColor,
+    this.themeConfig,
   });
 
   @override
