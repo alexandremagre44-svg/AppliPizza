@@ -60,11 +60,22 @@ class BuilderPage {
 
   /// List of blocks on this page, ordered by block.order
   /// 
-  /// @deprecated This field is maintained for backward compatibility.
-  /// Use [draftLayout] for editor changes and [publishedLayout] for runtime.
-  /// Will be removed in a future version. Migration:
+  /// ⚠️ LEGACY FIELD - DO NOT USE FOR NEW CODE ⚠️
+  /// 
+  /// @deprecated This field is maintained ONLY for backward compatibility during migration.
+  /// 
+  /// RUNTIME FIX (November 2024):
+  /// - The runtime now uses ONLY [publishedLayout] as the source of truth
+  /// - The editor now uses ONLY [draftLayout] for editing
+  /// - This [blocks] field is kept ONLY to avoid data loss during migration
+  /// - New code should NEVER read or write to this field
+  /// 
+  /// Migration path:
   /// - Editor: Read/write [draftLayout] instead of [blocks]
   /// - Runtime: Read [publishedLayout] instead of [blocks]
+  /// - Firestore: Data is automatically migrated on load via fromJson() fallback chain
+  /// 
+  /// Will be removed in a future version once all data is migrated.
   final List<BuilderBlock> blocks;
 
   /// Whether this page is currently enabled/published

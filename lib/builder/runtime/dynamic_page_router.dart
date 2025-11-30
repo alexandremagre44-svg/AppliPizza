@@ -13,19 +13,25 @@ import '../utils/builder_modules.dart' as builder_modules;
 
 /// Build a page from a BuilderPage configuration
 /// 
+/// RUNTIME FIX: publishedLayout is the ONLY source of truth for runtime display.
+/// 
 /// This function routes Builder pages to their runtime representations:
 /// - If page has publishedLayout blocks → render with BuilderRuntimeRenderer
-/// - Fallback to draftLayout if publishedLayout is empty
-/// - Fallback to blocks (legacy) if draftLayout is also empty
+/// - Fallback to draftLayout if publishedLayout is empty (editor preview mode)
+/// - Fallback to blocks (LEGACY) if draftLayout is also empty (backward compatibility only)
 /// - For system pages with no blocks → render default module (menu_catalog, cart_module, etc.)
 /// - If page is empty and not a system page → show "Page vide / non configurée" message
+/// 
+/// IMPORTANT: The "blocks" field is DEPRECATED and maintained only for migration.
+/// New code should NEVER write to "blocks", only to draftLayout/publishedLayout.
 /// 
 /// Example:
 /// ```dart
 /// final widget = buildPageFromBuilder(builderPage);
 /// ```
 Widget buildPageFromBuilder(BuildContext context, BuilderPage page) {
-  // Determine which layout to render (priority: published > draft > blocks legacy)
+  // RUNTIME FIX: Determine which layout to render 
+  // Priority: publishedLayout (runtime) → draftLayout (preview) → blocks (legacy migration only)
   List<BuilderBlock> blocksToRender = [];
   
   if (page.publishedLayout.isNotEmpty) {
@@ -35,8 +41,9 @@ Widget buildPageFromBuilder(BuildContext context, BuilderPage page) {
     blocksToRender = page.draftLayout;
     debugPrint('📄 [PageRouter] ${page.pageKey}: using draftLayout fallback (${blocksToRender.length} blocks)');
   } else if (page.blocks.isNotEmpty) {
+    // LEGACY FALLBACK: Only used for old data that hasn't been migrated yet
     blocksToRender = page.blocks;
-    debugPrint('📄 [PageRouter] ${page.pageKey}: using blocks legacy fallback (${blocksToRender.length} blocks)');
+    debugPrint('⚠️ [PageRouter] ${page.pageKey}: using LEGACY blocks fallback (${blocksToRender.length} blocks) - migration needed');
   }
   
   // Render blocks if we have any
