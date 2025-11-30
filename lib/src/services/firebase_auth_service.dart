@@ -328,4 +328,20 @@ class FirebaseAuthService {
       return null;
     }
   }
+
+  /// Récupérer les custom claims avec refresh forcé du token
+  /// Utile après une mise à jour des claims côté serveur
+  /// Returns null if user is null or claims cannot be retrieved
+  Future<Map<String, dynamic>?> getCustomClaimsForceRefresh(User user) async {
+    try {
+      // Force refresh the token to get latest claims
+      final idTokenResult = await user.getIdTokenResult(true);
+      return idTokenResult.claims;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error retrieving custom claims (force refresh): $e');
+      }
+      return null;
+    }
+  }
 }
