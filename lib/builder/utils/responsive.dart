@@ -6,17 +6,25 @@ import 'package:flutter/material.dart';
 
 /// Responsive breakpoints for Builder B3
 class ResponsiveBreakpoints {
-  // Mobile: < 600px (phones in portrait)
-  static const double mobile = 600;
+  // Mobile: < 768px (phones in portrait and landscape)
+  static const double mobile = 768;
   
-  // Tablet: >= 600px and < 1024px (tablets, large phones in landscape)
-  static const double tablet = 600;
+  // Tablet: >= 768px and < 1024px (tablets, large phones in landscape)
+  static const double tablet = 768;
   
   // Desktop: >= 1024px (desktops, large tablets in landscape)
   static const double desktop = 1024;
   
   // Max content width for centering on wide screens
   static const double maxContentWidth = 1200;
+  
+  // Sidebar widths for editor
+  static const double sidebarMinWidth = 260;
+  static const double sidebarMaxWidth = 320;
+  
+  // Properties panel widths
+  static const double propertiesPanelMinWidth = 320;
+  static const double propertiesPanelMaxWidth = 380;
 }
 
 /// Responsive builder helper
@@ -31,10 +39,10 @@ class ResponsiveBuilder {
     return ResponsiveBuilder(MediaQuery.of(context).size.width);
   }
   
-  /// Check if current width is mobile (<600px)
+  /// Check if current width is mobile (<768px)
   bool get isMobile => width < ResponsiveBreakpoints.mobile;
   
-  /// Check if current width is tablet (>=600px and <1024px)
+  /// Check if current width is tablet (>=768px and <1024px)
   bool get isTablet => width >= ResponsiveBreakpoints.mobile && 
                        width < ResponsiveBreakpoints.desktop;
   
@@ -69,7 +77,25 @@ class ResponsiveBuilder {
     return 16.0;
   }
   
+  /// Get sidebar width for page editor
+  double get sidebarWidth {
+    if (isMobile) return width; // Full width on mobile
+    if (isTablet) return 0; // Hidden on tablet (use dropdown)
+    // Desktop: fixed width between min and max
+    return ResponsiveBreakpoints.sidebarMinWidth;
+  }
+  
+  /// Get properties panel width for page editor
+  double get propertiesPanelWidth {
+    if (isMobile) return width; // Full width on mobile (bottom sheet)
+    if (isTablet) return width * 0.4; // 40% on tablet
+    // Desktop: fixed width between min and max
+    return ResponsiveBreakpoints.propertiesPanelMinWidth;
+  }
+  
   /// Get editor panel width
+  /// @deprecated Use [propertiesPanelWidth] instead
+  @Deprecated('Use propertiesPanelWidth instead')
   double get editorPanelWidth {
     if (isMobile) return width; // Full width on mobile
     if (isTablet) return width * 0.4; // 40% on tablet

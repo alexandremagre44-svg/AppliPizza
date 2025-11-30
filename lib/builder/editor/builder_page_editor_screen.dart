@@ -1,8 +1,9 @@
 // lib/builder/editor/builder_page_editor_screen.dart
 // Page editor screen for Builder B3 system
-// MOBILE RESPONSIVE: Adapts layout for mobile (<600px), tablet, and desktop
+// RESPONSIVE LAYOUT: Desktop (>=1024px) 3-column, Tablet (768-1024px) 2-column, Mobile (<768px) stacked
 // PHASE 7: Enhanced with all block fields, tap actions, auto-save, and page creation
 // PHASE 8E: System page protections and SystemBlock protections
+// PHASE 9: Modern UI redesign with Material 3 components
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
@@ -539,124 +540,1271 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         final responsive = ResponsiveBuilder(constraints.maxWidth);
         
         return Scaffold(
-          appBar: AppBar(
-            title: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(responsive.isMobile 
-                  ? _pageLabel 
-                  : 'Éditeur: $_pageLabel'
+          backgroundColor: const Color(0xFFF5F5F5), // Light grey background
+          appBar: _buildAppBar(responsive),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _page == null
+                  ? _buildErrorState()
+                  : _buildResponsiveLayout(responsive),
+          floatingActionButton: _buildFloatingActionButton(responsive),
+        );
+      },
+    );
+  }
+
+  /// Build the app bar with responsive actions
+  PreferredSizeWidget _buildAppBar(ResponsiveBuilder responsive) {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      foregroundColor: Theme.of(context).colorScheme.onSurface,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.edit_document,
+            size: 20,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            responsive.isMobile ? _pageLabel : 'Studio Builder',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          if (!responsive.isMobile) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                _pageLabel,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
-                if (_page != null && _page!.hasUnpublishedChanges) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'Modifs',
-                      style: TextStyle(fontSize: 10, color: Colors.white),
-                    ),
+              ),
+            ),
+          ],
+          if (_page != null && _page!.hasUnpublishedChanges) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.orange,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'Modifs',
+                style: TextStyle(fontSize: 10, color: Colors.white),
+              ),
+            ),
+          ],
+          if (_isSaving) ...[
+            const SizedBox(width: 8),
+            const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        // Save button
+        if (_hasChanges)
+          IconButton(
+            icon: const Icon(Icons.save),
+            tooltip: 'Sauvegarder',
+            onPressed: _saveDraft,
+          ),
+        // Mobile view toggle
+        if (responsive.isMobile)
+          IconButton(
+            icon: Icon(_showPreviewInMobile ? Icons.view_list : Icons.visibility),
+            tooltip: _showPreviewInMobile ? 'Liste des blocs' : 'Prévisualisation',
+            onPressed: () => setState(() => _showPreviewInMobile = !_showPreviewInMobile),
+          ),
+        // Full screen preview (not on mobile)
+        if (!responsive.isMobile)
+          IconButton(
+            icon: const Icon(Icons.fullscreen),
+            tooltip: 'Plein écran',
+            onPressed: _showFullScreenPreview,
+          ),
+        // Publish button
+        Stack(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.publish),
+              tooltip: 'Publier',
+              onPressed: _publishPage,
+            ),
+            if (_page != null && _page!.hasUnpublishedChanges)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Colors.orange,
+                    shape: BoxShape.circle,
                   ),
-                ],
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
+  /// Build responsive layout based on screen size
+  Widget _buildResponsiveLayout(ResponsiveBuilder responsive) {
+    if (responsive.isDesktop) {
+      return _buildDesktopLayout();
+    } else if (responsive.isTablet) {
+      return _buildTabletLayout();
+    } else {
+      return _buildMobileLayout();
+    }
+  }
+
+  /// Desktop layout: 3 columns (pages | preview | properties)
+  /// Width >= 1024px
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        // Left column: Pages list (260-320px)
+        SizedBox(
+          width: ResponsiveBreakpoints.sidebarMinWidth,
+          child: _buildPagesColumn(),
+        ),
+        
+        // Center column: Preview (flex)
+        Expanded(
+          child: _buildPreviewColumn(),
+        ),
+        
+        // Right column: Properties panel (320-380px)
+        SizedBox(
+          width: ResponsiveBreakpoints.propertiesPanelMinWidth,
+          child: _buildPropertiesColumn(),
+        ),
+      ],
+    );
+  }
+
+  /// Tablet layout: 2 columns (preview | properties) with page dropdown
+  /// Width >= 768px and < 1024px
+  Widget _buildTabletLayout() {
+    return Column(
+      children: [
+        // Page selector (dropdown)
+        _buildPageDropdown(),
+        
+        // Two-column layout
+        Expanded(
+          child: Row(
+            children: [
+              // Left: Preview (flex)
+              Expanded(
+                flex: 3,
+                child: _buildPreviewColumn(),
+              ),
+              
+              // Right: Properties panel
+              SizedBox(
+                width: 300,
+                child: _buildPropertiesColumn(),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Build error state widget
+  Widget _buildErrorState() {
+    return Center(
+      child: Card(
+        margin: const EdgeInsets.all(32),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Impossible de charger la page',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Vérifiez la connexion et réessayez',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: _loadPage,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Réessayer'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build floating action button
+  Widget? _buildFloatingActionButton(ResponsiveBuilder responsive) {
+    if (_page == null) return null;
+    
+    // Only show on mobile when viewing blocks list
+    if (responsive.isMobile && _showPreviewInMobile) return null;
+    
+    return FloatingActionButton.extended(
+      onPressed: _showAddBlockDialog,
+      icon: const Icon(Icons.add),
+      label: Text(responsive.isMobile ? 'Bloc' : 'Ajouter un bloc'),
+    );
+  }
+
+  /// Build the pages column (left sidebar)
+  Widget _buildPagesColumn() {
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(
+                bottom: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.layers,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Pages',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
-            bottom: responsive.isMobile 
-              ? null // No tabs on mobile - use bottom sheet instead
-              : TabBar(
-                  controller: _tabController,
-                  tabs: const [
-                    Tab(icon: Icon(Icons.edit), text: 'Édition'),
-                    Tab(icon: Icon(Icons.visibility), text: 'Prévisualisation'),
+          ),
+          
+          // Blocks list
+          Expanded(
+            child: _buildBlocksListContent(),
+          ),
+          
+          // Add block button
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(
+                top: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+            ),
+            child: FilledButton.icon(
+              onPressed: _showAddBlockDialog,
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Ajouter bloc'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(42),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build the preview column (center)
+  Widget _buildPreviewColumn() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFFF5F5F5),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(
+                bottom: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.visibility,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Prévisualisation',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                // Draft/Published toggle
+                SegmentedButton<bool>(
+                  segments: const [
+                    ButtonSegment(
+                      value: true,
+                      label: Text('Brouillon', style: TextStyle(fontSize: 12)),
+                      icon: Icon(Icons.edit_note, size: 16),
+                    ),
+                    ButtonSegment(
+                      value: false,
+                      label: Text('Publié', style: TextStyle(fontSize: 12)),
+                      icon: Icon(Icons.public, size: 16),
+                    ),
                   ],
-                ),
-            actions: [
-              // Active/Inactive toggle
-              if (_page != null)
-                IconButton(
-                  icon: Icon(
-                    _page!.isActive ? Icons.visibility : Icons.visibility_off,
-                    color: _page!.isActive ? Colors.green : Colors.grey,
+                  selected: {_isShowingDraft},
+                  onSelectionChanged: (selection) {
+                    setState(() => _isShowingDraft = selection.first);
+                  },
+                  style: ButtonStyle(
+                    visualDensity: VisualDensity.compact,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  tooltip: _page!.isActive ? 'Désactiver la page' : 'Activer la page',
-                  onPressed: _toggleActive,
                 ),
-              // Bottom nav order (only if bottomBar)
-              if (_page != null && _page!.displayLocation == 'bottomBar')
-                IconButton(
-                  icon: const Icon(Icons.sort),
-                  tooltip: 'Ordre: ${_page!.bottomNavIndex}',
-                  onPressed: _showBottomNavOrderDialog,
+              ],
+            ),
+          ),
+          
+          // Preview content
+          Expanded(
+            child: _buildPreviewContent(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build the properties column (right sidebar)
+  Widget _buildPropertiesColumn() {
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      child: DefaultTabController(
+        length: 3,
+        child: Column(
+          children: [
+            // Header with tabs
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                border: Border(
+                  bottom: BorderSide(color: Theme.of(context).dividerColor),
                 ),
-              if (_hasChanges)
-                IconButton(
-                  icon: const Icon(Icons.save),
-                  tooltip: 'Sauvegarder',
-                  onPressed: _saveDraft,
-                ),
-              if (responsive.isMobile)
-                IconButton(
-                  // When showing list, button switches to preview; when showing preview, button switches to list
-                  icon: Icon(!_showPreviewInMobile ? Icons.visibility : Icons.view_list),
-                  tooltip: !_showPreviewInMobile ? 'Voir la prévisualisation' : 'Voir la liste',
-                  onPressed: () => setState(() => _showPreviewInMobile = !_showPreviewInMobile),
-                ),
-              if (!responsive.isMobile)
-                IconButton(
-                  icon: const Icon(Icons.fullscreen),
-                  tooltip: 'Prévisualisation plein écran',
-                  onPressed: _showFullScreenPreview,
-                ),
-              // Publish button with badge
-              Stack(
+              ),
+              child: Column(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.publish),
-                    tooltip: 'Publier',
-                    onPressed: _publishPage,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.tune,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Propriétés',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  if (_page != null && _page!.hasUnpublishedChanges)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.orange,
-                          shape: BoxShape.circle,
+                  TabBar(
+                    labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                    unselectedLabelStyle: const TextStyle(fontSize: 11),
+                    tabs: [
+                      Tab(
+                        icon: Icon(Icons.article_outlined, size: 16),
+                        text: 'Page',
+                        height: 44,
+                      ),
+                      Tab(
+                        icon: Badge(
+                          isLabelVisible: _selectedBlock != null,
+                          smallSize: 6,
+                          child: Icon(Icons.widgets_outlined, size: 16),
+                        ),
+                        text: 'Bloc',
+                        height: 44,
+                      ),
+                      Tab(
+                        icon: Icon(Icons.navigation_outlined, size: 16),
+                        text: 'Nav',
+                        height: 44,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            
+            // Tab content
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _buildPagePropertiesTab(),
+                  _buildBlockPropertiesTab(),
+                  _buildNavigationTab(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build blocks list column for mobile
+  Widget _buildBlocksListColumn() {
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      child: _buildBlocksListContent(),
+    );
+  }
+
+  /// Build page dropdown for tablet/mobile
+  Widget _buildPageDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(color: Theme.of(context).dividerColor),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.layers,
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Page:',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _getPageIcon(_page),
+                    size: 18,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _page?.name ?? _pageLabel,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (_page != null && _page!.isActive)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'Actif',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.green,
                         ),
                       ),
                     ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build the mobile bottom panel for editing selected block
+  Widget _buildMobileBottomPanel() {
+    if (_selectedBlock == null) return const SizedBox.shrink();
+    
+    return Container(
+      color: Theme.of(context).colorScheme.primary,
+      child: SafeArea(
+        top: false,
+        child: ListTile(
+          leading: Text(
+            _selectedBlock!.type.icon,
+            style: const TextStyle(fontSize: 24),
+          ),
+          title: Text(
+            _selectedBlock!.type.label,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(
+            'Appuyez pour configurer',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+              fontSize: 12,
+            ),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onPrimary),
+                onPressed: _showMobileEditorSheet,
+              ),
+              IconButton(
+                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
+                onPressed: () => setState(() => _selectedBlock = null),
+              ),
             ],
           ),
-          body: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _page == null
-                  ? const Center(child: Text('Impossible de charger la page'))
-                  : responsive.isMobile
-                      ? _buildMobileLayout()
-                      : TabBarView(
-                          controller: _tabController,
+          onTap: _showMobileEditorSheet,
+        ),
+      ),
+    );
+  }
+
+  /// Build preview content
+  Widget _buildPreviewContent() {
+    if (_page == null) {
+      return Center(
+        child: Text(
+          'Aucune page à prévisualiser',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Theme.of(context).colorScheme.outline,
+          ),
+        ),
+      );
+    }
+
+    final List<BuilderBlock> layout;
+    if (_isShowingDraft) {
+      layout = _page!.draftLayout.isNotEmpty 
+          ? _page!.draftLayout 
+          : _page!.publishedLayout;
+    } else {
+      layout = _page!.publishedLayout.isNotEmpty 
+          ? _page!.publishedLayout 
+          : _page!.draftLayout;
+    }
+
+    return Card(
+      margin: const EdgeInsets.all(16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: BuilderPagePreview(
+        blocks: layout,
+        modules: _page!.modules,
+        backgroundColor: Colors.white,
+      ),
+    );
+  }
+
+  /// Build blocks list content (shared between desktop and mobile)
+  Widget _buildBlocksListContent() {
+    final blocks = _page!.sortedDraftBlocks;
+
+    return Column(
+      children: [
+        // System page protection banner
+        if (_page!.isSystemPage)
+          _buildSystemPageBanner(),
+        
+        // Navigation parameters panel
+        _buildNavigationParamsPanel(),
+        
+        // Blocks list
+        Expanded(
+          child: blocks.isEmpty
+              ? _buildEmptyBlocksState()
+              : ReorderableListView.builder(
+                  onReorder: _reorderBlocks,
+                  itemCount: blocks.length,
+                  padding: const EdgeInsets.all(8),
+                  itemBuilder: (context, index) {
+                    final block = blocks[index];
+                    final isSelected = _selectedBlock?.id == block.id;
+
+                    return Card(
+                      key: ValueKey(block.id),
+                      margin: const EdgeInsets.only(bottom: 8),
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.primaryContainer 
+                          : null,
+                      elevation: isSelected ? 2 : 0,
+                      child: ListTile(
+                        leading: Text(
+                          block.type.icon,
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                        title: Text(
+                          block.type.label,
+                          style: TextStyle(
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        subtitle: Text(
+                          _getBlockSummary(block),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            _buildEditorTab(responsive),
-                            _buildPreviewTab(),
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete_outline,
+                                color: Theme.of(context).colorScheme.error,
+                                size: 20,
+                              ),
+                              onPressed: () => _removeBlock(block.id),
+                            ),
+                            const Icon(Icons.drag_handle, size: 20),
                           ],
                         ),
-          floatingActionButton: (_tabController.index == 0 || responsive.isMobile)
-              ? FloatingActionButton.extended(
-                  onPressed: _showAddBlockDialog,
-                  icon: const Icon(Icons.add),
-                  label: Text(responsive.isMobile ? 'Bloc' : 'Ajouter un bloc'),
-                )
-              : null,
-        );
-      },
+                        onTap: () => _selectBlock(block),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
+  }
+
+  /// Build system page banner
+  Widget _buildSystemPageBanner() {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.shield, color: Colors.blue.shade700, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Page système protégée',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.blue.shade800,
+              ),
+            ),
+          ),
+          Tooltip(
+            message: 'Cette page ne peut pas être supprimée',
+            child: Icon(Icons.info_outline, color: Colors.blue.shade400, size: 16),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build navigation parameters panel (compact version for blocks list)
+  Widget _buildNavigationParamsPanel() {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.green.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.navigation, color: Colors.green.shade700, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Navigation',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.green.shade800,
+              ),
+            ),
+          ),
+          // Active switch
+          Switch(
+            value: _page!.isActive,
+            onChanged: (value) => _updateNavigationParams(isActive: value),
+            activeColor: Colors.green.shade600,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build empty blocks state
+  Widget _buildEmptyBlocksState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.widgets_outlined,
+              size: 48,
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Aucun bloc',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Appuyez sur + pour ajouter du contenu',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build page properties tab content
+  Widget _buildPagePropertiesTab() {
+    if (_page == null) {
+      return _buildEmptyPropertiesState('Aucune page sélectionnée');
+    }
+    
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Page info card
+        Card(
+          elevation: 0,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        _getPageIcon(_page),
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _page!.name.isNotEmpty ? _page!.name : _page!.pageKey,
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            _page!.route,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _buildStatChip(Icons.layers, '${_page!.draftLayout.length}', 'blocs'),
+                    const SizedBox(width: 8),
+                    _buildStatChip(
+                      Icons.public, 
+                      _page!.publishedLayout.isNotEmpty ? 'Oui' : 'Non', 
+                      'publié',
+                    ),
+                    const SizedBox(width: 8),
+                    _buildStatChip(
+                      Icons.visibility, 
+                      _page!.isActive ? 'Actif' : 'Inactif', 
+                      'statut',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        if (_page!.isSystemPage) ...[
+          const SizedBox(height: 12),
+          _buildSystemPageBanner(),
+        ],
+      ],
+    );
+  }
+
+  /// Build block properties tab content
+  Widget _buildBlockPropertiesTab() {
+    if (_selectedBlock == null) {
+      return _buildEmptyPropertiesState('Sélectionnez un bloc');
+    }
+    
+    final block = _selectedBlock!;
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Block header
+          Card(
+            elevation: 0,
+            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  Text(
+                    block.type.icon,
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          block.type.label,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Ordre: ${block.order}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 18),
+                    onPressed: () => setState(() => _selectedBlock = null),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          Text(
+            'Configuration',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          
+          const SizedBox(height: 8),
+          
+          // Configuration fields
+          ..._buildConfigFields(block),
+        ],
+      ),
+    );
+  }
+
+  /// Build navigation tab content
+  Widget _buildNavigationTab() {
+    if (_page == null) {
+      return _buildEmptyPropertiesState('Aucune page sélectionnée');
+    }
+    
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Active switch
+        Card(
+          elevation: 0,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Icon(
+                  _page!.isActive ? Icons.visibility : Icons.visibility_off,
+                  color: _page!.isActive ? Colors.green : Colors.grey,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Afficher dans la barre',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        _page!.isActive ? 'Visible' : 'Masqué',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: _page!.isActive,
+                  onChanged: (value) => _updateNavigationParams(isActive: value),
+                  activeColor: Colors.green,
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        if (_page!.isActive) ...[
+          const SizedBox(height: 12),
+          
+          // Position selector
+          Card(
+            elevation: 0,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.sort,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Position (0-4)',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Theme.of(context).dividerColor),
+                        ),
+                        child: DropdownButton<int>(
+                          value: (_page!.bottomNavIndex >= 0 && _page!.bottomNavIndex <= 4) 
+                              ? _page!.bottomNavIndex 
+                              : null,
+                          hint: const Text('?', style: TextStyle(fontSize: 14)),
+                          underline: const SizedBox(),
+                          isDense: true,
+                          items: List.generate(5, (i) => i).map((index) {
+                            return DropdownMenuItem<int>(
+                              value: index,
+                              child: Text('$index', style: const TextStyle(fontSize: 14)),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              _updateNavigationParams(bottomNavIndex: value);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  // Duplicate warning
+                  if (_duplicateIndexWarning != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.orange.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.warning, size: 14, color: Colors.orange.shade700),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                _duplicateIndexWarning!,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.orange.shade800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Icon picker (for custom pages only)
+          if (!_page!.isSystemPage) ...[
+            const SizedBox(height: 12),
+            Card(
+              elevation: 0,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Theme.of(context).dividerColor),
+                      ),
+                      child: Icon(
+                        _getPageIcon(_page),
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Icône',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            _page!.icon.isEmpty ? 'Par défaut' : _page!.icon,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FilledButton.tonal(
+                      onPressed: _showIconPicker,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        minimumSize: const Size(60, 32),
+                      ),
+                      child: const Text('Choisir', style: TextStyle(fontSize: 12)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ],
+    );
+  }
+
+  /// Build empty properties state
+  Widget _buildEmptyPropertiesState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.touch_app_outlined,
+              size: 40,
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build stat chip for page info
+  Widget _buildStatChip(IconData icon, String value, String label) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 12, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 4),
+                Text(
+                  value,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Helper to get page icon
+  IconData _getPageIcon(BuilderPage? page) {
+    if (page == null) return Icons.article;
+    
+    if (page.icon.isNotEmpty) {
+      return IconHelper.iconFromName(page.icon);
+    }
+    
+    if (page.isSystemPage) {
+      final sysId = page.systemId;
+      if (sysId != null) {
+        switch (sysId) {
+          case BuilderPageId.profile:
+            return Icons.person;
+          case BuilderPageId.cart:
+            return Icons.shopping_cart;
+          case BuilderPageId.rewards:
+            return Icons.card_giftcard;
+          case BuilderPageId.roulette:
+            return Icons.casino;
+          default:
+            return Icons.article;
+        }
+      }
+    }
+    
+    return Icons.article;
   }
 
   /// Toggle active status of the page
@@ -983,79 +2131,31 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     return IconHelper.iconFromName(iconName);
   }
 
-  Widget _buildEditorTab(ResponsiveBuilder responsive) {
-    return Row(
-      children: [
-        // Blocks list (left side)
-        Expanded(
-          flex: 2,
-          child: _buildBlocksList(),
-        ),
-        // Configuration panel (right side) - only on desktop/tablet
-        if (_selectedBlock != null && responsive.isNotMobile)
-          Expanded(
-            flex: 1,
-            child: _buildConfigPanel(),
-          ),
-      ],
-    );
-  }
-
   /// Mobile layout with blocks list showing delete/drag actions permanently
   Widget _buildMobileLayout() {
     return Stack(
       children: [
-        // Show either blocks list (default) or preview (when toggled)
-        Positioned.fill(
-          bottom: _shouldShowMobileEditorPanel ? _mobileEditorPanelHeight : 0,
-          child: _showPreviewInMobile ? _buildPreviewTab() : _buildBlocksList(),
+        Column(
+          children: [
+            // Page info bar
+            _buildPageDropdown(),
+            
+            // Content area with blocks list or preview
+            Expanded(
+              child: _showPreviewInMobile 
+                  ? _buildPreviewContent() 
+                  : _buildBlocksListContent(),
+            ),
+          ],
         ),
-        // Floating editor panel button (when block is selected and in list view)
+        
+        // Bottom editor panel button (when block is selected and in list view)
         if (_shouldShowMobileEditorPanel)
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: Container(
-              color: Theme.of(context).primaryColor,
-              child: SafeArea(
-                top: false,
-                child: ListTile(
-                  leading: Text(
-                    _selectedBlock!.type.icon,
-                    style: const TextStyle(fontSize: 24, color: Colors.white),
-                  ),
-                  title: Text(
-                    _selectedBlock!.type.label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'Tapez pour configurer',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 12,
-                    ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.white),
-                        onPressed: () => _showMobileEditorSheet(),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () => setState(() => _selectedBlock = null),
-                      ),
-                    ],
-                  ),
-                  onTap: () => _showMobileEditorSheet(),
-                ),
-              ),
-            ),
+            child: _buildMobileBottomPanel(),
           ),
       ],
     );
@@ -1144,69 +2244,10 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     );
   }
 
-  Widget _buildPreviewTab() {
-    if (_page == null) {
-      return const Center(child: Text('Aucune page à prévisualiser'));
-    }
-
-    // Choose layout based on toggle: draft or published
-    final List<BuilderBlock> layout;
-    if (_isShowingDraft) {
-      // Draft mode: use draftLayout, fallback to publishedLayout if empty
-      layout = _page!.draftLayout.isNotEmpty 
-          ? _page!.draftLayout 
-          : _page!.publishedLayout;
-    } else {
-      // Published mode: use publishedLayout, fallback to draftLayout if empty
-      layout = _page!.publishedLayout.isNotEmpty 
-          ? _page!.publishedLayout 
-          : _page!.draftLayout;
-    }
-
-    // Debug log for preview layout
-    debugPrint('🔍 [_buildPreviewTab] pageKey=${_page!.pageKey}');
-    debugPrint('   - draftLayout.blocks.length=${_page!.draftLayout.length}');
-    debugPrint('   - publishedLayout.blocks.length=${_page!.publishedLayout.length}');
-    debugPrint('   - layout.blocks.length=${layout.length} (mode: ${_isShowingDraft ? "draft" : "published"})');
-
-    return Column(
-      children: [
-        // Toggle between draft and published preview
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          color: Colors.grey.shade100,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Prévisualiser: ', style: TextStyle(fontWeight: FontWeight.w500)),
-              SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment(value: true, label: Text('Brouillon'), icon: Icon(Icons.edit_note)),
-                  ButtonSegment(value: false, label: Text('Publié'), icon: Icon(Icons.public)),
-                ],
-                selected: {_isShowingDraft},
-                onSelectionChanged: (selection) {
-                  setState(() => _isShowingDraft = selection.first);
-                },
-              ),
-            ],
-          ),
-        ),
-        // Preview content
-        Expanded(
-          child: BuilderPagePreview(
-            blocks: layout,
-            modules: _page!.modules,
-          ),
-        ),
-      ],
-    );
-  }
-
   void _showFullScreenPreview() {
     if (_page == null) return;
 
-    // Choose layout based on toggle: draft or published (same logic as _buildPreviewTab)
+    // Choose layout based on toggle: draft or published
     final List<BuilderBlock> layout;
     if (_isShowingDraft) {
       layout = _page!.draftLayout.isNotEmpty 
@@ -1223,353 +2264,6 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       blocks: layout,
       modules: _page!.modules,
       pageTitle: _pageLabel,
-    );
-  }
-
-  Widget _buildBlocksList() {
-    final blocks = _page!.sortedDraftBlocks;
-
-    return Column(
-      children: [
-        // System page protection banner
-        if (_page!.isSystemPage)
-          Container(
-            padding: const EdgeInsets.all(12),
-            margin: const EdgeInsets.only(left: 8, right: 8, top: 8),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.blue.shade200),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.shield, color: Colors.blue.shade700, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Page système protégée',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.blue.shade800,
-                        ),
-                      ),
-                    ),
-                    Tooltip(
-                      message: 'Cette page ne peut pas être supprimée.\nL\'ID ne peut pas être modifié.\nVous pouvez modifier les blocs.',
-                      child: Icon(Icons.info_outline, color: Colors.blue.shade400, size: 18),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    _buildProtectionChip(Icons.block, 'Suppression', false),
-                    _buildProtectionChip(Icons.block, 'ID', false),
-                    _buildProtectionChip(Icons.check_circle, 'Blocs', true),
-                    _buildProtectionChip(Icons.check_circle, 'Ordre', true),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        
-        // Navigation parameters panel
-        Container(
-          padding: const EdgeInsets.all(12),
-          margin: const EdgeInsets.only(left: 8, right: 8, top: 8),
-          decoration: BoxDecoration(
-            color: Colors.green.shade50,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.green.shade200),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.navigation, color: Colors.green.shade700, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Paramètres de navigation',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.green.shade800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              
-              // Switch: Afficher dans la bottom bar
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Afficher dans la barre du bas',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade800,
-                      ),
-                    ),
-                  ),
-                  Switch(
-                    value: _page!.isActive,
-                    onChanged: (value) => _updateNavigationParams(isActive: value),
-                    activeColor: Colors.green.shade600,
-                  ),
-                ],
-              ),
-              
-              // Dropdown/Slider: Position dans la barre
-              if (_page!.isActive) ...[
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Position (0-4)',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade800,
-                            ),
-                          ),
-                          // Show warning if invalid value
-                          if (_page!.bottomNavIndex < 0 || _page!.bottomNavIndex > 4)
-                            Text(
-                              'Valeur invalide: ${_page!.bottomNavIndex}',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.red.shade700,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: (_page!.bottomNavIndex >= 0 && _page!.bottomNavIndex <= 4) 
-                              ? Colors.green.shade300 
-                              : Colors.red.shade300,
-                        ),
-                      ),
-                      child: DropdownButton<int>(
-                        value: (_page!.bottomNavIndex >= 0 && _page!.bottomNavIndex <= 4) 
-                            ? _page!.bottomNavIndex 
-                            : null, // Show hint if invalid
-                        hint: const Text('Choisir'),
-                        underline: const SizedBox(),
-                        items: List.generate(5, (i) => i).map((index) {
-                          return DropdownMenuItem<int>(
-                            value: index,
-                            child: Text('$index'),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            _updateNavigationParams(bottomNavIndex: value);
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                
-                // Warning for duplicate index (cached)
-                if (_duplicateIndexWarning != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: Colors.orange.shade300),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.warning, size: 16, color: Colors.orange.shade700),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Attention: $_duplicateIndexWarning',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.orange.shade800,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                
-                // Icon picker for custom pages only
-                // System pages use their default icons (profile, cart, etc.)
-                if (!_page!.isSystemPage) ...[
-                  const SizedBox(height: 8),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Icône',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade800,
-                              ),
-                            ),
-                            Text(
-                              _page!.icon.isEmpty ? 'Aucune (défaut: calques)' : _page!.icon,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey.shade600,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Icon preview
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.green.shade300),
-                        ),
-                        child: Icon(
-                          _getIconFromName(_page!.icon.isEmpty ? 'layers' : _page!.icon),
-                          size: 24,
-                          color: Colors.green.shade700,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Change icon button
-                      ElevatedButton.icon(
-                        onPressed: _showIconPicker,
-                        icon: const Icon(Icons.palette, size: 16),
-                        label: const Text('Choisir'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.shade600,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ],
-            ],
-          ),
-        ),
-        
-        // Blocks list
-        Expanded(
-          child: blocks.isEmpty
-              ? const Center(
-                  child: Text(
-                    'Aucun bloc.\nAppuyez sur + pour en ajouter.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                )
-              : ReorderableListView.builder(
-                  onReorder: _reorderBlocks,
-                  itemCount: blocks.length,
-                  itemBuilder: (context, index) {
-                    final block = blocks[index];
-                    final isSelected = _selectedBlock?.id == block.id;
-
-                    return Card(
-                      key: ValueKey(block.id),
-                      margin: const EdgeInsets.all(8),
-                      color: isSelected ? Colors.blue.shade50 : null,
-                      elevation: isSelected ? 4 : 1,
-                      child: ListTile(
-                        leading: Text(
-                          block.type.icon,
-                          style: const TextStyle(fontSize: 24),
-                        ),
-                        title: Text(
-                          block.type.label,
-                          style: TextStyle(
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          ),
-                        ),
-                        subtitle: Text(_getBlockSummary(block)),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _removeBlock(block.id),
-                            ),
-                            const Icon(Icons.drag_handle),
-                          ],
-                        ),
-                        onTap: () => _selectBlock(block),
-                      ),
-                    );
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-  
-  /// Build a small protection chip for system page banner
-  Widget _buildProtectionChip(IconData icon, String label, bool allowed) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: allowed ? Colors.green.shade50 : Colors.red.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: allowed ? Colors.green.shade200 : Colors.red.shade200,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 12,
-            color: allowed ? Colors.green.shade600 : Colors.red.shade600,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: allowed ? Colors.green.shade700 : Colors.red.shade700,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -1591,57 +2285,6 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       default:
         return 'Bloc ${block.type.value}';
     }
-  }
-
-  Widget _buildConfigPanel() {
-    final block = _selectedBlock!;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        border: Border(left: BorderSide(color: Colors.grey.shade300)),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  block.type.icon,
-                  style: const TextStyle(fontSize: 32),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    block.type.label,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => setState(() => _selectedBlock = null),
-                ),
-              ],
-            ),
-            const Divider(height: 32),
-            Text(
-              'Configuration',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ..._buildConfigFields(block),
-          ],
-        ),
-      ),
-    );
   }
 
   List<Widget> _buildConfigFields(BuilderBlock block) {
