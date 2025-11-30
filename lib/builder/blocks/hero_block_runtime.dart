@@ -1,6 +1,6 @@
 // lib/builder/blocks/hero_block_runtime.dart
 // Runtime version of HeroBlock - Phase 5 enhanced with modern visual design
-// ThemeConfig Integration: Uses theme primaryColor for default background and button colors
+// ThemeConfig Integration: Uses theme primaryColor, textHeadingSize, textBodySize, buttonRadius
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
@@ -66,6 +66,16 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
   // Design constants
   static const double _maxOverlayOpacity = 0.7;
   static const double _pillButtonRadius = 50.0;
+  
+  // Responsive font scaling factors (relative to theme base sizes)
+  static const double _titleScaleDesktop = 1.35;
+  static const double _titleScaleTablet = 1.15;
+  static const double _titleScaleMobile = 1.08;
+  static const double _subtitleScaleDesktop = 1.25;
+  static const double _subtitleScaleTablet = 1.125;
+  static const double _subtitleScaleMobile = 1.0;
+  static const double _buttonTextScaleTablet = 0.94;
+  static const double _buttonTextScaleMobile = 0.875;
 
   @override
   void initState() {
@@ -213,15 +223,32 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
     ];
   }
 
-  /// Get responsive font sizes
-  Map<String, double> _getFontSizes(_DeviceType device) {
+  /// Get responsive font sizes based on theme
+  /// Uses theme.textHeadingSize for title and theme.textBodySize for subtitle
+  Map<String, double> _getFontSizes(_DeviceType device, ThemeConfig theme) {
+    // Use theme font sizes with responsive scaling
+    final headingSize = theme.textHeadingSize;
+    final bodySize = theme.textBodySize;
+    
     switch (device) {
       case _DeviceType.desktop:
-        return {'title': 32.0, 'subtitle': 20.0, 'button': 16.0};
+        return {
+          'title': headingSize * _titleScaleDesktop,
+          'subtitle': bodySize * _subtitleScaleDesktop,
+          'button': bodySize,
+        };
       case _DeviceType.tablet:
-        return {'title': 28.0, 'subtitle': 18.0, 'button': 15.0};
+        return {
+          'title': headingSize * _titleScaleTablet,
+          'subtitle': bodySize * _subtitleScaleTablet,
+          'button': bodySize * _buttonTextScaleTablet,
+        };
       case _DeviceType.mobile:
-        return {'title': 26.0, 'subtitle': 16.0, 'button': 14.0};
+        return {
+          'title': headingSize * _titleScaleMobile,
+          'subtitle': bodySize * _subtitleScaleMobile,
+          'button': bodySize * _buttonTextScaleMobile,
+        };
     }
   }
 
@@ -259,7 +286,7 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
     // Calculate responsive values
     final height = _calculateHeight(helper, screenWidth, device);
     final padding = _getPadding(helper, device);
-    final fontSizes = _getFontSizes(device);
+    final fontSizes = _getFontSizes(device, theme);
     final overlayColors = _getOverlayGradient(helper, imageUrl.isNotEmpty);
 
     // Determine alignment
