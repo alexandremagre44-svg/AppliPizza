@@ -6,17 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
-import '../blocks/hero_block_runtime.dart';
-import '../blocks/text_block_runtime.dart';
-import '../blocks/banner_block_runtime.dart';
-import '../blocks/product_list_block_runtime.dart';
-import '../blocks/info_block_runtime.dart';
-import '../blocks/spacer_block_runtime.dart';
-import '../blocks/image_block_runtime.dart';
-import '../blocks/button_block_runtime.dart';
-import '../blocks/category_list_block_runtime.dart';
-import '../blocks/html_block_runtime.dart';
-import '../blocks/system_block_runtime.dart';
+import '../runtime/builder_block_runtime_registry.dart';
 
 /// Renders a list of BuilderBlocks using runtime widgets
 /// These widgets can access providers, services, and real data
@@ -288,54 +278,11 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
     return null;
   }
 
-  /// Maps block type to corresponding runtime widget
+  /// Maps block type to corresponding runtime widget via registry
   Widget _buildBlock(BuilderBlock block, BuildContext context) {
-    switch (block.type) {
-      case BlockType.hero:
-        return HeroBlockRuntime(block: block);
-      
-      case BlockType.text:
-        return TextBlockRuntime(block: block);
-      
-      case BlockType.banner:
-        return BannerBlockRuntime(block: block);
-      
-      case BlockType.productList:
-        return ProductListBlockRuntime(block: block);
-      
-      case BlockType.info:
-        return InfoBlockRuntime(block: block);
-      
-      case BlockType.spacer:
-        return SpacerBlockRuntime(block: block);
-      
-      case BlockType.image:
-        return ImageBlockRuntime(block: block);
-      
-      case BlockType.button:
-        return ButtonBlockRuntime(block: block);
-      
-      case BlockType.categoryList:
-        return CategoryListBlockRuntime(block: block);
-      
-      case BlockType.html:
-        return HtmlBlockRuntime(block: block);
-      
-      case BlockType.system:
-        return buildSystemBlock(block, context);
-    }
-  }
-  
-  /// Build a SystemBlock with proper error handling and config application
-  /// 
-  /// This method:
-  /// - Reads block.config['moduleType']
-  /// - Applies visual properties via BlockConfigHelper (padding, margin, backgroundColor, height)
-  /// - Returns the corresponding system widget
-  /// - Handles unknown module types gracefully
-  Widget buildSystemBlock(BuilderBlock block, BuildContext context) {
-    return SystemBlockRuntime(
-      block: block,
+    return BuilderBlockRuntimeRegistry.render(
+      block,
+      context,
       maxContentWidth: maxContentWidth,
     );
   }

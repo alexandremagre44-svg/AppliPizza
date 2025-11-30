@@ -114,24 +114,21 @@ class _BuilderPageSidebarState extends State<BuilderPageSidebar> {
       return _buildCompactView();
     }
     
-    return Container(
-      width: widget.width,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        border: Border(
-          right: BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 1,
-          ),
-        ),
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Header
           _buildHeader(),
           
-          // Content
+          // Content with independent scroll
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -151,7 +148,7 @@ class _BuilderPageSidebarState extends State<BuilderPageSidebar> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         border: Border(
           bottom: BorderSide(
             color: Theme.of(context).dividerColor,
@@ -435,7 +432,7 @@ class _BuilderPageSidebarState extends State<BuilderPageSidebar> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         border: Border(
           top: BorderSide(
             color: Theme.of(context).dividerColor,
@@ -458,7 +455,7 @@ class _BuilderPageSidebarState extends State<BuilderPageSidebar> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         border: Border(
           bottom: BorderSide(
             color: Theme.of(context).dividerColor,

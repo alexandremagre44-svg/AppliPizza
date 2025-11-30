@@ -96,23 +96,20 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: widget.width,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          left: BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 1,
-          ),
-        ),
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
           // Header with tabs
           _buildHeader(),
           
-          // Tab content
+          // Tab content with independent scroll per tab
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -131,7 +128,7 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
   Widget _buildHeader() {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         border: Border(
           bottom: BorderSide(
             color: Theme.of(context).dividerColor,
