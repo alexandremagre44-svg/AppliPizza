@@ -3,6 +3,10 @@
 //
 // Uses new Firestore structure:
 // restaurants/{restaurantId}/pages_published/{pageId}
+//
+// WHITE-LABEL FIX (November 2024):
+// Client runtime now uses ONLY publishedLayout as the source of truth.
+// draftLayout is NEVER used for client runtime - only for editor preview.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,18 +68,15 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
               ? builderPage.name 
               : (systemConfig?.defaultName ?? builderPage.pageKey);
           
-          // RUNTIME FIX: publishedLayout is the source of truth for runtime display
-          // Check for content in order of priority: publishedLayout → draftLayout → blocks (legacy fallback)
-          final hasContent = builderPage.publishedLayout.isNotEmpty || 
-                            builderPage.draftLayout.isNotEmpty ||
-                            builderPage.blocks.isNotEmpty;
-          
-          // Select content to display - publishedLayout is primary, others are fallbacks
+          // WHITE-LABEL FIX: Only use publishedLayout for client runtime
+          // Never fall back to draftLayout - that's for editor preview only
+          // Legacy 'blocks' field is only used as migration fallback
           final blocksToRender = builderPage.publishedLayout.isNotEmpty
               ? builderPage.publishedLayout
-              : (builderPage.draftLayout.isNotEmpty 
-                  ? builderPage.draftLayout 
-                  : builderPage.blocks); // Legacy fallback only
+              : builderPage.blocks; // Legacy fallback only, never draftLayout
+          
+          // Check if we have any content to display
+          final hasContent = blocksToRender.isNotEmpty;
           
           return Scaffold(
             appBar: AppBar(
@@ -95,20 +96,20 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.construction_outlined,
+                          Icons.unpublished_outlined,
                           size: 80,
                           color: Colors.grey[400],
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          'Aucun contenu configuré',
+                          'Page non publiée',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Cette page n\'a pas encore de contenu publié.',
+                          'Cette page n\'a pas encore été publiée.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16,

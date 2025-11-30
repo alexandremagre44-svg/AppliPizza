@@ -5,6 +5,181 @@
 
 ---
 
+## PHASE 1: RUNTIME & DATA FLOW AUDIT
+
+### Overview of Collections and Fields
+
+| Collection | Purpose | Fields Used |
+|------------|---------|-------------|
+| `restaurants/{appId}/pages_draft/{pageKey}` | Admin editing | `draftLayout`, `publishedLayout`, `blocks` (legacy) |
+| `restaurants/{appId}/pages_published/{pageKey}` | Client runtime | `publishedLayout`, `draftLayout` (fallback), `blocks` (legacy) |
+
+---
+
+## 1. RUNTIME PATHS AUDIT
+
+### 1.1 DynamicPageResolver (lib/builder/services/dynamic_page_resolver.dart)
+
+| Method | Collection Used | Field Priority |
+|--------|-----------------|----------------|
+| `resolve(pageId, appId)` | `pages_published` | Returns full BuilderPage (caller decides field) |
+| `resolveByRoute(route, appId)` | `pages_published` | Returns full BuilderPage |
+| `resolveByKey(pageKey, appId)` | `pages_published` | Returns full BuilderPage |
+| `resolveSystemPage(pageId, appId)` | `pages_published` | Returns full BuilderPage |
+| `getAllPublishedPages(appId)` | `pages_published` | Returns full BuilderPage map |
+
+**✅ Collection: pages_published (CORRECT for runtime)**
+**⚠️ Issue: Returns full BuilderPage, leaves field selection to caller**
+
+### 1.2 BuilderPageLoader (lib/builder/runtime/builder_page_loader.dart)
+
+```dart
+// Line 52-53: Calls DynamicPageResolver.resolve()
+future: resolver.resolve(pageId, appId)
+
+// Line 79: Calls buildPageFromBuilder(context, builderPage)
+body: buildPageFromBuilder(context, builderPage)
+```
+
+**Collection**: `pages_published` (via DynamicPageResolver)
+**Field Selection**: Delegated to `buildPageFromBuilder()` in dynamic_page_router.dart
+
+### 1.3 dynamic_page_router.dart - buildPageFromBuilder() [CRITICAL]
+
+**File**: `lib/builder/runtime/dynamic_page_router.dart`
+
+```dart
+// Lines 36-47: Current field selection logic
+if (page.publishedLayout.isNotEmpty) {
+  blocksToRender = page.publishedLayout;
+} else if (page.draftLayout.isNotEmpty) {
+  blocksToRender = page.draftLayout;        // ⚠️ FALLBACK TO DRAFT
+} else if (page.blocks.isNotEmpty) {
+  blocksToRender = page.blocks;              // ⚠️ LEGACY FALLBACK
+}
+```
+
+**Fallback Chain**: `publishedLayout → draftLayout → blocks`
+
+**⚠️ ISSUE**: When `publishedLayout` is empty, it falls back to `draftLayout` - This means client sees draft content!
+
+### 1.4 DynamicBuilderPageScreen (lib/builder/runtime/dynamic_builder_page_screen.dart)
+
+**File**: `lib/builder/runtime/dynamic_builder_page_screen.dart`
+
+```dart
+// Lines 74-78: Field selection in screen
+final blocksToRender = builderPage.publishedLayout.isNotEmpty
+    ? builderPage.publishedLayout
+    : (builderPage.draftLayout.isNotEmpty 
+        ? builderPage.draftLayout     // ⚠️ FALLBACK TO DRAFT
+        : builderPage.blocks);         // ⚠️ LEGACY FALLBACK
+```
+
+**Same Issue**: Duplicated fallback chain that includes draftLayout
+
+### 1.5 SystemPagesInitializer (lib/builder/services/system_pages_initializer.dart)
+
+When creating new system pages:
+- Saves to both `pages_draft` and `pages_published` collections
+- Uses empty blocks array initially
+- Correct behavior for initialization
+
+---
+
+## 2. BUILDER UI (ADMIN) PATHS
+
+### 2.1 Editor Preview Logic (builder_page_editor_screen.dart)
+
+**Lines 1203-1212**:
+```dart
+if (_isShowingDraft) {
+  layout = _page!.draftLayout.isNotEmpty 
+      ? _page!.draftLayout 
+      : _page!.publishedLayout;   // Fallback for empty draft
+} else {
+  layout = _page!.publishedLayout.isNotEmpty 
+      ? _page!.publishedLayout 
+      : _page!.draftLayout;       // Fallback for empty published
+}
+```
+
+**✅ CORRECT**: Editor correctly uses toggle to show draftLayout OR publishedLayout
+
+### 2.2 Editor Data Source
+
+**Lines 124**: `_service.loadDraft(widget.appId, pageIdentifier)`
+
+- **Collection**: `pages_draft`
+- **Field**: draftLayout (primary), with fallback chain in BuilderLayoutService.loadDraft()
+
+### 2.3 Publish Action (BuilderLayoutService.publishPage)
+
+**File**: `lib/builder/services/builder_layout_service.dart`
+
+When publishing:
+1. Calls `page.publish(userId: userId)` which:
+   - Copies `draftLayout` → `publishedLayout`
+   - Sets `hasUnpublishedChanges: false`
+2. Writes to `pages_published/{pageKey}` collection
+
+**✅ CORRECT**: Publish logic properly copies draft to published
+
+---
+
+## 3. IDENTIFIED ISSUES (WHITE-LABEL RISK)
+
+### Issue A: Runtime Fallback to draftLayout
+
+**Location**: `dynamic_page_router.dart` and `dynamic_builder_page_screen.dart`
+
+**Problem**: When `publishedLayout` is empty, client sees `draftLayout` content
+
+**Impact**: Unpublished changes visible to end users
+
+### Issue B: Duplicated Fallback Logic
+
+**Location**: Two places with same fallback chain:
+1. `buildPageFromBuilder()` in dynamic_page_router.dart
+2. `DynamicBuilderPageScreen` widget
+
+**Impact**: Maintenance burden, inconsistency risk
+
+---
+
+## 4. RECOMMENDED FIX (WHITE-LABEL READY)
+
+### Rule A: Client Runtime - publishedLayout ONLY
+
+Modify `buildPageFromBuilder()` to:
+```dart
+// STRICT: Only use publishedLayout for client runtime
+if (page.publishedLayout.isNotEmpty) {
+  blocksToRender = page.publishedLayout;
+  debugPrint('📄 [PageRouter] Using publishedLayout');
+} else {
+  // NO FALLBACK to draftLayout - show empty state or system module
+  debugPrint('⚠️ [PageRouter] No publishedLayout - page not published');
+}
+```
+
+### Rule B: Migration Fallback (Temporary)
+
+For backward compatibility during migration:
+```dart
+if (page.publishedLayout.isEmpty && page.blocks.isNotEmpty) {
+  // ONE-TIME legacy migration - blocks only, never draftLayout
+  blocksToRender = page.blocks;
+  debugPrint('⚠️ [MIGRATION] Using legacy blocks field');
+}
+```
+
+---
+
+## ORIGINAL AUDIT CONTENT FOLLOWS
+
+---
+
 ## Renderer & Registry
 
 ### builder_runtime_renderer.dart
