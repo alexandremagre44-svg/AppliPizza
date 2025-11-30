@@ -185,15 +185,6 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     debugPrint('🎨 [EditorScreen] Theme entry selected');
   }
 
-  /// Handler called when user clicks on a page in the pages list
-  /// 
-  /// This exits "theme selection" mode and returns to normal page editing
-  void _onPageSelected() {
-    setState(() {
-      _isThemeSelected = false;
-    });
-  }
-
   /// Update theme configuration with partial updates
   void _onThemeChanged(Map<String, dynamic> updates) {
     if (_draftTheme == null) return;
@@ -1340,8 +1331,6 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     );
   }
 
-  /// Build the properties column (right sidebar)
-  /// Uses Material 3 surface colors and independent tab-based scroll
   /// Build the properties column (right sidebar)
   /// Uses Material 3 surface colors and independent tab-based scroll
   /// 
