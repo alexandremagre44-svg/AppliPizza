@@ -13,7 +13,9 @@ import '../exceptions/builder_exceptions.dart';
 import '../preview/preview.dart';
 import '../utils/responsive.dart';
 import '../utils/action_helper.dart';
+import '../utils/icon_helper.dart';
 import 'new_page_dialog.dart';
+import 'widgets/icon_picker_dialog.dart';
 
 /// Builder Page Editor Screen
 /// 
@@ -913,6 +915,73 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       debugPrint('Error checking duplicate index: $e');
     }
   }
+  
+  /// Show icon picker dialog for custom pages
+  Future<void> _showIconPicker() async {
+    if (_page == null || _page!.isSystemPage) return;
+    
+    final selectedIcon = await IconPickerDialog.show(
+      context,
+      currentIcon: _page!.icon.isNotEmpty ? _page!.icon : null,
+    );
+    
+    if (selectedIcon != null) {
+      await _updatePageIcon(selectedIcon);
+    }
+  }
+  
+  /// Update the page icon and save
+  Future<void> _updatePageIcon(String iconName) async {
+    if (_page == null) return;
+    
+    // Update local state
+    setState(() {
+      _page = _page!.copyWith(icon: iconName);
+      _hasChanges = true;
+    });
+    
+    // Save to Firestore
+    try {
+      await _service.saveDraft(_page!);
+      
+      // Also update published version if it exists
+      if (await _service.hasPublished(widget.appId, _page!.pageKey)) {
+        await _service.publishPage(
+          _page!,
+          userId: 'editor',
+          shouldDeleteDraft: false,
+        );
+      }
+      
+      setState(() => _hasChanges = false);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Icône "$iconName" enregistrée'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+      
+      debugPrint('[BuilderPageEditorScreen] ✅ Updated icon for ${_page!.pageKey}: $iconName');
+    } catch (e) {
+      debugPrint('[BuilderPageEditorScreen] ❌ Error updating icon: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Erreur: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+  
+  /// Helper to convert icon name to IconData
+  IconData _getIconFromName(String iconName) {
+    return IconHelper.iconFromName(iconName);
+  }
 
   Widget _buildEditorTab(ResponsiveBuilder responsive) {
     return Row(
@@ -1352,6 +1421,66 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                       ),
                     ),
                   ),
+                
+                // Icon picker for custom pages only
+                // System pages use their default icons (profile, cart, etc.)
+                if (!_page!.isSystemPage) ...[
+                  const SizedBox(height: 8),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Icône',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade800,
+                              ),
+                            ),
+                            Text(
+                              _page!.icon.isEmpty ? 'Aucune (défaut: calques)' : _page!.icon,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey.shade600,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Icon preview
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.green.shade300),
+                        ),
+                        child: Icon(
+                          _getIconFromName(_page!.icon.isEmpty ? 'layers' : _page!.icon),
+                          size: 24,
+                          color: Colors.green.shade700,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Change icon button
+                      ElevatedButton.icon(
+                        onPressed: _showIconPicker,
+                        icon: const Icon(Icons.palette, size: 16),
+                        label: const Text('Choisir'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green.shade600,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ],
           ),

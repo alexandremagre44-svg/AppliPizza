@@ -109,6 +109,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             context,
             navItems.pages,
           );
+          
+          // Get adaptive styling based on item count (supports up to 6 items)
+          final adaptiveStyle = _BottomNavAdaptiveStyle.forItemCount(navItems.items.length);
+          
+          // Debug: log rendered items count
+          debugPrint('[BottomNav] Rendered ${navItems.items.length} items');
 
           return Container(
             decoration: BoxDecoration(
@@ -125,8 +131,9 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               currentIndex: currentIndex,
               selectedItemColor: Theme.of(context).colorScheme.primary,
               unselectedItemColor: Colors.grey[400],
-              selectedFontSize: 13,
-              unselectedFontSize: 12,
+              selectedFontSize: adaptiveStyle.selectedFontSize,
+              unselectedFontSize: adaptiveStyle.unselectedFontSize,
+              iconSize: adaptiveStyle.iconSize,
               selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800),
               unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
               onTap: (int index) => _onItemTapped(context, index, navItems.pages, navItems.items, isAdmin),
@@ -261,12 +268,14 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           : (systemConfig?.defaultName ?? page.pageKey);
       
       // Get icon (with outlined/filled versions)
-      // If icon is empty or invalid, use system default
+      // System pages: use system default icon
+      // Custom pages with icon: use the custom icon
+      // Custom pages without icon: fallback to 'layers' (default for custom pages)
       final iconPair = page.icon.isNotEmpty 
           ? IconHelper.getIconPair(page.icon)
           : (systemConfig != null 
               ? IconHelper.getIconPair(_getIconNameFromIconData(systemConfig.defaultIcon))
-              : IconHelper.getIconPair('help_outline'));
+              : IconHelper.getIconPair('layers'));
       final outlinedIcon = iconPair.$1;
       final filledIcon = iconPair.$2;
 
@@ -384,4 +393,49 @@ class _NavigationItemsResult {
   final List<_NavPage> pages;
 
   _NavigationItemsResult({required this.items, required this.pages});
+}
+
+/// Adaptive styling configuration for bottom navigation bar
+/// Supports up to 6 items without overflow
+/// Maximum supported: 6 items (uses most compact styling for 6+)
+class _BottomNavAdaptiveStyle {
+  final double iconSize;
+  final double selectedFontSize;
+  final double unselectedFontSize;
+  
+  const _BottomNavAdaptiveStyle({
+    required this.iconSize,
+    required this.selectedFontSize,
+    required this.unselectedFontSize,
+  });
+  
+  /// Calculate adaptive styling based on item count
+  /// - 1-4 items: standard sizes
+  /// - 5 items: slightly reduced sizes
+  /// - 6+ items: compact sizes for proper fit (max supported is 6)
+  factory _BottomNavAdaptiveStyle.forItemCount(int itemCount) {
+    if (itemCount <= 4) {
+      // Standard sizing for 1-4 items
+      return const _BottomNavAdaptiveStyle(
+        iconSize: 24.0,
+        selectedFontSize: 13.0,
+        unselectedFontSize: 12.0,
+      );
+    } else if (itemCount == 5) {
+      // Slightly reduced for 5 items
+      return const _BottomNavAdaptiveStyle(
+        iconSize: 22.0,
+        selectedFontSize: 11.0,
+        unselectedFontSize: 10.0,
+      );
+    } else {
+      // Compact sizing for 6+ items (max recommended is 6)
+      // Using most compact sizing to avoid overflow
+      return const _BottomNavAdaptiveStyle(
+        iconSize: 20.0,
+        selectedFontSize: 10.0,
+        unselectedFontSize: 9.0,
+      );
+    }
+  }
 }

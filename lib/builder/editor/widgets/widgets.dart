@@ -5,3 +5,4 @@
 export 'block_tile.dart';
 export 'block_list_view.dart';
 export 'block_add_dialog.dart';
+export 'icon_picker_dialog.dart';
