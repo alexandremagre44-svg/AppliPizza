@@ -8,6 +8,9 @@ import '../../utils/action_helper.dart';
 import '../../utils/icon_helper.dart';
 import 'icon_picker_dialog.dart';
 
+/// Maximum characters for truncated page name in bottom nav preview
+const int kMaxPageNameLength = 6;
+
 /// Properties panel widget for page editor
 /// 
 /// Features:
@@ -752,7 +755,7 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        isCurrentPage ? page.name.take(6) : '$index',
+                        isCurrentPage ? page.name.take(kMaxPageNameLength) : '$index',
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: isCurrentPage ? FontWeight.bold : FontWeight.normal,

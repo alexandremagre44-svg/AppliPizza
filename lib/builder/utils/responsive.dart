@@ -93,7 +93,9 @@ class ResponsiveBuilder {
     return ResponsiveBreakpoints.propertiesPanelMinWidth;
   }
   
-  /// Get editor panel width (legacy - now use propertiesPanelWidth)
+  /// Get editor panel width
+  /// @deprecated Use [propertiesPanelWidth] instead
+  @Deprecated('Use propertiesPanelWidth instead')
   double get editorPanelWidth {
     if (isMobile) return width; // Full width on mobile
     if (isTablet) return width * 0.4; // 40% on tablet

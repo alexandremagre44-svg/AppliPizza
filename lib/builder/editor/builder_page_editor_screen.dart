@@ -730,37 +730,6 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     );
   }
 
-  /// Mobile layout: Stacked (page dropdown | preview OR blocks list | bottom panel)
-  /// Width < 768px
-  Widget _buildMobileLayoutNew() {
-    return Stack(
-      children: [
-        Column(
-          children: [
-            // Page selector (compact dropdown)
-            _buildPageDropdown(),
-            
-            // Content area
-            Expanded(
-              child: _showPreviewInMobile
-                  ? _buildPreviewColumn()
-                  : _buildBlocksListColumn(),
-            ),
-          ],
-        ),
-        
-        // Bottom editor panel (when block is selected and not showing preview)
-        if (_shouldShowMobileEditorPanel)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _buildMobileBottomPanel(),
-          ),
-      ],
-    );
-  }
-
   /// Build error state widget
   Widget _buildErrorState() {
     return Center(
