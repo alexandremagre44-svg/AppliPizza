@@ -1,6 +1,7 @@
 // lib/builder/blocks/system_block_runtime.dart
 // Runtime version of SystemBlock - renders existing application modules
 // Phase 5: Pure StatelessWidget, no ConsumerWidget, layout logic only
+// ThemeConfig Integration: Uses theme cardRadius, primaryColor, and spacing
 //
 // Removed in Phase 5 refactor:
 // - flutter_riverpod (no ConsumerWidget)
@@ -12,8 +13,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/builder_block.dart';
+import '../models/theme_config.dart';
 import '../utils/block_config_helper.dart';
 import '../utils/builder_modules.dart' as builder_modules;
+import '../runtime/builder_theme_resolver.dart';
 
 /// System Block Runtime Widget
 /// 
@@ -33,11 +36,17 @@ import '../utils/builder_modules.dart' as builder_modules;
 /// - margin: Optional margin around the module (in pixels)
 /// - backgroundColor: Optional background color (hex string)
 /// - height: Optional fixed height (in pixels)
+/// 
+/// ThemeConfig: Uses theme.cardRadius, theme.primaryColor, theme.spacing
 class SystemBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
   
   /// Maximum content width in pixels (optional constraint)
   final double? maxContentWidth;
+  
+  /// Optional theme config override
+  /// If null, uses theme from context
+  final ThemeConfig? themeConfig;
   
   // Demo data constants for Phase 5 compliance
   // In production, real data comes from parent widgets via providers
@@ -50,23 +59,27 @@ class SystemBlockRuntime extends StatelessWidget {
     super.key,
     required this.block,
     this.maxContentWidth,
+    this.themeConfig,
   });
 
   @override
   Widget build(BuildContext context) {
     final helper = BlockConfigHelper(block.config, blockId: block.id);
     
+    // Get theme (from prop or context)
+    final theme = themeConfig ?? context.builderTheme;
+    
     // Get the module type from config
     final moduleType = helper.getString('moduleType', defaultValue: '');
     
-    // Get styling configuration via BlockConfigHelper
-    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(16));
+    // Get styling configuration via BlockConfigHelper - use theme spacing as default
+    final padding = helper.getEdgeInsets('padding', defaultValue: EdgeInsets.all(theme.spacing));
     final margin = helper.getEdgeInsets('margin');
     final backgroundColor = helper.getColor('backgroundColor');
     final height = helper.has('height') ? helper.getDouble('height') : null;
     
     // Build the module widget with error handling
-    Widget moduleWidget = _buildModuleWidgetSafe(context, moduleType);
+    Widget moduleWidget = _buildModuleWidgetSafe(context, moduleType, theme);
     
     // Apply padding
     moduleWidget = Padding(
@@ -112,9 +125,9 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Safely builds the module widget with error handling
   /// Returns a fallback widget if an exception occurs
-  Widget _buildModuleWidgetSafe(BuildContext context, String moduleType) {
+  Widget _buildModuleWidgetSafe(BuildContext context, String moduleType, ThemeConfig theme) {
     try {
-      return _buildModuleWidget(context, moduleType);
+      return _buildModuleWidget(context, moduleType, theme);
     } catch (e, stackTrace) {
       if (kDebugMode) {
         debugPrint('Error building system module "$moduleType": $e');
@@ -125,7 +138,7 @@ class SystemBlockRuntime extends StatelessWidget {
   }
 
   /// Routes to the appropriate module builder based on type
-  Widget _buildModuleWidget(BuildContext context, String moduleType) {
+  Widget _buildModuleWidget(BuildContext context, String moduleType, ThemeConfig theme) {
     // First check if it's a new-style module from builder_modules
     // These are: menu_catalog, cart_module, profile_module, roulette_module
     if (_isBuilderModule(moduleType)) {
@@ -135,15 +148,15 @@ class SystemBlockRuntime extends StatelessWidget {
     // Legacy module types (for backward compatibility)
     switch (moduleType) {
       case 'roulette':
-        return _buildRouletteModule(context);
+        return _buildRouletteModule(context, theme);
       case 'loyalty':
-        return _buildLoyaltyModule(context);
+        return _buildLoyaltyModule(context, theme);
       case 'rewards':
-        return _buildRewardsModule(context);
+        return _buildRewardsModule(context, theme);
       case 'accountActivity':
-        return _buildAccountActivityModule(context);
+        return _buildAccountActivityModule(context, theme);
       default:
-        return _buildUnknownModule(moduleType);
+        return _buildUnknownModule(moduleType, theme);
     }
   }
   
@@ -207,9 +220,10 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Build Roulette module - access card for roulette game
   /// Phase 5: No providers, pure UI widget
-  Widget _buildRouletteModule(BuildContext context) {
+  /// Uses theme for cardRadius, spacing, and font sizes
+  Widget _buildRouletteModule(BuildContext context, ThemeConfig theme) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(theme.spacing * 1.5),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -219,7 +233,7 @@ class SystemBlockRuntime extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(theme.cardRadius),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -229,25 +243,25 @@ class SystemBlockRuntime extends StatelessWidget {
             size: 64,
             color: Colors.white,
           ),
-          const SizedBox(height: 16),
-          const Text(
+          SizedBox(height: theme.spacing),
+          Text(
             'Roue de la Chance',
             style: TextStyle(
-              fontSize: 24,
+              fontSize: theme.textHeadingSize,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: theme.spacing / 2),
+          Text(
             'Tentez votre chance et gagnez des récompenses !',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: theme.textBodySize * 0.875,
               color: Colors.white70,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: theme.spacing),
           ElevatedButton.icon(
             onPressed: () {
               context.go('/roulette');
@@ -257,7 +271,10 @@ class SystemBlockRuntime extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: Colors.purple.shade700,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: theme.spacing * 1.5, vertical: theme.spacing * 0.75),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(theme.buttonRadius),
+              ),
             ),
           ),
         ],
@@ -267,12 +284,13 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Build Loyalty module - loyalty section display
   /// Phase 5: No providers, uses demo data for display
-  Widget _buildLoyaltyModule(BuildContext context) {
+  /// Uses theme for cardRadius, spacing, and font sizes
+  Widget _buildLoyaltyModule(BuildContext context, ThemeConfig theme) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(theme.spacing * 1.25),
       decoration: BoxDecoration(
         color: Colors.amber.shade50,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(theme.cardRadius),
         border: Border.all(color: Colors.amber.shade200),
       ),
       child: Column(
@@ -282,39 +300,39 @@ class SystemBlockRuntime extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.stars, color: Colors.amber.shade700, size: 28),
-              const SizedBox(width: 12),
+              SizedBox(width: theme.spacing * 0.75),
               Text(
                 'Programme Fidélité',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: theme.textHeadingSize * 0.75,
                   fontWeight: FontWeight.bold,
                   color: Colors.amber.shade900,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: theme.spacing),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 '$_demoLoyaltyPoints points',
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: theme.textHeadingSize * 1.15,
                   fontWeight: FontWeight.bold,
                   color: Colors.amber.shade800,
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: EdgeInsets.symmetric(horizontal: theme.spacing * 0.75, vertical: theme.spacing * 0.375),
                 decoration: BoxDecoration(
                   color: Colors.amber.shade100,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(theme.buttonRadius),
                 ),
                 child: Text(
                   'Bronze',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: theme.textBodySize * 0.75,
                     fontWeight: FontWeight.bold,
                     color: Colors.amber.shade800,
                   ),
@@ -322,9 +340,9 @@ class SystemBlockRuntime extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: theme.spacing * 0.75),
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(theme.buttonRadius / 2),
             child: LinearProgressIndicator(
               value: _demoLoyaltyProgress,
               minHeight: 8,
@@ -332,11 +350,11 @@ class SystemBlockRuntime extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(Colors.amber.shade600),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: theme.spacing / 2),
           Text(
             'Encore 650 pts pour une pizza gratuite',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: theme.textBodySize * 0.75,
               color: Colors.amber.shade700,
             ),
           ),
@@ -347,12 +365,13 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Build Rewards module - rewards tickets display
   /// Phase 5: No providers, shows placeholder when no rewards
-  Widget _buildRewardsModule(BuildContext context) {
+  /// Uses theme for cardRadius, spacing, and font sizes
+  Widget _buildRewardsModule(BuildContext context, ThemeConfig theme) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(theme.spacing * 1.5),
       decoration: BoxDecoration(
         color: Colors.orange.shade50,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(theme.cardRadius),
         border: Border.all(color: Colors.orange.shade200),
       ),
       child: Column(
@@ -363,25 +382,25 @@ class SystemBlockRuntime extends StatelessWidget {
             size: 48,
             color: Colors.orange.shade400,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: theme.spacing * 0.75),
           Text(
             'Mes récompenses',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: theme.textHeadingSize * 0.75,
               fontWeight: FontWeight.bold,
               color: Colors.orange.shade800,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: theme.spacing / 2),
           Text(
             'Aucune récompense disponible',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: theme.textBodySize * 0.875,
               color: Colors.orange.shade600,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: theme.spacing),
           OutlinedButton(
             onPressed: () {
               context.go('/rewards');
@@ -389,6 +408,9 @@ class SystemBlockRuntime extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.orange.shade700,
               side: BorderSide(color: Colors.orange.shade300),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(theme.buttonRadius),
+              ),
             ),
             child: const Text('Voir toutes les récompenses'),
           ),
@@ -399,12 +421,13 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Build Account Activity module - orders and favorites display
   /// Phase 5: No providers, uses demo data for display
-  Widget _buildAccountActivityModule(BuildContext context) {
+  /// Uses theme for cardRadius, spacing, and font sizes
+  Widget _buildAccountActivityModule(BuildContext context, ThemeConfig theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(theme.spacing),
       decoration: BoxDecoration(
         color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(theme.cardRadius),
         border: Border.all(color: Colors.blue.shade200),
       ),
       child: Column(
@@ -414,28 +437,30 @@ class SystemBlockRuntime extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.timeline, color: Colors.blue.shade700, size: 24),
-              const SizedBox(width: 8),
+              SizedBox(width: theme.spacing / 2),
               Text(
                 'Activité du compte',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: theme.textBodySize,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue.shade900,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: theme.spacing),
           _buildActivityRow(
             context,
+            theme,
             icon: Icons.shopping_bag_outlined,
             label: 'Mes commandes',
             count: _demoOrdersCount,
             onTap: () => context.go('/orders'),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: theme.spacing * 0.75),
           _buildActivityRow(
             context,
+            theme,
             icon: Icons.favorite_outline,
             label: 'Mes favoris',
             count: _demoFavoritesCount,
@@ -448,7 +473,8 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Helper to build activity row
   Widget _buildActivityRow(
-    BuildContext context, {
+    BuildContext context,
+    ThemeConfig theme, {
     required IconData icon,
     required String label,
     required int count,
@@ -456,38 +482,38 @@ class SystemBlockRuntime extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(theme.buttonRadius),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        padding: EdgeInsets.symmetric(vertical: theme.spacing / 2, horizontal: theme.spacing / 4),
         child: Row(
           children: [
             Icon(icon, color: Colors.blue.shade600, size: 24),
-            const SizedBox(width: 12),
+            SizedBox(width: theme.spacing * 0.75),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: theme.textBodySize * 0.875,
                   color: Colors.blue.shade800,
                 ),
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: EdgeInsets.symmetric(horizontal: theme.spacing * 0.625, vertical: theme.spacing / 4),
               decoration: BoxDecoration(
                 color: Colors.blue.shade100,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(theme.buttonRadius),
               ),
               child: Text(
                 count.toString(),
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: theme.textBodySize * 0.875,
                   fontWeight: FontWeight.bold,
                   color: Colors.blue.shade700,
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: theme.spacing / 2),
             Icon(Icons.chevron_right, color: Colors.blue.shade400, size: 20),
           ],
         ),
@@ -497,12 +523,13 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Build unknown module placeholder
   /// Shows when moduleType is not in the list of available modules
-  Widget _buildUnknownModule(String moduleType) {
+  /// Uses theme for cardRadius, spacing, and font sizes
+  Widget _buildUnknownModule(String moduleType, ThemeConfig theme) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(theme.spacing * 1.5),
       decoration: BoxDecoration(
         color: Colors.amber.shade50,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(theme.cardRadius),
         border: Border.all(color: Colors.amber.shade400, width: 2),
       ),
       child: Column(
@@ -513,37 +540,37 @@ class SystemBlockRuntime extends StatelessWidget {
             size: 48,
             color: Colors.amber.shade700,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: theme.spacing * 0.75),
           Text(
             'Module inconnu',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: theme.textBodySize,
               fontWeight: FontWeight.bold,
               color: Colors.amber.shade800,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: theme.spacing / 2),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: theme.spacing * 0.75, vertical: theme.spacing * 0.375),
             decoration: BoxDecoration(
               color: Colors.amber.shade100,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(theme.buttonRadius / 2),
             ),
             child: Text(
               'Type: "$moduleType"',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: theme.textBodySize * 0.75,
                 fontFamily: 'monospace',
                 color: Colors.amber.shade900,
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: theme.spacing * 0.75),
           Text(
             'Modules disponibles:\nmenu_catalog, cart_module, profile_module, roulette_module\nroulette, loyalty, rewards, accountActivity',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: theme.textBodySize * 0.7,
               color: Colors.amber.shade700,
             ),
           ),

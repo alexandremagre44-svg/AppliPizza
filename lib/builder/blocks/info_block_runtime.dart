@@ -101,8 +101,8 @@ class InfoBlockRuntime extends StatelessWidget {
         borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
       ),
       child: align.toLowerCase() == 'center'
-          ? _buildCenteredLayout(icon, iconColor, title, subtitle, textColor, textAlign)
-          : _buildHorizontalLayout(icon, iconColor, title, subtitle, textColor, crossAxisAlignment, textAlign, tapActionConfig),
+          ? _buildCenteredLayout(icon, iconColor, title, subtitle, textColor, textAlign, theme)
+          : _buildHorizontalLayout(icon, iconColor, title, subtitle, textColor, crossAxisAlignment, textAlign, tapActionConfig, theme),
     );
 
     // Apply border radius with ClipRRect
@@ -130,6 +130,7 @@ class InfoBlockRuntime extends StatelessWidget {
   }
 
   /// Build horizontal layout (icon + text column)
+  /// Uses theme.textBodySize for font sizing
   Widget _buildHorizontalLayout(
     IconData icon,
     Color iconColor,
@@ -139,6 +140,7 @@ class InfoBlockRuntime extends StatelessWidget {
     CrossAxisAlignment crossAxisAlignment,
     TextAlign textAlign,
     Map<String, dynamic>? tapActionConfig,
+    ThemeConfig theme,
   ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,7 +169,7 @@ class InfoBlockRuntime extends StatelessWidget {
                       child: Text(
                         title,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: theme.textBodySize,
                           fontWeight: FontWeight.bold,
                           color: textColor,
                         ),
@@ -188,7 +190,7 @@ class InfoBlockRuntime extends StatelessWidget {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: theme.textBodySize * 0.875,
                     color: textColor.withOpacity(0.8),
                     height: 1.4,
                   ),
@@ -202,6 +204,7 @@ class InfoBlockRuntime extends StatelessWidget {
   }
 
   /// Build centered layout (vertical stack)
+  /// Uses theme.textHeadingSize for title and theme.textBodySize for subtitle
   Widget _buildCenteredLayout(
     IconData icon,
     Color iconColor,
@@ -209,6 +212,7 @@ class InfoBlockRuntime extends StatelessWidget {
     String subtitle,
     Color textColor,
     TextAlign textAlign,
+    ThemeConfig theme,
   ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -223,11 +227,11 @@ class InfoBlockRuntime extends StatelessWidget {
           child: Icon(icon, color: iconColor, size: 32),
         ),
         if (title.isNotEmpty) ...[
-          const SizedBox(height: 12),
+          SizedBox(height: theme.spacing * 0.75),
           Text(
             title,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: theme.textHeadingSize * 0.75,
               fontWeight: FontWeight.bold,
               color: textColor,
             ),
@@ -235,11 +239,11 @@ class InfoBlockRuntime extends StatelessWidget {
           ),
         ],
         if (subtitle.isNotEmpty) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: theme.spacing / 2),
           Text(
             subtitle,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: theme.textBodySize * 0.875,
               color: textColor.withOpacity(0.8),
               height: 1.4,
             ),

@@ -1,6 +1,6 @@
 // lib/builder/blocks/hero_block_runtime.dart
 // Runtime version of HeroBlock - Phase 5 enhanced with modern visual design
-// ThemeConfig Integration: Uses theme primaryColor for default background and button colors
+// ThemeConfig Integration: Uses theme primaryColor, textHeadingSize, textBodySize, buttonRadius
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
@@ -213,15 +213,32 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
     ];
   }
 
-  /// Get responsive font sizes
-  Map<String, double> _getFontSizes(_DeviceType device) {
+  /// Get responsive font sizes based on theme
+  /// Uses theme.textHeadingSize for title and theme.textBodySize for subtitle
+  Map<String, double> _getFontSizes(_DeviceType device, ThemeConfig theme) {
+    // Use theme font sizes with responsive scaling
+    final headingSize = theme.textHeadingSize;
+    final bodySize = theme.textBodySize;
+    
     switch (device) {
       case _DeviceType.desktop:
-        return {'title': 32.0, 'subtitle': 20.0, 'button': 16.0};
+        return {
+          'title': headingSize * 1.35,  // ~32 when headingSize=24
+          'subtitle': bodySize * 1.25,  // ~20 when bodySize=16
+          'button': bodySize,
+        };
       case _DeviceType.tablet:
-        return {'title': 28.0, 'subtitle': 18.0, 'button': 15.0};
+        return {
+          'title': headingSize * 1.15,  // ~28 when headingSize=24
+          'subtitle': bodySize * 1.125, // ~18 when bodySize=16
+          'button': bodySize * 0.94,
+        };
       case _DeviceType.mobile:
-        return {'title': 26.0, 'subtitle': 16.0, 'button': 14.0};
+        return {
+          'title': headingSize * 1.08,  // ~26 when headingSize=24
+          'subtitle': bodySize,         // 16 when bodySize=16
+          'button': bodySize * 0.875,
+        };
     }
   }
 
@@ -259,7 +276,7 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
     // Calculate responsive values
     final height = _calculateHeight(helper, screenWidth, device);
     final padding = _getPadding(helper, device);
-    final fontSizes = _getFontSizes(device);
+    final fontSizes = _getFontSizes(device, theme);
     final overlayColors = _getOverlayGradient(helper, imageUrl.isNotEmpty);
 
     // Determine alignment
