@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_auth_service.dart';
 import '../core/constants.dart';
+import '../models/auth_roles.dart';
 import 'restaurant_provider.dart';
 
 /// Provider pour le service d'authentification Firebase
@@ -48,6 +49,7 @@ class AuthState {
   final String? displayName;
   final Map<String, dynamic>? userProfile; // Full user profile from Firestore
   final Map<String, dynamic>? customClaims; // Custom claims from Firebase Auth token
+  final AuthRoles roles; // Parsed roles from custom claims
   final bool isLoading;
   final String? error;
 
@@ -59,12 +61,16 @@ class AuthState {
     this.displayName,
     this.userProfile,
     this.customClaims,
+    AuthRoles? roles,
     this.isLoading = false,
     this.error,
-  });
+  }) : roles = roles ?? AuthRoles.fromClaims(customClaims);
 
   bool get isAdmin => userRole == UserRole.admin || (customClaims?['admin'] == true);
   bool get isKitchen => userRole == UserRole.kitchen;
+  
+  /// True if user is a Super-Admin (from custom claims)
+  bool get isSuperAdmin => roles.isSuperAdmin;
 
   AuthState copyWith({
     bool? isLoggedIn,
@@ -74,6 +80,7 @@ class AuthState {
     String? displayName,
     Map<String, dynamic>? userProfile,
     Map<String, dynamic>? customClaims,
+    AuthRoles? roles,
     bool? isLoading,
     String? error,
   }) {
@@ -85,6 +92,7 @@ class AuthState {
       displayName: displayName ?? this.displayName,
       userProfile: userProfile ?? this.userProfile,
       customClaims: customClaims ?? this.customClaims,
+      roles: roles ?? this.roles,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
