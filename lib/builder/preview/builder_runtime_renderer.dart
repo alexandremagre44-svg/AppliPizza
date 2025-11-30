@@ -1,12 +1,14 @@
 // lib/builder/preview/builder_runtime_renderer.dart
 // Renders builder blocks using runtime widgets (with real providers and data)
 // Phase 5: Layout logic centralized, all styling via BlockConfigHelper
+// ThemeConfig Integration: Uses theme spacing and background color
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../runtime/builder_block_runtime_registry.dart';
+import '../runtime/builder_theme_resolver.dart';
 
 /// Renders a list of BuilderBlocks using runtime widgets
 /// These widgets can access providers, services, and real data
@@ -19,6 +21,7 @@ import '../runtime/builder_block_runtime_registry.dart';
 /// - Error handling for individual blocks
 /// - Phase 5 compliant: centralized layout logic
 /// - maxContentWidth support for constrained layouts
+/// - ThemeConfig support for consistent spacing and styling
 class BuilderRuntimeRenderer extends ConsumerWidget {
   final List<BuilderBlock> blocks;
   final Color? backgroundColor;
@@ -31,6 +34,11 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
   /// Whether to wrap content in SingleChildScrollView
   /// Set to false if parent already provides scrolling
   final bool wrapInScrollView;
+  
+  /// Optional ThemeConfig for consistent styling
+  /// If provided, uses theme.spacing for block spacing
+  /// If null, uses default spacing of 16px
+  final ThemeConfig? themeConfig;
 
   const BuilderRuntimeRenderer({
     super.key,
@@ -38,10 +46,18 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
     this.backgroundColor,
     this.maxContentWidth,
     this.wrapInScrollView = true,
+    this.themeConfig,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Use theme spacing or default
+    final theme = themeConfig ?? context.builderTheme;
+    final blockSpacing = theme.spacing;
+    
+    // Use theme background color if not explicitly set
+    final effectiveBackgroundColor = backgroundColor ?? theme.backgroundColor;
+    
     // Filter enabled blocks only (isActive == true) and sort by order
     final activeBlocks = blocks
         .where((block) => block.isActive)
@@ -51,14 +67,14 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
     // Empty state when no blocks are configured
     if (activeBlocks.isEmpty) {
       return Container(
-        color: backgroundColor,
-        child: const Center(
+        color: effectiveBackgroundColor,
+        child: Center(
           child: Padding(
-            padding: EdgeInsets.all(32.0),
+            padding: EdgeInsets.all(theme.spacing * 2),
             child: Text(
               'Aucun contenu configuré',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: theme.textBodySize,
                 color: Colors.grey,
               ),
             ),
@@ -67,16 +83,16 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
       );
     }
 
-    // Build column of blocks with spacing
+    // Build column of blocks with theme-based spacing
     Widget blocksColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Render each block with error handling and spacing
         for (int i = 0; i < activeBlocks.length; i++) ...[
-          _buildBlockSafe(activeBlocks[i], context),
+          _buildBlockSafe(activeBlocks[i], context, theme),
           // Add spacing between blocks (except after last block)
           if (i < activeBlocks.length - 1)
-            const SizedBox(height: 16),
+            SizedBox(height: blockSpacing),
         ],
       ],
     );
@@ -93,7 +109,7 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
 
     // Wrap in ScrollView if requested
     return Container(
-      color: backgroundColor,
+      color: effectiveBackgroundColor,
       child: wrapInScrollView
           ? SingleChildScrollView(child: blocksColumn)
           : blocksColumn,
@@ -103,13 +119,13 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
   /// Safely builds a block with error handling and generic config support
   /// Applies padding, margin, and other generic styles from config
   /// Returns SizedBox.shrink() if block fails to render
-  Widget _buildBlockSafe(BuilderBlock block, BuildContext context) {
+  Widget _buildBlockSafe(BuilderBlock block, BuildContext context, ThemeConfig theme) {
     try {
       // Build the core block widget
       Widget blockWidget = _buildBlock(block, context);
       
       // Apply generic config: padding, margin, styles
-      blockWidget = _applyGenericConfig(block, blockWidget);
+      blockWidget = _applyGenericConfig(block, blockWidget, theme);
       
       return blockWidget;
     } catch (e, stackTrace) {
@@ -120,17 +136,17 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
       }
       
       // Return fallback error widget instead of crashing the page
-      return _buildErrorFallback(block, e.toString());
+      return _buildErrorFallback(block, e.toString(), theme);
     }
   }
   
   /// Build error fallback widget for failed blocks
-  Widget _buildErrorFallback(BuilderBlock block, String errorMessage) {
+  Widget _buildErrorFallback(BuilderBlock block, String errorMessage, ThemeConfig theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(theme.spacing),
       decoration: BoxDecoration(
         color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(theme.cardRadius),
         border: Border.all(color: Colors.red.shade200),
       ),
       child: Column(
@@ -164,7 +180,7 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
 
   /// Apply generic configuration to a block widget
   /// Supports: padding, margin, backgroundColor, borderRadius, elevation
-  Widget _applyGenericConfig(BuilderBlock block, Widget child) {
+  Widget _applyGenericConfig(BuilderBlock block, Widget child, ThemeConfig theme) {
     Widget result = child;
     
     // Apply padding if configured
@@ -176,7 +192,9 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
     // Apply margin if configured (using Container with margin)
     final margin = _parsePadding(block.getConfig<dynamic>('margin'));
     final bgColor = _parseColor(block.getConfig<String>('backgroundColor'));
-    final borderRadius = block.getConfig<double>('borderRadius');
+    // Use block-specific radius or fallback to theme cardRadius
+    final borderRadius = block.getConfig<double>('borderRadius') ?? 
+        (bgColor != null ? theme.cardRadius : null);
     final elevation = block.getConfig<double>('elevation');
     
     if (margin != null || bgColor != null || borderRadius != null || elevation != null) {

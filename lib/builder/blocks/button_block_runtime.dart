@@ -1,10 +1,13 @@
 // lib/builder/blocks/button_block_runtime.dart
 // Runtime version of ButtonBlock - Phase 5 enhanced
+// ThemeConfig Integration: Uses theme primaryColor and buttonRadius
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
+import '../models/theme_config.dart';
 import '../utils/block_config_helper.dart';
 import '../utils/action_helper.dart';
+import '../runtime/builder_theme_resolver.dart';
 
 /// Button block for call-to-action buttons
 /// 
@@ -14,31 +17,42 @@ import '../utils/action_helper.dart';
 /// - alignment: Button alignment (left, center, right) (default: center)
 /// - textColor: Text color in hex (default: #FFFFFF for primary, theme for others)
 /// - backgroundColor: Background color in hex (default: theme primary)
-/// - borderRadius: Corner radius (default: 8)
+/// - borderRadius: Corner radius (default: theme buttonRadius)
 /// - padding: Padding around button (default: 12)
 /// - margin: Margin around block (default: 0)
 /// - action: Action to perform on tap (required)
 /// 
 /// Responsive: Constrained width on desktop
+/// ThemeConfig: Uses theme.primaryColor and theme.buttonRadius
 class ButtonBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
+  
+  /// Optional theme config override
+  /// If null, uses theme from context
+  final ThemeConfig? themeConfig;
 
   const ButtonBlockRuntime({
     super.key,
     required this.block,
+    this.themeConfig,
   });
 
   @override
   Widget build(BuildContext context) {
     final helper = BlockConfigHelper(block.config, blockId: block.id);
     
+    // Get theme (from prop or context)
+    final theme = themeConfig ?? context.builderTheme;
+    
     // Get configuration with defaults
     final label = helper.getString('label', defaultValue: 'Button');
     final size = helper.getString('size', defaultValue: 'medium');
     final alignment = helper.getString('alignment', defaultValue: 'center');
     final textColor = helper.getColor('textColor');
-    final backgroundColor = helper.getColor('backgroundColor');
-    final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
+    // Use theme primaryColor as default background
+    final backgroundColor = helper.getColor('backgroundColor') ?? theme.primaryColor;
+    // Use theme buttonRadius as default
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: theme.buttonRadius);
     final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
     final margin = helper.getEdgeInsets('margin');
     
@@ -83,7 +97,7 @@ class ButtonBlockRuntime extends StatelessWidget {
           ? () => ActionHelper.execute(context, BlockAction.fromConfig(actionConfig))
           : null,
       style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
+        backgroundColor: backgroundColor,
         foregroundColor: textColor ?? Colors.white,
         padding: buttonPadding,
         shape: RoundedRectangleBorder(

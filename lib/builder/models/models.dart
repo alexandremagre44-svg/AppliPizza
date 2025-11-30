@@ -7,3 +7,4 @@ export 'builder_block.dart';
 export 'builder_page.dart';
 export 'builder_pages_registry.dart';
 export 'system_pages.dart';
+export 'theme_config.dart';

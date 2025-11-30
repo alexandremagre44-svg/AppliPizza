@@ -8,12 +8,14 @@
 // - Reordering bottom navigation
 // - Managing modules on pages
 // - Cleaning duplicate pages
+// - Publishing pages with theme
 
 import 'package:flutter/foundation.dart';
 import '../models/models.dart';
 import '../utils/builder_modules.dart';
 import '../exceptions/builder_exceptions.dart';
 import 'builder_layout_service.dart';
+import 'theme_service.dart';
 
 /// Service for managing Builder pages with enhanced draft/publish workflow
 /// 
@@ -250,6 +252,56 @@ class BuilderPageService {
       return publishedPage;
     } catch (e, stackTrace) {
       debugPrint('[BuilderPageService] ❌ Error publishing page: $e');
+      if (kDebugMode) {
+        debugPrint('Stack trace: $stackTrace');
+      }
+      return null;
+    }
+  }
+
+  /// Publish a page and optionally publish the theme
+  /// 
+  /// Convenience method that publishes both page layout and theme config.
+  /// Use this when you want to ensure theme changes are also applied.
+  /// 
+  /// Example:
+  /// ```dart
+  /// await service.publishPageWithTheme(
+  ///   BuilderPageId.home,
+  ///   'delizza',
+  ///   userId: 'admin_123',
+  ///   publishTheme: true,
+  /// );
+  /// ```
+  Future<BuilderPage?> publishPageWithTheme(
+    BuilderPageId pageId,
+    String appId, {
+    required String userId,
+    bool publishTheme = true,
+  }) async {
+    try {
+      // First publish the page
+      final publishedPage = await publishPage(pageId, appId, userId: userId);
+      
+      if (publishedPage == null) {
+        return null;
+      }
+      
+      // Optionally publish the theme
+      if (publishTheme) {
+        try {
+          final themeService = ThemeService();
+          await themeService.publishTheme(appId, userId: userId);
+          debugPrint('[BuilderPageService] ✅ Theme also published for: $appId');
+        } catch (e) {
+          // Theme publish failure shouldn't fail page publish
+          debugPrint('[BuilderPageService] ⚠️ Theme publish warning: $e');
+        }
+      }
+      
+      return publishedPage;
+    } catch (e, stackTrace) {
+      debugPrint('[BuilderPageService] ❌ Error publishing page with theme: $e');
       if (kDebugMode) {
         debugPrint('Stack trace: $stackTrace');
       }
