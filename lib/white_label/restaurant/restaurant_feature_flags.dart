@@ -34,7 +34,7 @@ class RestaurantFeatureFlags {
     );
   }
 
-  /// Alias pour [fromConfig] - crée des feature flags à partir des modules.
+  /// Alias de [fromConfig] - crée des feature flags à partir des modules.
   factory RestaurantFeatureFlags.fromModules(
     String restaurantId,
     List<ModuleConfig> modules,

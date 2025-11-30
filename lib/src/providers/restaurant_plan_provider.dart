@@ -5,7 +5,6 @@
 ///
 /// Ces providers sont prêts à être consommés en Phase C2.
 /// Pour l'instant, ils ne sont PAS utilisés dans l'UI.
-library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

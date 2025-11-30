@@ -2,7 +2,6 @@
 ///
 /// Service runtime pour charger le RestaurantPlan depuis Firestore.
 /// Ce service est utilisé côté client pour lire la configuration du restaurant.
-library;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
