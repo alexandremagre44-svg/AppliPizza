@@ -23,9 +23,6 @@ class DeliverySettings {
   /// Rayon de livraison par défaut en kilomètres.
   final double radiusKm;
 
-  /// Frais par kilomètre supplémentaire (en euros).
-  final double feePerKm;
-
   /// Permet aux clients de donner un pourboire.
   final bool allowTips;
 
@@ -66,7 +63,6 @@ class DeliverySettings {
     this.deliveryFee = 2.50,
     this.freeDeliveryThreshold,
     this.radiusKm = 5.0,
-    this.feePerKm = 0.50,
     this.allowTips = true,
     this.allowDelayedOrders = true,
     this.preparationTimeMinutes = 15,
@@ -86,7 +82,6 @@ class DeliverySettings {
     double? deliveryFee,
     double? freeDeliveryThreshold,
     double? radiusKm,
-    double? feePerKm,
     bool? allowTips,
     bool? allowDelayedOrders,
     int? preparationTimeMinutes,
@@ -105,7 +100,6 @@ class DeliverySettings {
       freeDeliveryThreshold:
           freeDeliveryThreshold ?? this.freeDeliveryThreshold,
       radiusKm: radiusKm ?? this.radiusKm,
-      feePerKm: feePerKm ?? this.feePerKm,
       allowTips: allowTips ?? this.allowTips,
       allowDelayedOrders: allowDelayedOrders ?? this.allowDelayedOrders,
       preparationTimeMinutes:
@@ -133,7 +127,6 @@ class DeliverySettings {
       'deliveryFee': deliveryFee,
       'freeDeliveryThreshold': freeDeliveryThreshold,
       'radiusKm': radiusKm,
-      'feePerKm': feePerKm,
       'allowTips': allowTips,
       'allowDelayedOrders': allowDelayedOrders,
       'preparationTimeMinutes': preparationTimeMinutes,
@@ -175,7 +168,6 @@ class DeliverySettings {
       freeDeliveryThreshold:
           (json['freeDeliveryThreshold'] as num?)?.toDouble(),
       radiusKm: (json['radiusKm'] as num?)?.toDouble() ?? 5.0,
-      feePerKm: (json['feePerKm'] as num?)?.toDouble() ?? 0.50,
       allowTips: json['allowTips'] as bool? ?? true,
       allowDelayedOrders: json['allowDelayedOrders'] as bool? ?? true,
       preparationTimeMinutes: json['preparationTimeMinutes'] as int? ?? 15,
@@ -195,13 +187,14 @@ class DeliverySettings {
     return const DeliverySettings();
   }
 
-  /// Calcule les frais de livraison pour une distance donnée.
+  /// Retourne les frais de livraison de base.
+  ///
+  /// Note: La tarification au km a été supprimée. Les frais par zone
+  /// sont gérés via [DeliveryArea.deliveryFee] et [minimumOrderAmount].
   double calculateFee(double distanceKm) {
-    if (distanceKm <= radiusKm) {
-      return deliveryFee;
-    }
-    final extraKm = distanceKm - radiusKm;
-    return deliveryFee + (extraKm * feePerKm);
+    // Simple: si dans le rayon, on retourne les frais de base
+    // Pour une tarification par zone, utiliser findAreaByPostalCode
+    return deliveryFee;
   }
 
   /// Vérifie si la livraison est gratuite pour un montant donné.
