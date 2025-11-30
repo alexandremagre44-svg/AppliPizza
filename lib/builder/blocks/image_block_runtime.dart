@@ -1,10 +1,13 @@
 // lib/builder/blocks/image_block_runtime.dart
 // Runtime version of ImageBlock - Phase 5 enhanced
+// ThemeConfig Integration: Uses theme cardRadius and spacing
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
+import '../models/theme_config.dart';
 import '../utils/block_config_helper.dart';
 import '../utils/action_helper.dart';
+import '../runtime/builder_theme_resolver.dart';
 
 /// Image block for displaying images
 /// 
@@ -13,31 +16,41 @@ import '../utils/action_helper.dart';
 /// - caption: Optional caption below image
 /// - height: Image height in pixels (default: 200)
 /// - boxFit: How image should fit (cover, contain, fill) (default: cover)
-/// - borderRadius: Corner radius (default: 8)
-/// - padding: Padding around image (default: 12)
+/// - borderRadius: Corner radius (default: theme cardRadius)
+/// - padding: Padding around image (default: theme spacing * 0.75)
 /// - margin: Margin around block (default: 0)
 /// - action: Optional tap action
 /// 
 /// Responsive: Full width on mobile, max 800px on desktop
+/// ThemeConfig: Uses theme.cardRadius and theme.spacing
 class ImageBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
+  
+  /// Optional theme config override
+  /// If null, uses theme from context
+  final ThemeConfig? themeConfig;
 
   const ImageBlockRuntime({
     super.key,
     required this.block,
+    this.themeConfig,
   });
 
   @override
   Widget build(BuildContext context) {
     final helper = BlockConfigHelper(block.config, blockId: block.id);
     
-    // Get configuration with defaults
+    // Get theme (from prop or context)
+    final theme = themeConfig ?? context.builderTheme;
+    
+    // Get configuration with defaults - use theme values as defaults
     final imageUrl = helper.getString('imageUrl', defaultValue: '');
     final caption = helper.getString('caption', defaultValue: '');
     final height = helper.getDouble('height', defaultValue: 200.0);
     final boxFit = helper.getBoxFit('boxFit', defaultValue: BoxFit.cover);
-    final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
-    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
+    // Use theme cardRadius as default
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: theme.cardRadius);
+    final padding = helper.getEdgeInsets('padding', defaultValue: EdgeInsets.all(theme.spacing * 0.75));
     final margin = helper.getEdgeInsets('margin');
     
     // Get action config from separate tapAction/tapActionTarget fields
@@ -47,7 +60,7 @@ class ImageBlockRuntime extends StatelessWidget {
 
     // Show placeholder if no image URL
     if (imageUrl.isEmpty) {
-      return _buildPlaceholder(height, borderRadius, padding, margin);
+      return _buildPlaceholder(height, borderRadius, padding, margin, theme);
     }
 
     // Build image widget
@@ -59,11 +72,11 @@ class ImageBlockRuntime extends StatelessWidget {
         width: double.infinity,
         fit: boxFit,
         errorBuilder: (context, error, stackTrace) {
-          return _buildErrorPlaceholder(height);
+          return _buildErrorPlaceholder(height, theme);
         },
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return _buildLoadingPlaceholder(height);
+          return _buildLoadingPlaceholder(height, theme);
         },
       ),
     );
@@ -75,11 +88,11 @@ class ImageBlockRuntime extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               imageWidget,
-              const SizedBox(height: 8),
+              SizedBox(height: theme.spacing / 2),
               Text(
                 caption,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontSize: theme.textBodySize * 0.875,
                   fontStyle: FontStyle.italic,
                   color: Colors.grey,
                 ),
@@ -127,7 +140,7 @@ class ImageBlockRuntime extends StatelessWidget {
   }
 
   /// Build placeholder when no image URL is provided
-  Widget _buildPlaceholder(double height, double borderRadius, EdgeInsets padding, EdgeInsets margin) {
+  Widget _buildPlaceholder(double height, double borderRadius, EdgeInsets padding, EdgeInsets margin, ThemeConfig theme) {
     Widget placeholder = Container(
       height: height,
       decoration: BoxDecoration(
@@ -140,11 +153,11 @@ class ImageBlockRuntime extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.image_outlined, size: 48, color: Colors.grey.shade400),
-            const SizedBox(height: 8),
+            SizedBox(height: theme.spacing / 2),
             Text(
               'No image configured',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: theme.textBodySize * 0.875,
                 color: Colors.grey.shade600,
               ),
             ),
@@ -163,7 +176,7 @@ class ImageBlockRuntime extends StatelessWidget {
   }
 
   /// Build error placeholder
-  Widget _buildErrorPlaceholder(double height) {
+  Widget _buildErrorPlaceholder(double height, ThemeConfig theme) {
     return Container(
       height: height,
       color: Colors.grey.shade200,
@@ -172,10 +185,10 @@ class ImageBlockRuntime extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.broken_image, size: 48, color: Colors.grey),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: theme.spacing / 2),
+            Text(
               'Failed to load image',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: theme.textBodySize * 0.75, color: Colors.grey),
             ),
           ],
         ),
@@ -184,7 +197,7 @@ class ImageBlockRuntime extends StatelessWidget {
   }
 
   /// Build loading placeholder
-  Widget _buildLoadingPlaceholder(double height) {
+  Widget _buildLoadingPlaceholder(double height, ThemeConfig theme) {
     return Container(
       height: height,
       color: Colors.grey.shade200,

@@ -1,10 +1,13 @@
 // lib/builder/blocks/category_list_block_runtime.dart
 // Runtime version of CategoryListBlock - Phase 5 enhanced
+// ThemeConfig Integration: Uses theme primaryColor, cardRadius, and spacing
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
+import '../models/theme_config.dart';
 import '../utils/block_config_helper.dart';
 import '../utils/action_helper.dart';
+import '../runtime/builder_theme_resolver.dart';
 import '../../src/models/product.dart';
 
 /// Category list block for displaying category navigation
@@ -16,16 +19,21 @@ import '../../src/models/product.dart';
 /// - showIcons: Display category icons (default: true)
 /// - iconSize: Icon size in pixels (default: 24)
 /// - categoryStyle: Style - badge, card, circle (default: card)
-/// - spacing: Spacing between items (default: 12)
-/// - padding: Padding around container (default: 12)
+/// - spacing: Spacing between items (default: theme spacing * 0.75)
+/// - padding: Padding around container (default: theme spacing * 0.75)
 /// - margin: Margin around container (default: 0)
 /// - backgroundColor: Background color in hex (default: transparent)
-/// - borderRadius: Corner radius (default: 8)
+/// - borderRadius: Corner radius (default: theme cardRadius)
 /// - tapAction: Action when category is tapped (openPage, openUrl, scrollToBlock)
 /// 
 /// Responsive: Horizontal on mobile, grid adapts columns based on screen size
+/// ThemeConfig: Uses theme.primaryColor, theme.cardRadius, theme.spacing
 class CategoryListBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
+  
+  /// Optional theme config override
+  /// If null, uses theme from context
+  final ThemeConfig? themeConfig;
 
   // Responsive breakpoints
   static const double _mobileBreakpoint = 600.0;
@@ -34,24 +42,30 @@ class CategoryListBlockRuntime extends StatelessWidget {
   const CategoryListBlockRuntime({
     super.key,
     required this.block,
+    this.themeConfig,
   });
 
   @override
   Widget build(BuildContext context) {
     final helper = BlockConfigHelper(block.config, blockId: block.id);
     
-    // Get configuration with defaults
+    // Get theme (from prop or context)
+    final theme = themeConfig ?? context.builderTheme;
+    
+    // Get configuration with defaults - use theme values as defaults
     final title = helper.getString('title', defaultValue: '');
     final layout = helper.getString('layout', defaultValue: 'horizontal');
     final columns = _calculateColumns(helper, context);
     final showIcons = helper.getBool('showIcons', defaultValue: true);
     final iconSize = helper.getDouble('iconSize', defaultValue: 24.0);
     final categoryStyle = helper.getString('categoryStyle', defaultValue: 'card');
-    final spacing = helper.getDouble('spacing', defaultValue: 12.0);
-    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
+    // Use theme spacing as default
+    final spacing = helper.getDouble('spacing', defaultValue: theme.spacing * 0.75);
+    final padding = helper.getEdgeInsets('padding', defaultValue: EdgeInsets.all(theme.spacing * 0.75));
     final margin = helper.getEdgeInsets('margin');
     final backgroundColor = helper.getColor('backgroundColor');
-    final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
+    // Use theme cardRadius as default
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: theme.cardRadius);
     // Get action config from separate tapAction/tapActionTarget fields
     // Falls back to direct 'tapAction' Map for backward compatibility
     var tapActionConfig = helper.getActionConfig();
@@ -61,7 +75,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
     final categories = _getCategories();
 
     if (categories.isEmpty) {
-      return _buildPlaceholder(padding, margin, backgroundColor, borderRadius);
+      return _buildPlaceholder(padding, margin, backgroundColor, borderRadius, theme);
     }
 
     Widget content = Column(
@@ -71,8 +85,8 @@ class CategoryListBlockRuntime extends StatelessWidget {
         if (title.isNotEmpty) ...[
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 24,
+            style: TextStyle(
+              fontSize: theme.textHeadingSize,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -89,6 +103,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
           spacing,
           borderRadius,
           tapActionConfig,
+          theme,
         ),
       ],
     );
@@ -171,6 +186,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
     double spacing,
     double borderRadius,
     Map<String, dynamic>? tapActionConfig,
+    ThemeConfig theme,
   ) {
     switch (layout.toLowerCase()) {
       case 'grid':
@@ -184,6 +200,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
           spacing,
           borderRadius,
           tapActionConfig,
+          theme,
         );
       case 'horizontal':
       default:
@@ -196,6 +213,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
           spacing,
           borderRadius,
           tapActionConfig,
+          theme,
         );
     }
   }
@@ -210,6 +228,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
     double spacing,
     double borderRadius,
     Map<String, dynamic>? tapActionConfig,
+    ThemeConfig theme,
   ) {
     return SizedBox(
       height: 100,
@@ -228,6 +247,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
               categoryStyle,
               borderRadius,
               tapActionConfig,
+              theme,
               isHorizontal: true,
             ),
           );
@@ -247,6 +267,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
     double spacing,
     double borderRadius,
     Map<String, dynamic>? tapActionConfig,
+    ThemeConfig theme,
   ) {
     return GridView.builder(
       shrinkWrap: true,
@@ -268,6 +289,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
           categoryStyle,
           borderRadius,
           tapActionConfig,
+          theme,
           isHorizontal: false,
         );
       },
@@ -282,21 +304,22 @@ class CategoryListBlockRuntime extends StatelessWidget {
     double iconSize,
     String categoryStyle,
     double borderRadius,
-    Map<String, dynamic>? tapActionConfig, {
+    Map<String, dynamic>? tapActionConfig,
+    ThemeConfig theme, {
     bool isHorizontal = false,
   }) {
     Widget item;
     
     switch (categoryStyle.toLowerCase()) {
       case 'badge':
-        item = _buildBadgeStyle(category, showIcons, iconSize, borderRadius);
+        item = _buildBadgeStyle(category, showIcons, iconSize, borderRadius, theme);
         break;
       case 'circle':
-        item = _buildCircleStyle(category, showIcons, iconSize);
+        item = _buildCircleStyle(category, showIcons, iconSize, theme);
         break;
       case 'card':
       default:
-        item = _buildCardStyle(category, showIcons, iconSize, borderRadius, isHorizontal);
+        item = _buildCardStyle(category, showIcons, iconSize, borderRadius, isHorizontal, theme);
     }
 
     // Wrap with action
@@ -309,29 +332,30 @@ class CategoryListBlockRuntime extends StatelessWidget {
     );
   }
 
-  /// Build card style category
+  /// Build card style category - uses theme primaryColor
   Widget _buildCardStyle(
     _CategoryItem category,
     bool showIcons,
     double iconSize,
     double borderRadius,
     bool isHorizontal,
+    ThemeConfig theme,
   ) {
     return Container(
       width: isHorizontal ? 100 : null,
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(theme.spacing * 0.75),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFFD32F2F).withOpacity(0.1),
-            const Color(0xFFD32F2F).withOpacity(0.05),
+            theme.primaryColor.withOpacity(0.1),
+            theme.primaryColor.withOpacity(0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: const Color(0xFFD32F2F).withOpacity(0.2),
+          color: theme.primaryColor.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -342,15 +366,15 @@ class CategoryListBlockRuntime extends StatelessWidget {
             Icon(
               category.icon,
               size: iconSize,
-              color: const Color(0xFFD32F2F),
+              color: theme.primaryColor,
             ),
-          if (showIcons) const SizedBox(height: 8),
+          if (showIcons) SizedBox(height: theme.spacing / 2),
           Text(
             category.name,
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: theme.textBodySize * 0.875,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFD32F2F),
+              color: theme.primaryColor,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,
@@ -361,17 +385,18 @@ class CategoryListBlockRuntime extends StatelessWidget {
     );
   }
 
-  /// Build badge style category
+  /// Build badge style category - uses theme primaryColor
   Widget _buildBadgeStyle(
     _CategoryItem category,
     bool showIcons,
     double iconSize,
     double borderRadius,
+    ThemeConfig theme,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: theme.spacing, vertical: theme.spacing / 2),
       decoration: BoxDecoration(
-        color: const Color(0xFFD32F2F),
+        color: theme.primaryColor,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: Row(
@@ -384,12 +409,12 @@ class CategoryListBlockRuntime extends StatelessWidget {
               size: iconSize,
               color: Colors.white,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: theme.spacing / 2),
           ],
           Text(
             category.name,
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: theme.textBodySize * 0.875,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
@@ -399,11 +424,12 @@ class CategoryListBlockRuntime extends StatelessWidget {
     );
   }
 
-  /// Build circle style category
+  /// Build circle style category - uses theme primaryColor
   Widget _buildCircleStyle(
     _CategoryItem category,
     bool showIcons,
     double iconSize,
+    ThemeConfig theme,
   ) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -412,10 +438,10 @@ class CategoryListBlockRuntime extends StatelessWidget {
           width: 60,
           height: 60,
           decoration: BoxDecoration(
-            color: const Color(0xFFD32F2F).withOpacity(0.1),
+            color: theme.primaryColor.withOpacity(0.1),
             shape: BoxShape.circle,
             border: Border.all(
-              color: const Color(0xFFD32F2F).withOpacity(0.3),
+              color: theme.primaryColor.withOpacity(0.3),
               width: 2,
             ),
           ),
@@ -424,23 +450,23 @@ class CategoryListBlockRuntime extends StatelessWidget {
                 ? Icon(
                     category.icon,
                     size: iconSize,
-                    color: const Color(0xFFD32F2F),
+                    color: theme.primaryColor,
                   )
                 : Text(
                     category.name[0],
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFD32F2F),
+                      color: theme.primaryColor,
                     ),
                   ),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: theme.spacing / 2),
         Text(
           category.name,
-          style: const TextStyle(
-            fontSize: 12,
+          style: TextStyle(
+            fontSize: theme.textBodySize * 0.75,
             fontWeight: FontWeight.w600,
           ),
           textAlign: TextAlign.center,
@@ -479,6 +505,7 @@ class CategoryListBlockRuntime extends StatelessWidget {
     EdgeInsets margin,
     Color? backgroundColor,
     double borderRadius,
+    ThemeConfig theme,
   ) {
     Widget placeholder = Container(
       padding: padding,
@@ -492,11 +519,11 @@ class CategoryListBlockRuntime extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.category_outlined, size: 48, color: Colors.grey.shade400),
-            const SizedBox(height: 8),
+            SizedBox(height: theme.spacing / 2),
             Text(
               'No categories available',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: theme.textBodySize * 0.875,
                 color: Colors.grey.shade600,
               ),
             ),

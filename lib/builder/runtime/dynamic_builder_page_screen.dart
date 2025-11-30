@@ -1,5 +1,6 @@
 // lib/builder/runtime/dynamic_builder_page_screen.dart
 // Screen for displaying dynamic Builder pages via /page/:pageId route
+// THEME INTEGRATION: Loads published theme and passes it to blocks via BuilderThemeProvider
 //
 // Uses new Firestore structure:
 // restaurants/{restaurantId}/pages_published/{pageId}
@@ -11,14 +12,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
+import '../models/theme_config.dart';
 import '../services/dynamic_page_resolver.dart';
+import '../services/theme_service.dart';
 import '../../src/providers/restaurant_provider.dart';
 import '../preview/builder_runtime_renderer.dart';
+import 'builder_theme_resolver.dart';
 
 /// Screen that displays a dynamic Builder page
 /// 
 /// Used for the /page/:pageId route to display any Builder page dynamically.
 /// If the page doesn't exist, shows a "Page not found" message.
+/// 
+/// THEME INTEGRATION:
+/// - Loads publishedTheme from Firestore for client runtime
+/// - Wraps content with BuilderThemeProvider for context.builderTheme access
+/// - Falls back to ThemeConfig.defaultConfig if no theme exists
 /// 
 /// Example route: /page/promo-du-jour
 class DynamicBuilderPageScreen extends ConsumerWidget {
@@ -36,9 +45,14 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
     
     // Resolver instance - could be optimized with a provider if needed
     final resolver = DynamicPageResolver();
+    final themeService = ThemeService();
     
-    return FutureBuilder<BuilderPage?>(
-      future: resolver.resolveByKey(pageKey, appId),
+    // Load both page and published theme in parallel
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([
+        resolver.resolveByKey(pageKey, appId),
+        themeService.loadPublishedTheme(appId),
+      ]),
       builder: (context, snapshot) {
         // Show loading indicator while fetching
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -54,10 +68,13 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
           );
         }
         
-        // If page exists, render it
-        if (snapshot.hasData && snapshot.data != null) {
-          final builderPage = snapshot.data!;
-          
+        // Extract results from Future.wait
+        final results = snapshot.data;
+        final builderPage = results?[0] as BuilderPage?;
+        final publishedTheme = (results?[1] as ThemeConfig?) ?? ThemeConfig.defaultConfig;
+        
+        // If page exists, render it with published theme
+        if (builderPage != null) {
           // Use systemId to get system page config (only for system pages)
           final systemConfig = builderPage.systemId != null 
               ? SystemPages.getConfig(builderPage.systemId!) 
@@ -84,42 +101,47 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
               backgroundColor: Theme.of(context).colorScheme.surface,
               elevation: 0,
             ),
-            body: hasContent
-              ? BuilderRuntimeRenderer(
-                  blocks: blocksToRender,
-                  wrapInScrollView: true,
-                )
-              : Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.visibility_off_outlined,
-                          size: 80,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'Page non publiée',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Cette page n\'a pas encore été publiée.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
+            // THEME INTEGRATION: Wrap page content with BuilderThemeProvider
+            body: BuilderThemeProvider(
+              theme: publishedTheme,
+              child: hasContent
+                ? BuilderRuntimeRenderer(
+                    blocks: blocksToRender,
+                    wrapInScrollView: true,
+                    themeConfig: publishedTheme,
+                  )
+                : Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.visibility_off_outlined,
+                            size: 80,
+                            color: Colors.grey[400],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 24),
+                          Text(
+                            'Page non publiée',
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Cette page n\'a pas encore été publiée.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+            ),
           );
         }
         

@@ -1,10 +1,13 @@
 // lib/builder/blocks/info_block_runtime.dart
 // Runtime version of InfoBlock - Phase 5 enhanced
+// ThemeConfig Integration: Uses theme primaryColor, spacing, and font sizes
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
+import '../models/theme_config.dart';
 import '../utils/block_config_helper.dart';
 import '../utils/action_helper.dart';
+import '../runtime/builder_theme_resolver.dart';
 
 /// Info block for displaying informational content with icon
 /// 
@@ -12,37 +15,48 @@ import '../utils/action_helper.dart';
 /// - title: Info title text (default: '')
 /// - subtitle: Info subtitle text (default: '')
 /// - icon: Material icon name (default: 'info')
-/// - iconColor: Icon color in hex (default: primary)
+/// - iconColor: Icon color in hex (default: theme primary)
 /// - textColor: Text color in hex (default: black)
 /// - backgroundColor: Background color in hex (default: #F5F5F5)
-/// - borderRadius: Corner radius (default: 8)
-/// - padding: Padding inside the container (default: 12)
+/// - borderRadius: Corner radius (default: theme cardRadius)
+/// - padding: Padding inside the container (default: theme spacing * 0.75)
 /// - margin: Margin around the container (default: 0)
 /// - align: Text alignment - left, center, right (default: left)
 /// - tapAction: Action when info is tapped (openPage, openUrl, scrollToBlock)
 /// 
 /// Layout: Horizontal (icon + text column) by default
+/// ThemeConfig: Uses theme.primaryColor, theme.cardRadius, theme.spacing
 class InfoBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
+  
+  /// Optional theme config override
+  /// If null, uses theme from context
+  final ThemeConfig? themeConfig;
 
   const InfoBlockRuntime({
     super.key,
     required this.block,
+    this.themeConfig,
   });
 
   @override
   Widget build(BuildContext context) {
     final helper = BlockConfigHelper(block.config, blockId: block.id);
     
-    // Get configuration with defaults
+    // Get theme (from prop or context)
+    final theme = themeConfig ?? context.builderTheme;
+    
+    // Get configuration with defaults - use theme values as defaults
     final title = helper.getString('title', defaultValue: '');
     final subtitle = helper.getString('subtitle', defaultValue: '');
     final iconName = helper.getString('icon', defaultValue: 'info');
-    final iconColor = helper.getColor('iconColor', defaultValue: const Color(0xFFD32F2F)) ?? const Color(0xFFD32F2F);
+    // Use theme primary color as default icon color
+    final iconColor = helper.getColor('iconColor', defaultValue: theme.primaryColor) ?? theme.primaryColor;
     final textColor = helper.getColor('textColor', defaultValue: Colors.black) ?? Colors.black;
     final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFF5F5F5));
-    final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
-    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
+    // Use theme cardRadius as default
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: theme.cardRadius);
+    final padding = helper.getEdgeInsets('padding', defaultValue: EdgeInsets.all(theme.spacing * 0.75));
     final margin = helper.getEdgeInsets('margin');
     final align = helper.getString('align', defaultValue: 'left');
     // Get action config from separate tapAction/tapActionTarget fields
