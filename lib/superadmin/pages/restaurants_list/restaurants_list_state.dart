@@ -1,12 +1,17 @@
 /// lib/superadmin/pages/restaurants_list/restaurants_list_state.dart
 ///
 /// State management pour la liste des restaurants créés via le Wizard.
-/// Utilise StateNotifier pour gérer l'état en mémoire (100% mock).
+/// Utilise StateNotifier avec Firestore pour la persistance.
+/// Supporte aussi un mode mock pour le développement.
 library;
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/restaurant_blueprint.dart';
+import '../../services/superadmin_restaurant_service.dart';
 
 /// État de la liste des restaurants.
 class RestaurantListState {
@@ -208,10 +213,149 @@ List<RestaurantBlueprintLight> _generateMockRestaurants() {
 }
 
 /// Notifier pour gérer l'état de la liste des restaurants.
+/// Supporte deux modes:
+/// - Mode Firestore: charge les données depuis Firestore
+/// - Mode Mock: utilise des données statiques pour le développement
 class RestaurantListNotifier extends StateNotifier<RestaurantListState> {
-  RestaurantListNotifier() : super(RestaurantListState.initial());
+  final SuperadminRestaurantService _service;
+  StreamSubscription<List<RestaurantBlueprintLight>>? _subscription;
 
-  /// Ajoute un nouveau restaurant à la liste.
+  /// Constructeur avec service Firestore.
+  RestaurantListNotifier({SuperadminRestaurantService? service})
+      : _service = service ?? SuperadminRestaurantService(),
+        super(RestaurantListState.initial());
+
+  /// Charge les restaurants depuis Firestore.
+  Future<void> loadFromFirestore() async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      final restaurants = await _service.getAllRestaurants();
+      state = state.copyWith(
+        restaurants: restaurants,
+        isLoading: false,
+      );
+      if (kDebugMode) {
+        print('Loaded ${restaurants.length} restaurants from Firestore');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading restaurants: $e');
+      }
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Erreur de chargement: $e',
+      );
+    }
+  }
+
+  /// Écoute les changements en temps réel depuis Firestore.
+  void watchFromFirestore() {
+    state = state.copyWith(isLoading: true, error: null);
+
+    _subscription?.cancel();
+    _subscription = _service.watchAllRestaurants().listen(
+      (restaurants) {
+        state = state.copyWith(
+          restaurants: restaurants,
+          isLoading: false,
+        );
+      },
+      onError: (e) {
+        if (kDebugMode) {
+          print('Error watching restaurants: $e');
+        }
+        state = state.copyWith(
+          isLoading: false,
+          error: 'Erreur de synchronisation: $e',
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  /// Ajoute un nouveau restaurant (Firestore).
+  Future<void> addRestaurantFirestore(RestaurantBlueprintLight restaurant) async {
+    try {
+      final id = await _service.createRestaurantFromBlueprintLight(restaurant);
+      final newRestaurant = restaurant.copyWith(
+        id: id,
+        createdAt: DateTime.now(),
+      );
+
+      state = state.copyWith(
+        restaurants: [...state.restaurants, newRestaurant],
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error adding restaurant: $e');
+      }
+      state = state.copyWith(error: 'Erreur lors de l\'ajout: $e');
+    }
+  }
+
+  /// Supprime un restaurant (Firestore).
+  Future<void> removeRestaurantFirestore(String id) async {
+    try {
+      await _service.deleteRestaurant(id);
+      state = state.copyWith(
+        restaurants: state.restaurants.where((r) => r.id != id).toList(),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error removing restaurant: $e');
+      }
+      state = state.copyWith(error: 'Erreur lors de la suppression: $e');
+    }
+  }
+
+  /// Met à jour un restaurant (Firestore).
+  Future<void> updateRestaurantFirestore(RestaurantBlueprintLight restaurant) async {
+    try {
+      await _service.updateRestaurant(restaurant);
+      final updatedRestaurant = restaurant.copyWith(
+        updatedAt: DateTime.now(),
+      );
+
+      state = state.copyWith(
+        restaurants: state.restaurants.map((r) {
+          return r.id == restaurant.id ? updatedRestaurant : r;
+        }).toList(),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating restaurant: $e');
+      }
+      state = state.copyWith(error: 'Erreur lors de la mise à jour: $e');
+    }
+  }
+
+  /// Duplique un restaurant (Firestore).
+  Future<void> duplicateRestaurantFirestore(String id) async {
+    final original = getRestaurantById(id);
+    if (original == null) return;
+
+    final duplicate = original.copyWith(
+      id: '', // Nouvel ID sera généré par Firestore
+      name: '${original.name} (copie)',
+      slug: '${original.slug}-copy',
+      createdAt: DateTime.now(),
+      updatedAt: null,
+    );
+
+    await addRestaurantFirestore(duplicate);
+  }
+
+  // =========================================================================
+  // MÉTHODES MOCK (pour compatibilité avec l'existant)
+  // =========================================================================
+
+  /// Ajoute un nouveau restaurant à la liste (mock).
   void addRestaurant(RestaurantBlueprintLight restaurant) {
     // Génère un ID si nécessaire
     final newRestaurant = restaurant.copyWith(
@@ -226,14 +370,14 @@ class RestaurantListNotifier extends StateNotifier<RestaurantListState> {
     );
   }
 
-  /// Supprime un restaurant par son ID.
+  /// Supprime un restaurant par son ID (mock).
   void removeRestaurant(String id) {
     state = state.copyWith(
       restaurants: state.restaurants.where((r) => r.id != id).toList(),
     );
   }
 
-  /// Met à jour un restaurant existant.
+  /// Met à jour un restaurant existant (mock).
   void updateRestaurant(RestaurantBlueprintLight restaurant) {
     final updatedRestaurant = restaurant.copyWith(
       updatedAt: DateTime.now(),
@@ -277,7 +421,7 @@ class RestaurantListNotifier extends StateNotifier<RestaurantListState> {
     );
   }
 
-  /// Duplique un restaurant existant.
+  /// Duplique un restaurant existant (mock).
   void duplicateRestaurant(String id) {
     final original = getRestaurantById(id);
     if (original == null) return;
@@ -299,6 +443,11 @@ class RestaurantListNotifier extends StateNotifier<RestaurantListState> {
   void reset() {
     state = RestaurantListState.initial();
   }
+
+  /// Efface l'erreur.
+  void clearError() {
+    state = state.copyWith(error: null);
+  }
 }
 
 /// Provider pour la liste des restaurants.
@@ -307,6 +456,36 @@ final restaurantListProvider =
     StateNotifierProvider.autoDispose<RestaurantListNotifier, RestaurantListState>(
   (ref) => RestaurantListNotifier(),
 );
+
+/// Provider pour la liste des restaurants avec Firestore.
+/// Ce provider charge les données depuis Firestore au démarrage.
+final restaurantListFirestoreProvider =
+    StateNotifierProvider.autoDispose<RestaurantListNotifier, RestaurantListState>(
+  (ref) {
+    final notifier = RestaurantListNotifier();
+    // Charge les données depuis Firestore au démarrage
+    notifier.loadFromFirestore();
+    return notifier;
+  },
+);
+
+/// Provider pour la liste des restaurants avec synchronisation temps réel.
+/// Ce provider écoute les changements en temps réel depuis Firestore.
+final restaurantListLiveProvider =
+    StateNotifierProvider.autoDispose<RestaurantListNotifier, RestaurantListState>(
+  (ref) {
+    final notifier = RestaurantListNotifier();
+    // Active la synchronisation temps réel
+    notifier.watchFromFirestore();
+    return notifier;
+  },
+);
+
+/// Provider du service Firestore pour les restaurants.
+final superadminRestaurantServiceProvider =
+    Provider<SuperadminRestaurantService>((ref) {
+  return SuperadminRestaurantService();
+});
 
 /// Provider pour récupérer un restaurant par ID.
 final restaurantByIdProvider =
@@ -317,4 +496,11 @@ final restaurantByIdProvider =
   } catch (_) {
     return null;
   }
+});
+
+/// Provider async pour récupérer un restaurant depuis Firestore par ID.
+final restaurantByIdFirestoreProvider =
+    FutureProvider.autoDispose.family<RestaurantBlueprintLight?, String>((ref, id) async {
+  final service = ref.watch(superadminRestaurantServiceProvider);
+  return service.getRestaurant(id);
 });

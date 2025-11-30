@@ -2,11 +2,14 @@
 ///
 /// State management pour le Wizard de création de restaurant.
 /// Utilise StateNotifier pour gérer l'état du formulaire multi-étapes.
+/// Connecté à Firestore pour la persistance des données.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/restaurant_blueprint.dart';
+import '../../services/superadmin_restaurant_service.dart';
 
 /// Étapes du wizard.
 enum WizardStep {
@@ -299,8 +302,57 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     state = state.copyWith(currentStep: step);
   }
 
-  /// Soumet le wizard (mock - simule une sauvegarde).
-  Future<void> submit() async {
+  /// Soumet le wizard et enregistre dans Firestore.
+  /// 
+  /// Crée le restaurant dans Firestore via SuperadminRestaurantService,
+  /// puis met à jour l'état avec le blueprint final et l'ID généré.
+  Future<void> submit({String? ownerUserId}) async {
+    if (!state.blueprint.isValid) {
+      state = state.copyWith(error: 'Le blueprint n\'est pas valide');
+      return;
+    }
+
+    state = state.copyWith(isSubmitting: true, error: null);
+
+    try {
+      // Crée le service Firestore
+      final service = SuperadminRestaurantService();
+
+      // Crée le restaurant dans Firestore
+      final restaurantId = await service.createRestaurantFromBlueprintLight(
+        state.blueprint,
+        ownerUserId: ownerUserId,
+      );
+
+      // Met à jour le blueprint avec l'ID généré
+      final finalBlueprint = state.blueprint.copyWith(
+        id: restaurantId,
+        updatedAt: DateTime.now(),
+      );
+
+      state = state.copyWith(
+        blueprint: finalBlueprint,
+        isSubmitting: false,
+        isCompleted: true,
+      );
+
+      if (kDebugMode) {
+        print('Restaurant created successfully with ID: $restaurantId');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error submitting wizard: $e');
+      }
+      state = state.copyWith(
+        isSubmitting: false,
+        error: 'Erreur lors de la création: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Soumet le wizard en mode mock (sans Firestore).
+  /// Utile pour le développement et les tests.
+  Future<void> submitMock() async {
     if (!state.blueprint.isValid) {
       state = state.copyWith(error: 'Le blueprint n\'est pas valide');
       return;
