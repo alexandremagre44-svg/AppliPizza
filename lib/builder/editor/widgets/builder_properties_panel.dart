@@ -1,11 +1,13 @@
 // lib/builder/editor/widgets/builder_properties_panel.dart
 // Properties panel widget for Builder B3 page editor
-// Displays configuration options for pages, blocks, and navigation
+// Displays configuration options for pages, blocks, navigation, and theme
 
 import 'package:flutter/material.dart';
 import '../../models/models.dart';
+import '../../models/theme_config.dart';
 import '../../utils/action_helper.dart';
 import '../../utils/icon_helper.dart';
+import '../panels/theme_properties_panel.dart';
 import 'icon_picker_dialog.dart';
 
 /// Maximum characters for truncated page name in bottom nav preview
@@ -14,9 +16,10 @@ const int kMaxPageNameLength = 6;
 /// Properties panel widget for page editor
 /// 
 /// Features:
-/// - Tabbed interface (Page / Block / Navigation)
+/// - Tabbed interface (Page / Block / Navigation / Theme)
 /// - Block configuration fields
 /// - Navigation settings
+/// - Theme customization
 /// - Responsive width handling
 class BuilderPropertiesPanel extends StatefulWidget {
   /// The page being edited
@@ -46,6 +49,24 @@ class BuilderPropertiesPanel extends StatefulWidget {
   /// Duplicate index warning
   final String? duplicateIndexWarning;
 
+  /// Current theme configuration (draft by default)
+  final ThemeConfig? theme;
+  
+  /// Callback when theme values change
+  final void Function(Map<String, dynamic> updates)? onThemeChanged;
+  
+  /// Callback when user wants to save the draft theme
+  final VoidCallback? onThemeSave;
+  
+  /// Callback when user wants to publish the theme
+  final VoidCallback? onThemePublish;
+  
+  /// Callback when user wants to reset the theme to defaults
+  final VoidCallback? onThemeResetToDefaults;
+  
+  /// Whether the theme has unsaved changes
+  final bool themeHasChanges;
+
   const BuilderPropertiesPanel({
     super.key,
     this.page,
@@ -57,6 +78,12 @@ class BuilderPropertiesPanel extends StatefulWidget {
     this.onIconPickerRequested,
     this.width,
     this.duplicateIndexWarning,
+    this.theme,
+    this.onThemeChanged,
+    this.onThemeSave,
+    this.onThemePublish,
+    this.onThemeResetToDefaults,
+    this.themeHasChanges = false,
   });
 
   @override
@@ -70,7 +97,7 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     
     // Auto-select block tab if block is selected
     if (widget.selectedBlock != null) {
@@ -117,6 +144,7 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
                 _buildPageTab(),
                 _buildBlockTab(),
                 _buildNavigationTab(),
+                _buildThemeTab(),
               ],
             ),
           ),
@@ -180,6 +208,15 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
               Tab(
                 icon: Icon(Icons.navigation_outlined, size: 18),
                 text: 'Navigation',
+                height: 46,
+              ),
+              Tab(
+                icon: Badge(
+                  isLabelVisible: widget.themeHasChanges,
+                  smallSize: 8,
+                  child: Icon(Icons.palette_outlined, size: 18),
+                ),
+                text: 'Thème',
                 height: 46,
               ),
             ],
@@ -572,6 +609,54 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
         // Bottom nav visualization
         _buildBottomNavPreview(page),
       ],
+    );
+  }
+
+  /// Build the theme configuration tab
+  /// 
+  /// Uses ThemePropertiesPanel to display theme editing UI.
+  /// Safely handles null theme by showing a loading or empty state.
+  Widget _buildThemeTab() {
+    // Null safety: show loading state if theme is not loaded
+    if (widget.theme == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.palette_outlined,
+                size: 48,
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Chargement du thème...',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Display the ThemePropertiesPanel with the draft theme
+    return ThemePropertiesPanel(
+      theme: widget.theme!,
+      onThemeChanged: widget.onThemeChanged ?? (updates) {},
+      onPublishTheme: widget.onThemePublish,
+      onResetToDefaults: widget.onThemeResetToDefaults,
+      hasChanges: widget.themeHasChanges,
     );
   }
 
