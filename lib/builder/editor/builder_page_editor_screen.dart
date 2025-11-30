@@ -697,7 +697,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           ),
         ),
         
-        // Center column: Preview (flex) with 16px margin for breathing room
+        // Center column: Preview (flex) with 12px horizontal, 8px vertical padding
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -1221,7 +1221,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       child: BuilderPagePreview(
         blocks: layout,
         modules: _page!.modules,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
     );
   }
@@ -1265,7 +1265,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                       margin: const EdgeInsets.only(bottom: 8),
                       color: isSelected 
                           ? Theme.of(context).colorScheme.primaryContainer 
-                          : Theme.of(context).colorScheme.surface,
+                          : Theme.of(context).colorScheme.surfaceContainerLowest,
                       elevation: isSelected ? 2 : 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -2257,7 +2257,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     return Card(
       margin: const EdgeInsets.all(8.0),
       elevation: 2,
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -2265,7 +2265,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       child: BuilderPagePreview(
         blocks: layout,
         modules: _page!.modules,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
     );
   }
@@ -2298,9 +2298,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         maxChildSize: 0.95,
         builder: (context, scrollController) {
           return Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Column(
               children: [
@@ -3090,7 +3090,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           helperText: helperText,
           border: const OutlineInputBorder(),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Theme.of(context).colorScheme.surface,
         ),
         maxLines: maxLines,
         onChanged: onChanged,
@@ -3112,7 +3112,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           labelText: label,
           border: const OutlineInputBorder(),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Theme.of(context).colorScheme.surface,
         ),
         items: items.map((item) {
           return DropdownMenuItem<T>(
@@ -3140,9 +3140,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         contentPadding: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
-          side: BorderSide(color: Colors.grey.shade300),
+          side: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.5)),
         ),
-        tileColor: Colors.white,
+        tileColor: Theme.of(context).colorScheme.surface,
       ),
     );
   }
@@ -3469,7 +3469,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           helperText: helperText,
           border: const OutlineInputBorder(),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Theme.of(context).colorScheme.surface,
           suffixText: 'px',
         ),
         keyboardType: TextInputType.number,

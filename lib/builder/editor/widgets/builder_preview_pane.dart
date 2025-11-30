@@ -163,7 +163,7 @@ class _BuilderPreviewPaneState extends State<BuilderPreviewPane> {
       child: BuilderPagePreview(
         blocks: layout,
         modules: page.modules,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
     );
   }
