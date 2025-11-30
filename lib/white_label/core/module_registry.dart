@@ -190,7 +190,10 @@ class ModuleRegistry {
   static ModuleDefinition of(ModuleId id) {
     final definition = definitions[id];
     if (definition == null) {
-      throw ArgumentError('Module not found in registry: ${id.code}');
+      throw ArgumentError(
+        'Module with ID "${id.code}" not found in registry. '
+        'Available modules: ${definitions.keys.map((k) => k.code).join(", ")}',
+      );
     }
     return definition;
   }

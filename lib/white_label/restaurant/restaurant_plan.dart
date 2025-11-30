@@ -74,11 +74,12 @@ class RestaurantPlan {
 
   /// Retourne la configuration d'un module spécifique, ou null si non trouvé.
   ModuleConfig? getModuleConfig(ModuleId id) {
-    try {
-      return modules.firstWhere((m) => m.id == id);
-    } catch (_) {
-      return null;
+    for (final module in modules) {
+      if (module.id == id) {
+        return module;
+      }
     }
+    return null;
   }
 
   /// Retourne la liste des modules activés.
