@@ -1,5 +1,5 @@
 // lib/builder/blocks/hero_block_runtime.dart
-// Runtime version of HeroBlock - Phase 5 enhanced
+// Runtime version of HeroBlock - Phase 5 enhanced with modern visual design
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
@@ -8,29 +8,30 @@ import '../utils/action_helper.dart';
 
 /// Hero block for prominent headers with image, title, subtitle, and CTA button
 /// 
-/// Configuration:
+/// Configuration (all backward compatible):
 /// - title: Hero title text (default: 'Hero Title')
 /// - subtitle: Hero subtitle text (default: 'Hero subtitle')
 /// - imageUrl: Background image URL (default: '')
 /// - align: Text alignment - left, center, right (default: center)
 /// - padding: Padding inside the hero (default: 16)
+/// - paddingSize: Padding preset - S, M, L (default: M)
 /// - margin: Margin around the hero (default: 0)
 /// - backgroundColor: Background color in hex (default: #D32F2F)
 /// - textColor: Text color in hex (default: #FFFFFF)
 /// - buttonText: CTA button text (default: 'Button')
 /// - buttonColor: Button background color in hex (default: #FFFFFF)
 /// - buttonTextColor: Button text color in hex (default: #D32F2F)
-/// - borderRadius: Corner radius (default: 0)
-/// - height: Hero height in pixels (default: 200 mobile, 280 desktop)
+/// - borderRadius: Corner radius (default: 16)
+/// - height: Hero height in pixels (default: responsive)
+/// - aspectRatio: Aspect ratio - auto, 16:9, square (default: auto)
+/// - overlayEnabled: Enable gradient overlay (default: true)
+/// - overlayOpacity: Overlay opacity 0-0.7 (default: 0.5)
 /// - tapAction: Action when hero is tapped (openPage, openUrl, scrollToBlock)
 /// 
-/// Responsive: Full width on mobile, max 1200px centered on desktop
-class HeroBlockRuntime extends StatelessWidget {
+/// Responsive: Mobile / Tablet / Desktop with adaptive sizing
+/// Animation: Fade-in + slight scale on mount
+class HeroBlockRuntime extends StatefulWidget {
   final BuilderBlock block;
-
-  // Responsive breakpoints
-  static const double _desktopBreakpoint = 800.0;
-  static const double _maxDesktopWidth = 1200.0;
 
   const HeroBlockRuntime({
     super.key,
@@ -38,149 +39,356 @@ class HeroBlockRuntime extends StatelessWidget {
   });
 
   @override
+  State<HeroBlockRuntime> createState() => _HeroBlockRuntimeState();
+}
+
+class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+
+  // Responsive breakpoints
+  static const double _mobileBreakpoint = 480.0;
+  static const double _tabletBreakpoint = 768.0;
+  static const double _desktopBreakpoint = 1024.0;
+  static const double _maxDesktopWidth = 1200.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 700),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOut,
+      ),
+    );
+    _scaleAnimation = Tween<double>(begin: 0.96, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  /// Get device type for responsive design
+  _DeviceType _getDeviceType(double width) {
+    if (width >= _desktopBreakpoint) return _DeviceType.desktop;
+    if (width >= _tabletBreakpoint) return _DeviceType.tablet;
+    return _DeviceType.mobile;
+  }
+
+  /// Get padding based on size preset (S/M/L) or custom value
+  EdgeInsets _getPadding(BlockConfigHelper helper, _DeviceType device) {
+    final paddingSize = helper.getString('paddingSize', defaultValue: 'M');
+    final customPadding = helper.getEdgeInsets('padding');
+    
+    // If custom padding is provided, use it
+    if (customPadding != EdgeInsets.zero && helper.has('padding')) {
+      return customPadding;
+    }
+    
+    // Responsive padding based on device type and preset
+    switch (paddingSize.toUpperCase()) {
+      case 'S':
+        switch (device) {
+          case _DeviceType.desktop:
+            return const EdgeInsets.symmetric(horizontal: 32, vertical: 16);
+          case _DeviceType.tablet:
+            return const EdgeInsets.symmetric(horizontal: 24, vertical: 12);
+          case _DeviceType.mobile:
+            return const EdgeInsets.symmetric(horizontal: 16, vertical: 10);
+        }
+      case 'L':
+        switch (device) {
+          case _DeviceType.desktop:
+            return const EdgeInsets.symmetric(horizontal: 64, vertical: 48);
+          case _DeviceType.tablet:
+            return const EdgeInsets.symmetric(horizontal: 48, vertical: 36);
+          case _DeviceType.mobile:
+            return const EdgeInsets.symmetric(horizontal: 32, vertical: 28);
+        }
+      case 'M':
+      default:
+        switch (device) {
+          case _DeviceType.desktop:
+            return const EdgeInsets.symmetric(horizontal: 48, vertical: 32);
+          case _DeviceType.tablet:
+            return const EdgeInsets.symmetric(horizontal: 36, vertical: 24);
+          case _DeviceType.mobile:
+            return const EdgeInsets.symmetric(horizontal: 24, vertical: 20);
+        }
+    }
+  }
+
+  /// Calculate height based on aspect ratio or explicit height
+  double _calculateHeight(BlockConfigHelper helper, double screenWidth, _DeviceType device) {
+    final aspectRatio = helper.getString('aspectRatio', defaultValue: 'auto');
+    
+    // Check for explicit height first
+    if (helper.has('height')) {
+      return helper.getDouble('height', defaultValue: 280.0);
+    }
+    
+    // Support legacy 'heightPreset' field
+    final heightPreset = helper.getString('heightPreset', defaultValue: '');
+    if (heightPreset.isNotEmpty) {
+      switch (heightPreset.toLowerCase()) {
+        case 'small':
+          return device == _DeviceType.mobile ? 180 : 200;
+        case 'large':
+          return device == _DeviceType.mobile ? 320 : device == _DeviceType.tablet ? 380 : 420;
+        case 'normal':
+        default:
+          return device == _DeviceType.mobile ? 220 : device == _DeviceType.tablet ? 280 : 320;
+      }
+    }
+    
+    // Calculate based on aspect ratio
+    switch (aspectRatio.toLowerCase()) {
+      case '16:9':
+        // Constrain to reasonable max width for aspect ratio
+        final effectiveWidth = screenWidth.clamp(0.0, _maxDesktopWidth);
+        return effectiveWidth * 9 / 16;
+      case 'square':
+      case '1:1':
+        // Square but with reasonable max height
+        final maxSquareSize = device == _DeviceType.mobile ? 300.0 : 400.0;
+        return screenWidth.clamp(0.0, maxSquareSize);
+      case 'auto':
+      default:
+        // Responsive default heights
+        switch (device) {
+          case _DeviceType.desktop:
+            return 340.0;
+          case _DeviceType.tablet:
+            return 300.0;
+          case _DeviceType.mobile:
+            return 260.0;
+        }
+    }
+  }
+
+  /// Get overlay gradient colors based on config
+  List<Color> _getOverlayGradient(BlockConfigHelper helper, bool hasImage) {
+    final overlayEnabled = helper.getBool('overlayEnabled', defaultValue: true);
+    final overlayOpacity = helper.getDouble('overlayOpacity', defaultValue: 0.5);
+    
+    if (!overlayEnabled || !hasImage) {
+      return [Colors.transparent, Colors.transparent];
+    }
+    
+    // Clamp opacity between 0 and 0.7 for readability
+    final clampedOpacity = overlayOpacity.clamp(0.0, 0.7);
+    
+    return [
+      Colors.black.withOpacity(clampedOpacity * 0.4),
+      Colors.black.withOpacity(clampedOpacity),
+    ];
+  }
+
+  /// Get responsive font sizes
+  Map<String, double> _getFontSizes(_DeviceType device) {
+    switch (device) {
+      case _DeviceType.desktop:
+        return {'title': 32.0, 'subtitle': 20.0, 'button': 16.0};
+      case _DeviceType.tablet:
+        return {'title': 28.0, 'subtitle': 18.0, 'button': 15.0};
+      case _DeviceType.mobile:
+        return {'title': 26.0, 'subtitle': 16.0, 'button': 14.0};
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final helper = BlockConfigHelper(block.config, blockId: block.id);
+    final helper = BlockConfigHelper(widget.block.config, blockId: widget.block.id);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final device = _getDeviceType(screenWidth);
     
     // Get configuration with defaults
     final title = helper.getString('title', defaultValue: 'Hero Title');
     final subtitle = helper.getString('subtitle', defaultValue: 'Hero subtitle');
     final imageUrl = helper.getString('imageUrl', defaultValue: '');
     final align = _getAlignValue(helper);
-    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(16));
     final margin = helper.getEdgeInsets('margin');
     final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFD32F2F)) ?? const Color(0xFFD32F2F);
     final textColor = helper.getColor('textColor', defaultValue: Colors.white) ?? Colors.white;
     final buttonText = _getButtonTextValue(helper);
     final buttonColor = helper.getColor('buttonColor', defaultValue: Colors.white);
     final buttonTextColor = helper.getColor('buttonTextColor', defaultValue: const Color(0xFFD32F2F));
-    final borderRadius = helper.getDouble('borderRadius', defaultValue: 0.0);
+    
+    // Modern default: borderRadius 16
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: 16.0);
+    
     // Get action config from separate tapAction/tapActionTarget fields
     // Falls back to direct 'tapAction' Map for backward compatibility
     var tapActionConfig = helper.getActionConfig();
-    tapActionConfig ??= block.config['tapAction'] as Map<String, dynamic>?;
-    final height = _calculateHeight(helper, context);
+    tapActionConfig ??= widget.block.config['tapAction'] as Map<String, dynamic>?;
+    
+    // Calculate responsive values
+    final height = _calculateHeight(helper, screenWidth, device);
+    final padding = _getPadding(helper, device);
+    final fontSizes = _getFontSizes(device);
+    final overlayColors = _getOverlayGradient(helper, imageUrl.isNotEmpty);
 
     // Determine alignment
     CrossAxisAlignment crossAxisAlignment;
     TextAlign textAlign;
+    MainAxisAlignment mainAxisAlignment;
     switch (align.toLowerCase()) {
       case 'left':
         crossAxisAlignment = CrossAxisAlignment.start;
         textAlign = TextAlign.left;
+        mainAxisAlignment = MainAxisAlignment.center;
         break;
       case 'right':
         crossAxisAlignment = CrossAxisAlignment.end;
         textAlign = TextAlign.right;
+        mainAxisAlignment = MainAxisAlignment.center;
         break;
       default: // center
         crossAxisAlignment = CrossAxisAlignment.center;
         textAlign = TextAlign.center;
+        mainAxisAlignment = MainAxisAlignment.center;
     }
 
-    // Build hero content
-    Widget heroContent = Container(
-      height: height,
-      decoration: BoxDecoration(
-        borderRadius: borderRadius > 0 ? BorderRadius.circular(borderRadius) : null,
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background (image or solid color)
-          _buildBackground(imageUrl, backgroundColor, borderRadius),
-          
-          // Dark overlay for text readability (only if image is present)
-          if (imageUrl.isNotEmpty)
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.3),
-                    Colors.black.withOpacity(0.6),
-                  ],
-                ),
+    // Build hero content with modern styling
+    Widget heroContent = FadeTransition(
+      opacity: _fadeAnimation,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
               ),
-            ),
-          
-          // Content
-          Padding(
-            padding: padding,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: crossAxisAlignment,
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                // Title (only if not empty)
-                if (title.isNotEmpty)
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.5),
-                          blurRadius: 8,
+                // Background (image or gradient) with cover fit
+                _buildBackground(imageUrl, backgroundColor),
+                
+                // Configurable overlay gradient
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: overlayColors,
+                    ),
+                  ),
+                ),
+                
+                // Content with responsive padding
+                Padding(
+                  padding: padding,
+                  child: Column(
+                    mainAxisAlignment: mainAxisAlignment,
+                    crossAxisAlignment: crossAxisAlignment,
+                    children: [
+                      // Title with modern typography
+                      if (title.isNotEmpty)
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: fontSizes['title'],
+                            fontWeight: FontWeight.w600,
+                            color: textColor,
+                            letterSpacing: -0.5,
+                            height: 1.2,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.4),
+                                blurRadius: 12,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          textAlign: textAlign,
+                        ),
+                      
+                      // Subtitle with refined typography
+                      if (subtitle.isNotEmpty) ...[
+                        if (title.isNotEmpty) SizedBox(height: device == _DeviceType.mobile ? 10 : 14),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: fontSizes['subtitle'],
+                            fontWeight: FontWeight.w400,
+                            color: textColor.withOpacity(0.9),
+                            height: 1.4,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          textAlign: textAlign,
                         ),
                       ],
-                    ),
-                    textAlign: textAlign,
-                  ),
-                
-                // Subtitle (only if not empty)
-                if (subtitle.isNotEmpty) ...[
-                  if (title.isNotEmpty) const SizedBox(height: 12),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: textColor.withOpacity(0.95),
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.5),
-                          blurRadius: 4,
+                      
+                      // Modern pill button CTA (Material 3 style)
+                      if (buttonText.isNotEmpty) ...[
+                        if (title.isNotEmpty || subtitle.isNotEmpty) 
+                          SizedBox(height: device == _DeviceType.mobile ? 20 : 28),
+                        ElevatedButton(
+                          onPressed: tapActionConfig != null && tapActionConfig.isNotEmpty
+                              ? () => ActionHelper.execute(context, BlockAction.fromConfig(tapActionConfig))
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: buttonColor,
+                            foregroundColor: buttonTextColor,
+                            disabledBackgroundColor: buttonColor?.withOpacity(0.6),
+                            disabledForegroundColor: buttonTextColor?.withOpacity(0.6),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: device == _DeviceType.mobile ? 28 : 36,
+                              vertical: device == _DeviceType.mobile ? 14 : 18,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50), // Pill shape
+                            ),
+                            elevation: 6,
+                            shadowColor: Colors.black.withOpacity(0.25),
+                          ),
+                          child: Text(
+                            buttonText,
+                            style: TextStyle(
+                              fontSize: fontSizes['button'],
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
                         ),
                       ],
-                    ),
-                    textAlign: textAlign,
+                    ],
                   ),
-                ],
-                
-                // Button (only if buttonText is not empty)
-                if (buttonText.isNotEmpty) ...[
-                  if (title.isNotEmpty || subtitle.isNotEmpty) const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: tapActionConfig != null && tapActionConfig.isNotEmpty
-                        ? () => ActionHelper.execute(context, BlockAction.fromConfig(tapActionConfig))
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: buttonColor,
-                      foregroundColor: buttonTextColor,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 4,
-                    ),
-                    child: Text(
-                      buttonText,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: buttonTextColor,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
 
@@ -222,68 +430,25 @@ class HeroBlockRuntime extends StatelessWidget {
         defaultValue: helper.getString('buttonLabel', defaultValue: 'Button'));
   }
 
-  /// Calculate height with responsive defaults and legacy support
-  double _calculateHeight(BlockConfigHelper helper, BuildContext context) {
-    // Responsive height: check screen size
-    final isDesktop = MediaQuery.of(context).size.width > _desktopBreakpoint;
-    final defaultHeight = isDesktop ? 280.0 : 200.0;
-    
-    // Support legacy 'heightPreset' field
-    final heightPreset = helper.getString('heightPreset', defaultValue: '');
-    double legacyHeight = defaultHeight;
-    if (heightPreset.isNotEmpty) {
-      switch (heightPreset.toLowerCase()) {
-        case 'small':
-          legacyHeight = 200;
-          break;
-        case 'large':
-          legacyHeight = 400;
-          break;
-        case 'normal':
-        default:
-          legacyHeight = 280;
-      }
-    }
-    
-    // Use explicit 'height' if provided, otherwise use heightPreset value, otherwise default
-    return helper.has('height') 
-        ? helper.getDouble('height', defaultValue: defaultHeight)
-        : legacyHeight;
-  }
-
-  /// Build background with image or gradient
-  Widget _buildBackground(String imageUrl, Color backgroundColor, double borderRadius) {
-    Widget background;
-    
+  /// Build background with image or gradient with cover fit
+  Widget _buildBackground(String imageUrl, Color backgroundColor) {
     if (imageUrl.isNotEmpty) {
-      background = Image.network(
+      return Image.network(
         imageUrl,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          // Fallback to gradient if image fails with placeholder
           return _buildErrorPlaceholder(backgroundColor);
         },
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return _buildLoadingPlaceholder(backgroundColor);
+          return _buildLoadingPlaceholder(backgroundColor, loadingProgress);
         },
       );
-    } else {
-      background = _buildGradientBackground(backgroundColor);
     }
-
-    // Apply ClipRRect if borderRadius > 0
-    if (borderRadius > 0) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: background,
-      );
-    }
-
-    return background;
+    return _buildGradientBackground(backgroundColor);
   }
 
-  /// Build gradient background
+  /// Build modern gradient background
   Widget _buildGradientBackground(Color color) {
     return Container(
       decoration: BoxDecoration(
@@ -292,26 +457,41 @@ class HeroBlockRuntime extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             color,
-            color.withOpacity(0.8),
+            HSLColor.fromColor(color).withLightness(
+              (HSLColor.fromColor(color).lightness - 0.15).clamp(0.0, 1.0),
+            ).toColor(),
           ],
         ),
       ),
     );
   }
 
-  /// Build loading placeholder
-  Widget _buildLoadingPlaceholder(Color backgroundColor) {
+  /// Build loading placeholder with progress indicator
+  Widget _buildLoadingPlaceholder(Color backgroundColor, ImageChunkEvent loadingProgress) {
     return Container(
-      color: backgroundColor.withOpacity(0.7),
-      child: const Center(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            backgroundColor.withOpacity(0.8),
+            backgroundColor.withOpacity(0.6),
+          ],
+        ),
+      ),
+      child: Center(
         child: CircularProgressIndicator(
-          color: Colors.white,
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+              : null,
+          color: Colors.white.withOpacity(0.8),
+          strokeWidth: 3,
         ),
       ),
     );
   }
 
-  /// Build error placeholder (same style as image_block_runtime)
+  /// Build error placeholder with modern styling
   Widget _buildErrorPlaceholder(Color backgroundColor) {
     return Container(
       decoration: BoxDecoration(
@@ -320,7 +500,9 @@ class HeroBlockRuntime extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             backgroundColor,
-            backgroundColor.withOpacity(0.8),
+            HSLColor.fromColor(backgroundColor).withLightness(
+              (HSLColor.fromColor(backgroundColor).lightness - 0.1).clamp(0.0, 1.0),
+            ).toColor(),
           ],
         ),
       ),
@@ -328,16 +510,17 @@ class HeroBlockRuntime extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.broken_image,
+            Icon(
+              Icons.broken_image_outlined,
               size: 48,
-              color: Colors.white70,
+              color: Colors.white.withOpacity(0.6),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
-              'Failed to load image',
+              'Image non disponible',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
                 color: Colors.white.withOpacity(0.7),
               ),
             ),
@@ -347,3 +530,7 @@ class HeroBlockRuntime extends StatelessWidget {
     );
   }
 }
+
+/// Device type enum for responsive design
+enum _DeviceType { mobile, tablet, desktop }
+
