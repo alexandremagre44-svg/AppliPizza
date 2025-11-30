@@ -540,7 +540,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         final responsive = ResponsiveBuilder(constraints.maxWidth);
         
         return Scaffold(
-          backgroundColor: const Color(0xFFF5F5F5), // Light grey background
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
           appBar: _buildAppBar(responsive),
           body: _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -677,24 +677,45 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
 
   /// Desktop layout: 3 columns (pages | preview | properties)
   /// Width >= 1024px
+  /// - Sidebar: 260-320px with internal padding
+  /// - Preview: Flexible centered with margin/padding
+  /// - Properties: 320-380px with internal padding
   Widget _buildDesktopLayout() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Left column: Pages list (260-320px)
-        SizedBox(
-          width: ResponsiveBreakpoints.sidebarMinWidth,
-          child: _buildPagesColumn(),
+        // Left column: Pages list (260-320px) with 8px internal padding
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: ResponsiveBreakpoints.sidebarMinWidth,
+            maxWidth: ResponsiveBreakpoints.sidebarMaxWidth,
+          ),
+          child: Container(
+            width: ResponsiveBreakpoints.sidebarMinWidth,
+            padding: const EdgeInsets.all(8.0),
+            child: _buildPagesColumn(),
+          ),
         ),
         
-        // Center column: Preview (flex)
+        // Center column: Preview (flex) with 16px margin for breathing room
         Expanded(
-          child: _buildPreviewColumn(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: _buildPreviewColumn(),
+          ),
         ),
         
-        // Right column: Properties panel (320-380px)
-        SizedBox(
-          width: ResponsiveBreakpoints.propertiesPanelMinWidth,
-          child: _buildPropertiesColumn(),
+        // Right column: Properties panel (320-380px) with 8px internal padding
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: ResponsiveBreakpoints.propertiesPanelMinWidth,
+            maxWidth: ResponsiveBreakpoints.propertiesPanelMaxWidth,
+          ),
+          child: Container(
+            width: ResponsiveBreakpoints.propertiesPanelMinWidth,
+            padding: const EdgeInsets.all(8.0),
+            child: _buildPropertiesColumn(),
+          ),
         ),
       ],
     );
@@ -708,22 +729,32 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         // Page selector (dropdown)
         _buildPageDropdown(),
         
-        // Two-column layout
+        // Two-column layout with proper constraints
         Expanded(
-          child: Row(
-            children: [
-              // Left: Preview (flex)
-              Expanded(
-                flex: 3,
-                child: _buildPreviewColumn(),
-              ),
-              
-              // Right: Properties panel
-              SizedBox(
-                width: 300,
-                child: _buildPropertiesColumn(),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Left: Preview (flex) with margin
+                Expanded(
+                  flex: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: _buildPreviewColumn(),
+                  ),
+                ),
+                
+                // Right: Properties panel (min 280px, max 320px)
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minWidth: 280,
+                    maxWidth: 320,
+                  ),
+                  child: _buildPropertiesColumn(),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -785,13 +816,16 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   /// Build the pages column (left sidebar)
+  /// Uses Material 3 surface container colors and independent scrolling
   Widget _buildPagesColumn() {
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -799,7 +833,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: Theme.of(context).colorScheme.surfaceContainer,
               border: Border(
                 bottom: BorderSide(color: Theme.of(context).dividerColor),
               ),
@@ -822,7 +856,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
             ),
           ),
           
-          // Blocks list
+          // Blocks list with independent scroll
           Expanded(
             child: _buildBlocksListContent(),
           ),
@@ -831,7 +865,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: Theme.of(context).colorScheme.surfaceContainer,
               border: Border(
                 top: BorderSide(color: Theme.of(context).dividerColor),
               ),
@@ -851,18 +885,23 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   /// Build the preview column (center)
+  /// Uses Material 3 surface colors and centered preview with proper margins
   Widget _buildPreviewColumn() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFFF5F5F5),
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLowest,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
           // Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: Theme.of(context).colorScheme.surfaceContainer,
               border: Border(
                 bottom: BorderSide(color: Theme.of(context).dividerColor),
               ),
@@ -909,9 +948,12 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
             ),
           ),
           
-          // Preview content
+          // Preview content with padding for breathing room
           Expanded(
-            child: _buildPreviewContent(),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildPreviewContent(),
+            ),
           ),
         ],
       ),
@@ -919,13 +961,16 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   /// Build the properties column (right sidebar)
+  /// Uses Material 3 surface colors and independent tab-based scroll
   Widget _buildPropertiesColumn() {
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
       child: DefaultTabController(
         length: 3,
         child: Column(
@@ -933,7 +978,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
             // Header with tabs
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 border: Border(
                   bottom: BorderSide(color: Theme.of(context).dividerColor),
                 ),
@@ -988,7 +1033,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
               ),
             ),
             
-            // Tab content
+            // Tab content with independent scroll per tab
             Expanded(
               child: TabBarView(
                 children: [
@@ -1005,23 +1050,27 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   /// Build blocks list column for mobile
+  /// Uses Material 3 surface container colors
   Widget _buildBlocksListColumn() {
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
       child: _buildBlocksListContent(),
     );
   }
 
   /// Build page dropdown for tablet/mobile
+  /// Uses Material 3 surface container colors
   Widget _buildPageDropdown() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         border: Border(
           bottom: BorderSide(color: Theme.of(context).dividerColor),
         ),
@@ -1138,6 +1187,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   /// Build preview content
+  /// Centered card with proper elevation and rounded corners
   Widget _buildPreviewContent() {
     if (_page == null) {
       return Center(
@@ -1162,7 +1212,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     }
 
     return Card(
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.zero,
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -1177,26 +1227,35 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   /// Build blocks list content (shared between desktop and mobile)
+  /// Uses independent scrolling within its container
   Widget _buildBlocksListContent() {
     final blocks = _page!.sortedDraftBlocks;
 
     return Column(
       children: [
-        // System page protection banner
+        // System page protection banner with proper padding
         if (_page!.isSystemPage)
-          _buildSystemPageBanner(),
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: _buildSystemPageBanner(),
+          ),
         
-        // Navigation parameters panel
-        _buildNavigationParamsPanel(),
+        // Navigation parameters panel with proper spacing
+        Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: _buildNavigationParamsPanel(),
+        ),
         
-        // Blocks list
+        const SizedBox(height: 4),
+        
+        // Blocks list with independent scroll
         Expanded(
           child: blocks.isEmpty
               ? _buildEmptyBlocksState()
               : ReorderableListView.builder(
                   onReorder: _reorderBlocks,
                   itemCount: blocks.length,
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   itemBuilder: (context, index) {
                     final block = blocks[index];
                     final isSelected = _selectedBlock?.id == block.id;
@@ -1206,8 +1265,14 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
                       margin: const EdgeInsets.only(bottom: 8),
                       color: isSelected 
                           ? Theme.of(context).colorScheme.primaryContainer 
-                          : null,
+                          : Theme.of(context).colorScheme.surface,
                       elevation: isSelected ? 2 : 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: isSelected 
+                            ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5)
+                            : BorderSide.none,
+                      ),
                       child: ListTile(
                         leading: Text(
                           block.type.icon,
@@ -2132,19 +2197,23 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
   }
 
   /// Mobile layout with blocks list showing delete/drag actions permanently
+  /// Clear visual separation between panels with Material 3 styling
   Widget _buildMobileLayout() {
     return Stack(
       children: [
         Column(
           children: [
-            // Page info bar
+            // Page info bar with Material 3 styling
             _buildPageDropdown(),
             
-            // Content area with blocks list or preview
+            // Content area with proper padding
             Expanded(
-              child: _showPreviewInMobile 
-                  ? _buildPreviewContent() 
-                  : _buildBlocksListContent(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                child: _showPreviewInMobile 
+                    ? _buildMobilePreviewContent() 
+                    : _buildMobileBlocksListContent(),
+              ),
             ),
           ],
         ),
@@ -2158,6 +2227,60 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
             child: _buildMobileBottomPanel(),
           ),
       ],
+    );
+  }
+  
+  /// Mobile-optimized preview content with proper padding
+  Widget _buildMobilePreviewContent() {
+    if (_page == null) {
+      return Center(
+        child: Text(
+          'Aucune page à prévisualiser',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Theme.of(context).colorScheme.outline,
+          ),
+        ),
+      );
+    }
+
+    final List<BuilderBlock> layout;
+    if (_isShowingDraft) {
+      layout = _page!.draftLayout.isNotEmpty 
+          ? _page!.draftLayout 
+          : _page!.publishedLayout;
+    } else {
+      layout = _page!.publishedLayout.isNotEmpty 
+          ? _page!.publishedLayout 
+          : _page!.draftLayout;
+    }
+
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: BuilderPagePreview(
+        blocks: layout,
+        modules: _page!.modules,
+        backgroundColor: Colors.white,
+      ),
+    );
+  }
+  
+  /// Mobile-optimized blocks list content with proper styling
+  Widget _buildMobileBlocksListContent() {
+    return Card(
+      margin: const EdgeInsets.all(4.0),
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: _buildBlocksListContent(),
     );
   }
 

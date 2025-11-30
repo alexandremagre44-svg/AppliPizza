@@ -43,31 +43,28 @@ class _BuilderPreviewPaneState extends State<BuilderPreviewPane> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5), // Light grey background
-        border: Border(
-          left: BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 1,
-          ),
-          right: BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 1,
-          ),
-        ),
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLowest,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Header
           if (widget.showHeader) _buildHeader(),
           
-          // Preview content
+          // Preview content with proper padding
           Expanded(
-            child: widget.page != null
-                ? _buildPreview()
-                : _buildEmptyState(),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: widget.page != null
+                  ? _buildPreview()
+                  : _buildEmptyState(),
+            ),
           ),
         ],
       ),
@@ -78,7 +75,7 @@ class _BuilderPreviewPaneState extends State<BuilderPreviewPane> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         border: Border(
           bottom: BorderSide(
             color: Theme.of(context).dividerColor,
@@ -157,7 +154,7 @@ class _BuilderPreviewPaneState extends State<BuilderPreviewPane> {
     }
 
     return Card(
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.zero,
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -173,7 +170,7 @@ class _BuilderPreviewPaneState extends State<BuilderPreviewPane> {
 
   Widget _buildEmptyState() {
     return Card(
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.zero,
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
