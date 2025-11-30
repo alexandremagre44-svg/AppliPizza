@@ -102,12 +102,29 @@ class _ModuleCard extends StatelessWidget {
     }
   }
 
+  Color _getCategoryColor(ModuleCategory category) {
+    switch (category) {
+      case ModuleCategory.core:
+        return Colors.blue;
+      case ModuleCategory.marketing:
+        return Colors.purple;
+      case ModuleCategory.operations:
+        return Colors.orange;
+      case ModuleCategory.integration:
+        return Colors.teal;
+      case ModuleCategory.advanced:
+        return Colors.indigo;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isAvailable = module.available;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAvailable ? Colors.white : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: module.enabled ? Colors.green.shade200 : Colors.grey.shade200,
@@ -144,29 +161,57 @@ class _ModuleCard extends StatelessWidget {
               ),
               Switch(
                 value: module.enabled,
-                onChanged: (value) {
-                  // TODO: Implement module toggle
-                  debugPrint('TODO: Toggle module ${module.name} to $value');
-                },
+                onChanged: isAvailable
+                    ? (value) {
+                        // TODO: Implement module toggle
+                        debugPrint('TODO: Toggle module ${module.name} to $value');
+                      }
+                    : null,
                 activeColor: Colors.green,
               ),
             ],
           ),
           const Spacer(),
-          Text(
-            module.name,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1A1A2E),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  module.name,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: isAvailable
+                        ? const Color(0xFF1A1A2E)
+                        : Colors.grey.shade500,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: _getCategoryColor(module.category).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  module.category.displayName,
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: _getCategoryColor(module.category),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
-            module.enabled ? 'Enabled' : 'Disabled',
+            module.enabled 
+                ? 'Enabled' 
+                : (isAvailable ? 'Disabled' : 'Not available'),
             style: TextStyle(
               fontSize: 12,
-              color: module.enabled ? Colors.green : Colors.grey,
+              color: module.enabled 
+                  ? Colors.green 
+                  : (isAvailable ? Colors.grey : Colors.grey.shade400),
             ),
           ),
         ],

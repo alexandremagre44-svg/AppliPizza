@@ -85,15 +85,28 @@ class _UserListItem extends StatelessWidget {
 
   const _UserListItem({required this.user});
 
-  Color _getRoleColor(String role) {
+  Color _getRoleColor(AdminRole role) {
     switch (role) {
-      case 'super-admin':
+      case AdminRole.superAdmin:
         return Colors.purple;
-      case 'admin':
+      case AdminRole.restaurantOwner:
         return Colors.blue;
-      case 'manager':
+      case AdminRole.restaurantManager:
         return Colors.orange;
-      default:
+      case AdminRole.restaurantStaff:
+        return Colors.grey;
+    }
+  }
+
+  Color _getStatusColor(UserStatus status) {
+    switch (status) {
+      case UserStatus.active:
+        return Colors.green;
+      case UserStatus.pending:
+        return Colors.orange;
+      case UserStatus.suspended:
+        return Colors.red;
+      case UserStatus.disabled:
         return Colors.grey;
     }
   }
@@ -108,11 +121,25 @@ class _UserListItem extends StatelessWidget {
           CircleAvatar(
             radius: 24,
             backgroundColor: _getRoleColor(user.role).withValues(alpha: 0.1),
-            child: Icon(
-              Icons.person,
-              size: 24,
-              color: _getRoleColor(user.role),
-            ),
+            child: user.photoUrl != null
+                ? ClipOval(
+                    child: Image.network(
+                      user.photoUrl!,
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.person,
+                        size: 24,
+                        color: _getRoleColor(user.role),
+                      ),
+                    ),
+                  )
+                : Icon(
+                    Icons.person,
+                    size: 24,
+                    color: _getRoleColor(user.role),
+                  ),
           ),
           const SizedBox(width: 16),
           // Info
@@ -120,21 +147,48 @@ class _UserListItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  user.email,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A1A2E),
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        user.displayName ?? user.email,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1A1A2E),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (user.status != UserStatus.active)
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(user.status).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          user.status.value,
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: _getStatusColor(user.status),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${user.attachedRestaurants.length} restaurant(s) attached',
+                  '${user.email} • ${user.attachedRestaurants.length} restaurant(s)',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade600,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -147,7 +201,7 @@ class _UserListItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              user.role.toUpperCase(),
+              user.role.displayName.toUpperCase(),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,

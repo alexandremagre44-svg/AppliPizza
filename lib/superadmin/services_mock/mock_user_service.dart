@@ -10,35 +10,56 @@ import '../models/user_admin_meta.dart';
 class MockUserService {
   /// Liste mock d'utilisateurs administrateurs pour le développement.
   static final List<UserAdminMeta> _mockUsers = [
-    const UserAdminMeta(
+    UserAdminMeta(
       id: 'user-001',
       email: 'superadmin@delizza.com',
-      role: 'super-admin',
-      attachedRestaurants: ['resto-001', 'resto-002', 'resto-003', 'resto-004', 'resto-005'],
+      displayName: 'Super Admin',
+      role: AdminRole.superAdmin,
+      roleString: 'super-admin',
+      status: UserStatus.active,
+      attachedRestaurants: const ['resto-001', 'resto-002', 'resto-003', 'resto-004', 'resto-005'],
+      createdAt: DateTime(2022, 1, 1),
+      lastLoginAt: DateTime.now(),
     ),
-    const UserAdminMeta(
+    UserAdminMeta(
       id: 'user-002',
       email: 'admin.paris@delizza.com',
-      role: 'admin',
-      attachedRestaurants: ['resto-001'],
+      displayName: 'Admin Paris',
+      role: AdminRole.restaurantOwner,
+      roleString: 'owner',
+      status: UserStatus.active,
+      attachedRestaurants: const ['resto-001'],
+      createdAt: DateTime(2023, 1, 15),
     ),
-    const UserAdminMeta(
+    UserAdminMeta(
       id: 'user-003',
       email: 'admin.lyon@delizza.com',
-      role: 'admin',
-      attachedRestaurants: ['resto-002'],
+      displayName: 'Admin Lyon',
+      role: AdminRole.restaurantOwner,
+      roleString: 'owner',
+      status: UserStatus.active,
+      attachedRestaurants: const ['resto-002'],
+      createdAt: DateTime(2023, 3, 20),
     ),
-    const UserAdminMeta(
+    UserAdminMeta(
       id: 'user-004',
       email: 'manager.marseille@delizza.com',
-      role: 'manager',
-      attachedRestaurants: ['resto-003'],
+      displayName: 'Manager Marseille',
+      role: AdminRole.restaurantManager,
+      roleString: 'manager',
+      status: UserStatus.pending,
+      attachedRestaurants: const ['resto-003'],
+      createdAt: DateTime(2023, 6, 10),
     ),
-    const UserAdminMeta(
+    UserAdminMeta(
       id: 'user-005',
       email: 'multi.admin@delizza.com',
-      role: 'admin',
-      attachedRestaurants: ['resto-001', 'resto-002', 'resto-005'],
+      displayName: 'Multi Admin',
+      role: AdminRole.restaurantOwner,
+      roleString: 'owner',
+      status: UserStatus.active,
+      attachedRestaurants: const ['resto-001', 'resto-002', 'resto-005'],
+      createdAt: DateTime(2023, 2, 1),
     ),
   ];
 
@@ -56,9 +77,19 @@ class MockUserService {
     }
   }
 
-  /// Retourne les utilisateurs filtrés par rôle.
-  List<UserAdminMeta> getUsersByRole(String role) {
+  /// Retourne les utilisateurs filtrés par rôle (enum).
+  List<UserAdminMeta> getUsersByRole(AdminRole role) {
     return _mockUsers.where((u) => u.role == role).toList();
+  }
+
+  /// Retourne les utilisateurs filtrés par rôle (string pour compatibilité).
+  List<UserAdminMeta> getUsersByRoleString(String role) {
+    return _mockUsers.where((u) => u.roleString == role).toList();
+  }
+
+  /// Retourne les utilisateurs filtrés par statut.
+  List<UserAdminMeta> getUsersByStatus(UserStatus status) {
+    return _mockUsers.where((u) => u.status == status).toList();
   }
 
   /// Retourne les utilisateurs attachés à un restaurant donné.
@@ -73,11 +104,21 @@ class MockUserService {
 
   /// Retourne le nombre de super-admins.
   int get superAdminCount =>
-      _mockUsers.where((u) => u.role == 'super-admin').length;
+      _mockUsers.where((u) => u.role == AdminRole.superAdmin).length;
 
-  /// Retourne le nombre d'admins.
-  int get adminCount => _mockUsers.where((u) => u.role == 'admin').length;
+  /// Retourne le nombre de propriétaires.
+  int get ownerCount =>
+      _mockUsers.where((u) => u.role == AdminRole.restaurantOwner).length;
 
   /// Retourne le nombre de managers.
-  int get managerCount => _mockUsers.where((u) => u.role == 'manager').length;
+  int get managerCount =>
+      _mockUsers.where((u) => u.role == AdminRole.restaurantManager).length;
+
+  /// Retourne le nombre de staff.
+  int get staffCount =>
+      _mockUsers.where((u) => u.role == AdminRole.restaurantStaff).length;
+
+  /// Retourne le nombre d'utilisateurs actifs.
+  int get activeCount =>
+      _mockUsers.where((u) => u.status == UserStatus.active).length;
 }

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/superadmin_mock_providers.dart';
+import '../models/restaurant_meta.dart';
 
 /// Page détail d'un restaurant du Super-Admin.
 class RestaurantDetailPage extends ConsumerWidget {
@@ -19,6 +20,21 @@ class RestaurantDetailPage extends ConsumerWidget {
     super.key,
     required this.restaurantId,
   });
+
+  Color _getStatusColor(RestaurantStatus status) {
+    switch (status) {
+      case RestaurantStatus.active:
+        return Colors.green;
+      case RestaurantStatus.pending:
+        return Colors.orange;
+      case RestaurantStatus.suspended:
+        return Colors.red;
+      case RestaurantStatus.archived:
+        return Colors.grey;
+      case RestaurantStatus.draft:
+        return Colors.blue;
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -94,17 +110,43 @@ class RestaurantDetailPage extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            restaurant.name,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1A1A2E),
-                            ),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  restaurant.name,
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1A1A2E),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _getStatusColor(restaurant.status)
+                                      .withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  restaurant.status.value.toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: _getStatusColor(restaurant.status),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'ID: ${restaurant.id}',
+                            restaurant.brandName,
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey.shade600,
@@ -119,12 +161,77 @@ class RestaurantDetailPage extends ConsumerWidget {
                 const Divider(),
                 const SizedBox(height: 16),
                 // Details
+                _DetailRow(label: 'ID', value: restaurant.id),
+                _DetailRow(label: 'Slug', value: restaurant.slug),
+                _DetailRow(label: 'Brand', value: restaurant.brandName),
                 _DetailRow(label: 'Type', value: restaurant.type),
-                _DetailRow(label: 'Status', value: restaurant.status),
+                _DetailRow(
+                  label: 'Template',
+                  value: restaurant.templateId ?? 'None',
+                ),
                 _DetailRow(
                   label: 'Created At',
-                  value: '${restaurant.createdAt.day}/${restaurant.createdAt.month}/${restaurant.createdAt.year}',
+                  value:
+                      '${restaurant.createdAt.day}/${restaurant.createdAt.month}/${restaurant.createdAt.year}',
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Modules section
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Enabled Modules',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1A2E),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (restaurant.modulesEnabled.isEmpty)
+                  Text(
+                    'No modules enabled',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: restaurant.modulesEnabled.map((module) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          module,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
               ],
             ),
           ),

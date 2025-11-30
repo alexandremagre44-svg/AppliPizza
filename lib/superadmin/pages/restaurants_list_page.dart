@@ -85,16 +85,18 @@ class _RestaurantListItem extends StatelessWidget {
 
   const _RestaurantListItem({required this.restaurant});
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(RestaurantStatus status) {
     switch (status) {
-      case 'active':
+      case RestaurantStatus.active:
         return Colors.green;
-      case 'pending':
+      case RestaurantStatus.pending:
         return Colors.orange;
-      case 'inactive':
+      case RestaurantStatus.suspended:
         return Colors.red;
-      default:
+      case RestaurantStatus.archived:
         return Colors.grey;
+      case RestaurantStatus.draft:
+        return Colors.blue;
     }
   }
 
@@ -138,7 +140,7 @@ class _RestaurantListItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Type: ${restaurant.type} • ID: ${restaurant.id}',
+                    '${restaurant.brandName} • ${restaurant.type}',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey.shade600,
@@ -147,6 +149,23 @@ class _RestaurantListItem extends StatelessWidget {
                 ],
               ),
             ),
+            // Modules count badge
+            if (restaurant.modulesEnabled.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${restaurant.modulesEnabled.length} modules',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.blue.shade700,
+                  ),
+                ),
+              ),
             // Status badge
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -155,7 +174,7 @@ class _RestaurantListItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
-                restaurant.status.toUpperCase(),
+                restaurant.status.value.toUpperCase(),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,

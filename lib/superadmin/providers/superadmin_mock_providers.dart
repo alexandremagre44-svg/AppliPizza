@@ -61,14 +61,70 @@ final mockStatsProvider = Provider<MockStats>((ref) {
 /// Liste mock des modules disponibles.
 final mockModulesProvider = Provider<List<ModuleMeta>>((ref) {
   return const [
-    ModuleMeta(name: 'Roulette', enabled: true),
-    ModuleMeta(name: 'Loyalty', enabled: true),
-    ModuleMeta(name: 'Kitchen Display', enabled: true),
-    ModuleMeta(name: 'Staff Tablet', enabled: true),
-    ModuleMeta(name: 'Delivery Tracking', enabled: false),
-    ModuleMeta(name: 'Analytics', enabled: false),
-    ModuleMeta(name: 'Multi-language', enabled: false),
-    ModuleMeta(name: 'Push Notifications', enabled: true),
+    ModuleMeta(
+      id: 'roulette',
+      name: 'Roulette',
+      description: 'Interactive wheel game for customer engagement',
+      category: ModuleCategory.marketing,
+      enabled: true,
+      available: true,
+    ),
+    ModuleMeta(
+      id: 'loyalty',
+      name: 'Loyalty',
+      description: 'Customer loyalty program with points and rewards',
+      category: ModuleCategory.marketing,
+      enabled: true,
+      available: true,
+    ),
+    ModuleMeta(
+      id: 'kitchen-display',
+      name: 'Kitchen Display',
+      description: 'Real-time order display for kitchen staff',
+      category: ModuleCategory.operations,
+      enabled: true,
+      available: true,
+    ),
+    ModuleMeta(
+      id: 'staff-tablet',
+      name: 'Staff Tablet',
+      description: 'POS interface for staff order management',
+      category: ModuleCategory.operations,
+      enabled: true,
+      available: true,
+    ),
+    ModuleMeta(
+      id: 'delivery-tracking',
+      name: 'Delivery Tracking',
+      description: 'Real-time delivery tracking for customers',
+      category: ModuleCategory.integration,
+      enabled: false,
+      available: false,
+    ),
+    ModuleMeta(
+      id: 'analytics',
+      name: 'Analytics',
+      description: 'Advanced analytics and reporting dashboard',
+      category: ModuleCategory.advanced,
+      enabled: false,
+      available: true,
+    ),
+    ModuleMeta(
+      id: 'multi-language',
+      name: 'Multi-language',
+      description: 'Multi-language support for international customers',
+      category: ModuleCategory.core,
+      enabled: false,
+      available: true,
+    ),
+    ModuleMeta(
+      id: 'push-notifications',
+      name: 'Push Notifications',
+      description: 'Push notifications for orders and promotions',
+      category: ModuleCategory.marketing,
+      enabled: true,
+      available: true,
+    ),
   ];
 });
 
