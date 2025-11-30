@@ -1,10 +1,13 @@
 // lib/builder/blocks/hero_block_runtime.dart
 // Runtime version of HeroBlock - Phase 5 enhanced with modern visual design
+// ThemeConfig Integration: Uses theme primaryColor for default background and button colors
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
+import '../models/theme_config.dart';
 import '../utils/block_config_helper.dart';
 import '../utils/action_helper.dart';
+import '../runtime/builder_theme_resolver.dart';
 
 /// Hero block for prominent headers with image, title, subtitle, and CTA button
 /// 
@@ -30,12 +33,18 @@ import '../utils/action_helper.dart';
 /// 
 /// Responsive: Mobile / Tablet / Desktop with adaptive sizing
 /// Animation: Fade-in + slight scale on mount
+/// ThemeConfig: Uses theme.primaryColor for default background and button colors
 class HeroBlockRuntime extends StatefulWidget {
   final BuilderBlock block;
+  
+  /// Optional theme config override
+  /// If null, uses theme from context
+  final ThemeConfig? themeConfig;
 
   const HeroBlockRuntime({
     super.key,
     required this.block,
+    this.themeConfig,
   });
 
   @override
@@ -222,20 +231,25 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
     final screenWidth = MediaQuery.of(context).size.width;
     final device = _getDeviceType(screenWidth);
     
-    // Get configuration with defaults
+    // Get theme (from prop or context)
+    final theme = widget.themeConfig ?? context.builderTheme;
+    
+    // Get configuration with defaults - use theme primaryColor as default
     final title = helper.getString('title', defaultValue: 'Hero Title');
     final subtitle = helper.getString('subtitle', defaultValue: 'Hero subtitle');
     final imageUrl = helper.getString('imageUrl', defaultValue: '');
     final align = _getAlignValue(helper);
     final margin = helper.getEdgeInsets('margin');
-    final backgroundColor = helper.getColor('backgroundColor', defaultValue: const Color(0xFFD32F2F)) ?? const Color(0xFFD32F2F);
-    final textColor = helper.getColor('textColor', defaultValue: Colors.white) ?? Colors.white;
+    // Use theme primaryColor as default background
+    final backgroundColor = helper.getColor('backgroundColor') ?? theme.primaryColor;
+    final textColor = helper.getColor('textColor') ?? Colors.white;
     final buttonText = _getButtonTextValue(helper);
-    final buttonColor = helper.getColor('buttonColor', defaultValue: Colors.white);
-    final buttonTextColor = helper.getColor('buttonTextColor', defaultValue: const Color(0xFFD32F2F));
+    final buttonColor = helper.getColor('buttonColor') ?? Colors.white;
+    // Use theme primaryColor as default button text color
+    final buttonTextColor = helper.getColor('buttonTextColor') ?? theme.primaryColor;
     
-    // Modern default: borderRadius 16
-    final borderRadius = helper.getDouble('borderRadius', defaultValue: 16.0);
+    // Use theme buttonRadius as default, with 16.0 as ultimate fallback
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: theme.buttonRadius.clamp(0, 100));
     
     // Get action config from separate tapAction/tapActionTarget fields
     // Falls back to direct 'tapAction' Map for backward compatibility
