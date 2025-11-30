@@ -268,12 +268,14 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           : (systemConfig?.defaultName ?? page.pageKey);
       
       // Get icon (with outlined/filled versions)
-      // If icon is empty or invalid, use system default
+      // System pages: use system default icon
+      // Custom pages with icon: use the custom icon
+      // Custom pages without icon: fallback to 'layers' (default for custom pages)
       final iconPair = page.icon.isNotEmpty 
           ? IconHelper.getIconPair(page.icon)
           : (systemConfig != null 
               ? IconHelper.getIconPair(_getIconNameFromIconData(systemConfig.defaultIcon))
-              : IconHelper.getIconPair('help_outline'));
+              : IconHelper.getIconPair('layers'));
       final outlinedIcon = iconPair.$1;
       final filledIcon = iconPair.$2;
 
