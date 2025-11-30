@@ -1,11 +1,14 @@
 // lib/builder/blocks/product_list_block_runtime.dart
 // Runtime version of ProductListBlock - Phase 6F enhanced
+// ThemeConfig Integration: Uses theme cardRadius and primaryColor
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/builder_block.dart';
+import '../models/theme_config.dart';
 import '../utils/block_config_helper.dart';
 import '../utils/action_helper.dart';
+import '../runtime/builder_theme_resolver.dart';
 import '../../src/models/product.dart';
 import '../../src/providers/product_provider.dart';
 import '../../src/providers/cart_provider.dart';
@@ -21,11 +24,11 @@ import '../../src/screens/menu/menu_customization_modal.dart';
 /// - categoryId: Filter by category ID (default: '' = all products)
 /// - layout: Display layout - grid, list, carousel (default: grid)
 /// - limit: Maximum products to show (default: null = unlimited)
-/// - padding: Padding around container (default: 12)
+/// - padding: Padding around container (default: theme spacing)
 /// - margin: Margin around container (default: 0)
 /// - backgroundColor: Background color in hex (default: transparent)
 /// - textColor: Text color in hex (default: #000000)
-/// - borderRadius: Corner radius (default: 8)
+/// - borderRadius: Corner radius (default: theme cardRadius)
 /// - elevation: Card elevation (default: 2)
 /// - actionOnProductTap: Action type - openPage, openProductDetail (default: openProductDetail)
 /// 
@@ -34,8 +37,14 @@ import '../../src/screens/menu/menu_customization_modal.dart';
 /// - Tablet: 3 columns grid
 /// - Desktop: 4 columns grid
 /// - Carousel: min height 260px
+/// 
+/// ThemeConfig: Uses theme.cardRadius, theme.primaryColor, theme.spacing
 class ProductListBlockRuntime extends ConsumerWidget {
   final BuilderBlock block;
+  
+  /// Optional theme config override
+  /// If null, uses theme from context
+  final ThemeConfig? themeConfig;
 
   // Responsive breakpoints
   static const double _mobileBreakpoint = 600.0;
@@ -46,6 +55,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
   const ProductListBlockRuntime({
     super.key,
     required this.block,
+    this.themeConfig,
   });
 
   @override
@@ -58,29 +68,34 @@ class ProductListBlockRuntime extends ConsumerWidget {
     final helper = BlockConfigHelper(block.config, blockId: block.id);
     final productsAsync = ref.watch(productListProvider);
     
+    // Get theme (from prop or context)
+    final theme = themeConfig ?? context.builderTheme;
+    
     // Extract all config values
-    final config = _extractConfig(helper, context);
+    final config = _extractConfig(helper, context, theme);
 
     return productsAsync.when(
-      data: (allProducts) => _buildDataState(context, ref, allProducts, config),
+      data: (allProducts) => _buildDataState(context, ref, allProducts, config, theme),
       loading: () => _buildLoadingState(config),
       error: (error, stack) => _buildErrorState(error, config),
     );
   }
 
   /// Extract all configuration values with safe defaults
-  _ProductListConfig _extractConfig(BlockConfigHelper helper, BuildContext context) {
+  _ProductListConfig _extractConfig(BlockConfigHelper helper, BuildContext context, ThemeConfig theme) {
     final title = helper.getString('title', defaultValue: '');
     final titleAlignment = helper.getString('titleAlignment', defaultValue: 'left');
     final titleSize = helper.getString('titleSize', defaultValue: 'medium');
     final categoryId = helper.getString('categoryId', defaultValue: '');
     final layout = helper.getString('layout', defaultValue: 'grid');
     final limitValue = helper.has('limit') ? helper.getInt('limit') : null;
-    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(12));
+    // Use theme spacing as default padding
+    final padding = helper.getEdgeInsets('padding', defaultValue: EdgeInsets.all(theme.spacing * 0.75));
     final margin = helper.getEdgeInsets('margin');
     final backgroundColor = helper.getColor('backgroundColor');
     final textColor = helper.getColor('textColor', defaultValue: Colors.black87);
-    final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
+    // Use theme cardRadius as default
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: theme.cardRadius);
     final elevation = helper.getDouble('elevation', defaultValue: 2.0);
     final actionOnProductTap = helper.getString('actionOnProductTap', defaultValue: 'openProductDetail');
     final actionConfig = block.config['action'] as Map<String, dynamic>?;
@@ -126,6 +141,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
     WidgetRef ref,
     List<Product> allProducts,
     _ProductListConfig config,
+    ThemeConfig theme,
   ) {
     final products = _filterProducts(allProducts, config.categoryId, config.limit);
 
@@ -133,7 +149,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
       return _buildEmptyState(config);
     }
 
-    return _buildProductContainer(context, ref, products, config);
+    return _buildProductContainer(context, ref, products, config, theme);
   }
 
   /// Filter products by categoryId and limit
@@ -174,18 +190,19 @@ class ProductListBlockRuntime extends ConsumerWidget {
     WidgetRef ref,
     List<Product> products,
     _ProductListConfig config,
+    ThemeConfig theme,
   ) {
     Widget content = Column(
       crossAxisAlignment: _getTitleCrossAxisAlignment(config.titleAlignment),
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Title section
+        // Title section - uses theme heading size
         if (config.title.isNotEmpty) ...[
-          _buildTitle(config),
-          const SizedBox(height: 16),
+          _buildTitle(config, theme),
+          SizedBox(height: theme.spacing),
         ],
         // Product layout
-        _buildLayout(context, ref, products, config),
+        _buildLayout(context, ref, products, config, theme),
       ],
     );
 
@@ -220,8 +237,8 @@ class ProductListBlockRuntime extends ConsumerWidget {
   }
 
   /// Build title widget with alignment and size
-  Widget _buildTitle(_ProductListConfig config) {
-    final fontSize = _getTitleFontSize(config.titleSize);
+  Widget _buildTitle(_ProductListConfig config, ThemeConfig theme) {
+    final fontSize = _getTitleFontSize(config.titleSize, theme);
     
     return Text(
       config.title,
@@ -234,16 +251,16 @@ class ProductListBlockRuntime extends ConsumerWidget {
     );
   }
 
-  /// Get title font size based on titleSize config
-  double _getTitleFontSize(String titleSize) {
+  /// Get title font size based on titleSize config and theme
+  double _getTitleFontSize(String titleSize, ThemeConfig theme) {
     switch (titleSize.toLowerCase()) {
       case 'small':
-        return 18.0;
+        return theme.textHeadingSize * 0.75;
       case 'large':
-        return 28.0;
+        return theme.textHeadingSize * 1.15;
       case 'medium':
       default:
-        return 24.0;
+        return theme.textHeadingSize;
     }
   }
 
@@ -279,15 +296,16 @@ class ProductListBlockRuntime extends ConsumerWidget {
     WidgetRef ref,
     List<Product> products,
     _ProductListConfig config,
+    ThemeConfig theme,
   ) {
     switch (config.layout.toLowerCase()) {
       case 'carousel':
-        return _buildCarousel(context, ref, products, config);
+        return _buildCarousel(context, ref, products, config, theme);
       case 'list':
-        return _buildList(context, ref, products, config);
+        return _buildList(context, ref, products, config, theme);
       case 'grid':
       default:
-        return _buildGrid(context, ref, products, config);
+        return _buildGrid(context, ref, products, config, theme);
     }
   }
 
@@ -297,14 +315,15 @@ class ProductListBlockRuntime extends ConsumerWidget {
     WidgetRef ref,
     List<Product> products,
     _ProductListConfig config,
+    ThemeConfig theme,
   ) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: config.columns,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        mainAxisSpacing: theme.spacing * 0.75,
+        crossAxisSpacing: theme.spacing * 0.75,
         childAspectRatio: 0.75,
       ),
       itemCount: products.length,
@@ -313,6 +332,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
         ref,
         products[index],
         config,
+        theme,
       ),
     );
   }
@@ -323,12 +343,13 @@ class ProductListBlockRuntime extends ConsumerWidget {
     WidgetRef ref,
     List<Product> products,
     _ProductListConfig config,
+    ThemeConfig theme,
   ) {
     return Column(
       children: products
           .map((product) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildListProductCard(context, ref, product, config),
+                padding: EdgeInsets.only(bottom: theme.spacing * 0.75),
+                child: _buildListProductCard(context, ref, product, config, theme),
               ))
           .toList(),
     );
@@ -340,6 +361,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
     WidgetRef ref,
     List<Product> products,
     _ProductListConfig config,
+    ThemeConfig theme,
   ) {
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.7; // 70% of screen width
@@ -352,8 +374,8 @@ class ProductListBlockRuntime extends ConsumerWidget {
         itemBuilder: (context, index) {
           final product = products[index];
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: _buildCarouselProductCard(context, ref, product, config, cardWidth),
+            padding: EdgeInsets.symmetric(horizontal: theme.spacing / 2),
+            child: _buildCarouselProductCard(context, ref, product, config, cardWidth, theme),
           );
         },
       ),
@@ -366,6 +388,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
     WidgetRef ref,
     Product product,
     _ProductListConfig config,
+    ThemeConfig theme,
   ) {
     return GestureDetector(
       onTap: () => _handleProductTap(context, ref, product, config),
@@ -391,7 +414,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(theme.spacing / 2),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -399,20 +422,20 @@ class ProductListBlockRuntime extends ConsumerWidget {
                     Text(
                       product.name,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: theme.textBodySize * 0.875,
                         fontWeight: FontWeight.w600,
                         color: config.textColor,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: theme.spacing / 4),
                     Text(
                       '${product.price.toStringAsFixed(2)} €',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: theme.textBodySize,
                         fontWeight: FontWeight.bold,
-                        color: Colors.red.shade700,
+                        color: theme.primaryColor,
                       ),
                     ),
                   ],
@@ -431,6 +454,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
     WidgetRef ref,
     Product product,
     _ProductListConfig config,
+    ThemeConfig theme,
   ) {
     return GestureDetector(
       onTap: () => _handleProductTap(context, ref, product, config),
@@ -457,7 +481,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
               // Product info (right)
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(theme.spacing * 0.75),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -465,30 +489,30 @@ class ProductListBlockRuntime extends ConsumerWidget {
                       Text(
                         product.name,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: theme.textBodySize,
                           fontWeight: FontWeight.w600,
                           color: config.textColor,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: theme.spacing / 4),
                       Text(
                         product.description,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: theme.textBodySize * 0.75,
                           color: config.textColor?.withOpacity(0.7),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: theme.spacing / 2),
                       Text(
                         '${product.price.toStringAsFixed(2)} €',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: theme.textBodySize,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red.shade700,
+                          color: theme.primaryColor,
                         ),
                       ),
                     ],
@@ -497,9 +521,9 @@ class ProductListBlockRuntime extends ConsumerWidget {
               ),
               // Add button
               Padding(
-                padding: const EdgeInsets.only(right: 8),
+                padding: EdgeInsets.only(right: theme.spacing / 2),
                 child: IconButton(
-                  icon: const Icon(Icons.add_circle, color: Color(0xFFD32F2F)),
+                  icon: Icon(Icons.add_circle, color: theme.primaryColor),
                   onPressed: () => _handleProductTap(context, ref, product, config),
                 ),
               ),
@@ -517,6 +541,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
     Product product,
     _ProductListConfig config,
     double cardWidth,
+    ThemeConfig theme,
   ) {
     return GestureDetector(
       onTap: () => _handleProductTap(context, ref, product, config),
@@ -542,7 +567,7 @@ class ProductListBlockRuntime extends ConsumerWidget {
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(theme.spacing * 0.75),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -550,18 +575,18 @@ class ProductListBlockRuntime extends ConsumerWidget {
                     Text(
                       product.name,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: theme.textBodySize,
                         fontWeight: FontWeight.w600,
                         color: config.textColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: theme.spacing / 4),
                     Text(
                       product.description,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: theme.textBodySize * 0.75,
                         color: config.textColor?.withOpacity(0.7),
                       ),
                       maxLines: 2,
@@ -574,9 +599,9 @@ class ProductListBlockRuntime extends ConsumerWidget {
                         Text(
                           '${product.price.toStringAsFixed(2)} €',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: theme.textBodySize * 1.125,
                             fontWeight: FontWeight.bold,
-                            color: Colors.red.shade700,
+                            color: theme.primaryColor,
                           ),
                         ),
                         Icon(

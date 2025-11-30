@@ -1,10 +1,13 @@
 // lib/builder/blocks/banner_block_runtime.dart
 // Runtime version of BannerBlock - Phase 5 enhanced
+// ThemeConfig Integration: Uses theme cardRadius and textSizes
 
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
+import '../models/theme_config.dart';
 import '../utils/block_config_helper.dart';
 import '../utils/action_helper.dart';
+import '../runtime/builder_theme_resolver.dart';
 
 /// Banner block for promotional and informational messages
 /// 
@@ -17,13 +20,18 @@ import '../utils/action_helper.dart';
 /// - margin: Margin around the banner (default: 0)
 /// - backgroundColor: Background color in hex (default: transparent)
 /// - textColor: Text color in hex (default: #000000)
-/// - borderRadius: Corner radius (default: 8)
+/// - borderRadius: Corner radius (default: theme cardRadius)
 /// - height: Banner height in pixels (default: 140 mobile, 180 desktop)
 /// - tapAction: Action when banner is tapped (openPage, openUrl, scrollToBlock)
 /// 
 /// Responsive: Full width on mobile, max 1200px centered on desktop
+/// ThemeConfig: Uses theme.cardRadius for border radius
 class BannerBlockRuntime extends StatelessWidget {
   final BuilderBlock block;
+  
+  /// Optional theme config override
+  /// If null, uses theme from context
+  final ThemeConfig? themeConfig;
 
   // Responsive breakpoints
   static const double _desktopBreakpoint = 800.0;
@@ -32,22 +40,27 @@ class BannerBlockRuntime extends StatelessWidget {
   const BannerBlockRuntime({
     super.key,
     required this.block,
+    this.themeConfig,
   });
 
   @override
   Widget build(BuildContext context) {
     final helper = BlockConfigHelper(block.config, blockId: block.id);
     
+    // Get theme (from prop or context)
+    final theme = themeConfig ?? context.builderTheme;
+    
     // Get configuration with defaults
     final title = helper.getString('title', defaultValue: 'Banner Title');
     final subtitle = helper.getString('subtitle', defaultValue: '');
     final imageUrl = helper.getString('imageUrl', defaultValue: '');
     final align = helper.getString('align', defaultValue: 'center');
-    final padding = helper.getEdgeInsets('padding', defaultValue: const EdgeInsets.all(16));
+    final padding = helper.getEdgeInsets('padding', defaultValue: EdgeInsets.all(theme.spacing));
     final margin = helper.getEdgeInsets('margin');
     final backgroundColor = helper.getColor('backgroundColor');
     final textColor = helper.getColor('textColor', defaultValue: Colors.black) ?? Colors.black;
-    final borderRadius = helper.getDouble('borderRadius', defaultValue: 8.0);
+    // Use theme cardRadius as default
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: theme.cardRadius);
     // Get action config from separate tapAction/tapActionTarget fields
     // Falls back to direct 'tapAction' Map for backward compatibility
     var tapActionConfig = helper.getActionConfig();
@@ -95,25 +108,25 @@ class BannerBlockRuntime extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: crossAxisAlignment,
                   children: [
-                    // Title (only if not empty)
+                    // Title (only if not empty) - uses theme heading size
                     if (title.isNotEmpty)
                       Text(
                         title,
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: theme.textHeadingSize,
                           fontWeight: FontWeight.bold,
                           color: textColor,
                         ),
                         textAlign: textAlign,
                       ),
                     
-                    // Subtitle (only if not empty)
+                    // Subtitle (only if not empty) - uses theme body size
                     if (subtitle.isNotEmpty) ...[
-                      if (title.isNotEmpty) const SizedBox(height: 8),
+                      if (title.isNotEmpty) SizedBox(height: theme.spacing / 2),
                       Text(
                         subtitle,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: theme.textBodySize,
                           color: textColor.withOpacity(0.9),
                         ),
                         textAlign: textAlign,
@@ -198,17 +211,17 @@ class BannerBlockRuntime extends StatelessWidget {
   Widget _buildErrorPlaceholder(Color? backgroundColor) {
     return Container(
       color: backgroundColor ?? Colors.grey.shade200,
-      child: Center(
+      child: const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.broken_image,
               size: 48,
               color: Colors.grey,
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8),
+            Text(
               'Failed to load image',
               style: TextStyle(
                 fontSize: 12,
