@@ -76,37 +76,52 @@ class BuilderPagePreview extends StatelessWidget {
       return _buildEmptyState();
     }
 
+    // Resolve theme: use provided themeConfig or default
+    final theme = themeConfig ?? ThemeConfig.defaultConfig;
+    
+    // Use theme background color if not explicitly overridden
+    final effectiveBackgroundColor = backgroundColor ?? theme.backgroundColor;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final responsive = ResponsiveBuilder(constraints.maxWidth);
         
-        return Container(
-          color: backgroundColor ?? Colors.grey.shade50,
-          child: SingleChildScrollView(
-            physics: responsive.isMobile 
-              ? const ClampingScrollPhysics() 
-              : const AlwaysScrollableScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: responsive.previewMaxWidth,
-                minHeight: constraints.maxHeight,
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: responsive.horizontalPadding,
-                  vertical: responsive.verticalPadding,
+        // Wrap with BuilderThemeProvider for theme access in blocks
+        return BuilderThemeProvider(
+          theme: theme,
+          child: Container(
+            color: effectiveBackgroundColor,
+            child: SingleChildScrollView(
+              physics: responsive.isMobile 
+                ? const ClampingScrollPhysics() 
+                : const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: responsive.previewMaxWidth,
+                  minHeight: constraints.maxHeight,
                 ),
-                child: Column(
-                  children: [
-                    // Render blocks
-                    ...activeBlocks.map((block) => _buildBlock(block)),
-                    
-                    // Render module placeholders
-                    if (hasModules) ...[
-                      const SizedBox(height: 16),
-                      ...modules!.map((moduleId) => _buildModulePlaceholder(moduleId)),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: responsive.horizontalPadding,
+                    vertical: responsive.verticalPadding,
+                  ),
+                  child: Column(
+                    children: [
+                      // Render blocks with theme-based spacing
+                      for (int i = 0; i < activeBlocks.length; i++) ...[
+                        _buildBlock(activeBlocks[i]),
+                        // Add spacing between blocks using theme
+                        if (i < activeBlocks.length - 1)
+                          SizedBox(height: theme.spacing),
+                      ],
+                      
+                      // Render module placeholders
+                      if (hasModules) ...[
+                        SizedBox(height: theme.spacing),
+                        ...modules!.map((moduleId) => _buildModulePlaceholder(moduleId)),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
