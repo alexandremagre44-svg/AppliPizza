@@ -12,7 +12,7 @@
 | Collection | Purpose | Fields Used |
 |------------|---------|-------------|
 | `restaurants/{appId}/pages_draft/{pageKey}` | Admin editing | `draftLayout`, `publishedLayout`, `blocks` (legacy) |
-| `restaurants/{appId}/pages_published/{pageKey}` | Client runtime | `publishedLayout`, `draftLayout` (fallback), `blocks` (legacy) |
+| `restaurants/{appId}/pages_published/{pageKey}` | Client runtime | `publishedLayout`, `blocks` (legacy migration only) |
 
 ---
 

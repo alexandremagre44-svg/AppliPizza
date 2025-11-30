@@ -107,7 +107,7 @@ Widget _buildNotPublishedState(BuildContext context, String pageName) {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.unpublished_outlined,
+            Icons.visibility_off_outlined,
             size: 80,
             color: Colors.grey[400],
           ),

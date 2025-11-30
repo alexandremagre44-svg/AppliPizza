@@ -96,7 +96,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.unpublished_outlined,
+                          Icons.visibility_off_outlined,
                           size: 80,
                           color: Colors.grey[400],
                         ),
