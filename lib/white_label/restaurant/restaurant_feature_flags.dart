@@ -34,6 +34,14 @@ class RestaurantFeatureFlags {
     );
   }
 
+  /// Alias pour [fromConfig] - crée des feature flags à partir des modules.
+  factory RestaurantFeatureFlags.fromModules(
+    String restaurantId,
+    List<ModuleConfig> modules,
+  ) {
+    return RestaurantFeatureFlags.fromConfig(restaurantId, modules);
+  }
+
   /// Vérifie si un module est activé.
   bool has(ModuleId id) {
     return enabled[id] ?? false;
