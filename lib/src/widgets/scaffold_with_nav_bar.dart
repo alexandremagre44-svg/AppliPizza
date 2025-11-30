@@ -77,15 +77,27 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                 onTap: (index) {
                   if (index == 0) context.go('/menu');
                   if (index == 1) context.go('/cart');
+                  if (index == 2) context.go('/profile');
                 },
-                items: const [
-                  BottomNavigationBarItem(
+                items: [
+                  const BottomNavigationBarItem(
                     icon: Icon(Icons.restaurant_menu_outlined),
                     label: 'Menu',
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_cart_outlined),
+                    icon: badges.Badge(
+                      showBadge: totalItems > 0,
+                      badgeContent: Text(
+                        totalItems.toString(),
+                        style: const TextStyle(color: Colors.white, fontSize: 10),
+                      ),
+                      child: const Icon(Icons.shopping_cart_outlined),
+                    ),
                     label: 'Panier',
+                  ),
+                  const BottomNavigationBarItem(
+                    icon: Icon(Icons.person_outline),
+                    label: 'Profil',
                   ),
                 ],
               ),

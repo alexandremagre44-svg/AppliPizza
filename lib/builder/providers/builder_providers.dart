@@ -73,12 +73,21 @@ final homePagePublishedStreamProvider = StreamProvider<BuilderPage?>((ref) {
 /// Returns the route of the first page in the bottom navigation bar (position 0).
 /// Falls back to '/menu' if no pages are available.
 /// 
-/// This provider is used by GoRouter to determine the landing page at app launch.
+/// This provider exposes the dynamic landing page logic for use throughout the app.
+/// The actual navigation is handled by:
+/// - SplashScreen._handleSmartNavigation() on app launch
+/// - LoginScreen._navigateToDynamicLandingPage() after authentication
+/// 
 /// The landing page changes automatically if the order of pages in the Builder changes.
 /// 
 /// Usage:
 /// ```dart
-/// final initialRoute = ref.watch(initialRouteProvider);
+/// final initialRouteAsync = ref.watch(initialRouteProvider);
+/// initialRouteAsync.when(
+///   data: (route) => context.go(route),
+///   loading: () => context.go('/menu'),
+///   error: (_, __) => context.go('/menu'),
+/// );
 /// ```
 final initialRouteProvider = FutureProvider<String>((ref) async {
   final appId = ref.watch(currentRestaurantProvider).id;
