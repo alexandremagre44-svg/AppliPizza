@@ -397,6 +397,6 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
         }
       }
     }
-    return Icons.help_outline;
+    return Icons.layers;
   }
 }
