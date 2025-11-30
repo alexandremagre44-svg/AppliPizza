@@ -2,6 +2,7 @@
 // Preview widget that renders a list of blocks visually
 // MOBILE RESPONSIVE: Fixed sizing and zoom issues on mobile
 // Enhanced with draftLayout support and module placeholders
+// THEME INTEGRATION: Wraps content with BuilderThemeProvider for theme-aware blocks
 //
 // PREVIEW DATA SOURCES (Builder Studio):
 // - Brouillon preview: uses pages_draft + draftLayout
@@ -12,9 +13,11 @@
 
 import 'package:flutter/material.dart';
 import '../models/models.dart';
+import '../models/theme_config.dart';
 import '../blocks/blocks.dart';
 import '../utils/responsive.dart';
 import '../utils/builder_modules.dart';
+import '../runtime/builder_theme_resolver.dart';
 
 /// Builder Page Preview Widget
 /// 
@@ -22,25 +25,42 @@ import '../utils/builder_modules.dart';
 /// Now supports:
 /// - draftLayout for editor preview
 /// - Module placeholders for attached modules
+/// - ThemeConfig for consistent styling across blocks
 /// 
 /// Usage:
 /// ```dart
-/// BuilderPagePreview(blocks: page.draftLayout, modules: page.modules)
+/// BuilderPagePreview(
+///   blocks: page.draftLayout, 
+///   modules: page.modules,
+///   themeConfig: draftTheme, // Pass draft theme for live preview
+/// )
 /// ```
 class BuilderPagePreview extends StatelessWidget {
   final List<BuilderBlock> blocks;
   final List<String>? modules;
   final Color? backgroundColor;
+  
+  /// Optional ThemeConfig for theme-aware block rendering
+  /// 
+  /// When provided, wraps content with BuilderThemeProvider.
+  /// - For Builder editor: pass draftTheme for live preview
+  /// - For published preview: pass publishedTheme
+  /// - If null, uses ThemeConfig.defaultConfig
+  final ThemeConfig? themeConfig;
 
   const BuilderPagePreview({
     super.key,
     required this.blocks,
     this.modules,
     this.backgroundColor,
+    this.themeConfig,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Use provided theme or fallback to default
+    final theme = themeConfig ?? ThemeConfig.defaultConfig;
+    
     // Sort blocks by order
     final sortedBlocks = List<BuilderBlock>.from(blocks)
       ..sort((a, b) => a.order.compareTo(b.order));
@@ -56,12 +76,16 @@ class BuilderPagePreview extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    return LayoutBuilder(
+    // Build the preview content
+    Widget previewContent = LayoutBuilder(
       builder: (context, constraints) {
         final responsive = ResponsiveBuilder(constraints.maxWidth);
         
+        // Use theme backgroundColor if no explicit backgroundColor provided
+        final effectiveBackgroundColor = backgroundColor ?? theme.backgroundColor;
+        
         return Container(
-          color: backgroundColor ?? Colors.grey.shade50,
+          color: effectiveBackgroundColor,
           child: SingleChildScrollView(
             physics: responsive.isMobile 
               ? const ClampingScrollPhysics() 
@@ -78,12 +102,17 @@ class BuilderPagePreview extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // Render blocks
-                    ...activeBlocks.map((block) => _buildBlock(block)),
+                    // Render blocks with theme spacing
+                    for (int i = 0; i < activeBlocks.length; i++) ...[
+                      _buildBlock(activeBlocks[i]),
+                      // Add theme-based spacing between blocks (except after last)
+                      if (i < activeBlocks.length - 1)
+                        SizedBox(height: theme.spacing),
+                    ],
                     
                     // Render module placeholders
                     if (hasModules) ...[
-                      const SizedBox(height: 16),
+                      SizedBox(height: theme.spacing),
                       ...modules!.map((moduleId) => _buildModulePlaceholder(moduleId)),
                     ],
                   ],
@@ -93,6 +122,12 @@ class BuilderPagePreview extends StatelessWidget {
           ),
         );
       },
+    );
+    
+    // Wrap with BuilderThemeProvider so blocks can access theme via context.builderTheme
+    return BuilderThemeProvider(
+      theme: theme,
+      child: previewContent,
     );
   }
 
@@ -266,12 +301,16 @@ class BuilderFullScreenPreview extends StatelessWidget {
   final List<BuilderBlock> blocks;
   final List<String>? modules;
   final String pageTitle;
+  
+  /// Optional ThemeConfig for theme-aware block rendering
+  final ThemeConfig? themeConfig;
 
   const BuilderFullScreenPreview({
     super.key,
     required this.blocks,
     this.modules,
     required this.pageTitle,
+    this.themeConfig,
   });
 
   @override
@@ -286,7 +325,11 @@ class BuilderFullScreenPreview extends StatelessWidget {
           ),
         ],
       ),
-      body: BuilderPagePreview(blocks: blocks, modules: modules),
+      body: BuilderPagePreview(
+        blocks: blocks, 
+        modules: modules,
+        themeConfig: themeConfig,
+      ),
     );
   }
 
@@ -296,6 +339,7 @@ class BuilderFullScreenPreview extends StatelessWidget {
     required List<BuilderBlock> blocks,
     List<String>? modules,
     required String pageTitle,
+    ThemeConfig? themeConfig,
   }) {
     Navigator.push(
       context,
@@ -304,6 +348,7 @@ class BuilderFullScreenPreview extends StatelessWidget {
           blocks: blocks,
           modules: modules,
           pageTitle: pageTitle,
+          themeConfig: themeConfig,
         ),
         fullscreenDialog: true,
       ),

@@ -1622,7 +1622,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       child: BuilderPagePreview(
         blocks: previewData.layout,
         modules: previewData.modules,
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        // THEME INTEGRATION: Pass draftTheme for live preview when showing draft
+        // Use theme background color, not Material theme surface
+        themeConfig: _draftTheme,
       ),
     );
   }
@@ -2677,7 +2679,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       child: BuilderPagePreview(
         blocks: previewData.layout,
         modules: previewData.modules,
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        // THEME INTEGRATION: Pass draftTheme for live preview
+        themeConfig: _draftTheme,
       ),
     );
   }
@@ -2807,6 +2810,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       blocks: previewData.layout,
       modules: previewData.modules,
       pageTitle: _pageLabel,
+      // THEME INTEGRATION: Pass draftTheme for live full-screen preview
+      themeConfig: _draftTheme,
     );
   }
 

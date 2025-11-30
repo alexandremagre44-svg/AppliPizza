@@ -1,5 +1,6 @@
 // lib/builder/runtime/builder_page_loader.dart
 // Widget that loads Builder pages with fallback to legacy screens
+// THEME INTEGRATION: Loads published theme and passes it to blocks via BuilderThemeProvider
 //
 // Uses new Firestore structure:
 // restaurants/{restaurantId}/pages_published/{pageId}
@@ -7,16 +8,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
+import '../models/theme_config.dart';
 import '../services/dynamic_page_resolver.dart';
+import '../services/theme_service.dart';
 import '../../src/providers/restaurant_provider.dart';
 import '../preview/builder_runtime_renderer.dart';
 import 'dynamic_page_router.dart';
+import 'builder_theme_resolver.dart';
 
 /// Widget that loads a Builder page with fallback to legacy screen
 /// 
 /// This widget attempts to load a BuilderPage from Firestore.
 /// If the page exists, it renders it using BuilderRuntimeRenderer.
 /// If not, it displays the provided fallback widget.
+/// 
+/// THEME INTEGRATION:
+/// - Loads publishedTheme from Firestore for client runtime
+/// - Wraps content with BuilderThemeProvider for context.builderTheme access
+/// - Falls back to ThemeConfig.defaultConfig if no theme exists
 /// 
 /// This enables a smooth transition from legacy screens to Builder-driven pages
 /// without breaking existing functionality.
@@ -47,9 +56,14 @@ class BuilderPageLoader extends ConsumerWidget {
     
     // Resolver instance - could be optimized with a provider if needed
     final resolver = DynamicPageResolver();
+    final themeService = ThemeService();
     
-    return FutureBuilder<BuilderPage?>(
-      future: resolver.resolve(pageId, appId),
+    // Load both page and published theme in parallel
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([
+        resolver.resolve(pageId, appId),
+        themeService.loadPublishedTheme(appId),
+      ]),
       builder: (context, snapshot) {
         // Show loading indicator while fetching
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -62,10 +76,13 @@ class BuilderPageLoader extends ConsumerWidget {
           );
         }
         
-        // If Builder page exists and is enabled, render it
-        if (snapshot.hasData && snapshot.data != null) {
-          final builderPage = snapshot.data!;
-          
+        // Extract results from Future.wait
+        final results = snapshot.data;
+        final builderPage = results?[0] as BuilderPage?;
+        final publishedTheme = (results?[1] as ThemeConfig?) ?? ThemeConfig.defaultConfig;
+        
+        // If Builder page exists and is enabled, render it with published theme
+        if (builderPage != null) {
           // Get system page config for proper naming and icons
           final systemConfig = SystemPages.getConfig(pageId);
           
@@ -76,7 +93,11 @@ class BuilderPageLoader extends ConsumerWidget {
           
           return Scaffold(
             appBar: _buildAppBar(context, builderPage, displayName),
-            body: buildPageFromBuilder(context, builderPage),
+            // THEME INTEGRATION: Wrap page content with BuilderThemeProvider
+            body: BuilderThemeProvider(
+              theme: publishedTheme,
+              child: buildPageFromBuilder(context, builderPage),
+            ),
           );
         }
         

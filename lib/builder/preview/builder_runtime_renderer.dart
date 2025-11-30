@@ -2,6 +2,7 @@
 // Renders builder blocks using runtime widgets (with real providers and data)
 // Phase 5: Layout logic centralized, all styling via BlockConfigHelper
 // ThemeConfig Integration: Uses theme spacing and background color
+// PHASE 4: Wraps content with BuilderThemeProvider for consistent theme access
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ import '../runtime/builder_theme_resolver.dart';
 /// - Phase 5 compliant: centralized layout logic
 /// - maxContentWidth support for constrained layouts
 /// - ThemeConfig support for consistent spacing and styling
+/// - Wraps content with BuilderThemeProvider for context.builderTheme access
 class BuilderRuntimeRenderer extends ConsumerWidget {
   final List<BuilderBlock> blocks;
   final Color? backgroundColor;
@@ -37,7 +39,9 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
   
   /// Optional ThemeConfig for consistent styling
   /// If provided, uses theme.spacing for block spacing
-  /// If null, uses default spacing of 16px
+  /// If null, uses ThemeConfig.defaultConfig
+  /// 
+  /// IMPORTANT: This theme is provided to all child blocks via BuilderThemeProvider
   final ThemeConfig? themeConfig;
 
   const BuilderRuntimeRenderer({
@@ -51,7 +55,12 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Use theme spacing or default
+    // THEME RESOLUTION:
+    // 1. Use explicitly provided themeConfig (highest priority)
+    // 2. Try to get theme from context (if parent provides BuilderThemeProvider)
+    // 3. Fall back to ThemeConfig.defaultConfig
+    // 
+    // Note: context.builderTheme already returns defaultConfig if no provider found
     final theme = themeConfig ?? context.builderTheme;
     final blockSpacing = theme.spacing;
     
@@ -66,16 +75,19 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
 
     // Empty state when no blocks are configured
     if (activeBlocks.isEmpty) {
-      return Container(
-        color: effectiveBackgroundColor,
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.all(theme.spacing * 2),
-            child: Text(
-              'Aucun contenu configuré',
-              style: TextStyle(
-                fontSize: theme.textBodySize,
-                color: Colors.grey,
+      return BuilderThemeProvider(
+        theme: theme,
+        child: Container(
+          color: effectiveBackgroundColor,
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(theme.spacing * 2),
+              child: Text(
+                'Aucun contenu configuré',
+                style: TextStyle(
+                  fontSize: theme.textBodySize,
+                  color: Colors.grey,
+                ),
               ),
             ),
           ),
@@ -107,12 +119,18 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
       );
     }
 
-    // Wrap in ScrollView if requested
-    return Container(
+    // Build the final content with background
+    Widget content = Container(
       color: effectiveBackgroundColor,
       child: wrapInScrollView
           ? SingleChildScrollView(child: blocksColumn)
           : blocksColumn,
+    );
+    
+    // PHASE 4: Wrap with BuilderThemeProvider so blocks can access theme via context.builderTheme
+    return BuilderThemeProvider(
+      theme: theme,
+      child: content,
     );
   }
 
