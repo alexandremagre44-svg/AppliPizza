@@ -53,6 +53,10 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
   static const double _tabletBreakpoint = 768.0;
   static const double _desktopBreakpoint = 1024.0;
   static const double _maxDesktopWidth = 1200.0;
+  
+  // Design constants
+  static const double _maxOverlayOpacity = 0.7;
+  static const double _pillButtonRadius = 50.0;
 
   @override
   void initState() {
@@ -92,11 +96,13 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
   /// Get padding based on size preset (S/M/L) or custom value
   EdgeInsets _getPadding(BlockConfigHelper helper, _DeviceType device) {
     final paddingSize = helper.getString('paddingSize', defaultValue: 'M');
-    final customPadding = helper.getEdgeInsets('padding');
     
-    // If custom padding is provided, use it
-    if (customPadding != EdgeInsets.zero && helper.has('padding')) {
-      return customPadding;
+    // If custom padding is explicitly provided, use it
+    if (helper.has('padding')) {
+      final customPadding = helper.getEdgeInsets('padding');
+      if (customPadding != EdgeInsets.zero) {
+        return customPadding;
+      }
     }
     
     // Responsive padding based on device type and preset
@@ -189,8 +195,8 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
       return [Colors.transparent, Colors.transparent];
     }
     
-    // Clamp opacity between 0 and 0.7 for readability
-    final clampedOpacity = overlayOpacity.clamp(0.0, 0.7);
+    // Clamp opacity between 0 and max for readability
+    final clampedOpacity = overlayOpacity.clamp(0.0, _maxOverlayOpacity);
     
     return [
       Colors.black.withOpacity(clampedOpacity * 0.4),
@@ -367,7 +373,7 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
                               vertical: device == _DeviceType.mobile ? 14 : 18,
                             ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50), // Pill shape
+                              borderRadius: BorderRadius.circular(_pillButtonRadius), // Pill shape
                             ),
                             elevation: 6,
                             shadowColor: Colors.black.withOpacity(0.25),
@@ -517,7 +523,7 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
             ),
             const SizedBox(height: 12),
             Text(
-              'Image non disponible',
+              'Image unavailable',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,

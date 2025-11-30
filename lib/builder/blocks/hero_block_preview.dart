@@ -39,6 +39,10 @@ class _HeroBlockPreviewState extends State<HeroBlockPreview>
   // Responsive breakpoints
   static const double _tabletBreakpoint = 600.0;
   static const double _desktopBreakpoint = 900.0;
+  
+  // Design constants
+  static const double _maxOverlayOpacity = 0.7;
+  static const double _pillButtonRadius = 50.0;
 
   @override
   void initState() {
@@ -73,7 +77,8 @@ class _HeroBlockPreviewState extends State<HeroBlockPreview>
     final paddingSize = helper.getString('paddingSize', defaultValue: 'M');
     final customPadding = helper.getEdgeInsets('padding');
     
-    if (customPadding != EdgeInsets.zero) {
+    // If custom padding is explicitly provided, use it
+    if (helper.has('padding') && customPadding != EdgeInsets.zero) {
       return customPadding;
     }
     
@@ -128,8 +133,8 @@ class _HeroBlockPreviewState extends State<HeroBlockPreview>
       return [Colors.transparent, Colors.transparent];
     }
     
-    // Clamp opacity between 0 and 0.7 for readability
-    final clampedOpacity = overlayOpacity.clamp(0.0, 0.7);
+    // Clamp opacity between 0 and max for readability
+    final clampedOpacity = overlayOpacity.clamp(0.0, _maxOverlayOpacity);
     
     return [
       Colors.black.withOpacity(clampedOpacity * 0.5),
@@ -348,7 +353,7 @@ class _HeroBlockPreviewState extends State<HeroBlockPreview>
                               vertical: screenWidth >= _tabletBreakpoint ? 16 : 14,
                             ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50), // Pill shape
+                              borderRadius: BorderRadius.circular(_pillButtonRadius), // Pill shape
                             ),
                             elevation: 4,
                             shadowColor: Colors.black.withOpacity(0.3),
