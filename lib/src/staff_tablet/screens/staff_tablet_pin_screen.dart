@@ -104,7 +104,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                     ),
                     SizedBox(height: AppSpacing.xl),
                     FilledButton.icon(
-                      onPressed: () => context.go('/home'),
+                      onPressed: () => context.go('/menu'),
                       icon: const Icon(Icons.home),
                       label: const Text('Retour à l\'accueil'),
                       style: FilledButton.styleFrom(
@@ -312,7 +312,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
 
                     // Back to home button with better styling
                     TextButton.icon(
-                      onPressed: () => context.go('/home'),
+                      onPressed: () => context.go('/menu'),
                       icon: Icon(
                         Icons.arrow_back_rounded,
                         color: Colors.grey[600],

@@ -60,7 +60,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
             onPressed: () async {
               await ref.read(staffTabletAuthProvider.notifier).logout();
               if (mounted) {
-                context.go('/home');
+                context.go('/menu');
               }
             },
             tooltip: 'Déconnexion',
@@ -507,7 +507,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                   ),
                   SizedBox(height: AppSpacing.xl),
                   FilledButton.icon(
-                    onPressed: () => context.go('/home'),
+                    onPressed: () => context.go('/menu'),
                     icon: const Icon(Icons.home),
                     label: const Text('Retour à l\'accueil'),
                     style: FilledButton.styleFrom(

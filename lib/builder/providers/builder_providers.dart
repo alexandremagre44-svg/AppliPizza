@@ -1,6 +1,7 @@
 // lib/builder/providers/builder_providers.dart
 // Riverpod providers for Builder B3 system
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/services.dart';
@@ -65,4 +66,40 @@ final homePagePublishedStreamProvider = StreamProvider<BuilderPage?>((ref) {
   final service = ref.watch(builderLayoutServiceProvider);
   final appId = ref.watch(currentRestaurantProvider).id;
   return service.watchPublished(appId, BuilderPageId.home);
+});
+
+/// Provider for dynamic initial route based on bottom navigation pages
+/// 
+/// Returns the route of the first page in the bottom navigation bar (position 0).
+/// Falls back to '/menu' if no pages are available.
+/// 
+/// This provider is used by GoRouter to determine the landing page at app launch.
+/// The landing page changes automatically if the order of pages in the Builder changes.
+/// 
+/// Usage:
+/// ```dart
+/// final initialRoute = ref.watch(initialRouteProvider);
+/// ```
+final initialRouteProvider = FutureProvider<String>((ref) async {
+  final appId = ref.watch(currentRestaurantProvider).id;
+  final service = BuilderNavigationService(appId);
+  
+  try {
+    final pages = await service.getBottomBarPages();
+    
+    if (pages.isNotEmpty) {
+      final route = pages.first.route;
+      // Validate route format
+      if (route.isNotEmpty && route.startsWith('/')) {
+        debugPrint('[Landing] Initial route = $route (from pages.first)');
+        return route;
+      }
+    }
+  } catch (e) {
+    debugPrint('[Landing] Error loading initial route: $e');
+  }
+  
+  // Fallback to /menu if no valid pages found
+  debugPrint('[Landing] Initial route = /menu (fallback)');
+  return '/menu';
 });

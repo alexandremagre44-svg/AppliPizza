@@ -57,8 +57,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   /// Navigation decision flow:
   /// 1. Check auth state - if not logged in, navigate to '/login'
   /// 2. If logged in, fetch enabled bottom bar pages from Firestore
-  /// 3. If pages exist and first page has a valid route, navigate there
-  /// 4. Fallback to '/home' if no active pages or on error
+  /// 3. If pages exist and first page has a valid route, navigate there (pages.first)
+  /// 4. Fallback to '/menu' if no active pages or on error
   Future<void> _handleSmartNavigation() async {
     // Check authentication state
     final auth = ref.read(authProvider);
@@ -82,20 +82,24 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
         // Validate the route before navigation
         final firstRoute = pages.first.route;
         if (firstRoute.isNotEmpty && firstRoute.startsWith('/')) {
-          // Navigate to the first available page's route
+          // Navigate to the first available page's route (position 0 of bottom nav)
+          debugPrint('[Landing] Initial route = $firstRoute (from pages.first)');
           context.go(firstRoute);
         } else {
-          // Invalid route format - fallback to home
-          context.go('/home');
+          // Invalid route format - fallback to /menu
+          debugPrint('[Landing] Initial route = /menu (fallback - invalid route format)');
+          context.go('/menu');
         }
       } else {
         // Fallback: no active pages found (rare case)
-        context.go('/home');
+        debugPrint('[Landing] Initial route = /menu (fallback - no active pages)');
+        context.go('/menu');
       }
     } catch (e) {
-      // Error fetching pages - fallback to home
+      // Error fetching pages - fallback to /menu
+      debugPrint('[Landing] Initial route = /menu (fallback - error: $e)');
       if (mounted) {
-        context.go('/home');
+        context.go('/menu');
       }
     }
   }

@@ -387,7 +387,7 @@ class _KitchenPageState extends ConsumerState<KitchenPage> {
               color: KitchenConstants.kitchenText,
             ),
             tooltip: 'Quitter le mode cuisine',
-            onPressed: () => context.go(AppRoutes.home),
+            onPressed: () => context.go(AppRoutes.menu),
           ),
         ],
       ),
