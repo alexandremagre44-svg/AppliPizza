@@ -66,6 +66,16 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
   // Design constants
   static const double _maxOverlayOpacity = 0.7;
   static const double _pillButtonRadius = 50.0;
+  
+  // Responsive font scaling factors (relative to theme base sizes)
+  static const double _titleScaleDesktop = 1.35;
+  static const double _titleScaleTablet = 1.15;
+  static const double _titleScaleMobile = 1.08;
+  static const double _subtitleScaleDesktop = 1.25;
+  static const double _subtitleScaleTablet = 1.125;
+  static const double _subtitleScaleMobile = 1.0;
+  static const double _buttonTextScaleTablet = 0.94;
+  static const double _buttonTextScaleMobile = 0.875;
 
   @override
   void initState() {
@@ -223,21 +233,21 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
     switch (device) {
       case _DeviceType.desktop:
         return {
-          'title': headingSize * 1.35,  // ~32 when headingSize=24
-          'subtitle': bodySize * 1.25,  // ~20 when bodySize=16
+          'title': headingSize * _titleScaleDesktop,
+          'subtitle': bodySize * _subtitleScaleDesktop,
           'button': bodySize,
         };
       case _DeviceType.tablet:
         return {
-          'title': headingSize * 1.15,  // ~28 when headingSize=24
-          'subtitle': bodySize * 1.125, // ~18 when bodySize=16
-          'button': bodySize * 0.94,
+          'title': headingSize * _titleScaleTablet,
+          'subtitle': bodySize * _subtitleScaleTablet,
+          'button': bodySize * _buttonTextScaleTablet,
         };
       case _DeviceType.mobile:
         return {
-          'title': headingSize * 1.08,  // ~26 when headingSize=24
-          'subtitle': bodySize,         // 16 when bodySize=16
-          'button': bodySize * 0.875,
+          'title': headingSize * _titleScaleMobile,
+          'subtitle': bodySize * _subtitleScaleMobile,
+          'button': bodySize * _buttonTextScaleMobile,
         };
     }
   }
