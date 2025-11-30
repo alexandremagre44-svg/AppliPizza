@@ -241,15 +241,15 @@ class _HeroBlockRuntimeState extends State<HeroBlockRuntime>
     final align = _getAlignValue(helper);
     final margin = helper.getEdgeInsets('margin');
     // Use theme primaryColor as default background
-    final backgroundColor = helper.getColor('backgroundColor', defaultValue: theme.primaryColor) ?? theme.primaryColor;
-    final textColor = helper.getColor('textColor', defaultValue: Colors.white) ?? Colors.white;
+    final backgroundColor = helper.getColor('backgroundColor') ?? theme.primaryColor;
+    final textColor = helper.getColor('textColor') ?? Colors.white;
     final buttonText = _getButtonTextValue(helper);
-    final buttonColor = helper.getColor('buttonColor', defaultValue: Colors.white);
+    final buttonColor = helper.getColor('buttonColor') ?? Colors.white;
     // Use theme primaryColor as default button text color
-    final buttonTextColor = helper.getColor('buttonTextColor', defaultValue: theme.primaryColor);
+    final buttonTextColor = helper.getColor('buttonTextColor') ?? theme.primaryColor;
     
-    // Modern default: use theme buttonRadius or 16
-    final borderRadius = helper.getDouble('borderRadius', defaultValue: theme.buttonRadius > 0 ? theme.buttonRadius : 16.0);
+    // Use theme buttonRadius as default, with 16.0 as ultimate fallback
+    final borderRadius = helper.getDouble('borderRadius', defaultValue: theme.buttonRadius.clamp(0, 100));
     
     // Get action config from separate tapAction/tapActionTarget fields
     // Falls back to direct 'tapAction' Map for backward compatibility
