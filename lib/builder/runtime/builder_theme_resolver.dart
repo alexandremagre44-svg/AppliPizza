@@ -1,6 +1,15 @@
 // lib/builder/runtime/builder_theme_resolver.dart
 // Theme resolver for Builder B3 runtime
 //
+// THEME RESOLUTION BEHAVIOR:
+// ========================
+// - Builder preview uses draftTheme (from theme_draft collection)
+// - Client runtime uses publishedTheme (from theme_published collection)
+// - Blocks read ThemeConfig via BuilderThemeProvider/context.builderTheme
+//
+// This ensures admins see live changes in preview, while clients only see
+// published theme changes after explicit publish action.
+//
 // Resolves the appropriate ThemeConfig for block rendering.
 // Client runtime uses published theme, Builder uses draft theme.
 
