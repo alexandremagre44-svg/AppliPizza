@@ -236,34 +236,74 @@ class RestaurantDetailPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 24),
-          // Placeholder for actions
+          // Actions buttons
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey.shade200),
             ),
-            child: const Column(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.construction, size: 48, color: Colors.grey),
-                SizedBox(height: 16),
-                Text(
-                  'TODO: Implement Restaurant Management Actions',
+                const Text(
+                  'Actions',
                   style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1A2E),
                   ),
                 ),
-                SizedBox(height: 8),
-                Text(
-                  '(Edit, Delete, Assign Users, Configure Modules...)',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    // Modules button
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        context.go(
+                          '/superadmin/restaurants/${restaurant.id}/modules'
+                          '?name=${Uri.encodeComponent(restaurant.name)}',
+                        );
+                      },
+                      icon: const Icon(Icons.extension, size: 18),
+                      label: const Text('Gérer les modules'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    // TODO: Add more action buttons
+                    OutlinedButton.icon(
+                      onPressed: null, // TODO: implement
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text('Modifier'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: null, // TODO: implement
+                      icon: const Icon(Icons.people, size: 18),
+                      label: const Text('Utilisateurs'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

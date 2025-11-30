@@ -13,6 +13,7 @@ import 'pages/dashboard_page.dart';
 import 'pages/restaurants_list_page.dart';
 import 'pages/restaurant_detail_page.dart';
 import 'pages/restaurant_create_wizard.dart';
+import 'pages/restaurant_modules_page.dart';
 import 'pages/users_page.dart';
 import 'pages/modules_page.dart';
 import 'pages/settings_page.dart';
@@ -34,6 +35,9 @@ class SuperAdminRoutes {
 
   /// Route de détail d'un restaurant (avec paramètre :id).
   static const String restaurantDetail = '/superadmin/restaurants/:id';
+
+  /// Route de gestion des modules d'un restaurant (avec paramètre :id).
+  static const String restaurantModules = '/superadmin/restaurants/:id/modules';
 
   /// Route de gestion des utilisateurs.
   static const String users = '/superadmin/users';
@@ -102,6 +106,20 @@ GoRouter createSuperAdminRouter() {
               final restaurantId = state.pathParameters['id'] ?? '';
               return NoTransitionPage(
                 child: RestaurantDetailPage(restaurantId: restaurantId),
+              );
+            },
+          ),
+          // Restaurants - Modules
+          GoRoute(
+            path: SuperAdminRoutes.restaurantModules,
+            pageBuilder: (context, state) {
+              final restaurantId = state.pathParameters['id'] ?? '';
+              final restaurantName = state.uri.queryParameters['name'];
+              return NoTransitionPage(
+                child: RestaurantModulesPage(
+                  restaurantId: restaurantId,
+                  restaurantName: restaurantName,
+                ),
               );
             },
           ),
