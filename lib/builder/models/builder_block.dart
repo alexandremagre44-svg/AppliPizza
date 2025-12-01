@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'builder_enums.dart';
 import '../utils/firestore_parsing_helpers.dart';
+import '../../white_label/core/module_id.dart';
 
 /// Base block class for all content blocks
 /// 
@@ -50,6 +51,10 @@ class BuilderBlock {
   /// Timestamp when block was last updated
   final DateTime updatedAt;
 
+  /// Optional module ID required for this block to be visible
+  /// If set, the block will only render when the module is enabled
+  final ModuleId? requiredModule;
+
   BuilderBlock({
     required this.id,
     required this.type,
@@ -58,6 +63,7 @@ class BuilderBlock {
     this.isActive = true,
     this.visibility = BlockVisibility.visible,
     this.customStyles,
+    this.requiredModule,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -72,6 +78,7 @@ class BuilderBlock {
     bool? isActive,
     BlockVisibility? visibility,
     String? customStyles,
+    ModuleId? requiredModule,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -83,6 +90,7 @@ class BuilderBlock {
       isActive: isActive ?? this.isActive,
       visibility: visibility ?? this.visibility,
       customStyles: customStyles ?? this.customStyles,
+      requiredModule: requiredModule ?? this.requiredModule,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -98,6 +106,7 @@ class BuilderBlock {
       'isActive': isActive,
       'visibility': visibility.toJson(),
       'customStyles': customStyles,
+      'requiredModule': requiredModule?.code,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -166,6 +175,7 @@ class BuilderBlock {
           json['visibility'] as String? ?? 'visible',
         ),
         customStyles: json['customStyles'] as String?,
+        requiredModule: _parseModuleId(json['requiredModule'] as String?),
         // Use safe DateTime parsing for Firestore types
         createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
         updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),
@@ -184,6 +194,18 @@ class BuilderBlock {
         config: configMap, // Use whatever config we managed to parse
       );
     }
+  }
+
+  /// Helper to parse ModuleId from a string code
+  static ModuleId? _parseModuleId(String? code) {
+    if (code == null || code.isEmpty) return null;
+    
+    for (final moduleId in ModuleId.values) {
+      if (moduleId.code == code) {
+        return moduleId;
+      }
+    }
+    return null;
   }
 
   /// Helper: Get a config value with type safety
@@ -240,6 +262,7 @@ class SystemBlock extends BuilderBlock {
     super.isActive,
     super.visibility,
     super.customStyles,
+    super.requiredModule,
     super.createdAt,
     super.updatedAt,
   }) : super(
@@ -258,6 +281,7 @@ class SystemBlock extends BuilderBlock {
       isActive: block.isActive,
       visibility: block.visibility,
       customStyles: block.customStyles,
+      requiredModule: block.requiredModule,
       createdAt: block.createdAt,
       updatedAt: block.updatedAt,
     );
@@ -346,6 +370,7 @@ class SystemBlock extends BuilderBlock {
     bool? isActive,
     BlockVisibility? visibility,
     String? customStyles,
+    ModuleId? requiredModule,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -357,6 +382,7 @@ class SystemBlock extends BuilderBlock {
       isActive: isActive ?? this.isActive,
       visibility: visibility ?? this.visibility,
       customStyles: customStyles ?? this.customStyles,
+      requiredModule: requiredModule ?? this.requiredModule,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -417,6 +443,7 @@ class SystemBlock extends BuilderBlock {
           json['visibility'] as String? ?? 'visible',
         ),
         customStyles: json['customStyles'] as String?,
+        requiredModule: BuilderBlock._parseModuleId(json['requiredModule'] as String?),
         // Use safe DateTime parsing for Firestore types
         createdAt: safeParseDateTime(json['createdAt']) ?? DateTime.now(),
         updatedAt: safeParseDateTime(json['updatedAt']) ?? DateTime.now(),

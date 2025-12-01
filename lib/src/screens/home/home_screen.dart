@@ -12,6 +12,7 @@ import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/home_config_provider.dart';
 import '../../providers/app_texts_provider.dart';
+import '../../providers/restaurant_plan_provider.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/home/hero_banner.dart';
 import '../../widgets/home/section_header.dart';
@@ -28,6 +29,7 @@ import '../../../builder/models/models.dart';
 import '../../../builder/services/services.dart';
 import '../../../builder/providers/builder_providers.dart';
 import '../../../builder/preview/builder_runtime_renderer.dart';
+import '../../../white_label/core/module_id.dart';
 
 /// Home screen - Professional showcase page
 /// Displays hero banner, promos, bestsellers, category shortcuts, and info
@@ -477,7 +479,14 @@ class HomeScreen extends ConsumerWidget {
 
   /// Build the roulette promotional banner
   /// Only displayed when roulette is enabled and all conditions are met
+  /// Module guard: requires roulette module
   Widget _buildRouletteBanner(BuildContext context, WidgetRef ref) {
+    // Module guard: roulette module required
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
+    if (flags != null && !flags.has(ModuleId.roulette)) {
+      return const SizedBox.shrink();
+    }
+    
     final rulesService = ref.read(rouletteRulesServiceProvider);
     return FutureBuilder<RouletteRules?>(
       future: rulesService.getRules(),
