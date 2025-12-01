@@ -12,7 +12,7 @@ import 'layout/superadmin_layout.dart';
 import 'pages/dashboard_page.dart';
 import 'pages/restaurants_list_page.dart';
 import 'pages/restaurant_detail_page.dart';
-import 'pages/restaurant_create_wizard.dart';
+import 'pages/restaurant_wizard/wizard_entry_page.dart';
 import 'pages/restaurant_modules_page.dart';
 import 'pages/modules/delivery/delivery_settings_page.dart';
 import 'pages/users_page.dart';
@@ -86,7 +86,7 @@ final List<RouteBase> superAdminRoutes = [
       GoRoute(
         path: SuperAdminRoutes.restaurantCreate,
         pageBuilder: (context, state) => const NoTransitionPage(
-          child: RestaurantCreateWizard(),
+          child: WizardEntryPage(),
         ),
       ),
       // Restaurants - Détail
