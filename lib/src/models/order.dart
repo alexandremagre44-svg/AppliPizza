@@ -48,6 +48,49 @@ class OrderSource {
   static const String admin = 'admin';
 }
 
+/// Mode de retrait de la commande
+class OrderDeliveryMode {
+  static const String takeAway = 'takeAway';
+  static const String delivery = 'delivery';
+}
+
+/// Adresse de livraison pour une commande
+class OrderDeliveryAddress {
+  final String address;
+  final String postalCode;
+  final String? complement;
+  final String? driverInstructions;
+
+  const OrderDeliveryAddress({
+    required this.address,
+    required this.postalCode,
+    this.complement,
+    this.driverInstructions,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'address': address,
+    'postalCode': postalCode,
+    'complement': complement,
+    'driverInstructions': driverInstructions,
+  };
+
+  factory OrderDeliveryAddress.fromJson(Map<String, dynamic> json) => OrderDeliveryAddress(
+    address: json['address'] as String? ?? '',
+    postalCode: json['postalCode'] as String? ?? '',
+    complement: json['complement'] as String?,
+    driverInstructions: json['driverInstructions'] as String?,
+  );
+
+  String get formattedAddress {
+    final parts = <String>[address, postalCode];
+    if (complement != null && complement!.isNotEmpty) {
+      parts.add(complement!);
+    }
+    return parts.join(', ');
+  }
+}
+
 class Order {
   final String id;
   final double total;
@@ -65,6 +108,11 @@ class Order {
   final String? pickupTimeSlot;
   final String source; // Source of the order: client, staff_tablet, admin
   final String? paymentMethod; // Payment method for staff tablet: cash, card, other
+  // Delivery fields
+  final String? deliveryMode; // 'takeAway' or 'delivery'
+  final OrderDeliveryAddress? deliveryAddress;
+  final String? deliveryAreaId;
+  final double? deliveryFee;
 
   Order({
     required this.id,
@@ -83,7 +131,17 @@ class Order {
     this.pickupTimeSlot,
     this.source = OrderSource.client,
     this.paymentMethod,
+    this.deliveryMode,
+    this.deliveryAddress,
+    this.deliveryAreaId,
+    this.deliveryFee,
   });
+
+  /// Returns true if this is a delivery order
+  bool get isDeliveryOrder => deliveryMode == OrderDeliveryMode.delivery;
+
+  /// Returns true if this is a takeaway/pickup order
+  bool get isTakeAwayOrder => deliveryMode == OrderDeliveryMode.takeAway || deliveryMode == null;
 
   // Factory pour créer une commande à partir du contenu du panier
   factory Order.fromCart(
@@ -97,6 +155,10 @@ class Order {
     String? pickupTimeSlot,
     String source = OrderSource.client,
     String? paymentMethod,
+    String? deliveryMode,
+    OrderDeliveryAddress? deliveryAddress,
+    String? deliveryAreaId,
+    double? deliveryFee,
   }) {
     final itemsCopy = cartItems.map((item) => CartItem(
       id: item.id,
@@ -125,6 +187,10 @@ class Order {
       pickupTimeSlot: pickupTimeSlot,
       source: source,
       paymentMethod: paymentMethod,
+      deliveryMode: deliveryMode,
+      deliveryAddress: deliveryAddress,
+      deliveryAreaId: deliveryAreaId,
+      deliveryFee: deliveryFee,
       statusHistory: [
         OrderStatusHistory(
           status: OrderStatus.pending,
@@ -153,6 +219,10 @@ class Order {
     String? pickupTimeSlot,
     String? source,
     String? paymentMethod,
+    String? deliveryMode,
+    OrderDeliveryAddress? deliveryAddress,
+    String? deliveryAreaId,
+    double? deliveryFee,
   }) {
     return Order(
       id: id ?? this.id,
@@ -171,6 +241,10 @@ class Order {
       pickupTimeSlot: pickupTimeSlot ?? this.pickupTimeSlot,
       source: source ?? this.source,
       paymentMethod: paymentMethod ?? this.paymentMethod,
+      deliveryMode: deliveryMode ?? this.deliveryMode,
+      deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      deliveryAreaId: deliveryAreaId ?? this.deliveryAreaId,
+      deliveryFee: deliveryFee ?? this.deliveryFee,
     );
   }
   
@@ -201,6 +275,10 @@ class Order {
     'pickupTimeSlot': pickupTimeSlot,
     'source': source,
     'paymentMethod': paymentMethod,
+    'deliveryMode': deliveryMode,
+    'deliveryAddress': deliveryAddress?.toJson(),
+    'deliveryAreaId': deliveryAreaId,
+    'deliveryFee': deliveryFee,
   };
   
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -233,5 +311,11 @@ class Order {
     pickupTimeSlot: json['pickupTimeSlot'] as String?,
     source: json['source'] as String? ?? OrderSource.client,
     paymentMethod: json['paymentMethod'] as String?,
+    deliveryMode: json['deliveryMode'] as String?,
+    deliveryAddress: json['deliveryAddress'] != null
+        ? OrderDeliveryAddress.fromJson(json['deliveryAddress'] as Map<String, dynamic>)
+        : null,
+    deliveryAreaId: json['deliveryAreaId'] as String?,
+    deliveryFee: (json['deliveryFee'] as num?)?.toDouble(),
   );
 }

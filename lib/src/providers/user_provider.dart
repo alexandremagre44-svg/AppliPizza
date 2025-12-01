@@ -78,6 +78,11 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
     String? comment,
     String? pickupDate,
     String? pickupTimeSlot,
+    // Delivery fields
+    String? deliveryMode,
+    Map<String, dynamic>? deliveryAddress,
+    String? deliveryAreaId,
+    double? deliveryFee,
   }) async {
     // Le type lu par _ref.read(cartProvider) est CartState
     final cartState = _ref.read(cartProvider); 
@@ -101,6 +106,11 @@ class UserProfileNotifier extends StateNotifier<UserProfile> {
         comment: comment,
         pickupDate: pickupDate,
         pickupTimeSlot: pickupTimeSlot,
+        // Delivery fields
+        deliveryMode: deliveryMode,
+        deliveryAddress: deliveryAddress,
+        deliveryAreaId: deliveryAreaId,
+        deliveryFee: deliveryFee,
       );
 
       // Vider le panier après la commande (méthode de CartNotifier)

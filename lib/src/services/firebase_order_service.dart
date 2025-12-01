@@ -36,6 +36,11 @@ class FirebaseOrderService {
     String? pickupTimeSlot,
     String source = 'client',
     String? paymentMethod,
+    // Delivery fields
+    String? deliveryMode,
+    Map<String, dynamic>? deliveryAddress,
+    String? deliveryAreaId,
+    double? deliveryFee,
   }) async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -110,6 +115,12 @@ class FirebaseOrderService {
       'isViewed': false,
       'source': source,
       'paymentMethod': paymentMethod,
+      // Delivery fields - only included if delivery mode is set
+      if (deliveryMode != null) 'deliveryMode': deliveryMode,
+      if (deliveryAddress != null) 'deliveryAddress': deliveryAddress,
+      if (deliveryAreaId != null) 'deliveryAreaId': deliveryAreaId,
+      if (deliveryFee != null) 'deliveryFee': deliveryFee,
+      if (deliveryFee != null) 'deliveryFee_cents': (deliveryFee * 100).round(),
       'statusHistory': [
         {
           'status': app_models.OrderStatus.pending,
@@ -296,6 +307,22 @@ class FirebaseOrderService {
       total = (data['total'] as num).toDouble();
     }
 
+    // Parse delivery address if present
+    app_models.OrderDeliveryAddress? deliveryAddress;
+    if (data['deliveryAddress'] != null) {
+      deliveryAddress = app_models.OrderDeliveryAddress.fromJson(
+        data['deliveryAddress'] as Map<String, dynamic>,
+      );
+    }
+
+    // Parse delivery fee (from cents if available, otherwise from euros)
+    double? deliveryFee;
+    if (data['deliveryFee_cents'] != null) {
+      deliveryFee = (data['deliveryFee_cents'] as num) / 100.0;
+    } else if (data['deliveryFee'] != null) {
+      deliveryFee = (data['deliveryFee'] as num).toDouble();
+    }
+
     return app_models.Order(
       id: id,
       total: total,
@@ -313,6 +340,10 @@ class FirebaseOrderService {
       pickupTimeSlot: data['pickupTimeSlot'] as String?,
       source: data['source'] as String? ?? 'client',
       paymentMethod: data['paymentMethod'] as String?,
+      deliveryMode: data['deliveryMode'] as String?,
+      deliveryAddress: deliveryAddress,
+      deliveryAreaId: data['deliveryAreaId'] as String?,
+      deliveryFee: deliveryFee,
     );
   }
 }
