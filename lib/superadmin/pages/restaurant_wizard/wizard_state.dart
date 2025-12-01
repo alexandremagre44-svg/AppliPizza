@@ -270,14 +270,12 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     String? id,
     String? name,
     String? slug,
-    RestaurantType? type,
   }) {
     state = state.copyWith(
       blueprint: state.blueprint.copyWith(
         id: id,
         name: name,
         slug: slug,
-        type: type,
       ),
     );
   }
@@ -529,8 +527,8 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   /// Soumet le wizard en mode mock (sans Firestore).
   /// Utile pour le développement et les tests.
   Future<void> submitMock() async {
-    if (!state.blueprint.isValid) {
-      state = state.copyWith(error: 'Le blueprint n\'est pas valide');
+    if (!state.isReadyForCreation) {
+      state = state.copyWith(error: 'La configuration n\'est pas complète');
       return;
     }
 
