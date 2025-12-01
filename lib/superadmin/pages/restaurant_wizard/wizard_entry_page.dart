@@ -29,7 +29,13 @@ class WizardEntryPage extends ConsumerWidget {
         blueprint: wizardState.blueprint,
         onClose: () {
           ref.read(restaurantWizardProvider.notifier).reset();
-          context.go('/superadmin/restaurants');
+          // Navigate to the restaurant detail page
+          final restaurantId = wizardState.blueprint.id;
+          if (restaurantId.isNotEmpty) {
+            context.go('/superadmin/restaurants/$restaurantId');
+          } else {
+            context.go('/superadmin/restaurants');
+          }
         },
       );
     }
@@ -300,7 +306,7 @@ class _WizardFooter extends StatelessWidget {
               // Bouton Suivant / Créer
               if (wizardState.isLastStep)
                 ElevatedButton(
-                  onPressed: wizardState.isSubmitting || !wizardState.isCurrentStepValid
+                  onPressed: wizardState.isSubmitting || !wizardState.isReadyForCreation
                       ? null
                       : onSubmit,
                   style: ElevatedButton.styleFrom(

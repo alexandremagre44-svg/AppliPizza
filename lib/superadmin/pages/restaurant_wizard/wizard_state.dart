@@ -12,6 +12,7 @@ import '../../../white_label/core/module_id.dart';
 import '../../../white_label/core/module_registry.dart';
 import '../../models/restaurant_blueprint.dart';
 import '../../services/superadmin_restaurant_service.dart';
+import '../../services/restaurant_plan_service.dart';
 import 'wizard_step_template.dart';
 
 /// Étapes du wizard.
@@ -173,19 +174,39 @@ class RestaurantWizardState {
     );
   }
 
+  /// Vérifie si l'identité est valide (Step 1).
+  bool get isIdentityValid =>
+      blueprint.name.isNotEmpty && blueprint.slug.isNotEmpty;
+
+  /// Vérifie si la marque est valide (Step 2).
+  bool get isBrandValid => blueprint.brand.brandName.isNotEmpty;
+
+  /// Vérifie si le template est valide (Step 3).
+  /// Le template est optionnel, donc toujours valide.
+  bool get isTemplateValid => true;
+
+  /// Vérifie si les modules sont valides (Step 4).
+  /// Valide les dépendances des modules activés.
+  bool get isModulesValid => validateModuleDependencies(enabledModuleIds);
+
+  /// Vérifie si la configuration est prête pour la création (Step 5).
+  /// Combine toutes les validations.
+  bool get isReadyForCreation =>
+      isIdentityValid && isBrandValid && isTemplateValid && isModulesValid;
+
   /// Vérifie si l'étape courante est valide.
   bool get isCurrentStepValid {
     switch (currentStep) {
       case WizardStep.identity:
-        return blueprint.name.isNotEmpty && blueprint.slug.isNotEmpty;
+        return isIdentityValid;
       case WizardStep.brand:
-        return blueprint.brand.brandName.isNotEmpty;
+        return isBrandValid;
       case WizardStep.template:
-        return true; // Template est optionnel
+        return isTemplateValid;
       case WizardStep.modules:
-        return validateModuleDependencies(enabledModuleIds);
+        return isModulesValid;
       case WizardStep.preview:
-        return blueprint.isValid && validateModuleDependencies(enabledModuleIds);
+        return isReadyForCreation;
     }
   }
 
@@ -439,11 +460,13 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
 
   /// Soumet le wizard et enregistre dans Firestore.
   /// 
-  /// Crée le restaurant dans Firestore via SuperadminRestaurantService,
-  /// puis met à jour l'état avec le blueprint final et l'ID généré.
+  /// Crée le restaurant dans Firestore avec 3 documents:
+  /// 1. restaurants/{id} - document principal
+  /// 2. restaurants/{id}/plan/config - configuration des modules
+  /// 3. restaurants/{id}/settings/branding - paramètres de marque
   Future<void> submit({String? ownerUserId}) async {
-    if (!state.blueprint.isValid) {
-      state = state.copyWith(error: 'Le blueprint n\'est pas valide');
+    if (!state.isReadyForCreation) {
+      state = state.copyWith(error: 'La configuration n\'est pas complète');
       return;
     }
 
@@ -460,13 +483,21 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     state = state.copyWith(isSubmitting: true, error: null);
 
     try {
-      // Crée le service Firestore
-      final service = SuperadminRestaurantService();
+      // Génère un nouvel ID pour le restaurant
+      final restaurantId = 'resto-${DateTime.now().millisecondsSinceEpoch}';
 
-      // Crée le restaurant dans Firestore
-      final restaurantId = await service.createRestaurantFromBlueprintLight(
-        state.blueprint,
-        ownerUserId: ownerUserId,
+      // Prépare les données de marque
+      final brandData = state.blueprint.brand.toJson();
+
+      // Créer les 3 documents via RestaurantPlanService
+      final planService = RestaurantPlanService();
+      await planService.saveFullRestaurantCreation(
+        restaurantId: restaurantId,
+        name: state.blueprint.name,
+        slug: state.blueprint.slug,
+        enabledModuleIds: state.enabledModuleIds,
+        brand: brandData,
+        templateId: state.blueprint.templateId,
       );
 
       // Met à jour le blueprint avec l'ID généré
