@@ -84,6 +84,8 @@ class WizardStepModules extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final wizardState = ref.watch(restaurantWizardProvider);
     final enabledModules = wizardState.enabledModuleIds;
+    // Use a Set for O(1) lookup performance
+    final enabledModulesSet = enabledModules.toSet();
 
     // Récupérer tous les modules depuis ModuleRegistry
     final allModules = ModuleRegistry.definitions.values.toList();
@@ -144,7 +146,7 @@ class WizardStepModules extends ConsumerWidget {
                 return _ModuleCategorySection(
                   category: entry.key,
                   modules: entry.value,
-                  enabledModules: enabledModules,
+                  enabledModulesSet: enabledModulesSet,
                   onToggle: (moduleId, enabled) {
                     ref
                         .read(restaurantWizardProvider.notifier)
@@ -317,13 +319,13 @@ class _DependencyWarning extends StatelessWidget {
 class _ModuleCategorySection extends StatelessWidget {
   final ModuleCategory category;
   final List<core.ModuleDefinition> modules;
-  final List<ModuleId> enabledModules;
+  final Set<ModuleId> enabledModulesSet;
   final Function(ModuleId, bool) onToggle;
 
   const _ModuleCategorySection({
     required this.category,
     required this.modules,
-    required this.enabledModules,
+    required this.enabledModulesSet,
     required this.onToggle,
   });
 
@@ -373,7 +375,7 @@ class _ModuleCategorySection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ...modules.map((moduleDef) {
-          final isEnabled = enabledModules.contains(moduleDef.id);
+          final isEnabled = enabledModulesSet.contains(moduleDef.id);
           return _ModuleToggleCard(
             module: moduleDef,
             isEnabled: isEnabled,

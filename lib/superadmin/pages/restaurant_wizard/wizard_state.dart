@@ -353,6 +353,8 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   }
 
   /// Convertit une liste de ModuleId en RestaurantModulesLight.
+  /// Note: RestaurantModulesLight only supports 8 modules currently.
+  /// Additional ModuleId values are stored in enabledModuleIds for future use.
   RestaurantModulesLight _moduleIdsToModulesLight(List<ModuleId> moduleIds) {
     return RestaurantModulesLight(
       ordering: moduleIds.contains(ModuleId.ordering),
@@ -364,6 +366,21 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
       kitchenTablet: moduleIds.contains(ModuleId.kitchenTablet),
       staffTablet: moduleIds.contains(ModuleId.staffTablet),
     );
+  }
+
+  /// Convertit un RestaurantModulesLight en liste de ModuleId.
+  /// Note: Only extracts the 8 modules supported by RestaurantModulesLight.
+  List<ModuleId> _modulesLightToModuleIds(RestaurantModulesLight modules) {
+    final result = <ModuleId>[];
+    if (modules.ordering) result.add(ModuleId.ordering);
+    if (modules.delivery) result.add(ModuleId.delivery);
+    if (modules.clickAndCollect) result.add(ModuleId.clickAndCollect);
+    if (modules.payments) result.add(ModuleId.payments);
+    if (modules.loyalty) result.add(ModuleId.loyalty);
+    if (modules.roulette) result.add(ModuleId.roulette);
+    if (modules.kitchenTablet) result.add(ModuleId.kitchenTablet);
+    if (modules.staffTablet) result.add(ModuleId.staffTablet);
+    return result;
   }
 
   /// Met à jour les modules activés (ancienne méthode pour compatibilité).
@@ -378,52 +395,28 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     bool? staffTablet,
   }) {
     // Mettre à jour le blueprint
-    state = state.copyWith(
-      blueprint: state.blueprint.copyWith(
-        modules: state.blueprint.modules.copyWith(
-          ordering: ordering,
-          delivery: delivery,
-          clickAndCollect: clickAndCollect,
-          payments: payments,
-          loyalty: loyalty,
-          roulette: roulette,
-          kitchenTablet: kitchenTablet,
-          staffTablet: staffTablet,
-        ),
-      ),
+    final newModulesLight = state.blueprint.modules.copyWith(
+      ordering: ordering,
+      delivery: delivery,
+      clickAndCollect: clickAndCollect,
+      payments: payments,
+      loyalty: loyalty,
+      roulette: roulette,
+      kitchenTablet: kitchenTablet,
+      staffTablet: staffTablet,
     );
     
-    // Synchroniser avec enabledModuleIds
-    final newModules = <ModuleId>[];
-    final modules = state.blueprint.modules;
-    if (modules.ordering) newModules.add(ModuleId.ordering);
-    if (modules.delivery) newModules.add(ModuleId.delivery);
-    if (modules.clickAndCollect) newModules.add(ModuleId.clickAndCollect);
-    if (modules.payments) newModules.add(ModuleId.payments);
-    if (modules.loyalty) newModules.add(ModuleId.loyalty);
-    if (modules.roulette) newModules.add(ModuleId.roulette);
-    if (modules.kitchenTablet) newModules.add(ModuleId.kitchenTablet);
-    if (modules.staffTablet) newModules.add(ModuleId.staffTablet);
-    
-    state = state.copyWith(enabledModuleIds: newModules);
+    state = state.copyWith(
+      blueprint: state.blueprint.copyWith(modules: newModulesLight),
+      enabledModuleIds: _modulesLightToModuleIds(newModulesLight),
+    );
   }
 
   /// Remplace entièrement les modules.
   void setModules(RestaurantModulesLight modules) {
-    // Synchroniser avec enabledModuleIds
-    final newModules = <ModuleId>[];
-    if (modules.ordering) newModules.add(ModuleId.ordering);
-    if (modules.delivery) newModules.add(ModuleId.delivery);
-    if (modules.clickAndCollect) newModules.add(ModuleId.clickAndCollect);
-    if (modules.payments) newModules.add(ModuleId.payments);
-    if (modules.loyalty) newModules.add(ModuleId.loyalty);
-    if (modules.roulette) newModules.add(ModuleId.roulette);
-    if (modules.kitchenTablet) newModules.add(ModuleId.kitchenTablet);
-    if (modules.staffTablet) newModules.add(ModuleId.staffTablet);
-    
     state = state.copyWith(
       blueprint: state.blueprint.copyWith(modules: modules),
-      enabledModuleIds: newModules,
+      enabledModuleIds: _modulesLightToModuleIds(modules),
     );
   }
 
