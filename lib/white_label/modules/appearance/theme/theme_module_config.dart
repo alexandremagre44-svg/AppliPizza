@@ -92,7 +92,13 @@ class ThemeModuleConfig {
   @override
   int get hashCode => enabled.hashCode ^ settings.hashCode;
 
-  /// Helper pour comparer deux maps de manière profonde
+  /// Helper pour comparer deux maps de manière profonde.
+  /// 
+  /// Note: Cette implémentation effectue une comparaison superficielle
+  /// des valeurs (a[key] != b[key]). Pour des objets complexes imbriqués,
+  /// elle pourrait ne pas détecter toutes les différences. Dans le contexte
+  /// de ThemeModuleConfig, les valeurs sont généralement des types simples
+  /// (String, num, bool), donc cette approche est suffisante.
   static bool _mapEquals(Map<String, dynamic>? a, Map<String, dynamic>? b) {
     if (a == null) return b == null;
     if (b == null || a.length != b.length) return false;

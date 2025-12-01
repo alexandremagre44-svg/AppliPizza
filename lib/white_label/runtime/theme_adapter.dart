@@ -389,6 +389,12 @@ class ThemeAdapter {
   static Color _parseColor(dynamic value, Color fallback) {
     if (value == null) return fallback;
     
+    // Vérifier que la valeur est un type simple (String ou num)
+    // pour éviter des conversions toString() inattendues
+    if (value is! String && value is! num) {
+      return fallback;
+    }
+    
     try {
       String hexString = value.toString().trim();
       
@@ -416,6 +422,11 @@ class ThemeAdapter {
   }
   
   /// Convertit une couleur en string hex.
+  /// 
+  /// Convertit une Color Flutter en format hex "#RRGGBB".
+  /// - toRadixString(16): Convertit en hexadécimal
+  /// - padLeft(8, '0'): Assure le format AARRGGBB (8 caractères)
+  /// - substring(2): Retire le composant alpha (AA) pour obtenir RRGGBB
   static String _colorToHex(Color color) {
     return '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}';
   }
