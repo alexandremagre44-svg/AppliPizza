@@ -10,6 +10,7 @@ import '../../white_label/core/module_id.dart';
 import '../../white_label/core/module_config.dart';
 import '../../white_label/core/module_registry.dart';
 import '../../white_label/restaurant/restaurant_plan.dart';
+import '../../white_label/restaurant/restaurant_plan_unified.dart';
 
 /// Service pour gérer les plans de restaurant (modules activés/désactivés).
 ///
@@ -24,8 +25,53 @@ class RestaurantPlanService {
       _db.collection('restaurants');
 
   /// Référence au document plan d'un restaurant.
+  /// 
+  /// LEGACY: Collection 'plan' avec document 'config'
   DocumentReference<Map<String, dynamic>> _planDoc(String restaurantId) =>
       _restaurantsCollection.doc(restaurantId).collection('plan').doc('config');
+
+  /// Référence au document plan unifié d'un restaurant.
+  /// 
+  /// NOUVEAU: Document 'plan' directement sous le restaurant
+  DocumentReference<Map<String, dynamic>> _planUnifiedDoc(String restaurantId) =>
+      _restaurantsCollection.doc(restaurantId);
+
+  /// Charge le RestaurantPlanUnified depuis Firestore.
+  ///
+  /// Cherche d'abord dans restaurants/{id}/plan/unified (nouveau format)
+  /// Si non trouvé, retourne un plan par défaut.
+  Future<RestaurantPlanUnified?> loadUnifiedPlan(String restaurantId) async {
+    try {
+      // Essayer de charger le plan unifié
+      final unifiedDocRef = _restaurantsCollection.doc(restaurantId).collection('plan').doc('unified');
+      final doc = await unifiedDocRef.get();
+
+      if (doc.exists && doc.data() != null) {
+        return RestaurantPlanUnified.fromJson(doc.data()!);
+      }
+
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Sauvegarde le RestaurantPlanUnified dans Firestore.
+  Future<void> saveUnifiedPlan(RestaurantPlanUnified plan) async {
+    final unifiedDocRef = _restaurantsCollection.doc(plan.restaurantId).collection('plan').doc('unified');
+    await unifiedDocRef.set(plan.toJson());
+  }
+
+  /// Stream pour écouter les changements du plan unifié en temps réel.
+  Stream<RestaurantPlanUnified?> watchUnifiedPlan(String restaurantId) {
+    final unifiedDocRef = _restaurantsCollection.doc(restaurantId).collection('plan').doc('unified');
+    return unifiedDocRef.snapshots().map((doc) {
+      if (!doc.exists || doc.data() == null) {
+        return null;
+      }
+      return RestaurantPlanUnified.fromJson(doc.data()!);
+    });
+  }
 
   /// Charge le RestaurantPlan depuis Firestore.
   ///
@@ -128,10 +174,8 @@ class RestaurantPlanService {
 
   /// Sauvegarde complète lors de la création d'un restaurant via le wizard.
   /// 
-  /// Cette méthode crée 3 documents Firestore:
-  /// 1. restaurants/{id} - document principal du restaurant
-  /// 2. restaurants/{id}/plan/config - configuration des modules (RestaurantPlan)
-  /// 3. restaurants/{id}/settings/branding - paramètres de marque
+  /// Cette méthode crée un seul document Firestore avec le plan unifié:
+  /// - restaurants/{id} - document principal contenant le RestaurantPlanUnified
   /// 
   /// Paramètres:
   /// - restaurantId: ID du restaurant à créer
@@ -151,29 +195,43 @@ class RestaurantPlanService {
     String? templateId,
   }) async {
     try {
-      // Préparer les configurations de modules
-      final moduleConfigs = enabledModuleIds.map((moduleId) {
-        return ModuleConfig(
-          id: moduleId,
-          enabled: true,
-          settings: {},
-        );
-      }).toList();
+      // Convertir les modules en codes
+      final activeModules = enabledModuleIds.map((id) => id.code).toList();
 
-      // Créer le RestaurantPlan
-      final plan = RestaurantPlan(
+      // Créer la configuration de branding depuis le map
+      final branding = BrandingConfig(
+        brandName: brand['brandName'] as String?,
+        primaryColor: brand['primaryColor'] as String?,
+        secondaryColor: brand['secondaryColor'] as String?,
+        accentColor: brand['accentColor'] as String?,
+        backgroundColor: brand['backgroundColor'] as String?,
+        logoUrl: brand['logoUrl'] as String?,
+        squareLogoUrl: brand['squareLogoUrl'] as String?,
+        faviconUrl: brand['faviconUrl'] as String?,
+        fontFamily: brand['fontFamily'] as String?,
+        darkModeEnabled: brand['darkModeEnabled'] as bool? ?? false,
+        borderRadius: (brand['borderRadius'] as num?)?.toDouble(),
+      );
+
+      // Créer le RestaurantPlanUnified
+      final unifiedPlan = RestaurantPlanUnified(
         restaurantId: restaurantId,
         name: name,
         slug: slug,
-        modules: moduleConfigs,
+        templateId: templateId,
+        activeModules: activeModules,
+        branding: branding,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
-      // Batch write pour créer les 3 documents atomiquement
-      final batch = _db.batch();
+      // Sauvegarder dans Firestore: restaurants/{id}/plan
+      final planDocRef = _restaurantsCollection.doc(restaurantId).collection('plan').doc('unified');
+      await planDocRef.set(unifiedPlan.toJson());
 
-      // 1. Document principal restaurants/{id}
+      // Créer aussi le document principal du restaurant pour compatibilité
       final mainDocRef = _restaurantsCollection.doc(restaurantId);
-      batch.set(mainDocRef, {
+      await mainDocRef.set({
         'restaurantId': restaurantId,
         'name': name,
         'slug': slug,
@@ -182,21 +240,6 @@ class RestaurantPlanService {
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
-
-      // 2. Document restaurants/{id}/plan/config
-      final planDocRef = _planDoc(restaurantId);
-      batch.set(planDocRef, plan.toJson());
-
-      // 3. Document restaurants/{id}/settings/branding
-      final brandingDocRef = mainDocRef.collection('settings').doc('branding');
-      batch.set(brandingDocRef, {
-        ...brand,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      // Commit le batch
-      await batch.commit();
 
       return restaurantId;
     } catch (e) {

@@ -34,6 +34,28 @@ class RestaurantFeatureFlags {
     );
   }
 
+  /// Crée des feature flags à partir d'une liste de codes de modules (String).
+  /// 
+  /// Utilisé avec RestaurantPlanUnified où activeModules est une List<String>.
+  factory RestaurantFeatureFlags.fromModuleCodes(
+    String restaurantId,
+    List<String> moduleCodes,
+  ) {
+    final enabledMap = <ModuleId, bool>{};
+    for (final code in moduleCodes) {
+      try {
+        final moduleId = ModuleId.values.firstWhere((m) => m.code == code);
+        enabledMap[moduleId] = true;
+      } catch (_) {
+        // Ignorer les codes de modules inconnus
+      }
+    }
+    return RestaurantFeatureFlags(
+      restaurantId: restaurantId,
+      enabled: enabledMap,
+    );
+  }
+
   /// Alias de [fromConfig] - crée des feature flags à partir des modules.
   factory RestaurantFeatureFlags.fromModules(
     String restaurantId,
