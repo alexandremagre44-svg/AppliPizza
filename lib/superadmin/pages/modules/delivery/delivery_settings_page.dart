@@ -48,7 +48,6 @@ class _DeliverySettingsPageState extends State<DeliverySettingsPage> {
   final _deliveryFeeController = TextEditingController();
   final _freeThresholdController = TextEditingController();
   final _radiusController = TextEditingController();
-  final _feePerKmController = TextEditingController();
   final _prepTimeController = TextEditingController();
   final _deliveryTimeController = TextEditingController();
   final _maxScheduleController = TextEditingController();
@@ -68,7 +67,6 @@ class _DeliverySettingsPageState extends State<DeliverySettingsPage> {
     _deliveryFeeController.dispose();
     _freeThresholdController.dispose();
     _radiusController.dispose();
-    _feePerKmController.dispose();
     _prepTimeController.dispose();
     _deliveryTimeController.dispose();
     _maxScheduleController.dispose();
@@ -117,7 +115,6 @@ class _DeliverySettingsPageState extends State<DeliverySettingsPage> {
     _freeThresholdController.text =
         _settings.freeDeliveryThreshold?.toString() ?? '';
     _radiusController.text = _settings.radiusKm.toString();
-    _feePerKmController.text = _settings.feePerKm.toString();
     _prepTimeController.text = _settings.preparationTimeMinutes.toString();
     _deliveryTimeController.text =
         _settings.estimatedDeliveryMinutes.toString();
@@ -146,7 +143,6 @@ class _DeliverySettingsPageState extends State<DeliverySettingsPage> {
           ? null
           : double.tryParse(_freeThresholdController.text),
       radiusKm: double.tryParse(_radiusController.text) ?? 5.0,
-      feePerKm: double.tryParse(_feePerKmController.text) ?? 0.50,
       preparationTimeMinutes: int.tryParse(_prepTimeController.text) ?? 15,
       estimatedDeliveryMinutes:
           int.tryParse(_deliveryTimeController.text) ?? 30,
@@ -547,44 +543,20 @@ class _DeliverySettingsPageState extends State<DeliverySettingsPage> {
           ],
         ),
         const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _freeThresholdController,
-                decoration: const InputDecoration(
-                  labelText: 'Livraison gratuite dès',
-                  hintText: 'Laisser vide si non applicable',
-                  border: OutlineInputBorder(),
-                  suffixText: '€',
-                ),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-                ],
-                onChanged: (_) => _markChanged(),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: TextFormField(
-                controller: _feePerKmController,
-                decoration: const InputDecoration(
-                  labelText: 'Frais par km supplémentaire',
-                  hintText: '0.50',
-                  border: OutlineInputBorder(),
-                  suffixText: '€/km',
-                ),
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-                ],
-                onChanged: (_) => _markChanged(),
-              ),
-            ),
+        TextFormField(
+          controller: _freeThresholdController,
+          decoration: const InputDecoration(
+            labelText: 'Livraison gratuite dès',
+            hintText: 'Laisser vide si non applicable',
+            border: OutlineInputBorder(),
+            suffixText: '€',
+          ),
+          keyboardType:
+              const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
           ],
+          onChanged: (_) => _markChanged(),
         ),
       ],
     );
