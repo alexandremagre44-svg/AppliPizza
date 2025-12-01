@@ -60,6 +60,7 @@ import 'src/providers/theme_providers.dart';
 import 'src/providers/restaurant_plan_provider.dart';
 import 'src/navigation/module_route_guards.dart';
 import 'white_label/core/module_id.dart';
+import 'white_label/runtime/module_runtime_adapter.dart';
 
 // Builder B3 imports for dynamic pages
 import 'builder/models/models.dart';
@@ -135,6 +136,16 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Phase 3: Load unified plan and apply module runtime adapter
+    final unifiedPlanAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final unifiedPlan = unifiedPlanAsync.asData?.value;
+    
+    // Apply module runtime adapter (read-only, non-intrusive)
+    if (unifiedPlan != null) {
+      final runtimeContext = RuntimeContext(ref: ref);
+      ModuleRuntimeAdapter.applyAll(runtimeContext, unifiedPlan);
+    }
+    
     // Watch the theme configuration from Firestore
     final themeAsync = ref.watch(themeConfigProvider);
     
