@@ -27,14 +27,17 @@ class RestaurantPlanService {
   /// Référence au document plan d'un restaurant.
   /// 
   /// LEGACY: Collection 'plan' avec document 'config'
+  /// Path: restaurants/{restaurantId}/plan/config
   DocumentReference<Map<String, dynamic>> _planDoc(String restaurantId) =>
       _restaurantsCollection.doc(restaurantId).collection('plan').doc('config');
 
   /// Référence au document plan unifié d'un restaurant.
   /// 
-  /// NOUVEAU: Document 'plan' directement sous le restaurant
+  /// NOUVEAU: Document 'unified' dans la collection 'plan'
+  /// Path: restaurants/{restaurantId}/plan/unified
+  /// Contient le RestaurantPlanUnified avec toutes les configurations consolidées
   DocumentReference<Map<String, dynamic>> _planUnifiedDoc(String restaurantId) =>
-      _restaurantsCollection.doc(restaurantId);
+      _restaurantsCollection.doc(restaurantId).collection('plan').doc('unified');
 
   /// Charge le RestaurantPlanUnified depuis Firestore.
   ///
@@ -174,8 +177,9 @@ class RestaurantPlanService {
 
   /// Sauvegarde complète lors de la création d'un restaurant via le wizard.
   /// 
-  /// Cette méthode crée un seul document Firestore avec le plan unifié:
-  /// - restaurants/{id} - document principal contenant le RestaurantPlanUnified
+  /// Cette méthode crée les documents Firestore suivants:
+  /// 1. restaurants/{id} - document principal du restaurant
+  /// 2. restaurants/{id}/plan/unified - plan unifié (RestaurantPlanUnified)
   /// 
   /// Paramètres:
   /// - restaurantId: ID du restaurant à créer

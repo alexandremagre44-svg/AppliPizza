@@ -412,8 +412,10 @@ class RestaurantPlanUnified {
       try {
         branding =
             BrandingConfig.fromJson(json['branding'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Si le format JSON est invalide, on laisse null
+      } on FormatException catch (_) {
+        // Si les données sont mal formatées, on laisse null
       }
     }
 
@@ -422,8 +424,10 @@ class RestaurantPlanUnified {
       try {
         delivery = DeliveryModuleConfig.fromJson(
             json['delivery'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
       }
     }
 
@@ -432,8 +436,10 @@ class RestaurantPlanUnified {
       try {
         ordering = OrderingModuleConfig.fromJson(
             json['ordering'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
       }
     }
 
@@ -442,8 +448,10 @@ class RestaurantPlanUnified {
       try {
         clickAndCollect = ClickAndCollectModuleConfig.fromJson(
             json['clickAndCollect'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
       }
     }
 
@@ -452,8 +460,10 @@ class RestaurantPlanUnified {
       try {
         loyalty = LoyaltyModuleConfig.fromJson(
             json['loyalty'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
       }
     }
 
@@ -462,8 +472,10 @@ class RestaurantPlanUnified {
       try {
         promotions = PromotionsModuleConfig.fromJson(
             json['promotions'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
       }
     }
 
@@ -472,8 +484,10 @@ class RestaurantPlanUnified {
       try {
         roulette = RouletteModuleConfig.fromJson(
             json['roulette'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
       }
     }
 
@@ -482,8 +496,10 @@ class RestaurantPlanUnified {
       try {
         newsletter = NewsletterModuleConfig.fromJson(
             json['newsletter'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
       }
     }
 
@@ -492,8 +508,10 @@ class RestaurantPlanUnified {
       try {
         theme =
             ThemeModuleConfig.fromJson(json['theme'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
       }
     }
 
@@ -502,8 +520,10 @@ class RestaurantPlanUnified {
       try {
         pages = PagesBuilderModuleConfig.fromJson(
             json['pages'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
       }
     }
 
@@ -512,8 +532,10 @@ class RestaurantPlanUnified {
       try {
         tablets =
             TabletConfig.fromJson(json['tablets'] as Map<String, dynamic>);
-      } catch (_) {
-        // Si le parsing échoue, on laisse null
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
       }
     }
 
@@ -536,7 +558,10 @@ class RestaurantPlanUnified {
       theme: theme,
       pages: pages,
       tablets: tablets,
-      additionalSettings: null, // Non sérialisé depuis JSON pour éviter conflits
+      // Note: additionalSettings is intentionally not deserialized from JSON
+      // to avoid conflicts with known fields. If custom fields are needed,
+      // they should be added as explicit typed properties to this class.
+      additionalSettings: null,
     );
   }
 
