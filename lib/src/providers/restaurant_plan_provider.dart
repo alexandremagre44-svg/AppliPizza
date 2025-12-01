@@ -9,9 +9,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../white_label/core/module_id.dart';
+import '../../white_label/modules/core/delivery/delivery_module_config.dart';
 import '../../white_label/modules/core/delivery/delivery_settings.dart';
+import '../../white_label/modules/core/ordering/ordering_module_config.dart';
+import '../../white_label/modules/marketing/loyalty/loyalty_module_config.dart';
+import '../../white_label/modules/marketing/promotions/promotions_module_config.dart';
+import '../../white_label/modules/marketing/roulette/roulette_module_config.dart';
 import '../../white_label/restaurant/restaurant_feature_flags.dart';
 import '../../white_label/restaurant/restaurant_plan.dart';
+import '../../white_label/restaurant/restaurant_plan_unified.dart';
 import '../services/restaurant_plan_runtime_service.dart';
 import 'restaurant_provider.dart';
 
@@ -33,6 +39,47 @@ final restaurantPlanProvider = FutureProvider<RestaurantPlan?>((ref) async {
   if (restaurantId.isEmpty) return null;
 
   return service.loadPlan(restaurantId);
+});
+
+/// Provider pour charger le RestaurantPlanUnified du restaurant courant.
+///
+/// Utilise [currentRestaurantProvider] pour déterminer quel restaurant charger.
+/// Retourne null si pas de restaurantId ou si le plan n'existe pas.
+/// 
+/// Ce provider remplace progressivement [restaurantPlanProvider] pour utiliser
+/// le nouveau modèle unifié.
+final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>((ref) async {
+  final service = ref.watch(restaurantPlanRuntimeServiceProvider);
+  final restaurantConfig = ref.watch(currentRestaurantProvider);
+
+  final restaurantId = restaurantConfig.id;
+  if (restaurantId.isEmpty) return null;
+
+  return service.loadUnifiedPlan(restaurantId);
+});
+
+/// Provider dérivé pour les feature flags du restaurant courant (version unifiée).
+///
+/// Permet de vérifier rapidement si un module est activé à partir du plan unifié:
+/// ```dart
+/// final flags = ref.watch(restaurantFeatureFlagsUnifiedProvider);
+/// if (flags?.has(ModuleId.delivery) ?? false) {
+///   // Module livraison activé
+/// }
+/// ```
+final restaurantFeatureFlagsUnifiedProvider =
+    Provider<RestaurantFeatureFlags?>((ref) {
+  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+
+  return planAsync.maybeWhen(
+    data: (plan) => plan != null
+        ? RestaurantFeatureFlags.fromModuleCodes(
+            plan.restaurantId,
+            plan.activeModules,
+          )
+        : null,
+    orElse: () => null,
+  );
 });
 
 /// Provider dérivé pour les feature flags du restaurant courant.
@@ -100,4 +147,103 @@ final isDeliveryEnabledProvider = Provider<bool>((ref) {
 final isClickAndCollectEnabledProvider = Provider<bool>((ref) {
   final flags = ref.watch(restaurantFeatureFlagsProvider);
   return flags?.has(ModuleId.clickAndCollect) ?? false;
+});
+
+/// Provider pour les paramètres de livraison depuis le plan unifié.
+///
+/// Retourne null si:
+/// - Le plan unifié n'est pas chargé
+/// - Le module delivery n'existe pas dans le plan
+///
+/// Exemple d'utilisation:
+/// ```dart
+/// final deliveryConfig = ref.watch(deliveryConfigUnifiedProvider);
+/// if (deliveryConfig != null && deliveryConfig.enabled) {
+///   final settings = deliveryConfig.settings;
+///   // Utiliser les settings
+/// }
+/// ```
+final deliveryConfigUnifiedProvider = Provider<DeliveryModuleConfig?>((ref) {
+  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+  final plan = planAsync.asData?.value;
+
+  if (plan == null) return null;
+
+  return plan.delivery;
+});
+
+/// Provider pour vérifier si le module de livraison est activé (version unifiée).
+///
+/// Shortcut pratique pour les vérifications rapides.
+final isDeliveryEnabledUnifiedProvider = Provider<bool>((ref) {
+  final config = ref.watch(deliveryConfigUnifiedProvider);
+  return config?.enabled ?? false;
+});
+
+/// Provider pour les paramètres de commande depuis le plan unifié.
+final orderingConfigUnifiedProvider = Provider<OrderingModuleConfig?>((ref) {
+  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+  final plan = planAsync.asData?.value;
+
+  if (plan == null) return null;
+
+  return plan.ordering;
+});
+
+/// Provider pour les paramètres de fidélité depuis le plan unifié.
+final loyaltyConfigUnifiedProvider = Provider<LoyaltyModuleConfig?>((ref) {
+  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+  final plan = planAsync.asData?.value;
+
+  if (plan == null) return null;
+
+  return plan.loyalty;
+});
+
+/// Provider pour vérifier si le module fidélité est activé (version unifiée).
+final isLoyaltyEnabledUnifiedProvider = Provider<bool>((ref) {
+  final config = ref.watch(loyaltyConfigUnifiedProvider);
+  return config?.enabled ?? false;
+});
+
+/// Provider pour les paramètres de roulette depuis le plan unifié.
+final rouletteConfigUnifiedProvider = Provider<RouletteModuleConfig?>((ref) {
+  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+  final plan = planAsync.asData?.value;
+
+  if (plan == null) return null;
+
+  return plan.roulette;
+});
+
+/// Provider pour vérifier si le module roulette est activé (version unifiée).
+final isRouletteEnabledUnifiedProvider = Provider<bool>((ref) {
+  final config = ref.watch(rouletteConfigUnifiedProvider);
+  return config?.enabled ?? false;
+});
+
+/// Provider pour les paramètres de promotions depuis le plan unifié.
+final promotionsConfigUnifiedProvider = Provider<PromotionsModuleConfig?>((ref) {
+  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+  final plan = planAsync.asData?.value;
+
+  if (plan == null) return null;
+
+  return plan.promotions;
+});
+
+/// Provider pour vérifier si le module promotions est activé (version unifiée).
+final isPromotionsEnabledUnifiedProvider = Provider<bool>((ref) {
+  final config = ref.watch(promotionsConfigUnifiedProvider);
+  return config?.enabled ?? false;
+});
+
+/// Provider pour le branding depuis le plan unifié.
+final brandingConfigUnifiedProvider = Provider<BrandingConfig?>((ref) {
+  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+  final plan = planAsync.asData?.value;
+
+  if (plan == null) return null;
+
+  return plan.branding;
 });

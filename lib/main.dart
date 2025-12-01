@@ -58,7 +58,9 @@ import 'src/providers/auth_provider.dart';
 import 'src/providers/restaurant_provider.dart';
 import 'src/providers/theme_providers.dart';
 import 'src/providers/restaurant_plan_provider.dart';
+import 'src/navigation/module_route_guards.dart';
 import 'white_label/core/module_id.dart';
+import 'white_label/runtime/module_runtime_adapter.dart';
 
 // Builder B3 imports for dynamic pages
 import 'builder/models/models.dart';
@@ -134,6 +136,16 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Phase 3: Load unified plan and apply module runtime adapter
+    final unifiedPlanAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final unifiedPlan = unifiedPlanAsync.asData?.value;
+    
+    // Apply module runtime adapter (read-only, non-intrusive)
+    if (unifiedPlan != null) {
+      final runtimeContext = RuntimeContext(ref: ref);
+      ModuleRuntimeAdapter.applyAll(runtimeContext, unifiedPlan);
+    }
+    
     // Watch the theme configuration from Firestore
     final themeAsync = ref.watch(themeConfigProvider);
     
@@ -263,28 +275,24 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: '/rewards',
               builder: (context, state) {
-                // Module guard: loyalty module required
-                final flags = ref.read(restaurantFeatureFlagsProvider);
-                if (flags != null && !flags.has(ModuleId.loyalty)) {
-                  return const SizedBox.shrink();
-                }
-                return const BuilderPageLoader(
-                  pageId: BuilderPageId.rewards,
-                  fallback: RewardsScreen(),
+                // Phase 3: Use proper route guard for loyalty module
+                return loyaltyRouteGuard(
+                  const BuilderPageLoader(
+                    pageId: BuilderPageId.rewards,
+                    fallback: RewardsScreen(),
+                  ),
                 );
               },
             ),
             GoRoute(
               path: '/roulette',
               builder: (context, state) {
-                // Module guard: roulette module required
-                final flags = ref.read(restaurantFeatureFlagsProvider);
-                if (flags != null && !flags.has(ModuleId.roulette)) {
-                  return const SizedBox.shrink();
-                }
-                return const BuilderPageLoader(
-                  pageId: BuilderPageId.roulette,
-                  fallback: RouletteScreen(),
+                // Phase 3: Use proper route guard for roulette module
+                return rouletteRouteGuard(
+                  const BuilderPageLoader(
+                    pageId: BuilderPageId.roulette,
+                    fallback: RouletteScreen(),
+                  ),
                 );
               },
             ),
@@ -436,45 +444,25 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.deliveryAddress,
           builder: (context, state) {
-            // Module guard: delivery module required
-            final flags = ref.read(restaurantFeatureFlagsProvider);
-            if (flags != null && !flags.has(ModuleId.delivery)) {
-              return const Scaffold(
-                body: Center(
-                  child: Text('Module livraison non disponible'),
-                ),
-              );
-            }
-            return const DeliveryAddressScreen();
+            // Phase 3: Use proper route guard for delivery module
+            return deliveryRouteGuard(
+              const DeliveryAddressScreen(),
+            );
           },
         ),
         GoRoute(
           path: AppRoutes.deliveryArea,
           builder: (context, state) {
-            // Module guard: delivery module required
-            final flags = ref.read(restaurantFeatureFlagsProvider);
-            if (flags != null && !flags.has(ModuleId.delivery)) {
-              return const Scaffold(
-                body: Center(
-                  child: Text('Module livraison non disponible'),
-                ),
-              );
-            }
-            return const DeliveryAreaSelectorScreen();
+            // Phase 3: Use proper route guard for delivery module
+            return deliveryRouteGuard(
+              const DeliveryAreaSelectorScreen(),
+            );
           },
         ),
         GoRoute(
           path: '/order/:id/tracking',
           builder: (context, state) {
-            // Module guard: delivery module required
-            final flags = ref.read(restaurantFeatureFlagsProvider);
-            if (flags != null && !flags.has(ModuleId.delivery)) {
-              return const Scaffold(
-                body: Center(
-                  child: Text('Module livraison non disponible'),
-                ),
-              );
-            }
+            // Phase 3: Use proper route guard for delivery module
             // Validate order data
             if (state.extra is! Order) {
               return Scaffold(
@@ -485,19 +473,19 @@ class MyApp extends ConsumerWidget {
               );
             }
             final order = state.extra as Order;
-            return DeliveryTrackingScreen(order: order);
+            return deliveryRouteGuard(
+              DeliveryTrackingScreen(order: order),
+            );
           },
         ),
         // Route Kitchen Mode
         GoRoute(
           path: AppRoutes.kitchen,
           builder: (context, state) {
-            // Module guard: kitchenTablet module required
-            final flags = ref.read(restaurantFeatureFlagsProvider);
-            if (flags != null && !flags.has(ModuleId.kitchenTablet)) {
-              return const SizedBox.shrink();
-            }
-            return const KitchenPage();
+            // Phase 3: Use proper route guard for kitchen module
+            return kitchenRouteGuard(
+              const KitchenPage(),
+            );
           },
         ),
         // Route Roulette
@@ -531,11 +519,7 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.staffTabletPin,
           builder: (context, state) {
-            // Module guard: staffTablet module required
-            final flags = ref.read(restaurantFeatureFlagsProvider);
-            if (flags != null && !flags.has(ModuleId.staffTablet)) {
-              return const SizedBox.shrink();
-            }
+            // Phase 3: Use proper route guard for staff tablet module
             // PROTECTION: Staff tablet (CAISSE) est réservé aux admins
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
@@ -556,17 +540,15 @@ class MyApp extends ConsumerWidget {
                 ),
               );
             }
-            return const StaffTabletPinScreen();
+            return staffTabletRouteGuard(
+              const StaffTabletPinScreen(),
+            );
           },
         ),
         GoRoute(
           path: AppRoutes.staffTabletCatalog,
           builder: (context, state) {
-            // Module guard: staffTablet module required
-            final flags = ref.read(restaurantFeatureFlagsProvider);
-            if (flags != null && !flags.has(ModuleId.staffTablet)) {
-              return const SizedBox.shrink();
-            }
+            // Phase 3: Use proper route guard for staff tablet module
             // PROTECTION: Admin only
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
@@ -589,17 +571,15 @@ class MyApp extends ConsumerWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            return const StaffTabletCatalogScreen();
+            return staffTabletRouteGuard(
+              const StaffTabletCatalogScreen(),
+            );
           },
         ),
         GoRoute(
           path: AppRoutes.staffTabletCheckout,
           builder: (context, state) {
-            // Module guard: staffTablet module required
-            final flags = ref.read(restaurantFeatureFlagsProvider);
-            if (flags != null && !flags.has(ModuleId.staffTablet)) {
-              return const SizedBox.shrink();
-            }
+            // Phase 3: Use proper route guard for staff tablet module
             // PROTECTION: Admin only
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
@@ -622,17 +602,15 @@ class MyApp extends ConsumerWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            return const StaffTabletCheckoutScreen();
+            return staffTabletRouteGuard(
+              const StaffTabletCheckoutScreen(),
+            );
           },
         ),
         GoRoute(
           path: AppRoutes.staffTabletHistory,
           builder: (context, state) {
-            // Module guard: staffTablet module required
-            final flags = ref.read(restaurantFeatureFlagsProvider);
-            if (flags != null && !flags.has(ModuleId.staffTablet)) {
-              return const SizedBox.shrink();
-            }
+            // Phase 3: Use proper route guard for staff tablet module
             // PROTECTION: Admin only
             final authState = ref.read(authProvider);
             if (!authState.isAdmin) {
@@ -655,7 +633,9 @@ class MyApp extends ConsumerWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            return const StaffTabletHistoryScreen();
+            return staffTabletRouteGuard(
+              const StaffTabletHistoryScreen(),
+            );
           },
         ),
         // SuperAdmin parent route - redirects to dashboard

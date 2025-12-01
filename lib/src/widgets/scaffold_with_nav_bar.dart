@@ -15,11 +15,13 @@ import '../providers/auth_provider.dart';
 import '../providers/restaurant_provider.dart';
 import '../providers/restaurant_plan_provider.dart';
 import '../core/constants.dart';
+import '../navigation/dynamic_navbar_builder.dart';
 import '../../builder/models/models.dart';
 import '../../builder/services/builder_navigation_service.dart';
 import '../../builder/utils/icon_helper.dart';
 import '../../white_label/core/module_id.dart';
 import '../../white_label/restaurant/restaurant_feature_flags.dart';
+import '../../white_label/restaurant/restaurant_plan_unified.dart';
 
 /// Provider for bottom bar pages
 /// Loads pages dynamically from Builder B3
@@ -44,6 +46,10 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final isAdmin = ref.watch(authProvider.select((auth) => auth.isAdmin));
     final bottomBarPagesAsync = ref.watch(bottomBarPagesProvider);
     final flags = ref.watch(restaurantFeatureFlagsProvider);
+    
+    // Phase 3: Load unified plan for dynamic filtering
+    final unifiedPlanAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final unifiedPlan = unifiedPlanAsync.asData?.value;
 
     return Scaffold(
       body: child,
@@ -62,10 +68,17 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             flags,
           );
           
+          // Phase 3: Apply DynamicNavbarBuilder filtering based on active modules
+          final filteredNavItems = _applyModuleFiltering(
+            navItems,
+            unifiedPlan,
+            totalItems,
+          );
+          
           // Runtime safety: If less than 2 items, show fallback navigation
           // This prevents Flutter crash: 'items.length >= 2' assertion
-          if (navItems.items.length < 2) {
-            debugPrint('⚠️ Bottom bar has < 2 items (${navItems.items.length}), showing fallback navigation');
+          if (filteredNavItems.items.length < 2) {
+            debugPrint('⚠️ Bottom bar has < 2 items (${filteredNavItems.items.length}), showing fallback navigation');
             return Container(
               decoration: BoxDecoration(
                 boxShadow: [
@@ -112,14 +125,14 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           // Calculate current index based on location
           final currentIndex = _calculateSelectedIndex(
             context,
-            navItems.pages,
+            filteredNavItems.pages,
           );
           
           // Get adaptive styling based on item count (supports up to 6 items)
-          final adaptiveStyle = _BottomNavAdaptiveStyle.forItemCount(navItems.items.length);
+          final adaptiveStyle = _BottomNavAdaptiveStyle.forItemCount(filteredNavItems.items.length);
           
           // Debug: log rendered items count
-          debugPrint('[BottomNav] Rendered ${navItems.items.length} items');
+          debugPrint('[BottomNav] Rendered ${filteredNavItems.items.length} items (after module filtering)');
 
           return Container(
             decoration: BoxDecoration(
@@ -141,8 +154,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               iconSize: adaptiveStyle.iconSize,
               selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800),
               unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
-              onTap: (int index) => _onItemTapped(context, index, navItems.pages, navItems.items, isAdmin),
-              items: navItems.items,
+              onTap: (int index) => _onItemTapped(context, index, filteredNavItems.pages, filteredNavItems.items, isAdmin),
+              items: filteredNavItems.items,
             ),
           );
         },
@@ -414,6 +427,70 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       
       context.go(route);
     }
+  }
+
+  /// Phase 3: Apply module filtering using DynamicNavbarBuilder
+  /// 
+  /// Filters navigation items based on active modules in RestaurantPlanUnified.
+  /// If plan is null (restaurant without unified plan), returns items as-is for backward compatibility.
+  _NavigationItemsResult _applyModuleFiltering(
+    _NavigationItemsResult navItems,
+    RestaurantPlanUnified? plan,
+    int cartItemCount,
+  ) {
+    // If no plan loaded, return original items (fallback mode)
+    if (plan == null) {
+      debugPrint('📱 [BottomNav] No unified plan loaded, using all navigation items (fallback mode)');
+      return navItems;
+    }
+
+    // Convert _NavPage list to BuilderPage list for filtering
+    final builderPages = navItems.pages.map((navPage) {
+      return BuilderPage(
+        pageKey: navPage.route.replaceAll('/', '').replaceAll('-', '_'),
+        route: navPage.route,
+        order: 0,
+        title: navPage.label,
+        isActive: true,
+      );
+    }).toList();
+
+    // Apply DynamicNavbarBuilder filtering
+    final filtered = DynamicNavbarBuilder.filterNavItems(
+      originalPages: builderPages,
+      originalItems: navItems.items,
+      plan: plan,
+    );
+
+    // If filtering resulted in too few items, use fallback
+    if (filtered.items.length < 2) {
+      debugPrint('📱 [BottomNav] Module filtering resulted in <2 items, using fallback');
+      final fallback = DynamicNavbarBuilder.buildFallbackNavItems(
+        cartItemCount: cartItemCount,
+      );
+      
+      // Convert back to _NavigationItemsResult format
+      final fallbackPages = fallback.pages.map((page) {
+        return _NavPage(route: page.route, label: page.title);
+      }).toList();
+      
+      return _NavigationItemsResult(
+        items: fallback.items,
+        pages: fallbackPages,
+      );
+    }
+
+    // Convert filtered results back to _NavigationItemsResult
+    final filteredPages = filtered.pages.map((page) {
+      return _NavPage(route: page.route, label: page.title);
+    }).toList();
+
+    debugPrint('📱 [BottomNav] Module filtering: ${navItems.items.length} → ${filtered.items.length} items');
+    
+    return _NavigationItemsResult(
+      items: filtered.items,
+      pages: filteredPages,
+    );
   }
 }
 
