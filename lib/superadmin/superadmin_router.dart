@@ -57,6 +57,108 @@ class SuperAdminRoutes {
   static const String logs = '/superadmin/logs';
 }
 
+/// Liste des routes Super-Admin à intégrer dans le router principal.
+/// 
+/// Cette liste contient le ShellRoute avec toutes les sous-routes du Super-Admin.
+/// Elle peut être spreadée dans le router principal avec `...superAdminRoutes`.
+final List<RouteBase> superAdminRoutes = [
+  // ShellRoute applique le layout Super-Admin à toutes les sous-routes
+  ShellRoute(
+    builder: (context, state, child) {
+      return SuperAdminLayout(body: child);
+    },
+    routes: [
+      // Dashboard
+      GoRoute(
+        path: SuperAdminRoutes.dashboard,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: DashboardPage(),
+        ),
+      ),
+      // Restaurants - Liste
+      GoRoute(
+        path: SuperAdminRoutes.restaurants,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: RestaurantsListPage(),
+        ),
+      ),
+      // Restaurants - Création
+      GoRoute(
+        path: SuperAdminRoutes.restaurantCreate,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: RestaurantCreateWizard(),
+        ),
+      ),
+      // Restaurants - Détail
+      GoRoute(
+        path: SuperAdminRoutes.restaurantDetail,
+        pageBuilder: (context, state) {
+          final restaurantId = state.pathParameters['id'] ?? '';
+          return NoTransitionPage(
+            child: RestaurantDetailPage(restaurantId: restaurantId),
+          );
+        },
+      ),
+      // Restaurants - Modules
+      GoRoute(
+        path: SuperAdminRoutes.restaurantModules,
+        pageBuilder: (context, state) {
+          final restaurantId = state.pathParameters['id'] ?? '';
+          final restaurantName = state.uri.queryParameters['name'];
+          return NoTransitionPage(
+            child: RestaurantModulesPage(
+              restaurantId: restaurantId,
+              restaurantName: restaurantName,
+            ),
+          );
+        },
+      ),
+      // Restaurants - Delivery Settings
+      GoRoute(
+        path: SuperAdminRoutes.restaurantDeliverySettings,
+        pageBuilder: (context, state) {
+          final restaurantId = state.pathParameters['id'] ?? '';
+          final restaurantName = state.uri.queryParameters['name'];
+          return NoTransitionPage(
+            child: DeliverySettingsPage(
+              restaurantId: restaurantId,
+              restaurantName: restaurantName,
+            ),
+          );
+        },
+      ),
+      // Users
+      GoRoute(
+        path: SuperAdminRoutes.users,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: UsersPage(),
+        ),
+      ),
+      // Modules
+      GoRoute(
+        path: SuperAdminRoutes.modules,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: ModulesPage(),
+        ),
+      ),
+      // Settings
+      GoRoute(
+        path: SuperAdminRoutes.settings,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: SettingsPage(),
+        ),
+      ),
+      // Logs
+      GoRoute(
+        path: SuperAdminRoutes.logs,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: LogsPage(),
+        ),
+      ),
+    ],
+  ),
+];
+
 /// Configuration du router Super-Admin.
 /// 
 /// Ce router est conçu pour être utilisé de manière isolée.
@@ -77,101 +179,8 @@ GoRouter createSuperAdminRouter() {
       return null;
     },
     routes: [
-      // ShellRoute applique le layout Super-Admin à toutes les sous-routes
-      ShellRoute(
-        builder: (context, state, child) {
-          return SuperAdminLayout(body: child);
-        },
-        routes: [
-          // Dashboard
-          GoRoute(
-            path: SuperAdminRoutes.dashboard,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: DashboardPage(),
-            ),
-          ),
-          // Restaurants - Liste
-          GoRoute(
-            path: SuperAdminRoutes.restaurants,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: RestaurantsListPage(),
-            ),
-          ),
-          // Restaurants - Création
-          GoRoute(
-            path: SuperAdminRoutes.restaurantCreate,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: RestaurantCreateWizard(),
-            ),
-          ),
-          // Restaurants - Détail
-          GoRoute(
-            path: SuperAdminRoutes.restaurantDetail,
-            pageBuilder: (context, state) {
-              final restaurantId = state.pathParameters['id'] ?? '';
-              return NoTransitionPage(
-                child: RestaurantDetailPage(restaurantId: restaurantId),
-              );
-            },
-          ),
-          // Restaurants - Modules
-          GoRoute(
-            path: SuperAdminRoutes.restaurantModules,
-            pageBuilder: (context, state) {
-              final restaurantId = state.pathParameters['id'] ?? '';
-              final restaurantName = state.uri.queryParameters['name'];
-              return NoTransitionPage(
-                child: RestaurantModulesPage(
-                  restaurantId: restaurantId,
-                  restaurantName: restaurantName,
-                ),
-              );
-            },
-          ),
-          // Restaurants - Delivery Settings
-          GoRoute(
-            path: SuperAdminRoutes.restaurantDeliverySettings,
-            pageBuilder: (context, state) {
-              final restaurantId = state.pathParameters['id'] ?? '';
-              final restaurantName = state.uri.queryParameters['name'];
-              return NoTransitionPage(
-                child: DeliverySettingsPage(
-                  restaurantId: restaurantId,
-                  restaurantName: restaurantName,
-                ),
-              );
-            },
-          ),
-          // Users
-          GoRoute(
-            path: SuperAdminRoutes.users,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: UsersPage(),
-            ),
-          ),
-          // Modules
-          GoRoute(
-            path: SuperAdminRoutes.modules,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: ModulesPage(),
-            ),
-          ),
-          // Settings
-          GoRoute(
-            path: SuperAdminRoutes.settings,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: SettingsPage(),
-            ),
-          ),
-          // Logs
-          GoRoute(
-            path: SuperAdminRoutes.logs,
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: LogsPage(),
-            ),
-          ),
-        ],
-      ),
+      // Utilise les routes Super-Admin partagées
+      ...superAdminRoutes,
       // Route racine - redirige vers dashboard
       GoRoute(
         path: SuperAdminRoutes.root,
