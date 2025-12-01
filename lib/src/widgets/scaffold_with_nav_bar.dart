@@ -433,6 +433,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   /// 
   /// Filters navigation items based on active modules in RestaurantPlanUnified.
   /// If plan is null (restaurant without unified plan), returns items as-is for backward compatibility.
+  /// 
+  /// PHASE 3 FIX: Temporarily removed BuilderPage usage - Phase 5 will reintegrate builder
   _NavigationItemsResult _applyModuleFiltering(
     _NavigationItemsResult navItems,
     RestaurantPlanUnified? plan,
@@ -444,51 +446,37 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       return navItems;
     }
 
-    // Convert _NavPage list to BuilderPage list for filtering
-    final builderPages = navItems.pages.map((navPage) {
-      return BuilderPage(
-        pageKey: navPage.route.replaceAll('/', '').replaceAll('-', '_'),
-        route: navPage.route,
-        order: 0,
-        title: navPage.label,
-        isActive: true,
-      );
-    }).toList();
-
-    // Apply DynamicNavbarBuilder filtering
-    final filtered = DynamicNavbarBuilder.filterNavItems(
-      originalPages: builderPages,
-      originalItems: navItems.items,
-      plan: plan,
-    );
-
-    // If filtering resulted in too few items, use fallback
-    if (filtered.items.length < 2) {
-      debugPrint('📱 [BottomNav] Module filtering resulted in <2 items, using fallback');
-      final fallback = DynamicNavbarBuilder.buildFallbackNavItems(
-        cartItemCount: cartItemCount,
-      );
+    // PHASE 3: Direct filtering without BuilderPage conversion
+    // Filter based on routes and module requirements
+    final filteredItems = <BottomNavigationBarItem>[];
+    final filteredPages = <_NavPage>[];
+    
+    for (var i = 0; i < navItems.pages.length; i++) {
+      final page = navItems.pages[i];
+      final item = navItems.items[i];
       
-      // Convert back to _NavigationItemsResult format
-      final fallbackPages = fallback.pages.map((page) {
-        return _NavPage(route: page.route, label: page.title);
-      }).toList();
+      // Check if module is required for this route
+      final requiredModule = DynamicNavbarBuilder.getRequiredModule(page.route);
       
-      return _NavigationItemsResult(
-        items: fallback.items,
-        pages: fallbackPages,
-      );
+      if (requiredModule == null || plan.hasModule(requiredModule)) {
+        // No module required OR module is active - include this item
+        filteredItems.add(item);
+        filteredPages.add(page);
+      } else {
+        debugPrint('📱 [BottomNav] Filtering out ${page.route} - module ${requiredModule.code} not active');
+      }
     }
 
-    // Convert filtered results back to _NavigationItemsResult
-    final filteredPages = filtered.pages.map((page) {
-      return _NavPage(route: page.route, label: page.title);
-    }).toList();
+    // If filtering resulted in too few items, return original
+    if (filteredItems.length < 2) {
+      debugPrint('📱 [BottomNav] Module filtering resulted in <2 items, using original items');
+      return navItems;
+    }
 
-    debugPrint('📱 [BottomNav] Module filtering: ${navItems.items.length} → ${filtered.items.length} items');
+    debugPrint('📱 [BottomNav] Module filtering: ${navItems.items.length} → ${filteredItems.length} items');
     
     return _NavigationItemsResult(
-      items: filtered.items,
+      items: filteredItems,
       pages: filteredPages,
     );
   }
