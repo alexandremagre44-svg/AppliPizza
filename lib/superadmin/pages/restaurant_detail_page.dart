@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/superadmin_mock_providers.dart';
+import '../providers/superadmin_restaurants_provider.dart';
 import '../models/restaurant_meta.dart';
+import '../../white_label/core/module_id.dart';
+import '../../white_label/core/module_registry.dart';
 
 /// Page détail d'un restaurant du Super-Admin.
 class RestaurantDetailPage extends ConsumerWidget {
@@ -38,10 +40,18 @@ class RestaurantDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final restaurants = ref.watch(mockRestaurantsProvider);
-    final restaurant = restaurants.where((r) => r.id == restaurantId).firstOrNull;
+    final restaurantAsync = ref.watch(superAdminRestaurantDocProvider(restaurantId));
+    final unifiedPlanAsync = ref.watch(superAdminRestaurantUnifiedPlanProvider(restaurantId));
 
-    if (restaurant == null) {
+    // Handle loading state
+    if (restaurantAsync.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    // Handle error or not found
+    if (restaurantAsync.hasError || restaurantAsync.value == null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -52,6 +62,20 @@ class RestaurantDetailPage extends ConsumerWidget {
               'Restaurant not found: $restaurantId',
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
+            if (restaurantAsync.hasError) ...[
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  restaurantAsync.error.toString(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => context.go('/superadmin/restaurants'),
@@ -61,6 +85,8 @@ class RestaurantDetailPage extends ConsumerWidget {
         ),
       );
     }
+
+    final restaurant = restaurantAsync.value!;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -179,11 +205,181 @@ class RestaurantDetailPage extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           // Modules section
+          unifiedPlanAsync.when(
+            data: (unifiedPlan) {
+              if (unifiedPlan == null) {
+                // Plan unifié manquant
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.orange.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.orange.shade700,
+                        size: 32,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Plan unifié manquant',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange.shade900,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Ce restaurant utilise un plan legacy. Les modules et configurations détaillées ne sont pas disponibles.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.orange.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              // Afficher les modules depuis le plan unifié
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Enabled Modules',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A1A2E),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (unifiedPlan.activeModules.isEmpty)
+                      Text(
+                        'No modules enabled',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      )
+                    else
+                      _ModulesGrid(activeModules: unifiedPlan.activeModules),
+                  ],
+                ),
+              );
+            },
+            loading: () => Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            error: (error, _) => Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Text(
+                'Error loading plan: $error',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.red.shade700,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Branding section
+          unifiedPlanAsync.when(
+            data: (unifiedPlan) {
+              if (unifiedPlan?.branding == null) {
+                return const SizedBox.shrink();
+              }
+
+              final branding = unifiedPlan!.branding!;
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Branding',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A1A2E),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (branding.brandName != null)
+                      _DetailRow(
+                        label: 'Nom de marque',
+                        value: branding.brandName!,
+                      ),
+                    if (branding.accentColor != null)
+                      _ColorDetailRow(
+                        label: 'Accent color',
+                        colorHex: branding.accentColor!,
+                      ),
+                    if (branding.primaryColor != null)
+                      _ColorDetailRow(
+                        label: 'Primary color',
+                        colorHex: branding.primaryColor!,
+                      ),
+                    _DetailRow(
+                      label: 'Mode sombre',
+                      value: branding.darkModeEnabled ? 'Activé' : 'Désactivé',
+                    ),
+                  ],
+                ),
+              );
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+          const SizedBox(height: 24),
+          // Debug/Info section
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.grey.shade50,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey.shade200),
             ),
@@ -191,7 +387,7 @@ class RestaurantDetailPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Enabled Modules',
+                  'Debug Info',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -199,39 +395,24 @@ class RestaurantDetailPage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                if (restaurant.modulesEnabled.isEmpty)
-                  Text(
-                    'No modules enabled',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  )
-                else
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: restaurant.modulesEnabled.map((module) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Text(
-                          module,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.blue.shade700,
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                _DetailRow(
+                  label: 'Restaurant ID',
+                  value: restaurantId,
+                ),
+                unifiedPlanAsync.when(
+                  data: (plan) => _DetailRow(
+                    label: 'Plan unifié',
+                    value: plan != null ? '✓ Présent' : '✗ Manquant',
                   ),
+                  loading: () => _DetailRow(
+                    label: 'Plan unifié',
+                    value: 'Chargement...',
+                  ),
+                  error: (_, __) => _DetailRow(
+                    label: 'Plan unifié',
+                    value: '✗ Erreur',
+                  ),
+                ),
               ],
             ),
           ),
@@ -352,6 +533,155 @@ class _DetailRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Widget pour afficher une ligne de détail avec couleur.
+class _ColorDetailRow extends StatelessWidget {
+  final String label;
+  final String colorHex;
+
+  const _ColorDetailRow({
+    required this.label,
+    required this.colorHex,
+  });
+
+  Color _parseColor(String hex) {
+    try {
+      final hexColor = hex.replaceAll('#', '');
+      if (hexColor.length == 6) {
+        return Color(int.parse('FF$hexColor', radix: 16));
+      } else if (hexColor.length == 8) {
+        return Color(int.parse(hexColor, radix: 16));
+      }
+    } catch (_) {}
+    return Colors.grey;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: _parseColor(colorHex),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              colorHex,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF1A1A2E),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Widget pour afficher la grille de modules actifs.
+class _ModulesGrid extends StatelessWidget {
+  final List<String> activeModules;
+
+  const _ModulesGrid({required this.activeModules});
+
+  String _getModuleLabel(String moduleCode) {
+    try {
+      final moduleId = ModuleId.values.firstWhere(
+        (m) => m.code == moduleCode,
+      );
+      return moduleId.label;
+    } catch (_) {
+      // Si le module n'est pas trouvé dans le registry, retourner le code
+      return moduleCode;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Construire la liste de tous les modules avec leur statut
+    final allModules = ModuleId.values.map((moduleId) {
+      final isActive = activeModules.contains(moduleId.code);
+      return {
+        'id': moduleId,
+        'code': moduleId.code,
+        'label': moduleId.label,
+        'active': isActive,
+      };
+    }).toList();
+
+    return Column(
+      children: allModules.map((module) {
+        final isActive = module['active'] as bool;
+        final label = module['label'] as String;
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            children: [
+              Icon(
+                isActive ? Icons.check_circle : Icons.cancel,
+                size: 20,
+                color: isActive ? Colors.green : Colors.grey,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                    color: isActive
+                        ? const Color(0xFF1A1A2E)
+                        : Colors.grey.shade500,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? Colors.green.shade50
+                      : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  isActive ? 'ON' : 'OFF',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: isActive
+                        ? Colors.green.shade700
+                        : Colors.grey.shade600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }

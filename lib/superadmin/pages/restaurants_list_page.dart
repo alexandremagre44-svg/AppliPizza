@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../providers/superadmin_mock_providers.dart';
+import '../providers/superadmin_restaurants_provider.dart';
 import '../models/restaurant_meta.dart';
 
 /// Page liste des restaurants du Super-Admin.
@@ -17,7 +17,7 @@ class RestaurantsListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final restaurants = ref.watch(mockRestaurantsProvider);
+    final restaurantsAsync = ref.watch(superAdminRestaurantsProvider);
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -28,11 +28,27 @@ class RestaurantsListPage extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '${restaurants.length} restaurants',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
+              restaurantsAsync.when(
+                data: (restaurants) => Text(
+                  '${restaurants.length} restaurants',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                loading: () => Text(
+                  'Loading...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                error: (_, __) => Text(
+                  'Error loading count',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.red.shade600,
+                  ),
                 ),
               ),
               ElevatedButton.icon(
@@ -61,14 +77,99 @@ class RestaurantsListPage extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade200),
               ),
-              child: ListView.separated(
-                padding: const EdgeInsets.all(0),
-                itemCount: restaurants.length,
-                separatorBuilder: (context, index) =>
-                    Divider(height: 1, color: Colors.grey.shade200),
-                itemBuilder: (context, index) {
-                  final restaurant = restaurants[index];
-                  return _RestaurantListItem(restaurant: restaurant);
+              child: restaurantsAsync.when(
+                data: (restaurants) {
+                  if (restaurants.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.restaurant_outlined,
+                            size: 64,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Aucun restaurant configuré',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Créez votre premier restaurant',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    padding: const EdgeInsets.all(0),
+                    itemCount: restaurants.length,
+                    separatorBuilder: (context, index) =>
+                        Divider(height: 1, color: Colors.grey.shade200),
+                    itemBuilder: (context, index) {
+                      final restaurant = restaurants[index];
+                      return _RestaurantListItem(restaurant: restaurant);
+                    },
+                  );
+                },
+                loading: () => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                error: (error, stackTrace) {
+                  // Log détaillé en console
+                  debugPrint('Error loading restaurants: $error');
+                  debugPrint('Stack trace: $stackTrace');
+
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Erreur de chargement',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            error.toString(),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            ref.invalidate(superAdminRestaurantsProvider);
+                          },
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: const Text('Réessayer'),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               ),
             ),
@@ -81,7 +182,7 @@ class RestaurantsListPage extends ConsumerWidget {
 
 /// Widget item de la liste des restaurants.
 class _RestaurantListItem extends StatelessWidget {
-  final RestaurantMeta restaurant;
+  final SuperAdminRestaurantSummary restaurant;
 
   const _RestaurantListItem({required this.restaurant});
 
@@ -140,7 +241,9 @@ class _RestaurantListItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${restaurant.brandName} • ${restaurant.type}',
+                    restaurant.slug.isNotEmpty 
+                        ? restaurant.slug 
+                        : 'No slug',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey.shade600,
@@ -149,20 +252,20 @@ class _RestaurantListItem extends StatelessWidget {
                 ],
               ),
             ),
-            // Modules count badge
-            if (restaurant.modulesEnabled.isNotEmpty)
+            // Template badge
+            if (restaurant.templateId != null)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 margin: const EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: Colors.purple.shade50,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '${restaurant.modulesEnabled.length} modules',
+                  restaurant.templateId!,
                   style: TextStyle(
                     fontSize: 10,
-                    color: Colors.blue.shade700,
+                    color: Colors.purple.shade700,
                   ),
                 ),
               ),
