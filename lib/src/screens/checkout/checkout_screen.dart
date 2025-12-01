@@ -9,11 +9,14 @@ import '../../providers/user_provider.dart';
 import '../../providers/loyalty_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/restaurant_plan_provider.dart';
+import '../../providers/delivery_provider.dart';
 import '../../services/loyalty_service.dart';
 import '../../models/loyalty_reward.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 import '../../../white_label/core/module_id.dart';
+import '../delivery/delivery_summary_widget.dart';
+import '../delivery/delivery_not_available_widget.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -173,8 +176,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final cartState = ref.watch(cartProvider);
     final loyaltyInfoAsync = ref.watch(loyaltyInfoProvider);
     final flags = ref.watch(restaurantFeatureFlagsProvider);
+    final deliveryState = ref.watch(deliveryProvider);
+    final deliverySettings = ref.watch(deliverySettingsProvider);
+    final isDeliveryEnabled = ref.watch(isDeliveryEnabledProvider);
     
-    const deliveryFee = 5.00;
+    const serviceFee = 5.00;
     double subtotal = cartState.total;
     
     // Apply VIP discount (only if loyalty module is enabled)
@@ -194,7 +200,28 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       });
     }
     
-    final total = subtotal + deliveryFee;
+    // Calculate delivery fee if delivery mode is selected
+    double deliveryFee = 0.0;
+    if (deliveryState.isDeliverySelected && deliveryState.selectedArea != null) {
+      if (deliverySettings != null) {
+        deliveryFee = computeDeliveryFee(
+          deliverySettings,
+          deliveryState.selectedArea!,
+          cartState.total,
+        );
+      } else {
+        deliveryFee = deliveryState.selectedArea!.deliveryFee;
+      }
+    }
+    
+    final total = subtotal + serviceFee + deliveryFee;
+
+    // Check minimum order for delivery
+    final minimumOk = !deliveryState.isDeliverySelected || 
+        (deliverySettings != null 
+            ? isMinimumReached(deliverySettings, deliveryState.selectedArea, cartState.total)
+            : (deliveryState.selectedArea == null || 
+               cartState.total >= deliveryState.selectedArea!.minimumOrderAmount));
 
     return Scaffold(
       appBar: AppBar(
@@ -217,8 +244,32 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Mode de retrait section (only if delivery module is enabled)
+            if (isDeliveryEnabled) ...[
+              _buildDeliveryModeSection(context, deliveryState),
+              const SizedBox(height: 24),
+            ],
+            
+            // Delivery summary (if delivery is selected and configured)
+            if (deliveryState.isDeliveryConfigured) ...[
+              const DeliverySummaryWidget(),
+              const SizedBox(height: 24),
+            ],
+            
+            // Minimum not reached warning
+            if (deliveryState.isDeliverySelected && !minimumOk)
+              _buildMinimumWarning(context, deliverySettings, deliveryState, cartState.total),
+            
             // Récapitulatif commande
-            _buildOrderSummary(cartState, deliveryFee, total, vipDiscount, vipTier),
+            _buildOrderSummary(
+              cartState, 
+              serviceFee, 
+              deliveryFee,
+              total, 
+              vipDiscount, 
+              vipTier,
+              deliveryState.isDeliverySelected,
+            ),
             
             const SizedBox(height: 32),
             
@@ -303,7 +354,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Widget _buildOrderSummary(CartState cartState, double deliveryFee, double total, double vipDiscount, String? vipTier) {
+  Widget _buildOrderSummary(
+    CartState cartState, 
+    double serviceFee, 
+    double deliveryFee,
+    double total, 
+    double vipDiscount, 
+    String? vipTier,
+    bool isDelivery,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -367,9 +426,34 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Frais de service'),
-                Text('${deliveryFee.toStringAsFixed(2)} €'),
+                Text('${serviceFee.toStringAsFixed(2)} €'),
               ],
             ),
+            // Delivery fee (only shown if delivery is selected)
+            if (isDelivery) ...[
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.delivery_dining, size: 16, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      const Text('Frais de livraison'),
+                    ],
+                  ),
+                  Text(
+                    deliveryFee > 0 
+                        ? '${deliveryFee.toStringAsFixed(2)} €'
+                        : 'Gratuit',
+                    style: TextStyle(
+                      color: deliveryFee == 0 ? Colors.green : null,
+                      fontWeight: deliveryFee == 0 ? FontWeight.bold : null,
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -553,6 +637,184 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  /// Build delivery mode selection section
+  Widget _buildDeliveryModeSection(BuildContext context, DeliveryState deliveryState) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryRed.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.local_shipping,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Mode de retrait',
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
+            // Takeaway option
+            _buildDeliveryModeOption(
+              context,
+              icon: Icons.store,
+              title: 'Retrait sur place',
+              subtitle: 'Click & Collect',
+              isSelected: deliveryState.isTakeAwaySelected || !deliveryState.hasSelectedMode,
+              onTap: () {
+                ref.read(deliveryProvider.notifier).setMode(DeliveryMode.takeAway);
+                ref.read(deliveryProvider.notifier).resetDeliveryDetails();
+              },
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // Delivery option
+            _buildDeliveryModeOption(
+              context,
+              icon: Icons.delivery_dining,
+              title: 'Livraison',
+              subtitle: deliveryState.isDeliveryConfigured 
+                  ? deliveryState.selectedAddress?.formattedAddress ?? 'Configurer l\'adresse'
+                  : 'Configurer l\'adresse',
+              isSelected: deliveryState.isDeliverySelected,
+              onTap: () {
+                ref.read(deliveryProvider.notifier).setMode(DeliveryMode.delivery);
+                // Navigate to address screen if not configured
+                if (!deliveryState.isDeliveryConfigured) {
+                  context.push('/delivery/address');
+                }
+              },
+              trailing: deliveryState.isDeliverySelected && !deliveryState.isDeliveryConfigured
+                  ? const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey)
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeliveryModeOption(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool isSelected,
+    required VoidCallback onTap,
+    Widget? trailing,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isSelected 
+                ? Theme.of(context).colorScheme.primary 
+                : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          color: isSelected 
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.05)
+              : null,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                    : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey.shade600,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : null,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Colors.grey.shade600,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: Theme.of(context).colorScheme.primary,
+                size: 24,
+              )
+            else if (trailing != null)
+              trailing,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMinimumWarning(
+    BuildContext context,
+    dynamic deliverySettings,
+    DeliveryState deliveryState,
+    double cartTotal,
+  ) {
+    final minimumAmount = deliverySettings != null
+        ? getMinimumOrderAmount(deliverySettings, deliveryState.selectedArea)
+        : (deliveryState.selectedArea?.minimumOrderAmount ?? 0);
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: DeliveryMinimumWarning(
+        minimumAmount: minimumAmount,
+        currentAmount: cartTotal,
+        onAddItems: () => context.go('/menu'),
+      ),
     );
   }
 }
