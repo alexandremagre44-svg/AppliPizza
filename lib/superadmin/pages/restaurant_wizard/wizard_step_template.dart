@@ -2,70 +2,110 @@
 ///
 /// Étape 3 du Wizard: Sélection du template.
 /// Permet de choisir un template de départ pour le restaurant.
+/// Chaque template définit un ensemble de modules pré-configurés basé sur ModuleId.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../white_label/core/module_id.dart';
 import 'wizard_state.dart';
 
 /// Template disponible pour la création de restaurant.
+/// Utilise ModuleId pour définir les modules inclus.
 class RestaurantTemplate {
   final String id;
   final String name;
   final String description;
   final String iconName;
-  final List<String> includedModules;
-  final String previewImageUrl;
+  final List<ModuleId> modules;
 
   const RestaurantTemplate({
     required this.id,
     required this.name,
     required this.description,
     required this.iconName,
-    required this.includedModules,
-    this.previewImageUrl = '',
+    required this.modules,
   });
+
+  /// Liste des noms de modules inclus pour l'affichage.
+  List<String> get includedModuleNames => modules.map((m) => m.label).toList();
 }
 
-/// Templates mock disponibles.
-const List<RestaurantTemplate> _mockTemplates = [
+/// Templates disponibles pour la création de restaurant.
+/// Basés sur les 4 templates définis dans le problème.
+const List<RestaurantTemplate> availableTemplates = [
+  // 1) Pizzeria Classic
   RestaurantTemplate(
-    id: 'pizzeria-template-1',
+    id: 'pizzeria-classic',
     name: 'Pizzeria Classic',
-    description: 'Template complet pour pizzeria avec commande en ligne, livraison et fidélité.',
+    description:
+        'Template complet pour pizzeria avec commande en ligne, livraison, fidélité et jeux promotionnels.',
     iconName: 'local_pizza',
-    includedModules: ['ordering', 'delivery', 'clickAndCollect', 'payments', 'loyalty'],
+    modules: [
+      ModuleId.ordering,
+      ModuleId.delivery,
+      ModuleId.clickAndCollect,
+      ModuleId.loyalty,
+      ModuleId.roulette,
+      ModuleId.promotions,
+      ModuleId.kitchenTablet,
+    ],
   ),
+  // 2) Fast Food Express
   RestaurantTemplate(
-    id: 'fast-food-template-1',
+    id: 'fast-food-express',
     name: 'Fast Food Express',
-    description: 'Template optimisé pour la restauration rapide avec système de tickets.',
+    description:
+        'Template optimisé pour la restauration rapide avec click & collect et gestion du staff.',
     iconName: 'fastfood',
-    includedModules: ['ordering', 'clickAndCollect', 'payments', 'kitchenTablet'],
+    modules: [
+      ModuleId.ordering,
+      ModuleId.clickAndCollect,
+      ModuleId.staffTablet,
+      ModuleId.promotions,
+    ],
   ),
+  // 3) Restaurant Premium
   RestaurantTemplate(
     id: 'restaurant-premium',
     name: 'Restaurant Premium',
-    description: 'Template haut de gamme avec toutes les fonctionnalités incluses.',
+    description:
+        'Template haut de gamme avec toutes les fonctionnalités avancées incluses.',
     iconName: 'restaurant',
-    includedModules: ['ordering', 'delivery', 'clickAndCollect', 'payments', 'loyalty', 'roulette', 'kitchenTablet', 'staffTablet'],
+    modules: [
+      ModuleId.ordering,
+      ModuleId.delivery,
+      ModuleId.clickAndCollect,
+      ModuleId.loyalty,
+      ModuleId.promotions,
+      ModuleId.campaigns,
+      ModuleId.timeRecorder,
+      ModuleId.reporting,
+      ModuleId.theme,
+      ModuleId.pagesBuilder,
+    ],
   ),
-  RestaurantTemplate(
-    id: 'snack-delivery',
-    name: 'Snack + Livraison',
-    description: 'Template pour snack avec focus sur la livraison.',
-    iconName: 'delivery_dining',
-    includedModules: ['ordering', 'delivery', 'payments'],
-  ),
+  // 4) Blank
   RestaurantTemplate(
     id: 'blank-template',
     name: 'Template Vide',
-    description: 'Commencez de zéro et configurez tout manuellement.',
+    description:
+        'Commencez de zéro et configurez manuellement tous les modules.',
     iconName: 'add_box',
-    includedModules: [],
+    modules: [],
   ),
 ];
+
+/// Récupère un template par son ID.
+RestaurantTemplate? getTemplateById(String? id) {
+  if (id == null) return null;
+  try {
+    return availableTemplates.firstWhere((t) => t.id == id);
+  } catch (_) {
+    return null;
+  }
+}
 
 /// Étape 3: Sélection du template.
 class WizardStepTemplate extends ConsumerWidget {
@@ -113,9 +153,9 @@ class WizardStepTemplate extends ConsumerWidget {
                   crossAxisSpacing: 16,
                   childAspectRatio: 0.85,
                 ),
-                itemCount: _mockTemplates.length,
+                itemCount: availableTemplates.length,
                 itemBuilder: (context, index) {
-                  final template = _mockTemplates[index];
+                  final template = availableTemplates[index];
                   final isSelected = template.id == selectedTemplateId;
 
                   return _TemplateCard(
@@ -124,7 +164,7 @@ class WizardStepTemplate extends ConsumerWidget {
                     onTap: () {
                       ref
                           .read(restaurantWizardProvider.notifier)
-                          .updateTemplate(template.id);
+                          .selectTemplate(template);
                     },
                   );
                 },
@@ -134,10 +174,8 @@ class WizardStepTemplate extends ConsumerWidget {
               // Info sur le template sélectionné
               if (selectedTemplateId != null)
                 _TemplateDetails(
-                  template: _mockTemplates.firstWhere(
-                    (t) => t.id == selectedTemplateId,
-                    orElse: () => _mockTemplates.last,
-                  ),
+                  template: getTemplateById(selectedTemplateId) ??
+                      availableTemplates.last,
                 ),
             ],
           ),
@@ -262,7 +300,7 @@ class _TemplateCard extends StatelessWidget {
             const SizedBox(height: 12),
             // Modules inclus
             Text(
-              '${template.includedModules.length} modules inclus',
+              '${template.modules.length} modules inclus',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -281,29 +319,6 @@ class _TemplateDetails extends StatelessWidget {
   final RestaurantTemplate template;
 
   const _TemplateDetails({required this.template});
-
-  String _getModuleLabel(String module) {
-    switch (module) {
-      case 'ordering':
-        return 'Commande en ligne';
-      case 'delivery':
-        return 'Livraison';
-      case 'clickAndCollect':
-        return 'Click & Collect';
-      case 'payments':
-        return 'Paiement en ligne';
-      case 'loyalty':
-        return 'Programme fidélité';
-      case 'roulette':
-        return 'Jeu Roulette';
-      case 'kitchenTablet':
-        return 'Tablette cuisine';
-      case 'staffTablet':
-        return 'Tablette staff';
-      default:
-        return module;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -331,12 +346,12 @@ class _TemplateDetails extends StatelessWidget {
               ),
             ],
           ),
-          if (template.includedModules.isNotEmpty) ...[
+          if (template.modules.isNotEmpty) ...[
             const SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: template.includedModules.map((module) {
+              children: template.modules.map((moduleId) {
                 return Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -348,7 +363,7 @@ class _TemplateDetails extends StatelessWidget {
                     border: Border.all(color: Colors.blue.shade200),
                   ),
                   child: Text(
-                    _getModuleLabel(module),
+                    moduleId.label,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.blue.shade700,

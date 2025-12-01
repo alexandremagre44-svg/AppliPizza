@@ -2,13 +2,16 @@
 ///
 /// Étape 5 du Wizard: Aperçu et validation.
 /// Affiche un résumé de toutes les configurations avant création.
+/// Inclut une validation des dépendances des modules.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../white_label/core/module_id.dart';
 import '../../models/restaurant_blueprint.dart';
 import 'wizard_state.dart';
+import 'wizard_step_template.dart';
 
 /// Étape 5: Aperçu final avant création.
 class WizardStepPreview extends ConsumerWidget {
@@ -18,6 +21,14 @@ class WizardStepPreview extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final wizardState = ref.watch(restaurantWizardProvider);
     final blueprint = wizardState.blueprint;
+    final enabledModules = wizardState.enabledModuleIds;
+
+    // Valider les dépendances
+    final isModulesValid = validateModuleDependencies(enabledModules);
+    final missingDeps = getMissingDependencies(enabledModules);
+
+    // Récupérer le template sélectionné
+    final selectedTemplate = getTemplateById(blueprint.templateId);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
@@ -46,8 +57,13 @@ class WizardStepPreview extends ConsumerWidget {
               ),
               const SizedBox(height: 32),
 
-              // Validation status
-              _ValidationStatus(blueprint: blueprint),
+              // Validation status (avec vérification des dépendances)
+              _ValidationStatus(
+                blueprint: blueprint,
+                enabledModules: enabledModules,
+                isModulesValid: isModulesValid,
+                missingDeps: missingDeps,
+              ),
               const SizedBox(height: 24),
 
               // Sections de prévisualisation
@@ -63,7 +79,6 @@ class WizardStepPreview extends ConsumerWidget {
                 children: [
                   _PreviewRow(label: 'Nom', value: blueprint.name),
                   _PreviewRow(label: 'Slug', value: blueprint.slug),
-                  _PreviewRow(label: 'Type', value: blueprint.type.displayName),
                 ],
               ),
               const SizedBox(height: 16),
@@ -111,8 +126,8 @@ class WizardStepPreview extends ConsumerWidget {
                 children: [
                   _PreviewRow(
                     label: 'Template',
-                    value: blueprint.templateId ?? 'Aucun template sélectionné',
-                    isOptional: blueprint.templateId == null,
+                    value: selectedTemplate?.name ?? 'Aucun template sélectionné',
+                    isOptional: selectedTemplate == null,
                   ),
                 ],
               ),
@@ -128,7 +143,7 @@ class WizardStepPreview extends ConsumerWidget {
                       .goToStep(WizardStep.modules);
                 },
                 children: [
-                  _PreviewModulesRow(modules: blueprint.modules),
+                  _PreviewModulesRowNew(enabledModules: enabledModules),
                 ],
               ),
               const SizedBox(height: 32),
@@ -170,20 +185,32 @@ class WizardStepPreview extends ConsumerWidget {
   }
 }
 
-/// Indicateur de validation.
+/// Indicateur de validation (avec vérification des dépendances des modules).
 class _ValidationStatus extends StatelessWidget {
   final RestaurantBlueprintLight blueprint;
+  final List<ModuleId> enabledModules;
+  final bool isModulesValid;
+  final List<ModuleId> missingDeps;
 
-  const _ValidationStatus({required this.blueprint});
+  const _ValidationStatus({
+    required this.blueprint,
+    required this.enabledModules,
+    required this.isModulesValid,
+    required this.missingDeps,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isValid = blueprint.isValid;
     final issues = <String>[];
 
     if (blueprint.name.isEmpty) issues.add('Nom manquant');
     if (blueprint.slug.isEmpty) issues.add('Slug manquant');
     if (blueprint.brand.brandName.isEmpty) issues.add('Nom de marque manquant');
+    if (!isModulesValid) {
+      issues.add('Dépendances modules: ${missingDeps.map((m) => m.label).join(', ')}');
+    }
+
+    final isValid = blueprint.isValid && isModulesValid;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -222,11 +249,25 @@ class _ValidationStatus extends StatelessWidget {
                   ),
                 ),
                 if (!isValid && issues.isNotEmpty)
-                  Text(
-                    issues.join(' • '),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange.shade700,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      issues.join(' • '),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange.shade700,
+                      ),
+                    ),
+                  ),
+                if (isValid)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      '${enabledModules.length} modules activés',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.green.shade600,
+                      ),
                     ),
                   ),
               ],
@@ -469,6 +510,56 @@ class _PreviewModulesRow extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 _getModuleLabel(module),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.green.shade700,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+/// Ligne de prévisualisation pour les modules (version avec ModuleId).
+class _PreviewModulesRowNew extends StatelessWidget {
+  final List<ModuleId> enabledModules;
+
+  const _PreviewModulesRowNew({required this.enabledModules});
+
+  @override
+  Widget build(BuildContext context) {
+    if (enabledModules.isEmpty) {
+      return Text(
+        'Aucun module activé',
+        style: TextStyle(
+          fontSize: 13,
+          color: Colors.grey.shade500,
+          fontStyle: FontStyle.italic,
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: enabledModules.map((moduleId) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.green.shade50,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.green.shade200),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check, size: 14, color: Colors.green.shade600),
+              const SizedBox(width: 4),
+              Text(
+                moduleId.label,
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.green.shade700,

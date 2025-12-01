@@ -8,12 +8,15 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../white_label/core/module_id.dart';
+import '../../../white_label/core/module_registry.dart';
 import '../../models/restaurant_blueprint.dart';
 import '../../services/superadmin_restaurant_service.dart';
+import 'wizard_step_template.dart';
 
 /// Étapes du wizard.
 enum WizardStep {
-  /// Étape 1: Identité du restaurant (nom, slug, type).
+  /// Étape 1: Identité du restaurant (nom, slug).
   identity,
 
   /// Étape 2: Configuration de la marque (couleurs, logo).
@@ -67,7 +70,7 @@ extension WizardStepExtension on WizardStep {
   String get description {
     switch (this) {
       case WizardStep.identity:
-        return 'Définissez le nom et le type de votre restaurant';
+        return 'Définissez le nom de votre restaurant';
       case WizardStep.brand:
         return 'Personnalisez les couleurs et le logo';
       case WizardStep.template:
@@ -118,6 +121,9 @@ class RestaurantWizardState {
   /// Blueprint en cours de construction.
   final RestaurantBlueprintLight blueprint;
 
+  /// Liste des modules activés (basée sur ModuleId).
+  final List<ModuleId> enabledModuleIds;
+
   /// Étape courante du wizard.
   final WizardStep currentStep;
 
@@ -133,6 +139,7 @@ class RestaurantWizardState {
   /// Constructeur principal.
   const RestaurantWizardState({
     required this.blueprint,
+    this.enabledModuleIds = const [],
     this.currentStep = WizardStep.identity,
     this.isSubmitting = false,
     this.error,
@@ -143,12 +150,14 @@ class RestaurantWizardState {
   factory RestaurantWizardState.initial() {
     return RestaurantWizardState(
       blueprint: RestaurantBlueprintLight.empty(),
+      enabledModuleIds: const [],
     );
   }
 
   /// Crée une copie avec des valeurs modifiées.
   RestaurantWizardState copyWith({
     RestaurantBlueprintLight? blueprint,
+    List<ModuleId>? enabledModuleIds,
     WizardStep? currentStep,
     bool? isSubmitting,
     String? error,
@@ -156,6 +165,7 @@ class RestaurantWizardState {
   }) {
     return RestaurantWizardState(
       blueprint: blueprint ?? this.blueprint,
+      enabledModuleIds: enabledModuleIds ?? this.enabledModuleIds,
       currentStep: currentStep ?? this.currentStep,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       error: error,
@@ -173,9 +183,9 @@ class RestaurantWizardState {
       case WizardStep.template:
         return true; // Template est optionnel
       case WizardStep.modules:
-        return true; // Modules peuvent être tous désactivés
+        return validateModuleDependencies(enabledModuleIds);
       case WizardStep.preview:
-        return blueprint.isValid;
+        return blueprint.isValid && validateModuleDependencies(enabledModuleIds);
     }
   }
 
@@ -191,6 +201,38 @@ class RestaurantWizardState {
   /// Pourcentage de progression (0.0 à 1.0).
   double get progress =>
       (currentStep.index + 1) / WizardStepExtension.totalSteps;
+}
+
+/// Valide les dépendances des modules.
+/// Retourne true si toutes les dépendances sont satisfaites.
+bool validateModuleDependencies(List<ModuleId> modules) {
+  for (final moduleId in modules) {
+    final definition = ModuleRegistry.definitions[moduleId];
+    if (definition != null) {
+      for (final dep in definition.dependencies) {
+        if (!modules.contains(dep)) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+/// Récupère les dépendances manquantes pour une liste de modules.
+List<ModuleId> getMissingDependencies(List<ModuleId> modules) {
+  final missing = <ModuleId>[];
+  for (final moduleId in modules) {
+    final definition = ModuleRegistry.definitions[moduleId];
+    if (definition != null) {
+      for (final dep in definition.dependencies) {
+        if (!modules.contains(dep) && !missing.contains(dep)) {
+          missing.add(dep);
+        }
+      }
+    }
+  }
+  return missing;
 }
 
 /// Notifier pour gérer l'état du wizard.
@@ -251,7 +293,80 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     );
   }
 
-  /// Met à jour les modules activés.
+  /// Sélectionne un template et applique ses modules.
+  void selectTemplate(RestaurantTemplate template) {
+    // Mettre à jour le template ID et les modules activés
+    state = state.copyWith(
+      blueprint: state.blueprint.copyWith(
+        templateId: template.id,
+        modules: _moduleIdsToModulesLight(template.modules),
+      ),
+      enabledModuleIds: List<ModuleId>.from(template.modules),
+    );
+  }
+
+  /// Active ou désactive un module par son ID.
+  void toggleModule(ModuleId moduleId, bool enabled) {
+    final currentModules = List<ModuleId>.from(state.enabledModuleIds);
+    
+    if (enabled) {
+      if (!currentModules.contains(moduleId)) {
+        currentModules.add(moduleId);
+        // Ajouter automatiquement les dépendances requises
+        final definition = ModuleRegistry.definitions[moduleId];
+        if (definition != null) {
+          for (final dep in definition.dependencies) {
+            if (!currentModules.contains(dep)) {
+              currentModules.add(dep);
+            }
+          }
+        }
+      }
+    } else {
+      currentModules.remove(moduleId);
+      // Désactiver les modules qui dépendent de celui-ci
+      final dependentModules = currentModules.where((m) {
+        final def = ModuleRegistry.definitions[m];
+        return def != null && def.dependencies.contains(moduleId);
+      }).toList();
+      for (final dep in dependentModules) {
+        currentModules.remove(dep);
+      }
+    }
+    
+    state = state.copyWith(
+      enabledModuleIds: currentModules,
+      blueprint: state.blueprint.copyWith(
+        modules: _moduleIdsToModulesLight(currentModules),
+      ),
+    );
+  }
+
+  /// Remplace entièrement la liste des modules activés.
+  void setEnabledModules(List<ModuleId> moduleIds) {
+    state = state.copyWith(
+      enabledModuleIds: moduleIds,
+      blueprint: state.blueprint.copyWith(
+        modules: _moduleIdsToModulesLight(moduleIds),
+      ),
+    );
+  }
+
+  /// Convertit une liste de ModuleId en RestaurantModulesLight.
+  RestaurantModulesLight _moduleIdsToModulesLight(List<ModuleId> moduleIds) {
+    return RestaurantModulesLight(
+      ordering: moduleIds.contains(ModuleId.ordering),
+      delivery: moduleIds.contains(ModuleId.delivery),
+      clickAndCollect: moduleIds.contains(ModuleId.clickAndCollect),
+      payments: moduleIds.contains(ModuleId.payments),
+      loyalty: moduleIds.contains(ModuleId.loyalty),
+      roulette: moduleIds.contains(ModuleId.roulette),
+      kitchenTablet: moduleIds.contains(ModuleId.kitchenTablet),
+      staffTablet: moduleIds.contains(ModuleId.staffTablet),
+    );
+  }
+
+  /// Met à jour les modules activés (ancienne méthode pour compatibilité).
   void updateModules({
     bool? ordering,
     bool? delivery,
@@ -262,6 +377,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     bool? kitchenTablet,
     bool? staffTablet,
   }) {
+    // Mettre à jour le blueprint
     state = state.copyWith(
       blueprint: state.blueprint.copyWith(
         modules: state.blueprint.modules.copyWith(
@@ -276,12 +392,38 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
         ),
       ),
     );
+    
+    // Synchroniser avec enabledModuleIds
+    final newModules = <ModuleId>[];
+    final modules = state.blueprint.modules;
+    if (modules.ordering) newModules.add(ModuleId.ordering);
+    if (modules.delivery) newModules.add(ModuleId.delivery);
+    if (modules.clickAndCollect) newModules.add(ModuleId.clickAndCollect);
+    if (modules.payments) newModules.add(ModuleId.payments);
+    if (modules.loyalty) newModules.add(ModuleId.loyalty);
+    if (modules.roulette) newModules.add(ModuleId.roulette);
+    if (modules.kitchenTablet) newModules.add(ModuleId.kitchenTablet);
+    if (modules.staffTablet) newModules.add(ModuleId.staffTablet);
+    
+    state = state.copyWith(enabledModuleIds: newModules);
   }
 
   /// Remplace entièrement les modules.
   void setModules(RestaurantModulesLight modules) {
+    // Synchroniser avec enabledModuleIds
+    final newModules = <ModuleId>[];
+    if (modules.ordering) newModules.add(ModuleId.ordering);
+    if (modules.delivery) newModules.add(ModuleId.delivery);
+    if (modules.clickAndCollect) newModules.add(ModuleId.clickAndCollect);
+    if (modules.payments) newModules.add(ModuleId.payments);
+    if (modules.loyalty) newModules.add(ModuleId.loyalty);
+    if (modules.roulette) newModules.add(ModuleId.roulette);
+    if (modules.kitchenTablet) newModules.add(ModuleId.kitchenTablet);
+    if (modules.staffTablet) newModules.add(ModuleId.staffTablet);
+    
     state = state.copyWith(
       blueprint: state.blueprint.copyWith(modules: modules),
+      enabledModuleIds: newModules,
     );
   }
 
@@ -309,6 +451,16 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   Future<void> submit({String? ownerUserId}) async {
     if (!state.blueprint.isValid) {
       state = state.copyWith(error: 'Le blueprint n\'est pas valide');
+      return;
+    }
+
+    // Valider les dépendances des modules
+    if (!validateModuleDependencies(state.enabledModuleIds)) {
+      final missing = getMissingDependencies(state.enabledModuleIds);
+      final missingNames = missing.map((m) => m.label).join(', ');
+      state = state.copyWith(
+        error: 'Configuration incomplète: dépendances manquantes ($missingNames)',
+      );
       return;
     }
 
@@ -355,6 +507,16 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   Future<void> submitMock() async {
     if (!state.blueprint.isValid) {
       state = state.copyWith(error: 'Le blueprint n\'est pas valide');
+      return;
+    }
+
+    // Valider les dépendances des modules
+    if (!validateModuleDependencies(state.enabledModuleIds)) {
+      final missing = getMissingDependencies(state.enabledModuleIds);
+      final missingNames = missing.map((m) => m.label).join(', ');
+      state = state.copyWith(
+        error: 'Configuration incomplète: dépendances manquantes ($missingNames)',
+      );
       return;
     }
 
