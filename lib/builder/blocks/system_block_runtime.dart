@@ -142,7 +142,7 @@ class SystemBlockRuntime extends StatelessWidget {
     // First check if it's a new-style module from builder_modules
     // These are: menu_catalog, cart_module, profile_module, roulette_module
     if (_isBuilderModule(moduleType)) {
-      return _buildBuilderModule(context, moduleType);
+      return _buildBuilderModule(context, moduleType, theme);
     }
     
     // Legacy module types (for backward compatibility)
@@ -173,7 +173,7 @@ class SystemBlockRuntime extends StatelessWidget {
   
   /// Build a module from builder_modules.dart
   /// Uses the renderModule function which properly displays CartModuleWidget and others
-  Widget _buildBuilderModule(BuildContext context, String moduleType) {
+  Widget _buildBuilderModule(BuildContext context, String moduleType, ThemeConfig theme) {
     try {
       // Use the renderModule function from builder_modules.dart
       // This renders the actual module widgets (CartModuleWidget, etc.)
@@ -182,7 +182,7 @@ class SystemBlockRuntime extends StatelessWidget {
       if (kDebugMode) {
         debugPrint('Error rendering builder module "$moduleType": $e');
       }
-      return _buildUnknownModule(moduleType);
+      return _buildUnknownModule(moduleType, theme);
     }
   }
   
