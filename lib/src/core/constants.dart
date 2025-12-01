@@ -15,6 +15,11 @@ class AppRoutes {
   static const String roulette = '/roulette';
   static const String rewards = '/rewards';
   
+  // Delivery routes (module-guarded)
+  static const String deliveryAddress = '/delivery/address';
+  static const String deliveryArea = '/delivery/area';
+  static const String orderTracking = '/order/:id/tracking';
+  
   // Admin entry point
   static const String adminStudio = '/admin/studio';
   static const String adminTab = '/adminTab';

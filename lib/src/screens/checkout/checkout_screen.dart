@@ -85,6 +85,43 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       );
       return;
     }
+    
+    // Validate delivery state if delivery mode is selected
+    final deliveryState = ref.read(deliveryProvider);
+    final deliverySettings = ref.read(deliverySettingsProvider);
+    final cartState = ref.read(cartProvider);
+    
+    if (deliveryState.isDeliverySelected) {
+      // Check if delivery is fully configured
+      if (deliveryState.selectedAddress == null || deliveryState.selectedArea == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Veuillez configurer votre adresse de livraison'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        context.push('/delivery/address');
+        return;
+      }
+      
+      // Check minimum order amount
+      final minimumOk = deliverySettings != null
+          ? isMinimumReached(deliverySettings, deliveryState.selectedArea, cartState.total)
+          : cartState.total >= (deliveryState.selectedArea?.minimumOrderAmount ?? 0);
+      
+      if (!minimumOk) {
+        final minimumAmount = deliverySettings != null
+            ? getMinimumOrderAmount(deliverySettings, deliveryState.selectedArea)
+            : (deliveryState.selectedArea?.minimumOrderAmount ?? 0);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Minimum de commande pour la livraison : ${minimumAmount.toStringAsFixed(2)} €'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
 
     try {
       // Marquer les récompenses comme utilisées
@@ -103,13 +140,35 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           await loyaltyService.useReward(uid, RewardType.freeDessert);
         }
       }
+      
+      // Calculate delivery fee if applicable
+      double? deliveryFee;
+      if (deliveryState.isDeliverySelected && deliveryState.selectedArea != null) {
+        if (deliverySettings != null) {
+          deliveryFee = computeDeliveryFee(
+            deliverySettings,
+            deliveryState.selectedArea!,
+            cartState.total,
+          );
+        } else {
+          deliveryFee = deliveryState.selectedArea!.deliveryFee;
+        }
+      }
 
-      // Créer la commande avec les informations de retrait
+      // Créer la commande avec les informations de retrait et/ou livraison
       await ref.read(userProvider.notifier).addOrder(
         pickupDate: '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
         pickupTimeSlot: _selectedTimeSlot,
         customerName: 'Client', // TODO: Récupérer depuis le profil utilisateur
+        // Delivery data
+        deliveryMode: deliveryState.isDeliverySelected ? 'delivery' : 'takeAway',
+        deliveryAddress: deliveryState.selectedAddress?.toJson(),
+        deliveryAreaId: deliveryState.selectedArea?.id,
+        deliveryFee: deliveryFee,
       );
+      
+      // Reset delivery state after successful order
+      ref.read(deliveryProvider.notifier).reset();
       
       if (!mounted) return;
       
@@ -117,7 +176,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => AlertDialog(
+        builder: (dialogContext) => AlertDialog(
           title: const Row(
             children: [
               Icon(Icons.check_circle, color: Colors.green, size: 32),
@@ -129,20 +188,35 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Votre commande a été enregistrée.'),
+              const Text('Votre commande a été enregistrée.'),
+              const SizedBox(height: 12),
+              if (deliveryState.isDeliverySelected) ...[
+                const Text(
+                  'Livraison prévue:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(deliveryState.selectedAddress?.formattedAddress ?? ''),
+                const SizedBox(height: 8),
+                Text(
+                  'Délai estimé: ${deliveryState.selectedArea?.estimatedMinutes ?? 30} min',
+                  style: const TextStyle(color: Colors.blue),
+                ),
+              ] else ...[
+                const Text(
+                  'Retrait prévu:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                ),
+                Text(_selectedTimeSlot!),
+              ],
               const SizedBox(height: 12),
               Text(
-                'Retrait prévu:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-              ),
-              Text(_selectedTimeSlot!),
-              const SizedBox(height: 12),
-              Text(
-                'Statut: En préparation 🍕',
-                style: TextStyle(
+                deliveryState.isDeliverySelected
+                    ? 'Statut: En préparation 🛵'
+                    : 'Statut: En préparation 🍕',
+                style: const TextStyle(
                   color: Colors.orange,
                   fontWeight: FontWeight.bold,
                 ),
@@ -152,7 +226,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           actions: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 context.go('/profile'); // Voir historique
               },
               child: const Text('Voir mes commandes'),
@@ -301,18 +375,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             const SizedBox(height: 40),
             
             // Enhanced Confirmation Button
+            // Disable if delivery is selected and minimum not met
             SizedBox(
               width: double.infinity,
               height: 60,
               child: ElevatedButton(
-                onPressed: _confirmOrder,
+                onPressed: minimumOk ? _confirmOrder : null,
+                style: ElevatedButton.styleFrom(
+                  disabledBackgroundColor: Colors.grey.shade300,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.check_circle_outline, size: 24),
+                    Icon(
+                      minimumOk ? Icons.check_circle_outline : Icons.warning_amber,
+                      size: 24,
+                    ),
                     const SizedBox(width: 12),
                     Text(
-                      'Confirmer - ${total.toStringAsFixed(2)} €',
+                      minimumOk 
+                          ? 'Confirmer - ${total.toStringAsFixed(2)} €'
+                          : 'Minimum non atteint',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,

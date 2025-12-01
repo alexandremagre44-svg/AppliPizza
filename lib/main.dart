@@ -23,6 +23,11 @@ import 'src/kitchen/kitchen_page.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
 
+// Delivery screens imports
+import 'src/screens/delivery/delivery_address_screen.dart';
+import 'src/screens/delivery/delivery_area_selector_screen.dart';
+import 'src/screens/delivery/delivery_tracking_screen.dart';
+
 // Admin screens imports
 import 'src/screens/admin/admin_studio_screen.dart';
 import 'src/screens/admin/products_admin_screen.dart';
@@ -45,6 +50,7 @@ import 'src/staff_tablet/providers/staff_tablet_auth_provider.dart';
 // Importez le composant de barre de navigation
 import 'src/widgets/scaffold_with_nav_bar.dart'; 
 import 'src/models/product.dart';
+import 'src/models/order.dart';
 import 'src/models/restaurant_config.dart';
 import 'src/theme/app_theme.dart';
 import 'src/core/constants.dart';
@@ -425,6 +431,62 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.checkout,
           builder: (context, state) => const CheckoutScreen(),
+        ),
+        // Delivery Routes (module-guarded)
+        GoRoute(
+          path: AppRoutes.deliveryAddress,
+          builder: (context, state) {
+            // Module guard: delivery module required
+            final flags = ref.read(restaurantFeatureFlagsProvider);
+            if (flags != null && !flags.has(ModuleId.delivery)) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Module livraison non disponible'),
+                ),
+              );
+            }
+            return const DeliveryAddressScreen();
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.deliveryArea,
+          builder: (context, state) {
+            // Module guard: delivery module required
+            final flags = ref.read(restaurantFeatureFlagsProvider);
+            if (flags != null && !flags.has(ModuleId.delivery)) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Module livraison non disponible'),
+                ),
+              );
+            }
+            return const DeliveryAreaSelectorScreen();
+          },
+        ),
+        GoRoute(
+          path: '/order/:id/tracking',
+          builder: (context, state) {
+            // Module guard: delivery module required
+            final flags = ref.read(restaurantFeatureFlagsProvider);
+            if (flags != null && !flags.has(ModuleId.delivery)) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Module livraison non disponible'),
+                ),
+              );
+            }
+            // Validate order data
+            if (state.extra is! Order) {
+              return Scaffold(
+                appBar: AppBar(title: const Text('Erreur')),
+                body: const Center(
+                  child: Text('Commande introuvable'),
+                ),
+              );
+            }
+            final order = state.extra as Order;
+            return DeliveryTrackingScreen(order: order);
+          },
         ),
         // Route Kitchen Mode
         GoRoute(
