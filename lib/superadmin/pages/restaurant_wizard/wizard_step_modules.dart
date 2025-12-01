@@ -2,98 +2,79 @@
 ///
 /// Étape 4 du Wizard: Configuration des modules.
 /// Permet d'activer/désactiver les différents modules du restaurant.
+/// Utilise ModuleRegistry pour afficher tous les 17 modules disponibles.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/restaurant_blueprint.dart';
+import '../../../white_label/core/module_category.dart';
+import '../../../white_label/core/module_definition.dart' as core;
+import '../../../white_label/core/module_id.dart';
+import '../../../white_label/core/module_registry.dart';
 import 'wizard_state.dart';
 
-/// Définition d'un module avec ses métadonnées.
-class ModuleDefinition {
-  final String id;
-  final String name;
-  final String description;
-  final IconData icon;
-  final String category;
-  final bool isCore;
-
-  const ModuleDefinition({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.icon,
-    required this.category,
-    this.isCore = false,
-  });
+/// Retourne une icône pour un ModuleId.
+IconData _getModuleIcon(ModuleId moduleId) {
+  switch (moduleId) {
+    case ModuleId.ordering:
+      return Icons.shopping_cart;
+    case ModuleId.delivery:
+      return Icons.delivery_dining;
+    case ModuleId.clickAndCollect:
+      return Icons.store;
+    case ModuleId.payments:
+      return Icons.payment;
+    case ModuleId.paymentTerminal:
+      return Icons.point_of_sale;
+    case ModuleId.wallet:
+      return Icons.account_balance_wallet;
+    case ModuleId.loyalty:
+      return Icons.card_giftcard;
+    case ModuleId.roulette:
+      return Icons.casino;
+    case ModuleId.promotions:
+      return Icons.local_offer;
+    case ModuleId.newsletter:
+      return Icons.email;
+    case ModuleId.kitchenTablet:
+      return Icons.kitchen;
+    case ModuleId.staffTablet:
+      return Icons.tablet_android;
+    case ModuleId.timeRecorder:
+      return Icons.access_time;
+    case ModuleId.theme:
+      return Icons.palette;
+    case ModuleId.pagesBuilder:
+      return Icons.web;
+    case ModuleId.reporting:
+      return Icons.analytics;
+    case ModuleId.exports:
+      return Icons.download;
+    case ModuleId.campaigns:
+      return Icons.campaign;
+  }
 }
 
-/// Liste des modules disponibles.
-const List<ModuleDefinition> _availableModules = [
-  // Core
-  ModuleDefinition(
-    id: 'ordering',
-    name: 'Commande en ligne',
-    description: 'Permet aux clients de passer des commandes depuis l\'application.',
-    icon: Icons.shopping_cart,
-    category: 'Core',
-    isCore: true,
-  ),
-  ModuleDefinition(
-    id: 'payments',
-    name: 'Paiement en ligne',
-    description: 'Intègre les paiements par carte bancaire et autres moyens.',
-    icon: Icons.payment,
-    category: 'Core',
-    isCore: true,
-  ),
-  // Livraison
-  ModuleDefinition(
-    id: 'delivery',
-    name: 'Livraison',
-    description: 'Active le service de livraison à domicile.',
-    icon: Icons.delivery_dining,
-    category: 'Livraison',
-  ),
-  ModuleDefinition(
-    id: 'clickAndCollect',
-    name: 'Click & Collect',
-    description: 'Permet aux clients de commander et récupérer sur place.',
-    icon: Icons.store,
-    category: 'Livraison',
-  ),
-  // Marketing
-  ModuleDefinition(
-    id: 'loyalty',
-    name: 'Programme fidélité',
-    description: 'Système de points et récompenses pour fidéliser les clients.',
-    icon: Icons.card_giftcard,
-    category: 'Marketing',
-  ),
-  ModuleDefinition(
-    id: 'roulette',
-    name: 'Jeu Roulette',
-    description: 'Mini-jeu promotionnel pour engager les clients.',
-    icon: Icons.casino,
-    category: 'Marketing',
-  ),
-  // Operations
-  ModuleDefinition(
-    id: 'kitchenTablet',
-    name: 'Tablette cuisine',
-    description: 'Affichage des commandes en cuisine sur tablette.',
-    icon: Icons.kitchen,
-    category: 'Operations',
-  ),
-  ModuleDefinition(
-    id: 'staffTablet',
-    name: 'Tablette staff',
-    description: 'Interface de prise de commande pour le personnel.',
-    icon: Icons.tablet_android,
-    category: 'Operations',
-  ),
-];
+/// Retourne une couleur pour une catégorie de module.
+Color _getCategoryColor(ModuleCategory category) {
+  switch (category) {
+    case ModuleCategory.core:
+      return Colors.blue;
+    case ModuleCategory.payment:
+      return Colors.green;
+    case ModuleCategory.marketing:
+      return Colors.orange;
+    case ModuleCategory.operations:
+      return Colors.purple;
+    case ModuleCategory.appearance:
+      return Colors.pink;
+    case ModuleCategory.staff:
+      return Colors.teal;
+    case ModuleCategory.analytics:
+      return Colors.indigo;
+  }
+}
 
 /// Étape 4: Configuration des modules.
 class WizardStepModules extends ConsumerWidget {
@@ -102,14 +83,22 @@ class WizardStepModules extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final wizardState = ref.watch(restaurantWizardProvider);
-    final modules = wizardState.blueprint.modules;
+    final enabledModules = wizardState.enabledModuleIds;
+    // Use a Set for O(1) lookup performance
+    final enabledModulesSet = enabledModules.toSet();
+
+    // Récupérer tous les modules depuis ModuleRegistry
+    final allModules = ModuleRegistry.definitions.values.toList();
 
     // Grouper les modules par catégorie
-    final modulesByCategory = <String, List<ModuleDefinition>>{};
-    for (final module in _availableModules) {
+    final modulesByCategory = <ModuleCategory, List<core.ModuleDefinition>>{};
+    for (final module in allModules) {
       modulesByCategory.putIfAbsent(module.category, () => []);
       modulesByCategory[module.category]!.add(module);
     }
+
+    // Calculer les dépendances manquantes
+    final missingDeps = getMissingDependencies(enabledModules);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
@@ -130,7 +119,8 @@ class WizardStepModules extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Sélectionnez les fonctionnalités que vous souhaitez activer pour votre restaurant.',
+                'Sélectionnez les fonctionnalités que vous souhaitez activer pour votre restaurant. '
+                '${allModules.length} modules disponibles.',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey.shade600,
@@ -139,43 +129,52 @@ class WizardStepModules extends ConsumerWidget {
               const SizedBox(height: 16),
 
               // Résumé
-              _ModulesSummary(modules: modules),
-              const SizedBox(height: 32),
+              _ModulesSummary(
+                enabledCount: enabledModules.length,
+                totalCount: allModules.length,
+                enabledModules: enabledModules,
+              ),
+              const SizedBox(height: 16),
+
+              // Avertissement dépendances
+              if (missingDeps.isNotEmpty)
+                _DependencyWarning(missingDeps: missingDeps),
+              const SizedBox(height: 24),
 
               // Modules par catégorie
               ...modulesByCategory.entries.map((entry) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      entry.key,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A1A2E),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...entry.value.map((moduleDef) {
-                      final isEnabled = _isModuleEnabled(modules, moduleDef.id);
-                      return _ModuleToggleCard(
-                        module: moduleDef,
-                        isEnabled: isEnabled,
-                        onToggle: (value) {
-                          _toggleModule(ref, moduleDef.id, value);
-                        },
-                      );
-                    }),
-                    const SizedBox(height: 24),
-                  ],
+                return _ModuleCategorySection(
+                  category: entry.key,
+                  modules: entry.value,
+                  enabledModulesSet: enabledModulesSet,
+                  onToggle: (moduleId, enabled) {
+                    ref
+                        .read(restaurantWizardProvider.notifier)
+                        .toggleModule(moduleId, enabled);
+                  },
                 );
               }),
 
+              const SizedBox(height: 24),
+
               // Actions rapides
               _QuickActions(
-                onEnableAll: () => _enableAllModules(ref),
-                onDisableAll: () => _disableAllModules(ref),
-                onEnableCore: () => _enableCoreModules(ref),
+                onEnableAll: () {
+                  ref
+                      .read(restaurantWizardProvider.notifier)
+                      .setEnabledModules(ModuleId.values.toList());
+                },
+                onDisableAll: () {
+                  ref
+                      .read(restaurantWizardProvider.notifier)
+                      .setEnabledModules([]);
+                },
+                onEnableCore: () {
+                  ref.read(restaurantWizardProvider.notifier).setEnabledModules([
+                    ModuleId.ordering,
+                    ModuleId.payments,
+                  ]);
+                },
               ),
             ],
           ),
@@ -183,102 +182,22 @@ class WizardStepModules extends ConsumerWidget {
       ),
     );
   }
-
-  bool _isModuleEnabled(RestaurantModulesLight modules, String moduleId) {
-    switch (moduleId) {
-      case 'ordering':
-        return modules.ordering;
-      case 'delivery':
-        return modules.delivery;
-      case 'clickAndCollect':
-        return modules.clickAndCollect;
-      case 'payments':
-        return modules.payments;
-      case 'loyalty':
-        return modules.loyalty;
-      case 'roulette':
-        return modules.roulette;
-      case 'kitchenTablet':
-        return modules.kitchenTablet;
-      case 'staffTablet':
-        return modules.staffTablet;
-      default:
-        return false;
-    }
-  }
-
-  void _toggleModule(WidgetRef ref, String moduleId, bool value) {
-    final notifier = ref.read(restaurantWizardProvider.notifier);
-    switch (moduleId) {
-      case 'ordering':
-        notifier.updateModules(ordering: value);
-        break;
-      case 'delivery':
-        notifier.updateModules(delivery: value);
-        break;
-      case 'clickAndCollect':
-        notifier.updateModules(clickAndCollect: value);
-        break;
-      case 'payments':
-        notifier.updateModules(payments: value);
-        break;
-      case 'loyalty':
-        notifier.updateModules(loyalty: value);
-        break;
-      case 'roulette':
-        notifier.updateModules(roulette: value);
-        break;
-      case 'kitchenTablet':
-        notifier.updateModules(kitchenTablet: value);
-        break;
-      case 'staffTablet':
-        notifier.updateModules(staffTablet: value);
-        break;
-    }
-  }
-
-  void _enableAllModules(WidgetRef ref) {
-    ref.read(restaurantWizardProvider.notifier).setModules(
-          const RestaurantModulesLight(
-            ordering: true,
-            delivery: true,
-            clickAndCollect: true,
-            payments: true,
-            loyalty: true,
-            roulette: true,
-            kitchenTablet: true,
-            staffTablet: true,
-          ),
-        );
-  }
-
-  void _disableAllModules(WidgetRef ref) {
-    ref
-        .read(restaurantWizardProvider.notifier)
-        .setModules(const RestaurantModulesLight());
-  }
-
-  void _enableCoreModules(WidgetRef ref) {
-    ref.read(restaurantWizardProvider.notifier).setModules(
-          const RestaurantModulesLight(
-            ordering: true,
-            payments: true,
-          ),
-        );
-  }
 }
 
 /// Résumé des modules activés.
 class _ModulesSummary extends StatelessWidget {
-  final RestaurantModulesLight modules;
+  final int enabledCount;
+  final int totalCount;
+  final List<ModuleId> enabledModules;
 
-  const _ModulesSummary({required this.modules});
+  const _ModulesSummary({
+    required this.enabledCount,
+    required this.totalCount,
+    required this.enabledModules,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final enabledCount = modules.enabledCount;
-    final totalCount = _availableModules.length;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -320,7 +239,10 @@ class _ModulesSummary extends StatelessWidget {
                 const SizedBox(height: 4),
                 if (enabledCount > 0)
                   Text(
-                    modules.enabledModules.join(', '),
+                    enabledModules.take(5).map((m) => m.label).join(', ') +
+                        (enabledModules.length > 5
+                            ? ' +${enabledModules.length - 5}'
+                            : ''),
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.green.shade600,
@@ -345,20 +267,148 @@ class _ModulesSummary extends StatelessWidget {
   }
 }
 
-/// Carte de module avec toggle.
-class _ModuleToggleCard extends StatelessWidget {
-  final ModuleDefinition module;
-  final bool isEnabled;
-  final Function(bool) onToggle;
+/// Avertissement pour les dépendances manquantes.
+class _DependencyWarning extends StatelessWidget {
+  final List<ModuleId> missingDeps;
 
-  const _ModuleToggleCard({
-    required this.module,
-    required this.isEnabled,
+  const _DependencyWarning({required this.missingDeps});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber, color: Colors.orange.shade700),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dépendances manquantes',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Modules requis: ${missingDeps.map((m) => m.label).join(', ')}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.orange.shade700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Section de modules par catégorie.
+class _ModuleCategorySection extends StatelessWidget {
+  final ModuleCategory category;
+  final List<core.ModuleDefinition> modules;
+  final Set<ModuleId> enabledModulesSet;
+  final Function(ModuleId, bool) onToggle;
+
+  const _ModuleCategorySection({
+    required this.category,
+    required this.modules,
+    required this.enabledModulesSet,
     required this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
+    final color = _getCategoryColor(category);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 4,
+              height: 20,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              category.label,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A1A2E),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '(${modules.length})',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          category.description,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...modules.map((moduleDef) {
+          final isEnabled = enabledModulesSet.contains(moduleDef.id);
+          return _ModuleToggleCard(
+            module: moduleDef,
+            isEnabled: isEnabled,
+            categoryColor: color,
+            onToggle: (value) => onToggle(moduleDef.id, value),
+          );
+        }),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+}
+
+/// Carte de module avec toggle.
+class _ModuleToggleCard extends StatelessWidget {
+  final core.ModuleDefinition module;
+  final bool isEnabled;
+  final Color categoryColor;
+  final Function(bool) onToggle;
+
+  const _ModuleToggleCard({
+    required this.module,
+    required this.isEnabled,
+    required this.categoryColor,
+    required this.onToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Récupérer les dépendances
+    final deps = module.dependencies;
+    final hasDeps = deps.isNotEmpty;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -379,7 +429,7 @@ class _ModuleToggleCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
-              module.icon,
+              _getModuleIcon(module.id),
               size: 24,
               color: isEnabled ? Colors.green.shade600 : Colors.grey.shade600,
             ),
@@ -392,15 +442,18 @@ class _ModuleToggleCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      module.name,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A1A2E),
+                    Flexible(
+                      child: Text(
+                        module.name,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1A1A2E),
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (module.isCore) ...[
+                    if (module.isPremium) ...[
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -408,15 +461,15 @@ class _ModuleToggleCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade100,
+                          color: Colors.amber.shade100,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          'Core',
+                          'Premium',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: Colors.blue.shade700,
+                            color: Colors.amber.shade800,
                           ),
                         ),
                       ),
@@ -431,6 +484,30 @@ class _ModuleToggleCard extends StatelessWidget {
                     color: Colors.grey.shade600,
                   ),
                 ),
+                if (hasDeps) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.link,
+                        size: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          'Requiert: ${deps.map((d) => d.label).join(', ')}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade500,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

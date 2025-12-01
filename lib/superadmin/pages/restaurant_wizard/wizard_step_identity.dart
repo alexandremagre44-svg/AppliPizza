@@ -1,13 +1,13 @@
 /// lib/superadmin/pages/restaurant_wizard/wizard_step_identity.dart
 ///
 /// Étape 1 du Wizard: Identité du restaurant.
-/// Permet de définir le nom, le slug et le type du restaurant.
+/// Permet de définir le nom et le slug du restaurant.
+/// Note: Le type de restaurant est déterminé par le template choisi (étape 3).
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../models/restaurant_blueprint.dart';
 import 'wizard_state.dart';
 
 /// Étape 1: Configuration de l'identité du restaurant.
@@ -67,9 +67,6 @@ class _WizardStepIdentityState extends ConsumerState<WizardStepIdentity> {
 
   @override
   Widget build(BuildContext context) {
-    final wizardState = ref.watch(restaurantWizardProvider);
-    final blueprint = wizardState.blueprint;
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
       child: Center(
@@ -116,34 +113,6 @@ class _WizardStepIdentityState extends ConsumerState<WizardStepIdentity> {
                 isRequired: true,
                 helperText:
                     'Utilisé pour l\'URL: https://${_slugController.text.isEmpty ? 'mon-restaurant' : _slugController.text}.delizza.app',
-              ),
-              const SizedBox(height: 24),
-
-              // Type de restaurant
-              const Text(
-                'Type de restaurant *',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1A1A2E),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: RestaurantType.values.map((type) {
-                  final isSelected = blueprint.type == type;
-                  return _RestaurantTypeCard(
-                    type: type,
-                    isSelected: isSelected,
-                    onTap: () {
-                      ref
-                          .read(restaurantWizardProvider.notifier)
-                          .updateIdentity(type: type);
-                    },
-                  );
-                }).toList(),
               ),
               const SizedBox(height: 32),
 
@@ -222,94 +191,6 @@ class _WizardStepIdentityState extends ConsumerState<WizardStepIdentity> {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Carte de sélection du type de restaurant.
-class _RestaurantTypeCard extends StatelessWidget {
-  final RestaurantType type;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _RestaurantTypeCard({
-    required this.type,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  IconData _getIcon() {
-    switch (type) {
-      case RestaurantType.restaurant:
-        return Icons.restaurant;
-      case RestaurantType.snack:
-        return Icons.fastfood;
-      case RestaurantType.snackDelivery:
-        return Icons.delivery_dining;
-      case RestaurantType.custom:
-        return Icons.tune;
-    }
-  }
-
-  String _getDescription() {
-    switch (type) {
-      case RestaurantType.restaurant:
-        return 'Service à table, menu complet';
-      case RestaurantType.snack:
-        return 'Vente à emporter rapide';
-      case RestaurantType.snackDelivery:
-        return 'Vente à emporter + livraison';
-      case RestaurantType.custom:
-        return 'Configuration libre';
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 140,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF1A1A2E) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF1A1A2E) : Colors.grey.shade300,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              _getIcon(),
-              size: 32,
-              color: isSelected ? Colors.white : Colors.grey.shade600,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              type.displayName,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : const Color(0xFF1A1A2E),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              _getDescription(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 11,
-                color: isSelected ? Colors.white70 : Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
