@@ -102,6 +102,15 @@ class ModuleRegistry {
       requiresConfiguration: true,
       dependencies: [],
     ),
+    ModuleId.campaigns: const ModuleDefinition(
+      id: ModuleId.campaigns,
+      category: ModuleCategory.marketing,
+      name: 'Campagnes',
+      description: 'Création et gestion de campagnes marketing ciblées.',
+      isPremium: true,
+      requiresConfiguration: true,
+      dependencies: [],
+    ),
     ModuleId.newsletter: const ModuleDefinition(
       id: ModuleId.newsletter,
       category: ModuleCategory.marketing,

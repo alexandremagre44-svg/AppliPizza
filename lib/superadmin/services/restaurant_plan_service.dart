@@ -126,6 +126,84 @@ class RestaurantPlanService {
     });
   }
 
+  /// Sauvegarde complète lors de la création d'un restaurant via le wizard.
+  /// 
+  /// Cette méthode crée 3 documents Firestore:
+  /// 1. restaurants/{id} - document principal du restaurant
+  /// 2. restaurants/{id}/plan/config - configuration des modules (RestaurantPlan)
+  /// 3. restaurants/{id}/settings/branding - paramètres de marque
+  /// 
+  /// Paramètres:
+  /// - restaurantId: ID du restaurant à créer
+  /// - name: Nom du restaurant
+  /// - slug: Slug URL-friendly
+  /// - enabledModuleIds: Liste des modules activés
+  /// - brand: Configuration de la marque (Map avec brandName, colors, etc.)
+  /// - templateId: ID du template utilisé (optionnel)
+  /// 
+  /// Retourne l'ID du restaurant créé.
+  Future<String> saveFullRestaurantCreation({
+    required String restaurantId,
+    required String name,
+    required String slug,
+    required List<ModuleId> enabledModuleIds,
+    required Map<String, dynamic> brand,
+    String? templateId,
+  }) async {
+    try {
+      // Préparer les configurations de modules
+      final moduleConfigs = enabledModuleIds.map((moduleId) {
+        return ModuleConfig(
+          id: moduleId,
+          enabled: true,
+          settings: {},
+        );
+      }).toList();
+
+      // Créer le RestaurantPlan
+      final plan = RestaurantPlan(
+        restaurantId: restaurantId,
+        name: name,
+        slug: slug,
+        modules: moduleConfigs,
+      );
+
+      // Batch write pour créer les 3 documents atomiquement
+      final batch = _db.batch();
+
+      // 1. Document principal restaurants/{id}
+      final mainDocRef = _restaurantsCollection.doc(restaurantId);
+      batch.set(mainDocRef, {
+        'restaurantId': restaurantId,
+        'name': name,
+        'slug': slug,
+        if (templateId != null) 'templateId': templateId,
+        'status': 'ACTIVE',
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      // 2. Document restaurants/{id}/plan/config
+      final planDocRef = _planDoc(restaurantId);
+      batch.set(planDocRef, plan.toJson());
+
+      // 3. Document restaurants/{id}/settings/branding
+      final brandingDocRef = mainDocRef.collection('settings').doc('branding');
+      batch.set(brandingDocRef, {
+        ...brand,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Commit le batch
+      await batch.commit();
+
+      return restaurantId;
+    } catch (e) {
+      throw Exception('Erreur lors de la création du restaurant: $e');
+    }
+  }
+
   /// Vérifie si un module a des dépendances non satisfaites.
   List<ModuleId> checkDependencies(RestaurantPlan plan, ModuleId moduleId) {
     final definition = ModuleRegistry.of(moduleId);

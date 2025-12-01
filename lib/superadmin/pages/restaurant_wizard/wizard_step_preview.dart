@@ -23,9 +23,9 @@ class WizardStepPreview extends ConsumerWidget {
     final blueprint = wizardState.blueprint;
     final enabledModules = wizardState.enabledModuleIds;
 
-    // Valider les dépendances
-    final isModulesValid = validateModuleDependencies(enabledModules);
-    final missingDeps = getMissingDependencies(enabledModules);
+    // Utiliser les méthodes de validation du state
+    final isReady = wizardState.isReadyForCreation;
+    final missingDeps = isReady ? <ModuleId>[] : getMissingDependencies(enabledModules);
 
     // Récupérer le template sélectionné
     final selectedTemplate = getTemplateById(blueprint.templateId);
@@ -61,7 +61,7 @@ class WizardStepPreview extends ConsumerWidget {
               _ValidationStatus(
                 blueprint: blueprint,
                 enabledModules: enabledModules,
-                isModulesValid: isModulesValid,
+                isValid: isReady,
                 missingDeps: missingDeps,
               ),
               const SizedBox(height: 24),
@@ -189,13 +189,13 @@ class WizardStepPreview extends ConsumerWidget {
 class _ValidationStatus extends StatelessWidget {
   final RestaurantBlueprintLight blueprint;
   final List<ModuleId> enabledModules;
-  final bool isModulesValid;
+  final bool isValid;
   final List<ModuleId> missingDeps;
 
   const _ValidationStatus({
     required this.blueprint,
     required this.enabledModules,
-    required this.isModulesValid,
+    required this.isValid,
     required this.missingDeps,
   });
 
@@ -206,11 +206,9 @@ class _ValidationStatus extends StatelessWidget {
     if (blueprint.name.isEmpty) issues.add('Nom manquant');
     if (blueprint.slug.isEmpty) issues.add('Slug manquant');
     if (blueprint.brand.brandName.isEmpty) issues.add('Nom de marque manquant');
-    if (!isModulesValid) {
+    if (missingDeps.isNotEmpty) {
       issues.add('Dépendances modules: ${missingDeps.map((m) => m.label).join(', ')}');
     }
-
-    final isValid = blueprint.isValid && isModulesValid;
 
     return Container(
       padding: const EdgeInsets.all(16),
