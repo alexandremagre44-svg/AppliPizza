@@ -217,11 +217,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final total = subtotal + serviceFee + deliveryFee;
 
     // Check minimum order for delivery
-    final minimumOk = !deliveryState.isDeliverySelected || 
-        (deliverySettings != null 
-            ? isMinimumReached(deliverySettings, deliveryState.selectedArea, cartState.total)
-            : (deliveryState.selectedArea == null || 
-               cartState.total >= deliveryState.selectedArea!.minimumOrderAmount));
+    final minimumOk = _isMinimumOrderMet(
+      deliveryState, 
+      deliverySettings, 
+      cartState.total,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -816,5 +816,30 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         onAddItems: () => context.go('/menu'),
       ),
     );
+  }
+
+  /// Check if minimum order amount is met for delivery.
+  /// Returns true if not a delivery order or if minimum is met.
+  bool _isMinimumOrderMet(
+    DeliveryState deliveryState,
+    dynamic deliverySettings,
+    double cartTotal,
+  ) {
+    // Not a delivery order - no minimum required
+    if (!deliveryState.isDeliverySelected) {
+      return true;
+    }
+    
+    // Use deliverySettings if available for more accurate check
+    if (deliverySettings != null) {
+      return isMinimumReached(deliverySettings, deliveryState.selectedArea, cartTotal);
+    }
+    
+    // Fallback: check only area minimum
+    if (deliveryState.selectedArea == null) {
+      return true;
+    }
+    
+    return cartTotal >= deliveryState.selectedArea!.minimumOrderAmount;
   }
 }

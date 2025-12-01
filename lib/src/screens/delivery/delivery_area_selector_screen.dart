@@ -35,14 +35,7 @@ class DeliveryAreaSelectorScreen extends ConsumerStatefulWidget {
 class _DeliveryAreaSelectorScreenState
     extends ConsumerState<DeliveryAreaSelectorScreen> {
   DeliveryArea? _selectedArea;
-
-  @override
-  void initState() {
-    super.initState();
-    // Pré-sélectionner la zone existante si disponible
-    final deliveryState = ref.read(deliveryProvider);
-    _selectedArea = deliveryState.selectedArea;
-  }
+  bool _initialized = false;
 
   void _onAreaSelected(DeliveryArea area) {
     setState(() {
@@ -63,8 +56,14 @@ class _DeliveryAreaSelectorScreenState
   @override
   Widget build(BuildContext context) {
     final flags = ref.watch(restaurantFeatureFlagsProvider);
-    final deliverySettings = ref.watch(deliverySettingsProvider);
     final deliveryState = ref.watch(deliveryProvider);
+    
+    // Initialize selected area from provider (only once)
+    if (!_initialized) {
+      _initialized = true;
+      _selectedArea = deliveryState.selectedArea;
+    }
+    final deliverySettings = ref.watch(deliverySettingsProvider);
 
     // Guard: Vérifier si le module livraison est activé
     if (!(flags?.has(ModuleId.delivery) ?? false)) {

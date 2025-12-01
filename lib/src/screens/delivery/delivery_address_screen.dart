@@ -36,21 +36,7 @@ class _DeliveryAddressScreenState extends ConsumerState<DeliveryAddressScreen> {
   final _postalCodeController = TextEditingController();
   final _complementController = TextEditingController();
   final _instructionsController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    // Pré-remplir avec l'adresse existante si disponible
-    final deliveryState = ref.read(deliveryProvider);
-    if (deliveryState.selectedAddress != null) {
-      _addressController.text = deliveryState.selectedAddress!.address;
-      _postalCodeController.text = deliveryState.selectedAddress!.postalCode;
-      _complementController.text =
-          deliveryState.selectedAddress!.complement ?? '';
-      _instructionsController.text =
-          deliveryState.selectedAddress!.driverInstructions ?? '';
-    }
-  }
+  bool _initialized = false;
 
   @override
   void dispose() {
@@ -108,6 +94,18 @@ class _DeliveryAddressScreenState extends ConsumerState<DeliveryAddressScreen> {
   @override
   Widget build(BuildContext context) {
     final flags = ref.watch(restaurantFeatureFlagsProvider);
+    final deliveryState = ref.watch(deliveryProvider);
+
+    // Initialize controllers with existing address (only once)
+    if (!_initialized && deliveryState.selectedAddress != null) {
+      _initialized = true;
+      _addressController.text = deliveryState.selectedAddress!.address;
+      _postalCodeController.text = deliveryState.selectedAddress!.postalCode;
+      _complementController.text =
+          deliveryState.selectedAddress!.complement ?? '';
+      _instructionsController.text =
+          deliveryState.selectedAddress!.driverInstructions ?? '';
+    }
 
     // Guard: Vérifier si le module livraison est activé
     if (!(flags?.has(ModuleId.delivery) ?? false)) {

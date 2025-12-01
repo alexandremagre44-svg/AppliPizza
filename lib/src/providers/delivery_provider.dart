@@ -87,15 +87,18 @@ class DeliveryState {
   });
 
   /// Crée une copie de l'état avec les champs modifiés.
+  /// Use explicit null to clear a field.
   DeliveryState copyWith({
     DeliveryMode? mode,
     DeliveryAddress? selectedAddress,
     DeliveryArea? selectedArea,
+    bool clearAddress = false,
+    bool clearArea = false,
   }) {
     return DeliveryState(
       mode: mode ?? this.mode,
-      selectedAddress: selectedAddress ?? this.selectedAddress,
-      selectedArea: selectedArea ?? this.selectedArea,
+      selectedAddress: clearAddress ? null : (selectedAddress ?? this.selectedAddress),
+      selectedArea: clearArea ? null : (selectedArea ?? this.selectedArea),
     );
   }
 
@@ -129,20 +132,12 @@ class DeliveryNotifier extends StateNotifier<DeliveryState> {
 
   /// Définit l'adresse de livraison.
   void setAddress(DeliveryAddress address) {
-    state = DeliveryState(
-      mode: state.mode,
-      selectedAddress: address,
-      selectedArea: state.selectedArea,
-    );
+    state = state.copyWith(selectedAddress: address);
   }
 
   /// Définit la zone de livraison sélectionnée.
   void setArea(DeliveryArea area) {
-    state = DeliveryState(
-      mode: state.mode,
-      selectedAddress: state.selectedAddress,
-      selectedArea: area,
-    );
+    state = state.copyWith(selectedArea: area);
   }
 
   /// Réinitialise l'état de la livraison.
@@ -152,11 +147,7 @@ class DeliveryNotifier extends StateNotifier<DeliveryState> {
 
   /// Réinitialise uniquement l'adresse et la zone (garde le mode).
   void resetDeliveryDetails() {
-    state = DeliveryState(
-      mode: state.mode,
-      selectedAddress: null,
-      selectedArea: null,
-    );
+    state = state.copyWith(clearAddress: true, clearArea: true);
   }
 }
 
@@ -213,48 +204,40 @@ double getMinimumOrderAmount(DeliverySettings settings, DeliveryArea? area) {
 
 /// Provider pour les frais de livraison calculés.
 ///
-/// Retourne null si la livraison n'est pas configurée.
+/// This provider requires both deliveryProvider and deliverySettingsProvider.
+/// It's designed to be used where deliverySettingsProvider is available.
+/// Returns null if delivery is not selected or not configured.
+///
+/// Note: For use in checkout, the fee calculation is done directly
+/// using the computeDeliveryFee function with deliverySettingsProvider.
 final computedDeliveryFeeProvider = Provider.family<double?, double>((ref, cartTotal) {
   final deliveryState = ref.watch(deliveryProvider);
-  final deliverySettingsAsync = ref.watch(_deliverySettingsForCalcProvider);
   
   if (!deliveryState.isDeliverySelected || deliveryState.selectedArea == null) {
     return null;
   }
   
-  final settings = deliverySettingsAsync;
-  if (settings == null) {
-    return deliveryState.selectedArea!.deliveryFee;
-  }
-  
-  return computeDeliveryFee(settings, deliveryState.selectedArea!, cartTotal);
+  // Return the area's fee as a fallback
+  // The checkout screen should use deliverySettingsProvider for more accurate calculation
+  return deliveryState.selectedArea!.deliveryFee;
 });
 
 /// Provider pour vérifier si le minimum est atteint.
+///
+/// This is a simplified version that only checks the area minimum.
+/// For full validation including global settings, use isMinimumReached
+/// function directly with deliverySettingsProvider.
 final computedMinimumOkProvider = Provider.family<bool, double>((ref, cartTotal) {
   final deliveryState = ref.watch(deliveryProvider);
-  final deliverySettingsAsync = ref.watch(_deliverySettingsForCalcProvider);
   
   if (!deliveryState.isDeliverySelected) {
     return true; // Pas de minimum pour le retrait sur place
   }
   
-  final settings = deliverySettingsAsync;
-  if (settings == null) {
-    // Fallback: vérifier uniquement le minimum de la zone
-    if (deliveryState.selectedArea != null) {
-      return cartTotal >= deliveryState.selectedArea!.minimumOrderAmount;
-    }
-    return true;
+  // Check only the area minimum as a fallback
+  if (deliveryState.selectedArea != null) {
+    return cartTotal >= deliveryState.selectedArea!.minimumOrderAmount;
   }
   
-  return isMinimumReached(settings, deliveryState.selectedArea, cartTotal);
-});
-
-/// Provider interne pour accéder aux settings de livraison.
-/// Import différé pour éviter les dépendances circulaires.
-final _deliverySettingsForCalcProvider = Provider<DeliverySettings?>((ref) {
-  // Ce provider sera overridé ou connecté aux providers existants
-  // Pour l'instant, retourne null et utilise les valeurs de la zone
-  return null;
+  return true;
 });
