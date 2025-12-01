@@ -58,6 +58,9 @@ import 'white_label/core/module_id.dart';
 import 'builder/models/models.dart';
 import 'builder/runtime/runtime.dart';
 
+// SuperAdmin routes
+import 'superadmin/superadmin_router.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -593,6 +596,13 @@ class MyApp extends ConsumerWidget {
             return const StaffTabletHistoryScreen();
           },
         ),
+        // SuperAdmin parent route - redirects to dashboard
+        GoRoute(
+          path: SuperAdminRoutes.root,
+          redirect: (ctx, state) => SuperAdminRoutes.dashboard,
+        ),
+        // SuperAdmin internal routes
+        ...superAdminRoutes,
       ],
     );
   }
