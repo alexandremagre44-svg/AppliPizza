@@ -195,19 +195,25 @@ class DeliveryTrackingScreen extends ConsumerWidget {
   }
 
   Widget _buildStatusTimeline(BuildContext context) {
+    // Define delivery statuses with display name, status value, and icon
+    // Using a custom status value for "En livraison" since OrderStatus.ready maps to delivery in transit
+    const inDeliveryStatus = 'in_delivery';
+    
     final statuses = [
       ('Commande reçue', OrderStatus.pending, Icons.receipt_long),
       ('En préparation', OrderStatus.preparing, Icons.restaurant),
       ('En cuisson', OrderStatus.baking, Icons.local_fire_department),
-      ('En livraison', 'En livraison', Icons.delivery_dining),
+      ('En livraison', inDeliveryStatus, Icons.delivery_dining),
       ('Livrée', OrderStatus.delivered, Icons.check_circle),
     ];
 
     // Déterminer l'index actuel
     int currentIndex = 0;
     for (int i = 0; i < statuses.length; i++) {
-      if (order.status == statuses[i].$2 || 
-          (order.status == OrderStatus.ready && statuses[i].$2 == 'En livraison')) {
+      final statusValue = statuses[i].$2;
+      // OrderStatus.ready maps to "En livraison" for delivery orders
+      if (order.status == statusValue || 
+          (order.status == OrderStatus.ready && statusValue == inDeliveryStatus)) {
         currentIndex = i;
         break;
       }
