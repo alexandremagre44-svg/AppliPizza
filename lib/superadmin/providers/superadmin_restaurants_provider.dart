@@ -32,7 +32,6 @@ class SuperAdminRestaurantSummary {
   final RestaurantStatus status;
   final String? templateId;
   final DateTime createdAt;
-  final bool hasUnifiedPlan;
 
   const SuperAdminRestaurantSummary({
     required this.id,
@@ -41,7 +40,6 @@ class SuperAdminRestaurantSummary {
     required this.status,
     this.templateId,
     required this.createdAt,
-    this.hasUnifiedPlan = false,
   });
 
   /// Crée une instance depuis un document Firestore.
@@ -56,7 +54,6 @@ class SuperAdminRestaurantSummary {
       status: RestaurantStatusExtension.fromString(data['status'] as String?),
       templateId: data['templateId'] as String?,
       createdAt: _parseTimestamp(data['createdAt']),
-      hasUnifiedPlan: false, // Sera déterminé séparément si nécessaire
     );
   }
 

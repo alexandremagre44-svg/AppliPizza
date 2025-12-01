@@ -548,15 +548,26 @@ class _ColorDetailRow extends StatelessWidget {
   });
 
   Color _parseColor(String hex) {
+    // Parse une couleur hex en Color Flutter
+    // Supporte les formats: #RGB, #RRGGBB, #AARRGGBB
     try {
-      final hexColor = hex.replaceAll('#', '');
+      String hexColor = hex.replaceAll('#', '').toUpperCase();
+      
       if (hexColor.length == 6) {
+        // Format RRGGBB -> ajouter l'alpha FF
         return Color(int.parse('FF$hexColor', radix: 16));
       } else if (hexColor.length == 8) {
+        // Format AARRGGBB
         return Color(int.parse(hexColor, radix: 16));
+      } else if (hexColor.length == 3) {
+        // Format RGB -> RRGGBB
+        hexColor = hexColor.split('').map((c) => c + c).join();
+        return Color(int.parse('FF$hexColor', radix: 16));
       }
-    } catch (_) {}
-    return Colors.grey;
+    } on FormatException catch (_) {
+      // Couleur invalide
+    }
+    return Colors.grey.shade400;
   }
 
   @override
@@ -608,15 +619,13 @@ class _ModulesGrid extends StatelessWidget {
   const _ModulesGrid({required this.activeModules});
 
   String _getModuleLabel(String moduleCode) {
-    try {
-      final moduleId = ModuleId.values.firstWhere(
-        (m) => m.code == moduleCode,
-      );
+    // Cherche le module dans le registre
+    final moduleId = ModuleId.values.where((m) => m.code == moduleCode).firstOrNull;
+    if (moduleId != null) {
       return moduleId.label;
-    } catch (_) {
-      // Si le module n'est pas trouvé dans le registry, retourner le code
-      return moduleCode;
     }
+    // Si le module n'est pas trouvé dans le registry, retourner le code
+    return moduleCode;
   }
 
   @override

@@ -243,7 +243,7 @@ class _RestaurantListItem extends StatelessWidget {
                   Text(
                     restaurant.slug.isNotEmpty 
                         ? restaurant.slug 
-                        : 'No slug',
+                        : 'Aucun slug',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey.shade600,
