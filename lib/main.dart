@@ -146,44 +146,18 @@ class MyApp extends ConsumerWidget {
       ModuleRuntimeAdapter.applyAll(runtimeContext, unifiedPlan);
     }
     
-    // Watch the theme configuration from Firestore
-    final themeAsync = ref.watch(themeConfigProvider);
+    // Phase 4: Use unified theme provider (WhiteLabel integration)
+    // The unified theme provider handles:
+    // - No plan → legacy theme
+    // - Theme module OFF → template theme
+    // - Theme module ON → WhiteLabel theme
+    final theme = ref.watch(unifiedThemeProvider);
     
-    return themeAsync.when(
-      // Theme loaded successfully - use dynamic theme
-      data: (themeConfig) {
-        final themeData = ref.watch(currentThemeDataProvider(themeConfig));
-        return MaterialApp.router(
-          title: 'Pizza Deli\'Zza',
-          theme: themeData,
-          debugShowCheckedModeBanner: false,
-          routerConfig: _buildRouter(ref),
-        );
-      },
-      // Theme loading - show white splash screen
-      loading: () {
-        return MaterialApp(
-          title: 'Pizza Deli\'Zza',
-          theme: ThemeData.light(),
-          debugShowCheckedModeBanner: false,
-          home: const Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
-        );
-      },
-      // Theme loading failed - use default static theme
-      error: (error, stack) {
-        debugPrint('MyApp: Error loading theme: $error');
-        return MaterialApp.router(
-          title: 'Pizza Deli\'Zza',
-          theme: AppTheme.lightTheme,
-          debugShowCheckedModeBanner: false,
-          routerConfig: _buildRouter(ref),
-        );
-      },
+    return MaterialApp.router(
+      title: 'Pizza Deli\'Zza',
+      theme: theme,
+      debugShowCheckedModeBanner: false,
+      routerConfig: _buildRouter(ref),
     );
   }
 

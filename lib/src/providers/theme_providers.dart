@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/theme_config.dart';
 import '../services/theme_service.dart';
+import '../theme/app_theme.dart';
+import '../../white_label/runtime/theme_adapter.dart';
+import 'restaurant_plan_provider.dart';
 
 // Re-export themeServiceProvider from theme_service.dart
 export '../services/theme_service.dart' show themeServiceProvider;
@@ -297,3 +300,53 @@ final themeLoadingProvider = StateProvider<bool>((ref) => false);
 
 /// State provider for saving state
 final themeSavingProvider = StateProvider<bool>((ref) => false);
+
+// ========================================================================
+// PHASE 4: Unified Theme Provider (WhiteLabel Integration)
+// ========================================================================
+
+/// Provider unifié pour le thème basé sur RestaurantPlanUnified.
+///
+/// Cette provider implémente la logique suivante:
+/// 1. Si RestaurantPlanUnified absent → utiliser le thème legacy (AppTheme.lightTheme)
+/// 2. Si module thème OFF → utiliser le thème par défaut du template
+/// 3. Si module thème ON → utiliser ThemeAdapter.toAppTheme(plan.theme!)
+///
+/// Le thème legacy reste le fallback total si aucune configuration n'est disponible.
+///
+/// Usage dans MaterialApp:
+/// ```dart
+/// Widget build(BuildContext context, WidgetRef ref) {
+///   final theme = ref.watch(unifiedThemeProvider);
+///   return MaterialApp(
+///     theme: theme,
+///     ...
+///   );
+/// }
+/// ```
+final unifiedThemeProvider = Provider<ThemeData>((ref) {
+  // Charger le plan unifié du restaurant
+  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+  
+  // Extraire le plan si disponible
+  final plan = planAsync.maybeWhen(
+    data: (p) => p,
+    orElse: () => null,
+  );
+  
+  // Cas 1: Pas de plan → fallback sur le thème legacy
+  if (plan == null) {
+    return AppTheme.lightTheme;
+  }
+  
+  // Cas 2: Plan existe - vérifier le module thème
+  final themeModule = plan.theme;
+  
+  // Cas 2a: Module thème absent ou désactivé → thème du template
+  if (themeModule == null || !themeModule.enabled) {
+    return ThemeAdapter.defaultThemeForTemplate(plan.templateId);
+  }
+  
+  // Cas 2b: Module thème activé → utiliser la config WhiteLabel
+  return ThemeAdapter.toAppTheme(themeModule);
+});
