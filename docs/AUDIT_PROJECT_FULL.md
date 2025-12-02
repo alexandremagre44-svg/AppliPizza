@@ -6,6 +6,220 @@
 
 ---
 
+## ⚠️ SECTION 0 — PROBLÈMES ET RISQUES IDENTIFIÉS (FOCUS NÉGATIF)
+
+> **Cette section concentre TOUS les problèmes, failles et risques détectés dans le projet.**
+
+### 🔴 CRITIQUE — Sécurité (Score: 45/100)
+
+#### 1. Règles Firestore Manquantes — RISQUE SÉCURITÉ MAJEUR
+
+**Gravité:** 🔴 **CRITIQUE - BLOQUANT PRODUCTION**
+
+**11 collections Firestore utilisées SANS règles de sécurité:**
+
+| Collection | Utilisée Par | Impact | Risque |
+|------------|--------------|--------|--------|
+| `carts` | App client | Lecture/écriture paniers | 🔴 N'importe qui peut lire/modifier tous les paniers |
+| `rewardTickets` | Module loyalty | Tickets de récompense | 🔴 Fraude possible - création tickets gratuits |
+| `roulette_segments` | Module roulette | Configuration jeu | 🔴 Manipulation probabilités de gain |
+| `roulette_history` | Module roulette | Historique tirages | 🔴 Lecture historique de tous les utilisateurs |
+| `user_roulette_spins` | Module roulette | Compteur tirages | 🔴 Réinitialisation compteur possible |
+| `roulette_rate_limit` | Module roulette | Anti-abus | 🔴 Contournement rate limiting |
+| `order_rate_limit` | Module ordering | Anti-spam commandes | 🔴 Flood de commandes possible |
+| `user_popup_views` | UI tracking | Affichage popups | 🟠 Pollution données tracking |
+| `apps` | SuperAdmin | Config applications | 🔴 Lecture config de toutes les apps |
+| `restaurants` | SuperAdmin | Données restaurants | 🔴 Accès config de tous les restaurants |
+| `users` | SuperAdmin | Gestion utilisateurs | 🔴 Lecture/modification utilisateurs |
+
+**Conséquences possibles:**
+- ✗ Fraude sur système de fidélité (création points/tickets)
+- ✗ Manipulation résultats roulette (probabilités/gains)
+- ✗ Vol de données utilisateurs et restaurants
+- ✗ Spam/flood de commandes
+- ✗ Accès non autorisé aux configs SuperAdmin
+- ✗ Non-conformité RGPD (données personnelles non protégées)
+
+**Action requise:** Ajouter règles de sécurité AVANT tout déploiement production (2h de travail)
+
+---
+
+### 🟠 IMPORTANT — Fonctionnalités Incomplètes (Score: 55/100)
+
+#### 2. Modules Fantômes — 7 Modules Déclarés mais Non Implémentés
+
+**Gravité:** 🟠 **IMPORTANT - Incohérence architecture**
+
+**Modules promis mais absents:**
+
+| Module | Type | Premium | Impact |
+|--------|------|---------|--------|
+| `click_and_collect` | Core | Non | 🟠 Feature annoncée mais inexistante |
+| `payments` | Payment | Non | 🔴 Paiements non implémentés (critique!) |
+| `payment_terminal` | Payment | Oui | 🟠 Terminal physique absent |
+| `wallet` | Payment | Oui | 🟠 Portefeuille électronique absent |
+| `time_recorder` | Operations | Oui | 🟡 Pointeuse absente |
+| `reporting` | Analytics | Non | 🟠 Reporting absent |
+| `exports` | Analytics | Oui | 🟡 Exports absents |
+
+**Impact:**
+- ✗ Module `payments` déclaré mais AUCUN système de paiement fonctionnel
+- ✗ Confusion pour restaurants activant modules inexistants
+- ✗ SuperAdmin affiche modules non fonctionnels
+- ✗ 37% des modules (7/19) sont des "promesses" non tenues
+
+**Risque business:** Clients activent des fonctionnalités qui ne fonctionnent pas.
+
+---
+
+#### 3. Pages Orphelines — Écrans Créés mais Jamais Accessibles
+
+**Gravité:** 🟡 **MOYEN - Gaspillage ressources**
+
+**3 écrans développés mais inutilisables:**
+
+| Écran | Fichier | Lignes Code | Problème |
+|-------|---------|-------------|----------|
+| About | `lib/src/screens/about/about_screen.dart` | ~150 | ❌ Pas de route dans main.dart |
+| Contact | `lib/src/screens/contact/contact_screen.dart` | ~200 | ❌ Pas de route dans main.dart |
+| Promo | `lib/src/screens/promo/promo_screen.dart` | ~180 | ❌ Pas de route dans main.dart |
+
+**Impact:**
+- ✗ ~530 lignes de code mort (temps dev gaspillé)
+- ✗ Écrans testés mais jamais utilisés
+- ✗ Maintenance inutile de code non atteignable
+- ✗ Définis dans BuilderPagesRegistry mais non routés
+
+**Décision à prendre:** Intégrer ou supprimer ces écrans.
+
+---
+
+#### 4. Routes Fantômes — Constantes Définies mais Non Utilisées
+
+**Gravité:** 🟡 **MINEUR - Pollution code**
+
+**2 routes définies dans constants.dart mais absentes du routing:**
+
+| Route | Constante | Problème |
+|-------|-----------|----------|
+| `/categories` | `AppRoutes.categories` | ❌ Aucune GoRoute correspondante |
+| `/adminTab` | `AppRoutes.adminTab` | ❌ Aucune GoRoute correspondante |
+
+**Impact:**
+- ✗ Confusion pour développeurs (routes qui semblent exister)
+- ✗ Risque de navigation vers routes inexistantes
+- ✗ Constants.dart pas à jour avec routing réel
+
+---
+
+### 🟡 MOYEN — Architecture et Maintenance
+
+#### 5. SuperAdmin Partiellement Implémenté
+
+**Gravité:** 🟡 **MOYEN - Fonctionnalité incomplète**
+
+**4 pages SuperAdmin avec UI minimale:**
+
+| Page | État | Ce qui manque |
+|------|------|---------------|
+| `users_page.dart` | 40% complet | Gestion complète utilisateurs, rôles, permissions |
+| `modules_page.dart` | 50% complet | Configuration avancée modules, dépendances |
+| `settings_page.dart` | 20% complet | Paramètres globaux système |
+| `logs_page.dart` | 30% complet | Consultation logs, filtres, recherche |
+
+**Impact:**
+- ⚠️ SuperAdmin fonctionnel pour création resto mais limité pour gestion avancée
+- ⚠️ Impossible de gérer finement utilisateurs et permissions
+- ⚠️ Pas de vue logs pour debug production
+
+---
+
+#### 6. Contamination Legacy → White-Label
+
+**Gravité:** 🟡 **MOYEN - Dette technique**
+
+**Statut:** `LEGACY_POLLUTED_LOW` (contrôlée mais présente)
+
+**Analyse des imports croisés:**
+- `lib/src` → `lib/white_label` : **44 imports**
+- `lib/white_label` → `lib/src` : **1 import**
+
+**7 fichiers legacy contaminés par white-label:**
+
+| Fichier | Type Import | Risque |
+|---------|-------------|--------|
+| `module_visibility.dart` | ModuleId direct | 🟠 Dépendance forte |
+| `module_route_guards.dart` | ModuleId direct | 🟠 Dépendance forte |
+| `restaurant_plan_provider.dart` | Plans unified | 🟠 Couplage architecture |
+| `theme_providers.dart` | Theme WL | 🟠 Double système thème |
+| `restaurant_plan_runtime_service.dart` | Plans unified | 🟠 Service hybride |
+| 6 adapters `services/adapters/*` | Configs modules | 🟡 Architecture adapter (OK) |
+| `main.dart` | RuntimeAdapter | 🟡 Point d'entrée (OK) |
+
+**Risques:**
+- ⚠️ Difficulté à maintenir code legacy séparément
+- ⚠️ Migration white-label incomplète (hybride legacy/WL)
+- ⚠️ Double système de thème (ancien + nouveau)
+- ✓ Mitigation: Pattern adapter limite contamination
+
+---
+
+### 🟢 MINEUR — Optimisations
+
+#### 7. Modules Partiellement Implémentés
+
+**Gravité:** 🟢 **MINEUR - Améliorations possibles**
+
+**3 modules avec fonctionnalités limitées:**
+
+| Module | Implémenté | Manquant | Impact |
+|--------|------------|----------|--------|
+| `promotions` | Service + Admin | UI client pour codes promo | 🟡 Clients ne voient pas les promos |
+| `newsletter` | Service + Adapter | UI subscription | 🟡 Pas d'inscription newsletter app |
+| `kitchen_tablet` | Écran cuisine | Multi-écrans, impression | 🟡 Fonctionnalité basique |
+
+---
+
+#### 8. Collections Firestore Sans Utilisation
+
+**Gravité:** 🟢 **MINEUR - Nettoyage**
+
+**Collections dans règles mais non utilisées:**
+- `_b3_test` - Collection de test technique (OK, gardée pour init)
+
+**Collections candidates au nettoyage:** Aucune autre détectée ✓
+
+---
+
+### 📊 SCORES PAR CATÉGORIE
+
+| Catégorie | Score | Détail |
+|-----------|-------|--------|
+| **Sécurité** | 🔴 45/100 | 11 collections sans protection |
+| **Complétude Fonctionnelle** | 🟠 55/100 | 7 modules fantômes, 3 écrans orphelins |
+| **Architecture** | 🟡 70/100 | Contamination low, double thème |
+| **Maintenance** | 🟢 80/100 | Code propre, peu de dead code |
+| **Documentation** | 🟢 75/100 | Bien documenté mais éparpillé |
+| **GLOBAL** | 🟠 65/100 | Bon mais failles sécurité critiques |
+
+---
+
+### 🎯 SYNTHÈSE DES RISQUES
+
+#### Risques Bloquants Production:
+1. 🔴 **11 collections Firestore exposées** - Fraude + Vol données possible
+2. 🔴 **Module payments fantôme** - Aucun système paiement réel
+
+#### Risques Majeurs Business:
+3. 🟠 **7 modules promis non livrés** - Confusion clients
+4. 🟠 **SuperAdmin incomplet** - Gestion limitée
+
+#### Risques Mineurs:
+5. 🟡 **3 écrans orphelins** - Gaspillage ressources
+6. 🟡 **Contamination legacy** - Dette technique
+
+---
+
 ## SECTION 1 — STRUCTURE GLOBALE DU PROJET
 
 ### 1.1 Dossiers Principaux + Rôle
