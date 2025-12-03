@@ -130,7 +130,7 @@ extension ModuleIdX on ModuleId {
       case ModuleId.kitchenTablet:
         return 'Tablette cuisine';
       case ModuleId.staffTablet:
-        return 'Tablette staff';
+        return 'Caisse / Staff Tablet';
       case ModuleId.timeRecorder:
         return 'Pointeuse';
       case ModuleId.theme:

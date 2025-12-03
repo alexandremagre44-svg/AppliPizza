@@ -47,6 +47,9 @@ import 'src/staff_tablet/screens/staff_tablet_checkout_screen.dart';
 import 'src/staff_tablet/screens/staff_tablet_history_screen.dart';
 import 'src/staff_tablet/providers/staff_tablet_auth_provider.dart';
 
+// POS (Caisse) Module - Phase 1
+import 'src/screens/admin/pos/pos_screen.dart';
+
 // Importez le composant de barre de navigation
 import 'src/widgets/scaffold_with_nav_bar.dart'; 
 import 'src/models/product.dart';
@@ -593,6 +596,33 @@ class MyApp extends ConsumerWidget {
             return staffTabletRouteGuard(
               const StaffTabletHistoryScreen(),
             );
+          },
+        ),
+        // POS (Caisse) Route - Phase 1 - Admin Only
+        GoRoute(
+          path: '/pos',
+          builder: (context, state) {
+            // PROTECTION: POS est réservé aux administrateurs
+            final authState = ref.read(authProvider);
+            if (!authState.isAdmin) {
+              // Redirect to menu if not admin
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go(AppRoutes.menu);
+              });
+              return Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock, size: 64, color: Colors.red),
+                      SizedBox(height: 16),
+                      Text('Accès réservé aux administrateurs'),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return const PosScreen();
           },
         ),
         // SuperAdmin parent route - redirects to dashboard

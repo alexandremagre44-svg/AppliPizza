@@ -37,6 +37,9 @@ class AppRoutes {
   static const String staffTabletCatalog = '/staff-tablet/catalog';
   static const String staffTabletCheckout = '/staff-tablet/checkout';
   static const String staffTabletHistory = '/staff-tablet/history';
+  
+  // POS (Caisse) Module - Phase 1 - Admin Only
+  static const String pos = '/pos';
 }
 
 /// Rôles utilisateurs

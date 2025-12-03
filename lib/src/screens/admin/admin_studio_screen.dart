@@ -181,6 +181,17 @@ class AdminStudioScreen extends ConsumerWidget {
             ),
           ],
           
+          // TODO(POS_PHASE2): remove or replace with proper navigation
+          // Temporary button to access POS (Caisse) - Phase 1
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.point_of_sale,
+            title: 'Ouvrir la caisse (POS) - Phase 1',
+            subtitle: 'Module de caisse en construction • Interface squelette',
+            onTap: () => context.go('/pos'),
+          ),
+          
           SizedBox(height: AppSpacing.md),
         ],
       ),

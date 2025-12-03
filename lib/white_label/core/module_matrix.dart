@@ -300,14 +300,14 @@ const Map<String, ModuleDefinitionMeta> moduleMatrix = {
   
   'staff_tablet': ModuleDefinitionMeta(
     id: 'staff_tablet',
-    label: 'Tablette staff',
+    label: 'Caisse / Staff Tablet',
     category: ModuleCategory.operations,
     status: ModuleStatus.implemented,
     hasPage: true,
     hasBuilderBlock: false,
     premium: true,
-    defaultRoute: '/staff',
-    tags: ['operations', 'staff', 'tablet', 'premium'],
+    defaultRoute: '/pos',
+    tags: ['operations', 'staff', 'tablet', 'pos', 'caisse', 'premium'],
   ),
   
   'time_recorder': ModuleDefinitionMeta(
