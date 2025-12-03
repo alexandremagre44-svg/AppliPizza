@@ -1,7 +1,7 @@
 // lib/src/screens/admin/pos/pos_routes.dart
 // Route constants and helpers for POS module
 
-import '../../core/constants.dart';
+import '../../../core/constants.dart';
 
 /// Routes pour le module POS (Caisse)
 /// 
