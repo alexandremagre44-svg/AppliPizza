@@ -7,7 +7,7 @@ import '../../../core/module_id.dart';
 /// Ce module affiche les commandes en cuisine sur une tablette dédiée
 /// pour une meilleure organisation de la production.
 ModuleDefinition get kitchenTabletModuleDefinition => const ModuleDefinition(
-      id: ModuleId.kitchenTablet,
+      id: ModuleId.kitchen_tablet,
       category: ModuleCategory.operations,
       name: 'Tablette cuisine',
       description: 'Affichage des commandes en cuisine sur tablette dédiée.',

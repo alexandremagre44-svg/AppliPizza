@@ -12,7 +12,7 @@ class KitchenTabletModule {
   static const route = '/kitchen';
 
   /// Identifiant du module
-  static const moduleId = ModuleId.kitchenTablet;
+  static const moduleId = ModuleId.kitchen_tablet;
 
   /// Vérifie si le module est activé pour un restaurant
   static bool isEnabled(RestaurantPlanUnified plan) =>

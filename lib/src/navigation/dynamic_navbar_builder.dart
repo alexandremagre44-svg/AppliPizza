@@ -128,10 +128,10 @@ class DynamicNavbarBuilder {
       return ModuleId.newsletter;
     }
     if (route.startsWith('/kitchen') || route == '/kitchen') {
-      return ModuleId.kitchenTablet;
+      return ModuleId.kitchen_tablet;
     }
-    if (route.startsWith('/staff') || route == '/staff') {
-      return ModuleId.staffTablet;
+    if (route.startsWith('/pos') || route == '/pos') {
+      return ModuleId.staff_tablet;
     }
 
     // Route personnalisée ou inconnue, pas de module requis

@@ -33,7 +33,7 @@ IconData _getModuleIcon(ModuleId moduleId) {
       return Icons.palette;
     case ModuleId.pagesBuilder:
       return Icons.web;
-    case ModuleId.kitchenTablet:
+    case ModuleId.kitchen_tablet:
       return Icons.kitchen;
     default:
       return Icons.block;
@@ -85,7 +85,7 @@ class WizardStepModules extends ConsumerWidget {
       ModuleId.promotions,
       ModuleId.pagesBuilder,
       ModuleId.theme,
-      ModuleId.kitchenTablet,
+      ModuleId.kitchen_tablet,
     };
 
     // Filtrer pour n'afficher que les modules destinés aux restaurants

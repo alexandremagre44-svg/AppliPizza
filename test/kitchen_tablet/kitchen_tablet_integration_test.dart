@@ -18,10 +18,10 @@ void main() {
     
     // Task 1: Module exists in ModuleRegistry
     test('kitchenTablet is registered in ModuleRegistry', () {
-      final definition = ModuleRegistry.definitions[ModuleId.kitchenTablet];
+      final definition = ModuleRegistry.definitions[ModuleId.kitchen_tablet];
       
       expect(definition, isNotNull);
-      expect(definition!.id, ModuleId.kitchenTablet);
+      expect(definition!.id, ModuleId.kitchen_tablet);
       expect(definition.name, 'Tablette cuisine');
       expect(definition.category, ModuleCategory.operations);
       expect(definition.isPremium, true);
@@ -50,27 +50,27 @@ void main() {
     // Task 3: ModuleRuntimeMapping returns correct values
     test('ModuleRuntimeMapping provides correct kitchen_tablet data', () {
       // Route
-      final route = ModuleRuntimeMapping.getRuntimeRoute(ModuleId.kitchenTablet);
+      final route = ModuleRuntimeMapping.getRuntimeRoute(ModuleId.kitchen_tablet);
       expect(route, '/kitchen');
       
       // Has page
-      final hasPage = ModuleRuntimeMapping.getRuntimePage(ModuleId.kitchenTablet);
+      final hasPage = ModuleRuntimeMapping.getRuntimePage(ModuleId.kitchen_tablet);
       expect(hasPage, true);
       
       // No builder block
-      final hasBlock = ModuleRuntimeMapping.hasBuilderBlock(ModuleId.kitchenTablet);
+      final hasBlock = ModuleRuntimeMapping.hasBuilderBlock(ModuleId.kitchen_tablet);
       expect(hasBlock, false);
       
       // Is implemented
-      final isImplemented = ModuleRuntimeMapping.isImplemented(ModuleId.kitchenTablet);
+      final isImplemented = ModuleRuntimeMapping.isImplemented(ModuleId.kitchen_tablet);
       expect(isImplemented, true);
       
       // Is premium
-      final isPremium = ModuleRuntimeMapping.isPremium(ModuleId.kitchenTablet);
+      final isPremium = ModuleRuntimeMapping.isPremium(ModuleId.kitchen_tablet);
       expect(isPremium, true);
       
       // Category
-      final category = ModuleRuntimeMapping.getCategory(ModuleId.kitchenTablet);
+      final category = ModuleRuntimeMapping.getCategory(ModuleId.kitchen_tablet);
       expect(category, ModuleCategory.operations);
     });
     
@@ -78,8 +78,8 @@ void main() {
     test('ModuleRouteResolver resolves /kitchen to kitchenTablet', () {
       final moduleId = ModuleRouteResolver.resolve('/kitchen');
       
-      expect(moduleId, ModuleId.kitchenTablet);
-      expect(ModuleRouteResolver.belongsToModule('/kitchen', ModuleId.kitchenTablet), true);
+      expect(moduleId, ModuleId.kitchen_tablet);
+      expect(ModuleRouteResolver.belongsToModule('/kitchen', ModuleId.kitchen_tablet), true);
       expect(ModuleRouteResolver.isValidRoute('/kitchen'), true);
       expect(ModuleRouteResolver.isPhantomRoute('/kitchen'), false);
     });
@@ -155,7 +155,7 @@ void main() {
       
       // Check module is active
       expect(plan.activeModules, contains('kitchen_tablet'));
-      expect(plan.hasModule(ModuleId.kitchenTablet), true);
+      expect(plan.hasModule(ModuleId.kitchen_tablet), true);
     });
     
     test('RestaurantPlanUnified hasModule returns false when module inactive', () {
@@ -168,7 +168,7 @@ void main() {
       );
       
       // Check module is not active
-      expect(plan.hasModule(ModuleId.kitchenTablet), false);
+      expect(plan.hasModule(ModuleId.kitchen_tablet), false);
     });
     
     // Integration: All routes map correctly
@@ -176,16 +176,16 @@ void main() {
       final allRoutes = ModuleRouteResolver.getAllModuleRoutes();
       
       // Kitchen should be in the map
-      expect(allRoutes['/kitchen'], ModuleId.kitchenTablet);
+      expect(allRoutes['/kitchen'], ModuleId.kitchen_tablet);
     });
     
     // Integration: Module exists in all systems
     test('kitchen_tablet module is consistently defined across systems', () {
       // 1. In ModuleId enum
-      expect(ModuleId.values, contains(ModuleId.kitchenTablet));
+      expect(ModuleId.values, contains(ModuleId.kitchen_tablet));
       
       // 2. In ModuleRegistry
-      final registryDef = ModuleRegistry.definitions[ModuleId.kitchenTablet];
+      final registryDef = ModuleRegistry.definitions[ModuleId.kitchen_tablet];
       expect(registryDef, isNotNull);
       
       // 3. In module_matrix
@@ -193,12 +193,12 @@ void main() {
       expect(matrixMeta, isNotNull);
       
       // 4. Has runtime mapping
-      final route = ModuleRuntimeMapping.getRuntimeRoute(ModuleId.kitchenTablet);
+      final route = ModuleRuntimeMapping.getRuntimeRoute(ModuleId.kitchen_tablet);
       expect(route, isNotNull);
       
       // 5. Route resolves correctly
       final resolvedModule = ModuleRouteResolver.resolve('/kitchen');
-      expect(resolvedModule, ModuleId.kitchenTablet);
+      expect(resolvedModule, ModuleId.kitchen_tablet);
     });
     
     // Completeness: Verify no phantom routes
@@ -208,7 +208,7 @@ void main() {
       final result = ModuleRouteResolver.resolveDetailed('/kitchen');
       expect(result.isResolved, true);
       expect(result.requiresModule, true);
-      expect(result.moduleId, ModuleId.kitchenTablet);
+      expect(result.moduleId, ModuleId.kitchen_tablet);
     });
   });
 }

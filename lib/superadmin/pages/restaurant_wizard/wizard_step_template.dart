@@ -49,7 +49,7 @@ const List<RestaurantTemplate> availableTemplates = [
       ModuleId.loyalty,
       ModuleId.roulette,
       ModuleId.promotions,
-      ModuleId.kitchenTablet,
+      ModuleId.kitchen_tablet,
     ],
   ),
   // 2) Fast Food Express
@@ -62,7 +62,7 @@ const List<RestaurantTemplate> availableTemplates = [
     modules: [
       ModuleId.ordering,
       ModuleId.clickAndCollect,
-      ModuleId.staffTablet,
+      ModuleId.staff_tablet,
       ModuleId.promotions,
     ],
   ),

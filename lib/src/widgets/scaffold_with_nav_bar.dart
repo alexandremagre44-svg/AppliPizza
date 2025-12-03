@@ -375,12 +375,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       case '/rewards':
         return ModuleId.loyalty;
       case '/kitchen':
-        return ModuleId.kitchenTablet;
+        return ModuleId.kitchen_tablet;
       case '/staff-tablet':
       case '/staff-tablet/catalog':
       case '/staff-tablet/checkout':
       case '/staff-tablet/history':
-        return ModuleId.staffTablet;
+        return ModuleId.staff_tablet;
       default:
         return null;
     }

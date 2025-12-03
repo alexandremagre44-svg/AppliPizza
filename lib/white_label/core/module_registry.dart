@@ -122,8 +122,8 @@ class ModuleRegistry {
     ),
 
     // === OPERATIONS ===
-    ModuleId.kitchenTablet: const ModuleDefinition(
-      id: ModuleId.kitchenTablet,
+    ModuleId.kitchen_tablet: const ModuleDefinition(
+      id: ModuleId.kitchen_tablet,
       category: ModuleCategory.operations,
       name: 'Tablette cuisine',
       description:
@@ -132,8 +132,8 @@ class ModuleRegistry {
       requiresConfiguration: true,
       dependencies: [ModuleId.ordering],
     ),
-    ModuleId.staffTablet: const ModuleDefinition(
-      id: ModuleId.staffTablet,
+    ModuleId.staff_tablet: const ModuleDefinition(
+      id: ModuleId.staff_tablet,
       category: ModuleCategory.operations,
       name: 'Tablette staff',
       description:

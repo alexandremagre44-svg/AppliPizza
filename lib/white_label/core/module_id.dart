@@ -36,19 +36,13 @@ enum ModuleId {
   newsletter,
 
   /// Module tablette cuisine
-  kitchenTablet,
+  kitchen_tablet,
 
   /// Module tablette staff / serveur
-  staffTablet,
+  staff_tablet,
 
   /// Module pointeuse / gestion du temps
   timeRecorder,
-
-  /// Module POS (Point of Sale)
-  pos,
-
-  /// Module Kitchen
-  kitchen,
 
   /// Module thème / personnalisation visuelle
   theme,
@@ -91,16 +85,12 @@ extension ModuleIdX on ModuleId {
         return 'promotions';
       case ModuleId.newsletter:
         return 'newsletter';
-      case ModuleId.kitchenTablet:
+      case ModuleId.kitchen_tablet:
         return 'kitchen_tablet';
-      case ModuleId.staffTablet:
+      case ModuleId.staff_tablet:
         return 'staff_tablet';
       case ModuleId.timeRecorder:
         return 'time_recorder';
-      case ModuleId.pos:
-        return 'pos';
-      case ModuleId.kitchen:
-        return 'kitchen';
       case ModuleId.theme:
         return 'theme';
       case ModuleId.pagesBuilder:
@@ -137,16 +127,12 @@ extension ModuleIdX on ModuleId {
         return 'Promotions';
       case ModuleId.newsletter:
         return 'Newsletter';
-      case ModuleId.kitchenTablet:
+      case ModuleId.kitchen_tablet:
         return 'Tablette cuisine';
-      case ModuleId.staffTablet:
+      case ModuleId.staff_tablet:
         return 'Caisse / Staff Tablet';
       case ModuleId.timeRecorder:
         return 'Pointeuse';
-      case ModuleId.pos:
-        return 'POS';
-      case ModuleId.kitchen:
-        return 'Cuisine';
       case ModuleId.theme:
         return 'Thème';
       case ModuleId.pagesBuilder:
@@ -176,11 +162,9 @@ extension ModuleIdX on ModuleId {
       case ModuleId.promotions:
       case ModuleId.newsletter:
         return ModuleCategory.marketing;
-      case ModuleId.kitchenTablet:
-      case ModuleId.staffTablet:
+      case ModuleId.kitchen_tablet:
+      case ModuleId.staff_tablet:
       case ModuleId.timeRecorder:
-      case ModuleId.pos:
-      case ModuleId.kitchen:
         return ModuleCategory.operations;
       case ModuleId.theme:
       case ModuleId.pagesBuilder:
