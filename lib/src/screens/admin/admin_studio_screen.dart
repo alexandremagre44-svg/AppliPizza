@@ -3,6 +3,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import '../../core/constants.dart';
@@ -13,6 +14,7 @@ import 'ingredients_admin_screen.dart';
 import 'mailing_admin_screen.dart';
 import 'promotions_admin_screen.dart';
 import '../../../builder/builder_entry.dart';
+import '../../providers/restaurant_plan_provider.dart';
 
 /// Admin Menu - Point d'entrée principal pour tous les outils d'administration
 /// 
@@ -23,12 +25,15 @@ import '../../../builder/builder_entry.dart';
 /// - Gestion des promotions
 /// - Mailing
 /// - Configuration de la roulette
-class AdminStudioScreen extends StatelessWidget {
+/// - Accès cuisine (si module kitchen_tablet activé)
+class AdminStudioScreen extends ConsumerWidget {
   const AdminStudioScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final unifiedPlanAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final unifiedPlan = unifiedPlanAsync.asData?.value;
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
@@ -163,6 +168,19 @@ class AdminStudioScreen extends StatelessWidget {
               );
             },
           ),
+          
+          // Kitchen Tablet Module - Only shown if module is active
+          if (unifiedPlan != null && unifiedPlan.activeModules.contains('kitchen_tablet')) ...[
+            SizedBox(height: AppSpacing.md),
+            _buildStudioBlock(
+              context,
+              iconData: Icons.kitchen,
+              title: 'Accès cuisine',
+              subtitle: 'Ouvrir l\'interface Kitchen Tablet',
+              onTap: () => context.go('/kitchen'),
+            ),
+          ],
+          
           SizedBox(height: AppSpacing.md),
         ],
       ),
