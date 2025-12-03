@@ -68,6 +68,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
   }
 
   Widget _buildPromotionsList() {
+    final colorScheme = Theme.of(context).colorScheme;
     if (_promotions.isEmpty) {
       return Center(
         child: Column(
