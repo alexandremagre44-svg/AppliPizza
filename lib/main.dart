@@ -471,7 +471,7 @@ class MyApp extends ConsumerWidget {
         ),
         // Kitchen Module Route - Protected by module guard
         GoRoute(
-          path: '/kitchen',
+          path: AppRoutes.kitchen,
           name: 'kitchen',
           builder: (context, state) => const KitchenScreen(),
         ),
@@ -600,7 +600,7 @@ class MyApp extends ConsumerWidget {
         ),
         // POS Route - New minimal screen with module guard
         GoRoute(
-          path: '/pos',
+          path: AppRoutes.pos,
           name: 'pos',
           builder: (context, state) => const PosScreen(),
         ),
