@@ -236,3 +236,21 @@ Widget staffTabletRouteGuard(Widget child, {String? fallbackRoute}) {
     child: child,
   );
 }
+
+/// Guard pour le module POS (Point of Sale).
+Widget posRouteGuard(Widget child, {String? fallbackRoute}) {
+  return ModuleRouteGuard(
+    requiredModule: ModuleId.pos,
+    fallbackRoute: fallbackRoute ?? AppRoutes.home,
+    child: child,
+  );
+}
+
+/// Guard pour le module Kitchen.
+Widget kitchenModuleRouteGuard(Widget child, {String? fallbackRoute}) {
+  return ModuleRouteGuard(
+    requiredModule: ModuleId.kitchen,
+    fallbackRoute: fallbackRoute ?? AppRoutes.home,
+    child: child,
+  );
+}

@@ -169,27 +169,24 @@ class AdminStudioScreen extends ConsumerWidget {
             },
           ),
           
-          // Kitchen Tablet Module - Only shown if module is active
-          if (unifiedPlan != null && unifiedPlan.activeModules.contains('kitchen_tablet')) ...[
-            SizedBox(height: AppSpacing.md),
-            _buildStudioBlock(
-              context,
-              iconData: Icons.kitchen,
-              title: 'Accès cuisine',
-              subtitle: 'Ouvrir l\'interface Kitchen Tablet',
-              onTap: () => context.go('/kitchen'),
-            ),
-          ],
-          
-          // TODO(POS_PHASE2): remove or replace with proper navigation
-          // Temporary button to access POS (Caisse) - Phase 1
+          // POS Module - Accessible via Admin only
           SizedBox(height: AppSpacing.md),
           _buildStudioBlock(
             context,
             iconData: Icons.point_of_sale,
-            title: 'Ouvrir la caisse (POS) - Phase 1',
-            subtitle: 'Module de caisse en construction • Interface squelette',
-            onTap: () => context.go('/pos'),
+            title: 'Accéder au POS',
+            subtitle: 'Module Point de Vente • Interface simplifiée',
+            onTap: () => context.push('/pos'),
+          ),
+          
+          // Kitchen Module - Accessible via Admin only
+          SizedBox(height: AppSpacing.md),
+          _buildStudioBlock(
+            context,
+            iconData: Icons.kitchen,
+            title: 'Accéder à la Cuisine',
+            subtitle: 'Module Cuisine • Interface simplifiée',
+            onTap: () => context.push('/kitchen'),
           ),
           
           SizedBox(height: AppSpacing.md),

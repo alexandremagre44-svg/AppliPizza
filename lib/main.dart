@@ -50,6 +50,10 @@ import 'src/staff_tablet/providers/staff_tablet_auth_provider.dart';
 // POS (Caisse) Module - Phase 1
 import 'src/screens/admin/pos/pos_screen.dart';
 
+// POS + Kitchen Modules - New minimal screens
+import 'src/screens/pos/pos_home_screen.dart';
+import 'src/screens/kitchen/kitchen_screen.dart';
+
 // Importez le composant de barre de navigation
 import 'src/widgets/scaffold_with_nav_bar.dart'; 
 import 'src/models/product.dart';
@@ -465,13 +469,13 @@ class MyApp extends ConsumerWidget {
             );
           },
         ),
-        // Route Kitchen Mode
+        // Kitchen Module Route - Protected by module guard
         GoRoute(
           path: AppRoutes.kitchen,
           builder: (context, state) {
-            // Phase 3: Use proper route guard for kitchen module
-            return kitchenRouteGuard(
-              const KitchenTabletScreen(),
+            // Use new minimal kitchen screen with module guard
+            return kitchenModuleRouteGuard(
+              const KitchenScreen(),
             );
           },
         ),
@@ -598,7 +602,7 @@ class MyApp extends ConsumerWidget {
             );
           },
         ),
-        // POS (Caisse) Route - Phase 1 - Admin Only
+        // POS Route - New minimal screen with module guard
         GoRoute(
           path: AppRoutes.pos,
           builder: (context, state) {
@@ -626,7 +630,9 @@ class MyApp extends ConsumerWidget {
                 ),
               );
             }
-            return const PosScreen();
+            return posRouteGuard(
+              const PosHomeScreen(),
+            );
           },
         ),
         // SuperAdmin parent route - redirects to dashboard
