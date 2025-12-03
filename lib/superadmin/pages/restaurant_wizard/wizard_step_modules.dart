@@ -2,7 +2,7 @@
 ///
 /// Étape 4 du Wizard: Configuration des modules.
 /// Permet d'activer/désactiver les différents modules du restaurant.
-/// Utilise ModuleRegistry pour afficher tous les 17 modules disponibles.
+/// Affiche uniquement les modules pertinents pour les restaurants (9 modules).
 library;
 
 import 'package:flutter/material.dart';
@@ -74,7 +74,8 @@ class WizardStepModules extends ConsumerWidget {
     // Récupérer tous les modules depuis ModuleRegistry
     final allModules = ModuleRegistry.definitions.values.toList();
 
-    // Modules visibles dans le wizard restaurant (OPTION B)
+    // Modules pertinents pour les restaurants, exclusion des modules
+    // internes (POS, Kitchen, etc.) et de gestion avancée
     const restaurantVisibleModules = {
       ModuleId.ordering,
       ModuleId.delivery,
