@@ -236,9 +236,10 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
   }
 
   Widget _buildCategorySelector() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surface,
+      color: colorScheme.surface,
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -269,14 +270,15 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
   }
 
   Widget _buildSwitchTile(String title, bool value, ValueChanged<bool> onChanged) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surface,
+      color: colorScheme.surface,
       child: SwitchListTile(
         title: Text(title, style: AppTextStyles.bodyMedium),
         value: value,
         onChanged: onChanged,
-        activeColor: Theme.of(context).colorScheme.primary,
+        activeColor: colorScheme.primary,
       ),
     );
   }
