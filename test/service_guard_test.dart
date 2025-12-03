@@ -158,7 +158,7 @@ void main() {
 
       expect(guard.isEnabled(ModuleId.loyalty), true);
       expect(guard.isEnabled(ModuleId.roulette), true);
-      expect(() => guard.ensureEnabled(ModuleId.loyalty), returnsNormally);
+      expect(() => guard.ensureEnabled(ModuleId.loyalty, 'test'), returnsNormally);
     });
 
     test('ServiceGuard.strict denies all operations', () {
