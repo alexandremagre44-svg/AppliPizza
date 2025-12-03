@@ -61,6 +61,7 @@ import 'src/providers/restaurant_plan_provider.dart';
 import 'src/navigation/module_route_guards.dart';
 import 'white_label/core/module_id.dart';
 import 'white_label/runtime/module_runtime_adapter.dart';
+import 'white_label/runtime/router_guard.dart';
 
 // Builder B3 imports for dynamic pages
 import 'builder/models/models.dart';
@@ -182,6 +183,15 @@ class MyApp extends ConsumerWidget {
         // Si pas connecté, rediriger vers login
         if (!authState.isLoggedIn) {
           return AppRoutes.login;
+        }
+        
+        // Phase 4C: Apply WhiteLabel route guard
+        // Check if route belongs to an active module
+        final unifiedPlanAsync = ref.read(restaurantPlanUnifiedProvider);
+        final plan = unifiedPlanAsync.asData?.value;
+        final guardRedirect = whiteLabelRouteGuard(state, plan);
+        if (guardRedirect != null) {
+          return guardRedirect;
         }
         
         return null;
