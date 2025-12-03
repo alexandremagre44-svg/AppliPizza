@@ -1,12 +1,10 @@
 // lib/src/screens/admin/products_admin_screen.dart
 // Écran d'administration pour gérer le catalogue produits (Pizzas, Menus, Boissons, Desserts)
 
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../design_system/app_theme.dart';
+import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import '../../models/product.dart';
 import '../../providers/product_provider.dart';
 import '../../services/firestore_product_service.dart';
@@ -42,13 +40,15 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
   @override
   Widget build(BuildContext context) {
     final productsAsync = ref.watch(productListProvider);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
         title: const Text('Catalogue Produits'),
         centerTitle: true,
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -90,12 +90,14 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
         onPressed: () => _navigateToProductForm(null),
         icon: const Icon(Icons.add),
         label: const Text('Nouveau produit'),
-        backgroundColor: AppColors.primary,
+        backgroundColor: colorScheme.primary,
       ),
     );
   }
 
   Widget _buildProductList(List<Product> products, ProductCategory category) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     if (products.isEmpty) {
       return Center(
         child: Column(
@@ -104,20 +106,20 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
             Icon(
               Icons.inventory_2_outlined,
               size: 64,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
             SizedBox(height: AppSpacing.md),
             Text(
               'Aucun produit',
               style: AppTextStyles.titleMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
               'Ajoutez votre premier ${category.value.toLowerCase()}',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -136,9 +138,11 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
   }
 
   Widget _buildProductCard(Product product) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       margin: EdgeInsets.only(bottom: AppSpacing.md),
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
@@ -159,13 +163,14 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
                   height: 80,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
+                    final colorScheme = Theme.of(context).colorScheme;
                     return Container(
                       width: 80,
                       height: 80,
-                      color: AppColors.surfaceContainerLow,
+                      color: colorScheme.surfaceContainerLow,
                       child: Icon(
                         Icons.image_not_supported,
-                        color: AppColors.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     );
                   },
@@ -194,13 +199,13 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.errorContainer,
+                              color: colorScheme.errorContainer,
                               borderRadius: AppRadius.radiusSmall,
                             ),
                             child: Text(
                               'Inactif',
                               style: AppTextStyles.labelSmall.copyWith(
-                                color: AppColors.onErrorContainer,
+                                color: colorScheme.onErrorContainer,
                               ),
                             ),
                           ),
@@ -210,7 +215,7 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
                     Text(
                       product.description,
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -221,7 +226,7 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
                         Text(
                           '${product.price.toStringAsFixed(2)} €',
                           style: AppTextStyles.titleSmall.copyWith(
-                            color: AppColors.primary,
+                            color: colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -230,7 +235,7 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
                           Icon(
                             Icons.star,
                             size: 16,
-                            color: AppColors.tertiary,
+                            color: colorScheme.tertiary,
                           ),
                         if (product.isNew)
                           Padding(
@@ -238,7 +243,7 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
                             child: Icon(
                               Icons.fiber_new,
                               size: 16,
-                              color: AppColors.secondary,
+                              color: colorScheme.secondary,
                             ),
                           ),
                       ],

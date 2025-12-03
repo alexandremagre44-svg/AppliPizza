@@ -2,12 +2,11 @@
 // Formulaire de création/modification de promotion
 
 
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
-import '../../design_system/app_theme.dart';
+import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import '../../models/promotion.dart';
 import '../../providers/promotion_provider.dart';
 
@@ -78,11 +77,11 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
     final isEditing = widget.promotion != null;
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
         title: Text(isEditing ? 'Modifier la promotion' : 'Nouvelle promotion'),
         centerTitle: true,
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
       ),
       body: Form(
@@ -194,7 +193,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
               onPressed: _isSaving ? null : _savePromotion,
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
-                backgroundColor: AppColors.primary,
+                backgroundColor: colorScheme.primary,
               ),
               child: _isSaving
                   ? const SizedBox(
@@ -240,7 +239,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
         labelText: label,
         hintText: hint,
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: AppRadius.radiusSmall,
           borderSide: BorderSide.none,
@@ -255,7 +254,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
   Widget _buildDiscountTypeSelector() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -300,7 +299,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
   }) {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       child: ListTile(
         title: Text(label, style: AppTextStyles.bodyMedium),
         subtitle: Text(
@@ -341,12 +340,12 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
   Widget _buildSwitchTile(String title, bool value, ValueChanged<bool> onChanged) {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       child: SwitchListTile(
         title: Text(title, style: AppTextStyles.bodyMedium),
         value: value,
         onChanged: onChanged,
-        activeColor: AppColors.primary,
+        activeColor: colorScheme.primary,
       ),
     );
   }

@@ -2,10 +2,9 @@
 // Écran d'administration du module mailing
 
 
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../design_system/app_theme.dart';
+import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import '../../models/subscriber.dart';
 import '../../services/mailing_service.dart';
 
@@ -48,11 +47,11 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
         title: const Text('Mailing'),
         centerTitle: true,
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -79,7 +78,7 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
         onPressed: _tabController.index == 0 ? _addSubscriber : _createCampaign,
         icon: Icon(_tabController.index == 0 ? Icons.person_add : Icons.email),
         label: Text(_tabController.index == 0 ? 'Ajouter abonné' : 'Nouvelle campagne'),
-        backgroundColor: AppColors.primary,
+        backgroundColor: colorScheme.primary,
       ),
     );
   }
@@ -120,20 +119,20 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
             Icon(
               Icons.email_outlined,
               size: 80,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
             SizedBox(height: AppSpacing.lg),
             Text(
               'Campagnes Email',
               style: AppTextStyles.headlineSmall.copyWith(
-                color: AppColors.onSurface,
+                color: colorScheme.onSurface,
               ),
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
               'Créez et envoyez des campagnes email à vos abonnés',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -143,7 +142,7 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
               icon: const Icon(Icons.add),
               label: const Text('Créer une campagne'),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: colorScheme.primary,
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSpacing.lg,
                   vertical: AppSpacing.md,
@@ -159,7 +158,7 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
   Widget _buildStatsCard(int active, int inactive) {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.lg),
@@ -170,33 +169,33 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
                 'Actifs',
                 active.toString(),
                 Icons.check_circle,
-                AppColors.primary,
+                colorScheme.primary,
               ),
             ),
             Container(
               width: 1,
               height: 40,
-              color: AppColors.outlineVariant,
+              color: colorScheme.outlineVariant,
             ),
             Expanded(
               child: _buildStatItem(
                 'Inactifs',
                 inactive.toString(),
                 Icons.cancel,
-                AppColors.error,
+                colorScheme.error,
               ),
             ),
             Container(
               width: 1,
               height: 40,
-              color: AppColors.outlineVariant,
+              color: colorScheme.outlineVariant,
             ),
             Expanded(
               child: _buildStatItem(
                 'Total',
                 _subscribers.length.toString(),
                 Icons.people,
-                AppColors.secondary,
+                colorScheme.secondary,
               ),
             ),
           ],
@@ -220,7 +219,7 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
         Text(
           label,
           style: AppTextStyles.labelSmall.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -241,15 +240,15 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
     
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       margin: EdgeInsets.only(bottom: AppSpacing.sm),
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: isActive ? AppColors.primaryContainer : AppColors.errorContainer,
+          backgroundColor: isActive ? colorScheme.primaryContainer : colorScheme.errorContainer,
           child: Icon(
             isActive ? Icons.person : Icons.person_off,
-            color: isActive ? AppColors.onPrimaryContainer : AppColors.onErrorContainer,
+            color: isActive ? colorScheme.onPrimaryContainer : colorScheme.onErrorContainer,
           ),
         ),
         title: Text(
@@ -263,7 +262,7 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
             Text(
               'Inscrit le ${_formatDate(subscriber.dateInscription)}',
               style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             if (subscriber.tags.isNotEmpty) ...[

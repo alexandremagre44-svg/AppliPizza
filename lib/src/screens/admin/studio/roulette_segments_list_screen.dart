@@ -2,12 +2,11 @@
 // List screen for managing roulette segments - Material 3 + Pizza Deli'Zza
 
 
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/roulette_config.dart';
 import '../../../services/roulette_segment_service.dart';
-import '../../../design_system/app_theme.dart';
+import '../../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import 'roulette_segment_editor_screen.dart';
 
 /// Screen to list and manage all roulette segments
@@ -60,20 +59,20 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         centerTitle: true,
         title: Text(
           'Segments de la roue',
           style: AppTextStyles.headlineMedium.copyWith(
-            color: AppColors.onSurface,
+            color: colorScheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
+          icon: const Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -104,8 +103,8 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createSegment,
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
         icon: const Icon(Icons.add),
         label: const Text('Nouveau segment'),
       ),
@@ -122,7 +121,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
 
     return Card(
       elevation: 0,
-      color: AppColors.primaryContainer,
+      color: colorScheme.primaryContainer,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
       ),
@@ -133,12 +132,12 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
           children: [
             Row(
               children: [
-                Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+                Icon(Icons.info_outline, color: colorScheme.primary, size: 20),
                 SizedBox(width: AppSpacing.xs),
                 Text(
                   'Informations',
                   style: AppTextStyles.titleMedium.copyWith(
-                    color: AppColors.onPrimaryContainer,
+                    color: colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -148,13 +147,13 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
             Text(
               'Segments: $activeCount actifs / ${_segments.length} total',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onPrimaryContainer,
+                color: colorScheme.onPrimaryContainer,
               ),
             ),
             Text(
               'Probabilité totale: ${totalProbability.toStringAsFixed(1)}%',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onPrimaryContainer,
+                color: colorScheme.onPrimaryContainer,
               ),
             ),
             if (totalProbability != 100.0) ...[
@@ -165,13 +164,13 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
                   vertical: AppSpacing.xxs,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.warning.withOpacity(0.2),
+                  color: Colors.orange.withOpacity(0.2),
                   borderRadius: AppRadius.badge,
                 ),
                 child: Text(
                   '⚠ La somme devrait être 100%',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.warningDark,
+                    color: Colors.orangeDark,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -187,7 +186,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
   Widget _buildSegmentCard(RouletteSegment segment) {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
       ),
@@ -206,14 +205,14 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
                   color: segment.color,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.outline,
+                    color: colorScheme.outline,
                     width: 2,
                   ),
                 ),
                 child: segment.iconName != null
                     ? Icon(
                         _getIconData(segment.iconName!),
-                        color: AppColors.white,
+                        color: Colors.white,
                         size: 20,
                       )
                     : null,
@@ -235,7 +234,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
                     Text(
                       _getRewardTypeLabel(segment.rewardType),
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     if (segment.description != null) ...[
@@ -243,7 +242,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
                       Text(
                         segment.description!,
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -263,13 +262,13 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
                       vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryContainer,
+                      color: colorScheme.primaryContainer,
                       borderRadius: AppRadius.badge,
                     ),
                     child: Text(
                       '${segment.probability.toStringAsFixed(0)}%',
                       style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.primary,
+                        color: colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -279,7 +278,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
                   Switch(
                     value: segment.isActive,
                     onChanged: (value) => _toggleSegmentActive(segment, value),
-                    activeColor: AppColors.primary,
+                    activeColor: colorScheme.primary,
                   ),
                 ],
               ),
@@ -288,7 +287,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
               SizedBox(width: AppSpacing.xs),
               IconButton(
                 icon: const Icon(Icons.edit_outlined),
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
                 onPressed: () => _editSegment(segment),
               ),
             ],
@@ -309,7 +308,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
             Icon(
               Icons.casino_outlined,
               size: 80,
-              color: AppColors.onSurfaceVariant.withOpacity(0.5),
+              color: colorScheme.onSurfaceVariant.withOpacity(0.5),
             ),
             SizedBox(height: AppSpacing.lg),
             Text(
@@ -322,7 +321,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
             Text(
               'Créez des segments pour configurer\nla roue de la chance',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -425,7 +424,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? AppColors.error : AppColors.success,
+        backgroundColor: isError ? colorScheme.error : Colors.green,
         behavior: SnackBarBehavior.floating,
       ),
     );

@@ -2,10 +2,9 @@
 // Admin Menu - Point d'entrée principal pour tous les outils d'administration
 
 
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../design_system/app_theme.dart';
+import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import '../../core/constants.dart';
 import 'studio/roulette_segments_list_screen.dart';
 import 'studio/roulette_admin_settings_screen.dart';
@@ -30,11 +29,11 @@ class AdminStudioScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
         title: const Text('Studio Admin'),
         centerTitle: true,
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -67,7 +66,7 @@ class AdminStudioScreen extends StatelessWidget {
             child: Text(
               'Modules de gestion',
               style: AppTextStyles.labelLarge.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -132,7 +131,7 @@ class AdminStudioScreen extends StatelessWidget {
             child: Text(
               'Autres modules',
               style: AppTextStyles.labelLarge.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -178,7 +177,7 @@ class AdminStudioScreen extends StatelessWidget {
   }) {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
       ),
@@ -193,12 +192,12 @@ class AdminStudioScreen extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
+                  color: colorScheme.primaryContainer,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   iconData,
-                  color: AppColors.primary,
+                  color: colorScheme.primary,
                   size: 24,
                   weight: 300,
                 ),
@@ -215,7 +214,7 @@ class AdminStudioScreen extends StatelessWidget {
                     Text(
                       subtitle,
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -223,7 +222,7 @@ class AdminStudioScreen extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
                 size: 24,
               ),
             ],
@@ -243,10 +242,10 @@ class AdminStudioScreen extends StatelessWidget {
   }) {
     return Card(
       elevation: 4,
-      color: AppColors.primaryContainer,
+      color: colorScheme.primaryContainer,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
-        side: BorderSide(color: AppColors.primary, width: 2),
+        side: BorderSide(color: colorScheme.primary, width: 2),
       ),
       child: InkWell(
         onTap: onTap,
@@ -259,7 +258,7 @@ class AdminStudioScreen extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: colorScheme.primary,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -276,14 +275,14 @@ class AdminStudioScreen extends StatelessWidget {
                     Text(
                       title,
                       style: AppTextStyles.titleLarge.copyWith(
-                        color: AppColors.onPrimaryContainer,
+                        color: colorScheme.onPrimaryContainer,
                       ),
                     ),
                     SizedBox(height: 4),
                     Text(
                       subtitle,
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.onPrimaryContainer.withOpacity(0.8),
+                        color: colorScheme.onPrimaryContainer.withOpacity(0.8),
                       ),
                     ),
                   ],
@@ -291,7 +290,7 @@ class AdminStudioScreen extends StatelessWidget {
               ),
               Icon(
                 Icons.arrow_forward_rounded,
-                color: AppColors.primary,
+                color: colorScheme.primary,
                 size: 32,
               ),
             ],

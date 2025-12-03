@@ -2,7 +2,6 @@
 // Editor screen for creating/editing roulette segments - Material 3 + Pizza Deli'Zza
 
 
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -12,7 +11,7 @@ import '../../../models/roulette_config.dart';
 import '../../../models/product.dart';
 import '../../../services/roulette_segment_service.dart';
 import '../../../services/firestore_product_service.dart';
-import '../../../design_system/app_theme.dart';
+import '../../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 
 /// Screen to create or edit a roulette segment
 /// Follows Material 3 and Pizza Deli'Zza Brand Guidelines
@@ -147,26 +146,26 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         centerTitle: true,
         title: Text(
           widget.segment == null ? 'Nouveau segment' : 'Modifier le segment',
           style: AppTextStyles.headlineMedium.copyWith(
-            color: AppColors.onSurface,
+            color: colorScheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.onSurface),
+          icon: const Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           if (widget.segment != null)
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              icon: const Icon(Icons.delete_outline, color: colorScheme.error),
               onPressed: _deleteSegment,
             ),
         ],
@@ -285,8 +284,8 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
                     FilledButton(
                       onPressed: _isSaving ? null : _saveSegment,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.onPrimary,
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: _isSaving
@@ -296,7 +295,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.white,
+                                  Colors.white,
                                 ),
                               ),
                             )
@@ -324,10 +323,10 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
         labelText: label,
         hintText: hint,
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: AppRadius.input,
-          borderSide: const BorderSide(color: AppColors.outline),
+          borderSide: const BorderSide(color: colorScheme.outline),
         ),
       ),
       maxLines: maxLines,
@@ -340,7 +339,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
   Widget _buildRewardTypeDropdown() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
       ),
@@ -360,10 +359,10 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
               value: _selectedRewardType,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: AppColors.surfaceContainerLow,
+                fillColor: colorScheme.surfaceContainerLow,
                 border: OutlineInputBorder(
                   borderRadius: AppRadius.input,
-                  borderSide: const BorderSide(color: AppColors.outline),
+                  borderSide: const BorderSide(color: colorScheme.outline),
                 ),
               ),
               items: RewardType.values.map((type) {
@@ -391,7 +390,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
   Widget _buildProductSelector() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
       ),
@@ -411,10 +410,10 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
               value: _selectedProductId,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: AppColors.surfaceContainerLow,
+                fillColor: colorScheme.surfaceContainerLow,
                 border: OutlineInputBorder(
                   borderRadius: AppRadius.input,
-                  borderSide: const BorderSide(color: AppColors.outline),
+                  borderSide: const BorderSide(color: colorScheme.outline),
                 ),
                 hintText: 'Sélectionner un produit',
               ),
@@ -440,7 +439,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
   Widget _buildDrinkSelector() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
       ),
@@ -460,10 +459,10 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
               value: _selectedProductId,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: AppColors.surfaceContainerLow,
+                fillColor: colorScheme.surfaceContainerLow,
                 border: OutlineInputBorder(
                   borderRadius: AppRadius.input,
-                  borderSide: const BorderSide(color: AppColors.outline),
+                  borderSide: const BorderSide(color: colorScheme.outline),
                 ),
                 hintText: 'Sélectionner une boisson',
               ),
@@ -489,7 +488,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
   Widget _buildColorPicker() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
       ),
@@ -520,12 +519,12 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
                       color: color,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isSelected ? AppColors.primary : AppColors.outline,
+                        color: isSelected ? colorScheme.primary : colorScheme.outline,
                         width: isSelected ? 3 : 2,
                       ),
                     ),
                     child: isSelected
-                        ? const Icon(Icons.check, color: AppColors.white, size: 20)
+                        ? const Icon(Icons.check, color: Colors.white, size: 20)
                         : null,
                   ),
                 );
@@ -547,7 +546,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
   Widget _buildIconSelector() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
       ),
@@ -576,17 +575,17 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
                     height: 48,
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primaryContainer
-                          : AppColors.surfaceContainerLow,
+                          ? colorScheme.primaryContainer
+                          : colorScheme.surfaceContainerLow,
                       borderRadius: AppRadius.badge,
                       border: Border.all(
-                        color: isSelected ? AppColors.primary : AppColors.outline,
+                        color: isSelected ? colorScheme.primary : colorScheme.outline,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
                     child: Icon(
                       entry.value,
-                      color: isSelected ? AppColors.primary : AppColors.onSurfaceVariant,
+                      color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                       size: 24,
                     ),
                   ),
@@ -603,7 +602,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
   Widget _buildActiveSwitch() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
       ),
@@ -625,7 +624,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
                   Text(
                     'Le segment apparaîtra sur la roue',
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -634,7 +633,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
             Switch(
               value: _isActive,
               onChanged: (value) => setState(() => _isActive = value),
-              activeColor: AppColors.primary,
+              activeColor: colorScheme.primary,
             ),
           ],
         ),
@@ -768,7 +767,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.error,
+                backgroundColor: colorScheme.error,
               ),
               child: const Text('Supprimer'),
             ),
@@ -793,7 +792,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? AppColors.error : AppColors.success,
+        backgroundColor: isError ? colorScheme.error : Colors.green,
         behavior: SnackBarBehavior.floating,
       ),
     );

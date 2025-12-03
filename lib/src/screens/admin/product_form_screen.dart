@@ -1,13 +1,11 @@
 // lib/src/screens/admin/product_form_screen.dart
 // Formulaire de création/modification de produit
 
-
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../../design_system/app_theme.dart';
+import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import '../../models/product.dart';
 import '../../services/firestore_product_service.dart';
 import '../../providers/ingredient_provider.dart';
@@ -103,13 +101,15 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.product != null;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
         title: Text(isEditing ? 'Modifier le produit' : 'Nouveau produit'),
         centerTitle: true,
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
       ),
       body: Form(
@@ -257,7 +257,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               onPressed: _isSaving ? null : _saveProduct,
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
-                backgroundColor: AppColors.primary,
+                backgroundColor: colorScheme.primary,
               ),
               child: _isSaving
                   ? const SizedBox(
@@ -307,7 +307,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         labelText: label,
         hintText: hint,
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: Theme.of(context).colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: AppRadius.radiusSmall,
           borderSide: BorderSide.none,
@@ -320,9 +320,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   }
 
   Widget _buildCategorySelector() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -352,9 +353,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   }
 
   Widget _buildDisplaySpotSelector() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -384,14 +386,15 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   }
 
   Widget _buildSwitchTile(String title, bool value, ValueChanged<bool> onChanged) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       child: SwitchListTile(
         title: Text(title, style: AppTextStyles.bodyMedium),
         value: value,
         onChanged: onChanged,
-        activeColor: AppColors.primary,
+        activeColor: colorScheme.primary,
       ),
     );
   }
@@ -401,9 +404,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     required int value,
     required ValueChanged<int> onChanged,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Row(
@@ -434,18 +438,20 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   Widget _buildIngredientSelector({required bool isBaseIngredient}) {
     final ingredientsAsync = ref.watch(ingredientStreamProvider);
     
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return ingredientsAsync.when(
       data: (ingredients) {
         if (ingredients.isEmpty) {
           return Card(
             elevation: 0,
-            color: AppColors.surface,
+            color: colorScheme.surface,
             child: Padding(
               padding: EdgeInsets.all(AppSpacing.md),
               child: Text(
                 'Aucun ingrédient disponible. Créez d\'abord des ingrédients dans la section "Ingrédients".',
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -454,7 +460,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         
         return Card(
           elevation: 0,
-          color: AppColors.surface,
+          color: colorScheme.surface,
           child: Padding(
             padding: EdgeInsets.all(AppSpacing.md),
             child: Column(
@@ -466,7 +472,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     child: Text(
                       'Sélectionnez les ingrédients inclus par défaut',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -476,7 +482,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     child: Text(
                       'Sélectionnez les ingrédients autorisés en supplément',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -510,8 +516,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                           }
                         });
                       },
-                      selectedColor: AppColors.primaryContainer,
-                      checkmarkColor: AppColors.primary,
+                      selectedColor: colorScheme.primaryContainer,
+                      checkmarkColor: colorScheme.primary,
                     );
                   }).toList(),
                 ),
@@ -528,13 +534,13 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       ),
       error: (error, stack) => Card(
         elevation: 0,
-        color: AppColors.errorContainer,
+        color: colorScheme.errorContainer,
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.md),
           child: Text(
             'Erreur lors du chargement des ingrédients: $error',
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.onErrorContainer,
+              color: colorScheme.onErrorContainer,
             ),
           ),
         ),

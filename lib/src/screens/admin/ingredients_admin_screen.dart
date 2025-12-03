@@ -2,11 +2,10 @@
 // Écran d'administration pour gérer les ingrédients universels
 
 
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../design_system/app_theme.dart';
+import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import '../../models/product.dart';
 import '../../providers/ingredient_provider.dart';
 import '../../services/firestore_ingredient_service.dart';
@@ -45,11 +44,11 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
     final ingredientsAsync = ref.watch(ingredientStreamProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
         title: const Text('Gestion des Ingrédients'),
         centerTitle: true,
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -85,7 +84,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64, color: AppColors.error),
+              Icon(Icons.error_outline, size: 64, color: colorScheme.error),
               SizedBox(height: AppSpacing.md),
               Text('Erreur: $error', style: AppTextStyles.bodyMedium),
             ],
@@ -96,7 +95,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
         onPressed: () => _navigateToIngredientForm(null),
         icon: const Icon(Icons.add),
         label: const Text('Nouvel ingrédient'),
-        backgroundColor: AppColors.primary,
+        backgroundColor: colorScheme.primary,
       ),
     );
   }
@@ -110,13 +109,13 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
             Icon(
               Icons.inventory_2_outlined,
               size: 64,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
             SizedBox(height: AppSpacing.md),
             Text(
               'Aucun ingrédient',
               style: AppTextStyles.titleMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(height: AppSpacing.sm),
@@ -125,7 +124,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
                 ? 'Ajoutez votre premier ingrédient de type ${category.displayName.toLowerCase()}'
                 : 'Ajoutez votre premier ingrédient',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -147,7 +146,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
   Widget _buildIngredientCard(Ingredient ingredient) {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       margin: EdgeInsets.only(bottom: AppSpacing.md),
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
@@ -165,15 +164,15 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
                 height: 60,
                 decoration: BoxDecoration(
                   color: ingredient.isActive 
-                      ? AppColors.primaryContainer 
-                      : AppColors.surfaceContainerLow,
+                      ? colorScheme.primaryContainer 
+                      : colorScheme.surfaceContainerLow,
                   borderRadius: AppRadius.radiusSmall,
                 ),
                 child: Icon(
                   _getIngredientIcon(ingredient),
                   color: ingredient.isActive 
-                      ? AppColors.primary 
-                      : AppColors.onSurfaceVariant,
+                      ? colorScheme.primary 
+                      : colorScheme.onSurfaceVariant,
                   size: 32,
                 ),
               ),
@@ -200,13 +199,13 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.errorContainer,
+                              color: colorScheme.errorContainer,
                               borderRadius: AppRadius.radiusSmall,
                             ),
                             child: Text(
                               'Inactif',
                               style: AppTextStyles.labelSmall.copyWith(
-                                color: AppColors.onErrorContainer,
+                                color: colorScheme.onErrorContainer,
                               ),
                             ),
                           ),
@@ -221,13 +220,13 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.secondaryContainer,
+                            color: colorScheme.secondaryContainer,
                             borderRadius: AppRadius.radiusSmall,
                           ),
                           child: Text(
                             ingredient.category.displayName,
                             style: AppTextStyles.labelSmall.copyWith(
-                              color: AppColors.onSecondaryContainer,
+                              color: colorScheme.onSecondaryContainer,
                             ),
                           ),
                         ),
@@ -235,7 +234,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
                         Text(
                           'Ordre: ${ingredient.order}',
                           style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.onSurfaceVariant,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -246,7 +245,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
                           ? '+${ingredient.extraCost.toStringAsFixed(2)} €'
                           : 'Gratuit',
                       style: AppTextStyles.titleSmall.copyWith(
-                        color: AppColors.primary,
+                        color: colorScheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

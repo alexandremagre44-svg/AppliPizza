@@ -5,8 +5,6 @@
 // restaurants/{restaurantId}/pages_system (order)
 // restaurants/{restaurantId}/pages_published (content)
 
-// TODO(PHASE2): Migrate legacy theme → unified WL theme (line 151 hardcoded color)
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -150,7 +148,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               type: BottomNavigationBarType.fixed,
               currentIndex: currentIndex,
               selectedItemColor: Theme.of(context).colorScheme.primary,
-              unselectedItemColor: Colors.grey[400],
+              unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
               selectedFontSize: adaptiveStyle.selectedFontSize,
               unselectedFontSize: adaptiveStyle.unselectedFontSize,
               iconSize: adaptiveStyle.iconSize,
