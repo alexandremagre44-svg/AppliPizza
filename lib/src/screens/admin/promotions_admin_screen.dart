@@ -41,6 +41,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
@@ -133,6 +134,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
   }
 
   Widget _buildStatsCard(int active, int scheduled, int inactive) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -182,6 +184,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
   }
 
   Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         Icon(icon, color: color, size: 28),
@@ -213,6 +216,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
   }
 
   Widget _buildPromotionCard(Promotion promotion, {bool isActive = false, bool isScheduled = false}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,

@@ -74,6 +74,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isEditing = widget.promotion != null;
 
     return Scaffold(
@@ -233,6 +234,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
     TextInputType? keyboardType,
     String? Function(String?)? validator,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -252,6 +254,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
   }
 
   Widget _buildDiscountTypeSelector() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -297,6 +300,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
     required ValueChanged<DateTime> onDateSelected,
     bool allowNull = false,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -338,6 +342,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
   }
 
   Widget _buildSwitchTile(String title, bool value, ValueChanged<bool> onChanged) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,

@@ -28,6 +28,7 @@ class AdminStudioScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
@@ -175,6 +176,7 @@ class AdminStudioScreen extends StatelessWidget {
     required String subtitle,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -240,6 +242,7 @@ class AdminStudioScreen extends StatelessWidget {
     required String subtitle,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 4,
       color: colorScheme.primaryContainer,
