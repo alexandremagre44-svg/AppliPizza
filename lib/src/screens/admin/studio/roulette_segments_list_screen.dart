@@ -59,6 +59,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
@@ -73,7 +74,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -172,7 +173,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
                 child: Text(
                   '⚠ La somme devrait être 100%',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.orangeDark,
+                    color: Colors.orange.shade700,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

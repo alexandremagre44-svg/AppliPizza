@@ -146,6 +146,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
@@ -160,13 +161,13 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: colorScheme.onSurface),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           if (widget.segment != null)
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: colorScheme.error),
+              icon: Icon(Icons.delete_outline, color: colorScheme.error),
               onPressed: _deleteSegment,
             ),
         ],
@@ -328,7 +329,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
         fillColor: colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: AppRadius.input,
-          borderSide: const BorderSide(color: colorScheme.outline),
+          borderSide: BorderSide(color: colorScheme.outline),
         ),
       ),
       maxLines: maxLines,
@@ -365,7 +366,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
                 fillColor: colorScheme.surfaceContainerLow,
                 border: OutlineInputBorder(
                   borderRadius: AppRadius.input,
-                  borderSide: const BorderSide(color: colorScheme.outline),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
               ),
               items: RewardType.values.map((type) {
@@ -417,7 +418,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
                 fillColor: colorScheme.surfaceContainerLow,
                 border: OutlineInputBorder(
                   borderRadius: AppRadius.input,
-                  borderSide: const BorderSide(color: colorScheme.outline),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 hintText: 'Sélectionner un produit',
               ),
@@ -467,7 +468,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
                 fillColor: colorScheme.surfaceContainerLow,
                 border: OutlineInputBorder(
                   borderRadius: AppRadius.input,
-                  borderSide: const BorderSide(color: colorScheme.outline),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 hintText: 'Sélectionner une boisson',
               ),
