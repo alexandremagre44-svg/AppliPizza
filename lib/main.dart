@@ -50,8 +50,7 @@ import 'src/staff_tablet/providers/staff_tablet_auth_provider.dart';
 // POS (Caisse) Module - Phase 1
 import 'src/screens/admin/pos/pos_screen.dart';
 
-// POS + Kitchen Modules - New minimal screens
-import 'src/screens/pos/pos_home_screen.dart';
+// Kitchen Module - Minimal screen
 import 'src/screens/kitchen/kitchen_screen.dart';
 
 // Importez le composant de barre de navigation
