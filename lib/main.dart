@@ -50,8 +50,7 @@ import 'src/staff_tablet/providers/staff_tablet_auth_provider.dart';
 // POS (Caisse) Module - Phase 1
 import 'src/screens/admin/pos/pos_screen.dart';
 
-// POS + Kitchen Modules - New minimal screens
-import 'src/screens/pos/pos_home_screen.dart';
+// Kitchen Module - Minimal screen
 import 'src/screens/kitchen/kitchen_screen.dart';
 
 // Importez le composant de barre de navigation
@@ -472,12 +471,8 @@ class MyApp extends ConsumerWidget {
         // Kitchen Module Route - Protected by module guard
         GoRoute(
           path: AppRoutes.kitchen,
-          builder: (context, state) {
-            // Use new minimal kitchen screen with module guard
-            return kitchenModuleRouteGuard(
-              const KitchenScreen(),
-            );
-          },
+          name: 'kitchen',
+          builder: (context, state) => const KitchenScreen(),
         ),
         // Staff Tablet Routes (CAISSE - Admin Only)
         GoRoute(
@@ -605,35 +600,8 @@ class MyApp extends ConsumerWidget {
         // POS Route - New minimal screen with module guard
         GoRoute(
           path: AppRoutes.pos,
-          builder: (context, state) {
-            // PROTECTION: POS est réservé aux administrateurs
-            final authState = ref.read(authProvider);
-            if (!authState.isAdmin) {
-              // Redirect to menu if not admin
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.menu);
-              });
-              return Scaffold(
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.lock,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text('Accès réservé aux administrateurs'),
-                    ],
-                  ),
-                ),
-              );
-            }
-            return posRouteGuard(
-              const PosHomeScreen(),
-            );
-          },
+          name: 'pos',
+          builder: (context, state) => const PosScreen(),
         ),
         // SuperAdmin parent route - redirects to dashboard
         GoRoute(
