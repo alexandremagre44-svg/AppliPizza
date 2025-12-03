@@ -600,7 +600,7 @@ class MyApp extends ConsumerWidget {
         ),
         // POS (Caisse) Route - Phase 1 - Admin Only
         GoRoute(
-          path: '/pos',
+          path: AppRoutes.pos,
           builder: (context, state) {
             // PROTECTION: POS est réservé aux administrateurs
             final authState = ref.read(authProvider);
