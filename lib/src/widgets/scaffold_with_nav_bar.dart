@@ -22,6 +22,7 @@ import '../../builder/utils/icon_helper.dart';
 import '../../white_label/core/module_id.dart';
 import '../../white_label/restaurant/restaurant_feature_flags.dart';
 import '../../white_label/restaurant/restaurant_plan_unified.dart';
+import '../../white_label/runtime/navbar_module_adapter.dart';
 
 /// Provider for bottom bar pages
 /// Loads pages dynamically from Builder B3
@@ -429,12 +430,11 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     }
   }
 
-  /// Phase 3: Apply module filtering using DynamicNavbarBuilder
+  /// Phase 4C: Apply module filtering using NavbarModuleAdapter
   /// 
   /// Filters navigation items based on active modules in RestaurantPlanUnified.
+  /// Uses the Phase 4B NavbarModuleAdapter for consistent filtering logic.
   /// If plan is null (restaurant without unified plan), returns items as-is for backward compatibility.
-  /// 
-  /// PHASE 3 FIX: Temporarily removed BuilderPage usage - Phase 5 will reintegrate builder
   _NavigationItemsResult _applyModuleFiltering(
     _NavigationItemsResult navItems,
     RestaurantPlanUnified? plan,
@@ -446,24 +446,41 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       return navItems;
     }
 
-    // PHASE 3: Direct filtering without BuilderPage conversion
-    // Filter based on routes and module requirements
+    // Phase 4C: Use NavbarModuleAdapter for filtering
+    // Convert _NavPage to NavItem for adapter
+    final navItemsList = <NavItem>[];
+    for (final page in navItems.pages) {
+      navItemsList.add(NavItem(
+        route: page.route,
+        label: page.name,
+      ));
+    }
+
+    // Apply filtering using NavbarModuleAdapter
+    final filterResult = NavbarModuleAdapter.filterNavItemsByModules(
+      navItemsList,
+      plan,
+    );
+
+    // Log filtering results
+    if (filterResult.hasRemovals) {
+      debugPrint('📱 [BottomNav] Filtered out ${filterResult.removedCount} items: ${filterResult.removedRoutes}');
+      debugPrint('📱 [BottomNav] Disabled modules: ${filterResult.disabledModules}');
+    }
+
+    // Build filtered result
     final filteredItems = <BottomNavigationBarItem>[];
     final filteredPages = <_NavPage>[];
     
-    for (var i = 0; i < navItems.pages.length; i++) {
-      final page = navItems.pages[i];
-      final item = navItems.items[i];
-      
-      // Check if module is required for this route
-      final requiredModule = DynamicNavbarBuilder.getRequiredModule(page.route);
-      
-      if (requiredModule == null || plan.hasModule(requiredModule)) {
-        // No module required OR module is active - include this item
-        filteredItems.add(item);
-        filteredPages.add(page);
-      } else {
-        debugPrint('📱 [BottomNav] Filtering out ${page.route} - module ${requiredModule.code} not active');
+    // Map filtered items back to original items
+    for (final filteredNavItem in filterResult.items) {
+      // Find matching page in original list
+      for (var i = 0; i < navItems.pages.length; i++) {
+        if (navItems.pages[i].route == filteredNavItem.route) {
+          filteredItems.add(navItems.items[i]);
+          filteredPages.add(navItems.pages[i]);
+          break;
+        }
       }
     }
 
