@@ -122,40 +122,35 @@ class KitchenOrdersRuntimeService {
   ///
   /// Filtre et trie les commandes par statut de cuisine
   Stream<List<KitchenOrder>> watchKitchenOrders() {
-    return ref.watch(ordersStreamProvider.stream).asyncMap((ordersAsync) async {
-      return ordersAsync.when(
-        data: (orders) {
-          // Filtrer les commandes actives (non annulées)
-          final activeOrders = orders
-              .where((o) => o.status != OrderStatus.cancelled)
-              .toList();
+    // Watch le stream provider et transforme les données
+    return ref.watch(ordersStreamProvider.stream).map((orders) {
+      // Filtrer les commandes actives (non annulées)
+      final activeOrders = orders
+          .where((o) => o.status != OrderStatus.cancelled)
+          .toList();
 
-          // Convertir en KitchenOrder
-          final kitchenOrders =
-              activeOrders.map((o) => KitchenOrder.fromOrder(o)).toList();
+      // Convertir en KitchenOrder
+      final kitchenOrders =
+          activeOrders.map((o) => KitchenOrder.fromOrder(o)).toList();
 
-          // Trier par statut puis par heure de création
-          kitchenOrders.sort((a, b) {
-            // D'abord par statut (ordre logique du workflow)
-            final statusOrder = {
-              KitchenStatus.pending: 0,
-              KitchenStatus.preparing: 1,
-              KitchenStatus.ready: 2,
-              KitchenStatus.delivered: 3,
-            };
-            final statusComparison =
-                statusOrder[a.status]!.compareTo(statusOrder[b.status]!);
-            if (statusComparison != 0) return statusComparison;
+      // Trier par statut puis par heure de création
+      kitchenOrders.sort((a, b) {
+        // D'abord par statut (ordre logique du workflow)
+        final statusOrder = {
+          KitchenStatus.pending: 0,
+          KitchenStatus.preparing: 1,
+          KitchenStatus.ready: 2,
+          KitchenStatus.delivered: 3,
+        };
+        final statusComparison =
+            statusOrder[a.status]!.compareTo(statusOrder[b.status]!);
+        if (statusComparison != 0) return statusComparison;
 
-            // Ensuite par heure de création (plus ancien en premier)
-            return a.createdAt.compareTo(b.createdAt);
-          });
+        // Ensuite par heure de création (plus ancien en premier)
+        return a.createdAt.compareTo(b.createdAt);
+      });
 
-          return kitchenOrders;
-        },
-        loading: () => <KitchenOrder>[],
-        error: (_, __) => <KitchenOrder>[],
-      );
+      return kitchenOrders;
     });
   }
 
