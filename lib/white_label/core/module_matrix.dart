@@ -321,30 +321,6 @@ const Map<String, ModuleDefinitionMeta> moduleMatrix = {
     defaultRoute: null,
     tags: ['operations', 'hr', 'premium', 'future'],
   ),
-
-  'pos': ModuleDefinitionMeta(
-    id: 'pos',
-    label: 'POS',
-    category: ModuleCategory.operations,
-    status: ModuleStatus.implemented,
-    hasPage: true,
-    hasBuilderBlock: false,
-    premium: false,
-    defaultRoute: '/pos',
-    tags: ['staff', 'operations'],
-  ),
-
-  'kitchen': ModuleDefinitionMeta(
-    id: 'kitchen',
-    label: 'Cuisine',
-    category: ModuleCategory.operations,
-    status: ModuleStatus.implemented,
-    hasPage: true,
-    hasBuilderBlock: false,
-    premium: false,
-    defaultRoute: '/kitchen',
-    tags: ['staff', 'operations'],
-  ),
   
   // ============================================================================
   // ANALYTICS MODULES

@@ -382,8 +382,8 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
       payments: moduleIds.contains(ModuleId.payments),
       loyalty: moduleIds.contains(ModuleId.loyalty),
       roulette: moduleIds.contains(ModuleId.roulette),
-      kitchenTablet: moduleIds.contains(ModuleId.kitchenTablet),
-      staffTablet: moduleIds.contains(ModuleId.staffTablet),
+      kitchenTablet: moduleIds.contains(ModuleId.kitchen_tablet),
+      staffTablet: moduleIds.contains(ModuleId.staff_tablet),
     );
   }
 
@@ -397,8 +397,8 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     if (modules.payments) result.add(ModuleId.payments);
     if (modules.loyalty) result.add(ModuleId.loyalty);
     if (modules.roulette) result.add(ModuleId.roulette);
-    if (modules.kitchenTablet) result.add(ModuleId.kitchenTablet);
-    if (modules.staffTablet) result.add(ModuleId.staffTablet);
+    if (modules.kitchenTablet) result.add(ModuleId.kitchen_tablet);
+    if (modules.staffTablet) result.add(ModuleId.staff_tablet);
     return result;
   }
 

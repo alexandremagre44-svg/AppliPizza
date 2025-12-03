@@ -69,14 +69,14 @@ bool isNewsletterEnabled(WidgetRef ref) {
 bool isKitchenEnabled(WidgetRef ref) {
   final planAsync = ref.watch(restaurantPlanUnifiedProvider);
   final plan = planAsync.asData?.value;
-  return ModuleRuntimeAdapter.isModuleActiveById(plan, ModuleId.kitchenTablet);
+  return ModuleRuntimeAdapter.isModuleActiveById(plan, ModuleId.kitchen_tablet);
 }
 
 /// Vérifie si le module tablette staff est activé.
 bool isStaffTabletEnabled(WidgetRef ref) {
   final planAsync = ref.watch(restaurantPlanUnifiedProvider);
   final plan = planAsync.asData?.value;
-  return ModuleRuntimeAdapter.isModuleActiveById(plan, ModuleId.staffTablet);
+  return ModuleRuntimeAdapter.isModuleActiveById(plan, ModuleId.staff_tablet);
 }
 
 /// Vérifie si le module de paiement est activé.

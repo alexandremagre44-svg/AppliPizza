@@ -7,7 +7,7 @@ import '../../../core/module_id.dart';
 /// Ce module fournit une application pour les serveurs et le personnel
 /// de salle, facilitant la prise de commandes et le service.
 ModuleDefinition get staffTabletModuleDefinition => const ModuleDefinition(
-      id: ModuleId.staffTablet,
+      id: ModuleId.staff_tablet,
       category: ModuleCategory.operations,
       name: 'Tablette staff',
       description: 'Application pour les serveurs et le personnel de salle.',
