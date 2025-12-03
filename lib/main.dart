@@ -469,12 +469,11 @@ class MyApp extends ConsumerWidget {
             );
           },
         ),
-        // Route Kitchen Mode (legacy - kitchenTablet module)
+        // Kitchen Module Route - Protected by module guard
         GoRoute(
           path: AppRoutes.kitchen,
           builder: (context, state) {
-            // Check if using new kitchen module or legacy kitchenTablet
-            // Priority: new kitchen module over legacy
+            // Use new minimal kitchen screen with module guard
             return kitchenModuleRouteGuard(
               const KitchenScreen(),
             );
