@@ -146,7 +146,7 @@ class KitchenTabletOrderCard extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Liste des items
-            Expanded(
+            Flexible(
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -154,6 +154,8 @@ class KitchenTabletOrderCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: order.items.length,
                   itemBuilder: (context, index) {
                     return Padding(

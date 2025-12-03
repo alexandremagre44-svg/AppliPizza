@@ -62,7 +62,7 @@ class _KitchenTabletScreenState extends ConsumerState<KitchenTabletScreen> {
     final ordersStream = service.watchKitchenOrders();
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text(
           'TABLETTE CUISINE',

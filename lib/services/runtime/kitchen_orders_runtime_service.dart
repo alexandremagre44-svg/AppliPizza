@@ -100,9 +100,12 @@ class KitchenOrder {
     final kitchenStatus =
         KitchenStatusX.fromOrderStatus(order.status) ?? KitchenStatus.pending;
 
+    // Générer le numéro de commande à partir de l'ID
+    final orderNumber = order.id.substring(0, 8).toUpperCase();
+
     return KitchenOrder(
       id: order.id,
-      orderNumber: order.orderNumber.toString(),
+      orderNumber: orderNumber,
       items: items,
       createdAt: order.date,
       pickupTime: pickupTime,
