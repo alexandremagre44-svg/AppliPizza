@@ -1,12 +1,10 @@
 // lib/src/screens/admin/ingredient_form_screen.dart
 // Formulaire de création/modification d'ingrédient
 
-
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../../design_system/app_theme.dart';
+import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import '../../models/product.dart';
 import '../../services/firestore_ingredient_service.dart';
 
@@ -69,13 +67,15 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.ingredient != null;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
         title: Text(isEditing ? 'Modifier l\'ingrédient' : 'Nouvel ingrédient'),
         centerTitle: true,
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
       ),
       body: Form(
@@ -173,7 +173,7 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
               onPressed: _isSaving ? null : _saveIngredient,
               style: FilledButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
-                backgroundColor: AppColors.primary,
+                backgroundColor: colorScheme.primary,
               ),
               child: _isSaving
                   ? const SizedBox(
@@ -223,7 +223,7 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
         labelText: label,
         hintText: hint,
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: Theme.of(context).colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: AppRadius.radiusSmall,
           borderSide: BorderSide.none,
@@ -238,7 +238,7 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
   Widget _buildCategorySelector() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: Theme.of(context).colorScheme.surface,
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
@@ -271,12 +271,12 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
   Widget _buildSwitchTile(String title, bool value, ValueChanged<bool> onChanged) {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: Theme.of(context).colorScheme.surface,
       child: SwitchListTile(
         title: Text(title, style: AppTextStyles.bodyMedium),
         value: value,
         onChanged: onChanged,
-        activeColor: AppColors.primary,
+        activeColor: Theme.of(context).colorScheme.primary,
       ),
     );
   }

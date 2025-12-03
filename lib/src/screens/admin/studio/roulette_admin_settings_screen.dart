@@ -2,11 +2,10 @@
 // Unified admin screen for roulette settings and rules
 
 
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../design_system/app_theme.dart';
+import '../../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import '../../../services/roulette_rules_service.dart';
 import '../../../services/roulette_settings_service.dart';
 
@@ -98,7 +97,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors du chargement: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: colorScheme.error,
           ),
         );
       }
@@ -132,7 +131,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Configuration sauvegardée avec succès'),
-            backgroundColor: AppColors.success,
+            backgroundColor: Colors.green,
           ),
         );
       }
@@ -141,7 +140,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la sauvegarde: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: colorScheme.error,
           ),
         );
       }
@@ -165,11 +164,11 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
         title: const Text('Paramètres & Règles'),
         centerTitle: true,
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
       ),
       body: _isLoading
@@ -201,7 +200,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
   Widget _buildActivationSection() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
@@ -210,7 +209,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
           children: [
             Row(
               children: [
-                Icon(Icons.power_settings_new, color: AppColors.primary, size: 24),
+                Icon(Icons.power_settings_new, color: colorScheme.primary, size: 24),
                 SizedBox(width: AppSpacing.sm),
                 Text('Activation globale', style: AppTextStyles.titleMedium),
               ],
@@ -219,7 +218,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
             Text(
               'Activer ou désactiver la roulette pour tous les utilisateurs',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(height: AppSpacing.md),
@@ -233,12 +232,12 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                     ? 'Les utilisateurs peuvent tourner la roue'
                     : 'La roulette n\'est pas visible côté client',
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               value: _isEnabled,
               onChanged: (value) => setState(() => _isEnabled = value),
-              activeColor: AppColors.primary,
+              activeColor: colorScheme.primary,
               contentPadding: EdgeInsets.zero,
             ),
           ],
@@ -251,7 +250,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
   Widget _buildRateLimitSection() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
@@ -260,7 +259,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
           children: [
             Row(
               children: [
-                Icon(Icons.security, color: AppColors.primary, size: 24),
+                Icon(Icons.security, color: colorScheme.primary, size: 24),
                 SizedBox(width: AppSpacing.sm),
                 Text('Limite de Rate Limit (Sécurité)', style: AppTextStyles.titleMedium),
               ],
@@ -269,7 +268,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
             Text(
               'Délai minimum (en secondes) entre deux tours. Appliqué côté serveur (Firestore) pour la sécurité.',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(height: AppSpacing.md),
@@ -279,7 +278,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                 labelText: 'Rate Limit (secondes)',
                 border: OutlineInputBorder(borderRadius: AppRadius.input),
                 filled: true,
-                fillColor: AppColors.surfaceContainerLow,
+                fillColor: colorScheme.surfaceContainerLow,
                 helperText: 'Recommandé: 10-30 secondes. Maximum: 3600 (1h)',
                 suffixText: 'sec',
               ),
@@ -300,10 +299,10 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
             Container(
               padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: AppColors.info.withOpacity(0.1),
+                color: Colors.blue.withOpacity(0.1),
                 borderRadius: AppRadius.card,
                 border: Border.all(
-                  color: AppColors.info.withOpacity(0.3),
+                  color: Colors.blue.withOpacity(0.3),
                   width: 1,
                 ),
               ),
@@ -311,7 +310,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: AppColors.info,
+                    color: Colors.blue,
                     size: 20,
                   ),
                   SizedBox(width: AppSpacing.sm),
@@ -319,7 +318,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                     child: Text(
                       'Cette limite est appliquée par les règles de sécurité Firestore et ne peut pas être contournée côté client.',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -336,7 +335,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
   Widget _buildCooldownSection() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
@@ -345,7 +344,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
           children: [
             Row(
               children: [
-                Icon(Icons.schedule, color: AppColors.primary, size: 24),
+                Icon(Icons.schedule, color: colorScheme.primary, size: 24),
                 SizedBox(width: AppSpacing.sm),
                 Text('Délai entre utilisations', style: AppTextStyles.titleMedium),
               ],
@@ -354,7 +353,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
             Text(
               'Temps minimum à attendre entre deux tours de roue',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(height: AppSpacing.md),
@@ -364,7 +363,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                 labelText: 'Cooldown (minutes)',
                 border: OutlineInputBorder(borderRadius: AppRadius.input),
                 filled: true,
-                fillColor: AppColors.surfaceContainerLow,
+                fillColor: colorScheme.surfaceContainerLow,
                 helperText: 'Exemple: 1440 pour 24 heures',
                 suffixText: 'min',
               ),
@@ -391,7 +390,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
   Widget _buildLimitsSection() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
@@ -400,7 +399,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
           children: [
             Row(
               children: [
-                Icon(Icons.timeline, color: AppColors.primary, size: 24),
+                Icon(Icons.timeline, color: colorScheme.primary, size: 24),
                 SizedBox(width: AppSpacing.sm),
                 Text('Limites d\'utilisation', style: AppTextStyles.titleMedium),
               ],
@@ -409,7 +408,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
             Text(
               'Nombre maximum de tours par période (0 = illimité)',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(height: AppSpacing.md),
@@ -419,7 +418,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                 labelText: 'Spins max par jour',
                 border: OutlineInputBorder(borderRadius: AppRadius.input),
                 filled: true,
-                fillColor: AppColors.surfaceContainerLow,
+                fillColor: colorScheme.surfaceContainerLow,
                 helperText: '0 = illimité',
                 suffixText: 'spins',
               ),
@@ -443,7 +442,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                 labelText: 'Spins max par semaine',
                 border: OutlineInputBorder(borderRadius: AppRadius.input),
                 filled: true,
-                fillColor: AppColors.surfaceContainerLow,
+                fillColor: colorScheme.surfaceContainerLow,
                 helperText: '0 = illimité',
                 suffixText: 'spins',
               ),
@@ -467,7 +466,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                 labelText: 'Spins max par mois',
                 border: OutlineInputBorder(borderRadius: AppRadius.input),
                 filled: true,
-                fillColor: AppColors.surfaceContainerLow,
+                fillColor: colorScheme.surfaceContainerLow,
                 helperText: '0 = illimité',
                 suffixText: 'spins',
               ),
@@ -494,7 +493,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
   Widget _buildTimeRangeSection() {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
@@ -503,7 +502,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
           children: [
             Row(
               children: [
-                Icon(Icons.access_time, color: AppColors.primary, size: 24),
+                Icon(Icons.access_time, color: colorScheme.primary, size: 24),
                 SizedBox(width: AppSpacing.sm),
                 Text('Plage horaire autorisée', style: AppTextStyles.titleMedium),
               ],
@@ -512,7 +511,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
             Text(
               'Heures pendant lesquelles la roulette est accessible',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(height: AppSpacing.md),
@@ -525,7 +524,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                       labelText: 'Heure de début',
                       border: OutlineInputBorder(borderRadius: AppRadius.input),
                       filled: true,
-                      fillColor: AppColors.surfaceContainerLow,
+                      fillColor: colorScheme.surfaceContainerLow,
                       helperText: 'Format 24h',
                       suffixText: 'h',
                     ),
@@ -551,7 +550,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                       labelText: 'Heure de fin',
                       border: OutlineInputBorder(borderRadius: AppRadius.input),
                       filled: true,
-                      fillColor: AppColors.surfaceContainerLow,
+                      fillColor: colorScheme.surfaceContainerLow,
                       helperText: 'Format 24h',
                       suffixText: 'h',
                     ),
@@ -575,10 +574,10 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
             Container(
               padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: AppColors.info.withOpacity(0.1),
+                color: Colors.blue.withOpacity(0.1),
                 borderRadius: AppRadius.card,
                 border: Border.all(
-                  color: AppColors.info.withOpacity(0.3),
+                  color: Colors.blue.withOpacity(0.3),
                   width: 1,
                 ),
               ),
@@ -586,7 +585,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: AppColors.info,
+                    color: Colors.blue,
                     size: 20,
                   ),
                   SizedBox(width: AppSpacing.sm),
@@ -594,7 +593,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                     child: Text(
                       'Exemple: 9h-22h → La roulette sera disponible de 9h à 22h',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -615,8 +614,8 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
       child: ElevatedButton(
         onPressed: _isSaving ? null : _saveSettings,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
           shape: RoundedRectangleBorder(borderRadius: AppRadius.button),
           elevation: 0,
         ),
@@ -626,13 +625,13 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.onPrimary),
+                  valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
                 ),
               )
             : Text(
                 'Enregistrer la configuration',
                 style: AppTextStyles.labelLarge.copyWith(
-                  color: AppColors.onPrimary,
+                  color: colorScheme.onPrimary,
                   fontWeight: FontWeight.w600,
                 ),
               ),

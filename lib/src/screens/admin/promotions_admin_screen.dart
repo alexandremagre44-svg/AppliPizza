@@ -2,12 +2,11 @@
 // Écran d'administration du module promotions
 
 
-// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../design_system/app_theme.dart';
+import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
 import '../../models/promotion.dart';
 import '../../providers/promotion_provider.dart';
 import 'promotion_form_screen.dart';
@@ -43,11 +42,11 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceContainerLow,
+      backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
         title: const Text('Promotions'),
         centerTitle: true,
-        backgroundColor: AppColors.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -61,7 +60,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
         onPressed: _navigateToPromotionForm,
         icon: const Icon(Icons.add),
         label: const Text('Nouvelle promotion'),
-        backgroundColor: AppColors.primary,
+        backgroundColor: colorScheme.primary,
       ),
     );
   }
@@ -75,20 +74,20 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
             Icon(
               Icons.discount_outlined,
               size: 80,
-              color: AppColors.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
             SizedBox(height: AppSpacing.lg),
             Text(
               'Aucune promotion',
               style: AppTextStyles.titleLarge.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(height: AppSpacing.sm),
             Text(
               'Créez votre première promotion',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -136,7 +135,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
   Widget _buildStatsCard(int active, int scheduled, int inactive) {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.lg),
@@ -147,33 +146,33 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
                 'Actives',
                 active.toString(),
                 Icons.check_circle,
-                AppColors.primary,
+                colorScheme.primary,
               ),
             ),
             Container(
               width: 1,
               height: 40,
-              color: AppColors.outlineVariant,
+              color: colorScheme.outlineVariant,
             ),
             Expanded(
               child: _buildStatItem(
                 'Planifiées',
                 scheduled.toString(),
                 Icons.schedule,
-                AppColors.secondary,
+                colorScheme.secondary,
               ),
             ),
             Container(
               width: 1,
               height: 40,
-              color: AppColors.outlineVariant,
+              color: colorScheme.outlineVariant,
             ),
             Expanded(
               child: _buildStatItem(
                 'Inactives',
                 inactive.toString(),
                 Icons.cancel,
-                AppColors.error,
+                colorScheme.error,
               ),
             ),
           ],
@@ -197,7 +196,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
         Text(
           label,
           style: AppTextStyles.labelSmall.copyWith(
-            color: AppColors.onSurfaceVariant,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -216,7 +215,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
   Widget _buildPromotionCard(Promotion promotion, {bool isActive = false, bool isScheduled = false}) {
     return Card(
       elevation: 0,
-      color: AppColors.surface,
+      color: colorScheme.surface,
       margin: EdgeInsets.only(bottom: AppSpacing.sm),
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
       child: InkWell(
@@ -237,10 +236,10 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: isActive
-                          ? AppColors.primaryContainer
+                          ? colorScheme.primaryContainer
                           : isScheduled
-                              ? AppColors.secondaryContainer
-                              : AppColors.errorContainer,
+                              ? colorScheme.secondaryContainer
+                              : colorScheme.errorContainer,
                       borderRadius: AppRadius.radiusSmall,
                     ),
                     child: Text(
@@ -251,10 +250,10 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
                               : 'Inactive',
                       style: AppTextStyles.labelSmall.copyWith(
                         color: isActive
-                            ? AppColors.onPrimaryContainer
+                            ? colorScheme.onPrimaryContainer
                             : isScheduled
-                                ? AppColors.onSecondaryContainer
-                                : AppColors.onErrorContainer,
+                                ? colorScheme.onSecondaryContainer
+                                : colorScheme.onErrorContainer,
                       ),
                     ),
                   ),
@@ -265,7 +264,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
                         ? '-${promotion.discountValue?.toInt() ?? 0}%'
                         : '-${promotion.discountValue?.toStringAsFixed(2) ?? '0.00'}€',
                     style: AppTextStyles.titleLarge.copyWith(
-                      color: AppColors.primary,
+                      color: colorScheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -284,7 +283,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
               Text(
                 promotion.description,
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -296,13 +295,13 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
                   Icon(
                     Icons.calendar_today,
                     size: 14,
-                    color: AppColors.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   SizedBox(width: 4),
                   Text(
                     '${promotion.startDate != null ? _formatDate(promotion.startDate!) : 'Non défini'} - ${promotion.endDate != null ? _formatDate(promotion.endDate!) : 'Illimité'}',
                     style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.onSurfaceVariant,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
