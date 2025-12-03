@@ -471,13 +471,9 @@ class MyApp extends ConsumerWidget {
         ),
         // Kitchen Module Route - Protected by module guard
         GoRoute(
-          path: AppRoutes.kitchen,
-          builder: (context, state) {
-            // Use new minimal kitchen screen with module guard
-            return kitchenModuleRouteGuard(
-              const KitchenScreen(),
-            );
-          },
+          path: '/kitchen',
+          name: 'kitchen',
+          builder: (context, state) => const KitchenScreen(),
         ),
         // Staff Tablet Routes (CAISSE - Admin Only)
         GoRoute(
@@ -604,36 +600,9 @@ class MyApp extends ConsumerWidget {
         ),
         // POS Route - New minimal screen with module guard
         GoRoute(
-          path: AppRoutes.pos,
-          builder: (context, state) {
-            // PROTECTION: POS est réservé aux administrateurs
-            final authState = ref.read(authProvider);
-            if (!authState.isAdmin) {
-              // Redirect to menu if not admin
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.menu);
-              });
-              return Scaffold(
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.lock,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      const SizedBox(height: 16),
-                      const Text('Accès réservé aux administrateurs'),
-                    ],
-                  ),
-                ),
-              );
-            }
-            return posRouteGuard(
-              const PosHomeScreen(),
-            );
-          },
+          path: '/pos',
+          name: 'pos',
+          builder: (context, state) => const PosScreen(),
         ),
         // SuperAdmin parent route - redirects to dashboard
         GoRoute(
