@@ -614,9 +614,13 @@ class MyApp extends ConsumerWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.lock, size: 64, color: Colors.red),
-                      SizedBox(height: 16),
-                      Text('Accès réservé aux administrateurs'),
+                      Icon(
+                        Icons.lock,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text('Accès réservé aux administrateurs'),
                     ],
                   ),
                 ),
