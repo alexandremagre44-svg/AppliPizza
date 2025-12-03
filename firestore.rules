@@ -4,14 +4,24 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     // ============================================================================
-    // CONSTANTE ADMIN
-    // ============================================================================
-    // UID Firebase du seul administrateur autorisé
-    // Cet utilisateur a tous les droits en lecture/écriture sur l'ensemble de Firestore
+    // HELPER FUNCTIONS
     // ============================================================================
     
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user is admin (via custom claim OR hardcoded UID for backward compatibility)
     function isAdmin() {
-      return request.auth != null && request.auth.uid == "dbmnp2DdyJaURWJO4YEE5fgv3002";
+      return request.auth != null && 
+             (request.auth.token.admin == true || 
+              request.auth.uid == "dbmnp2DdyJaURWJO4YEE5fgv3002");
+    }
+    
+    // Check if authenticated user owns the document (userId field matches auth uid)
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
     }
     
     // ============================================================================
@@ -300,6 +310,245 @@ service cloud.firestore {
     
     match /_b3_test/{testDoc} {
       // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // Aucun accès public
+      allow read, write: if false;
+    }
+    
+    // ============================================================================
+    // PHASE 2 SECURITY HARDENING - 11 CRITICAL COLLECTIONS
+    // ============================================================================
+    
+    // ============================================================================
+    // RÈGLES POUR REWARD TICKETS (Programme de fidélité)
+    // ============================================================================
+    // Structure: rewardTickets/{ticketId}
+    //
+    // Permissions:
+    // - Admin: full read/write (création et gestion des tickets)
+    // - User: read own tickets only (via userId field)
+    // - No user write (prevent fraud)
+    // ============================================================================
+    
+    match /rewardTickets/{ticketId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // User: lecture de ses propres tickets uniquement
+      allow read: if isAuthenticated() 
+                  && request.auth.uid == resource.data.userId;
+      
+      // Aucune écriture par user (fraude)
+      allow write: if false;
+    }
+    
+    // ============================================================================
+    // RÈGLES POUR ROULETTE SEGMENTS (Configuration du jeu)
+    // ============================================================================
+    // Structure: roulette_segments/{segmentId}
+    //
+    // Permissions:
+    // - Admin: write only (configuration des gains)
+    // - Public: read (affichage roulette)
+    // - No user write (prevent manipulation)
+    // ============================================================================
+    
+    match /roulette_segments/{segmentId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // Public: lecture seule (affichage app)
+      allow read: if true;
+      
+      // Aucune écriture publique
+      allow write: if false;
+    }
+    
+    // ============================================================================
+    // RÈGLES POUR ROULETTE HISTORY (Historique des parties)
+    // ============================================================================
+    // Structure: roulette_history/{historyId}
+    //
+    // Permissions:
+    // - Admin: full access
+    // - User: read/write own history only
+    // ============================================================================
+    
+    match /roulette_history/{historyId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // User: accès à son propre historique uniquement
+      allow read, write: if isAuthenticated() 
+                         && request.auth.uid == resource.data.userId;
+      
+      // User: création de son propre historique
+      allow create: if isAuthenticated() 
+                    && request.auth.uid == request.resource.data.userId;
+    }
+    
+    // ============================================================================
+    // RÈGLES POUR USER ROULETTE SPINS (Compteur de spins)
+    // ============================================================================
+    // Structure: user_roulette_spins/{userId}
+    //
+    // Permissions:
+    // - Admin: full access (system management)
+    // - User: read own only
+    // - No user write (prevent counter reset)
+    // ============================================================================
+    
+    match /user_roulette_spins/{userId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // User: lecture de son propre compteur uniquement
+      allow read: if isOwner(userId);
+      
+      // Aucune écriture user (éviter reset)
+      allow write: if false;
+    }
+    
+    // ============================================================================
+    // RÈGLES POUR ROULETTE RATE LIMIT (Anti-abus roulette)
+    // ============================================================================
+    // Structure: roulette_rate_limit/{userId}
+    //
+    // Permissions:
+    // - Admin: full access
+    // - User: read own limit status
+    // - No user write (system managed)
+    // ============================================================================
+    
+    match /roulette_rate_limit/{userId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // User: lecture de son propre rate limit
+      allow read: if isOwner(userId);
+      
+      // Aucune écriture user (système géré)
+      allow write: if false;
+    }
+    
+    // ============================================================================
+    // RÈGLES POUR ORDER RATE LIMIT (Anti-spam commandes)
+    // ============================================================================
+    // Structure: order_rate_limit/{userId}
+    //
+    // Permissions:
+    // - Admin: full access
+    // - User: write own rate limit doc (system tracks)
+    // ============================================================================
+    
+    match /order_rate_limit/{userId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // User: accès à son propre rate limit
+      allow read, write: if isOwner(userId);
+    }
+    
+    // ============================================================================
+    // RÈGLES POUR USER POPUP VIEWS (Tracking UI)
+    // ============================================================================
+    // Structure: user_popup_views/{userId}
+    //
+    // Permissions:
+    // - Admin: full access
+    // - User: read/write own popup views
+    // ============================================================================
+    
+    match /user_popup_views/{userId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // User: accès à ses propres vues de popup
+      allow read, write: if isOwner(userId);
+    }
+    
+    // ============================================================================
+    // RÈGLES POUR APPS (Configuration multi-app superadmin)
+    // ============================================================================
+    // Structure: apps/{appId}
+    //
+    // Permissions:
+    // - Admin only (superadmin management)
+    // - No public access
+    // ============================================================================
+    
+    match /apps/{appId} {
+      // Admin: accès complet (SuperAdmin uniquement)
+      allow read, write: if isAdmin();
+      
+      // Aucun accès public
+      allow read, write: if false;
+    }
+    
+    // ============================================================================
+    // RÈGLES POUR RESTAURANTS (White-label restaurant data)
+    // ============================================================================
+    // Structure: restaurants/{restaurantId}
+    //
+    // Permissions:
+    // - Admin: full write access (superadmin + wizard)
+    // - Public: read basic info (client app)
+    // ============================================================================
+    
+    match /restaurants/{restaurantId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // Public: lecture seule (informations restaurant)
+      allow read: if true;
+      
+      // Aucune écriture publique
+      allow write: if false;
+    }
+    
+    // Sous-collections de restaurants (plan, settings, etc.)
+    match /restaurants/{restaurantId}/{subcollection}/{docId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // Public: lecture seule
+      allow read: if true;
+      
+      // Aucune écriture publique
+      allow write: if false;
+    }
+    
+    // ============================================================================
+    // RÈGLES POUR USERS (User management superadmin)
+    // ============================================================================
+    // Structure: users/{userId}
+    //
+    // Permissions:
+    // - Admin: full access (user management)
+    // - User: read/write own profile
+    // ============================================================================
+    
+    match /users/{userId} {
+      // Admin: accès complet
+      allow read, write: if isAdmin();
+      
+      // User: accès à son propre profil uniquement
+      allow read, write: if isOwner(userId);
+    }
+    
+    // ============================================================================
+    // RÈGLES POUR BUILDER B3 (Page Builder System)
+    // ============================================================================
+    // Structure: builder/{path=**}
+    //
+    // Permissions:
+    // - Admin only (Builder B3 access)
+    // - No public access
+    // ============================================================================
+    
+    match /builder/{path=**} {
+      // Admin: accès complet (Builder B3)
       allow read, write: if isAdmin();
       
       // Aucun accès public
