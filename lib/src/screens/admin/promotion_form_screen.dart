@@ -1,6 +1,8 @@
 // lib/src/screens/admin/promotion_form_screen.dart
 // Formulaire de création/modification de promotion
 
+
+// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';

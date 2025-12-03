@@ -462,33 +462,6 @@ class MyApp extends ConsumerWidget {
             );
           },
         ),
-        // Route Roulette
-        GoRoute(
-          path: AppRoutes.roulette,
-          builder: (context, state) {
-            // Module guard: roulette module required
-            final flags = ref.read(restaurantFeatureFlagsProvider);
-            if (flags != null && !flags.has(ModuleId.roulette)) {
-              return const SizedBox.shrink();
-            }
-            // Get userId from auth state
-            final authState = ref.read(authProvider);
-            final userId = authState.userId ?? 'guest';
-            return RouletteScreen(userId: userId);
-          },
-        ),
-        // Route Rewards
-        GoRoute(
-          path: AppRoutes.rewards,
-          builder: (context, state) {
-            // Module guard: loyalty module required
-            final flags = ref.read(restaurantFeatureFlagsProvider);
-            if (flags != null && !flags.has(ModuleId.loyalty)) {
-              return const SizedBox.shrink();
-            }
-            return const RewardsScreen();
-          },
-        ),
         // Staff Tablet Routes (CAISSE - Admin Only)
         GoRoute(
           path: AppRoutes.staffTabletPin,

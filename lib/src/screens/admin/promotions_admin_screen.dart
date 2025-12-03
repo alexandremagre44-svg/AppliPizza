@@ -1,6 +1,8 @@
 // lib/src/screens/admin/promotions_admin_screen.dart
 // Écran d'administration du module promotions
 
+
+// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
