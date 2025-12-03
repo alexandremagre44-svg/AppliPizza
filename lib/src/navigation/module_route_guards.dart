@@ -222,7 +222,7 @@ Widget newsletterRouteGuard(Widget child, {String? fallbackRoute}) {
 /// Guard pour le module tablette cuisine.
 Widget kitchenRouteGuard(Widget child, {String? fallbackRoute}) {
   return ModuleRouteGuard(
-    requiredModule: ModuleId.kitchenTablet,
+    requiredModule: ModuleId.kitchen_tablet,
     fallbackRoute: fallbackRoute ?? AppRoutes.home,
     child: child,
   );
@@ -231,25 +231,7 @@ Widget kitchenRouteGuard(Widget child, {String? fallbackRoute}) {
 /// Guard pour le module tablette staff.
 Widget staffTabletRouteGuard(Widget child, {String? fallbackRoute}) {
   return ModuleRouteGuard(
-    requiredModule: ModuleId.staffTablet,
-    fallbackRoute: fallbackRoute ?? AppRoutes.home,
-    child: child,
-  );
-}
-
-/// Guard pour le module POS (Point of Sale).
-Widget posRouteGuard(Widget child, {String? fallbackRoute}) {
-  return ModuleRouteGuard(
-    requiredModule: ModuleId.pos,
-    fallbackRoute: fallbackRoute ?? AppRoutes.home,
-    child: child,
-  );
-}
-
-/// Guard pour le module Kitchen.
-Widget kitchenModuleRouteGuard(Widget child, {String? fallbackRoute}) {
-  return ModuleRouteGuard(
-    requiredModule: ModuleId.kitchen,
+    requiredModule: ModuleId.staff_tablet,
     fallbackRoute: fallbackRoute ?? AppRoutes.home,
     child: child,
   );

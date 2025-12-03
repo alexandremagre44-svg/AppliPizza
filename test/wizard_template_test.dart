@@ -25,7 +25,7 @@ void main() {
       expect(template.modules, contains(ModuleId.loyalty));
       expect(template.modules, contains(ModuleId.roulette));
       expect(template.modules, contains(ModuleId.promotions));
-      expect(template.modules, contains(ModuleId.kitchenTablet));
+      expect(template.modules, contains(ModuleId.kitchen_tablet));
     });
 
     test('Fast Food Express template has correct modules', () {
@@ -36,7 +36,7 @@ void main() {
       expect(template.name, 'Fast Food Express');
       expect(template.modules, contains(ModuleId.ordering));
       expect(template.modules, contains(ModuleId.clickAndCollect));
-      expect(template.modules, contains(ModuleId.staffTablet));
+      expect(template.modules, contains(ModuleId.staff_tablet));
       expect(template.modules, contains(ModuleId.promotions));
     });
 

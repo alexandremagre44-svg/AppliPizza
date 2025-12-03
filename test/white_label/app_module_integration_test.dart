@@ -176,11 +176,11 @@ void main() {
       );
       expect(
         DynamicNavbarBuilder.getRequiredModule('/kitchen'),
-        equals(ModuleId.kitchenTablet),
+        equals(ModuleId.kitchen_tablet),
       );
       expect(
         DynamicNavbarBuilder.getRequiredModule('/staff'),
-        equals(ModuleId.staffTablet),
+        equals(ModuleId.staff_tablet),
       );
     });
 

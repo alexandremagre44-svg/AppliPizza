@@ -71,7 +71,7 @@ void main() {
       
       final operationsModuleIds = operationsModules.map((m) => m.id).toList();
       expect(operationsModuleIds, contains(ModuleId.kitchenTablet));
-      expect(operationsModuleIds, contains(ModuleId.staffTablet));
+      expect(operationsModuleIds, contains(ModuleId.staff_tablet));
       expect(operationsModuleIds, contains(ModuleId.timeRecorder));
     });
 
@@ -107,7 +107,7 @@ void main() {
       expect(kitchenTablet.dependencies, contains(ModuleId.ordering));
       
       // Staff tablet depends on ordering
-      final staffTablet = ModuleRegistry.of(ModuleId.staffTablet);
+      final staffTablet = ModuleRegistry.of(ModuleId.staff_tablet);
       expect(staffTablet.dependencies, contains(ModuleId.ordering));
       
       // Payment terminal depends on payments
@@ -135,7 +135,7 @@ void main() {
       expect(premiumModuleIds, contains(ModuleId.wallet));
       expect(premiumModuleIds, contains(ModuleId.pagesBuilder));
       expect(premiumModuleIds, contains(ModuleId.kitchenTablet));
-      expect(premiumModuleIds, contains(ModuleId.staffTablet));
+      expect(premiumModuleIds, contains(ModuleId.staff_tablet));
       expect(premiumModuleIds, contains(ModuleId.timeRecorder));
       expect(premiumModuleIds, contains(ModuleId.exports));
     });
