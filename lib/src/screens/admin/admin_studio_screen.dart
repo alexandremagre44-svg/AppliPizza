@@ -1,6 +1,8 @@
 // lib/src/screens/admin/admin_studio_screen.dart
 // Admin Menu - Point d'entrée principal pour tous les outils d'administration
 
+
+// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart';

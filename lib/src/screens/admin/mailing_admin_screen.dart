@@ -1,6 +1,8 @@
 // lib/src/screens/admin/mailing_admin_screen.dart
 // Écran d'administration du module mailing
 
+
+// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart';

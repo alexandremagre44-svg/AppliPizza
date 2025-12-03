@@ -1,6 +1,8 @@
 // lib/src/screens/admin/studio/roulette_segment_editor_screen.dart
 // Editor screen for creating/editing roulette segments - Material 3 + Pizza Deli'Zza
 
+
+// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';

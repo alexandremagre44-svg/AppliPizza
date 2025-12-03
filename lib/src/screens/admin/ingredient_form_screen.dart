@@ -1,6 +1,8 @@
 // lib/src/screens/admin/ingredient_form_screen.dart
 // Formulaire de création/modification d'ingrédient
 
+
+// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';

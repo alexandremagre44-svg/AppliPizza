@@ -6,7 +6,6 @@ class AppRoutes {
   static const String login = '/login';
   static const String home = '/home';
   static const String menu = '/menu';
-  static const String categories = '/categories';
   static const String cart = '/cart';
   static const String profile = '/profile';
   static const String productDetail = '/details';
@@ -22,7 +21,6 @@ class AppRoutes {
   
   // Admin entry point
   static const String adminStudio = '/admin/studio';
-  static const String adminTab = '/adminTab';
   
   // Admin management routes
   static const String adminProducts = '/admin/products';

@@ -1,6 +1,8 @@
 // lib/src/screens/admin/product_form_screen.dart
 // Formulaire de création/modification de produit
 
+
+// TODO(PHASE2): Migrate legacy theme → unified WL theme
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
