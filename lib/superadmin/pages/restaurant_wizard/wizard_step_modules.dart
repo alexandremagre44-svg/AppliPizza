@@ -2,7 +2,7 @@
 ///
 /// Étape 4 du Wizard: Configuration des modules.
 /// Permet d'activer/désactiver les différents modules du restaurant.
-/// Utilise ModuleRegistry pour afficher tous les 17 modules disponibles.
+/// Affiche uniquement les modules pertinents pour les restaurants (9 modules).
 library;
 
 import 'package:flutter/material.dart';
@@ -23,36 +23,20 @@ IconData _getModuleIcon(ModuleId moduleId) {
       return Icons.delivery_dining;
     case ModuleId.clickAndCollect:
       return Icons.store;
-    case ModuleId.payments:
-      return Icons.payment;
-    case ModuleId.paymentTerminal:
-      return Icons.point_of_sale;
-    case ModuleId.wallet:
-      return Icons.account_balance_wallet;
     case ModuleId.loyalty:
       return Icons.card_giftcard;
     case ModuleId.roulette:
       return Icons.casino;
     case ModuleId.promotions:
       return Icons.local_offer;
-    case ModuleId.newsletter:
-      return Icons.email;
-    case ModuleId.kitchenTablet:
-      return Icons.kitchen;
-    case ModuleId.staffTablet:
-      return Icons.tablet_android;
-    case ModuleId.timeRecorder:
-      return Icons.access_time;
     case ModuleId.theme:
       return Icons.palette;
     case ModuleId.pagesBuilder:
       return Icons.web;
-    case ModuleId.reporting:
-      return Icons.analytics;
-    case ModuleId.exports:
-      return Icons.download;
-    case ModuleId.campaigns:
-      return Icons.campaign;
+    case ModuleId.kitchenTablet:
+      return Icons.kitchen;
+    default:
+      return Icons.block;
   }
 }
 
@@ -90,9 +74,28 @@ class WizardStepModules extends ConsumerWidget {
     // Récupérer tous les modules depuis ModuleRegistry
     final allModules = ModuleRegistry.definitions.values.toList();
 
+    // Modules pertinents pour les restaurants, exclusion des modules
+    // internes (POS, Kitchen, etc.) et de gestion avancée
+    const restaurantVisibleModules = {
+      ModuleId.ordering,
+      ModuleId.delivery,
+      ModuleId.clickAndCollect,
+      ModuleId.loyalty,
+      ModuleId.roulette,
+      ModuleId.promotions,
+      ModuleId.pagesBuilder,
+      ModuleId.theme,
+      ModuleId.kitchenTablet,
+    };
+
+    // Filtrer pour n'afficher que les modules destinés aux restaurants
+    final visibleModules = allModules
+        .where((module) => restaurantVisibleModules.contains(module.id))
+        .toList();
+
     // Grouper les modules par catégorie
     final modulesByCategory = <ModuleCategory, List<core.ModuleDefinition>>{};
-    for (final module in allModules) {
+    for (final module in visibleModules) {
       modulesByCategory.putIfAbsent(module.category, () => []);
       modulesByCategory[module.category]!.add(module);
     }
@@ -120,7 +123,7 @@ class WizardStepModules extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 'Sélectionnez les fonctionnalités que vous souhaitez activer pour votre restaurant. '
-                '${allModules.length} modules disponibles.',
+                '${visibleModules.length} modules disponibles.',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey.shade600,
@@ -131,7 +134,7 @@ class WizardStepModules extends ConsumerWidget {
               // Résumé
               _ModulesSummary(
                 enabledCount: enabledModules.length,
-                totalCount: allModules.length,
+                totalCount: visibleModules.length,
                 enabledModules: enabledModules,
               ),
               const SizedBox(height: 16),
