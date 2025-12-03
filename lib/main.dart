@@ -19,7 +19,7 @@ import 'src/screens/cart/cart_screen.dart';
 import 'src/screens/checkout/checkout_screen.dart';
 import 'src/screens/profile/profile_screen.dart'; 
 import 'src/screens/product_detail/product_detail_screen.dart';
-import 'src/kitchen/kitchen_page.dart';
+import 'screens/kitchen_tablet/kitchen_tablet_screen.dart';
 import 'src/screens/roulette/roulette_screen.dart';
 import 'src/screens/client/rewards/rewards_screen.dart';
 
@@ -468,7 +468,7 @@ class MyApp extends ConsumerWidget {
           builder: (context, state) {
             // Phase 3: Use proper route guard for kitchen module
             return kitchenRouteGuard(
-              const KitchenPage(),
+              const KitchenTabletScreen(),
             );
           },
         ),
