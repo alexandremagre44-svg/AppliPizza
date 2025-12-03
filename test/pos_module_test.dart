@@ -7,11 +7,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pizza_delizza/src/screens/admin/pos/pos_screen.dart';
 import 'package:pizza_delizza/src/screens/admin/pos/pos_shell_scaffold.dart';
 import 'package:pizza_delizza/src/screens/admin/pos/pos_routes.dart';
+import 'package:pizza_delizza/src/core/constants.dart';
 
 void main() {
   group('POS Module Phase 1 Tests', () {
     
-    test('PosRoutes constants are defined', () {
+    test('PosRoutes.main references AppRoutes.pos correctly', () {
+      // Verify consistency between PosRoutes.main and AppRoutes.pos
+      expect(PosRoutes.main, equals(AppRoutes.pos));
+      // Verify the expected value
       expect(PosRoutes.main, equals('/pos'));
     });
 
