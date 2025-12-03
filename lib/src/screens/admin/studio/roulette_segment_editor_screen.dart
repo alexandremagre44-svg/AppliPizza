@@ -145,6 +145,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
@@ -317,6 +318,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
     TextInputType? keyboardType,
     String? Function(String?)? validator,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -337,6 +339,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
 
   /// Build reward type dropdown
   Widget _buildRewardTypeDropdown() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -388,6 +391,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
 
   /// Build product selector
   Widget _buildProductSelector() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -437,6 +441,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
 
   /// Build drink selector
   Widget _buildDrinkSelector() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -486,6 +491,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
 
   /// Build color picker
   Widget _buildColorPicker() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -544,6 +550,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
 
   /// Build icon selector
   Widget _buildIconSelector() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -600,6 +607,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
 
   /// Build active switch
   Widget _buildActiveSwitch() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -753,6 +761,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
 
   /// Delete segment
   Future<void> _deleteSegment() async {
+    final colorScheme = Theme.of(context).colorScheme;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -789,6 +798,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
 
   /// Show snackbar
   void _showSnackBar(String message, {required bool isError}) {
+    final colorScheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

@@ -58,6 +58,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
@@ -113,6 +114,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
 
   /// Header info section
   Widget _buildHeaderInfo() {
+    final colorScheme = Theme.of(context).colorScheme;
     final totalProbability = _segments.fold<double>(
       0,
       (sum, segment) => sum + segment.probability,
@@ -184,6 +186,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
 
   /// Build a segment card
   Widget _buildSegmentCard(RouletteSegment segment) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -299,6 +302,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
 
   /// Empty state
   Widget _buildEmptyState() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: AppSpacing.paddingXL,
@@ -421,6 +425,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
 
   /// Show snackbar
   void _showSnackBar(String message, {required bool isError}) {
+    final colorScheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

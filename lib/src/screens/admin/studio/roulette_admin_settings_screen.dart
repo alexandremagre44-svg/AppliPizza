@@ -94,6 +94,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
+        final colorScheme = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors du chargement: $e'),
@@ -137,6 +138,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
       }
     } catch (e) {
       if (mounted) {
+        final colorScheme = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la sauvegarde: $e'),
@@ -163,6 +165,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
@@ -198,6 +201,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
 
   /// Section 1 - Global activation
   Widget _buildActivationSection() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -248,6 +252,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
 
   /// Section 2 - Rate Limit (Server-side security)
   Widget _buildRateLimitSection() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -333,6 +338,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
 
   /// Section 3 - Cooldown
   Widget _buildCooldownSection() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -388,6 +394,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
 
   /// Section 4 - Usage limits
   Widget _buildLimitsSection() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -491,6 +498,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
 
   /// Section 5 - Time range
   Widget _buildTimeRangeSection() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -608,6 +616,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
 
   /// Save button
   Widget _buildSaveButton() {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
       height: 48,

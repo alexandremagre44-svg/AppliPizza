@@ -40,6 +40,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     // Utilisation du stream provider pour les mises à jour en temps réel
     final ingredientsAsync = ref.watch(ingredientStreamProvider);
 
@@ -101,6 +102,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
   }
 
   Widget _buildIngredientList(List<Ingredient> ingredients, IngredientCategory? category) {
+    final colorScheme = Theme.of(context).colorScheme;
     if (ingredients.isEmpty) {
       return Center(
         child: Column(
@@ -144,6 +146,7 @@ class _IngredientsAdminScreenState extends ConsumerState<IngredientsAdminScreen>
   }
 
   Widget _buildIngredientCard(Ingredient ingredient) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,

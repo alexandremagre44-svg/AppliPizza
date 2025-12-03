@@ -46,6 +46,7 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
@@ -110,6 +111,7 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
   }
 
   Widget _buildCampaignsTab() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.xl),
@@ -156,6 +158,7 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
   }
 
   Widget _buildStatsCard(int active, int inactive) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 0,
       color: colorScheme.surface,
@@ -205,6 +208,7 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
   }
 
   Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         Icon(icon, color: color, size: 28),
@@ -236,6 +240,7 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
   }
 
   Widget _buildSubscriberCard(Subscriber subscriber) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isActive = subscriber.status == 'active';
     
     return Card(
