@@ -166,6 +166,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLow,
       appBar: AppBar(
@@ -629,7 +630,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
           elevation: 0,
         ),
         child: _isSaving
-            ? const SizedBox(
+            ? SizedBox(
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
