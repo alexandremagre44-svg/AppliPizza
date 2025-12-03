@@ -251,29 +251,30 @@ class ModuleRouteResolver {
     return normalized.trim();
   }
 
+  /// Core system routes that don't require a module.
+  /// These are application-level routes that always exist.
+  static const List<String> _systemRoutes = [
+    '/',
+    '/home',
+    '/menu',
+    '/cart',
+    '/profile',
+    '/about',
+    '/contact',
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/settings',
+    '/orders',
+    '/order-history',
+    '/checkout',
+  ];
+
   /// Check if a route is a system route (doesn't require a module).
   ///
   /// System routes are core application routes that don't depend on modules.
   static bool _isSystemRoute(String route) {
-    // Core system routes that always exist
-    const systemRoutes = [
-      '/',
-      '/home',
-      '/menu',
-      '/cart',
-      '/profile',
-      '/about',
-      '/contact',
-      '/login',
-      '/signup',
-      '/forgot-password',
-      '/settings',
-      '/orders',
-      '/order-history',
-      '/checkout',
-    ];
-
-    return systemRoutes.contains(route);
+    return _systemRoutes.contains(route);
   }
 
   /// Find a module by exact route match.
@@ -327,22 +328,7 @@ class ModuleRouteResolver {
   /// print(systemRoutes); // ["/", "/home", "/menu", ...]
   /// ```
   static List<String> getSystemRoutes() {
-    return [
-      '/',
-      '/home',
-      '/menu',
-      '/cart',
-      '/profile',
-      '/about',
-      '/contact',
-      '/login',
-      '/signup',
-      '/forgot-password',
-      '/settings',
-      '/orders',
-      '/order-history',
-      '/checkout',
-    ];
+    return List.unmodifiable(_systemRoutes);
   }
 
   /// Validate a list of routes against active modules.

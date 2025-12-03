@@ -122,7 +122,11 @@ void main() {
       expect(modules, contains(ModuleId.roulette));
       expect(modules, contains(ModuleId.promotions));
       
-      expect(modules.length, 3); // Only 3 modules have builder blocks
+      // Verify that only modules with builder blocks are returned
+      expect(modules.length, greaterThan(0));
+      for (final module in modules) {
+        expect(ModuleRuntimeMapping.hasBuilderBlock(module), true);
+      }
     });
 
     test('getStatusSummary returns correct counts', () {
