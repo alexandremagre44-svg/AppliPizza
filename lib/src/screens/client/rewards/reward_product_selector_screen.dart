@@ -33,7 +33,8 @@ class RewardProductSelectorScreen extends ConsumerStatefulWidget {
 
 class _RewardProductSelectorScreenState
     extends ConsumerState<RewardProductSelectorScreen> {
-  final RewardService _rewardService = RewardService();
+  // Use getter to access service via provider
+  RewardService get _rewardService => ref.watch(rewardServiceProvider);
   bool _isProcessing = false;
 
   @override

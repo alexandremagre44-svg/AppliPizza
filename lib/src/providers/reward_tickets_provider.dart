@@ -24,7 +24,7 @@ final activeRewardTicketsProvider = StreamProvider.autoDispose<List<RewardTicket
     return Stream.value([]);
   }
   
-  final rewardService = RewardService();
+  final rewardService = ref.watch(rewardServiceProvider);
   return rewardService.watchUserTickets(userId).map((tickets) {
     return tickets.where((ticket) => ticket.isActive).toList();
   });

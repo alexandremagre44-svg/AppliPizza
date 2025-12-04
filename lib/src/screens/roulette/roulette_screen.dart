@@ -86,6 +86,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   RouletteService get _rouletteService => ref.read(rouletteServiceProvider);
   RouletteRulesService get _rulesService => ref.read(rouletteRulesServiceProvider);
   LoyaltyService get _loyaltyService => ref.read(loyaltyServiceProvider);
+  RewardService get _rewardService => ref.read(rewardServiceProvider);
   
   List<RouletteSegment> _segments = [];
   bool _isLoading = true;
@@ -212,6 +213,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       await createTicketFromRouletteSegment(
         userId: _effectiveUserId,
         segment: segment,
+        rewardService: _rewardService,
         rulesService: _rulesService,
         loyaltyService: _loyaltyService,
       );

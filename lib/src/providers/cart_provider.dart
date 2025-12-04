@@ -112,11 +112,13 @@ class CartState {
 // =============================================
 
 final cartProvider = StateNotifierProvider<CartNotifier, CartState>((ref) {
-  return CartNotifier();
+  return CartNotifier(ref);
 });
 
 class CartNotifier extends StateNotifier<CartState> {
-  CartNotifier() : super(CartState([]));
+  final Ref _ref;
+  
+  CartNotifier(this._ref) : super(CartState([]));
 
   // Ajoute un produit simple ou un menu standard au panier
   void addItem(Product product, {String? customDescription}) {
@@ -339,7 +341,7 @@ class CartNotifier extends StateNotifier<CartState> {
       throw Exception('Ce ticket a expiré');
     }
 
-    final rewardService = RewardService();
+    final rewardService = _ref.read(rewardServiceProvider);
 
     // Apply based on reward type
     switch (ticket.action.type) {
