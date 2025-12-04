@@ -54,7 +54,8 @@ import 'src/screens/admin/pos/pos_screen.dart';
 import 'src/screens/kitchen/kitchen_screen.dart';
 
 // Importez le composant de barre de navigation
-import 'src/widgets/scaffold_with_nav_bar.dart'; 
+import 'src/widgets/scaffold_with_nav_bar.dart';
+import 'src/widgets/restaurant_scope.dart';
 import 'src/models/product.dart';
 import 'src/models/order.dart';
 import 'src/models/restaurant_config.dart';
@@ -124,16 +125,11 @@ void main() async {
   
   runApp(
     ProviderScope(
-      overrides: [
-        // Override the restaurant provider with environment-configured value
-        currentRestaurantProvider.overrideWithValue(
-          RestaurantConfig(
-            id: appId,
-            name: appName,
-          ),
-        ),
-      ],
-      child: const MyApp(),
+      child: RestaurantScope(
+        restaurantId: appId,
+        restaurantName: appName,
+        child: const MyApp(),
+      ),
     ),
   );
 }
