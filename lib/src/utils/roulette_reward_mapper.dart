@@ -86,6 +86,7 @@ RewardAction mapSegmentToRewardAction(roulette.RouletteSegment segment) {
 /// - [userId]: The user who won
 /// - [segment]: The winning segment
 /// - [validity]: How long the ticket is valid (default: 7 days for roulette)
+/// - [rewardService]: The reward service (scoped to appId)
 /// - [rulesService]: The roulette rules service (scoped to appId)
 /// - [loyaltyService]: The loyalty service (scoped to appId)
 /// 
@@ -93,6 +94,7 @@ RewardAction mapSegmentToRewardAction(roulette.RouletteSegment segment) {
 Future<RewardTicket?> createTicketFromRouletteSegment({
   required String userId,
   required roulette.RouletteSegment segment,
+  required RewardService rewardService,
   required RouletteRulesService rulesService,
   required LoyaltyService loyaltyService,
   Duration? validity,
@@ -146,8 +148,7 @@ Future<RewardTicket?> createTicketFromRouletteSegment({
         Duration(days: 7); // Default 7 days for roulette rewards
     
     // Create ticket via RewardService
-    final service = RewardService();
-    final ticket = await service.createTicket(
+    final ticket = await rewardService.createTicket(
       userId: userId,
       action: action,
       validity: ticketValidity,

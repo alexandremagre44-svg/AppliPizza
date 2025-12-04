@@ -62,6 +62,7 @@ import '../../services/roulette_segment_service.dart';
 import '../../services/roulette_service.dart';
 import '../../services/roulette_rules_service.dart';
 import '../../services/loyalty_service.dart';
+import '../../services/reward_service.dart';
 import '../../widgets/pizza_roulette_wheel.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -86,6 +87,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
   RouletteService get _rouletteService => ref.read(rouletteServiceProvider);
   RouletteRulesService get _rulesService => ref.read(rouletteRulesServiceProvider);
   LoyaltyService get _loyaltyService => ref.read(loyaltyServiceProvider);
+  RewardService get _rewardService => ref.read(rewardServiceProvider);
   
   List<RouletteSegment> _segments = [];
   bool _isLoading = true;
@@ -212,6 +214,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       await createTicketFromRouletteSegment(
         userId: _effectiveUserId,
         segment: segment,
+        rewardService: _rewardService,
         rulesService: _rulesService,
         loyaltyService: _loyaltyService,
       );
