@@ -11,10 +11,13 @@ import 'restaurant_provider.dart';
 
 /// Provider pour le service d'authentification Firebase
 /// Watches currentRestaurantProvider to inject the appId for multi-tenant isolation
-final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
-  final config = ref.watch(currentRestaurantProvider);
-  return FirebaseAuthService(appId: config.id);
-});
+final firebaseAuthServiceProvider = Provider<FirebaseAuthService>(
+  (ref) {
+    final config = ref.watch(currentRestaurantProvider);
+    return FirebaseAuthService(appId: config.id);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider pour l'état d'authentification
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {

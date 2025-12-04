@@ -9,10 +9,13 @@ import 'restaurant_provider.dart';
 
 /// Provider pour le service de commandes Firebase
 /// Watches currentRestaurantProvider to inject the appId for multi-tenant isolation
-final firebaseOrderServiceProvider = Provider<FirebaseOrderService>((ref) {
-  final config = ref.watch(currentRestaurantProvider);
-  return FirebaseOrderService(appId: config.id);
-});
+final firebaseOrderServiceProvider = Provider<FirebaseOrderService>(
+  (ref) {
+    final config = ref.watch(currentRestaurantProvider);
+    return FirebaseOrderService(appId: config.id);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider pour le stream des commandes (temps réel)
 /// Affiche toutes les commandes pour admin/kitchen, seulement les commandes de l'utilisateur pour client

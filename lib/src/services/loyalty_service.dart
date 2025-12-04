@@ -348,7 +348,10 @@ class LoyaltyService {
 }
 
 /// Provider for LoyaltyService scoped to the current restaurant
-final loyaltyServiceProvider = Provider<LoyaltyService>((ref) {
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return LoyaltyService(appId: appId);
-});
+final loyaltyServiceProvider = Provider<LoyaltyService>(
+  (ref) {
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return LoyaltyService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);

@@ -12,10 +12,13 @@ import 'order_provider.dart';
 
 /// Provider for the UserProfileService
 /// Watches currentRestaurantProvider to inject the appId for multi-tenant isolation
-final userProfileServiceProvider = Provider<UserProfileService>((ref) {
-  final config = ref.watch(currentRestaurantProvider);
-  return UserProfileService(appId: config.id);
-});
+final userProfileServiceProvider = Provider<UserProfileService>(
+  (ref) {
+    final config = ref.watch(currentRestaurantProvider);
+    return UserProfileService(appId: config.id);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 final userProvider =
     StateNotifierProvider<UserProfileNotifier, UserProfile>((ref) {

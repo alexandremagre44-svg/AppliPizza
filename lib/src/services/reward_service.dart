@@ -238,7 +238,10 @@ class RewardService {
 }
 
 /// Provider for RewardService scoped to the current restaurant
-final rewardServiceProvider = Provider<RewardService>((ref) {
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return RewardService(appId: appId);
-});
+final rewardServiceProvider = Provider<RewardService>(
+  (ref) {
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return RewardService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);

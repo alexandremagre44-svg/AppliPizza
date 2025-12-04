@@ -209,7 +209,10 @@ class CombinedProductRepository implements ProductRepository {
 }
 
 // Le provider pour fournir l'instance du Repository
-final productRepositoryProvider = Provider<ProductRepository>((ref) {
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return CombinedProductRepository(appId: appId);
-});
+final productRepositoryProvider = Provider<ProductRepository>(
+  (ref) {
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return CombinedProductRepository(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);

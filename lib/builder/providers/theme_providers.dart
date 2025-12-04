@@ -30,20 +30,26 @@ final themeServiceProvider = Provider<ThemeService>((ref) {
 ///   error: (_, __) => BuilderThemeProvider(theme: ThemeConfig.defaultConfig, child: ...),
 /// );
 /// ```
-final publishedThemeProvider = FutureProvider<ThemeConfig>((ref) async {
-  final service = ref.watch(themeServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return await service.loadPublishedTheme(appId);
-});
+final publishedThemeProvider = FutureProvider<ThemeConfig>(
+  (ref) async {
+    final service = ref.watch(themeServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return await service.loadPublishedTheme(appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Stream provider for real-time published theme updates
 ///
 /// Use this when you need live updates as the published theme changes.
-final publishedThemeStreamProvider = StreamProvider<ThemeConfig>((ref) {
-  final service = ref.watch(themeServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return service.watchPublishedTheme(appId);
-});
+final publishedThemeStreamProvider = StreamProvider<ThemeConfig>(
+  (ref) {
+    final service = ref.watch(themeServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return service.watchPublishedTheme(appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider for draft theme configuration
 ///
@@ -54,20 +60,26 @@ final publishedThemeStreamProvider = StreamProvider<ThemeConfig>((ref) {
 /// ```dart
 /// final draftThemeAsync = ref.watch(draftThemeProvider);
 /// ```
-final draftThemeProvider = FutureProvider<ThemeConfig>((ref) async {
-  final service = ref.watch(themeServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return await service.loadDraftTheme(appId);
-});
+final draftThemeProvider = FutureProvider<ThemeConfig>(
+  (ref) async {
+    final service = ref.watch(themeServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return await service.loadDraftTheme(appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Stream provider for real-time draft theme updates
 ///
 /// Use this in the Builder editor for live preview updates.
-final draftThemeStreamProvider = StreamProvider<ThemeConfig>((ref) {
-  final service = ref.watch(themeServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return service.watchDraftTheme(appId);
-});
+final draftThemeStreamProvider = StreamProvider<ThemeConfig>(
+  (ref) {
+    final service = ref.watch(themeServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return service.watchDraftTheme(appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// StateNotifier for managing draft theme edits in the Builder
 ///
@@ -176,22 +188,31 @@ class DraftThemeNotifier extends StateNotifier<AsyncValue<ThemeConfig>> {
 /// await draftNotifier.publish(userId: 'admin');
 /// ```
 final draftThemeNotifierProvider =
-    StateNotifierProvider<DraftThemeNotifier, AsyncValue<ThemeConfig>>((ref) {
-  final service = ref.watch(themeServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return DraftThemeNotifier(service: service, appId: appId);
-});
+    StateNotifierProvider<DraftThemeNotifier, AsyncValue<ThemeConfig>>(
+  (ref) {
+    final service = ref.watch(themeServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return DraftThemeNotifier(service: service, appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider for checking if theme has been published
-final hasPublishedThemeProvider = FutureProvider<bool>((ref) async {
-  final service = ref.watch(themeServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return await service.hasPublishedTheme(appId);
-});
+final hasPublishedThemeProvider = FutureProvider<bool>(
+  (ref) async {
+    final service = ref.watch(themeServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return await service.hasPublishedTheme(appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider for checking if draft theme exists
-final hasDraftThemeProvider = FutureProvider<bool>((ref) async {
-  final service = ref.watch(themeServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return await service.hasDraftTheme(appId);
-});
+final hasDraftThemeProvider = FutureProvider<bool>(
+  (ref) async {
+    final service = ref.watch(themeServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return await service.hasDraftTheme(appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);

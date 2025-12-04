@@ -7,12 +7,15 @@ import '../services/app_texts_service.dart';
 import 'restaurant_provider.dart';
 
 /// Provider for AppTextsService
-final appTextsServiceProvider = Provider<AppTextsService>((ref) {
-  final config = ref.watch(currentRestaurantProvider);
-  // Use default 'delizza' if config is invalid (should not happen in normal usage)
-  final appId = config.isValid ? config.id : 'delizza';
-  return AppTextsService(appId: appId);
-});
+final appTextsServiceProvider = Provider<AppTextsService>(
+  (ref) {
+    final config = ref.watch(currentRestaurantProvider);
+    // Use default 'delizza' if config is invalid (should not happen in normal usage)
+    final appId = config.isValid ? config.id : 'delizza';
+    return AppTextsService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Stream provider for real-time app texts configuration
 /// Watches Firestore for changes and updates automatically

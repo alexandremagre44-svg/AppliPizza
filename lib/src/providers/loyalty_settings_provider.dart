@@ -9,11 +9,14 @@ import 'restaurant_plan_provider.dart';
 import '../../white_label/core/module_id.dart';
 
 /// Provider for LoyaltySettingsService scoped to the current restaurant
-final loyaltySettingsServiceProvider = Provider<LoyaltySettingsService>((ref) {
-  final config = ref.watch(currentRestaurantProvider);
-  final appId = config.isValid ? config.id : 'delizza';
-  return LoyaltySettingsService(appId: appId);
-});
+final loyaltySettingsServiceProvider = Provider<LoyaltySettingsService>(
+  (ref) {
+    final config = ref.watch(currentRestaurantProvider);
+    final appId = config.isValid ? config.id : 'delizza';
+    return LoyaltySettingsService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Stream provider for loyalty settings
 /// Module guard: requires loyalty module
