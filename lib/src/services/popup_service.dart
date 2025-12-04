@@ -10,10 +10,13 @@ import '../core/firestore_paths.dart';
 
 class PopupService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String appId;
+
+  PopupService({required this.appId});
 
   /// Get collection reference for popups
   CollectionReference<Map<String, dynamic>> get _popupsCollection =>
-      FirestorePaths.popups();
+      FirestorePaths.popups(appId);
 
   // Get all popups
   Future<List<PopupConfig>> getAllPopups() async {
@@ -130,6 +133,8 @@ class PopupService {
     // Check display condition
     try {
       final userPopupDoc = await _firestore
+          .collection('restaurants')
+          .doc(appId)
           .collection('user_popup_views')
           .doc('${userId}_${popup.id}')
           .get();
@@ -167,6 +172,8 @@ class PopupService {
   Future<void> recordPopupView(String userId, String popupId) async {
     try {
       await _firestore
+          .collection('restaurants')
+          .doc(appId)
           .collection('user_popup_views')
           .doc('${userId}_$popupId')
           .set({

@@ -10,10 +10,13 @@ import '../core/firestore_paths.dart';
 
 class BannerService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String appId;
+
+  BannerService({required this.appId});
 
   /// Get collection reference for banners
   CollectionReference<Map<String, dynamic>> get _bannersCollection =>
-      FirestorePaths.banners();
+      FirestorePaths.banners(appId);
 
   /// Get all banners ordered by order field
   Future<List<BannerConfig>> getAllBanners() async {

@@ -9,10 +9,14 @@ import '../models/loyalty_settings.dart';
 import '../core/firestore_paths.dart';
 
 class LoyaltySettingsService {
+  final String appId;
+
+  LoyaltySettingsService({required this.appId});
+
   // Get loyalty settings
   Future<LoyaltySettings> getLoyaltySettings() async {
     try {
-      final doc = await FirestorePaths.loyaltySettingsDoc().get();
+      final doc = await FirestorePaths.loyaltySettingsDoc(appId).get();
       if (doc.exists && doc.data() != null) {
         return LoyaltySettings.fromJson(doc.data()!);
       }
@@ -26,7 +30,7 @@ class LoyaltySettingsService {
   // Save loyalty settings
   Future<bool> saveLoyaltySettings(LoyaltySettings settings) async {
     try {
-      await FirestorePaths.loyaltySettingsDoc().set(
+      await FirestorePaths.loyaltySettingsDoc(appId).set(
             settings.toJson(),
             SetOptions(merge: true),
           );
@@ -40,7 +44,7 @@ class LoyaltySettingsService {
   // Initialize with default settings if doesn't exist
   Future<bool> initializeDefaultSettings() async {
     try {
-      final existing = await FirestorePaths.loyaltySettingsDoc().get();
+      final existing = await FirestorePaths.loyaltySettingsDoc(appId).get();
       if (existing.exists) return true;
 
       final defaultSettings = LoyaltySettings.defaultSettings();
@@ -53,7 +57,7 @@ class LoyaltySettingsService {
 
   // Stream for real-time updates
   Stream<LoyaltySettings> watchLoyaltySettings() {
-    return FirestorePaths.loyaltySettingsDoc()
+    return FirestorePaths.loyaltySettingsDoc(appId)
         .snapshots()
         .map((snapshot) {
       if (snapshot.exists && snapshot.data() != null) {

@@ -8,8 +8,10 @@ import '../services/popup_service.dart';
 import '../widgets/popup_dialog.dart';
 
 class PopupManager {
-  final PopupService _popupService = PopupService();
+  final PopupService _popupService;
   static const String _dismissedPopupsKey = 'dismissed_popups';
+
+  PopupManager({required PopupService popupService}) : _popupService = popupService;
   
   // Session storage for oncePerSession popups
   static final Set<String> _shownThisSession = {};

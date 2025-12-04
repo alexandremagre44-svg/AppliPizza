@@ -2,15 +2,20 @@
 // Central service for managing reward tickets in Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/reward_action.dart';
 import '../models/reward_ticket.dart';
+import '../providers/restaurant_provider.dart';
 
 /// Service for managing reward tickets
 /// 
 /// Handles CRUD operations for reward tickets in Firestore.
-/// Tickets are stored in: users/{userId}/rewardTickets/{ticketId}
+/// Tickets are stored in: restaurants/{appId}/reward_tickets/{userId}/tickets/{ticketId}
 class RewardService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String appId;
+
+  RewardService({required this.appId});
 
   /// Create a new reward ticket for a user
   /// 
@@ -29,11 +34,13 @@ class RewardService {
       final now = DateTime.now();
       final expiresAt = now.add(validity);
       
-      // Generate a new document reference (auto-generates ID)
+      // Generate a new document reference (auto-generates ID) - scoped to restaurant
       final docRef = _firestore
-          .collection('users')
+          .collection('restaurants')
+          .doc(appId)
+          .collection('reward_tickets')
           .doc(userId)
-          .collection('rewardTickets')
+          .collection('tickets')
           .doc();
       
       final ticket = RewardTicket(
@@ -62,9 +69,11 @@ class RewardService {
   Future<List<RewardTicket>> getUserTickets(String userId) async {
     try {
       final snapshot = await _firestore
-          .collection('users')
+          .collection('restaurants')
+          .doc(appId)
+          .collection('reward_tickets')
           .doc(userId)
-          .collection('rewardTickets')
+          .collection('tickets')
           .orderBy('createdAt', descending: true)
           .get();
       
@@ -83,9 +92,11 @@ class RewardService {
   Future<void> markTicketUsed(String userId, String ticketId) async {
     try {
       await _firestore
-          .collection('users')
+          .collection('restaurants')
+          .doc(appId)
+          .collection('reward_tickets')
           .doc(userId)
-          .collection('rewardTickets')
+          .collection('tickets')
           .doc(ticketId)
           .update({
         'isUsed': true,
@@ -103,9 +114,11 @@ class RewardService {
   /// tickets are added, modified, or removed
   Stream<List<RewardTicket>> watchUserTickets(String userId) {
     return _firestore
-        .collection('users')
+        .collection('restaurants')
+        .doc(appId)
+        .collection('reward_tickets')
         .doc(userId)
-        .collection('rewardTickets')
+        .collection('tickets')
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
@@ -119,9 +132,11 @@ class RewardService {
   Future<RewardTicket?> getTicket(String userId, String ticketId) async {
     try {
       final doc = await _firestore
-          .collection('users')
+          .collection('restaurants')
+          .doc(appId)
+          .collection('reward_tickets')
           .doc(userId)
-          .collection('rewardTickets')
+          .collection('tickets')
           .doc(ticketId)
           .get();
       
@@ -192,9 +207,11 @@ class RewardService {
     try {
       final now = DateTime.now();
       final snapshot = await _firestore
-          .collection('users')
+          .collection('restaurants')
+          .doc(appId)
+          .collection('reward_tickets')
           .doc(userId)
-          .collection('rewardTickets')
+          .collection('tickets')
           .where('isUsed', isEqualTo: true)
           .get();
       
@@ -219,3 +236,9 @@ class RewardService {
     }
   }
 }
+
+/// Provider for RewardService scoped to the current restaurant
+final rewardServiceProvider = Provider<RewardService>((ref) {
+  final appId = ref.watch(currentRestaurantProvider).id;
+  return RewardService(appId: appId);
+});
