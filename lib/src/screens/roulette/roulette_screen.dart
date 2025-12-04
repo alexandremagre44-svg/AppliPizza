@@ -62,6 +62,7 @@ import '../../services/roulette_segment_service.dart';
 import '../../services/roulette_service.dart';
 import '../../services/roulette_rules_service.dart';
 import '../../services/loyalty_service.dart';
+import '../../services/reward_service.dart';
 import '../../widgets/pizza_roulette_wheel.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
