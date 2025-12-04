@@ -133,6 +133,8 @@ class PopupService {
     // Check display condition
     try {
       final userPopupDoc = await _firestore
+          .collection('restaurants')
+          .doc(appId)
           .collection('user_popup_views')
           .doc('${userId}_${popup.id}')
           .get();
@@ -170,6 +172,8 @@ class PopupService {
   Future<void> recordPopupView(String userId, String popupId) async {
     try {
       await _firestore
+          .collection('restaurants')
+          .doc(appId)
           .collection('user_popup_views')
           .doc('${userId}_$popupId')
           .set({
