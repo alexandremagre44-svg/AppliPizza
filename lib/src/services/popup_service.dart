@@ -10,10 +10,13 @@ import '../core/firestore_paths.dart';
 
 class PopupService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String appId;
+
+  PopupService({required this.appId});
 
   /// Get collection reference for popups
   CollectionReference<Map<String, dynamic>> get _popupsCollection =>
-      FirestorePaths.popups();
+      FirestorePaths.popups(appId);
 
   // Get all popups
   Future<List<PopupConfig>> getAllPopups() async {
