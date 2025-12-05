@@ -1,31 +1,53 @@
 // lib/builder/runtime/builder_block_runtime_registry.dart
-// Central registry for runtime block rendering
-// White-label pro architecture - Phase 5 compliant
+// Central registry for block rendering (preview + runtime)
+// White-label pro architecture - Module-aware
 //
-// Purpose: Centralize the mapping between BlockType and runtime widgets
-// Adding a new block type only requires:
-//   1) Creating a runtime widget in lib/builder/blocks/
-//   2) Importing it here and adding to _builders map
+// Purpose: Centralize the mapping between BlockType and block widgets
+// Unified renderer that works in both preview and runtime modes
+// Module-aware: automatically hides blocks for disabled modules
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../blocks/hero_block_runtime.dart';
+import '../blocks/hero_block_preview.dart';
 import '../blocks/text_block_runtime.dart';
+import '../blocks/text_block_preview.dart';
 import '../blocks/banner_block_runtime.dart';
+import '../blocks/banner_block_preview.dart';
 import '../blocks/product_list_block_runtime.dart';
+import '../blocks/product_list_block_preview.dart';
 import '../blocks/info_block_runtime.dart';
+import '../blocks/info_block_preview.dart';
 import '../blocks/spacer_block_runtime.dart';
+import '../blocks/spacer_block_preview.dart';
 import '../blocks/image_block_runtime.dart';
+import '../blocks/image_block_preview.dart';
 import '../blocks/button_block_runtime.dart';
+import '../blocks/button_block_preview.dart';
 import '../blocks/category_list_block_runtime.dart';
+import '../blocks/category_list_block_preview.dart';
 import '../blocks/html_block_runtime.dart';
+import '../blocks/html_block_preview.dart';
 import '../blocks/system_block_runtime.dart';
+import '../blocks/system_block_preview.dart';
 import '../../white_label/restaurant/restaurant_feature_flags.dart';
+import '../../white_label/runtime/module_helpers.dart';
+import '../../white_label/core/module_id.dart';
 
-/// Typedef for a block runtime builder function.
+/// Typedef for a unified block renderer function.
 /// 
-/// Takes a [BuilderBlock] and [BuildContext], optionally constrained by [maxContentWidth].
-/// Returns a [Widget] that renders the block at runtime.
+/// Takes a [BuilderBlock], [BuildContext], and [isPreview] flag.
+/// Returns a [Widget] that renders the block in preview or runtime mode.
+typedef BlockRenderer = Widget Function(
+  BuildContext context,
+  BuilderBlock block,
+  bool isPreview, {
+  double? maxContentWidth,
+});
+
+/// Legacy typedef for backward compatibility.
+@Deprecated('Use BlockRenderer instead')
 typedef BlockRuntimeBuilder = Widget Function(
   BuilderBlock block,
   BuildContext context, {
@@ -55,129 +77,229 @@ class BuilderBlockRuntimeRegistry {
   // Private constructor - this class is not meant to be instantiated
   BuilderBlockRuntimeRegistry._();
   
-  /// Map from [BlockType] to a runtime widget builder.
+  /// Map from [BlockType] to a unified block renderer.
   /// 
   /// Each entry maps a block type to a function that creates the corresponding
-  /// runtime widget. The builder receives the block data and context, and
-  /// optionally a max content width for responsive layouts.
-  static final Map<BlockType, BlockRuntimeBuilder> _builders = {
-    BlockType.hero: (block, context, {double? maxContentWidth}) {
-      return HeroBlockRuntime(block: block);
+  /// widget in either preview or runtime mode. The renderer receives:
+  /// - context: BuildContext
+  /// - block: BuilderBlock data
+  /// - isPreview: true for editor preview, false for runtime
+  /// - maxContentWidth: optional width constraint
+  static final Map<BlockType, BlockRenderer> _renderers = {
+    BlockType.hero: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview 
+        ? HeroBlockPreview(block: block)
+        : HeroBlockRuntime(block: block);
     },
     
-    BlockType.text: (block, context, {double? maxContentWidth}) {
-      return TextBlockRuntime(block: block);
+    BlockType.text: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? TextBlockPreview(block: block)
+        : TextBlockRuntime(block: block);
     },
     
-    BlockType.banner: (block, context, {double? maxContentWidth}) {
-      return BannerBlockRuntime(block: block);
+    BlockType.banner: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? BannerBlockPreview(block: block)
+        : BannerBlockRuntime(block: block);
     },
     
-    BlockType.productList: (block, context, {double? maxContentWidth}) {
-      return ProductListBlockRuntime(block: block);
+    BlockType.productList: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? ProductListBlockPreview(block: block)
+        : ProductListBlockRuntime(block: block);
     },
     
-    BlockType.info: (block, context, {double? maxContentWidth}) {
-      return InfoBlockRuntime(block: block);
+    BlockType.info: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? InfoBlockPreview(block: block)
+        : InfoBlockRuntime(block: block);
     },
     
-    BlockType.spacer: (block, context, {double? maxContentWidth}) {
-      return SpacerBlockRuntime(block: block);
+    BlockType.spacer: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? SpacerBlockPreview(block: block)
+        : SpacerBlockRuntime(block: block);
     },
     
-    BlockType.image: (block, context, {double? maxContentWidth}) {
-      return ImageBlockRuntime(block: block);
+    BlockType.image: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? ImageBlockPreview(block: block)
+        : ImageBlockRuntime(block: block);
     },
     
-    BlockType.button: (block, context, {double? maxContentWidth}) {
-      return ButtonBlockRuntime(block: block);
+    BlockType.button: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? ButtonBlockPreview(block: block)
+        : ButtonBlockRuntime(block: block);
     },
     
-    BlockType.categoryList: (block, context, {double? maxContentWidth}) {
-      return CategoryListBlockRuntime(block: block);
+    BlockType.categoryList: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? CategoryListBlockPreview(block: block)
+        : CategoryListBlockRuntime(block: block);
     },
     
-    BlockType.html: (block, context, {double? maxContentWidth}) {
-      return HtmlBlockRuntime(block: block);
+    BlockType.html: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? HtmlBlockPreview(block: block)
+        : HtmlBlockRuntime(block: block);
     },
     
-    BlockType.system: (block, context, {double? maxContentWidth}) {
-      return SystemBlockRuntime(
-        block: block,
-        maxContentWidth: maxContentWidth,
-      );
+    BlockType.system: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? SystemBlockPreview(block: block)
+        : SystemBlockRuntime(
+            block: block,
+            maxContentWidth: maxContentWidth,
+          );
     },
   };
   
-  /// Get the builder function for a specific [BlockType].
+  /// Legacy builders map for backward compatibility.
+  @Deprecated('Use _renderers instead')
+  static final Map<BlockType, BlockRuntimeBuilder> _builders = {};{}
+  
+  /// Get the renderer function for a specific [BlockType].
   /// 
-  /// Returns `null` if no builder is registered for the given type.
+  /// Returns `null` if no renderer is registered for the given type.
   /// Use [render] for direct rendering with fallback handling.
-  static BlockRuntimeBuilder? getBuilder(BlockType type) {
-    return _builders[type];
+  static BlockRenderer? getRenderer(BlockType type) {
+    return _renderers[type];
   }
   
-  /// Check if a builder is registered for the given [BlockType].
+  /// Legacy method for backward compatibility.
+  @Deprecated('Use getRenderer instead')
+  static BlockRuntimeBuilder? getBuilder(BlockType type) {
+    final renderer = _renderers[type];
+    if (renderer == null) return null;
+    return (block, context, {double? maxContentWidth}) {
+      return renderer(context, block, false, maxContentWidth: maxContentWidth);
+    };
+  }
+  
+  /// Check if a renderer is registered for the given [BlockType].
+  static bool hasRenderer(BlockType type) {
+    return _renderers.containsKey(type);
+  }
+  
+  /// Legacy method for backward compatibility.
+  @Deprecated('Use hasRenderer instead')
   static bool hasBuilder(BlockType type) {
-    return _builders.containsKey(type);
+    return hasRenderer(type);
   }
   
   /// Get all registered block types.
-  static Set<BlockType> get registeredTypes => _builders.keys.toSet();
+  static Set<BlockType> get registeredTypes => _renderers.keys.toSet();
   
   /// Render a [BuilderBlock] to a widget.
   /// 
-  /// Uses the registered builder for the block's type. If no builder is found,
+  /// Uses the registered renderer for the block's type. If no renderer is found,
   /// returns a fallback widget showing an "unknown block type" message.
+  /// 
+  /// Module-aware: Automatically hides blocks that require disabled modules.
   /// 
   /// [block] - The block to render
   /// [context] - The build context
+  /// [isPreview] - True for editor preview, false for runtime (default: false)
   /// [maxContentWidth] - Optional max width constraint for responsive layouts
-  /// [featureFlags] - Optional feature flags for module visibility check
+  /// [featureFlags] - Optional feature flags for legacy module visibility check
   static Widget render(
     BuilderBlock block,
     BuildContext context, {
+    bool isPreview = false,
     double? maxContentWidth,
     RestaurantFeatureFlags? featureFlags,
   }) {
-    // Module guard: if block requires a module and it's not enabled, hide it
-    if (block.requiredModule != null && featureFlags != null) {
-      if (!featureFlags.has(block.requiredModule!)) {
-        return const SizedBox.shrink();
+    // Module guard: Check if block requires a module
+    if (!isPreview && block.requiredModule != null) {
+      // First try the new isModuleEnabled helper (preferred)
+      if (context is StatefulElement || context is StatelessElement) {
+        try {
+          // Try to get WidgetRef from context (only works if Consumer/ConsumerWidget)
+          final container = ProviderScope.containerOf(context, listen: false);
+          if (container != null) {
+            // Use the new module helper
+            final moduleIdStr = block.requiredModule!;
+            final moduleId = _parseModuleId(moduleIdStr);
+            if (moduleId != null) {
+              // We need a WidgetRef, but we have BuildContext
+              // For now, fall back to featureFlags check
+              // TODO: Refactor to accept WidgetRef parameter
+            }
+          }
+        } catch (_) {
+          // Fall through to featureFlags check
+        }
+      }
+      
+      // Fallback to legacy featureFlags check
+      if (featureFlags != null) {
+        if (!featureFlags.has(block.requiredModule!)) {
+          return const SizedBox.shrink();
+        }
       }
     }
     
-    final builder = _builders[block.type];
+    final renderer = _renderers[block.type];
     
-    if (builder != null) {
-      return builder(block, context, maxContentWidth: maxContentWidth);
+    if (renderer != null) {
+      return renderer(
+        context,
+        block,
+        isPreview,
+        maxContentWidth: maxContentWidth,
+      );
     }
     
     // Fallback for unknown block types
-    return _buildUnknownBlockFallback(block, context);
+    return _buildUnknownBlockFallback(block, context, isPreview);
+  }
+  
+  /// Parse module ID string to ModuleId enum.
+  /// Returns null if the string doesn't match any ModuleId.
+  static ModuleId? _parseModuleId(String moduleIdStr) {
+    try {
+      return ModuleId.values.firstWhere(
+        (id) => id.code == moduleIdStr,
+      );
+    } catch (_) {
+      return null;
+    }
   }
   
   /// Render a list of blocks to widgets.
   /// 
   /// Convenience method for rendering multiple blocks at once.
   /// Each block is rendered using [render].
+  /// 
+  /// [blocks] - List of blocks to render
+  /// [context] - Build context
+  /// [isPreview] - True for editor preview, false for runtime (default: false)
+  /// [maxContentWidth] - Optional max width constraint
   /// [featureFlags] - Optional feature flags for module visibility check
   static List<Widget> renderAll(
     List<BuilderBlock> blocks,
     BuildContext context, {
+    bool isPreview = false,
     double? maxContentWidth,
     RestaurantFeatureFlags? featureFlags,
   }) {
     return blocks.map((block) => render(
       block,
       context,
+      isPreview: isPreview,
       maxContentWidth: maxContentWidth,
       featureFlags: featureFlags,
     )).toList();
   }
   
   /// Build fallback widget for unknown block types.
-  static Widget _buildUnknownBlockFallback(BuilderBlock block, BuildContext context) {
+  static Widget _buildUnknownBlockFallback(
+    BuilderBlock block,
+    BuildContext context,
+    bool isPreview,
+  ) {
     return Container(
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.all(16),
@@ -215,6 +337,17 @@ class BuilderBlockRuntimeRegistry {
                     color: Colors.amber.shade700,
                   ),
                 ),
+                if (isPreview) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '(Preview Mode)',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.amber.shade600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -223,21 +356,35 @@ class BuilderBlockRuntimeRegistry {
     );
   }
   
-  /// Register a custom builder for a block type.
+  /// Register a custom renderer for a block type.
   /// 
-  /// Use this to override default builders or add new block types at runtime.
+  /// Use this to override default renderers or add new block types at runtime.
   /// This is useful for white-label customization or testing.
   /// 
   /// Note: This modifies the global registry. In production, prefer
-  /// defining all builders in [_builders] at compile time.
-  static void registerBuilder(BlockType type, BlockRuntimeBuilder builder) {
-    _builders[type] = builder;
+  /// defining all renderers in [_renderers] at compile time.
+  static void registerRenderer(BlockType type, BlockRenderer renderer) {
+    _renderers[type] = renderer;
   }
   
-  /// Unregister a builder for a block type.
+  /// Legacy method for backward compatibility.
+  @Deprecated('Use registerRenderer instead')
+  static void registerBuilder(BlockType type, BlockRuntimeBuilder builder) {
+    _renderers[type] = (context, block, isPreview, {double? maxContentWidth}) {
+      return builder(block, context, maxContentWidth: maxContentWidth);
+    };
+  }
+  
+  /// Unregister a renderer for a block type.
   /// 
-  /// Returns `true` if a builder was removed, `false` if none was registered.
+  /// Returns `true` if a renderer was removed, `false` if none was registered.
+  static bool unregisterRenderer(BlockType type) {
+    return _renderers.remove(type) != null;
+  }
+  
+  /// Legacy method for backward compatibility.
+  @Deprecated('Use unregisterRenderer instead')
   static bool unregisterBuilder(BlockType type) {
-    return _builders.remove(type) != null;
+    return unregisterRenderer(type);
   }
 }

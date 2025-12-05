@@ -5,3 +5,4 @@ export 'builder_block_runtime_registry.dart';
 export 'builder_page_loader.dart';
 export 'dynamic_builder_page_screen.dart';
 export 'builder_theme_resolver.dart';
+export 'module_aware_block.dart';
