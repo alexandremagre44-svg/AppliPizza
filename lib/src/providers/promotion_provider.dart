@@ -9,12 +9,15 @@ import 'restaurant_plan_provider.dart';
 import '../../white_label/core/module_id.dart';
 
 /// Provider for PromotionService
-final promotionServiceProvider = Provider<PromotionService>((ref) {
-  final config = ref.watch(currentRestaurantProvider);
-  // Use default 'delizza' if config is invalid (should not happen in normal usage)
-  final appId = config.isValid ? config.id : 'delizza';
-  return PromotionService(appId: appId);
-});
+final promotionServiceProvider = Provider<PromotionService>(
+  (ref) {
+    final config = ref.watch(currentRestaurantProvider);
+    // Use default 'delizza' if config is invalid (should not happen in normal usage)
+    final appId = config.isValid ? config.id : 'delizza';
+    return PromotionService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Stream provider for all promotions
 /// Module guard: requires promotions module

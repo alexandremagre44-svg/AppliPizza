@@ -135,4 +135,5 @@ final builderPageProvider = FutureProvider.family<BuilderPage?, BuilderPageId>(
     final appId = ref.watch(currentRestaurantProvider).id;
     return await DynamicPageResolver().resolve(pageId, appId);
   },
+  dependencies: [currentRestaurantProvider],
 );

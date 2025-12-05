@@ -31,15 +31,18 @@ final restaurantPlanRuntimeServiceProvider =
 ///
 /// Utilise [currentRestaurantProvider] pour déterminer quel restaurant charger.
 /// Retourne null si pas de restaurantId ou si le plan n'existe pas.
-final restaurantPlanProvider = FutureProvider<RestaurantPlan?>((ref) async {
-  final service = ref.watch(restaurantPlanRuntimeServiceProvider);
-  final restaurantConfig = ref.watch(currentRestaurantProvider);
+final restaurantPlanProvider = FutureProvider<RestaurantPlan?>(
+  (ref) async {
+    final service = ref.watch(restaurantPlanRuntimeServiceProvider);
+    final restaurantConfig = ref.watch(currentRestaurantProvider);
 
-  final restaurantId = restaurantConfig.id;
-  if (restaurantId.isEmpty) return null;
+    final restaurantId = restaurantConfig.id;
+    if (restaurantId.isEmpty) return null;
 
-  return service.loadPlan(restaurantId);
-});
+    return service.loadPlan(restaurantId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider pour charger le RestaurantPlanUnified du restaurant courant.
 ///
@@ -48,15 +51,18 @@ final restaurantPlanProvider = FutureProvider<RestaurantPlan?>((ref) async {
 /// 
 /// Ce provider remplace progressivement [restaurantPlanProvider] pour utiliser
 /// le nouveau modèle unifié.
-final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>((ref) async {
-  final service = ref.watch(restaurantPlanRuntimeServiceProvider);
-  final restaurantConfig = ref.watch(currentRestaurantProvider);
+final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
+  (ref) async {
+    final service = ref.watch(restaurantPlanRuntimeServiceProvider);
+    final restaurantConfig = ref.watch(currentRestaurantProvider);
 
-  final restaurantId = restaurantConfig.id;
-  if (restaurantId.isEmpty) return null;
+    final restaurantId = restaurantConfig.id;
+    if (restaurantId.isEmpty) return null;
 
-  return service.loadUnifiedPlan(restaurantId);
-});
+    return service.loadUnifiedPlan(restaurantId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider dérivé pour les feature flags du restaurant courant (version unifiée).
 ///

@@ -390,7 +390,10 @@ FirestoreProductService createFirestoreProductService({required String appId}) {
 }
 
 /// Provider for FirestoreProductService scoped to the current restaurant
-final firestoreProductServiceProvider = Provider<FirestoreProductService>((ref) {
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return createFirestoreProductService(appId: appId);
-});
+final firestoreProductServiceProvider = Provider<FirestoreProductService>(
+  (ref) {
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return createFirestoreProductService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);

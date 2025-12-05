@@ -90,7 +90,10 @@ class RouletteSettingsService {
 }
 
 /// Provider for RouletteSettingsService scoped to the current restaurant
-final rouletteSettingsServiceProvider = Provider<RouletteSettingsService>((ref) {
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return RouletteSettingsService(appId: appId);
-});
+final rouletteSettingsServiceProvider = Provider<RouletteSettingsService>(
+  (ref) {
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return RouletteSettingsService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);

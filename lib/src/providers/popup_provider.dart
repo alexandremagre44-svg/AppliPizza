@@ -7,11 +7,14 @@ import '../services/popup_service.dart';
 import 'restaurant_provider.dart';
 
 /// Provider for PopupService scoped to the current restaurant
-final popupServiceProvider = Provider<PopupService>((ref) {
-  final config = ref.watch(currentRestaurantProvider);
-  final appId = config.isValid ? config.id : 'delizza';
-  return PopupService(appId: appId);
-});
+final popupServiceProvider = Provider<PopupService>(
+  (ref) {
+    final config = ref.watch(currentRestaurantProvider);
+    final appId = config.isValid ? config.id : 'delizza';
+    return PopupService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Stream provider for all popups
 final popupsProvider = StreamProvider<List<PopupConfig>>((ref) {

@@ -25,25 +25,34 @@ final builderLayoutServiceProvider = Provider<BuilderLayoutService>((ref) {
 ///   error: (err, stack) => ErrorWidget(),
 /// );
 /// ```
-final homePagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
-  final service = ref.watch(builderLayoutServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return await service.loadPublished(appId, BuilderPageId.home);
-});
+final homePagePublishedProvider = FutureProvider<BuilderPage?>(
+  (ref) async {
+    final service = ref.watch(builderLayoutServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return await service.loadPublished(appId, BuilderPageId.home);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider for published menu page layout
-final menuPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
-  final service = ref.watch(builderLayoutServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return await service.loadPublished(appId, BuilderPageId.menu);
-});
+final menuPagePublishedProvider = FutureProvider<BuilderPage?>(
+  (ref) async {
+    final service = ref.watch(builderLayoutServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return await service.loadPublished(appId, BuilderPageId.menu);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider for published promo page layout
-final promoPagePublishedProvider = FutureProvider<BuilderPage?>((ref) async {
-  final service = ref.watch(builderLayoutServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return await service.loadPublished(appId, BuilderPageId.promo);
-});
+final promoPagePublishedProvider = FutureProvider<BuilderPage?>(
+  (ref) async {
+    final service = ref.watch(builderLayoutServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return await service.loadPublished(appId, BuilderPageId.promo);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Generic family provider for any page
 /// Uses Riverpod family for proper caching and state management
@@ -58,15 +67,19 @@ final publishedPageProvider = FutureProvider.family<BuilderPage?, BuilderPageId>
     final appId = ref.watch(currentRestaurantProvider).id;
     return await service.loadPublished(appId, pageId);
   },
+  dependencies: [currentRestaurantProvider],
 );
 
 /// Stream provider for real-time updates of home page
 /// Use this if you need live updates when layout changes in Firestore
-final homePagePublishedStreamProvider = StreamProvider<BuilderPage?>((ref) {
-  final service = ref.watch(builderLayoutServiceProvider);
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return service.watchPublished(appId, BuilderPageId.home);
-});
+final homePagePublishedStreamProvider = StreamProvider<BuilderPage?>(
+  (ref) {
+    final service = ref.watch(builderLayoutServiceProvider);
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return service.watchPublished(appId, BuilderPageId.home);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider for dynamic initial route based on bottom navigation pages
 /// 
@@ -89,26 +102,29 @@ final homePagePublishedStreamProvider = StreamProvider<BuilderPage?>((ref) {
 ///   error: (_, __) => context.go('/menu'),
 /// );
 /// ```
-final initialRouteProvider = FutureProvider<String>((ref) async {
-  final appId = ref.watch(currentRestaurantProvider).id;
-  final service = BuilderNavigationService(appId);
-  
-  try {
-    final pages = await service.getBottomBarPages();
+final initialRouteProvider = FutureProvider<String>(
+  (ref) async {
+    final appId = ref.watch(currentRestaurantProvider).id;
+    final service = BuilderNavigationService(appId);
     
-    if (pages.isNotEmpty) {
-      final route = pages.first.route;
-      // Validate route format
-      if (route.isNotEmpty && route.startsWith('/')) {
-        debugPrint('[Landing] Initial route = $route (from pages.first)');
-        return route;
+    try {
+      final pages = await service.getBottomBarPages();
+      
+      if (pages.isNotEmpty) {
+        final route = pages.first.route;
+        // Validate route format
+        if (route.isNotEmpty && route.startsWith('/')) {
+          debugPrint('[Landing] Initial route = $route (from pages.first)');
+          return route;
+        }
       }
+    } catch (e) {
+      debugPrint('[Landing] Error loading initial route: $e');
     }
-  } catch (e) {
-    debugPrint('[Landing] Error loading initial route: $e');
-  }
-  
-  // Fallback to /menu if no valid pages found
-  debugPrint('[Landing] Initial route = /menu (fallback)');
-  return '/menu';
-});
+    
+    // Fallback to /menu if no valid pages found
+    debugPrint('[Landing] Initial route = /menu (fallback)');
+    return '/menu';
+  },
+  dependencies: [currentRestaurantProvider],
+);

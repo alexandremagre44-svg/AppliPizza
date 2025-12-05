@@ -7,12 +7,15 @@ import '../services/home_config_service.dart';
 import 'restaurant_provider.dart';
 
 // Service provider
-final homeConfigServiceProvider = Provider<HomeConfigService>((ref) {
-  final config = ref.watch(currentRestaurantProvider);
-  // Use default 'delizza' if config is invalid (should not happen in normal usage)
-  final appId = config.isValid ? config.id : 'delizza';
-  return HomeConfigService(appId: appId);
-});
+final homeConfigServiceProvider = Provider<HomeConfigService>(
+  (ref) {
+    final config = ref.watch(currentRestaurantProvider);
+    // Use default 'delizza' if config is invalid (should not happen in normal usage)
+    final appId = config.isValid ? config.id : 'delizza';
+    return HomeConfigService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 // Home config provider
 final homeConfigProvider = StreamProvider<HomeConfig?>((ref) {

@@ -7,11 +7,14 @@ import '../services/banner_service.dart';
 import 'restaurant_provider.dart';
 
 /// Provider for BannerService scoped to the current restaurant
-final bannerServiceProvider = Provider<BannerService>((ref) {
-  final config = ref.watch(currentRestaurantProvider);
-  final appId = config.isValid ? config.id : 'delizza';
-  return BannerService(appId: appId);
-});
+final bannerServiceProvider = Provider<BannerService>(
+  (ref) {
+    final config = ref.watch(currentRestaurantProvider);
+    final appId = config.isValid ? config.id : 'delizza';
+    return BannerService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Stream provider for all banners
 final bannersProvider = StreamProvider<List<BannerConfig>>((ref) {

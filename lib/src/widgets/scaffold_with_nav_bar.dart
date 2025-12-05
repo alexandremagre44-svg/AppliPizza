@@ -27,11 +27,14 @@ import '../../white_label/runtime/navbar_module_adapter.dart';
 /// Provider for bottom bar pages
 /// Loads pages dynamically from Builder B3
 /// Uses currentRestaurantProvider for consistent restaurant scoping
-final bottomBarPagesProvider = FutureProvider.autoDispose<List<BuilderPage>>((ref) async {
-  final appId = ref.watch(currentRestaurantProvider).id;
-  final service = BuilderNavigationService(appId);
-  return await service.getBottomBarPages();
-});
+final bottomBarPagesProvider = FutureProvider.autoDispose<List<BuilderPage>>(
+  (ref) async {
+    final appId = ref.watch(currentRestaurantProvider).id;
+    final service = BuilderNavigationService(appId);
+    return await service.getBottomBarPages();
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 class ScaffoldWithNavBar extends ConsumerWidget {
   const ScaffoldWithNavBar({

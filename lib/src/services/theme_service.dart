@@ -75,7 +75,10 @@ class ThemeService {
 }
 
 /// Provider for ThemeService scoped to the current restaurant
-final themeServiceProvider = Provider<ThemeService>((ref) {
-  final appId = ref.watch(currentRestaurantProvider).id;
-  return ThemeService(appId: appId);
-});
+final themeServiceProvider = Provider<ThemeService>(
+  (ref) {
+    final appId = ref.watch(currentRestaurantProvider).id;
+    return ThemeService(appId: appId);
+  },
+  dependencies: [currentRestaurantProvider],
+);
