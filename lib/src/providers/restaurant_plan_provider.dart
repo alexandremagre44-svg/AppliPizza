@@ -74,19 +74,22 @@ final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
 /// }
 /// ```
 final restaurantFeatureFlagsUnifiedProvider =
-    Provider<RestaurantFeatureFlags?>((ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    Provider<RestaurantFeatureFlags?>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
 
-  return planAsync.maybeWhen(
-    data: (plan) => plan != null
-        ? RestaurantFeatureFlags.fromModuleCodes(
-            plan.restaurantId,
-            plan.activeModules,
-          )
-        : null,
-    orElse: () => null,
-  );
-});
+    return planAsync.maybeWhen(
+      data: (plan) => plan != null
+          ? RestaurantFeatureFlags.fromModuleCodes(
+              plan.restaurantId,
+              plan.activeModules,
+            )
+          : null,
+      orElse: () => null,
+    );
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);
 
 /// Provider dérivé pour les feature flags du restaurant courant.
 ///
@@ -98,16 +101,19 @@ final restaurantFeatureFlagsUnifiedProvider =
 /// }
 /// ```
 final restaurantFeatureFlagsProvider =
-    Provider<RestaurantFeatureFlags?>((ref) {
-  final planAsync = ref.watch(restaurantPlanProvider);
+    Provider<RestaurantFeatureFlags?>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanProvider);
 
-  return planAsync.maybeWhen(
-    data: (plan) => plan != null
-        ? RestaurantFeatureFlags.fromModules(plan.restaurantId, plan.modules)
-        : null,
-    orElse: () => null,
-  );
-});
+    return planAsync.maybeWhen(
+      data: (plan) => plan != null
+          ? RestaurantFeatureFlags.fromModules(plan.restaurantId, plan.modules)
+          : null,
+      orElse: () => null,
+    );
+  },
+  dependencies: [restaurantPlanProvider],
+);
 
 /// Provider pour les paramètres de livraison du restaurant courant.
 ///
@@ -124,20 +130,23 @@ final restaurantFeatureFlagsProvider =
 ///   final fee = settings.deliveryFee;
 /// }
 /// ```
-final deliverySettingsProvider = Provider<DeliverySettings?>((ref) {
-  final planAsync = ref.watch(restaurantPlanProvider);
-  final plan = planAsync.asData?.value;
+final deliverySettingsProvider = Provider<DeliverySettings?>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanProvider);
+    final plan = planAsync.asData?.value;
 
-  if (plan == null) return null;
+    if (plan == null) return null;
 
-  final config = plan.getModuleConfig(ModuleId.delivery);
-  if (config == null || !config.enabled) return null;
+    final config = plan.getModuleConfig(ModuleId.delivery);
+    if (config == null || !config.enabled) return null;
 
-  // Reconstruire DeliverySettings à partir de config.settings
-  return DeliverySettings.fromJson(
-    Map<String, dynamic>.from(config.settings),
-  );
-});
+    // Reconstruire DeliverySettings à partir de config.settings
+    return DeliverySettings.fromJson(
+      Map<String, dynamic>.from(config.settings),
+    );
+  },
+  dependencies: [restaurantPlanProvider],
+);
 
 /// Provider pour vérifier si le module de livraison est activé.
 ///
@@ -169,14 +178,17 @@ final isClickAndCollectEnabledProvider = Provider<bool>((ref) {
 ///   // Utiliser les settings
 /// }
 /// ```
-final deliveryConfigUnifiedProvider = Provider<DeliveryModuleConfig?>((ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  final plan = planAsync.asData?.value;
+final deliveryConfigUnifiedProvider = Provider<DeliveryModuleConfig?>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.asData?.value;
 
-  if (plan == null) return null;
+    if (plan == null) return null;
 
-  return plan.delivery;
-});
+    return plan.delivery;
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);
 
 /// Provider pour vérifier si le module de livraison est activé (version unifiée).
 ///
@@ -187,24 +199,30 @@ final isDeliveryEnabledUnifiedProvider = Provider<bool>((ref) {
 });
 
 /// Provider pour les paramètres de commande depuis le plan unifié.
-final orderingConfigUnifiedProvider = Provider<OrderingModuleConfig?>((ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  final plan = planAsync.asData?.value;
+final orderingConfigUnifiedProvider = Provider<OrderingModuleConfig?>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.asData?.value;
 
-  if (plan == null) return null;
+    if (plan == null) return null;
 
-  return plan.ordering;
-});
+    return plan.ordering;
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);
 
 /// Provider pour les paramètres de fidélité depuis le plan unifié.
-final loyaltyConfigUnifiedProvider = Provider<LoyaltyModuleConfig?>((ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  final plan = planAsync.asData?.value;
+final loyaltyConfigUnifiedProvider = Provider<LoyaltyModuleConfig?>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.asData?.value;
 
-  if (plan == null) return null;
+    if (plan == null) return null;
 
-  return plan.loyalty;
-});
+    return plan.loyalty;
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);
 
 /// Provider pour vérifier si le module fidélité est activé (version unifiée).
 final isLoyaltyEnabledUnifiedProvider = Provider<bool>((ref) {
@@ -213,14 +231,17 @@ final isLoyaltyEnabledUnifiedProvider = Provider<bool>((ref) {
 });
 
 /// Provider pour les paramètres de roulette depuis le plan unifié.
-final rouletteConfigUnifiedProvider = Provider<RouletteModuleConfig?>((ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  final plan = planAsync.asData?.value;
+final rouletteConfigUnifiedProvider = Provider<RouletteModuleConfig?>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.asData?.value;
 
-  if (plan == null) return null;
+    if (plan == null) return null;
 
-  return plan.roulette;
-});
+    return plan.roulette;
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);
 
 /// Provider pour vérifier si le module roulette est activé (version unifiée).
 final isRouletteEnabledUnifiedProvider = Provider<bool>((ref) {
@@ -229,14 +250,17 @@ final isRouletteEnabledUnifiedProvider = Provider<bool>((ref) {
 });
 
 /// Provider pour les paramètres de promotions depuis le plan unifié.
-final promotionsConfigUnifiedProvider = Provider<PromotionsModuleConfig?>((ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  final plan = planAsync.asData?.value;
+final promotionsConfigUnifiedProvider = Provider<PromotionsModuleConfig?>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.asData?.value;
 
-  if (plan == null) return null;
+    if (plan == null) return null;
 
-  return plan.promotions;
-});
+    return plan.promotions;
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);
 
 /// Provider pour vérifier si le module promotions est activé (version unifiée).
 final isPromotionsEnabledUnifiedProvider = Provider<bool>((ref) {
@@ -245,11 +269,14 @@ final isPromotionsEnabledUnifiedProvider = Provider<bool>((ref) {
 });
 
 /// Provider pour le branding depuis le plan unifié.
-final brandingConfigUnifiedProvider = Provider<BrandingConfig?>((ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  final plan = planAsync.asData?.value;
+final brandingConfigUnifiedProvider = Provider<BrandingConfig?>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.asData?.value;
 
-  if (plan == null) return null;
+    if (plan == null) return null;
 
-  return plan.branding;
-});
+    return plan.branding;
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);

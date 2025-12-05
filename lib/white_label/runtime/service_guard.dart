@@ -254,30 +254,36 @@ class ServiceGuard {
 /// final guard = ref.watch(serviceGuardProvider);
 /// guard.ensureEnabled(ModuleId.loyalty, 'addPoints');
 /// ```
-final serviceGuardProvider = Provider<ServiceGuard>((ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  final plan = planAsync.asData?.value;
+final serviceGuardProvider = Provider<ServiceGuard>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.asData?.value;
 
-  return ServiceGuard(
-    plan: plan,
-    allowWhenPlanNull: true,
-    strictPartialCheck: false,
-  );
-});
+    return ServiceGuard(
+      plan: plan,
+      allowWhenPlanNull: true,
+      strictPartialCheck: false,
+    );
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);
 
 /// Provider for strict ServiceGuard (throws on partial modules).
 ///
 /// Use this when you need full module functionality.
-final strictServiceGuardProvider = Provider<ServiceGuard>((ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  final plan = planAsync.asData?.value;
+final strictServiceGuardProvider = Provider<ServiceGuard>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.asData?.value;
 
-  return ServiceGuard(
-    plan: plan,
-    allowWhenPlanNull: true,
-    strictPartialCheck: true,
-  );
-});
+    return ServiceGuard(
+      plan: plan,
+      allowWhenPlanNull: true,
+      strictPartialCheck: true,
+    );
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);
 
 /// Helper extension for WidgetRef to easily create guards.
 extension ServiceGuardRefExtension on WidgetRef {
