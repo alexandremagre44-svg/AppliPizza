@@ -19,42 +19,51 @@ final firebaseOrderServiceProvider = Provider<FirebaseOrderService>(
 
 /// Provider pour le stream des commandes (temps réel)
 /// Affiche toutes les commandes pour admin/kitchen, seulement les commandes de l'utilisateur pour client
-final ordersStreamProvider = StreamProvider<List<Order>>((ref) {
-  final service = ref.watch(firebaseOrderServiceProvider);
-  final authState = ref.watch(authProvider);
-  final authService = ref.watch(firebaseAuthServiceProvider);
-  
-  // Si admin ou kitchen, afficher toutes les commandes
-  if (authState.isAdmin || authState.isKitchen) {
-    return service.watchAllOrders();
-  }
-  
-  // Si client connecté, afficher uniquement ses commandes
-  if (authState.isLoggedIn) {
-    final user = authService.currentUser;
-    if (user != null) {
-      return service.watchUserOrders(user.uid);
+final ordersStreamProvider = StreamProvider<List<Order>>(
+  (ref) {
+    final service = ref.watch(firebaseOrderServiceProvider);
+    final authState = ref.watch(authProvider);
+    final authService = ref.watch(firebaseAuthServiceProvider);
+    
+    // Si admin ou kitchen, afficher toutes les commandes
+    if (authState.isAdmin || authState.isKitchen) {
+      return service.watchAllOrders();
     }
-  }
-  
-  // Par défaut, retourner un stream vide
-  return Stream.value([]);
-});
+    
+    // Si client connecté, afficher uniquement ses commandes
+    if (authState.isLoggedIn) {
+      final user = authService.currentUser;
+      if (user != null) {
+        return service.watchUserOrders(user.uid);
+      }
+    }
+    
+    // Par défaut, retourner un stream vide
+    return Stream.value([]);
+  },
+  dependencies: [firebaseOrderServiceProvider, authProvider, firebaseAuthServiceProvider],
+);
 
 /// Provider pour obtenir les commandes non vues
-final unviewedOrdersProvider = Provider<List<Order>>((ref) {
-  final ordersAsync = ref.watch(ordersStreamProvider);
-  return ordersAsync.when(
-    data: (orders) => orders.where((o) => !o.isViewed).toList(),
-    loading: () => [],
-    error: (_, __) => [],
-  );
-});
+final unviewedOrdersProvider = Provider<List<Order>>(
+  (ref) {
+    final ordersAsync = ref.watch(ordersStreamProvider);
+    return ordersAsync.when(
+      data: (orders) => orders.where((o) => !o.isViewed).toList(),
+      loading: () => [],
+      error: (_, __) => [],
+    );
+  },
+  dependencies: [ordersStreamProvider],
+);
 
 /// Provider pour compter les commandes non vues
-final unviewedOrdersCountProvider = Provider<int>((ref) {
-  return ref.watch(unviewedOrdersProvider).length;
-});
+final unviewedOrdersCountProvider = Provider<int>(
+  (ref) {
+    return ref.watch(unviewedOrdersProvider).length;
+  },
+  dependencies: [unviewedOrdersProvider],
+);
 
 /// État des filtres et options d'affichage
 class OrdersViewState {
@@ -154,60 +163,63 @@ final ordersViewProvider = StateNotifierProvider<OrdersViewNotifier, OrdersViewS
 });
 
 /// Provider pour les commandes filtrées et triées
-final filteredOrdersProvider = Provider<List<Order>>((ref) {
-  final ordersAsync = ref.watch(ordersStreamProvider);
-  final viewState = ref.watch(ordersViewProvider);
-  
-  return ordersAsync.when(
-    data: (orders) {
-      List<Order> filtered = orders;
-      
-      // Appliquer filtre de statut
-      if (viewState.statusFilter != null) {
-        filtered = filtered.where((o) => o.status == viewState.statusFilter).toList();
-      }
-      
-      // Appliquer filtre de date
-      if (viewState.startDateFilter != null && viewState.endDateFilter != null) {
-        filtered = filtered.where((o) {
-          return o.date.isAfter(viewState.startDateFilter!.subtract(const Duration(days: 1))) &&
-                 o.date.isBefore(viewState.endDateFilter!.add(const Duration(days: 1)));
-        }).toList();
-      }
-      
-      // Appliquer recherche
-      if (viewState.searchQuery.isNotEmpty) {
-        final query = viewState.searchQuery.toLowerCase();
-        filtered = filtered.where((o) {
-          return o.id.toLowerCase().contains(query) ||
-                 (o.customerName?.toLowerCase().contains(query) ?? false) ||
-                 (o.customerPhone?.toLowerCase().contains(query) ?? false);
-        }).toList();
-      }
-      
-      // Appliquer tri
-      filtered.sort((a, b) {
-        int comparison = 0;
-        switch (viewState.sortBy) {
-          case OrdersSortBy.date:
-            comparison = a.date.compareTo(b.date);
-            break;
-          case OrdersSortBy.total:
-            comparison = a.total.compareTo(b.total);
-            break;
-          case OrdersSortBy.status:
-            comparison = a.status.compareTo(b.status);
-            break;
-          case OrdersSortBy.customer:
-            comparison = (a.customerName ?? '').compareTo(b.customerName ?? '');
-            break;
+final filteredOrdersProvider = Provider<List<Order>>(
+  (ref) {
+    final ordersAsync = ref.watch(ordersStreamProvider);
+    final viewState = ref.watch(ordersViewProvider);
+    
+    return ordersAsync.when(
+      data: (orders) {
+        List<Order> filtered = orders;
+        
+        // Appliquer filtre de statut
+        if (viewState.statusFilter != null) {
+          filtered = filtered.where((o) => o.status == viewState.statusFilter).toList();
         }
-        return viewState.sortAscending ? comparison : -comparison;
-      });
-      
-      return filtered;
-    },
-    loading: () => [],
-    error: (_, __) => [],
-  );
-});
+        
+        // Appliquer filtre de date
+        if (viewState.startDateFilter != null && viewState.endDateFilter != null) {
+          filtered = filtered.where((o) {
+            return o.date.isAfter(viewState.startDateFilter!.subtract(const Duration(days: 1))) &&
+                   o.date.isBefore(viewState.endDateFilter!.add(const Duration(days: 1)));
+          }).toList();
+        }
+        
+        // Appliquer recherche
+        if (viewState.searchQuery.isNotEmpty) {
+          final query = viewState.searchQuery.toLowerCase();
+          filtered = filtered.where((o) {
+            return o.id.toLowerCase().contains(query) ||
+                   (o.customerName?.toLowerCase().contains(query) ?? false) ||
+                   (o.customerPhone?.toLowerCase().contains(query) ?? false);
+          }).toList();
+        }
+        
+        // Appliquer tri
+        filtered.sort((a, b) {
+          int comparison = 0;
+          switch (viewState.sortBy) {
+            case OrdersSortBy.date:
+              comparison = a.date.compareTo(b.date);
+              break;
+            case OrdersSortBy.total:
+              comparison = a.total.compareTo(b.total);
+              break;
+            case OrdersSortBy.status:
+              comparison = a.status.compareTo(b.status);
+              break;
+            case OrdersSortBy.customer:
+              comparison = (a.customerName ?? '').compareTo(b.customerName ?? '');
+              break;
+          }
+          return viewState.sortAscending ? comparison : -comparison;
+        });
+        
+        return filtered;
+      },
+      loading: () => [],
+      error: (_, __) => [],
+    );
+  },
+  dependencies: [ordersStreamProvider, ordersViewProvider],
+);

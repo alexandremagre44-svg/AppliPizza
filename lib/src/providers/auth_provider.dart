@@ -20,9 +20,12 @@ final firebaseAuthServiceProvider = Provider<FirebaseAuthService>(
 );
 
 /// Provider pour l'état d'authentification
-final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(ref.watch(firebaseAuthServiceProvider));
-});
+final authProvider = StateNotifierProvider<AuthNotifier, AuthState>(
+  (ref) {
+    return AuthNotifier(ref.watch(firebaseAuthServiceProvider));
+  },
+  dependencies: [firebaseAuthServiceProvider],
+);
 
 /// Listenable for GoRouter's refreshListenable parameter
 /// This notifies GoRouter when authentication state changes
