@@ -10,6 +10,7 @@ import '../services/theme_service.dart';
 import '../theme/app_theme.dart';
 import '../../white_label/runtime/theme_adapter.dart';
 import 'restaurant_plan_provider.dart';
+import 'restaurant_provider.dart';
 
 // Re-export themeServiceProvider from theme_service.dart
 export '../services/theme_service.dart' show themeServiceProvider;
@@ -25,16 +26,22 @@ export '../services/theme_service.dart' show themeServiceProvider;
 ///   error: (e, s) => ...,
 /// );
 /// ```
-final themeConfigProvider = FutureProvider<ThemeConfig>((ref) async {
-  final service = ref.watch(themeServiceProvider);
-  return service.loadTheme();
-});
+final themeConfigProvider = FutureProvider<ThemeConfig>(
+  (ref) async {
+    final service = ref.watch(themeServiceProvider);
+    return service.loadTheme();
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// StreamProvider for real-time theme updates
-final themeConfigStreamProvider = StreamProvider<ThemeConfig>((ref) {
-  final service = ref.watch(themeServiceProvider);
-  return service.watchTheme();
-});
+final themeConfigStreamProvider = StreamProvider<ThemeConfig>(
+  (ref) {
+    final service = ref.watch(themeServiceProvider);
+    return service.watchTheme();
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider that converts ThemeConfig to Flutter ThemeData
 /// 
@@ -324,29 +331,32 @@ final themeSavingProvider = StateProvider<bool>((ref) => false);
 ///   );
 /// }
 /// ```
-final unifiedThemeProvider = Provider<ThemeData>((ref) {
-  // Charger le plan unifié du restaurant
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  
-  // Extraire le plan si disponible
-  final plan = planAsync.maybeWhen(
-    data: (p) => p,
-    orElse: () => null,
-  );
-  
-  // Cas 1: Pas de plan → fallback sur le thème legacy
-  if (plan == null) {
-    return AppTheme.lightTheme;
-  }
-  
-  // Cas 2: Plan existe - vérifier le module thème
-  final themeModule = plan.theme;
-  
-  // Cas 2a: Module thème absent ou désactivé → thème du template
-  if (themeModule == null || !themeModule.enabled) {
-    return ThemeAdapter.defaultThemeForTemplate(plan.templateId);
-  }
-  
-  // Cas 2b: Module thème activé → utiliser la config WhiteLabel
-  return ThemeAdapter.toAppTheme(themeModule);
-});
+final unifiedThemeProvider = Provider<ThemeData>(
+  (ref) {
+    // Charger le plan unifié du restaurant
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    
+    // Extraire le plan si disponible
+    final plan = planAsync.maybeWhen(
+      data: (p) => p,
+      orElse: () => null,
+    );
+    
+    // Cas 1: Pas de plan → fallback sur le thème legacy
+    if (plan == null) {
+      return AppTheme.lightTheme;
+    }
+    
+    // Cas 2: Plan existe - vérifier le module thème
+    final themeModule = plan.theme;
+    
+    // Cas 2a: Module thème absent ou désactivé → thème du template
+    if (themeModule == null || !themeModule.enabled) {
+      return ThemeAdapter.defaultThemeForTemplate(plan.templateId);
+    }
+    
+    // Cas 2b: Module thème activé → utiliser la config WhiteLabel
+    return ThemeAdapter.toAppTheme(themeModule);
+  },
+  dependencies: [restaurantPlanUnifiedProvider, currentRestaurantProvider],
+);
