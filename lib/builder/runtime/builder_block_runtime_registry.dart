@@ -156,9 +156,7 @@ class BuilderBlockRuntimeRegistry {
     },
   };
   
-  /// Legacy builders map for backward compatibility.
-  @Deprecated('Use _renderers instead')
-  static final Map<BlockType, BlockRuntimeBuilder> _builders = {};
+
   
   /// Get the renderer function for a specific [BlockType].
   /// 

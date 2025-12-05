@@ -50,20 +50,7 @@ class ModuleAwareBlock extends ConsumerWidget {
     
     // In runtime mode, check if block requires a module
     if (block.requiredModule != null) {
-      // Parse the module ID
-      final moduleId = _parseModuleId(block.requiredModule!);
-      
-      if (moduleId == null) {
-        // Invalid module ID - log warning in debug mode
-        assert(
-          false,
-          'Invalid requiredModule: "${block.requiredModule}". '
-          'Block will be shown by default. '
-          'Valid module IDs: ${ModuleId.values.map((m) => m.code).join(", ")}',
-        );
-        // In release mode, show the block (fail open)
-        return _renderBlock(context);
-      }
+      final moduleId = block.requiredModule!;
       
       // Check if module is enabled
       if (!isModuleEnabled(ref, moduleId)) {
@@ -84,18 +71,6 @@ class ModuleAwareBlock extends ConsumerWidget {
       isPreview: isPreview,
       maxContentWidth: maxContentWidth,
     );
-  }
-  
-  /// Parse module ID string to ModuleId enum.
-  /// Returns null if the string doesn't match any ModuleId.
-  static ModuleId? _parseModuleId(String moduleIdStr) {
-    try {
-      return ModuleId.values.firstWhere(
-        (id) => id.code == moduleIdStr,
-      );
-    } catch (_) {
-      return null;
-    }
   }
 }
 
