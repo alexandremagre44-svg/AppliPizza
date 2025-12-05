@@ -10,7 +10,6 @@ import '../services/theme_service.dart';
 import '../theme/app_theme.dart';
 import '../../white_label/runtime/theme_adapter.dart';
 import 'restaurant_plan_provider.dart';
-import 'restaurant_provider.dart';
 
 // Re-export themeServiceProvider from theme_service.dart
 export '../services/theme_service.dart' show themeServiceProvider;
@@ -26,22 +25,16 @@ export '../services/theme_service.dart' show themeServiceProvider;
 ///   error: (e, s) => ...,
 /// );
 /// ```
-final themeConfigProvider = FutureProvider<ThemeConfig>(
-  (ref) async {
-    final service = ref.watch(themeServiceProvider);
-    return service.loadTheme();
-  },
-  dependencies: [currentRestaurantProvider],
-);
+final themeConfigProvider = FutureProvider<ThemeConfig>((ref) async {
+  final service = ref.watch(themeServiceProvider);
+  return service.loadTheme();
+});
 
 /// StreamProvider for real-time theme updates
-final themeConfigStreamProvider = StreamProvider<ThemeConfig>(
-  (ref) {
-    final service = ref.watch(themeServiceProvider);
-    return service.watchTheme();
-  },
-  dependencies: [currentRestaurantProvider],
-);
+final themeConfigStreamProvider = StreamProvider<ThemeConfig>((ref) {
+  final service = ref.watch(themeServiceProvider);
+  return service.watchTheme();
+});
 
 /// Provider that converts ThemeConfig to Flutter ThemeData
 /// 
@@ -358,5 +351,5 @@ final unifiedThemeProvider = Provider<ThemeData>(
     // Cas 2b: Module thème activé → utiliser la config WhiteLabel
     return ThemeAdapter.toAppTheme(themeModule);
   },
-  dependencies: [restaurantPlanUnifiedProvider, currentRestaurantProvider],
+  dependencies: [restaurantPlanUnifiedProvider],
 );
