@@ -53,12 +53,22 @@ class ModuleAwareBlock extends ConsumerWidget {
       // Parse the module ID
       final moduleId = _parseModuleId(block.requiredModule!);
       
-      if (moduleId != null) {
-        // Check if module is enabled
-        if (!isModuleEnabled(ref, moduleId)) {
-          // Module is disabled, hide the block
-          return const SizedBox.shrink();
-        }
+      if (moduleId == null) {
+        // Invalid module ID - log warning in debug mode
+        assert(
+          false,
+          'Invalid requiredModule: "${block.requiredModule}". '
+          'Block will be shown by default. '
+          'Valid module IDs: ${ModuleId.values.map((m) => m.code).join(", ")}',
+        );
+        // In release mode, show the block (fail open)
+        return _renderBlock(context);
+      }
+      
+      // Check if module is enabled
+      if (!isModuleEnabled(ref, moduleId)) {
+        // Module is disabled, hide the block
+        return const SizedBox.shrink();
       }
     }
     

@@ -158,7 +158,7 @@ class BuilderBlockRuntimeRegistry {
   
   /// Legacy builders map for backward compatibility.
   @Deprecated('Use _renderers instead')
-  static final Map<BlockType, BlockRuntimeBuilder> _builders = {};{}
+  static final Map<BlockType, BlockRuntimeBuilder> _builders = {};
   
   /// Get the renderer function for a specific [BlockType].
   /// 
@@ -197,7 +197,9 @@ class BuilderBlockRuntimeRegistry {
   /// Uses the registered renderer for the block's type. If no renderer is found,
   /// returns a fallback widget showing an "unknown block type" message.
   /// 
-  /// Module-aware: Automatically hides blocks that require disabled modules.
+  /// Note: For module-aware rendering with automatic hiding of disabled modules,
+  /// use [ModuleAwareBlock] widget instead. This method only supports legacy
+  /// featureFlags checking.
   /// 
   /// [block] - The block to render
   /// [context] - The build context
@@ -211,33 +213,11 @@ class BuilderBlockRuntimeRegistry {
     double? maxContentWidth,
     RestaurantFeatureFlags? featureFlags,
   }) {
-    // Module guard: Check if block requires a module
-    if (!isPreview && block.requiredModule != null) {
-      // First try the new isModuleEnabled helper (preferred)
-      if (context is StatefulElement || context is StatelessElement) {
-        try {
-          // Try to get WidgetRef from context (only works if Consumer/ConsumerWidget)
-          final container = ProviderScope.containerOf(context, listen: false);
-          if (container != null) {
-            // Use the new module helper
-            final moduleIdStr = block.requiredModule!;
-            final moduleId = _parseModuleId(moduleIdStr);
-            if (moduleId != null) {
-              // We need a WidgetRef, but we have BuildContext
-              // For now, fall back to featureFlags check
-              // TODO: Refactor to accept WidgetRef parameter
-            }
-          }
-        } catch (_) {
-          // Fall through to featureFlags check
-        }
-      }
-      
-      // Fallback to legacy featureFlags check
-      if (featureFlags != null) {
-        if (!featureFlags.has(block.requiredModule!)) {
-          return const SizedBox.shrink();
-        }
+    // Legacy module guard using featureFlags
+    // For modern module-aware rendering, use ModuleAwareBlock widget
+    if (!isPreview && block.requiredModule != null && featureFlags != null) {
+      if (!featureFlags.has(block.requiredModule!)) {
+        return const SizedBox.shrink();
       }
     }
     
@@ -254,18 +234,6 @@ class BuilderBlockRuntimeRegistry {
     
     // Fallback for unknown block types
     return _buildUnknownBlockFallback(block, context, isPreview);
-  }
-  
-  /// Parse module ID string to ModuleId enum.
-  /// Returns null if the string doesn't match any ModuleId.
-  static ModuleId? _parseModuleId(String moduleIdStr) {
-    try {
-      return ModuleId.values.firstWhere(
-        (id) => id.code == moduleIdStr,
-      );
-    } catch (_) {
-      return null;
-    }
   }
   
   /// Render a list of blocks to widgets.
