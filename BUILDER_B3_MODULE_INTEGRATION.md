@@ -183,8 +183,8 @@ final block = BuilderBlock(
   },
 );
 
-// Mark as requiring roulette module
-block.requiredModule = 'roulette';
+// Mark as requiring roulette module (using ModuleId enum)
+block.requiredModule = ModuleId.roulette;
 ```
 
 #### In JSON/Firestore
@@ -201,6 +201,8 @@ block.requiredModule = 'roulette';
   },
   "requiredModule": "roulette"
 }
+// Note: In JSON, requiredModule is stored as a string (ModuleId.code)
+// The BuilderBlock.fromJson() automatically converts it to ModuleId enum
 ```
 
 ## Supported Block Types
@@ -439,13 +441,16 @@ ModuleAwareBlock(block: block, isPreview: true);
 
 **Problem**: `requiredModule` set but block still shows.
 
-**Solution**: Check the module ID string matches `ModuleId.code`:
+**Solution**: Use the correct ModuleId enum value:
 ```dart
-// ❌ Wrong
-block.requiredModule = 'Roulette';
+// ❌ Wrong - String values don't work
+block.requiredModule = 'roulette';
 
-// ✅ Correct (must match ModuleId enum)
-block.requiredModule = 'roulette';  // Matches ModuleId.roulette.code
+// ✅ Correct - Use ModuleId enum
+block.requiredModule = ModuleId.roulette;
+
+// Available modules:
+// ModuleId.loyalty, ModuleId.roulette, ModuleId.delivery, etc.
 ```
 
 ## Examples
@@ -466,8 +471,8 @@ final rouletteButton = BuilderBlock(
       'route': '/roulette',
     },
   },
+  requiredModule: ModuleId.roulette,  // Set module requirement
 );
-rouletteButton.requiredModule = 'roulette';
 
 // Render with module awareness
 ModuleAwareBlock(
@@ -495,8 +500,8 @@ final loyaltyBanner = BuilderBlock(
       'route': '/rewards',
     },
   },
+  requiredModule: ModuleId.loyalty,  // Require loyalty module
 );
-loyaltyBanner.requiredModule = 'loyalty';
 
 // Render in a page
 ModuleAwareBlockList(

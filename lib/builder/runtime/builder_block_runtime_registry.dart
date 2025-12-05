@@ -47,7 +47,27 @@ typedef BlockRenderer = Widget Function(
 });
 
 /// Legacy typedef for backward compatibility.
-@Deprecated('Use BlockRenderer instead')
+/// 
+/// **Deprecated**: Use [BlockRenderer] instead, which supports both preview
+/// and runtime modes through a single unified interface.
+/// 
+/// Migration example:
+/// ```dart
+/// // Old way (deprecated)
+/// BlockRuntimeBuilder builder = (block, context, {maxContentWidth}) {
+///   return MyBlockWidget(block: block);
+/// };
+/// 
+/// // New way (recommended)
+/// BlockRenderer renderer = (context, block, isPreview, {maxContentWidth}) {
+///   return isPreview
+///     ? MyBlockPreview(block: block)
+///     : MyBlockRuntime(block: block);
+/// };
+/// ```
+/// 
+/// This typedef will be removed in a future version.
+@Deprecated('Use BlockRenderer instead. Will be removed in v2.0.')
 typedef BlockRuntimeBuilder = Widget Function(
   BuilderBlock block,
   BuildContext context, {
@@ -167,11 +187,18 @@ class BuilderBlockRuntimeRegistry {
   }
   
   /// Legacy method for backward compatibility.
-  @Deprecated('Use getRenderer instead')
+  /// 
+  /// **Deprecated**: Use [getRenderer] instead.
+  /// 
+  /// Note: This adapter always renders in runtime mode (isPreview = false)
+  /// to maintain backward compatibility with code that expects runtime rendering.
+  /// For preview mode support, use [getRenderer] with the isPreview parameter.
+  @Deprecated('Use getRenderer instead. Will be removed in v2.0.')
   static BlockRuntimeBuilder? getBuilder(BlockType type) {
     final renderer = _renderers[type];
     if (renderer == null) return null;
     return (block, context, {double? maxContentWidth}) {
+      // Legacy mode: always render as runtime (isPreview = false)
       return renderer(context, block, false, maxContentWidth: maxContentWidth);
     };
   }
@@ -334,9 +361,18 @@ class BuilderBlockRuntimeRegistry {
   }
   
   /// Legacy method for backward compatibility.
-  @Deprecated('Use registerRenderer instead')
+  /// 
+  /// **Deprecated**: Use [registerRenderer] instead.
+  /// 
+  /// **Limitation**: The legacy builder only supports runtime mode. It will be
+  /// used for both preview and runtime rendering, which may not be the desired
+  /// behavior. For proper preview support, use [registerRenderer] with a
+  /// BlockRenderer that handles both modes.
+  @Deprecated('Use registerRenderer instead. Will be removed in v2.0.')
   static void registerBuilder(BlockType type, BlockRuntimeBuilder builder) {
     _renderers[type] = (context, block, isPreview, {double? maxContentWidth}) {
+      // Legacy adapter: ignores isPreview, always uses runtime builder
+      // This maintains backward compatibility but doesn't support preview mode
       return builder(block, context, maxContentWidth: maxContentWidth);
     };
   }

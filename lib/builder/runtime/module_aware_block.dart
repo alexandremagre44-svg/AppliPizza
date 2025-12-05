@@ -49,9 +49,8 @@ class ModuleAwareBlock extends ConsumerWidget {
     }
     
     // In runtime mode, check if block requires a module
-    if (block.requiredModule != null) {
-      final moduleId = block.requiredModule!;
-      
+    final moduleId = block.requiredModule;
+    if (moduleId != null) {
       // Check if module is enabled
       if (!isModuleEnabled(ref, moduleId)) {
         // Module is disabled, hide the block
