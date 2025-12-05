@@ -9,6 +9,7 @@
 /// This file should be called once during app initialization.
 library;
 
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/module_id.dart';
 import '../core/module_category.dart';
