@@ -69,6 +69,8 @@ import 'src/navigation/module_route_guards.dart';
 import 'white_label/core/module_id.dart';
 import 'white_label/runtime/module_runtime_adapter.dart';
 import 'white_label/runtime/router_guard.dart';
+import 'white_label/runtime/register_module_routes.dart';
+import 'white_label/runtime/module_guards.dart';
 
 // Builder B3 imports for dynamic pages
 import 'builder/models/models.dart';
@@ -79,6 +81,9 @@ import 'superadmin/superadmin_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Register all module routes before running the app
+  registerAllModuleRoutes();
   
   // Read APP_ID from environment variable with default fallback
   const appId = String.fromEnvironment('APP_ID', defaultValue: 'delizza');
@@ -258,12 +263,13 @@ class MyApp extends ConsumerWidget {
                 fallback: ProfileScreen(),
               ),
             ),
+            // Module routes with guards
             GoRoute(
               path: '/rewards',
               builder: (context, state) {
-                // Phase 3: Use proper route guard for loyalty module
-                return loyaltyRouteGuard(
-                  const BuilderPageLoader(
+                return ModuleGuard(
+                  module: ModuleId.loyalty,
+                  child: const BuilderPageLoader(
                     pageId: BuilderPageId.rewards,
                     fallback: RewardsScreen(),
                   ),
@@ -273,9 +279,9 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: '/roulette',
               builder: (context, state) {
-                // Phase 3: Use proper route guard for roulette module
-                return rouletteRouteGuard(
-                  const BuilderPageLoader(
+                return ModuleGuard(
+                  module: ModuleId.roulette,
+                  child: const BuilderPageLoader(
                     pageId: BuilderPageId.roulette,
                     fallback: RouletteScreen(),
                   ),
@@ -426,29 +432,28 @@ class MyApp extends ConsumerWidget {
           path: AppRoutes.checkout,
           builder: (context, state) => const CheckoutScreen(),
         ),
-        // Delivery Routes (module-guarded)
+        // Delivery Routes (with module guards)
         GoRoute(
           path: AppRoutes.deliveryAddress,
           builder: (context, state) {
-            // Phase 3: Use proper route guard for delivery module
-            return deliveryRouteGuard(
-              const DeliveryAddressScreen(),
+            return ModuleGuard(
+              module: ModuleId.delivery,
+              child: const DeliveryAddressScreen(),
             );
           },
         ),
         GoRoute(
           path: AppRoutes.deliveryArea,
           builder: (context, state) {
-            // Phase 3: Use proper route guard for delivery module
-            return deliveryRouteGuard(
-              const DeliveryAreaSelectorScreen(),
+            return ModuleGuard(
+              module: ModuleId.delivery,
+              child: const DeliveryAreaSelectorScreen(),
             );
           },
         ),
         GoRoute(
           path: '/order/:id/tracking',
           builder: (context, state) {
-            // Phase 3: Use proper route guard for delivery module
             // Validate order data
             if (state.extra is! Order) {
               return Scaffold(
@@ -459,8 +464,9 @@ class MyApp extends ConsumerWidget {
               );
             }
             final order = state.extra as Order;
-            return deliveryRouteGuard(
-              DeliveryTrackingScreen(order: order),
+            return ModuleGuard(
+              module: ModuleId.delivery,
+              child: DeliveryTrackingScreen(order: order),
             );
           },
         ),
@@ -468,53 +474,29 @@ class MyApp extends ConsumerWidget {
         GoRoute(
           path: AppRoutes.kitchen,
           name: 'kitchen',
-          builder: (context, state) => const KitchenScreen(),
+          builder: (context, state) {
+            return ModuleAndRoleGuard(
+              module: ModuleId.kitchen_tablet,
+              requiresKitchen: true,
+              child: const KitchenScreen(),
+            );
+          },
         ),
-        // Staff Tablet Routes (CAISSE - Admin Only)
+        // Staff Tablet Routes (with guards)
         GoRoute(
           path: AppRoutes.staffTabletPin,
           builder: (context, state) {
-            // Phase 3: Use proper route guard for staff tablet module
-            // PROTECTION: Staff tablet (CAISSE) est réservé aux admins
-            final authState = ref.read(authProvider);
-            if (!authState.isAdmin) {
-              // Redirect to menu if not admin
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.menu);
-              });
-              return Scaffold(
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.lock, size: 64, color: Colors.red),
-                      SizedBox(height: 16),
-                      Text('Accès réservé aux administrateurs'),
-                    ],
-                  ),
-                ),
-              );
-            }
-            return staffTabletRouteGuard(
-              const StaffTabletPinScreen(),
+            return ModuleAndRoleGuard(
+              module: ModuleId.staff_tablet,
+              requiresAdmin: true,
+              child: const StaffTabletPinScreen(),
             );
           },
         ),
         GoRoute(
           path: AppRoutes.staffTabletCatalog,
           builder: (context, state) {
-            // Phase 3: Use proper route guard for staff tablet module
-            // PROTECTION: Admin only
             final authState = ref.read(authProvider);
-            if (!authState.isAdmin) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.menu);
-              });
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-            
             // Check if authenticated in staff tablet
             final staffAuth = ref.read(staffTabletAuthProvider);
             if (!staffAuth.isAuthenticated) {
@@ -526,26 +508,16 @@ class MyApp extends ConsumerWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            return staffTabletRouteGuard(
-              const StaffTabletCatalogScreen(),
+            return ModuleAndRoleGuard(
+              module: ModuleId.staff_tablet,
+              requiresAdmin: true,
+              child: const StaffTabletCatalogScreen(),
             );
           },
         ),
         GoRoute(
           path: AppRoutes.staffTabletCheckout,
           builder: (context, state) {
-            // Phase 3: Use proper route guard for staff tablet module
-            // PROTECTION: Admin only
-            final authState = ref.read(authProvider);
-            if (!authState.isAdmin) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.menu);
-              });
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-            
             // Check if authenticated in staff tablet
             final staffAuth = ref.read(staffTabletAuthProvider);
             if (!staffAuth.isAuthenticated) {
@@ -557,26 +529,16 @@ class MyApp extends ConsumerWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            return staffTabletRouteGuard(
-              const StaffTabletCheckoutScreen(),
+            return ModuleAndRoleGuard(
+              module: ModuleId.staff_tablet,
+              requiresAdmin: true,
+              child: const StaffTabletCheckoutScreen(),
             );
           },
         ),
         GoRoute(
           path: AppRoutes.staffTabletHistory,
           builder: (context, state) {
-            // Phase 3: Use proper route guard for staff tablet module
-            // PROTECTION: Admin only
-            final authState = ref.read(authProvider);
-            if (!authState.isAdmin) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                context.go(AppRoutes.menu);
-              });
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-            
             // Check if authenticated in staff tablet
             final staffAuth = ref.read(staffTabletAuthProvider);
             if (!staffAuth.isAuthenticated) {
@@ -588,16 +550,24 @@ class MyApp extends ConsumerWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-            return staffTabletRouteGuard(
-              const StaffTabletHistoryScreen(),
+            return ModuleAndRoleGuard(
+              module: ModuleId.staff_tablet,
+              requiresAdmin: true,
+              child: const StaffTabletHistoryScreen(),
             );
           },
         ),
-        // POS Route - New minimal screen with module guard
+        // POS Route - Protected by module guard
         GoRoute(
           path: AppRoutes.pos,
           name: 'pos',
-          builder: (context, state) => const PosScreen(),
+          builder: (context, state) {
+            return ModuleAndRoleGuard(
+              module: ModuleId.staff_tablet,
+              requiresAdmin: true,
+              child: const PosScreen(),
+            );
+          },
         ),
         // SuperAdmin parent route - redirects to dashboard
         GoRoute(

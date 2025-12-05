@@ -70,3 +70,58 @@ extension ModuleCategoryX on ModuleCategory {
   // TODO: Ajouter une icône (IconData) pour chaque catégorie
   // TODO: Ajouter une couleur thématique pour chaque catégorie
 }
+
+/// Niveau d'accès requis pour un module ou une route.
+///
+/// Définit qui peut accéder à un module donné en fonction de leur rôle.
+enum ModuleAccessLevel {
+  /// Accessible par tous les utilisateurs (clients)
+  client,
+
+  /// Accessible uniquement par le staff (serveurs, caissiers)
+  staff,
+
+  /// Accessible uniquement par les administrateurs
+  admin,
+
+  /// Modules système (cuisine, tablettes spécialisées)
+  kitchen,
+
+  /// Modules système (ne nécessite pas d'authentification spéciale)
+  system,
+}
+
+/// Extension pour ajouter des métadonnées aux niveaux d'accès.
+extension ModuleAccessLevelX on ModuleAccessLevel {
+  /// Retourne un libellé lisible pour le niveau d'accès.
+  String get label {
+    switch (this) {
+      case ModuleAccessLevel.client:
+        return 'Client';
+      case ModuleAccessLevel.staff:
+        return 'Staff';
+      case ModuleAccessLevel.admin:
+        return 'Administrateur';
+      case ModuleAccessLevel.kitchen:
+        return 'Cuisine';
+      case ModuleAccessLevel.system:
+        return 'Système';
+    }
+  }
+
+  /// Retourne une description du niveau d'accès.
+  String get description {
+    switch (this) {
+      case ModuleAccessLevel.client:
+        return 'Accessible à tous les utilisateurs connectés';
+      case ModuleAccessLevel.staff:
+        return 'Réservé au personnel (serveurs, caissiers)';
+      case ModuleAccessLevel.admin:
+        return 'Réservé aux administrateurs du restaurant';
+      case ModuleAccessLevel.kitchen:
+        return 'Réservé au personnel de cuisine';
+      case ModuleAccessLevel.system:
+        return 'Module système sans restriction spéciale';
+    }
+  }
+}

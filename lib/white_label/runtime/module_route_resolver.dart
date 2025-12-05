@@ -14,9 +14,12 @@
 /// - Enable runtime validation
 library;
 
+import 'package:go_router/go_router.dart';
 import '../core/module_id.dart';
 import '../core/module_matrix.dart';
 import '../core/module_runtime_mapping.dart';
+import '../restaurant/restaurant_plan_unified.dart';
+import 'module_navigation_registry.dart';
 
 /// Result of route resolution.
 ///
@@ -99,6 +102,106 @@ class ModuleRouteResolver {
   /// Private constructor to prevent instantiation.
   /// All methods are static.
   ModuleRouteResolver._();
+
+  /// Resolve all routes for a given restaurant plan.
+  ///
+  /// This function generates a list of GoRoute objects based on the modules
+  /// enabled in the restaurant plan. Only routes for enabled modules are included.
+  ///
+  /// The function:
+  /// - Iterates through all modules in the plan
+  /// - Checks if each module is enabled
+  /// - Retrieves routes from ModuleNavigationRegistry
+  /// - Returns only routes for enabled modules
+  ///
+  /// Example:
+  /// ```dart
+  /// final plan = await ref.read(restaurantPlanUnifiedProvider.future);
+  /// final routes = ModuleRouteResolver.resolveRoutesFor(plan);
+  /// ```
+  ///
+  /// Returns an empty list if plan is null or has no enabled modules.
+  static List<GoRoute> resolveRoutesFor(RestaurantPlanUnified? plan) {
+    // If no plan, return empty list
+    if (plan == null) {
+      return [];
+    }
+
+    final routes = <GoRoute>[];
+
+    // Iterate through all registered modules
+    for (final moduleId in ModuleNavigationRegistry.getAllRegisteredModules()) {
+      // Check if module is enabled in the plan
+      if (plan.hasModule(moduleId)) {
+        // Get routes for this module
+        final moduleRoutes = ModuleNavigationRegistry.getGoRoutesFor(moduleId);
+        routes.addAll(moduleRoutes);
+      }
+    }
+
+    return routes;
+  }
+
+  /// Resolve routes for enabled modules only.
+  ///
+  /// Similar to resolveRoutesFor but also filters by implementation status.
+  /// Only includes routes for modules that are:
+  /// - Enabled in the plan
+  /// - Fully implemented or partially implemented
+  ///
+  /// Skips planned modules even if enabled in the plan.
+  ///
+  /// Example:
+  /// ```dart
+  /// final routes = ModuleRouteResolver.resolveImplementedRoutesFor(plan);
+  /// ```
+  static List<GoRoute> resolveImplementedRoutesFor(RestaurantPlanUnified? plan) {
+    if (plan == null) {
+      return [];
+    }
+
+    final routes = <GoRoute>[];
+
+    for (final moduleId in ModuleNavigationRegistry.getAllRegisteredModules()) {
+      // Check if module is enabled
+      if (plan.hasModule(moduleId)) {
+        // Check if module is implemented (not just planned)
+        if (ModuleRuntimeMapping.isImplemented(moduleId) ||
+            ModuleRuntimeMapping.isPartiallyImplemented(moduleId)) {
+          final moduleRoutes = ModuleNavigationRegistry.getGoRoutesFor(moduleId);
+          routes.addAll(moduleRoutes);
+        }
+      }
+    }
+
+    return routes;
+  }
+
+  /// Get all enabled module IDs from a plan.
+  ///
+  /// Returns a list of ModuleId for all modules that are:
+  /// - Enabled in the plan
+  /// - Have registered routes
+  ///
+  /// Example:
+  /// ```dart
+  /// final enabledModules = ModuleRouteResolver.getEnabledModulesWithRoutes(plan);
+  /// ```
+  static List<ModuleId> getEnabledModulesWithRoutes(RestaurantPlanUnified? plan) {
+    if (plan == null) {
+      return [];
+    }
+
+    final modules = <ModuleId>[];
+
+    for (final moduleId in ModuleNavigationRegistry.getAllRegisteredModules()) {
+      if (plan.hasModule(moduleId)) {
+        modules.add(moduleId);
+      }
+    }
+
+    return modules;
+  }
 
   /// Resolve a route to its owning module.
   ///
