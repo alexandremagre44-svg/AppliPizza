@@ -441,17 +441,21 @@ ModuleAwareBlock(block: block, isPreview: true);
 
 **Problem**: `requiredModule` set but block still shows.
 
-**Solution**: Use the correct ModuleId enum value:
+**Solution**: Use the correct ModuleId enum value in Dart code:
 ```dart
-// ❌ Wrong - String values don't work
+// ❌ Wrong - String values don't work in Dart code
 block.requiredModule = 'roulette';
 
-// ✅ Correct - Use ModuleId enum
+// ✅ Correct - Use ModuleId enum in Dart
 block.requiredModule = ModuleId.roulette;
 
 // Available modules:
 // ModuleId.loyalty, ModuleId.roulette, ModuleId.delivery, etc.
 ```
+
+**Note**: In JSON/Firestore, `requiredModule` is stored as a string (e.g., `"roulette"`).
+The `BuilderBlock.fromJson()` method automatically converts it to `ModuleId` enum.
+In Dart code, always use the `ModuleId` enum, never strings.
 
 ## Examples
 
