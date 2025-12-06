@@ -76,7 +76,6 @@ class SuperAdminSidebar extends ConsumerWidget {
 
     // Filter sidebar items - hide "Modules" entry unless in debug mode
     final visibleItems = _sidebarItems.where((item) {
-      // Hide "Modules" entry unless in debug mode
       if (item.label == 'Modules') {
         return kDebugMode;
       }

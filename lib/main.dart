@@ -193,6 +193,7 @@ class MyApp extends ConsumerWidget {
         }
         
         // PROTECTION: SuperAdmin routes - only accessible to superadmins
+        // If user is not a superadmin, redirect to menu. If superadmin, allow access (return null).
         if (state.matchedLocation.startsWith('/superadmin')) {
           if (!authState.isSuperAdmin) {
             return AppRoutes.menu;
