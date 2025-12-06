@@ -127,4 +127,103 @@ void main() {
       expect(moduleIds, contains('newsletter_module'));
     });
   });
+
+  group('Module Filtering by Plan Tests', () {
+    test('isBuilderModuleAvailableForPlan returns true when plan is null (fallback safe)', () {
+      expect(isBuilderModuleAvailableForPlan('roulette_module', null), isTrue);
+      expect(isBuilderModuleAvailableForPlan('loyalty_module', null), isTrue);
+      expect(isBuilderModuleAvailableForPlan('unknown_module', null), isTrue);
+    });
+
+    test('isBuilderModuleAvailableForPlan returns true for unmapped modules (legacy)', () {
+      // Create a mock plan with no modules
+      final mockPlan = createMockPlan([]);
+      expect(isBuilderModuleAvailableForPlan('accountActivity', mockPlan), isTrue,
+          reason: 'Unmapped modules should always be available for backward compatibility');
+    });
+
+    test('isBuilderModuleAvailableForPlan checks module correctly', () {
+      // Create a plan with only roulette enabled
+      final planWithRoulette = createMockPlan(['roulette']);
+      expect(isBuilderModuleAvailableForPlan('roulette_module', planWithRoulette), isTrue);
+      expect(isBuilderModuleAvailableForPlan('loyalty_module', planWithRoulette), isFalse);
+    });
+
+    test('getAvailableModulesForPlan returns all modules when plan is null', () {
+      final filtered = getAvailableModulesForPlan(null);
+      expect(filtered.length, equals(availableModules.length));
+    });
+
+    test('getAvailableModulesForPlan filters modules correctly', () {
+      final planWithRouletteOnly = createMockPlan(['roulette']);
+      final filtered = getAvailableModulesForPlan(planWithRouletteOnly);
+      
+      // Should contain profile_module (no requiredModuleId) and roulette_module
+      final filteredIds = filtered.map((m) => m.id).toList();
+      expect(filteredIds, contains('profile_module'));
+      expect(filteredIds, contains('roulette_module'));
+      
+      // Should NOT contain loyalty_module (requires loyalty ModuleId)
+      expect(filteredIds, isNot(contains('loyalty_module')));
+    });
+
+    test('SystemBlock.getFilteredModules returns all when plan is null', () {
+      final filtered = SystemBlock.getFilteredModules(null);
+      expect(filtered.length, equals(SystemBlock.availableModules.length));
+    });
+
+    test('SystemBlock.getFilteredModules filters correctly', () {
+      final planWithRoulette = createMockPlan(['roulette']);
+      final filtered = SystemBlock.getFilteredModules(planWithRoulette);
+      
+      // Should contain legacy roulette and roulette_module
+      expect(filtered, contains('roulette'));
+      expect(filtered, contains('roulette_module'));
+      
+      // Should NOT contain loyalty_module
+      expect(filtered, isNot(contains('loyalty_module')));
+    });
+
+    test('SystemBlock.getFilteredModules handles legacy aliases', () {
+      final planWithLoyalty = createMockPlan(['loyalty']);
+      final filtered = SystemBlock.getFilteredModules(planWithLoyalty);
+      
+      // Should contain both legacy 'loyalty' and canonical 'loyalty_module'
+      expect(filtered, contains('loyalty'));
+      expect(filtered, contains('loyalty_module'));
+      expect(filtered, contains('rewards_module')); // Also uses loyalty ModuleId
+    });
+  });
+}
+
+/// Helper function to create a mock RestaurantPlanUnified for testing
+/// 
+/// Note: This is a simplified mock. In real implementation, you would use
+/// a proper mocking library or test fixtures.
+dynamic createMockPlan(List<String> activeModuleCodes) {
+  // Create a minimal mock that implements hasModule()
+  return _MockRestaurantPlan(activeModuleCodes);
+}
+
+class _MockRestaurantPlan {
+  final List<String> activeModules;
+  
+  _MockRestaurantPlan(this.activeModules);
+  
+  bool hasModule(dynamic moduleId) {
+    // Handle both ModuleId enum and String
+    String code;
+    if (moduleId is String) {
+      code = moduleId;
+    } else {
+      // Try to get code property safely
+      try {
+        code = (moduleId as dynamic).code as String;
+      } catch (e) {
+        // If we can't get the code, treat as not found
+        return false;
+      }
+    }
+    return activeModules.contains(code);
+  }
 }

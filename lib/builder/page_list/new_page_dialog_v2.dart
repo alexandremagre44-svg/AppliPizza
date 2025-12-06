@@ -3,8 +3,11 @@
 // Supports both template and blank page creation
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/services.dart';
+import '../../white_label/core/module_id.dart';
+import '../../src/providers/restaurant_plan_provider.dart';
 
 /// Template definition for page creation
 class PageTemplate {
@@ -71,13 +74,29 @@ const List<PageTemplate> availableTemplates = [
   // These system pages should be edited via the system page editor, not created from templates
 ];
 
+/// Mapping des templates vers leur ModuleId requis
+/// 
+/// Détermine quel module WL doit être activé pour qu'un template soit disponible.
+/// null = toujours disponible (pas de restriction)
+const Map<String, ModuleId?> templateRequiredModules = {
+  'home_template': null, // Toujours disponible
+  'menu_template': ModuleId.ordering, // Nécessite module commande
+  'promo_template': ModuleId.promotions, // Nécessite module promotions
+  'about_template': null, // Toujours disponible
+  'contact_template': null, // Toujours disponible
+};
+
 /// Enhanced dialog for creating new Builder pages
 /// 
 /// Features:
 /// - Choice between Template or Blank page
 /// - Template list with icons and descriptions
 /// - Calls createPageFromTemplate or createBlankPage
-class NewPageDialogV2 extends StatefulWidget {
+/// - **Filters templates based on restaurant's white-label plan**
+///   - Only shows templates for which the required modules are activated
+///   - Templates without module requirements are always shown
+///   - Falls back to showing all templates if plan is not loaded
+class NewPageDialogV2 extends ConsumerStatefulWidget {
   final String appId;
   final Function(BuilderPage) onPageCreated;
 
@@ -88,10 +107,10 @@ class NewPageDialogV2 extends StatefulWidget {
   });
 
   @override
-  State<NewPageDialogV2> createState() => _NewPageDialogV2State();
+  ConsumerState<NewPageDialogV2> createState() => _NewPageDialogV2State();
 }
 
-class _NewPageDialogV2State extends State<NewPageDialogV2> {
+class _NewPageDialogV2State extends ConsumerState<NewPageDialogV2> {
   final BuilderPageService _pageService = BuilderPageService();
   
   // Step 1: Choose type (template or blank)
@@ -317,11 +336,24 @@ class _NewPageDialogV2State extends State<NewPageDialogV2> {
   }
 
   Widget _buildTemplateList() {
+    // Get restaurant plan for filtering templates
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.valueOrNull;
+    
+    // Filter templates based on required modules
+    final filteredTemplates = availableTemplates.where((template) {
+      final requiredModule = templateRequiredModules[template.id];
+      // If no required module or plan is null, template is available
+      if (requiredModule == null || plan == null) return true;
+      // Check if plan has the required module
+      return plan.hasModule(requiredModule);
+    }).toList();
+    
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: availableTemplates.length,
+      itemCount: filteredTemplates.length,
       itemBuilder: (context, index) {
-        final template = availableTemplates[index];
+        final template = filteredTemplates[index];
         final isSelected = _selectedTemplate?.id == template.id;
         
         return Card(
