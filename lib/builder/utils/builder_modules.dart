@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../runtime/modules/menu_catalog_runtime_widget.dart';
 import '../runtime/modules/profile_module_widget.dart';
 import '../runtime/modules/roulette_module_widget.dart';
+import '../../white_label/core/module_id.dart';
 
 /// Builder modules configuration
 /// 
@@ -45,6 +46,47 @@ Widget _placeholderModule(BuildContext context, String moduleName) {
 }
 
 
+
+/// Module ID mapping
+/// 
+/// Maps Builder module IDs to their corresponding white-label ModuleId codes.
+/// This ensures compatibility between the Builder system and white-label module checking.
+/// 
+/// Builder IDs -> White-label codes:
+/// - 'menu_catalog' -> 'ordering'
+/// - 'cart_module' -> 'ordering'
+/// - 'profile_module' -> 'ordering' (part of core ordering system)
+/// - 'roulette_module' -> 'roulette'
+final Map<String, String> moduleIdMapping = {
+  'menu_catalog': ModuleId.ordering.code,
+  'cart_module': ModuleId.ordering.code,
+  'profile_module': ModuleId.ordering.code,
+  'roulette_module': ModuleId.roulette.code,
+  // Aliases for backward compatibility
+  'roulette': ModuleId.roulette.code,
+};
+
+/// Get the white-label ModuleId code for a Builder module ID
+/// 
+/// Returns null if the module ID is not mapped.
+String? getModuleIdCode(String builderModuleId) {
+  return moduleIdMapping[builderModuleId];
+}
+
+/// Get the ModuleId enum for a Builder module ID
+/// 
+/// Returns null if the module ID is not mapped or invalid.
+ModuleId? getModuleId(String builderModuleId) {
+  final code = moduleIdMapping[builderModuleId];
+  if (code == null) return null;
+  
+  for (final moduleId in ModuleId.values) {
+    if (moduleId.code == code) {
+      return moduleId;
+    }
+  }
+  return null;
+}
 
 /// Builder modules mapping
 /// 
