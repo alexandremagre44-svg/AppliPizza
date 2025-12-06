@@ -290,22 +290,31 @@ class SystemBlock extends BuilderBlock {
   /// Available system module types
   /// 
   /// Updated to be consistent with builder_modules.dart
-  /// Includes all modules defined in the builderModules map:
-  /// - roulette: Roulette game module
-  /// - loyalty: Loyalty program module
-  /// - rewards: Rewards tickets module
-  /// - accountActivity: Account activity widget
-  /// - menu_catalog: Product catalog module
-  /// - cart_module: Shopping cart module
-  /// - profile_module: User profile module
+  /// Includes all modules defined in the builderModules map plus legacy modules
+  /// 
+  /// Note: Legacy aliases ('roulette', 'loyalty', 'rewards') are kept for
+  /// backward compatibility with existing data. Use normalizeModuleType()
+  /// to convert legacy names to canonical forms ('roulette_module', etc.)
   static const List<String> availableModules = [
+    // Legacy (backward compatibility) - use normalizeModuleType() to convert
     'roulette',
     'loyalty',
     'rewards',
     'accountActivity',
+    // Builder modules (cohérent avec builder_modules.dart)
     'menu_catalog',
     'cart_module',
     'profile_module',
+    'roulette_module',
+    // Nouveaux modules WL
+    'loyalty_module',
+    'rewards_module',
+    'delivery_module',
+    'click_collect_module',
+    'kitchen_module',
+    'staff_module',
+    'promotions_module',
+    'newsletter_module',
   ];
 
   /// Get display label for a module type
@@ -313,23 +322,38 @@ class SystemBlock extends BuilderBlock {
   /// FIX M2/N2: Added labels for new module types
   static String getModuleLabel(String moduleType) {
     switch (moduleType) {
+      // Legacy modules
       case 'roulette':
+      case 'roulette_module':
         return 'Roulette';
       case 'loyalty':
+      case 'loyalty_module':
         return 'Fidélité';
       case 'rewards':
+      case 'rewards_module':
         return 'Récompenses';
       case 'accountActivity':
         return 'Activité du compte';
+      // Core modules
       case 'menu_catalog':
         return 'Catalogue Menu';
       case 'cart_module':
         return 'Panier';
       case 'profile_module':
         return 'Profil';
-      // Backward compatibility for roulette_module
-      case 'roulette_module':
-        return 'Roulette';
+      // New modules
+      case 'delivery_module':
+        return 'Livraison';
+      case 'click_collect_module':
+        return 'Click & Collect';
+      case 'kitchen_module':
+        return 'Cuisine';
+      case 'staff_module':
+        return 'Caisse Staff';
+      case 'promotions_module':
+        return 'Promotions';
+      case 'newsletter_module':
+        return 'Newsletter';
       default:
         return 'Module inconnu';
     }
@@ -340,26 +364,56 @@ class SystemBlock extends BuilderBlock {
   /// FIX M2/N2: Added icons for new module types
   static String getModuleIcon(String moduleType) {
     switch (moduleType) {
+      // Legacy modules
       case 'roulette':
+      case 'roulette_module':
         return '🎰';
       case 'loyalty':
+      case 'loyalty_module':
         return '⭐';
       case 'rewards':
+      case 'rewards_module':
         return '🎁';
       case 'accountActivity':
         return '📊';
+      // Core modules
       case 'menu_catalog':
         return '🍕';
       case 'cart_module':
         return '🛒';
       case 'profile_module':
         return '👤';
-      // Backward compatibility for roulette_module
-      case 'roulette_module':
-        return '🎰';
+      // New modules
+      case 'delivery_module':
+        return '🚚';
+      case 'click_collect_module':
+        return '🏪';
+      case 'kitchen_module':
+        return '👨‍🍳';
+      case 'staff_module':
+        return '💳';
+      case 'promotions_module':
+        return '🏷️';
+      case 'newsletter_module':
+        return '📧';
       default:
         return '❓';
     }
+  }
+
+  /// Normalise un moduleType vers son ID canonique
+  /// 
+  /// Maps legacy module type aliases to their canonical IDs:
+  /// - 'roulette' -> 'roulette_module'
+  /// - 'loyalty' -> 'loyalty_module'
+  /// - 'rewards' -> 'rewards_module'
+  static String normalizeModuleType(String moduleType) {
+    const aliases = {
+      'roulette': 'roulette_module',
+      'loyalty': 'loyalty_module',
+      'rewards': 'rewards_module',
+    };
+    return aliases[moduleType] ?? moduleType;
   }
 
   @override

@@ -806,6 +806,7 @@ class BuilderLayoutService {
   /// This method is maintained for backward compatibility during transition.
   @Deprecated('Use loadPublished() instead. pages_system collection is legacy.')
   Future<BuilderPage?> loadSystemPage(String appId, BuilderPageId pageId) async {
+    debugPrint('⚠️ [DEPRECATED] loadSystemPage called - use loadPublished instead');
     try {
       final docRef = FirestorePaths.systemPageDoc(pageId.value, appId);
       final snapshot = await docRef.get();
@@ -834,6 +835,7 @@ class BuilderLayoutService {
   /// This method is maintained for backward compatibility during transition.
   @Deprecated('Use pages_published collection instead. pages_system is legacy.')
   Stream<List<BuilderPage>> watchSystemPages(String appId) {
+    debugPrint('⚠️ [DEPRECATED] watchSystemPages called - use watchPublishedPages instead');
     return FirestorePaths.pagesSystem(appId).snapshots().map((snapshot) {
       final pages = <BuilderPage>[];
       

@@ -9,6 +9,7 @@ import '../runtime/modules/menu_catalog_runtime_widget.dart';
 import '../runtime/modules/profile_module_widget.dart';
 import '../runtime/modules/roulette_module_widget.dart';
 import '../../white_label/core/module_id.dart';
+import '../../white_label/restaurant/restaurant_plan_unified.dart';
 
 /// Builder modules configuration
 /// 
@@ -47,45 +48,74 @@ Widget _placeholderModule(BuildContext context, String moduleName) {
 
 
 
-/// Module ID mapping
+/// Mapping Builder module ID → White-Label ModuleId
 /// 
-/// Maps Builder module IDs to their corresponding white-label ModuleId codes.
-/// This ensures compatibility between the Builder system and white-label module checking.
+/// This centralized mapping ensures all builder modules are properly
+/// validated against the restaurant's white-label plan.
 /// 
-/// Builder IDs -> White-label codes:
-/// - 'menu_catalog' -> 'ordering'
-/// - 'cart_module' -> 'ordering'
-/// - 'profile_module' -> 'ordering' (part of core ordering system)
-/// - 'roulette_module' -> 'roulette'
-final Map<String, String> moduleIdMapping = {
-  'menu_catalog': ModuleId.ordering.code,
-  'cart_module': ModuleId.ordering.code,
-  'profile_module': ModuleId.ordering.code,
-  'roulette_module': ModuleId.roulette.code,
+/// Note: Multiple builder modules can map to the same ModuleId:
+/// - 'menu_catalog', 'cart_module', 'profile_module' → ModuleId.ordering
+///   (all part of the core ordering system)
+/// - 'loyalty_module', 'rewards_module' → ModuleId.loyalty
+///   (both require the loyalty feature)
+const Map<String, ModuleId> moduleIdMapping = {
+  // Core ordering system modules
+  'menu_catalog': ModuleId.ordering,
+  'cart_module': ModuleId.ordering,
+  'profile_module': ModuleId.ordering,
+  // Marketing modules
+  'roulette_module': ModuleId.roulette,
+  'loyalty_module': ModuleId.loyalty,
+  'rewards_module': ModuleId.loyalty,
+  'delivery_module': ModuleId.delivery,
+  'click_collect_module': ModuleId.clickAndCollect,
+  'kitchen_module': ModuleId.kitchen_tablet,
+  'staff_module': ModuleId.staff_tablet,
+  'pos_module': ModuleId.staff_tablet,
+  'promotions_module': ModuleId.promotions,
+  'newsletter_module': ModuleId.newsletter,
   // Aliases for backward compatibility
-  'roulette': ModuleId.roulette.code,
+  'roulette': ModuleId.roulette,
+  'loyalty': ModuleId.loyalty,
+  'rewards': ModuleId.loyalty,
 };
+
+/// Obtenir le ModuleId pour un ID builder
+/// 
+/// Returns null if the module ID is not mapped.
+ModuleId? getModuleIdForBuilder(String builderModuleId) {
+  return moduleIdMapping[builderModuleId];
+}
 
 /// Get the white-label ModuleId code for a Builder module ID
 /// 
 /// Returns null if the module ID is not mapped.
+/// @deprecated Use getModuleIdForBuilder instead
+@Deprecated('Use getModuleIdForBuilder instead')
 String? getModuleIdCode(String builderModuleId) {
-  return moduleIdMapping[builderModuleId];
+  return moduleIdMapping[builderModuleId]?.code;
 }
 
 /// Get the ModuleId enum for a Builder module ID
 /// 
 /// Returns null if the module ID is not mapped or invalid.
+/// @deprecated Use getModuleIdForBuilder instead
+@Deprecated('Use getModuleIdForBuilder instead')
 ModuleId? getModuleId(String builderModuleId) {
-  final code = moduleIdMapping[builderModuleId];
-  if (code == null) return null;
-  
-  for (final moduleId in ModuleId.values) {
-    if (moduleId.code == code) {
-      return moduleId;
-    }
-  }
-  return null;
+  return moduleIdMapping[builderModuleId];
+}
+
+/// Vérifier si un module builder est activé dans le plan
+/// 
+/// Returns true if:
+/// - plan is null (no restrictions)
+/// - module has no requiredModuleId (always available)
+/// - plan has the required module enabled
+bool isBuilderModuleEnabled(String builderModuleId, RestaurantPlanUnified? plan) {
+  if (plan == null) return true;
+  final moduleId = moduleIdMapping[builderModuleId];
+  if (moduleId == null) return true;
+  return plan.hasModule(moduleId);
 }
 
 /// Builder modules mapping
@@ -109,6 +139,7 @@ class ModuleConfig {
   final String description;
   final String icon;
   final bool isSystemModule;
+  final ModuleId? requiredModuleId;
   
   const ModuleConfig({
     required this.id,
@@ -116,6 +147,7 @@ class ModuleConfig {
     required this.description,
     required this.icon,
     this.isSystemModule = false,
+    this.requiredModuleId,
   });
 }
 
@@ -123,12 +155,14 @@ class ModuleConfig {
 /// 
 /// Used by the editor to display module options.
 const List<ModuleConfig> availableModules = [
+  // Core modules
   ModuleConfig(
     id: 'menu_catalog',
     name: 'Catalogue Menu',
     description: 'Affiche la liste des produits avec catégories et filtres',
     icon: 'restaurant_menu',
     isSystemModule: false,
+    requiredModuleId: ModuleId.ordering,
   ),
   ModuleConfig(
     id: 'cart_module',
@@ -136,6 +170,7 @@ const List<ModuleConfig> availableModules = [
     description: 'Panier et validation de commande',
     icon: 'shopping_cart',
     isSystemModule: true,
+    requiredModuleId: ModuleId.ordering,
   ),
   ModuleConfig(
     id: 'profile_module',
@@ -143,13 +178,83 @@ const List<ModuleConfig> availableModules = [
     description: 'Widget du profil avec informations et paramètres',
     icon: 'person',
     isSystemModule: true,
+    requiredModuleId: null, // Toujours disponible
   ),
+  
+  // Marketing modules
   ModuleConfig(
     id: 'roulette_module',
     name: 'Roue de la Chance',
     description: 'Widget de la roulette pour gagner des récompenses',
     icon: 'casino',
     isSystemModule: false,
+    requiredModuleId: ModuleId.roulette,
+  ),
+  ModuleConfig(
+    id: 'loyalty_module',
+    name: 'Fidélité',
+    description: 'Widget points de fidélité et niveau',
+    icon: 'star',
+    isSystemModule: false,
+    requiredModuleId: ModuleId.loyalty,
+  ),
+  ModuleConfig(
+    id: 'rewards_module',
+    name: 'Récompenses',
+    description: 'Liste des récompenses disponibles',
+    icon: 'card_giftcard',
+    isSystemModule: false,
+    requiredModuleId: ModuleId.loyalty,
+  ),
+  ModuleConfig(
+    id: 'promotions_module',
+    name: 'Promotions',
+    description: 'Affichage des promotions actives',
+    icon: 'local_offer',
+    isSystemModule: false,
+    requiredModuleId: ModuleId.promotions,
+  ),
+  ModuleConfig(
+    id: 'newsletter_module',
+    name: 'Newsletter',
+    description: 'Formulaire inscription newsletter',
+    icon: 'email',
+    isSystemModule: false,
+    requiredModuleId: ModuleId.newsletter,
+  ),
+  
+  // Operations modules
+  ModuleConfig(
+    id: 'delivery_module',
+    name: 'Livraison',
+    description: 'Sélection zone et adresse de livraison',
+    icon: 'delivery_dining',
+    isSystemModule: false,
+    requiredModuleId: ModuleId.delivery,
+  ),
+  ModuleConfig(
+    id: 'click_collect_module',
+    name: 'Click & Collect',
+    description: 'Sélection du créneau de retrait',
+    icon: 'store',
+    isSystemModule: false,
+    requiredModuleId: ModuleId.clickAndCollect,
+  ),
+  ModuleConfig(
+    id: 'kitchen_module',
+    name: 'Cuisine',
+    description: 'Affichage commandes cuisine (admin uniquement)',
+    icon: 'kitchen',
+    isSystemModule: true,
+    requiredModuleId: ModuleId.kitchen_tablet,
+  ),
+  ModuleConfig(
+    id: 'staff_module',
+    name: 'Caisse Staff',
+    description: 'Interface tablette staff (admin uniquement)',
+    icon: 'point_of_sale',
+    isSystemModule: true,
+    requiredModuleId: ModuleId.staff_tablet,
   ),
 ];
 
@@ -180,6 +285,36 @@ List<ModuleConfig> getSystemModules() {
 /// Get non-system modules only
 List<ModuleConfig> getNonSystemModules() {
   return availableModules.where((m) => !m.isSystemModule).toList();
+}
+
+/// Obtenir uniquement les modules actifs pour un restaurant
+/// 
+/// Filters availableModules based on the restaurant's plan:
+/// - If plan is null, returns all modules
+/// - If module has no requiredModuleId, it's always included
+/// - Otherwise, checks if plan has the required module enabled
+List<ModuleConfig> getAvailableModulesForPlan(RestaurantPlanUnified? plan) {
+  if (plan == null) return availableModules;
+  
+  return availableModules.where((module) {
+    if (module.requiredModuleId == null) return true;
+    return plan.hasModule(module.requiredModuleId!);
+  }).toList();
+}
+
+/// Normalise un moduleType vers son ID canonique
+/// 
+/// Maps legacy module type aliases to their canonical IDs:
+/// - 'roulette' -> 'roulette_module'
+/// - 'loyalty' -> 'loyalty_module'
+/// - 'rewards' -> 'rewards_module'
+String normalizeModuleType(String moduleType) {
+  const aliases = {
+    'roulette': 'roulette_module',
+    'loyalty': 'loyalty_module',
+    'rewards': 'rewards_module',
+  };
+  return aliases[moduleType] ?? moduleType;
 }
 
 /// Register a custom module widget builder
