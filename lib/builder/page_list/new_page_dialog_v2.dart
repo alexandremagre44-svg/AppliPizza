@@ -347,7 +347,7 @@ class _NewPageDialogV2State extends ConsumerState<NewPageDialogV2> {
     );
   }
 
-  /// Build loading skeleton for template list
+  /// Build loading indicator for template list
   Widget _buildTemplateListLoading() {
     return const Center(
       child: Padding(

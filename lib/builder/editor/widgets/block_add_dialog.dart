@@ -65,7 +65,7 @@ class BlockAddDialog extends ConsumerWidget {
     );
   }
 
-  /// Build dialog content with loading state
+  /// Build loading dialog
   Widget _buildLoadingDialog(BuildContext context) {
     return AlertDialog(
       title: Row(
