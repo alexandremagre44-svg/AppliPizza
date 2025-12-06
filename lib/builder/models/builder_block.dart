@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'builder_enums.dart';
 import '../utils/firestore_parsing_helpers.dart';
 import '../../white_label/core/module_id.dart';
+import '../../white_label/restaurant/restaurant_plan_unified.dart';
+import '../utils/builder_modules.dart' as builder_modules;
 
 /// Base block class for all content blocks
 /// 
@@ -414,6 +416,25 @@ class SystemBlock extends BuilderBlock {
       'rewards': 'rewards_module',
     };
     return aliases[moduleType] ?? moduleType;
+  }
+
+  /// Retourne les modules filtrés selon le plan WL du restaurant
+  /// 
+  /// Utilise le mapping de builder_modules.dart pour vérifier
+  /// quels modules sont activés dans le plan.
+  /// 
+  /// Returns all modules if plan is null (fallback safe).
+  /// Modules without mapping are always visible (legacy compatibility).
+  static List<String> getFilteredModules(RestaurantPlanUnified? plan) {
+    if (plan == null) return availableModules; // Fallback safe
+    
+    return availableModules.where((moduleType) {
+      final normalizedType = normalizeModuleType(moduleType);
+      final moduleId = builder_modules.getModuleIdForBuilder(normalizedType);
+      // Modules legacy sans mapping = toujours visibles (rétrocompatibilité)
+      if (moduleId == null) return true;
+      return plan.hasModule(moduleId);
+    }).toList();
   }
 
   @override

@@ -3,7 +3,9 @@
 // Part of Builder B3 modular UI layer
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/models.dart';
+import '../../../src/providers/restaurant_plan_provider.dart';
 
 /// Dialog for selecting and adding a new block
 /// 
@@ -12,7 +14,8 @@ import '../../models/models.dart';
 /// - Separate section for system modules
 /// - Block type previews and descriptions
 /// - Returns the created block or null if cancelled
-class BlockAddDialog extends StatelessWidget {
+/// - Filters modules based on restaurant's white-label plan
+class BlockAddDialog extends ConsumerWidget {
   /// Current number of blocks (used for order calculation)
   final int currentBlockCount;
   
@@ -47,7 +50,11 @@ class BlockAddDialog extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get restaurant plan for filtering modules
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.valueOrNull;
+    
     // Filter out system type from regular blocks
     final regularBlocks = (allowedTypes ?? BlockType.values)
         .where((t) => t != BlockType.system)
@@ -85,7 +92,7 @@ class BlockAddDialog extends StatelessWidget {
                   Colors.blue,
                 ),
                 const SizedBox(height: 8),
-                _buildSystemModulesList(context),
+                _buildSystemModulesList(context, plan),
               ],
             ],
           ),
@@ -157,8 +164,8 @@ class BlockAddDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildSystemModulesList(BuildContext context) {
-    final modules = [
+  Widget _buildSystemModulesList(BuildContext context, dynamic plan) {
+    final allModules = [
       _SystemModuleInfo(
         id: 'cart_module',
         label: 'Panier',
@@ -196,8 +203,15 @@ class BlockAddDialog extends StatelessWidget {
       ),
     ];
 
+    // Filter modules based on restaurant plan
+    // Use SystemBlock.getFilteredModules() to get available modules for this plan
+    final availableModuleIds = SystemBlock.getFilteredModules(plan);
+    final filteredModules = allModules.where((module) {
+      return availableModuleIds.contains(module.id);
+    }).toList();
+
     return Column(
-      children: modules.map((module) => _buildSystemModuleTile(context, module)).toList(),
+      children: filteredModules.map((module) => _buildSystemModuleTile(context, module)).toList(),
     );
   }
 

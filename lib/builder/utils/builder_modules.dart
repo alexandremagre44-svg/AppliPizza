@@ -302,6 +302,19 @@ List<ModuleConfig> getAvailableModulesForPlan(RestaurantPlanUnified? plan) {
   }).toList();
 }
 
+/// Vérifie si un module Builder spécifique est disponible pour un plan
+/// 
+/// Returns true if:
+/// - plan is null (no restrictions - fallback safe)
+/// - module has no requiredModuleId mapping (always available - legacy compatibility)
+/// - plan has the required module enabled
+bool isBuilderModuleAvailableForPlan(String builderModuleId, RestaurantPlanUnified? plan) {
+  if (plan == null) return true; // Fallback safe
+  final moduleId = moduleIdMapping[builderModuleId];
+  if (moduleId == null) return true; // Module non mappé = toujours disponible (legacy)
+  return plan.hasModule(moduleId);
+}
+
 /// Normalise un moduleType vers son ID canonique
 /// 
 /// Maps legacy module type aliases to their canonical IDs:
