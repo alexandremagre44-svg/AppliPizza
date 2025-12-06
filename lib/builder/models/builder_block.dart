@@ -291,14 +291,13 @@ class SystemBlock extends BuilderBlock {
   /// 
   /// FIX M2/N2: Updated to be consistent with builder_modules.dart
   /// Includes all modules defined in the builderModules map:
-  /// - roulette (same as roulette_module)
+  /// - roulette
   /// - loyalty
   /// - rewards
   /// - accountActivity
   /// - menu_catalog (new)
   /// - cart_module (new)
   /// - profile_module (new)
-  /// - roulette_module (alias for roulette)
   static const List<String> availableModules = [
     'roulette',
     'loyalty',
@@ -308,7 +307,6 @@ class SystemBlock extends BuilderBlock {
     'menu_catalog',
     'cart_module',
     'profile_module',
-    'roulette_module', // Alias for 'roulette' for consistency
   ];
 
   /// Get display label for a module type
@@ -317,7 +315,6 @@ class SystemBlock extends BuilderBlock {
   static String getModuleLabel(String moduleType) {
     switch (moduleType) {
       case 'roulette':
-      case 'roulette_module':
         return 'Roulette';
       case 'loyalty':
         return 'Fidélité';
@@ -331,6 +328,9 @@ class SystemBlock extends BuilderBlock {
         return 'Panier';
       case 'profile_module':
         return 'Profil';
+      // Backward compatibility for roulette_module
+      case 'roulette_module':
+        return 'Roulette';
       default:
         return 'Module inconnu';
     }
@@ -342,7 +342,6 @@ class SystemBlock extends BuilderBlock {
   static String getModuleIcon(String moduleType) {
     switch (moduleType) {
       case 'roulette':
-      case 'roulette_module':
         return '🎰';
       case 'loyalty':
         return '⭐';
@@ -356,6 +355,9 @@ class SystemBlock extends BuilderBlock {
         return '🛒';
       case 'profile_module':
         return '👤';
+      // Backward compatibility for roulette_module
+      case 'roulette_module':
+        return '🎰';
       default:
         return '❓';
     }

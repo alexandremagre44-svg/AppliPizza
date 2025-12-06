@@ -259,7 +259,9 @@ class AppContextNotifier extends StateNotifier<AppContextState> {
           currentAppId: _defaultRestaurantId,
           accessibleApps: [],
           userRole: BuilderRole.client,
-          hasBuilderAccess: false,
+          // FIX: Initialize with true to avoid "Access denied" during loading
+          // This prevents the UI from showing access denied before context loads
+          hasBuilderAccess: true,
         ));
   
   /// Load user context

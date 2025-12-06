@@ -38,8 +38,12 @@ bool isModuleEnabled(WidgetRef ref, ModuleId id) {
       if (plan == null) return false;
       return plan.hasModule(id);
     },
-    loading: () => false,
-    error: (_, __) => false,
+    // FIX: Return true during loading to avoid hiding blocks prematurely
+    // The plan is still being loaded, so we should show modules by default
+    loading: () => true,
+    // FIX: Return true on error to avoid hiding blocks due to temporary errors
+    // This prevents modules from disappearing when there's a network issue
+    error: (_, __) => true,
   );
 }
 
@@ -101,8 +105,10 @@ bool watchModuleEnabled(WidgetRef ref, ModuleId id) {
       if (plan == null) return false;
       return plan.hasModule(id);
     },
-    loading: () => false,
-    error: (_, __) => false,
+    // FIX: Return true during loading to avoid hiding blocks prematurely
+    loading: () => true,
+    // FIX: Return true on error to avoid hiding blocks due to temporary errors
+    error: (_, __) => true,
   );
 }
 
