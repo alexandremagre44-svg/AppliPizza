@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../runtime/builder_block_runtime_registry.dart';
 import '../runtime/builder_theme_resolver.dart';
+import '../runtime/module_aware_block.dart';
 
 /// Renders a list of BuilderBlocks using runtime widgets
 /// These widgets can access providers, services, and real data
@@ -24,6 +25,7 @@ import '../runtime/builder_theme_resolver.dart';
 /// - maxContentWidth support for constrained layouts
 /// - ThemeConfig support for consistent spacing and styling
 /// - Wraps content with BuilderThemeProvider for context.builderTheme access
+/// - WHITE-LABEL: Uses ModuleAwareBlock to hide blocks for disabled modules
 class BuilderRuntimeRenderer extends ConsumerWidget {
   final List<BuilderBlock> blocks;
   final Color? backgroundColor;
@@ -96,12 +98,17 @@ class BuilderRuntimeRenderer extends ConsumerWidget {
     }
 
     // Build column of blocks with theme-based spacing
+    // WHITE-LABEL: Wrap each block in ModuleAwareBlock to hide disabled module blocks
     Widget blocksColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Render each block with error handling and spacing
+        // Render each block with module awareness and spacing
         for (int i = 0; i < activeBlocks.length; i++) ...[
-          _buildBlockSafe(activeBlocks[i], context, theme),
+          ModuleAwareBlock(
+            block: activeBlocks[i],
+            isPreview: false,
+            maxContentWidth: maxContentWidth,
+          ),
           // Add spacing between blocks (except after last block)
           if (i < activeBlocks.length - 1)
             SizedBox(height: blockSpacing),
