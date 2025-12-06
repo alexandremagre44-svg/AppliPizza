@@ -1,10 +1,19 @@
 /// lib/white_label/runtime/register_module_routes.dart
 ///
-/// Registration of all module routes.
+/// Registration of module ROUTES ONLY (not navigation).
 ///
-/// This file registers all routes for each module into the
-/// ModuleNavigationRegistry. It serves as a central location
-/// to define and manage all module-specific routes.
+/// IMPORTANT: This file registers routes for URL access, NOT navigation items.
+/// Navigation is controlled entirely by Builder B3 (pages_system, pages_published).
+///
+/// Purpose:
+/// - Register routes so they can be accessed via URL
+/// - Associate routes with modules for guard validation
+/// - Define access levels (client, admin, staff, kitchen)
+///
+/// Does NOT control:
+/// - Navigation bar items (Builder B3 controls this)
+/// - Order of navigation (Builder B3 controls this)
+/// - Visibility in UI (Builder B3 controls this)
 ///
 /// This file should be called once during app initialization.
 library;

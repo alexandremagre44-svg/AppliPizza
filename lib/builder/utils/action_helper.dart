@@ -1,9 +1,12 @@
 // lib/builder/utils/action_helper.dart
 // Helper for handling block actions (navigation, URLs, scroll)
+// WHITE-LABEL INTEGRATION: Uses ModuleRuntimeMapping for dynamic routes
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
+import '../../white_label/core/module_id.dart';
+import '../../white_label/core/module_runtime_mapping.dart';
 
 /// Types of actions supported by blocks
 enum BlockActionType {
@@ -16,6 +19,8 @@ enum BlockActionType {
 }
 
 /// List of legacy app routes for the route picker
+/// WHITE-LABEL: These routes are now dynamically resolved via ModuleRuntimeMapping
+/// when modules are involved. System routes (home, menu, cart, profile) remain static.
 class LegacyRoutes {
   static const List<Map<String, String>> routes = [
     {'value': '/home', 'label': 'Accueil'},
@@ -23,8 +28,8 @@ class LegacyRoutes {
     {'value': '/cart', 'label': 'Panier'},
     {'value': '/profile', 'label': 'Profil'},
     {'value': '/orders', 'label': 'Mes commandes'},
-    {'value': '/roulette', 'label': 'Roulette'},
-    {'value': '/rewards', 'label': 'Récompenses'},
+    {'value': '/roulette', 'label': 'Roulette'},  // WL: Dynamic via ModuleId.roulette
+    {'value': '/rewards', 'label': 'Récompenses'},  // WL: Dynamic via ModuleId.loyalty
     {'value': '/checkout', 'label': 'Paiement'},
     {'value': '/login', 'label': 'Connexion'},
     {'value': '/register', 'label': 'Inscription'},
@@ -46,7 +51,16 @@ class LegacyRoutes {
 }
 
 /// List of system pages for the openSystemPage action
+/// WHITE-LABEL INTEGRATION: Now uses ModuleRuntimeMapping to get dynamic routes
 class SystemPageRoutes {
+  // Map system page IDs to ModuleId for WL integration
+  static final Map<String, ModuleId?> _pageToModule = {
+    'profile': null,  // System page, no module
+    'cart': null,  // System page, no module
+    'rewards': ModuleId.loyalty,  // WL: Dynamic route
+    'roulette': ModuleId.roulette,  // WL: Dynamic route
+  };
+  
   static const List<Map<String, String>> pages = [
     {'value': 'profile', 'label': 'Page Profil', 'route': '/profile'},
     {'value': 'cart', 'label': 'Page Panier', 'route': '/cart'},
@@ -65,7 +79,21 @@ class SystemPageRoutes {
     return page['label']!;
   }
   
+  /// Get route for a system page - WHITE-LABEL: Uses ModuleRuntimeMapping for dynamic routes
   static String getRouteFor(String value) {
+    // Check if this page is mapped to a module
+    final moduleId = _pageToModule[value];
+    
+    if (moduleId != null) {
+      // Use WL dynamic route
+      final route = ModuleRuntimeMapping.getRuntimeRoute(moduleId);
+      if (route != null) {
+        debugPrint('[WL ActionHelper] Using dynamic route for $value: $route (module: ${moduleId.code})');
+        return route;
+      }
+    }
+    
+    // Fallback to static route
     final page = pages.firstWhere(
       (p) => p['value'] == value,
       orElse: () => {'value': value, 'label': value, 'route': '/$value'},

@@ -4,6 +4,28 @@
 // Navigation structure loaded from:
 // restaurants/{restaurantId}/pages_system (order)
 // restaurants/{restaurantId}/pages_published (content)
+//
+// WHITE-LABEL ARCHITECTURE (CORRECT SEPARATION):
+// ================================================
+// Builder B3 (MASTER):
+// - Controls which pages appear in navigation
+// - Controls the order and visibility of items
+// - Decides where modules are placed (home, nav, etc.)
+// - Full control over UI presentation
+//
+// White-Label Modules (VALIDATION):
+// - Block route access if module disabled (via guards)
+// - Hide Builder blocks if module disabled (via ModuleAwareBlock)
+// - NO control over navigation structure
+// - NO filtering of Builder B3 pages
+//
+// This file:
+// - Renders navigation exactly as Builder B3 defines it
+// - Logs active modules for debugging
+// - _applyModuleFiltering provides safety layer for route security
+// - Does NOT filter pages based on plan.hasModule()
+//
+// Result: Builder controls presentation, WL controls access rights
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +77,11 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final unifiedPlanAsync = ref.watch(restaurantPlanUnifiedProvider);
     final unifiedPlan = unifiedPlanAsync.asData?.value;
 
+    // White-label: Log active modules when plan is loaded
+    if (unifiedPlan != null && kDebugMode) {
+      debugPrint('[WL NAV] Modules actifs: ${unifiedPlan.activeModules}');
+    }
+
     return Scaffold(
       body: child,
       bottomNavigationBar: bottomBarPagesAsync.when(
@@ -62,7 +89,9 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           // Debug: trace loaded pages (using pageKey instead of pageId)
           debugPrint('📱 [BottomNav] Loaded ${builderPages.length} pages: ${builderPages.map((p) => "${p.pageKey}(route:${p.route}, system:${p.systemId?.value ?? 'null'})").join(", ")}');
           
-          // Build navigation items dynamically
+          // Build navigation items dynamically from Builder B3
+          // Builder B3 controls what appears in navigation
+          // White-label only validates route access via _applyModuleFiltering below
           final navItems = _buildNavigationItems(
             context,
             ref,
@@ -244,9 +273,21 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   }
 
   /// Build navigation items from Builder pages
-  /// Injects admin page if user is admin
-  /// Uses SystemPages registry for consistent icon and label handling
-  /// Module guard: filters pages based on feature flags
+  /// 
+  /// WHITE-LABEL ARCHITECTURE (CORRECTED):
+  /// ========================================
+  /// Builder B3 is the MASTER - it controls:
+  /// - Which pages appear in navigation
+  /// - The order of navigation items
+  /// - The visibility of modules in the UI
+  /// 
+  /// White-label modules (plan.hasModule) only control:
+  /// - Route access (via guards)
+  /// - Block visibility (via ModuleAwareBlock)
+  /// 
+  /// This function does NOT filter pages - it trusts Builder B3 completely.
+  /// The _applyModuleFiltering() in the parent provides a safety layer for
+  /// route-level security, but does NOT remove items from navigation.
   _NavigationItemsResult _buildNavigationItems(
     BuildContext context,
     WidgetRef ref,
@@ -258,21 +299,10 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final items = <BottomNavigationBarItem>[];
     final pages = <_NavPage>[];
 
-    // Add builder pages first
+    // Build navigation items for ALL pages from Builder B3
+    // No filtering by modules - Builder decides what's visible
     for (final page in builderPages) {
-      // Module guard: Skip pages for disabled modules
-      final requiredModule = _getRequiredModuleForRoute(page.route);
-      if (requiredModule != null && flags != null) {
-        if (!flags.has(requiredModule)) {
-          if (kDebugMode) {
-            debugPrint('🚫 [BottomNav] Skipping ${page.pageKey} - module ${requiredModule.code} is disabled');
-          }
-          continue;
-        }
-      }
-      
       // Determine the correct route for this page
-      // System pages use their defined routes, custom pages use /page/<pageKey>
       String effectiveRoute = page.route;
       
       // Fix: If route is empty or '/', generate appropriate route
@@ -285,27 +315,28 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           // Custom page: always use /page/<pageKey>
           effectiveRoute = '/page/${page.pageKey}';
         }
-        debugPrint('🔧 [BottomNav] Generated route for ${page.pageKey}: $effectiveRoute');
+        if (kDebugMode) {
+          debugPrint('[WL NAV] Generated route for ${page.pageKey}: $effectiveRoute');
+        }
       }
       
       // Safety check: Skip pages with still-invalid routes
       if (effectiveRoute.isEmpty || effectiveRoute == '/') {
-        debugPrint('⚠️ Skipping page ${page.pageKey} with invalid route: "$effectiveRoute"');
+        if (kDebugMode) {
+          debugPrint('[WL NAV] ⚠️ Skipping page ${page.pageKey} with invalid route: "$effectiveRoute"');
+        }
         continue;
       }
       
-      // Try to get system page configuration for this page (only for system pages)
+      // Try to get system page configuration
       final systemConfig = page.systemId != null ? SystemPages.getConfig(page.systemId!) : null;
       
-      // Use page name if available and not generic, otherwise use system default or pageKey
+      // Determine display name
       final displayName = (page.name.isNotEmpty && page.name != 'Page')
           ? page.name 
           : (systemConfig?.defaultName ?? page.pageKey);
       
-      // Get icon (with outlined/filled versions)
-      // System pages: use system default icon
-      // Custom pages with icon: use the custom icon
-      // Custom pages without icon: fallback to 'layers' (default for custom pages)
+      // Get icon pair (outlined/filled)
       final iconPair = page.icon.isNotEmpty 
           ? IconHelper.getIconPair(page.icon)
           : (systemConfig != null 
@@ -354,11 +385,21 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       pages.add(_NavPage(route: AppRoutes.adminStudio, name: 'Admin'));
     }
 
+    if (kDebugMode) {
+      debugPrint('[WL NAV] Built ${items.length} navigation items from Builder B3');
+    }
+
     return _NavigationItemsResult(items: items, pages: pages);
   }
   
   /// Helper to convert IconData to icon name string
-  /// This is a workaround since we need string names for IconHelper
+  /// 
+  /// This is a workaround since we need string names for IconHelper.getIconPair().
+  /// Used when mapping system page icons from IconData to string names.
+  /// 
+  /// Note: This function is used indirectly via SystemPages configuration.
+  /// It provides a mapping between Flutter's IconData and string icon names
+  /// that IconHelper can process to get outlined/filled icon pairs.
   String _getIconNameFromIconData(IconData iconData) {
     if (iconData == Icons.home) return 'home';
     if (iconData == Icons.restaurant_menu) return 'restaurant_menu';
