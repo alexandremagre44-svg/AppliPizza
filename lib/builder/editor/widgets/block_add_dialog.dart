@@ -56,8 +56,40 @@ class BlockAddDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Get restaurant plan for filtering modules
     final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-    final plan = planAsync.valueOrNull;
     
+    // Use .when() to properly handle loading/error/data states
+    return planAsync.when(
+      loading: () => _buildLoadingDialog(context),
+      error: (e, _) => _buildDialogContent(context, null), // Fallback: show all modules
+      data: (plan) => _buildDialogContent(context, plan),
+    );
+  }
+
+  /// Build dialog content with loading state
+  Widget _buildLoadingDialog(BuildContext context) {
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(Icons.add_box, color: Theme.of(context).primaryColor),
+          const SizedBox(width: 12),
+          const Text('Ajouter un bloc'),
+        ],
+      ),
+      content: const SizedBox(
+        height: 100,
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Annuler'),
+        ),
+      ],
+    );
+  }
+
+  /// Build dialog content with plan data (or null for fallback)
+  Widget _buildDialogContent(BuildContext context, RestaurantPlanUnified? plan) {
     // Filter out system type from regular blocks
     final regularBlocks = (allowedTypes ?? BlockType.values)
         .where((t) => t != BlockType.system)

@@ -338,8 +338,27 @@ class _NewPageDialogV2State extends ConsumerState<NewPageDialogV2> {
   Widget _buildTemplateList() {
     // Get restaurant plan for filtering templates
     final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-    final plan = planAsync.valueOrNull;
     
+    // Use .when() to properly handle loading/error/data states
+    return planAsync.when(
+      loading: () => _buildTemplateListLoading(),
+      error: (e, _) => _buildTemplateListContent(null), // Fallback: show all templates
+      data: (plan) => _buildTemplateListContent(plan),
+    );
+  }
+
+  /// Build loading skeleton for template list
+  Widget _buildTemplateListLoading() {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32.0),
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  /// Build template list content with plan data (or null for fallback)
+  Widget _buildTemplateListContent(RestaurantPlanUnified? plan) {
     // Filter templates based on required modules
     final filteredTemplates = availableTemplates.where((template) {
       final requiredModule = templateRequiredModules[template.id];
