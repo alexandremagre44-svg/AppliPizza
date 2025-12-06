@@ -9,12 +9,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/theme_config.dart';
 import '../services/theme_service.dart';
 import '../../src/providers/restaurant_provider.dart';
+import '../../src/providers/restaurant_plan_provider.dart';
 
 /// Service provider for ThemeService
-/// Provides singleton instance of the theme service
-final themeServiceProvider = Provider<ThemeService>((ref) {
-  return ThemeService();
-});
+/// Provides singleton instance of the theme service with restaurant plan integration
+///
+/// This provider now depends on currentRestaurantProvider to ensure proper
+/// scoping of theme operations per restaurant. The service will check if the
+/// theme module is enabled before performing any operations.
+final themeServiceProvider = Provider<ThemeService>(
+  (ref) {
+    // Watch the unified plan to get module configuration
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    
+    // Extract the plan if available
+    final plan = planAsync.maybeWhen(
+      data: (p) => p,
+      orElse: () => null,
+    );
+    
+    return ThemeService(restaurantPlan: plan);
+  },
+  dependencies: [currentRestaurantProvider, restaurantPlanUnifiedProvider],
+);
 
 /// Provider for published theme configuration
 ///
