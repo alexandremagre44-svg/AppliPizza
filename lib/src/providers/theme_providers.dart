@@ -25,16 +25,22 @@ export '../services/theme_service.dart' show themeServiceProvider;
 ///   error: (e, s) => ...,
 /// );
 /// ```
-final themeConfigProvider = FutureProvider<ThemeConfig>((ref) async {
-  final service = ref.watch(themeServiceProvider);
-  return service.loadTheme();
-});
+final themeConfigProvider = FutureProvider<ThemeConfig>(
+  (ref) async {
+    final service = ref.watch(themeServiceProvider);
+    return service.loadTheme();
+  },
+  dependencies: [themeServiceProvider],
+);
 
 /// StreamProvider for real-time theme updates
-final themeConfigStreamProvider = StreamProvider<ThemeConfig>((ref) {
-  final service = ref.watch(themeServiceProvider);
-  return service.watchTheme();
-});
+final themeConfigStreamProvider = StreamProvider<ThemeConfig>(
+  (ref) {
+    final service = ref.watch(themeServiceProvider);
+    return service.watchTheme();
+  },
+  dependencies: [themeServiceProvider],
+);
 
 /// Provider that converts ThemeConfig to Flutter ThemeData
 /// 

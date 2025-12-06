@@ -17,13 +17,19 @@ final popupServiceProvider = Provider<PopupService>(
 );
 
 /// Stream provider for all popups
-final popupsProvider = StreamProvider<List<PopupConfig>>((ref) {
-  final service = ref.watch(popupServiceProvider);
-  return service.watchPopups();
-});
+final popupsProvider = StreamProvider<List<PopupConfig>>(
+  (ref) {
+    final service = ref.watch(popupServiceProvider);
+    return service.watchPopups();
+  },
+  dependencies: [popupServiceProvider],
+);
 
 /// Provider for active popups
-final activePopupsProvider = FutureProvider<List<PopupConfig>>((ref) async {
-  final service = ref.watch(popupServiceProvider);
-  return await service.getActivePopups();
-});
+final activePopupsProvider = FutureProvider<List<PopupConfig>>(
+  (ref) async {
+    final service = ref.watch(popupServiceProvider);
+    return await service.getActivePopups();
+  },
+  dependencies: [popupServiceProvider],
+);
