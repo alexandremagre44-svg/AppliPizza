@@ -7,7 +7,10 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/theme_config.dart';
+import '../../white_label/core/module_id.dart';
+import '../../white_label/restaurant/restaurant_plan_unified.dart';
 
 /// Service for managing Builder theme configuration in Firestore
 ///
@@ -21,11 +24,20 @@ import '../models/theme_config.dart';
 /// restaurants/{appId}/theme_draft     (single document)
 /// restaurants/{appId}/theme_published (single document)
 /// ```
+///
+/// White-label integration:
+/// - Checks if ModuleId.theme is enabled before performing operations
+/// - Fails silently in release mode when module is disabled
+/// - Throws assertion errors in debug mode when module is disabled
 class ThemeService {
   final FirebaseFirestore _firestore;
+  final RestaurantPlanUnified? _restaurantPlan;
 
-  ThemeService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  ThemeService({
+    FirebaseFirestore? firestore,
+    RestaurantPlanUnified? restaurantPlan,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _restaurantPlan = restaurantPlan;
 
   /// Collection path for theme_draft
   static const String _themeDraftCollection = 'theme_draft';
@@ -35,6 +47,34 @@ class ThemeService {
 
   /// Document ID for the theme config
   static const String _themeDocId = 'config';
+
+  // ==================== MODULE GUARD ====================
+
+  /// Checks if the theme module is enabled for the current restaurant.
+  ///
+  /// Returns true if:
+  /// - No restaurant plan is set (backward compatibility)
+  /// - The theme module is enabled in the restaurant plan
+  ///
+  /// In debug mode, throws an assertion error when module is disabled.
+  /// In release mode, returns false silently when module is disabled.
+  bool _isThemeModuleEnabled() {
+    // If no plan is set, allow access for backward compatibility
+    if (_restaurantPlan == null) {
+      return true;
+    }
+
+    final isEnabled = _restaurantPlan!.hasModule(ModuleId.theme);
+
+    // In debug mode, assert that the module is enabled
+    assert(
+      isEnabled,
+      'Theme module is not enabled for restaurant ${_restaurantPlan!.restaurantId}. '
+      'Enable ModuleId.theme in the restaurant plan to use theme features.',
+    );
+
+    return isEnabled;
+  }
 
   // ==================== DOCUMENT REFERENCES ====================
 
@@ -64,7 +104,15 @@ class ThemeService {
   ///
   /// Returns ThemeConfig.defaultConfig if no draft exists.
   /// Used by the Builder editor for theme editing.
+  ///
+  /// White-label guard: Returns default config if theme module is disabled.
   Future<ThemeConfig> loadDraftTheme(String appId) async {
+    // Check if theme module is enabled
+    if (!_isThemeModuleEnabled()) {
+      debugPrint('[ThemeService] ⚠️  Theme module disabled for $appId, using defaults');
+      return ThemeConfig.defaultConfig;
+    }
+
     try {
       final ref = _getDraftRef(appId);
       final snapshot = await ref.get();
@@ -88,7 +136,15 @@ class ThemeService {
   ///
   /// Updates the theme_draft document with the new configuration.
   /// This is called on every change in the Builder editor.
+  ///
+  /// White-label guard: Silently returns if theme module is disabled.
   Future<void> saveDraftTheme(String appId, ThemeConfig config) async {
+    // Check if theme module is enabled
+    if (!_isThemeModuleEnabled()) {
+      debugPrint('[ThemeService] ⚠️  Theme module disabled for $appId, skipping save');
+      return;
+    }
+
     try {
       final ref = _getDraftRef(appId);
       final data = config.copyWith(updatedAt: DateTime.now()).toMap();
@@ -106,7 +162,15 @@ class ThemeService {
   ///
   /// Returns a stream that emits ThemeConfig whenever the draft changes.
   /// Falls back to defaultConfig if no draft exists.
+  ///
+  /// White-label guard: Returns default config stream if theme module is disabled.
   Stream<ThemeConfig> watchDraftTheme(String appId) {
+    // Check if theme module is enabled
+    if (!_isThemeModuleEnabled()) {
+      debugPrint('[ThemeService] ⚠️  Theme module disabled for $appId, using default stream');
+      return Stream.value(ThemeConfig.defaultConfig);
+    }
+
     return _getDraftRef(appId).snapshots().map((snapshot) {
       if (!snapshot.exists || snapshot.data() == null) {
         return ThemeConfig.defaultConfig;
@@ -126,7 +190,15 @@ class ThemeService {
   ///
   /// Returns ThemeConfig.defaultConfig if no published theme exists.
   /// Used by the client runtime for rendering blocks.
+  ///
+  /// White-label guard: Returns default config if theme module is disabled.
   Future<ThemeConfig> loadPublishedTheme(String appId) async {
+    // Check if theme module is enabled
+    if (!_isThemeModuleEnabled()) {
+      debugPrint('[ThemeService] ⚠️  Theme module disabled for $appId, using defaults');
+      return ThemeConfig.defaultConfig;
+    }
+
     try {
       final ref = _getPublishedRef(appId);
       final snapshot = await ref.get();
@@ -150,7 +222,15 @@ class ThemeService {
   ///
   /// Returns a stream that emits ThemeConfig whenever the published theme changes.
   /// Falls back to defaultConfig if no published theme exists.
+  ///
+  /// White-label guard: Returns default config stream if theme module is disabled.
   Stream<ThemeConfig> watchPublishedTheme(String appId) {
+    // Check if theme module is enabled
+    if (!_isThemeModuleEnabled()) {
+      debugPrint('[ThemeService] ⚠️  Theme module disabled for $appId, using default stream');
+      return Stream.value(ThemeConfig.defaultConfig);
+    }
+
     return _getPublishedRef(appId).snapshots().map((snapshot) {
       if (!snapshot.exists || snapshot.data() == null) {
         return ThemeConfig.defaultConfig;
@@ -174,7 +254,15 @@ class ThemeService {
   /// Parameters:
   /// - appId: The restaurant/app identifier
   /// - userId: The user performing the publish action (for audit)
+  ///
+  /// White-label guard: Silently returns if theme module is disabled.
   Future<void> publishTheme(String appId, {String? userId}) async {
+    // Check if theme module is enabled
+    if (!_isThemeModuleEnabled()) {
+      debugPrint('[ThemeService] ⚠️  Theme module disabled for $appId, skipping publish');
+      return;
+    }
+
     try {
       // Load draft
       final draft = await loadDraftTheme(appId);
