@@ -17,13 +17,19 @@ final bannerServiceProvider = Provider<BannerService>(
 );
 
 /// Stream provider for all banners
-final bannersProvider = StreamProvider<List<BannerConfig>>((ref) {
-  final service = ref.watch(bannerServiceProvider);
-  return service.watchBanners();
-});
+final bannersProvider = StreamProvider<List<BannerConfig>>(
+  (ref) {
+    final service = ref.watch(bannerServiceProvider);
+    return service.watchBanners();
+  },
+  dependencies: [bannerServiceProvider],
+);
 
 /// Provider for active banners
-final activeBannersProvider = FutureProvider<List<BannerConfig>>((ref) async {
-  final service = ref.watch(bannerServiceProvider);
-  return await service.getActiveBanners();
-});
+final activeBannersProvider = FutureProvider<List<BannerConfig>>(
+  (ref) async {
+    final service = ref.watch(bannerServiceProvider);
+    return await service.getActiveBanners();
+  },
+  dependencies: [bannerServiceProvider],
+);

@@ -19,10 +19,13 @@ final appTextsServiceProvider = Provider<AppTextsService>(
 
 /// Stream provider for real-time app texts configuration
 /// Watches Firestore for changes and updates automatically
-final appTextsConfigProvider = StreamProvider<AppTextsConfig>((ref) {
-  final service = ref.watch(appTextsServiceProvider);
-  return service.watchAppTextsConfig();
-});
+final appTextsConfigProvider = StreamProvider<AppTextsConfig>(
+  (ref) {
+    final service = ref.watch(appTextsServiceProvider);
+    return service.watchAppTextsConfig();
+  },
+  dependencies: [appTextsServiceProvider],
+);
 
 /// Alias for appTextsConfigProvider for backward compatibility
 /// Use this provider for multi-tenant compatibility

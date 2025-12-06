@@ -21,52 +21,64 @@ final promotionServiceProvider = Provider<PromotionService>(
 
 /// Stream provider for all promotions
 /// Module guard: requires promotions module
-final promotionsProvider = StreamProvider<List<Promotion>>((ref) {
-  // Module guard: promotions module required
-  final flags = ref.watch(restaurantFeatureFlagsProvider);
-  if (flags != null && !flags.has(ModuleId.promotions)) {
-    return Stream.value([]);
-  }
-  
-  final service = ref.watch(promotionServiceProvider);
-  return service.watchPromotions();
-});
+final promotionsProvider = StreamProvider<List<Promotion>>(
+  (ref) {
+    // Module guard: promotions module required
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
+    if (flags != null && !flags.has(ModuleId.promotions)) {
+      return Stream.value([]);
+    }
+    
+    final service = ref.watch(promotionServiceProvider);
+    return service.watchPromotions();
+  },
+  dependencies: [restaurantFeatureFlagsProvider, promotionServiceProvider],
+);
 
 /// Provider for active promotions
 /// Module guard: requires promotions module
-final activePromotionsProvider = FutureProvider<List<Promotion>>((ref) async {
-  // Module guard: promotions module required
-  final flags = ref.watch(restaurantFeatureFlagsProvider);
-  if (flags != null && !flags.has(ModuleId.promotions)) {
-    return [];
-  }
-  
-  final service = ref.watch(promotionServiceProvider);
-  return await service.getActivePromotions();
-});
+final activePromotionsProvider = FutureProvider<List<Promotion>>(
+  (ref) async {
+    // Module guard: promotions module required
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
+    if (flags != null && !flags.has(ModuleId.promotions)) {
+      return [];
+    }
+    
+    final service = ref.watch(promotionServiceProvider);
+    return await service.getActivePromotions();
+  },
+  dependencies: [restaurantFeatureFlagsProvider, promotionServiceProvider],
+);
 
 /// Provider for home banner promotions
 /// Module guard: requires promotions module
-final homeBannerPromotionsProvider = FutureProvider<List<Promotion>>((ref) async {
-  // Module guard: promotions module required
-  final flags = ref.watch(restaurantFeatureFlagsProvider);
-  if (flags != null && !flags.has(ModuleId.promotions)) {
-    return [];
-  }
-  
-  final service = ref.watch(promotionServiceProvider);
-  return await service.getHomeBannerPromotions();
-});
+final homeBannerPromotionsProvider = FutureProvider<List<Promotion>>(
+  (ref) async {
+    // Module guard: promotions module required
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
+    if (flags != null && !flags.has(ModuleId.promotions)) {
+      return [];
+    }
+    
+    final service = ref.watch(promotionServiceProvider);
+    return await service.getHomeBannerPromotions();
+  },
+  dependencies: [restaurantFeatureFlagsProvider, promotionServiceProvider],
+);
 
 /// Provider for promo block promotions
 /// Module guard: requires promotions module
-final promoBlockPromotionsProvider = FutureProvider<List<Promotion>>((ref) async {
-  // Module guard: promotions module required
-  final flags = ref.watch(restaurantFeatureFlagsProvider);
-  if (flags != null && !flags.has(ModuleId.promotions)) {
-    return [];
-  }
-  
-  final service = ref.watch(promotionServiceProvider);
-  return await service.getPromoBlockPromotions();
-});
+final promoBlockPromotionsProvider = FutureProvider<List<Promotion>>(
+  (ref) async {
+    // Module guard: promotions module required
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
+    if (flags != null && !flags.has(ModuleId.promotions)) {
+      return [];
+    }
+    
+    final service = ref.watch(promotionServiceProvider);
+    return await service.getPromoBlockPromotions();
+  },
+  dependencies: [restaurantFeatureFlagsProvider, promotionServiceProvider],
+);
