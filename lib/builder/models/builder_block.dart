@@ -291,8 +291,12 @@ class SystemBlock extends BuilderBlock {
   /// 
   /// Updated to be consistent with builder_modules.dart
   /// Includes all modules defined in the builderModules map plus legacy modules
+  /// 
+  /// Note: Legacy aliases ('roulette', 'loyalty', 'rewards') are kept for
+  /// backward compatibility with existing data. Use normalizeModuleType()
+  /// to convert legacy names to canonical forms ('roulette_module', etc.)
   static const List<String> availableModules = [
-    // Legacy (backward compatibility)
+    // Legacy (backward compatibility) - use normalizeModuleType() to convert
     'roulette',
     'loyalty',
     'rewards',

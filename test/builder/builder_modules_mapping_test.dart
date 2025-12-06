@@ -106,9 +106,11 @@ void main() {
     });
 
     test('availableModules includes all 12+ white-label modules', () {
-      // Should have at least 12 modules (as mentioned in the problem statement)
+      // Expected: 3 core + 4 marketing + 2 operations + 2 admin = 11 main modules
+      // Plus profile_module (always available) = 12 modules minimum
+      // Plus click_collect_module = 13 modules total
       expect(availableModules.length, greaterThanOrEqualTo(12),
-          reason: 'Should have at least 12 modules defined');
+          reason: 'Should have at least 12 modules (core + marketing + operations + admin)');
       
       // Verify key modules are present
       final moduleIds = availableModules.map((m) => m.id).toList();

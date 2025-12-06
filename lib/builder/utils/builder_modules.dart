@@ -52,10 +52,18 @@ Widget _placeholderModule(BuildContext context, String moduleName) {
 /// 
 /// This centralized mapping ensures all builder modules are properly
 /// validated against the restaurant's white-label plan.
+/// 
+/// Note: Multiple builder modules can map to the same ModuleId:
+/// - 'menu_catalog', 'cart_module', 'profile_module' → ModuleId.ordering
+///   (all part of the core ordering system)
+/// - 'loyalty_module', 'rewards_module' → ModuleId.loyalty
+///   (both require the loyalty feature)
 const Map<String, ModuleId> moduleIdMapping = {
+  // Core ordering system modules
   'menu_catalog': ModuleId.ordering,
   'cart_module': ModuleId.ordering,
   'profile_module': ModuleId.ordering,
+  // Marketing modules
   'roulette_module': ModuleId.roulette,
   'loyalty_module': ModuleId.loyalty,
   'rewards_module': ModuleId.loyalty,
