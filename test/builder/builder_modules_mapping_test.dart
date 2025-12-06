@@ -212,7 +212,18 @@ class _MockRestaurantPlan {
   
   bool hasModule(dynamic moduleId) {
     // Handle both ModuleId enum and String
-    final code = moduleId is String ? moduleId : moduleId.code;
+    String code;
+    if (moduleId is String) {
+      code = moduleId;
+    } else {
+      // Try to get code property safely
+      try {
+        code = (moduleId as dynamic).code as String;
+      } catch (e) {
+        // If we can't get the code, treat as not found
+        return false;
+      }
+    }
     return activeModules.contains(code);
   }
 }

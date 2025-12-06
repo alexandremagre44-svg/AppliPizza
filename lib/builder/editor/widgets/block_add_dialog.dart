@@ -14,7 +14,10 @@ import '../../../src/providers/restaurant_plan_provider.dart';
 /// - Separate section for system modules
 /// - Block type previews and descriptions
 /// - Returns the created block or null if cancelled
-/// - Filters modules based on restaurant's white-label plan
+/// - **Filters system modules based on restaurant's white-label plan**
+///   - Only shows modules for which the required ModuleId is activated
+///   - Modules without module requirements are always shown (legacy compatibility)
+///   - Falls back to showing all modules if plan is not loaded
 class BlockAddDialog extends ConsumerWidget {
   /// Current number of blocks (used for order calculation)
   final int currentBlockCount;

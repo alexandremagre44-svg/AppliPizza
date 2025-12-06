@@ -92,7 +92,10 @@ const Map<String, ModuleId?> templateRequiredModules = {
 /// - Choice between Template or Blank page
 /// - Template list with icons and descriptions
 /// - Calls createPageFromTemplate or createBlankPage
-/// - Filters templates based on restaurant's white-label plan
+/// - **Filters templates based on restaurant's white-label plan**
+///   - Only shows templates for which the required modules are activated
+///   - Templates without module requirements are always shown
+///   - Falls back to showing all templates if plan is not loaded
 class NewPageDialogV2 extends ConsumerStatefulWidget {
   final String appId;
   final Function(BuilderPage) onPageCreated;

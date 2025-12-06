@@ -425,6 +425,10 @@ class SystemBlock extends BuilderBlock {
   /// 
   /// Returns all modules if plan is null (fallback safe).
   /// Modules without mapping are always visible (legacy compatibility).
+  /// 
+  /// Note: normalizeModuleType() is called in the loop, but this is acceptable
+  /// because: (1) list size is small (<20), (2) it's a simple O(1) map lookup,
+  /// (3) called only during UI rendering, not in performance-critical paths.
   static List<String> getFilteredModules(RestaurantPlanUnified? plan) {
     if (plan == null) return availableModules; // Fallback safe
     
