@@ -199,7 +199,7 @@ class BlockAddDialog extends ConsumerWidget {
     );
   }
 
-  Widget _buildSystemModulesList(BuildContext context, dynamic plan) {
+  Widget _buildSystemModulesList(BuildContext context, RestaurantPlanUnified? plan) {
     final allModules = [
       _SystemModuleInfo(
         id: 'cart_module',
