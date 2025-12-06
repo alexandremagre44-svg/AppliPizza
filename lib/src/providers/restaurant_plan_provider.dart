@@ -73,18 +73,16 @@ final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
 ///   // Module livraison activé
 /// }
 /// ```
+/// 
+/// IMPORTANT: C'est le SEUL endroit où RestaurantFeatureFlags doit être instancié.
+/// RestaurantFeatureFlags est maintenant un proxy vers RestaurantPlanUnified.
 final restaurantFeatureFlagsUnifiedProvider =
     Provider<RestaurantFeatureFlags?>(
   (ref) {
     final planAsync = ref.watch(restaurantPlanUnifiedProvider);
 
     return planAsync.maybeWhen(
-      data: (plan) => plan != null
-          ? RestaurantFeatureFlags.fromModuleCodes(
-              plan.restaurantId,
-              plan.activeModules,
-            )
-          : null,
+      data: (plan) => plan != null ? RestaurantFeatureFlags(plan) : null,
       orElse: () => null,
     );
   },
@@ -92,6 +90,11 @@ final restaurantFeatureFlagsUnifiedProvider =
 );
 
 /// Provider dérivé pour les feature flags du restaurant courant.
+///
+/// DEPRECATED: Utilisez [restaurantFeatureFlagsUnifiedProvider] à la place.
+/// 
+/// Ce provider est maintenant un alias vers le provider unifié pour assurer
+/// la rétrocompatibilité. RestaurantPlanUnified est la source unique de vérité.
 ///
 /// Permet de vérifier rapidement si un module est activé:
 /// ```dart
@@ -103,16 +106,10 @@ final restaurantFeatureFlagsUnifiedProvider =
 final restaurantFeatureFlagsProvider =
     Provider<RestaurantFeatureFlags?>(
   (ref) {
-    final planAsync = ref.watch(restaurantPlanProvider);
-
-    return planAsync.maybeWhen(
-      data: (plan) => plan != null
-          ? RestaurantFeatureFlags.fromModules(plan.restaurantId, plan.modules)
-          : null,
-      orElse: () => null,
-    );
+    // Délègue vers le provider unifié (source unique de vérité)
+    return ref.watch(restaurantFeatureFlagsUnifiedProvider);
   },
-  dependencies: [restaurantPlanProvider],
+  dependencies: [restaurantFeatureFlagsUnifiedProvider],
 );
 
 /// Provider pour les paramètres de livraison du restaurant courant.
