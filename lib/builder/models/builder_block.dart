@@ -289,21 +289,20 @@ class SystemBlock extends BuilderBlock {
 
   /// Available system module types
   /// 
-  /// FIX M2/N2: Updated to be consistent with builder_modules.dart
+  /// Updated to be consistent with builder_modules.dart
   /// Includes all modules defined in the builderModules map:
-  /// - roulette
-  /// - loyalty
-  /// - rewards
-  /// - accountActivity
-  /// - menu_catalog (new)
-  /// - cart_module (new)
-  /// - profile_module (new)
+  /// - roulette: Roulette game module
+  /// - loyalty: Loyalty program module
+  /// - rewards: Rewards tickets module
+  /// - accountActivity: Account activity widget
+  /// - menu_catalog: Product catalog module
+  /// - cart_module: Shopping cart module
+  /// - profile_module: User profile module
   static const List<String> availableModules = [
     'roulette',
     'loyalty',
     'rewards',
     'accountActivity',
-    // FIX M2/N2: Added modules that are defined in builder_modules.dart
     'menu_catalog',
     'cart_module',
     'profile_module',

@@ -28,15 +28,15 @@ void main() {
 
     test('availableModules ne contient pas roulette_module (évite duplication)', () {
       final modules = SystemBlock.availableModules;
-      // roulette_module devrait être géré comme un alias, pas dans la liste principale
-      final hasRouletteModule = modules.contains('roulette_module');
-      final hasRoulette = modules.contains('roulette');
       
-      // On accepte soit roulette, soit les deux ne sont pas dupliqués de manière problématique
-      expect(hasRoulette, isTrue, reason: 'Should have roulette in the list');
+      // Vérifie que 'roulette' est présent dans la liste
+      expect(modules, contains('roulette'),
+          reason: 'roulette should be in availableModules');
       
-      // Si roulette_module existe, cela ne devrait pas causer de problème
-      // mais idéalement il ne devrait pas être dans la liste principale
+      // Vérifie que 'roulette_module' n'est PAS dans la liste pour éviter duplication
+      // 'roulette_module' doit être géré comme un alias via getModuleLabel/getModuleIcon
+      expect(modules, isNot(contains('roulette_module')),
+          reason: 'roulette_module should not be in availableModules to avoid duplication with roulette');
     });
 
     test('getModuleLabel retourne le label correct pour roulette', () {
