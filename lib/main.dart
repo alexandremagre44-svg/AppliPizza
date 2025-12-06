@@ -192,6 +192,14 @@ class MyApp extends ConsumerWidget {
           return AppRoutes.login;
         }
         
+        // PROTECTION: SuperAdmin routes - only accessible to superadmins
+        // If user is not a superadmin, redirect to menu. If superadmin, allow access (return null).
+        if (state.matchedLocation.startsWith('/superadmin')) {
+          if (!authState.isSuperAdmin) {
+            return AppRoutes.menu;
+          }
+        }
+        
         // Phase 4C: Apply WhiteLabel route guard
         // Check if route belongs to an active module
         final unifiedPlanAsync = ref.read(restaurantPlanUnifiedProvider);

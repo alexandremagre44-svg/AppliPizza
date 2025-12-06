@@ -4,6 +4,7 @@
 /// Contient les liens vers toutes les sections du module.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -73,6 +74,14 @@ class SuperAdminSidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentRoute = GoRouterState.of(context).uri.toString();
 
+    // Filter sidebar items - hide "Modules" entry unless in debug mode
+    final visibleItems = _sidebarItems.where((item) {
+      if (item.label == 'Modules') {
+        return kDebugMode;
+      }
+      return true;
+    }).toList();
+
     return Container(
       width: 250,
       decoration: const BoxDecoration(
@@ -127,9 +136,9 @@ class SuperAdminSidebar extends ConsumerWidget {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: _sidebarItems.length,
+              itemCount: visibleItems.length,
               itemBuilder: (context, index) {
-                final item = _sidebarItems[index];
+                final item = visibleItems[index];
                 final isSelected = currentRoute.startsWith(item.route);
 
                 return _SidebarItemWidget(
