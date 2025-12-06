@@ -15,6 +15,7 @@ export '../core/module_runtime_mapping.dart';
 // Runtime exports
 export 'module_guards.dart';
 export 'module_helpers.dart';
+export 'module_enabled_provider.dart';
 export 'module_navigation_registry.dart';
 export 'module_route_resolver.dart';
 export 'router_guard.dart';
