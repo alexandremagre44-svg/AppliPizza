@@ -5,14 +5,27 @@
 // restaurants/{restaurantId}/pages_system (order)
 // restaurants/{restaurantId}/pages_published (content)
 //
-// White-Label Integration:
-// - Uses RestaurantPlanUnified to filter pages by active modules
-// - Calls plan.hasModule(moduleId) to check if module is enabled
-// - Logs active modules: '[WL NAV] Modules actifs: ${plan.activeModules}'
-// - Hides pages and nav buttons for disabled modules
-// - Preserves all existing UI/UX (IndexedStack, BottomNav)
-// - Does not modify Builder B3, Admin routes, or SuperAdmin routes
-// - Maintains backward compatibility with feature flags
+// WHITE-LABEL ARCHITECTURE (CORRECT SEPARATION):
+// ================================================
+// Builder B3 (MASTER):
+// - Controls which pages appear in navigation
+// - Controls the order and visibility of items
+// - Decides where modules are placed (home, nav, etc.)
+// - Full control over UI presentation
+//
+// White-Label Modules (VALIDATION):
+// - Block route access if module disabled (via guards)
+// - Hide Builder blocks if module disabled (via ModuleAwareBlock)
+// - NO control over navigation structure
+// - NO filtering of Builder B3 pages
+//
+// This file:
+// - Renders navigation exactly as Builder B3 defines it
+// - Logs active modules for debugging
+// - _applyModuleFiltering provides safety layer for route security
+// - Does NOT filter pages based on plan.hasModule()
+//
+// Result: Builder controls presentation, WL controls access rights
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -76,7 +89,9 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           // Debug: trace loaded pages (using pageKey instead of pageId)
           debugPrint('📱 [BottomNav] Loaded ${builderPages.length} pages: ${builderPages.map((p) => "${p.pageKey}(route:${p.route}, system:${p.systemId?.value ?? 'null'})").join(", ")}');
           
-          // Build navigation items dynamically
+          // Build navigation items dynamically from Builder B3
+          // Builder B3 controls what appears in navigation
+          // White-label only validates route access via _applyModuleFiltering below
           final navItems = _buildNavigationItems(
             context,
             ref,
@@ -84,7 +99,6 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             isAdmin,
             totalItems,
             flags,
-            unifiedPlan, // Pass plan to avoid duplicate subscription
           );
           
           // Phase 3: Apply DynamicNavbarBuilder filtering based on active modules
@@ -260,18 +274,20 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 
   /// Build navigation items from Builder pages
   /// 
-  /// White-label integration: This function now uses the unified plan
-  /// to filter pages based on active modules. It delegates to:
-  /// - buildPagesFromPlan() for page filtering
-  /// - buildBottomNavItemsFromPlan() for item creation
+  /// WHITE-LABEL ARCHITECTURE (CORRECTED):
+  /// ========================================
+  /// Builder B3 is the MASTER - it controls:
+  /// - Which pages appear in navigation
+  /// - The order of navigation items
+  /// - The visibility of modules in the UI
   /// 
-  /// The function preserves backward compatibility by:
-  /// - Using feature flags as fallback when plan is not available
-  /// - Keeping all existing UI logic (icons, labels, badges)
-  /// - Maintaining admin tab injection
-  /// - Preserving system pages (menu, cart, profile)
+  /// White-label modules (plan.hasModule) only control:
+  /// - Route access (via guards)
+  /// - Block visibility (via ModuleAwareBlock)
   /// 
-  /// Module guard: filters pages based on feature flags (legacy) or unified plan (white-label)
+  /// This function does NOT filter pages - it trusts Builder B3 completely.
+  /// The _applyModuleFiltering() in the parent provides a safety layer for
+  /// route-level security, but does NOT remove items from navigation.
   _NavigationItemsResult _buildNavigationItems(
     BuildContext context,
     WidgetRef ref,
@@ -279,135 +295,13 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     bool isAdmin,
     int totalItems,
     RestaurantFeatureFlags? flags,
-    RestaurantPlanUnified? unifiedPlan, // Pass plan from parent to avoid duplicate subscription
-  ) {
-    // White-label: Filter pages based on active modules in the plan
-    // This uses plan.hasModule() to determine which pages to show
-    final filteredPages = buildPagesFromPlan(builderPages, unifiedPlan);
-
-    // White-label: Build navigation items from filtered pages
-    // This creates the actual BottomNavigationBarItem widgets
-    final result = buildBottomNavItemsFromPlan(
-      context,
-      ref,
-      filteredPages,
-      unifiedPlan,
-      isAdmin,
-      totalItems,
-    );
-
-    // Note: Additional filtering via _applyModuleFiltering() is applied after this
-    // in the main build method for safety and consistency with NavbarModuleAdapter
-    return result;
-  }
-  
-  /// Helper to convert IconData to icon name string
-  /// 
-  /// This is a workaround since we need string names for IconHelper.getIconPair().
-  /// Used by buildBottomNavItemsFromPlan() when mapping system page icons.
-  /// 
-  /// Note: This function is used indirectly via SystemPages configuration.
-  /// It provides a mapping between Flutter's IconData and string icon names
-  /// that IconHelper can process to get outlined/filled icon pairs.
-  String _getIconNameFromIconData(IconData iconData) {
-    if (iconData == Icons.home) return 'home';
-    if (iconData == Icons.restaurant_menu) return 'restaurant_menu';
-    if (iconData == Icons.shopping_cart) return 'shopping_cart';
-    if (iconData == Icons.person) return 'person';
-    if (iconData == Icons.card_giftcard) return 'card_giftcard';
-    if (iconData == Icons.casino) return 'casino';
-    return 'help_outline';
-  }
-
-  /// White-label: Build pages from unified plan
-  /// 
-  /// This function filters Builder pages based on active modules in the plan.
-  /// It uses plan.hasModule() to check if each module is enabled.
-  /// 
-  /// Returns a filtered list of pages that should be shown in navigation.
-  /// This function is called by the main navigation builder to ensure
-  /// only pages for active modules are displayed.
-  /// 
-  /// Rules:
-  /// - System pages (menu, cart, profile) are always included
-  /// - Module pages are included only if plan.hasModule(moduleId) returns true
-  /// - Custom pages from Builder B3 are always included (no module requirement)
-  List<BuilderPage> buildPagesFromPlan(
-    List<BuilderPage> builderPages,
-    RestaurantPlanUnified? plan,
-  ) {
-    // If no plan loaded, return Builder pages as-is (fallback mode for backward compatibility)
-    if (plan == null) {
-      if (kDebugMode) {
-        debugPrint('[WL NAV] No plan loaded - returning Builder pages as-is');
-      }
-      return builderPages;
-    }
-
-    final filteredPages = <BuilderPage>[];
-
-    for (final page in builderPages) {
-      // Check if page requires a specific module
-      final requiredModule = _getRequiredModuleForRoute(page.route);
-      
-      if (requiredModule != null) {
-        // Module-specific page: check if module is enabled using plan.hasModule()
-        if (plan.hasModule(requiredModule)) {
-          filteredPages.add(page);
-          if (kDebugMode) {
-            debugPrint('[WL NAV] ✓ Page ${page.pageKey} included - module ${requiredModule.code} is enabled');
-          }
-        } else {
-          if (kDebugMode) {
-            debugPrint('[WL NAV] ✗ Page ${page.pageKey} excluded - module ${requiredModule.code} is disabled');
-          }
-        }
-      } else {
-        // System or custom page: always include
-        filteredPages.add(page);
-        if (kDebugMode) {
-          debugPrint('[WL NAV] ✓ Page ${page.pageKey} included - no module requirement');
-        }
-      }
-    }
-
-    if (kDebugMode) {
-      debugPrint('[WL NAV] Filtered pages: ${builderPages.length} → ${filteredPages.length}');
-    }
-
-    return filteredPages;
-  }
-
-  /// White-label: Build bottom navigation items from unified plan
-  /// 
-  /// This function creates BottomNavigationBarItem widgets based on the filtered pages
-  /// and the unified plan. It ensures that only navigation items for active modules
-  /// are displayed.
-  /// 
-  /// The function:
-  /// 1. Takes filtered pages from buildPagesFromPlan()
-  /// 2. Creates BottomNavigationBarItem for each page
-  /// 3. Adds special handling for cart badge
-  /// 4. Adds admin tab if user is admin
-  /// 
-  /// Returns a result containing both items and pages for navigation.
-  _NavigationItemsResult buildBottomNavItemsFromPlan(
-    BuildContext context,
-    WidgetRef ref,
-    List<BuilderPage> filteredPages,
-    RestaurantPlanUnified? plan,
-    bool isAdmin,
-    int totalItems,
   ) {
     final items = <BottomNavigationBarItem>[];
     final pages = <_NavPage>[];
 
-    if (kDebugMode) {
-      debugPrint('[WL NAV] Building nav items for ${filteredPages.length} pages');
-    }
-
-    // Build navigation items for each filtered page
-    for (final page in filteredPages) {
+    // Build navigation items for ALL pages from Builder B3
+    // No filtering by modules - Builder decides what's visible
+    for (final page in builderPages) {
       // Determine the correct route for this page
       String effectiveRoute = page.route;
       
@@ -489,17 +383,31 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         ),
       );
       pages.add(_NavPage(route: AppRoutes.adminStudio, name: 'Admin'));
-      
-      if (kDebugMode) {
-        debugPrint('[WL NAV] Added admin tab');
-      }
     }
 
     if (kDebugMode) {
-      debugPrint('[WL NAV] Built ${items.length} navigation items');
+      debugPrint('[WL NAV] Built ${items.length} navigation items from Builder B3');
     }
 
     return _NavigationItemsResult(items: items, pages: pages);
+  }
+  
+  /// Helper to convert IconData to icon name string
+  /// 
+  /// This is a workaround since we need string names for IconHelper.getIconPair().
+  /// Used when mapping system page icons from IconData to string names.
+  /// 
+  /// Note: This function is used indirectly via SystemPages configuration.
+  /// It provides a mapping between Flutter's IconData and string icon names
+  /// that IconHelper can process to get outlined/filled icon pairs.
+  String _getIconNameFromIconData(IconData iconData) {
+    if (iconData == Icons.home) return 'home';
+    if (iconData == Icons.restaurant_menu) return 'restaurant_menu';
+    if (iconData == Icons.shopping_cart) return 'shopping_cart';
+    if (iconData == Icons.person) return 'person';
+    if (iconData == Icons.card_giftcard) return 'card_giftcard';
+    if (iconData == Icons.casino) return 'casino';
+    return 'help_outline';
   }
 
   /// Get the required module for a specific route
