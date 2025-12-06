@@ -66,7 +66,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 
     // White-label: Log active modules when plan is loaded
     if (unifiedPlan != null && kDebugMode) {
-      print('[WL NAV] Modules actifs: ${unifiedPlan.activeModules}');
+      debugPrint('[WL NAV] Modules actifs: ${unifiedPlan.activeModules}');
     }
 
     return Scaffold(
@@ -84,6 +84,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             isAdmin,
             totalItems,
             flags,
+            unifiedPlan, // Pass plan to avoid duplicate subscription
           );
           
           // Phase 3: Apply DynamicNavbarBuilder filtering based on active modules
@@ -278,11 +279,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     bool isAdmin,
     int totalItems,
     RestaurantFeatureFlags? flags,
+    RestaurantPlanUnified? unifiedPlan, // Pass plan from parent to avoid duplicate subscription
   ) {
-    // White-label: Get unified plan for module-based filtering
-    final unifiedPlanAsync = ref.watch(restaurantPlanUnifiedProvider);
-    final unifiedPlan = unifiedPlanAsync.asData?.value;
-
     // White-label: Filter pages based on active modules in the plan
     // This uses plan.hasModule() to determine which pages to show
     final filteredPages = buildPagesFromPlan(builderPages, unifiedPlan);
@@ -298,42 +296,19 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       totalItems,
     );
 
-    // Legacy fallback: If no plan is available, also check feature flags
-    // This ensures backward compatibility with restaurants not using unified plan
-    if (unifiedPlan == null && flags != null) {
-      final legacyFilteredItems = <BottomNavigationBarItem>[];
-      final legacyFilteredPages = <_NavPage>[];
-      
-      for (var i = 0; i < result.pages.length; i++) {
-        final page = result.pages[i];
-        final requiredModule = _getRequiredModuleForRoute(page.route);
-        
-        if (requiredModule != null && !flags.has(requiredModule)) {
-          if (kDebugMode) {
-            debugPrint('[WL NAV] Legacy filter: Skipping ${page.name} - module ${requiredModule.code} disabled in flags');
-          }
-          continue;
-        }
-        
-        legacyFilteredItems.add(result.items[i]);
-        legacyFilteredPages.add(page);
-      }
-      
-      if (kDebugMode) {
-        debugPrint('[WL NAV] Applied legacy feature flags filter: ${result.items.length} → ${legacyFilteredItems.length}');
-      }
-      
-      return _NavigationItemsResult(
-        items: legacyFilteredItems,
-        pages: legacyFilteredPages,
-      );
-    }
-
+    // Note: Additional filtering via _applyModuleFiltering() is applied after this
+    // in the main build method for safety and consistency with NavbarModuleAdapter
     return result;
   }
   
   /// Helper to convert IconData to icon name string
-  /// This is a workaround since we need string names for IconHelper
+  /// 
+  /// This is a workaround since we need string names for IconHelper.getIconPair().
+  /// Used by buildBottomNavItemsFromPlan() when mapping system page icons.
+  /// 
+  /// Note: This function is used indirectly via SystemPages configuration.
+  /// It provides a mapping between Flutter's IconData and string icon names
+  /// that IconHelper can process to get outlined/filled icon pairs.
   String _getIconNameFromIconData(IconData iconData) {
     if (iconData == Icons.home) return 'home';
     if (iconData == Icons.restaurant_menu) return 'restaurant_menu';
@@ -361,10 +336,10 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     List<BuilderPage> builderPages,
     RestaurantPlanUnified? plan,
   ) {
-    // If no plan loaded, return all pages (fallback mode for backward compatibility)
+    // If no plan loaded, return Builder pages as-is (fallback mode for backward compatibility)
     if (plan == null) {
       if (kDebugMode) {
-        debugPrint('[WL NAV] No plan loaded - returning all pages');
+        debugPrint('[WL NAV] No plan loaded - returning Builder pages as-is');
       }
       return builderPages;
     }
