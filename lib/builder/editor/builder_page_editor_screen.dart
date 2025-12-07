@@ -27,6 +27,7 @@ import 'new_page_dialog.dart';
 import 'widgets/icon_picker_dialog.dart';
 import 'widgets/builder_properties_panel.dart';
 import 'panels/theme_properties_panel.dart';
+import '../debug/diagnostic_dialog.dart';
 
 /// Builder Page Editor Screen
 /// 
@@ -909,6 +910,13 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         ],
       ),
       actions: [
+        // Debug button (debug mode only)
+        if (kDebugMode)
+          IconButton(
+            icon: const Icon(Icons.bug_report),
+            tooltip: 'Diagnostic WL',
+            onPressed: () => _showDiagnosticDialog(),
+          ),
         // Save button
         if (_hasChanges)
           IconButton(
@@ -2780,6 +2788,11 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         },
       ),
     );
+  }
+
+  /// Show diagnostic dialog for Builder ↔ White-Label modules
+  void _showDiagnosticDialog() {
+    BuilderDiagnosticDialog.show(context, appIdOverride: widget.appId);
   }
 
   void _showFullScreenPreview() {
