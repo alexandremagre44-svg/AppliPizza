@@ -44,6 +44,7 @@ import 'modules/promotions_module_widget.dart';
 import 'modules/newsletter_module_widget.dart';
 import 'modules/kitchen_module_widget.dart';
 import 'modules/staff_module_widget.dart';
+import 'modules/payment_module_wrapper.dart';
 
 /// Typedef for a unified block renderer function.
 /// 
@@ -508,5 +509,16 @@ void registerWhiteLabelModules() {
   ModuleRuntimeRegistry.registerClient(
     'staff_module',
     (ctx) => const StaffModuleWidget(),
+  );
+
+  // Payment Module (Checkout)
+  // Admin and client both use the wrapper with Riverpod integration
+  ModuleRuntimeRegistry.registerAdmin(
+    'payment_module',
+    (ctx) => const PaymentModuleWrapper(),
+  );
+  ModuleRuntimeRegistry.registerClient(
+    'payment_module',
+    (ctx) => const PaymentModuleWrapper(),
   );
 }
