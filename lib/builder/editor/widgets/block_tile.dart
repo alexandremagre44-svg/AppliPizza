@@ -161,6 +161,9 @@ class BlockTile extends StatelessWidget {
       case BlockType.system:
         final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
         return 'Module: ${SystemBlock.getModuleLabel(moduleType)}';
+      case BlockType.module:
+        final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
+        return 'Module WL: ${SystemBlock.getModuleLabel(moduleType)}';
     }
   }
 }

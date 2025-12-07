@@ -1020,6 +1020,8 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
         return _buildHtmlConfig(block);
       case BlockType.system:
         return _buildSystemConfig(block);
+      case BlockType.module:
+        return _buildSystemConfig(block);
     }
   }
 

@@ -40,8 +40,14 @@ class _DeliveryClientWidgetState extends State<DeliveryClientWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final text = AppTextStyles.of(context);
+    // Design System Usage:
+    // - AppColors: Use static constants directly (e.g., AppColors.primary)
+    // - AppTextStyles: Use static constants directly (e.g., AppTextStyles.titleLarge)
+    // - AppRadius: Use static constants directly (e.g., AppRadius.card)
+    // - AppSpacing: Use static constants directly (e.g., AppSpacing.lg)
+    // NO .of(context) method exists - these are all static classes with constants
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Card(
       elevation: 2,
@@ -54,11 +60,11 @@ class _DeliveryClientWidgetState extends State<DeliveryClientWidget> {
             // Header with icon and title
             Row(
               children: [
-                Icon(Icons.delivery_dining, color: colors.primary, size: 32),
+                Icon(Icons.delivery_dining, color: colorScheme.primary, size: 32),
                 SizedBox(width: AppSpacing.md),
                 Text(
                   "Livraison",
-                  style: text.titleLarge.copyWith(color: colors.primary),
+                  style: textTheme.titleLarge?.copyWith(color: colorScheme.primary),
                 ),
               ],
             ),
@@ -68,7 +74,7 @@ class _DeliveryClientWidgetState extends State<DeliveryClientWidget> {
             // Address section
             Text(
               "Votre adresse",
-              style: text.labelLarge.copyWith(color: colors.onSurfaceVariant),
+              style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
 
             SizedBox(height: AppSpacing.xs),
@@ -78,7 +84,7 @@ class _DeliveryClientWidgetState extends State<DeliveryClientWidget> {
               decoration: InputDecoration(
                 hintText: "Saisissez votre adresse…",
                 filled: true,
-                fillColor: colors.surfaceContainerLow,
+                fillColor: AppColors.surfaceContainerLow,
                 border: OutlineInputBorder(
                   borderRadius: AppRadius.input,
                   borderSide: BorderSide.none,
@@ -96,7 +102,7 @@ class _DeliveryClientWidgetState extends State<DeliveryClientWidget> {
             // Time slot section
             Text(
               "Créneau de livraison",
-              style: text.labelLarge.copyWith(color: colors.onSurfaceVariant),
+              style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: AppSpacing.sm),
 
@@ -109,8 +115,8 @@ class _DeliveryClientWidgetState extends State<DeliveryClientWidget> {
                   label: Text(slot),
                   selected: selected,
                   onSelected: (_) => setState(() => selectedSlot = slot),
-                  selectedColor: colors.primary.withOpacity(0.2),
-                  checkmarkColor: colors.primary,
+                  selectedColor: colorScheme.primary.withOpacity(0.2),
+                  checkmarkColor: colorScheme.primary,
                 );
               }).toList(),
             ),
@@ -133,8 +139,8 @@ class _DeliveryClientWidgetState extends State<DeliveryClientWidget> {
                     }
                   : null,
               style: FilledButton.styleFrom(
-                backgroundColor: colors.primary,
-                foregroundColor: colors.onPrimary,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(
                   borderRadius: AppRadius.button,
