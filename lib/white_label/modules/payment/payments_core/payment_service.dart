@@ -193,10 +193,17 @@ class CartService {
   /// Ajoute un produit au panier
   void add(String productId, String productName, double price, int qty, {String? imageUrl, String? customDescription, bool isMenu = false}) {
     try {
+      // Try to find an existing item with the same characteristics
+      // Menu items and items with custom descriptions are always treated as separate items
       final existingItem = items.firstWhere(
-        (item) => item.productId == productId && item.customDescription == customDescription && !item.isMenu,
+        (item) => item.productId == productId && 
+                  item.customDescription == customDescription && 
+                  item.isMenu == isMenu,
       );
+      // If found, increment the quantity
       existingItem.quantity += qty;
+    } catch (_) {
+      // Item not found, add new item
       items.add(CartItem(
         id: _uuid.v4(),
         productId: productId,
