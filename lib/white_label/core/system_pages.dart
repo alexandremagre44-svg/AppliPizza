@@ -105,8 +105,11 @@ class SystemPageManager {
       icon: Icons.restaurant_menu,
       isSystem: true,
       widgetBuilder: (context) {
-        // Import dynamically to avoid circular dependency
-        // This will be replaced with actual import when used
+        // NOTE: Placeholder widget used for initial implementation.
+        // To wire up actual pages, replace these builders with imports to real screens:
+        // Example: return const MenuScreen();
+        // The actual screen widgets should be imported at the call site to avoid
+        // circular dependencies with this core module.
         return const _PlaceholderPage(title: 'Menu');
       },
       bottomNavIndex: 0,
@@ -118,7 +121,10 @@ class SystemPageManager {
       icon: Icons.shopping_cart,
       isSystem: true,
       widgetBuilder: (context) {
-        // Import dynamically to avoid circular dependency
+        // NOTE: Placeholder widget used for initial implementation.
+        // To wire up actual cart page, replace with:
+        // import '../../src/screens/cart/cart_screen.dart';
+        // return const CartScreen();
         return const _PlaceholderPage(title: 'Panier');
       },
       bottomNavIndex: 1,
@@ -130,7 +136,10 @@ class SystemPageManager {
       icon: Icons.person,
       isSystem: true,
       widgetBuilder: (context) {
-        // Import dynamically to avoid circular dependency
+        // NOTE: Placeholder widget used for initial implementation.
+        // To wire up actual profile page, replace with:
+        // import '../../src/screens/profile/profile_screen.dart';
+        // return const ProfileScreen();
         return const _PlaceholderPage(title: 'Profil');
       },
       bottomNavIndex: 2,
@@ -142,7 +151,10 @@ class SystemPageManager {
       icon: Icons.admin_panel_settings,
       isSystem: true,
       widgetBuilder: (context) {
-        // Import dynamically to avoid circular dependency
+        // NOTE: Placeholder widget used for initial implementation.
+        // To wire up actual admin panel, replace with:
+        // import '../../src/screens/admin/admin_studio_screen.dart';
+        // return const AdminStudioScreen();
         return const _PlaceholderPage(title: 'Admin');
       },
       bottomNavIndex: 3,
