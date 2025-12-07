@@ -184,12 +184,27 @@ class SystemBlockRuntime extends StatelessWidget {
   }
 
   /// Detect if current context is admin/builder mode
+  /// 
+  /// SAFE implementation - no traversal, no stored context, no async operations.
+  /// Uses ModalRoute.of which is safe to call during build.
   bool _isAdminContext(BuildContext context) {
-    // Check for admin route or builder preview context
-    final route = ModalRoute.of(context)?.settings.name ?? '';
-    return route.contains('/admin') || 
-           route.contains('/builder') ||
-           route.contains('/editor');
+    try {
+      // Safe: ModalRoute.of does NOT traverse child elements or store context
+      // It only walks up the ancestor tree looking for a ModalRoute
+      final route = ModalRoute.of(context);
+      if (route == null) return false;
+      
+      final routeName = route.settings.name ?? '';
+      
+      // Check if we're in admin/builder/editor routes
+      return routeName.contains('/admin') || 
+             routeName.contains('/builder') ||
+             routeName.contains('/editor') ||
+             routeName.contains('/studio');
+    } catch (e) {
+      // Fallback to false if any error (shouldn't happen, but safe)
+      return false;
+    }
   }
   
   /// Check if moduleType is a builder module (from builder_modules.dart)

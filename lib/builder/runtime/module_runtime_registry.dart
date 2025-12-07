@@ -146,10 +146,13 @@ class ModuleRuntimeRegistry {
   /// Build an ADMIN widget for a White-Label module
   ///
   /// [moduleId] - The module identifier to build
-  /// [context] - The build context
+  /// [context] - The build context (MUST be valid and mounted)
   ///
   /// Returns the admin widget if registered, null otherwise.
   /// The widget is automatically wrapped in wrapModuleSafe for layout safety.
+  ///
+  /// SAFE: No context storage, no async operations, no navigation.
+  /// Just builds widget and wraps it with layout constraints.
   ///
   /// Example:
   /// ```dart
@@ -161,16 +164,24 @@ class ModuleRuntimeRegistry {
   static Widget? buildAdmin(String moduleId, BuildContext context) {
     final builder = _adminWidgets[moduleId];
     if (builder == null) return null;
-    return wrapModuleSafe(builder(context));  // ← Auto-wrap
+    
+    // Build the widget (no side effects)
+    final widget = builder(context);
+    
+    // Wrap with safe layout constraints (no context manipulation)
+    return wrapModuleSafe(widget);
   }
 
   /// Build a CLIENT widget for a White-Label module
   ///
   /// [moduleId] - The module identifier to build
-  /// [context] - The build context
+  /// [context] - The build context (MUST be valid and mounted)
   ///
   /// Returns the client widget if registered, null otherwise.
   /// The widget is automatically wrapped in wrapModuleSafe for layout safety.
+  ///
+  /// SAFE: No context storage, no async operations, no navigation.
+  /// Just builds widget and wraps it with layout constraints.
   ///
   /// Example:
   /// ```dart
@@ -182,7 +193,12 @@ class ModuleRuntimeRegistry {
   static Widget? buildClient(String moduleId, BuildContext context) {
     final builder = _clientWidgets[moduleId];
     if (builder == null) return null;
-    return wrapModuleSafe(builder(context));  // ← Auto-wrap
+    
+    // Build the widget (no side effects)
+    final widget = builder(context);
+    
+    // Wrap with safe layout constraints (no context manipulation)
+    return wrapModuleSafe(widget);
   }
 
   /// Build a White-Label module widget (legacy method)
@@ -190,10 +206,12 @@ class ModuleRuntimeRegistry {
   /// @deprecated Use buildAdmin or buildClient instead
   ///
   /// [moduleId] - The module identifier to build
-  /// [context] - The build context
+  /// [context] - The build context (MUST be valid and mounted)
   ///
   /// Returns the module widget if registered, null otherwise.
   /// The widget is automatically wrapped in wrapModuleSafe for layout safety.
+  ///
+  /// SAFE: No context storage, no async operations, no navigation.
   ///
   /// Example:
   /// ```dart
@@ -206,7 +224,12 @@ class ModuleRuntimeRegistry {
   static Widget? build(String moduleId, BuildContext context) {
     final builder = _registry[moduleId];
     if (builder == null) return null;
-    return wrapModuleSafe(builder(context));
+    
+    // Build the widget (no side effects)
+    final widget = builder(context);
+    
+    // Wrap with safe layout constraints (no context manipulation)
+    return wrapModuleSafe(widget);
   }
 
   /// Check if a module is registered (checks both admin and client registries)
