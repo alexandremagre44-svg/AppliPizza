@@ -89,7 +89,20 @@ const Map<String, ModuleId> moduleIdMapping = {
 /// Obtenir le ModuleId pour un ID builder
 /// 
 /// Returns null if the module ID is not mapped.
+/// 
+/// Special handling for legacy aliases:
+/// - 'roulette' and 'roulette_module' both map to ModuleId.roulette
+/// - 'loyalty' and 'loyalty_module' both map to ModuleId.loyalty
+/// - 'rewards' and 'rewards_module' both map to ModuleId.loyalty
 ModuleId? getModuleIdForBuilder(String builderModuleId) {
+  // Explicit mapping for roulette to ensure Builder recognition
+  switch (builderModuleId) {
+    case 'roulette':
+    case 'roulette_module':
+      return ModuleId.roulette; // White-label ModuleId
+  }
+  
+  // Fallback to existing mapping
   return moduleIdMapping[builderModuleId];
 }
 
@@ -334,6 +347,56 @@ String normalizeModuleType(String moduleType) {
     'rewards': 'rewards_module',
   };
   return aliases[moduleType] ?? moduleType;
+}
+
+/// Retourne les modules Builder visibles selon le plan WL
+/// 
+/// Returns list of builder module IDs that are available based on the plan:
+/// - If plan is null, returns all module IDs (fallback)
+/// - Filters modules based on their ModuleId mapping
+/// - Modules without mapping are always visible (legacy)
+/// 
+/// This function filters the complete set of builder modules including:
+/// - Core modules from ModuleConfig (menu_catalog, cart_module, etc.)
+/// - Legacy aliases (roulette, loyalty, rewards)
+/// - All WL-integrated modules
+/// 
+/// Note: The module list is intentionally duplicated here (rather than
+/// referencing SystemBlock.availableModules) to keep this utility function
+/// self-contained and avoid circular dependencies. This ensures the function
+/// can be used independently without requiring the full SystemBlock class.
+List<String> getBuilderModulesForPlan(RestaurantPlanUnified? plan) {
+  // Complete list of all builder module IDs including legacy aliases
+  // This matches SystemBlock.availableModules to ensure consistency
+  const allModuleIds = [
+    // Legacy (backward compatibility)
+    'roulette',
+    'loyalty',
+    'rewards',
+    'accountActivity',
+    // Core builder modules
+    'menu_catalog',
+    'cart_module',
+    'profile_module',
+    'roulette_module',
+    // WL modules
+    'loyalty_module',
+    'rewards_module',
+    'delivery_module',
+    'click_collect_module',
+    'kitchen_module',
+    'staff_module',
+    'promotions_module',
+    'newsletter_module',
+  ];
+  
+  if (plan == null) return allModuleIds; // fallback
+  
+  return allModuleIds.where((builderId) {
+    final moduleId = getModuleIdForBuilder(builderId);
+    if (moduleId == null) return true; // legacy
+    return plan.hasModule(moduleId);
+  }).toList();
 }
 
 /// Register a custom module widget builder
