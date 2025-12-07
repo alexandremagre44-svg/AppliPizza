@@ -271,7 +271,7 @@ class BlockAddDialog extends ConsumerWidget {
     
     // DEBUG: Log filtered modules
     if (kDebugMode) {
-      debugPrint('   Available module IDs: ${availableModuleIds.join(", ")}');
+      debugPrint('   Available module IDs: ${moduleIds.join(", ")}');
       debugPrint('   Filtered modules: ${filteredModules.map((m) => m.id).join(", ")}');
     }
 
