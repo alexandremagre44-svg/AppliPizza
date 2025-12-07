@@ -441,6 +441,63 @@ class SystemBlock extends BuilderBlock {
     }).toList();
   }
 
+  /// Log détaillé des modules filtrés pour debug (méthode statique)
+  /// 
+  /// Affiche dans la console:
+  /// - Le restaurantId du plan
+  /// - Les activeModules
+  /// - Pour chaque module: status (✅/❌), raison (enabled/disabled/no mapping)
+  static void debugLogFilteredModules(
+    String restaurantId,
+    RestaurantPlanUnified? plan,
+  ) {
+    if (!kDebugMode) return;
+
+    debugPrint('═══════════════════════════════════════════════');
+    debugPrint('🔍 DEBUG: Modules filtrés pour $restaurantId');
+    debugPrint('═══════════════════════════════════════════════');
+
+    if (plan == null) {
+      debugPrint('❌ Plan: null → fallback (tous les modules affichés)');
+      debugPrint('');
+      return;
+    }
+
+    debugPrint('✅ Plan chargé');
+    debugPrint('   restaurantId: ${plan.restaurantId}');
+    debugPrint('   activeModules: ${plan.activeModules.map((m) => m.code).join(", ")}');
+    debugPrint('');
+
+    final allModules = SystemBlock.availableModules;
+    debugPrint('📦 Analyse des ${allModules.length} modules disponibles:');
+    debugPrint('');
+
+    for (final moduleType in allModules) {
+      final normalizedType = SystemBlock.normalizeModuleType(moduleType);
+      final moduleId = builder_modules.getModuleIdForBuilder(normalizedType);
+
+      String status;
+      String reason;
+
+      if (moduleId == null) {
+        status = '✅';
+        reason = 'legacy (toujours visible)';
+      } else {
+        if (plan.hasModule(moduleId)) {
+          status = '✅';
+          reason = 'enabled (${moduleId.code})';
+        } else {
+          status = '❌';
+          reason = 'disabled (${moduleId.code})';
+        }
+      }
+
+      debugPrint('  $status $moduleType → $reason');
+    }
+
+    debugPrint('═══════════════════════════════════════════════');
+  }
+
   @override
   SystemBlock copyWith({
     String? id,

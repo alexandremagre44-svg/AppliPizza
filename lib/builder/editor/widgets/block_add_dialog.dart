@@ -2,6 +2,7 @@
 // Dialog for adding new blocks to a page
 // Part of Builder B3 modular UI layer
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/models.dart';
@@ -58,11 +59,41 @@ class BlockAddDialog extends ConsumerWidget {
     // Get restaurant plan for filtering modules
     final planAsync = ref.watch(restaurantPlanUnifiedProvider);
     
+    // DEBUG: Log plan loading state
+    if (kDebugMode) {
+      debugPrint('🔍 [BlockAddDialog] planAsync state:');
+      planAsync.when(
+        loading: () => debugPrint('  ⏳ loading...'),
+        error: (e, _) => debugPrint('  ❌ error: $e'),
+        data: (plan) {
+          if (plan == null) {
+            debugPrint('  ⚠️ data: plan is null → fallback (show all modules)');
+          } else {
+            final activeModules = plan.activeModules.map((m) => m.code).join(', ');
+            debugPrint('  ✅ data: plan loaded with ${plan.activeModules.length} modules: $activeModules');
+          }
+        },
+      );
+    }
+    
     // Use .when() to properly handle loading/error/data states
     return planAsync.when(
-      loading: () => _buildLoadingDialog(context),
-      error: (e, _) => _buildDialogContent(context, null), // Fallback: show all modules
-      data: (plan) => _buildDialogContent(context, plan),
+      loading: () {
+        debugPrint('📦 [BlockAddDialog] Displaying loading dialog');
+        return _buildLoadingDialog(context);
+      },
+      error: (e, _) {
+        debugPrint('⚠️ [BlockAddDialog] Error loading plan, fallback to all modules: $e');
+        return _buildDialogContent(context, null); // Fallback: show all modules
+      },
+      data: (plan) {
+        if (plan == null) {
+          debugPrint('⚠️ [BlockAddDialog] Plan is null, fallback to all modules');
+        } else {
+          debugPrint('✅ [BlockAddDialog] Plan loaded successfully');
+        }
+        return _buildDialogContent(context, plan);
+      },
     );
   }
 
@@ -78,7 +109,16 @@ class BlockAddDialog extends ConsumerWidget {
       ),
       content: const SizedBox(
         height: 100,
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Chargement du plan...'),
+            ],
+          ),
+        ),
       ),
       actions: [
         TextButton(
@@ -95,6 +135,12 @@ class BlockAddDialog extends ConsumerWidget {
     final regularBlocks = (allowedTypes ?? BlockType.values)
         .where((t) => t != BlockType.system)
         .toList();
+    
+    // DEBUG: Log filtering
+    if (kDebugMode && plan != null) {
+      debugPrint('🔍 [BlockAddDialog] Filtering modules for plan ${plan.restaurantId}');
+      debugPrint('   Active modules: ${plan.activeModules.map((m) => m.code).join(", ")}');
+    }
 
     return AlertDialog(
       title: Row(
@@ -245,9 +291,43 @@ class BlockAddDialog extends ConsumerWidget {
     final filteredModules = allModules.where((module) {
       return availableModuleIds.contains(module.id);
     }).toList();
+    
+    // DEBUG: Log filtered modules
+    if (kDebugMode) {
+      debugPrint('   Available module IDs: ${availableModuleIds.join(", ")}');
+      debugPrint('   Filtered modules: ${filteredModules.map((m) => m.id).join(", ")}');
+    }
 
     return Column(
-      children: filteredModules.map((module) => _buildSystemModuleTile(context, module)).toList(),
+      children: [
+        // Show warning if plan is null
+        if (plan == null)
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.orange.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning, color: Colors.orange.shade700, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Plan non chargé → tous les modules affichés (fallback)',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange.shade900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ...filteredModules.map((module) => _buildSystemModuleTile(context, module)).toList(),
+      ],
     );
   }
 

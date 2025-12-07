@@ -58,6 +58,11 @@ Widget _placeholderModule(BuildContext context, String moduleName) {
 ///   (all part of the core ordering system)
 /// - 'loyalty_module', 'rewards_module' → ModuleId.loyalty
 ///   (both require the loyalty feature)
+/// 
+/// Legacy modules without mapping:
+/// - 'accountActivity': Legacy module, always visible (no White-Label mapping)
+///   This module represents account activity history and is kept for backward
+///   compatibility. It's always displayed regardless of plan configuration.
 const Map<String, ModuleId> moduleIdMapping = {
   // Core ordering system modules
   'menu_catalog': ModuleId.ordering,
@@ -78,6 +83,7 @@ const Map<String, ModuleId> moduleIdMapping = {
   'roulette': ModuleId.roulette,
   'loyalty': ModuleId.loyalty,
   'rewards': ModuleId.loyalty,
+  // NOTE: 'accountActivity' is intentionally NOT mapped (legacy, always visible)
 };
 
 /// Obtenir le ModuleId pour un ID builder
@@ -421,4 +427,53 @@ class CartModuleWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Valider le mapping des modules et retourner les résultats
+/// 
+/// Retourne une map contenant:
+/// - unmappedBuilderModules: Liste des modules builder sans mapping WL
+/// - unmappedWLModules: Liste des ModuleId WL non utilisés dans le builder
+/// - legacyModules: Liste des modules legacy (toujours visibles)
+/// - totalBuilderModules: Nombre total de modules builder
+/// - totalWLModules: Nombre total de ModuleId WL
+/// 
+/// Utilisé pour diagnostiquer les problèmes de propagation entre SuperAdmin et Builder.
+Map<String, dynamic> validateModuleMapping() {
+  final allModuleIds = ModuleId.values;
+  final builderModules = moduleIdMapping.keys.toList();
+  final unmappedBuilderModules = <String>[];
+  final mappingDetails = <String, String>{};
+
+  // Vérifier chaque module builder
+  for (final builderModule in builderModules) {
+    final moduleId = getModuleIdForBuilder(builderModule);
+    if (moduleId != null) {
+      mappingDetails[builderModule] = moduleId.code;
+    } else {
+      unmappedBuilderModules.add(builderModule);
+    }
+  }
+
+  // Modules WL non mappés dans le builder
+  final unmappedWLModules = <String>[];
+  final mappedModuleIds = moduleIdMapping.values.toSet();
+  for (final moduleId in allModuleIds) {
+    if (!mappedModuleIds.contains(moduleId)) {
+      unmappedWLModules.add(moduleId.code);
+    }
+  }
+
+  // Modules legacy (toujours visibles, pas de mapping)
+  final legacyModules = ['accountActivity'];
+
+  return {
+    'unmappedBuilderModules': unmappedBuilderModules,
+    'unmappedWLModules': unmappedWLModules,
+    'legacyModules': legacyModules,
+    'totalBuilderModules': builderModules.length,
+    'totalWLModules': allModuleIds.length,
+    'mappedCount': mappingDetails.length,
+    'mapping': mappingDetails,
+  };
 }
