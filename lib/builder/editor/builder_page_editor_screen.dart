@@ -745,6 +745,12 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
         return {
           'moduleType': 'unknown',
         };
+      case BlockType.module:
+        // Module blocks (White-Label modules)
+        return {
+          'moduleType': 'unknown',
+          'moduleId': '',
+        };
     }
   }
 
