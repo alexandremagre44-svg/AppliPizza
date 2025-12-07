@@ -65,7 +65,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
       setState(() {
         _plan = plan;
         _rawData = data;
-        _selectedModules = plan.activeModules.map((m) => m.code).toSet();
+        _selectedModules = plan.activeModules.toSet();
         _isLoading = false;
       });
     } catch (e) {
@@ -82,9 +82,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
     setState(() => _isLoading = true);
 
     try {
-      final activeModules = _selectedModules
-          .map((code) => ModuleId.values.firstWhere((m) => m.code == code))
-          .toList();
+      final activeModules = _selectedModules.toList();
 
       final updatedPlan = _plan!.copyWith(
         activeModules: activeModules,
@@ -234,10 +232,20 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: activeModules.map((module) {
+                  ModuleId? moduleId;
+                  try {
+                    moduleId = ModuleId.values.firstWhere(
+                      (m) => m.code == module,
+                    );
+                  } catch (_) {
+                    // Unknown module code - display it as-is
+                  }
                   return Chip(
                     avatar: const Icon(Icons.check, size: 16),
-                    label: Text(module.label),
-                    backgroundColor: Colors.green.shade100,
+                    label: Text(moduleId?.label ?? '⚠️ $module (unknown)'),
+                    backgroundColor: moduleId != null
+                        ? Colors.green.shade100
+                        : Colors.orange.shade100,
                   );
                 }).toList(),
               ),
