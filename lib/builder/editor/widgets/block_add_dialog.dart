@@ -253,50 +253,21 @@ class BlockAddDialog extends ConsumerWidget {
   }
 
   Widget _buildSystemModulesList(BuildContext context, RestaurantPlanUnified? plan) {
-    final allModules = [
-      _SystemModuleInfo(
-        id: 'cart_module',
-        label: 'Panier',
-        description: 'Panier et validation',
-        icon: Icons.shopping_cart,
-        color: Colors.green,
-      ),
-      _SystemModuleInfo(
-        id: 'roulette',
-        label: 'Roulette',
-        description: 'Roue de la chance',
-        icon: Icons.casino,
-        color: Colors.purple,
-      ),
-      _SystemModuleInfo(
-        id: 'loyalty',
-        label: 'Fidélité',
-        description: 'Points et progression',
-        icon: Icons.card_giftcard,
-        color: Colors.amber,
-      ),
-      _SystemModuleInfo(
-        id: 'rewards',
-        label: 'Récompenses',
-        description: 'Tickets et bons',
-        icon: Icons.stars,
-        color: Colors.orange,
-      ),
-      _SystemModuleInfo(
-        id: 'accountActivity',
-        label: 'Activité du compte',
-        description: 'Commandes et favoris',
-        icon: Icons.history,
-        color: Colors.blue,
-      ),
-    ];
-
-    // Filter modules based on restaurant plan
-    // Use SystemBlock.getFilteredModules() to get available modules for this plan
-    final availableModuleIds = SystemBlock.getFilteredModules(plan);
-    final filteredModules = allModules.where((module) {
-      return availableModuleIds.contains(module.id);
+    // Get filtered module IDs based on restaurant plan
+    final moduleIds = SystemBlock.getFilteredModules(plan);
+    
+    // Dynamically construct module info using SystemBlock helper methods
+    final builderModules = moduleIds.map((id) {
+      return _SystemModuleInfo(
+        id: id,
+        label: SystemBlock.getModuleLabel(id),
+        description: SystemBlock.getModuleDescription(id),
+        icon: SystemBlock.getModuleIcon(id),
+        color: SystemBlock.getModuleColor(id),
+      );
     }).toList();
+    
+    final filteredModules = builderModules;
     
     // DEBUG: Log filtered modules
     if (kDebugMode) {

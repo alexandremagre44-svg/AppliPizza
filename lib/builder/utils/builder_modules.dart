@@ -336,6 +336,51 @@ String normalizeModuleType(String moduleType) {
   return aliases[moduleType] ?? moduleType;
 }
 
+/// Retourne les modules Builder visibles selon le plan WL
+/// 
+/// Returns list of builder module IDs that are available based on the plan:
+/// - If plan is null, returns all module IDs (fallback)
+/// - Filters modules based on their ModuleId mapping
+/// - Modules without mapping are always visible (legacy)
+/// 
+/// This function filters the complete set of builder modules including:
+/// - Core modules from ModuleConfig (menu_catalog, cart_module, etc.)
+/// - Legacy aliases (roulette, loyalty, rewards)
+/// - All WL-integrated modules
+List<String> getBuilderModulesForPlan(RestaurantPlanUnified? plan) {
+  // Complete list of all builder module IDs including legacy aliases
+  // This matches SystemBlock.availableModules to ensure consistency
+  const allModuleIds = [
+    // Legacy (backward compatibility)
+    'roulette',
+    'loyalty',
+    'rewards',
+    'accountActivity',
+    // Core builder modules
+    'menu_catalog',
+    'cart_module',
+    'profile_module',
+    'roulette_module',
+    // WL modules
+    'loyalty_module',
+    'rewards_module',
+    'delivery_module',
+    'click_collect_module',
+    'kitchen_module',
+    'staff_module',
+    'promotions_module',
+    'newsletter_module',
+  ];
+  
+  if (plan == null) return allModuleIds; // fallback
+  
+  return allModuleIds.where((builderId) {
+    final moduleId = getModuleIdForBuilder(builderId);
+    if (moduleId == null) return true; // legacy
+    return plan.hasModule(moduleId);
+  }).toList();
+}
+
 /// Register a custom module widget builder
 /// 
 /// Used by the runtime to register actual widget implementations.

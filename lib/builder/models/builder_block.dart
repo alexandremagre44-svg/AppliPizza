@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'builder_enums.dart';
 import '../utils/firestore_parsing_helpers.dart';
 import '../../white_label/core/module_id.dart';
@@ -364,43 +365,72 @@ class SystemBlock extends BuilderBlock {
   /// Get icon for a module type
   /// 
   /// FIX M2/N2: Added icons for new module types
-  static String getModuleIcon(String moduleType) {
-    switch (moduleType) {
-      // Legacy modules
-      case 'roulette':
-      case 'roulette_module':
-        return '🎰';
-      case 'loyalty':
-      case 'loyalty_module':
-        return '⭐';
-      case 'rewards':
-      case 'rewards_module':
-        return '🎁';
-      case 'accountActivity':
-        return '📊';
-      // Core modules
-      case 'menu_catalog':
-        return '🍕';
-      case 'cart_module':
-        return '🛒';
-      case 'profile_module':
-        return '👤';
-      // New modules
-      case 'delivery_module':
-        return '🚚';
-      case 'click_collect_module':
-        return '🏪';
-      case 'kitchen_module':
-        return '👨‍🍳';
-      case 'staff_module':
-        return '💳';
-      case 'promotions_module':
-        return '🏷️';
-      case 'newsletter_module':
-        return '📧';
-      default:
-        return '❓';
-    }
+  static IconData getModuleIcon(String moduleType) {
+    const icons = {
+      'cart_module': Icons.shopping_cart,
+      'roulette': Icons.casino,
+      'roulette_module': Icons.casino,
+      'loyalty': Icons.card_giftcard,
+      'loyalty_module': Icons.card_giftcard,
+      'rewards': Icons.stars,
+      'rewards_module': Icons.stars,
+      'accountActivity': Icons.history,
+      'delivery_module': Icons.delivery_dining,
+      'click_collect_module': Icons.store,
+      'promotions_module': Icons.local_offer,
+      'menu_catalog': Icons.restaurant_menu,
+      'profile_module': Icons.person,
+      'kitchen_module': Icons.kitchen,
+      'staff_module': Icons.point_of_sale,
+      'newsletter_module': Icons.email,
+    };
+    return icons[moduleType] ?? Icons.extension;
+  }
+
+  /// Get description for a module type
+  static String getModuleDescription(String moduleType) {
+    const descriptions = {
+      'cart_module': 'Panier et validation',
+      'roulette': 'Roue de la chance',
+      'roulette_module': 'Roue de la chance',
+      'loyalty': 'Points et progression',
+      'loyalty_module': 'Points et progression',
+      'rewards': 'Tickets et bons',
+      'rewards_module': 'Tickets et bons',
+      'accountActivity': 'Commandes et favoris',
+      'delivery_module': 'Gestion des livraisons',
+      'click_collect_module': 'Retrait en magasin',
+      'promotions_module': 'Offres et réductions',
+      'menu_catalog': 'Liste des produits',
+      'profile_module': 'Profil utilisateur',
+      'kitchen_module': 'Affichage commandes cuisine',
+      'staff_module': 'Interface tablette staff',
+      'newsletter_module': 'Formulaire inscription newsletter',
+    };
+    return descriptions[moduleType] ?? '';
+  }
+
+  /// Get color for a module type (returns MaterialColor identifier)
+  static Color getModuleColor(String moduleType) {
+    const colors = {
+      'cart_module': Colors.green,
+      'roulette': Colors.purple,
+      'roulette_module': Colors.purple,
+      'loyalty': Colors.amber,
+      'loyalty_module': Colors.amber,
+      'rewards': Colors.orange,
+      'rewards_module': Colors.orange,
+      'accountActivity': Colors.blue,
+      'delivery_module': Colors.teal,
+      'click_collect_module': Colors.indigo,
+      'promotions_module': Colors.red,
+      'menu_catalog': Colors.deepOrange,
+      'profile_module': Colors.blueGrey,
+      'kitchen_module': Colors.brown,
+      'staff_module': Colors.cyan,
+      'newsletter_module': Colors.lime,
+    };
+    return colors[moduleType] ?? Colors.grey;
   }
 
   /// Normalise un moduleType vers son ID canonique
@@ -425,20 +455,8 @@ class SystemBlock extends BuilderBlock {
   /// 
   /// Returns all modules if plan is null (fallback safe).
   /// Modules without mapping are always visible (legacy compatibility).
-  /// 
-  /// Note: normalizeModuleType() is called in the loop, but this is acceptable
-  /// because: (1) list size is small (<20), (2) it's a simple O(1) map lookup,
-  /// (3) called only during UI rendering, not in performance-critical paths.
   static List<String> getFilteredModules(RestaurantPlanUnified? plan) {
-    if (plan == null) return availableModules; // Fallback safe
-    
-    return availableModules.where((moduleType) {
-      final normalizedType = normalizeModuleType(moduleType);
-      final moduleId = builder_modules.getModuleIdForBuilder(normalizedType);
-      // Modules legacy sans mapping = toujours visibles (rétrocompatibilité)
-      if (moduleId == null) return true;
-      return plan.hasModule(moduleId);
-    }).toList();
+    return builder_modules.getBuilderModulesForPlan(plan);
   }
 
   /// Log détaillé des modules filtrés pour debug (méthode statique)
