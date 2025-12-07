@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
+import '../models/builder_enums.dart';
 import '../runtime/module_runtime_registry.dart';
 
 /// System Block Preview Widget
