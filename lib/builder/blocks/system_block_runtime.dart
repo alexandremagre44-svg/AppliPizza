@@ -574,7 +574,7 @@ class SystemBlockRuntime extends StatelessWidget {
   /// Shows when moduleType is not in the list of available modules
   /// Uses theme for cardRadius, spacing, and font sizes
   ///
-  /// Safe layout with SizedBox.expand to prevent "RenderBox was not laid out" errors
+  /// Safe layout with proper constraints to prevent layout errors
   Widget _buildUnknownModule(String moduleType, ThemeConfig theme) {
     // Get list of available modules
     // Core modules + legacy aliases + WL modules (via ModuleRuntimeRegistry)
@@ -588,14 +588,17 @@ class SystemBlockRuntime extends StatelessWidget {
       'promotions_module', 'newsletter_module', 'kitchen_module', 'staff_module'
     ];
     
-    return SizedBox.expand(
-      child: Container(
-        color: Colors.amber[100],
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+    // Use Container with constraints instead of SizedBox.expand for safer layout
+    return Container(
+      constraints: const BoxConstraints(minHeight: 200),
+      width: double.infinity,
+      color: Colors.amber[100],
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
             const Icon(Icons.help_outline, size: 48, color: Colors.orange),
             const SizedBox(height: 12),
             const Text(
@@ -616,8 +619,7 @@ class SystemBlockRuntime extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   /// Build error fallback widget
