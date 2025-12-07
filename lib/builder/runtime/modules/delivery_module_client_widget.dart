@@ -41,28 +41,20 @@ class _DeliveryModuleClientWidgetState extends State<DeliveryModuleClientWidget>
 
   @override
   Widget build(BuildContext context) {
-    // Design System Usage:
-    // - AppColors: Use static constants directly (e.g., AppColors.primary)
-    // - AppTextStyles: Use static constants directly (e.g., AppTextStyles.titleLarge)
-    // - AppRadius: Use static constants directly (e.g., AppRadius.card)
-    // - AppSpacing: Use static constants directly (e.g., AppSpacing.lg)
-    // NO .of(context) method exists - these are all static classes with constants
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    // Wrap in SingleChildScrollView to ensure safe rendering in all contexts
-    return SingleChildScrollView(
+    // NO SingleChildScrollView - the wrapper handles constraints
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+      margin: EdgeInsets.all(AppSpacing.lg),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.lg),
-        child: Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
-          child: Padding(
-            padding: EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        child: Column(
+          mainAxisSize: MainAxisSize.min,  // ← CRITICAL: shrink to content
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             // Header with icon and title
             Row(
               children: [
@@ -74,17 +66,13 @@ class _DeliveryModuleClientWidgetState extends State<DeliveryModuleClientWidget>
                 ),
               ],
             ),
-
             SizedBox(height: AppSpacing.lg),
-
             // Address section
             Text(
               "Votre adresse",
               style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
-
             SizedBox(height: AppSpacing.xs),
-
             TextField(
               controller: addressController,
               decoration: InputDecoration(
@@ -102,64 +90,40 @@ class _DeliveryModuleClientWidgetState extends State<DeliveryModuleClientWidget>
               ),
               onChanged: (_) => setState(() {}),
             ),
-
             SizedBox(height: AppSpacing.lg),
-
             // Time slot section
             Text(
               "Créneau de livraison",
               style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
-            SizedBox(height: AppSpacing.sm),
-
+            SizedBox(height: AppSpacing.xs),
             Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
-              children: slots.map((slot) {
-                final selected = slot == selectedSlot;
-                return ChoiceChip(
-                  label: Text(slot),
-                  selected: selected,
-                  onSelected: (_) => setState(() => selectedSlot = slot),
-                  selectedColor: colorScheme.primary.withOpacity(0.2),
-                  checkmarkColor: colorScheme.primary,
-                );
-              }).toList(),
+              children: slots.map((slot) => ChoiceChip(
+                label: Text(slot),
+                selected: selectedSlot == slot,
+                onSelected: (selected) {
+                  setState(() => selectedSlot = selected ? slot : null);
+                },
+              )).toList(),
             ),
-
-            SizedBox(height: AppSpacing.xl),
-
-            // Validation button
+            SizedBox(height: AppSpacing.lg),
+            // Confirm button
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: (addressController.text.isNotEmpty &&
-                        selectedSlot != null)
+                onPressed: (addressController.text.isNotEmpty && selectedSlot != null)
                     ? () {
-                        // TODO: Handle delivery validation
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Livraison confirmée pour ${addressController.text} à $selectedSlot',
-                            ),
-                          ),
+                          SnackBar(content: Text('Livraison confirmée: $selectedSlot')),
                         );
                       }
                     : null,
-                style: FilledButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: AppRadius.button,
-                  ),
-                ),
-                child: const Text("Valider la livraison"),
+                child: const Text("Confirmer la livraison"),
               ),
             ),
-              ],
-            ),
-          ),
+          ],
         ),
       ),
     );

@@ -9,6 +9,7 @@
 // (ex: "delivery_module", "loyalty_module", etc.)
 
 import 'package:flutter/material.dart';
+import 'wl/wl_module_wrapper.dart';
 
 /// Type definition for module admin widget builders (for Builder UI)
 ///
@@ -26,52 +27,15 @@ typedef ModuleClientBuilder = Widget Function(BuildContext context);
 @Deprecated('Use ModuleAdminBuilder or ModuleClientBuilder instead')
 typedef ModuleRuntimeBuilder = Widget Function(BuildContext context);
 
-/// Wraps a module widget in a safe layout wrapper to prevent layout exceptions.
+/// Legacy function for wrapping module widgets with safe layout constraints.
 ///
-/// This wrapper ensures that:
-/// - The widget is always laid out properly before hit-testing
-/// - The widget has valid constraints
-/// - Invalid constraint scenarios are handled gracefully
+/// **Deprecated**: Use ModuleRuntimeRegistry.wrapModuleSafe() instead.
+/// This function will be removed in a future version.
 ///
-/// Use this wrapper around ALL widgets returned from the registry to prevent
-/// "Cannot hit test a render box that has never been laid out" errors.
-///
-/// Example:
-/// ```dart
-/// return wrapModuleSafe(MyModuleWidget());
-/// ```
+/// @deprecated Use ModuleRuntimeRegistry.wrapModuleSafe() instead
+@Deprecated('Use ModuleRuntimeRegistry.wrapModuleSafe() instead')
 Widget wrapModuleSafe(Widget child) {
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      // If constraints are completely unbounded, show error widget
-      if (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          alignment: Alignment.center,
-          child: const Text(
-            'Module non disponible (layout invalide)',
-            style: TextStyle(fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-        );
-      }
-
-      // Apply constraints to ensure proper layout
-      return ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: 0,
-          maxWidth: constraints.hasBoundedWidth
-              ? constraints.maxWidth
-              : double.infinity,
-          minHeight: 0,
-          maxHeight: constraints.hasBoundedHeight
-              ? constraints.maxHeight
-              : double.infinity,
-        ),
-        child: child,
-      );
-    },
-  );
+  return ModuleRuntimeRegistry.wrapModuleSafe(child);
 }
 
 /// Registry dedicated to White-Label modules.
@@ -100,6 +64,27 @@ class ModuleRuntimeRegistry {
   /// Legacy internal registry mapping module IDs to their widget builders
   /// @deprecated Use _adminWidgets and _clientWidgets instead
   static final Map<String, ModuleRuntimeBuilder> _registry = {};
+
+  /// Wrap a module widget with safe layout constraints
+  /// 
+  /// This wrapper is automatically applied to all WL modules
+  /// to prevent layout issues in the Builder grid.
+  /// 
+  /// The wrapper provides:
+  /// - Maximum width constraint (600px default)
+  /// - IntrinsicHeight for proper height calculation
+  /// - Center alignment for horizontal centering
+  /// 
+  /// This prevents errors like:
+  /// - "Cannot hit test a render box with no size"
+  /// - Infinite constraint errors from scroll widgets
+  /// - Layout conflicts with parent ListView
+  /// 
+  /// Example:
+  /// ```dart
+  /// return ModuleRuntimeRegistry.wrapModuleSafe(MyModuleWidget());
+  /// ```
+  static Widget wrapModuleSafe(Widget child) => WLModuleWrapper(child: child);
 
   /// Register an ADMIN widget for a White-Label module
   ///
@@ -176,7 +161,7 @@ class ModuleRuntimeRegistry {
   static Widget? buildAdmin(String moduleId, BuildContext context) {
     final builder = _adminWidgets[moduleId];
     if (builder == null) return null;
-    return wrapModuleSafe(builder(context));
+    return wrapModuleSafe(builder(context));  // ← Wrap automatique
   }
 
   /// Build a CLIENT widget for a White-Label module
@@ -197,7 +182,7 @@ class ModuleRuntimeRegistry {
   static Widget? buildClient(String moduleId, BuildContext context) {
     final builder = _clientWidgets[moduleId];
     if (builder == null) return null;
-    return wrapModuleSafe(builder(context));
+    return wrapModuleSafe(builder(context));  // ← Wrap automatique
   }
 
   /// Build a White-Label module widget (legacy method)
