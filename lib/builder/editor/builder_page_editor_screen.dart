@@ -88,6 +88,12 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
   BuilderPage? _publishedPage;
   bool _isLoadingPublished = false;
   
+  /// Restaurant plan for filtering modules
+  /// 
+  /// Loaded from restaurantPlanUnifiedProvider and used to filter
+  /// system modules in the BlockAddDialog based on enabled modules.
+  RestaurantPlanUnified? _restaurantPlan;
+  
   // ==================== GLOBAL THEME SELECTION STATE ====================
   
   /// Whether the global theme is currently selected
@@ -880,6 +886,9 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
   
   /// Build the editor with optional plan
   Widget _buildEditor(BuildContext context, RestaurantPlanUnified? plan) {
+    // Store plan in state for use in dialog calls
+    _restaurantPlan = plan;
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         final responsive = ResponsiveBuilder(constraints.maxWidth);
@@ -891,7 +900,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               ? const Center(child: CircularProgressIndicator())
               : _page == null
                   ? _buildErrorState()
-                  : _buildResponsiveLayout(responsive),
+                  : _buildResponsiveLayout(responsive, plan),
           floatingActionButton: _buildFloatingActionButton(responsive),
         );
       },
@@ -1017,7 +1026,10 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
   }
 
   /// Build responsive layout based on screen size
-  Widget _buildResponsiveLayout(ResponsiveBuilder responsive) {
+  Widget _buildResponsiveLayout(
+    ResponsiveBuilder responsive,
+    RestaurantPlanUnified? plan,
+  ) {
     if (responsive.isDesktop) {
       return _buildDesktopLayout();
     } else if (responsive.isTablet) {
@@ -3733,6 +3745,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       context,
       currentBlockCount: _page!.draftLayout.length,
       showSystemModules: true,
+      restaurantPlan: _restaurantPlan,
     );
     
     if (block != null) {
