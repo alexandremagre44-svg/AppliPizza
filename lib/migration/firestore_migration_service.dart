@@ -7,6 +7,8 @@
 /// 2. Normaliser les champs des restaurants
 /// 3. Copier roulette_settings dans plan/unified
 /// 4. Normaliser les champs utilisateurs
+/// 5. Copier loyalty_settings vers builder_settings de chaque restaurant
+/// 6. Copier roulette_segments vers chaque restaurant
 library;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,6 +23,8 @@ import 'migration_report.dart';
 /// 2. Normalise les champs des restaurants
 /// 3. Copie roulette_settings dans plan/unified
 /// 4. Normalise les champs utilisateurs
+/// 5. Copie loyalty_settings vers builder_settings de chaque restaurant
+/// 6. Copie roulette_segments vers chaque restaurant
 ///
 /// Ce service est:
 /// - **Idempotent** : peut être exécuté plusieurs fois sans effet secondaire
