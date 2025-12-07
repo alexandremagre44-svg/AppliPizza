@@ -232,14 +232,20 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: activeModules.map((module) {
-                  final moduleId = ModuleId.values.firstWhere(
-                    (m) => m.code == module,
-                    orElse: () => ModuleId.ordering,
-                  );
+                  ModuleId? moduleId;
+                  try {
+                    moduleId = ModuleId.values.firstWhere(
+                      (m) => m.code == module,
+                    );
+                  } catch (_) {
+                    // Unknown module code - display it as-is
+                  }
                   return Chip(
                     avatar: const Icon(Icons.check, size: 16),
-                    label: Text(moduleId.label),
-                    backgroundColor: Colors.green.shade100,
+                    label: Text(moduleId?.label ?? '⚠️ $module (unknown)'),
+                    backgroundColor: moduleId != null
+                        ? Colors.green.shade100
+                        : Colors.orange.shade100,
                   );
                 }).toList(),
               ),
