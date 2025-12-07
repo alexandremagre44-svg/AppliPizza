@@ -12,6 +12,7 @@
 library;
 
 import '../core/module_id.dart';
+import '../core/module_config.dart';
 import '../modules/appearance/theme/theme_module_config.dart';
 import '../modules/appearance/pages_builder/pages_builder_module_config.dart';
 import '../modules/core/delivery/delivery_module_config.dart';
@@ -132,6 +133,11 @@ class BrandingConfig {
       borderRadius: borderRadius ?? this.borderRadius,
     );
   }
+
+  /// Creates an empty BrandingConfig with default values.
+  factory BrandingConfig.empty() {
+    return const BrandingConfig();
+  }
 }
 
 /// Configuration des tablettes cuisine et staff.
@@ -239,9 +245,16 @@ class RestaurantPlanUnified {
 
   // ========== B. Modules activés ==========
 
+  /// Liste complète des configurations de modules pour ce restaurant.
+  ///
+  /// Chaque entrée contient l'ID du module, son statut enabled/disabled,
+  /// et ses paramètres spécifiques dans settings.
+  final List<ModuleConfig> modules;
+
   /// Liste des IDs de modules activés pour ce restaurant.
   ///
   /// Utilise les codes de ModuleId (ex: "delivery", "loyalty", "roulette").
+  /// Cette liste est calculée à partir de modules.where(enabled).
   final List<String> activeModules;
 
   // ========== C. Paramètres consolidés ==========
@@ -290,6 +303,7 @@ class RestaurantPlanUnified {
     this.templateId,
     this.createdAt,
     this.updatedAt,
+    this.modules = const [],
     this.activeModules = const [],
     this.branding,
     this.delivery,
@@ -313,6 +327,7 @@ class RestaurantPlanUnified {
     String? templateId,
     DateTime? createdAt,
     DateTime? updatedAt,
+    List<ModuleConfig>? modules,
     List<String>? activeModules,
     BrandingConfig? branding,
     DeliveryModuleConfig? delivery,
@@ -334,6 +349,7 @@ class RestaurantPlanUnified {
       templateId: templateId ?? this.templateId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      modules: modules ?? this.modules,
       activeModules: activeModules ?? this.activeModules,
       branding: branding ?? this.branding,
       delivery: delivery ?? this.delivery,
@@ -362,6 +378,7 @@ class RestaurantPlanUnified {
       if (templateId != null) 'templateId': templateId,
       if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
       if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+      'modules': modules.map((m) => m.toJson()).toList(),
       'activeModules': activeModules,
       if (branding != null) 'branding': branding!.toJson(),
       if (delivery != null) 'delivery': delivery!.toJson(),
@@ -383,9 +400,17 @@ class RestaurantPlanUnified {
   /// Cette méthode assure la rétrocompatibilité en gérant les champs
   /// manquants avec des valeurs par défaut appropriées.
   factory RestaurantPlanUnified.fromJson(Map<String, dynamic> json) {
-    // Parser la liste des modules activés
-    final activeModulesJson = json['activeModules'] as List<dynamic>? ?? [];
-    final activeModules = activeModulesJson.map((m) => m.toString()).toList();
+    // Parser la liste des modules depuis la nouvelle structure
+    final modulesJson = json['modules'] as List<dynamic>? ?? [];
+    final modules = modulesJson
+        .map((e) => ModuleConfig.fromJson(e as Map<String, dynamic>))
+        .toList();
+
+    // Calculer activeModules à partir des modules enabled
+    final activeModules = modules
+        .where((m) => m.enabled == true)
+        .map((m) => m.id)
+        .toList();
 
     // Parser les dates
     DateTime? createdAt;
@@ -546,6 +571,7 @@ class RestaurantPlanUnified {
       templateId: json['templateId'] as String?,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      modules: modules,
       activeModules: activeModules,
       branding: branding,
       delivery: delivery,
@@ -568,9 +594,16 @@ class RestaurantPlanUnified {
   /// Vérifie si un module est activé pour ce restaurant.
   ///
   /// Utilise la liste [activeModules] pour déterminer si un module
-  /// identifié par son [ModuleId] est activé.
-  bool hasModule(ModuleId moduleId) {
-    return activeModules.contains(moduleId.code);
+  /// identifié par son code string ou [ModuleId] est activé.
+  ///
+  /// Accepte soit un string (ex: "delivery") soit un ModuleId.
+  bool hasModule(dynamic moduleIdOrCode) {
+    if (moduleIdOrCode is ModuleId) {
+      return activeModules.contains(moduleIdOrCode.code);
+    } else if (moduleIdOrCode is String) {
+      return activeModules.contains(moduleIdOrCode);
+    }
+    return false;
   }
 
   /// Retourne la liste des modules activés sous forme de [ModuleId].
@@ -599,6 +632,7 @@ class RestaurantPlanUnified {
       name: name,
       slug: slug,
       templateId: templateId,
+      modules: [],
       activeModules: [],
       branding: null,
       delivery: null,

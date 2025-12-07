@@ -6,9 +6,11 @@
 /// Ces providers sont prêts à être consommés en Phase C2.
 /// Pour l'instant, ils ne sont PAS utilisés dans l'UI.
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../white_label/core/module_id.dart';
+import '../../white_label/core/module_config.dart';
 import '../../white_label/core/system_pages.dart';
 import '../../white_label/modules/core/delivery/delivery_module_config.dart';
 import '../../white_label/modules/core/delivery/delivery_settings.dart';
@@ -47,20 +49,57 @@ final restaurantPlanProvider = FutureProvider<RestaurantPlan?>(
 
 /// Provider pour charger le RestaurantPlanUnified du restaurant courant.
 ///
-/// Utilise [currentRestaurantProvider] pour déterminer quel restaurant charger.
-/// Retourne null si pas de restaurantId ou si le plan n'existe pas.
+/// Lit UNIQUEMENT depuis restaurants/{id}/plan/config avec la structure modules[].
+/// Calcule activeModules depuis modules.where(enabled).
 /// 
-/// Ce provider remplace progressivement [restaurantPlanProvider] pour utiliser
-/// le nouveau modèle unifié.
+/// Retourne un plan vide si le document config n'existe pas (backward compatibility).
 final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
   (ref) async {
-    final service = ref.watch(restaurantPlanRuntimeServiceProvider);
     final restaurantConfig = ref.watch(currentRestaurantProvider);
-
     final restaurantId = restaurantConfig.id;
+    
     if (restaurantId.isEmpty) return null;
 
-    return service.loadUnifiedPlan(restaurantId);
+    final firestore = FirebaseFirestore.instance;
+
+    final configDoc = await firestore
+        .collection('restaurants')
+        .doc(restaurantId)
+        .collection('plan')
+        .doc('config')
+        .get();
+
+    if (!configDoc.exists) {
+      return RestaurantPlanUnified(
+        restaurantId: restaurantId,
+        name: '',
+        slug: '',
+        modules: [],
+        activeModules: [],
+        branding: BrandingConfig.empty(),
+      );
+    }
+
+    final data = configDoc.data()!;
+    final modules = (data['modules'] as List<dynamic>? ?? [])
+        .map((e) => ModuleConfig.fromJson(e as Map<String, dynamic>))
+        .toList();
+
+    final activeModules = modules
+        .where((m) => m.enabled == true)
+        .map((m) => m.id)
+        .toList();
+
+    return RestaurantPlanUnified(
+      restaurantId: restaurantId,
+      name: data['name'] as String? ?? '',
+      slug: data['slug'] as String? ?? '',
+      modules: modules,
+      activeModules: activeModules,
+      branding: data['branding'] != null
+          ? BrandingConfig.fromJson(data['branding'] as Map<String, dynamic>)
+          : BrandingConfig.empty(),
+    );
   },
   dependencies: [currentRestaurantProvider],
 );

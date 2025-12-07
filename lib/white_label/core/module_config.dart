@@ -1,5 +1,3 @@
-import 'module_id.dart';
-
 /// Configuration d'un module pour un restaurant spécifique.
 ///
 /// Chaque restaurant peut activer/désactiver des modules et personnaliser
@@ -7,9 +5,18 @@ import 'module_id.dart';
 ///
 /// Cette classe est générique : chaque module peut avoir des settings
 /// spécifiques stockés dans la Map [settings].
+///
+/// Structure Firestore attendue:
+/// ```json
+/// {
+///   "id": "ordering",
+///   "enabled": true,
+///   "settings": {}
+/// }
+/// ```
 class ModuleConfig {
-  /// Identifiant du module concerné.
-  final ModuleId id;
+  /// Identifiant du module concerné (string code, ex: "ordering", "delivery").
+  final String id;
 
   /// Indique si le module est activé pour ce restaurant.
   final bool enabled;
@@ -27,7 +34,7 @@ class ModuleConfig {
 
   /// Crée une copie de cette configuration avec les champs modifiés.
   ModuleConfig copyWith({
-    ModuleId? id,
+    String? id,
     bool? enabled,
     Map<String, dynamic>? settings,
   }) {
@@ -41,7 +48,7 @@ class ModuleConfig {
   /// Sérialise la configuration en JSON.
   Map<String, dynamic> toJson() {
     return {
-      'id': id.code,
+      'id': id,
       'enabled': enabled,
       'settings': settings,
     };
@@ -49,14 +56,8 @@ class ModuleConfig {
 
   /// Désérialise une configuration depuis un JSON.
   factory ModuleConfig.fromJson(Map<String, dynamic> json) {
-    final idCode = json['id'] as String;
-    final moduleId = ModuleId.values.firstWhere(
-      (m) => m.code == idCode,
-      orElse: () => throw ArgumentError('Unknown module id: $idCode'),
-    );
-
     return ModuleConfig(
-      id: moduleId,
+      id: json['id'] as String? ?? '',
       enabled: json['enabled'] as bool? ?? false,
       settings: Map<String, dynamic>.from(json['settings'] as Map? ?? {}),
     );
@@ -64,9 +65,6 @@ class ModuleConfig {
 
   @override
   String toString() {
-    return 'ModuleConfig(id: ${id.code}, enabled: $enabled, settings: $settings)';
+    return 'ModuleConfig(id: $id, enabled: $enabled, settings: $settings)';
   }
-
-  // TODO: Ajouter une méthode validate() pour valider les settings
-  // TODO: Plus tard, typer les settings par module avec des classes spécifiques
 }
