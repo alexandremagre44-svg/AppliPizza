@@ -36,6 +36,27 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
     _loadPlan();
   }
 
+  /// Convertit récursivement les Timestamp Firestore en String ISO8601
+  /// pour permettre la sérialisation JSON
+  Map<String, dynamic> _convertTimestamps(Map<String, dynamic>? data) {
+    if (data == null) return {};
+    
+    return data.map((key, value) {
+      if (value is Timestamp) {
+        return MapEntry(key, value.toDate().toIso8601String());
+      } else if (value is Map<String, dynamic>) {
+        return MapEntry(key, _convertTimestamps(value));
+      } else if (value is List) {
+        return MapEntry(key, value.map((e) {
+          if (e is Timestamp) return e.toDate().toIso8601String();
+          if (e is Map<String, dynamic>) return _convertTimestamps(e);
+          return e;
+        }).toList());
+      }
+      return MapEntry(key, value);
+    });
+  }
+
   Future<void> _loadPlan() async {
     setState(() {
       _isLoading = true;
@@ -303,7 +324,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
   Widget _buildRawJsonSection(ThemeData theme) {
     if (_rawData == null) return const SizedBox();
 
-    final jsonString = const JsonEncoder.withIndent('  ').convert(_rawData);
+    final jsonString = const JsonEncoder.withIndent('  ').convert(_convertTimestamps(_rawData));
 
     return Card(
       child: Padding(
