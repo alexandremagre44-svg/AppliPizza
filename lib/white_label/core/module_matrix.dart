@@ -132,7 +132,7 @@ const Map<String, ModuleDefinitionMeta> moduleMatrix = {
     category: ModuleCategory.core,
     status: ModuleStatus.implemented,
     hasPage: true,
-    hasBuilderBlock: false,
+    hasBuilderBlock: true,
     premium: false,
     defaultRoute: '/delivery',
     tags: ['core', 'delivery', 'logistics'],

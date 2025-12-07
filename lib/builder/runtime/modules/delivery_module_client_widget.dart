@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import '../../../src/design_system/app_theme.dart';
 
-/// Delivery Client Widget
+/// Delivery Module Client Widget
 /// 
 /// User-facing widget for the Delivery module in the client app.
 /// Allows customers to enter their delivery address and select a delivery time slot.
@@ -14,14 +14,15 @@ import '../../../src/design_system/app_theme.dart';
 /// - Time slot selection with choice chips
 /// - Material 3 compliant design
 /// - Form validation (button only enabled when address and slot selected)
-class DeliveryClientWidget extends StatefulWidget {
-  const DeliveryClientWidget({super.key});
+/// - Properly constrained for use in Builder system
+class DeliveryModuleClientWidget extends StatefulWidget {
+  const DeliveryModuleClientWidget({super.key});
 
   @override
-  State<DeliveryClientWidget> createState() => _DeliveryClientWidgetState();
+  State<DeliveryModuleClientWidget> createState() => _DeliveryModuleClientWidgetState();
 }
 
-class _DeliveryClientWidgetState extends State<DeliveryClientWidget> {
+class _DeliveryModuleClientWidgetState extends State<DeliveryModuleClientWidget> {
   String? selectedSlot;
   final addressController = TextEditingController();
 
@@ -49,14 +50,19 @@ class _DeliveryClientWidgetState extends State<DeliveryClientWidget> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+    // Wrap in SingleChildScrollView to ensure safe rendering in all contexts
+    return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             // Header with icon and title
             Row(
               children: [
@@ -124,31 +130,36 @@ class _DeliveryClientWidgetState extends State<DeliveryClientWidget> {
             SizedBox(height: AppSpacing.xl),
 
             // Validation button
-            FilledButton(
-              onPressed: (addressController.text.isNotEmpty &&
-                      selectedSlot != null)
-                  ? () {
-                      // TODO: Handle delivery validation
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Livraison confirmée pour ${addressController.text} à $selectedSlot',
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: (addressController.text.isNotEmpty &&
+                        selectedSlot != null)
+                    ? () {
+                        // TODO: Handle delivery validation
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Livraison confirmée pour ${addressController.text} à $selectedSlot',
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  : null,
-              style: FilledButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                minimumSize: const Size(double.infinity, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: AppRadius.button,
+                        );
+                      }
+                    : null,
+                style: FilledButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppRadius.button,
+                  ),
                 ),
+                child: const Text("Valider la livraison"),
               ),
-              child: const Text("Valider la livraison"),
-            )
-          ],
+            ),
+              ],
+            ),
+          ),
         ),
       ),
     );

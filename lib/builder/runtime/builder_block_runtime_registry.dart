@@ -416,7 +416,7 @@ class BuilderBlockRuntimeRegistry {
 /// Currently registered modules:
 /// - delivery_module: 
 ///   - ADMIN: DeliveryModuleAdminWidget (configuration card)
-///   - CLIENT: DeliveryClientWidget (address + time slot selection)
+///   - CLIENT: DeliveryModuleClientWidget (address + time slot selection)
 /// 
 /// Add more modules here as they are implemented.
 void registerWhiteLabelModules() {
@@ -428,7 +428,7 @@ void registerWhiteLabelModules() {
   
   ModuleRuntimeRegistry.registerClient(
     'delivery_module',
-    (ctx) => const DeliveryClientWidget(),
+    (ctx) => const DeliveryModuleClientWidget(),
   );
 
   // TODO: Register other WL modules as they are implemented

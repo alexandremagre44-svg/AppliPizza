@@ -11,6 +11,7 @@ import '../../../src/design_system/app_theme.dart';
 /// Theme-aware, Material 3 compliant widget for the Delivery module in Builder/Admin mode.
 /// Displays a card with delivery information and configuration button.
 /// This widget is shown in the Builder UI for administrators to configure delivery settings.
+/// Properly constrained to work within Builder layout system.
 class DeliveryModuleAdminWidget extends StatelessWidget {
   const DeliveryModuleAdminWidget({super.key});
 
@@ -19,19 +20,19 @@ class DeliveryModuleAdminWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.lg),
-      child: Card(
-        elevation: 2,
-        shadowColor: AppColors.black.withOpacity(0.1),
-        shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.card,
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return Card(
+      elevation: 2,
+      shadowColor: AppColors.black.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.card,
+      ),
+      margin: EdgeInsets.all(AppSpacing.lg),
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
               Icon(
                 Icons.local_shipping,
                 size: 42,
@@ -59,30 +60,35 @@ class DeliveryModuleAdminWidget extends StatelessWidget {
 
               SizedBox(height: AppSpacing.lg),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FilledButton(
-                    onPressed: () {
-                      // TODO: Navigate to delivery config
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: AppSpacing.xl,
-                        vertical: AppSpacing.md,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FilledButton(
+                  onPressed: () {
+                    // TODO: Navigate to delivery config
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Configuration de livraison - À implémenter'),
+                        duration: Duration(seconds: 2),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: AppRadius.button,
-                      ),
+                    );
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xl,
+                      vertical: AppSpacing.md,
                     ),
-                    child: Text("Configurer"),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadius.button,
+                    ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                  child: const Text("Configurer"),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
