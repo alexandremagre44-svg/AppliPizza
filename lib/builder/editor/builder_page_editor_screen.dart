@@ -1695,6 +1695,8 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         // THEME INTEGRATION: Pass draftTheme for live preview when showing draft
         // Use theme background color, not Material theme surface
         themeConfig: _draftTheme,
+        // FILTERING INTEGRATION: Pass restaurant plan for module filtering
+        plan: _restaurantPlan,
       ),
     );
   }
@@ -2751,6 +2753,8 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         modules: previewData.modules,
         // THEME INTEGRATION: Pass draftTheme for live preview
         themeConfig: _draftTheme,
+        // FILTERING INTEGRATION: Pass restaurant plan for module filtering
+        plan: _restaurantPlan,
       ),
     );
   }

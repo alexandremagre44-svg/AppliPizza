@@ -47,6 +47,12 @@ class BuilderPagePreview extends StatelessWidget {
   /// - For published preview: pass publishedTheme
   /// - If null, uses ThemeConfig.defaultConfig
   final ThemeConfig? themeConfig;
+  
+  /// Optional restaurant plan for filtering modules
+  /// 
+  /// When provided, SystemBlockPreview will filter disabled modules.
+  /// If null or module is disabled, the block will be hidden.
+  final dynamic plan; // RestaurantPlanUnified? - dynamic to avoid import cycle
 
   const BuilderPagePreview({
     super.key,
@@ -54,6 +60,7 @@ class BuilderPagePreview extends StatelessWidget {
     this.modules,
     this.backgroundColor,
     this.themeConfig,
+    this.plan,
   });
 
   @override
@@ -154,9 +161,9 @@ class BuilderPagePreview extends StatelessWidget {
       case BlockType.html:
         return HtmlBlockPreview(block: block);
       case BlockType.system:
-        return SystemBlockPreview(block: block);
+        return SystemBlockPreview(block: block, plan: plan);
       case BlockType.module:
-        return SystemBlockPreview(block: block);
+        return SystemBlockPreview(block: block, plan: plan);
     }
   }
 

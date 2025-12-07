@@ -77,31 +77,20 @@ class SystemBlockPreview extends StatelessWidget {
   /// Check if a module is enabled in the plan
   /// 
   /// Returns true if:
-  /// - plan is null (no filtering)
   /// - module is in the filtered modules list from SystemBlock.getFilteredModules
+  /// 
+  /// Conservative approach: returns false if plan is null (hides all WL modules by default).
   bool _isModuleEnabled(String moduleType) {
-    if (plan == null) return true;
-    
-    // Get filtered modules from SystemBlock
+    // Use the centralized SystemBlock.isModuleEnabled method
     // Note: plan is dynamic to avoid import cycle
-    // We use a try-catch for type safety
     try {
-      // Type check before using
-      if (plan is! Object) {
-        if (kDebugMode) {
-          debugPrint('⚠️ [SystemBlockPreview] Plan is not a valid object');
-        }
-        return true; // Fail-open
-      }
-      
-      final filteredModules = SystemBlock.getFilteredModules(plan as dynamic);
-      return filteredModules.contains(moduleType);
+      return SystemBlock.isModuleEnabled(moduleType, plan as dynamic);
     } catch (e) {
-      // If filtering fails, show the module (fail-open)
+      // If filtering fails, hide the module (conservative/fail-closed)
       if (kDebugMode) {
         debugPrint('⚠️ [SystemBlockPreview] Error checking module enabled: $e');
       }
-      return true;
+      return false;
     }
   }
 
@@ -127,6 +116,14 @@ class SystemBlockPreview extends StatelessWidget {
       final systemBlock = block as SystemBlock;
       if (systemBlock.moduleId != null) {
         final moduleId = systemBlock.moduleId!;
+        
+        // Filter modules based on plan for BlockType.module
+        if (!SystemBlock.isModuleEnabled(moduleId, plan as dynamic)) {
+          if (kDebugMode) {
+            debugPrint('🚫 [SystemBlockPreview] Module "$moduleId" is disabled in plan - hiding');
+          }
+          return const SizedBox.shrink();
+        }
         
         // Check if this is a WL system module (cart_module, delivery_module)
         // These should show a neutral placeholder, NOT try to render
