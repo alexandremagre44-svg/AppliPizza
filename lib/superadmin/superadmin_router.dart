@@ -19,6 +19,7 @@ import 'pages/users_page.dart';
 import 'pages/modules_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/logs_page.dart';
+import 'pages/migration_page.dart';
 
 /// Routes du module Super-Admin.
 class SuperAdminRoutes {
@@ -55,6 +56,9 @@ class SuperAdminRoutes {
 
   /// Route des logs d'activité.
   static const String logs = '/superadmin/logs';
+
+  /// Route de migration Firestore.
+  static const String migration = '/superadmin/migration';
 }
 
 /// Liste des routes Super-Admin à intégrer dans le router principal.
@@ -153,6 +157,13 @@ final List<RouteBase> superAdminRoutes = [
         path: SuperAdminRoutes.logs,
         pageBuilder: (context, state) => const NoTransitionPage(
           child: LogsPage(),
+        ),
+      ),
+      // Migration
+      GoRoute(
+        path: SuperAdminRoutes.migration,
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: MigrationPage(),
         ),
       ),
     ],
