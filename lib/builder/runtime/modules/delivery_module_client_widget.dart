@@ -45,10 +45,10 @@ class _DeliveryModuleClientWidgetState extends State<DeliveryModuleClientWidget>
     final textTheme = Theme.of(context).textTheme;
 
     // NO SingleChildScrollView - the wrapper handles constraints
+    // NO margin on Card - the wrapper handles layout to prevent conflicts
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
-      margin: EdgeInsets.all(AppSpacing.lg),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
@@ -115,9 +115,12 @@ class _DeliveryModuleClientWidgetState extends State<DeliveryModuleClientWidget>
               child: FilledButton(
                 onPressed: (addressController.text.isNotEmpty && selectedSlot != null)
                     ? () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Livraison confirmée: $selectedSlot')),
-                        );
+                        // Safe: Check if context is still mounted before showing snackbar
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Livraison confirmée: $selectedSlot')),
+                          );
+                        }
                       }
                     : null,
                 child: const Text("Confirmer la livraison"),

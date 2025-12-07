@@ -184,12 +184,27 @@ class SystemBlockRuntime extends StatelessWidget {
   }
 
   /// Detect if current context is admin/builder mode
+  /// 
+  /// SAFE implementation - no traversal, no stored context, no async operations.
+  /// Uses ModalRoute.of which is safe to call during build.
   bool _isAdminContext(BuildContext context) {
-    // Check for admin route or builder preview context
-    final route = ModalRoute.of(context)?.settings.name ?? '';
-    return route.contains('/admin') || 
-           route.contains('/builder') ||
-           route.contains('/editor');
+    try {
+      // Safe: ModalRoute.of does NOT traverse child elements or store context
+      // It only walks up the ancestor tree looking for a ModalRoute
+      final route = ModalRoute.of(context);
+      if (route == null) return false;
+      
+      final routeName = route.settings.name ?? '';
+      
+      // Check if we're in admin/builder/editor routes
+      return routeName.contains('/admin') || 
+             routeName.contains('/builder') ||
+             routeName.contains('/editor') ||
+             routeName.contains('/studio');
+    } catch (e) {
+      // Fallback to false if any error (shouldn't happen, but safe)
+      return false;
+    }
   }
   
   /// Check if moduleType is a builder module (from builder_modules.dart)
@@ -559,7 +574,7 @@ class SystemBlockRuntime extends StatelessWidget {
   /// Shows when moduleType is not in the list of available modules
   /// Uses theme for cardRadius, spacing, and font sizes
   ///
-  /// Safe layout with SizedBox.expand to prevent "RenderBox was not laid out" errors
+  /// Safe layout with proper constraints to prevent layout errors
   Widget _buildUnknownModule(String moduleType, ThemeConfig theme) {
     // Get list of available modules
     // Core modules + legacy aliases + WL modules (via ModuleRuntimeRegistry)
@@ -573,14 +588,17 @@ class SystemBlockRuntime extends StatelessWidget {
       'promotions_module', 'newsletter_module', 'kitchen_module', 'staff_module'
     ];
     
-    return SizedBox.expand(
-      child: Container(
-        color: Colors.amber[100],
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+    // Use Container with constraints instead of SizedBox.expand for safer layout
+    return Container(
+      constraints: const BoxConstraints(minHeight: 200),
+      width: double.infinity,
+      color: Colors.amber[100],
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
             const Icon(Icons.help_outline, size: 48, color: Colors.orange),
             const SizedBox(height: 12),
             const Text(
@@ -601,8 +619,7 @@ class SystemBlockRuntime extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   /// Build error fallback widget
