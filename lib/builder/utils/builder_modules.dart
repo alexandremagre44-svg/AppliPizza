@@ -8,6 +8,14 @@ import 'package:flutter/material.dart';
 import '../runtime/modules/menu_catalog_runtime_widget.dart';
 import '../runtime/modules/profile_module_widget.dart';
 import '../runtime/modules/roulette_module_widget.dart';
+import '../runtime/modules/delivery_module_widget.dart';
+import '../runtime/modules/click_collect_module_widget.dart';
+import '../runtime/modules/loyalty_module_widget.dart';
+import '../runtime/modules/rewards_module_widget.dart';
+import '../runtime/modules/promotions_module_widget.dart';
+import '../runtime/modules/newsletter_module_widget.dart';
+import '../runtime/modules/kitchen_module_widget.dart';
+import '../runtime/modules/staff_module_widget.dart';
 import '../../white_label/core/module_id.dart';
 import '../../white_label/restaurant/restaurant_plan_unified.dart';
 
@@ -94,12 +102,38 @@ const Map<String, ModuleId> moduleIdMapping = {
 /// - 'roulette' and 'roulette_module' both map to ModuleId.roulette
 /// - 'loyalty' and 'loyalty_module' both map to ModuleId.loyalty
 /// - 'rewards' and 'rewards_module' both map to ModuleId.loyalty
+/// 
+/// FIX: Added explicit mappings for all WL modules
 ModuleId? getModuleIdForBuilder(String builderModuleId) {
-  // Explicit mapping for roulette to ensure Builder recognition
+  // Explicit mapping for all modules to ensure Builder recognition
   switch (builderModuleId) {
     case 'roulette':
     case 'roulette_module':
-      return ModuleId.roulette; // White-label ModuleId
+      return ModuleId.roulette;
+    
+    case 'delivery_module':
+      return ModuleId.delivery;
+    
+    case 'click_collect_module':
+      return ModuleId.clickAndCollect;
+    
+    case 'loyalty_module':
+      return ModuleId.loyalty;
+    
+    case 'rewards_module':
+      return ModuleId.loyalty;
+    
+    case 'promotions_module':
+      return ModuleId.promotions;
+    
+    case 'newsletter_module':
+      return ModuleId.newsletter;
+    
+    case 'kitchen_module':
+      return ModuleId.kitchen_tablet;
+    
+    case 'staff_module':
+      return ModuleId.staff_tablet;
   }
   
   // Fallback to existing mapping
@@ -142,11 +176,22 @@ bool isBuilderModuleEnabled(String builderModuleId, RestaurantPlanUnified? plan)
 /// Maps module IDs to their widget builders.
 /// 
 /// All runtime widgets are imported and available directly.
+/// 
+/// FIX: Added WL module registrations
 final Map<String, ModuleWidgetBuilder> builderModules = {
   'menu_catalog': (context) => const MenuCatalogRuntimeWidget(),
   'cart_module': (context) => const CartModuleWidget(),
   'profile_module': (context) => const ProfileModuleWidget(),
   'roulette_module': (context) => const RouletteModuleWidget(),
+  // WL modules
+  'delivery_module': (context) => const DeliveryModuleWidget(),
+  'click_collect_module': (context) => const ClickCollectModuleWidget(),
+  'loyalty_module': (context) => const LoyaltyModuleWidget(),
+  'rewards_module': (context) => const RewardsModuleWidget(),
+  'promotions_module': (context) => const PromotionsModuleWidget(),
+  'newsletter_module': (context) => const NewsletterModuleWidget(),
+  'kitchen_module': (context) => const KitchenModuleWidget(),
+  'staff_module': (context) => const StaffModuleWidget(),
 };
 
 /// Module configuration
