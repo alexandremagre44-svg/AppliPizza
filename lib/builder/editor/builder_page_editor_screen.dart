@@ -2844,6 +2844,9 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       case BlockType.system:
         final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
         return 'Module ${SystemBlock.getModuleLabel(moduleType)}';
+      case BlockType.module:
+        final moduleType = block.getConfig<String>('moduleType', 'unknown') ?? 'unknown';
+        return 'Module WL ${SystemBlock.getModuleLabel(moduleType)}';
       default:
         return 'Bloc ${block.type.value}';
     }
@@ -2872,6 +2875,8 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
       case BlockType.html:
         return _buildHtmlConfig(block);
       case BlockType.system:
+        return _buildSystemConfig(block);
+      case BlockType.module:
         return _buildSystemConfig(block);
     }
   }
@@ -3697,6 +3702,7 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
 
     final newBlock = SystemBlock(
       id: 'block_${DateTime.now().millisecondsSinceEpoch}',
+      type: BlockType.module,
       moduleType: moduleType,
       order: _page!.draftLayout.length,
     );

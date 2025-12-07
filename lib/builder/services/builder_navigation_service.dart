@@ -242,6 +242,7 @@ class BuilderNavigationService {
         return [
           SystemBlock(
             id: 'menu_catalog_auto_$timestamp',
+            type: BlockType.module,
             moduleType: 'menu_catalog',
             order: 0,
           ),
@@ -250,6 +251,7 @@ class BuilderNavigationService {
         return [
           SystemBlock(
             id: 'cart_module_auto_$timestamp',
+            type: BlockType.module,
             moduleType: 'cart_module',
             order: 0,
           ),
@@ -258,6 +260,7 @@ class BuilderNavigationService {
         return [
           SystemBlock(
             id: 'profile_module_auto_$timestamp',
+            type: BlockType.module,
             moduleType: 'profile_module',
             order: 0,
           ),
@@ -266,6 +269,7 @@ class BuilderNavigationService {
         return [
           SystemBlock(
             id: 'roulette_module_auto_$timestamp',
+            type: BlockType.module,
             moduleType: 'roulette_module',
             order: 0,
           ),

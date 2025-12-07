@@ -862,6 +862,7 @@ class BuilderPageService {
             defaultBlocks = [
               SystemBlock(
                 id: 'cart_module_fix_$timestamp',
+                type: BlockType.module,
                 moduleType: 'cart_module',
                 order: 0,
               ),
@@ -871,6 +872,7 @@ class BuilderPageService {
             defaultBlocks = [
               SystemBlock(
                 id: 'menu_catalog_fix_$timestamp',
+                type: BlockType.module,
                 moduleType: 'menu_catalog',
                 order: 0,
               ),
@@ -880,6 +882,7 @@ class BuilderPageService {
             defaultBlocks = [
               SystemBlock(
                 id: 'profile_module_fix_$timestamp',
+                type: BlockType.module,
                 moduleType: 'profile_module',
                 order: 0,
               ),
@@ -889,6 +892,7 @@ class BuilderPageService {
             defaultBlocks = [
               SystemBlock(
                 id: 'roulette_module_fix_$timestamp',
+                type: BlockType.module,
                 moduleType: 'roulette_module',
                 order: 0,
               ),
@@ -1057,6 +1061,7 @@ class BuilderPageService {
         return [
           SystemBlock(
             id: 'cart_module_init_$timestamp',
+            type: BlockType.module,
             moduleType: 'cart_module',
             order: 0,
           ),
@@ -1065,6 +1070,7 @@ class BuilderPageService {
         return [
           SystemBlock(
             id: 'menu_catalog_init_$timestamp',
+            type: BlockType.module,
             moduleType: 'menu_catalog',
             order: 0,
           ),
@@ -1073,6 +1079,7 @@ class BuilderPageService {
         return [
           SystemBlock(
             id: 'profile_module_init_$timestamp',
+            type: BlockType.module,
             moduleType: 'profile_module',
             order: 0,
           ),
@@ -1081,6 +1088,7 @@ class BuilderPageService {
         return [
           SystemBlock(
             id: 'roulette_module_init_$timestamp',
+            type: BlockType.module,
             moduleType: 'roulette_module',
             order: 0,
           ),
@@ -1165,6 +1173,7 @@ class BuilderPageService {
         return [
           SystemBlock(
             id: 'rewards_module_init_$timestamp',
+            type: BlockType.system,
             moduleType: 'rewards',
             order: 0,
           ),
@@ -1275,6 +1284,7 @@ class BuilderPageService {
     return [
       SystemBlock(
         id: 'menu-module-1',
+        type: BlockType.module,
         moduleType: 'menu_catalog',
         order: 0,
       ),
@@ -1286,6 +1296,7 @@ class BuilderPageService {
     return [
       SystemBlock(
         id: 'cart-module-1',
+        type: BlockType.module,
         moduleType: 'cart_module',
         order: 0,
       ),
@@ -1297,6 +1308,7 @@ class BuilderPageService {
     return [
       SystemBlock(
         id: 'profile-module-1',
+        type: BlockType.module,
         moduleType: 'profile_module',
         order: 0,
       ),
@@ -1308,6 +1320,7 @@ class BuilderPageService {
     return [
       SystemBlock(
         id: 'roulette-module-1',
+        type: BlockType.module,
         moduleType: 'roulette_module',
         order: 0,
       ),

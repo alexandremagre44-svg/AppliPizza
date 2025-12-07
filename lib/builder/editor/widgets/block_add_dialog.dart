@@ -476,6 +476,8 @@ class BlockAddDialog extends ConsumerWidget {
         return {'htmlContent': '<p>Contenu HTML</p>'};
       case BlockType.system:
         return {'moduleType': 'unknown'};
+      case BlockType.module:
+        return {'moduleType': 'unknown', 'moduleId': ''};
     }
   }
 }
