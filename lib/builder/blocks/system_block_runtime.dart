@@ -140,8 +140,23 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Routes to the appropriate module builder based on type
   Widget _buildModuleWidget(BuildContext context, String moduleType, ThemeConfig theme) {
-    // PRIORITY 1: Check ModuleRuntimeRegistry for White-Label modules
-    // This is the new parallel system for WL modules (delivery, loyalty, etc.)
+    // PRIORITY 1: Check if this is a BlockType.module with moduleId
+    // These use the dual admin/client registry system
+    if (block.type == BlockType.module && block is SystemBlock) {
+      final systemBlock = block as SystemBlock;
+      if (systemBlock.moduleId != null) {
+        // For runtime (client mode), use the CLIENT widget
+        final widget = ModuleRuntimeRegistry.buildClient(systemBlock.moduleId!, context);
+        if (widget != null) {
+          return widget;
+        }
+        // Fallback if client widget not registered
+        return UnknownModuleWidget(moduleId: systemBlock.moduleId!);
+      }
+    }
+    
+    // PRIORITY 2: Check ModuleRuntimeRegistry for White-Label modules (legacy)
+    // This is the old system for WL modules (delivery, loyalty, etc.)
     if (ModuleRuntimeRegistry.contains(moduleType)) {
       final widget = ModuleRuntimeRegistry.build(moduleType, context);
       if (widget != null) {
@@ -151,13 +166,13 @@ class SystemBlockRuntime extends StatelessWidget {
       return UnknownModuleWidget(moduleId: moduleType);
     }
     
-    // PRIORITY 2: Check if it's a new-style module from builder_modules
+    // PRIORITY 3: Check if it's a new-style module from builder_modules
     // These are: menu_catalog, cart_module, profile_module, roulette_module
     if (_isBuilderModule(moduleType)) {
       return _buildBuilderModule(context, moduleType, theme);
     }
     
-    // PRIORITY 3: Legacy module types (for backward compatibility)
+    // PRIORITY 4: Legacy module types (for backward compatibility)
     switch (moduleType) {
       case 'roulette':
         return _buildRouletteModule(context, theme);

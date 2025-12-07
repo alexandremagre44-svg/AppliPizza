@@ -253,15 +253,23 @@ class BuilderBlock {
 /// - loyalty: Loyalty points section
 /// - rewards: Rewards tickets widget
 /// - accountActivity: Account activity widget
+/// 
+/// For new White-Label modules with admin/client separation, use moduleId field.
 class SystemBlock extends BuilderBlock {
   /// The system module type (roulette, loyalty, rewards, accountActivity)
   final String moduleType;
+
+  /// The module ID for White-Label modules (e.g., "delivery_module")
+  /// Used when BlockType.module is used instead of BlockType.system
+  final String? moduleId;
 
   SystemBlock({
     required super.id,
     required this.moduleType,
     required super.order,
+    required super.type,
     Map<String, dynamic>? config,
+    this.moduleId,
     super.isActive,
     super.visibility,
     super.customStyles,
@@ -269,16 +277,41 @@ class SystemBlock extends BuilderBlock {
     super.createdAt,
     super.updatedAt,
   }) : super(
-          type: BlockType.system,
-          config: config ?? {'moduleType': moduleType},
+          config: config ?? {
+            'moduleType': moduleType,
+            if (moduleId != null) 'moduleId': moduleId,
+          },
         );
+
+  /// Create a Module block (White-Label module with admin/client separation)
+  /// 
+  /// This factory creates a block using the new BlockType.module type
+  /// instead of BlockType.system. Used for modules like delivery_module.
+  /// 
+  /// Example:
+  /// ```dart
+  /// final block = SystemBlock.createModule('delivery_module');
+  /// ```
+  factory SystemBlock.createModule(String moduleId) {
+    return SystemBlock(
+      id: 'block_${DateTime.now().millisecondsSinceEpoch}_${moduleId.hashCode.abs()}',
+      type: BlockType.module,
+      moduleType: 'module', // Special type marker for WL modules
+      moduleId: moduleId,
+      order: 0,
+      config: {'moduleId': moduleId},
+    );
+  }
 
   /// Create SystemBlock from a BuilderBlock
   factory SystemBlock.fromBlock(BuilderBlock block) {
     final moduleType = block.config['moduleType'] as String? ?? 'unknown';
+    final moduleId = block.config['moduleId'] as String?;
     return SystemBlock(
       id: block.id,
+      type: block.type,
       moduleType: moduleType,
+      moduleId: moduleId,
       order: block.order,
       config: block.config,
       isActive: block.isActive,
@@ -532,7 +565,9 @@ class SystemBlock extends BuilderBlock {
   }) {
     return SystemBlock(
       id: id ?? this.id,
+      type: type ?? this.type,
       moduleType: moduleType,
+      moduleId: moduleId,
       order: order ?? this.order,
       config: config ?? Map<String, dynamic>.from(this.config),
       isActive: isActive ?? this.isActive,
@@ -547,7 +582,11 @@ class SystemBlock extends BuilderBlock {
   @override
   Map<String, dynamic> toJson() {
     final json = super.toJson();
-    json['config'] = {...config, 'moduleType': moduleType};
+    json['config'] = {
+      ...config,
+      'moduleType': moduleType,
+      if (moduleId != null) 'moduleId': moduleId,
+    };
     return json;
   }
 
@@ -589,9 +628,18 @@ class SystemBlock extends BuilderBlock {
         debugPrint('⚠️ [SystemBlock.fromJson] SystemBlock $blockId missing moduleType, defaulting to "unknown"');
       }
       
+      // Parse moduleId from config (for White-Label modules)
+      final rawModuleId = configMap['moduleId'] as String?;
+      
+      // Determine block type from json, defaulting to 'system'
+      final rawType = json['type'] as String?;
+      final blockType = rawType != null ? BlockType.fromJson(rawType) : BlockType.system;
+      
       return SystemBlock(
         id: blockId,
+        type: blockType,
         moduleType: moduleType,
+        moduleId: rawModuleId,
         order: json['order'] as int? ?? 0,
         config: configMap,
         isActive: json['isActive'] as bool? ?? true,
@@ -612,6 +660,7 @@ class SystemBlock extends BuilderBlock {
       final fallbackId = 'sysblock_fallback_${DateTime.now().millisecondsSinceEpoch}';
       return SystemBlock(
         id: fallbackId,
+        type: BlockType.system,
         moduleType: 'unknown',
         order: 0,
         config: configMap, // Use whatever config we managed to parse

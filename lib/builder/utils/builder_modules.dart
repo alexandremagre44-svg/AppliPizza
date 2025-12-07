@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import '../runtime/modules/menu_catalog_runtime_widget.dart';
 import '../runtime/modules/profile_module_widget.dart';
 import '../runtime/modules/roulette_module_widget.dart';
-import '../runtime/modules/delivery_module_widget.dart';
+import '../runtime/modules/delivery_module_admin_widget.dart';
 import '../runtime/modules/click_collect_module_widget.dart';
 import '../runtime/modules/loyalty_module_widget.dart';
 import '../runtime/modules/rewards_module_widget.dart';
@@ -178,13 +178,16 @@ bool isBuilderModuleEnabled(String builderModuleId, RestaurantPlanUnified? plan)
 /// All runtime widgets are imported and available directly.
 ///
 /// FIX: Added WL module registrations
+/// Note: delivery_module now uses the dual admin/client system via ModuleRuntimeRegistry
+/// This legacy map is kept for backward compatibility with old system modules
 final Map<String, ModuleWidgetBuilder> builderModules = {
   'menu_catalog': (context) => const MenuCatalogRuntimeWidget(),
   'cart_module': (context) => const CartModuleWidget(),
   'profile_module': (context) => const ProfileModuleWidget(),
   'roulette_module': (context) => const RouletteModuleWidget(),
-  // WL modules
-  'delivery_module': (context) => const DeliveryModuleWidget(),
+  // WL modules - Note: delivery_module uses admin widget here for legacy support
+  // The new dual system is handled via ModuleRuntimeRegistry
+  'delivery_module': (context) => const DeliveryModuleAdminWidget(),
   'click_collect_module': (context) => const ClickCollectModuleWidget(),
   'loyalty_module': (context) => const LoyaltyModuleWidget(),
   'rewards_module': (context) => const RewardsModuleWidget(),
