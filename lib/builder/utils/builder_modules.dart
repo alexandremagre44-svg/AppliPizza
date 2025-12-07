@@ -347,6 +347,11 @@ String normalizeModuleType(String moduleType) {
 /// - Core modules from ModuleConfig (menu_catalog, cart_module, etc.)
 /// - Legacy aliases (roulette, loyalty, rewards)
 /// - All WL-integrated modules
+/// 
+/// Note: The module list is intentionally duplicated here (rather than
+/// referencing SystemBlock.availableModules) to keep this utility function
+/// self-contained and avoid circular dependencies. This ensures the function
+/// can be used independently without requiring the full SystemBlock class.
 List<String> getBuilderModulesForPlan(RestaurantPlanUnified? plan) {
   // Complete list of all builder module IDs including legacy aliases
   // This matches SystemBlock.availableModules to ensure consistency

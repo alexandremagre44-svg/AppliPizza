@@ -410,7 +410,7 @@ class SystemBlock extends BuilderBlock {
     return descriptions[moduleType] ?? '';
   }
 
-  /// Get color for a module type (returns MaterialColor identifier)
+  /// Get color for a module type
   static Color getModuleColor(String moduleType) {
     const colors = {
       'cart_module': Colors.green,

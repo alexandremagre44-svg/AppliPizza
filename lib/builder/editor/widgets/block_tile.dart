@@ -83,9 +83,10 @@ class BlockTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
-          child: Text(
+          child: Icon(
             SystemBlock.getModuleIcon(moduleType),
-            style: const TextStyle(fontSize: 20),
+            size: 20,
+            color: Colors.blue.shade700,
           ),
         ),
       );
