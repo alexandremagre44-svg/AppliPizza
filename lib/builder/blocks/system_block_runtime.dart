@@ -141,39 +141,34 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Routes to the appropriate module builder based on type
   Widget _buildModuleWidget(BuildContext context, String moduleType, ThemeConfig theme) {
-    // PRIORITY 1: Check if this is a BlockType.module with moduleId
-    // These use the dual admin/client registry system
-    if (block.type == BlockType.module && block is SystemBlock) {
-      final systemBlock = block as SystemBlock;
-      if (systemBlock.moduleId != null) {
-        // For runtime (client mode), use the CLIENT widget
-        final widget = ModuleRuntimeRegistry.buildClient(systemBlock.moduleId!, context);
-        if (widget != null) {
-          return widget;
-        }
-        // Fallback if client widget not registered
-        return UnknownModuleWidget(moduleId: systemBlock.moduleId!);
+    // PRIORITY 1: Check ModuleRuntimeRegistry for WL modules
+    if (ModuleRuntimeRegistry.containsAdmin(moduleType) || 
+        ModuleRuntimeRegistry.containsClient(moduleType)) {
+      
+      // Detect if we're in admin context
+      final isAdminContext = _isAdminContext(context);
+      
+      Widget? widget;
+      if (isAdminContext) {
+        widget = ModuleRuntimeRegistry.buildAdmin(moduleType, context);
+      } else {
+        widget = ModuleRuntimeRegistry.buildClient(moduleType, context);
+        // Fallback to admin if no client widget registered
+        widget ??= ModuleRuntimeRegistry.buildAdmin(moduleType, context);
       }
-    }
-    
-    // PRIORITY 2: Check ModuleRuntimeRegistry for White-Label modules (legacy)
-    // This is the old system for WL modules (delivery, loyalty, etc.)
-    if (ModuleRuntimeRegistry.contains(moduleType)) {
-      final widget = ModuleRuntimeRegistry.build(moduleType, context);
+      
       if (widget != null) {
         return widget;
       }
-      // Fallback if builder returns null
       return UnknownModuleWidget(moduleId: moduleType);
     }
     
-    // PRIORITY 3: Check if it's a new-style module from builder_modules
-    // These are: menu_catalog, cart_module, profile_module, roulette_module
+    // PRIORITY 2: Legacy builder_modules (core modules only)
     if (_isBuilderModule(moduleType)) {
       return _buildBuilderModule(context, moduleType, theme);
     }
     
-    // PRIORITY 4: Legacy module types (for backward compatibility)
+    // PRIORITY 3: Legacy module types (for backward compatibility)
     switch (moduleType) {
       case 'roulette':
         return _buildRouletteModule(context, theme);
@@ -187,25 +182,25 @@ class SystemBlockRuntime extends StatelessWidget {
         return _buildUnknownModule(moduleType, theme);
     }
   }
+
+  /// Detect if current context is admin/builder mode
+  bool _isAdminContext(BuildContext context) {
+    // Check for admin route or builder preview context
+    final route = ModalRoute.of(context)?.settings.name ?? '';
+    return route.contains('/admin') || 
+           route.contains('/builder') ||
+           route.contains('/editor');
+  }
   
   /// Check if moduleType is a builder module (from builder_modules.dart)
   ///
-  /// FIX: Added all WL modules to builder modules list
+  /// Core/legacy modules only. WL modules are now handled via ModuleRuntimeRegistry.
   bool _isBuilderModule(String moduleType) {
     const builderModules = [
       'menu_catalog',
       'cart_module',
       'profile_module',
       'roulette_module',
-      // WL modules
-      'delivery_module',
-      'click_collect_module',
-      'loyalty_module',
-      'rewards_module',
-      'promotions_module',
-      'newsletter_module',
-      'kitchen_module',
-      'staff_module',
     ];
     return builderModules.contains(moduleType);
   }
@@ -564,12 +559,16 @@ class SystemBlockRuntime extends StatelessWidget {
   /// Shows when moduleType is not in the list of available modules
   /// Uses theme for cardRadius, spacing, and font sizes
   ///
-  /// FIX: Safe layout with SizedBox.expand to prevent "RenderBox was not laid out" errors
+  /// Safe layout with SizedBox.expand to prevent "RenderBox was not laid out" errors
   Widget _buildUnknownModule(String moduleType, ThemeConfig theme) {
-    // Get list of available modules from SystemBlock
+    // Get list of available modules
+    // Core modules + legacy aliases + WL modules (via ModuleRuntimeRegistry)
     final availableModules = [
+      // Core modules
       'menu_catalog', 'cart_module', 'profile_module', 'roulette_module',
+      // Legacy aliases
       'roulette', 'loyalty', 'rewards', 'accountActivity',
+      // WL modules (registered in ModuleRuntimeRegistry)
       'delivery_module', 'click_collect_module', 'loyalty_module', 'rewards_module',
       'promotions_module', 'newsletter_module', 'kitchen_module', 'staff_module'
     ];

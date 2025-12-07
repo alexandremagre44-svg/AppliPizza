@@ -8,14 +8,6 @@ import 'package:flutter/material.dart';
 import '../runtime/modules/menu_catalog_runtime_widget.dart';
 import '../runtime/modules/profile_module_widget.dart';
 import '../runtime/modules/roulette_module_widget.dart';
-import '../runtime/modules/delivery_module_admin_widget.dart';
-import '../runtime/modules/click_collect_module_widget.dart';
-import '../runtime/modules/loyalty_module_widget.dart';
-import '../runtime/modules/rewards_module_widget.dart';
-import '../runtime/modules/promotions_module_widget.dart';
-import '../runtime/modules/newsletter_module_widget.dart';
-import '../runtime/modules/kitchen_module_widget.dart';
-import '../runtime/modules/staff_module_widget.dart';
 import '../../white_label/core/module_id.dart';
 import '../../white_label/restaurant/restaurant_plan_unified.dart';
 
@@ -175,26 +167,24 @@ bool isBuilderModuleEnabled(String builderModuleId, RestaurantPlanUnified? plan)
 /// 
 /// Maps module IDs to their widget builders.
 /// 
-/// All runtime widgets are imported and available directly.
-///
-/// FIX: Added WL module registrations
-/// Note: delivery_module now uses the dual admin/client system via ModuleRuntimeRegistry
-/// This legacy map is kept for backward compatibility with old system modules
+/// This map contains ONLY core/legacy modules.
+/// White-Label modules are now registered exclusively via ModuleRuntimeRegistry.
+/// 
+/// Core modules in this map:
+/// - menu_catalog: Product catalog widget
+/// - cart_module: Shopping cart widget  
+/// - profile_module: User profile widget
+/// - roulette_module: Roulette game widget
+/// 
+/// Note: All WL modules (delivery, loyalty, rewards, etc.) have been removed
+/// from this map and are now handled via ModuleRuntimeRegistry with proper
+/// admin/client separation.
 final Map<String, ModuleWidgetBuilder> builderModules = {
   'menu_catalog': (context) => const MenuCatalogRuntimeWidget(),
   'cart_module': (context) => const CartModuleWidget(),
   'profile_module': (context) => const ProfileModuleWidget(),
   'roulette_module': (context) => const RouletteModuleWidget(),
-  // WL modules - Note: delivery_module uses admin widget here for legacy support
-  // The new dual system is handled via ModuleRuntimeRegistry
-  'delivery_module': (context) => const DeliveryModuleAdminWidget(),
-  'click_collect_module': (context) => const ClickCollectModuleWidget(),
-  'loyalty_module': (context) => const LoyaltyModuleWidget(),
-  'rewards_module': (context) => const RewardsModuleWidget(),
-  'promotions_module': (context) => const PromotionsModuleWidget(),
-  'newsletter_module': (context) => const NewsletterModuleWidget(),
-  'kitchen_module': (context) => const KitchenModuleWidget(),
-  'staff_module': (context) => const StaffModuleWidget(),
+  // Legacy modules only - NO WL modules here
 };
 
 /// Module configuration

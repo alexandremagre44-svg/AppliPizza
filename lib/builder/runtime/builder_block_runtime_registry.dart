@@ -37,6 +37,13 @@ import '../../white_label/core/module_id.dart';
 import 'module_runtime_registry.dart';
 import 'modules/delivery_module_admin_widget.dart';
 import 'modules/delivery_module_client_widget.dart';
+import 'modules/click_collect_module_widget.dart';
+import 'modules/loyalty_module_widget.dart';
+import 'modules/rewards_module_widget.dart';
+import 'modules/promotions_module_widget.dart';
+import 'modules/newsletter_module_widget.dart';
+import 'modules/kitchen_module_widget.dart';
+import 'modules/staff_module_widget.dart';
 
 /// Typedef for a unified block renderer function.
 /// 
@@ -413,86 +420,93 @@ class BuilderBlockRuntimeRegistry {
 /// This should be called during app initialization (e.g., in main.dart
 /// or at the start of the runtime initialization).
 ///
-/// Currently registered modules:
-/// - delivery_module: 
-///   - ADMIN: DeliveryModuleAdminWidget (configuration card)
-///   - CLIENT: DeliveryModuleClientWidget (address + time slot selection)
-/// 
-/// Add more modules here as they are implemented.
+/// Registered modules:
+/// - delivery_module: Delivery address and time slot selection
+/// - click_collect_module: Click & Collect pickup selection
+/// - loyalty_module: Loyalty points and rewards
+/// - rewards_module: Rewards catalog
+/// - promotions_module: Active promotions display
+/// - newsletter_module: Newsletter subscription form
+/// - kitchen_module: Kitchen tablet interface
+/// - staff_module: Staff/POS tablet interface
 void registerWhiteLabelModules() {
-  // Register delivery_module with dual admin/client widgets
+  // Delivery Module
   ModuleRuntimeRegistry.registerAdmin(
     'delivery_module',
     (ctx) => const DeliveryModuleAdminWidget(),
   );
-  
   ModuleRuntimeRegistry.registerClient(
     'delivery_module',
     (ctx) => const DeliveryModuleClientWidget(),
   );
 
-  // TODO: Register other WL modules as they are implemented
-  // 
-  // ModuleRuntimeRegistry.registerAdmin(
-  //   'click_collect_module',
-  //   (ctx) => const ClickCollectModuleAdminWidget(),
-  // );
-  // ModuleRuntimeRegistry.registerClient(
-  //   'click_collect_module',
-  //   (ctx) => const ClickCollectClientWidget(),
-  // );
-  // 
-  // ModuleRuntimeRegistry.registerAdmin(
-  //   'loyalty_module',
-  //   (ctx) => const LoyaltyModuleAdminWidget(),
-  // );
-  // ModuleRuntimeRegistry.registerClient(
-  //   'loyalty_module',
-  //   (ctx) => const LoyaltyClientWidget(),
-  // );
-  // 
-  // ModuleRuntimeRegistry.registerAdmin(
-  //   'rewards_module',
-  //   (ctx) => const RewardsModuleAdminWidget(),
-  // );
-  // ModuleRuntimeRegistry.registerClient(
-  //   'rewards_module',
-  //   (ctx) => const RewardsClientWidget(),
-  // );
-  // 
-  // ModuleRuntimeRegistry.registerAdmin(
-  //   'promotions_module',
-  //   (ctx) => const PromotionsModuleAdminWidget(),
-  // );
-  // ModuleRuntimeRegistry.registerClient(
-  //   'promotions_module',
-  //   (ctx) => const PromotionsClientWidget(),
-  // );
-  // 
-  // ModuleRuntimeRegistry.registerAdmin(
-  //   'newsletter_module',
-  //   (ctx) => const NewsletterModuleAdminWidget(),
-  // );
-  // ModuleRuntimeRegistry.registerClient(
-  //   'newsletter_module',
-  //   (ctx) => const NewsletterClientWidget(),
-  // );
-  // 
-  // ModuleRuntimeRegistry.registerAdmin(
-  //   'kitchen_module',
-  //   (ctx) => const KitchenModuleAdminWidget(),
-  // );
-  // ModuleRuntimeRegistry.registerClient(
-  //   'kitchen_module',
-  //   (ctx) => const KitchenClientWidget(),
-  // );
-  // 
-  // ModuleRuntimeRegistry.registerAdmin(
-  //   'staff_module',
-  //   (ctx) => const StaffModuleAdminWidget(),
-  // );
-  // ModuleRuntimeRegistry.registerClient(
-  //   'staff_module',
-  //   (ctx) => const StaffClientWidget(),
-  // );
+  // Click & Collect Module
+  ModuleRuntimeRegistry.registerAdmin(
+    'click_collect_module',
+    (ctx) => const ClickCollectModuleWidget(),
+  );
+  ModuleRuntimeRegistry.registerClient(
+    'click_collect_module',
+    (ctx) => const ClickCollectModuleWidget(),
+  );
+
+  // Loyalty Module
+  ModuleRuntimeRegistry.registerAdmin(
+    'loyalty_module',
+    (ctx) => const LoyaltyModuleWidget(),
+  );
+  ModuleRuntimeRegistry.registerClient(
+    'loyalty_module',
+    (ctx) => const LoyaltyModuleWidget(),
+  );
+
+  // Rewards Module
+  ModuleRuntimeRegistry.registerAdmin(
+    'rewards_module',
+    (ctx) => const RewardsModuleWidget(),
+  );
+  ModuleRuntimeRegistry.registerClient(
+    'rewards_module',
+    (ctx) => const RewardsModuleWidget(),
+  );
+
+  // Promotions Module
+  ModuleRuntimeRegistry.registerAdmin(
+    'promotions_module',
+    (ctx) => const PromotionsModuleWidget(),
+  );
+  ModuleRuntimeRegistry.registerClient(
+    'promotions_module',
+    (ctx) => const PromotionsModuleWidget(),
+  );
+
+  // Newsletter Module
+  ModuleRuntimeRegistry.registerAdmin(
+    'newsletter_module',
+    (ctx) => const NewsletterModuleWidget(),
+  );
+  ModuleRuntimeRegistry.registerClient(
+    'newsletter_module',
+    (ctx) => const NewsletterModuleWidget(),
+  );
+
+  // Kitchen Module
+  ModuleRuntimeRegistry.registerAdmin(
+    'kitchen_module',
+    (ctx) => const KitchenModuleWidget(),
+  );
+  ModuleRuntimeRegistry.registerClient(
+    'kitchen_module',
+    (ctx) => const KitchenModuleWidget(),
+  );
+
+  // Staff Module
+  ModuleRuntimeRegistry.registerAdmin(
+    'staff_module',
+    (ctx) => const StaffModuleWidget(),
+  );
+  ModuleRuntimeRegistry.registerClient(
+    'staff_module',
+    (ctx) => const StaffModuleWidget(),
+  );
 }
