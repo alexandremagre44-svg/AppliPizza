@@ -1,6 +1,30 @@
 // lib/builder/editor/widgets/block_add_dialog.dart
 // Dialog for adding new blocks to a page
 // Part of Builder B3 modular UI layer
+//
+// TODO: Manual test cases after applying this patch:
+//
+// Test Case 1: Selective module activation
+//   - In SuperAdmin, enable only: Commandes en ligne, Livraison, Click & Collect, Thème
+//   - Disable: Fidélité, Roulette, Promotions, Newsletter, Tablette, etc.
+//   - In Builder, open "Ajouter un bloc" modal
+//   - Expected: "Modules système" section should show only modules corresponding to 
+//     enabled features (plus always-visible modules like menu_catalog and profile_module)
+//   - The disabled modules should NOT appear in the list
+//
+// Test Case 2: Minimal configuration
+//   - In SuperAdmin, disable all optional WL features (keep only minimum required)
+//   - In Builder, open "Ajouter un bloc" modal
+//   - Expected: System modules list should be drastically reduced
+//   - App should not crash, existing system pages remain editable
+//   - Cannot add new blocks for disabled modules
+//
+// Test Case 3: Plan not loaded (null)
+//   - If plan is not loaded or fails to load
+//   - Expected: BlockAddDialog should behave safely
+//     - Show only always-visible modules (menu_catalog, profile_module)
+//     - OR show nothing in system modules section
+//     - Should NOT show all modules like before (current behavior)
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +43,8 @@ import '../../../white_label/restaurant/restaurant_plan_unified.dart';
 /// - **Filters system modules based on restaurant's white-label plan**
 ///   - Only shows modules for which the required ModuleId is activated
 ///   - Modules without module requirements are always shown (legacy compatibility)
-///   - Falls back to showing all modules if plan is not loaded
-class BlockAddDialog extends ConsumerWidget {
+///   - If plan is null, shows only always-visible modules (strict filtering)
+class BlockAddDialog extends StatelessWidget {
   /// Current number of blocks (used for order calculation)
   final int currentBlockCount;
   
@@ -29,12 +53,19 @@ class BlockAddDialog extends ConsumerWidget {
   
   /// Whether to show system modules section
   final bool showSystemModules;
+  
+  /// Restaurant plan for filtering modules
+  /// 
+  /// If provided, only modules enabled in this plan will be shown.
+  /// If null, only always-visible modules (menu_catalog, profile_module) are shown.
+  final RestaurantPlanUnified? restaurantPlan;
 
   const BlockAddDialog({
     super.key,
     required this.currentBlockCount,
     this.allowedTypes,
     this.showSystemModules = true,
+    this.restaurantPlan,
   });
 
   /// Show the dialog and return the created block
@@ -43,6 +74,7 @@ class BlockAddDialog extends ConsumerWidget {
     required int currentBlockCount,
     List<BlockType>? allowedTypes,
     bool showSystemModules = true,
+    RestaurantPlanUnified? restaurantPlan,
   }) {
     return showDialog<BuilderBlock>(
       context: context,
@@ -50,92 +82,31 @@ class BlockAddDialog extends ConsumerWidget {
         currentBlockCount: currentBlockCount,
         allowedTypes: allowedTypes,
         showSystemModules: showSystemModules,
+        restaurantPlan: restaurantPlan,
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Get restaurant plan for filtering modules
-    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+  Widget build(BuildContext context) {
+    // Use the restaurant plan passed from the editor
+    final plan = restaurantPlan;
     
-    // DEBUG: Log plan loading state
+    // DEBUG: Log plan state
     if (kDebugMode) {
-      debugPrint('🔍 [BlockAddDialog] planAsync state:');
-      planAsync.when(
-        loading: () => debugPrint('  ⏳ loading...'),
-        error: (e, _) => debugPrint('  ❌ error: $e'),
-        data: (plan) {
-          if (plan == null) {
-            debugPrint('  ⚠️ data: plan is null → fallback (show all modules)');
-          } else {
-            final activeModules = plan.activeModules.join(', ');
-            debugPrint('  ✅ data: plan loaded with ${plan.activeModules.length} modules: $activeModules');
-          }
-        },
-      );
+      debugPrint('🔍 [BlockAddDialog] Build with plan:');
+      if (plan == null) {
+        debugPrint('  ⚠️ plan is null → show only always-visible modules');
+      } else {
+        final activeModules = plan.activeModules.join(', ');
+        debugPrint('  ✅ plan loaded with ${plan.activeModules.length} modules: $activeModules');
+      }
     }
     
-    // Use .when() to properly handle loading/error/data states
-    return planAsync.when(
-      loading: () {
-        if (kDebugMode) {
-          debugPrint('📦 [BlockAddDialog] Displaying loading dialog');
-        }
-        return _buildLoadingDialog(context);
-      },
-      error: (e, _) {
-        if (kDebugMode) {
-          debugPrint('⚠️ [BlockAddDialog] Error loading plan, fallback to all modules: $e');
-        }
-        return _buildDialogContent(context, null); // Fallback: show all modules
-      },
-      data: (plan) {
-        if (kDebugMode) {
-          if (plan == null) {
-            debugPrint('⚠️ [BlockAddDialog] Plan is null, fallback to all modules');
-          } else {
-            debugPrint('✅ [BlockAddDialog] Plan loaded successfully');
-          }
-        }
-        return _buildDialogContent(context, plan);
-      },
-    );
+    return _buildDialogContent(context, plan);
   }
 
-  /// Build loading dialog
-  Widget _buildLoadingDialog(BuildContext context) {
-    return AlertDialog(
-      title: Row(
-        children: [
-          Icon(Icons.add_box, color: Theme.of(context).primaryColor),
-          const SizedBox(width: 12),
-          const Text('Ajouter un bloc'),
-        ],
-      ),
-      content: const SizedBox(
-        height: 100,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Chargement du plan...'),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Annuler'),
-        ),
-      ],
-    );
-  }
-
-  /// Build dialog content with plan data (or null for fallback)
+  /// Build dialog content with plan data (or null for strict filtering)
   Widget _buildDialogContent(BuildContext context, RestaurantPlanUnified? plan) {
     // Filter out system type from regular blocks
     final regularBlocks = (allowedTypes ?? BlockType.values)
@@ -254,6 +225,7 @@ class BlockAddDialog extends ConsumerWidget {
 
   Widget _buildSystemModulesList(BuildContext context, RestaurantPlanUnified? plan) {
     // Get filtered module IDs based on restaurant plan
+    // This is the KEY CHANGE: using SystemBlock.getFilteredModules() to respect the plan
     final moduleIds = SystemBlock.getFilteredModules(plan);
     
     // Dynamically construct module info using SystemBlock helper methods
@@ -277,7 +249,7 @@ class BlockAddDialog extends ConsumerWidget {
 
     return Column(
       children: [
-        // Show warning if plan is null
+        // Show warning if plan is null (strict filtering mode)
         if (plan == null)
           Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -293,10 +265,36 @@ class BlockAddDialog extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Plan non chargé → tous les modules affichés (fallback)',
+                    'Plan non chargé → seuls les modules toujours visibles sont affichés',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.orange.shade900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        // Show message if no modules are available
+        if (filteredModules.isEmpty)
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Aucun module système disponible avec la configuration actuelle',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.blue.shade900,
                     ),
                   ),
                 ),
