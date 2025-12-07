@@ -538,7 +538,7 @@ class FirestoreMigrationService {
   /// Comportement:
   /// - Lit tous les documents de la collection roulette_segments (racine)
   /// - Pour chaque restaurant, copie tous les segments
-  /// - Ne remplace pas si le segment existe déjà (merge)
+  /// - Ne remplace pas si le segment existe déjà (skip)
   /// - Ne supprime PAS les documents source (rétrocompatibilité)
   Future<int> migrateRouletteSegments({
     bool dryRun = false,
