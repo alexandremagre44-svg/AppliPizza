@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 import '../../white_label/core/module_id.dart';
+import '../../white_label/restaurant/restaurant_plan_unified.dart';
 import '../../src/providers/restaurant_plan_provider.dart';
 
 /// Template definition for page creation
