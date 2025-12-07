@@ -83,8 +83,17 @@ class SystemBlockPreview extends StatelessWidget {
     if (plan == null) return true;
     
     // Get filtered modules from SystemBlock
-    // Note: plan is dynamic to avoid import cycle, cast it properly
+    // Note: plan is dynamic to avoid import cycle
+    // We use a try-catch for type safety
     try {
+      // Type check before using
+      if (plan is! Object) {
+        if (kDebugMode) {
+          debugPrint('⚠️ [SystemBlockPreview] Plan is not a valid object');
+        }
+        return true; // Fail-open
+      }
+      
       final filteredModules = SystemBlock.getFilteredModules(plan as dynamic);
       return filteredModules.contains(moduleType);
     } catch (e) {

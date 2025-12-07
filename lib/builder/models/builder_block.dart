@@ -489,8 +489,19 @@ class SystemBlock extends BuilderBlock {
   /// Utilise le mapping de builder_modules.dart pour vérifier
   /// quels modules sont activés dans le plan.
   /// 
-  /// If plan is null, returns empty list (strict filtering).
-  /// Always visible modules (defined in SystemModules.alwaysVisible) bypass plan check.
+  /// **Behavior:**
+  /// - If plan is null: returns empty list (strict filtering)
+  ///   This prevents showing modules when plan is not loaded yet.
+  ///   In the editor, the plan should always be loaded before calling this.
+  /// 
+  /// - Always visible modules (SystemModules.alwaysVisible) bypass plan check
+  /// - Legacy modules without WL mapping are always visible
+  /// - Other modules checked via plan.hasModule(wlModuleId)
+  /// 
+  /// **Breaking Change Note:**
+  /// Previous behavior returned all modules when plan was null (fallback-safe).
+  /// New behavior returns empty list to enforce proper plan loading.
+  /// Callers must ensure plan is loaded before calling this method.
   static List<String> getFilteredModules(RestaurantPlanUnified? plan) {
     if (plan == null) return [];
     
