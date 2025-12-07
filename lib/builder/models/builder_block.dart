@@ -523,6 +523,22 @@ class SystemBlock extends BuilderBlock {
     }).toList();
   }
 
+  /// Check if a specific module is enabled in the plan
+  /// 
+  /// Returns true if the module should be visible, false otherwise.
+  /// Used by SystemBlockPreview and SystemBlockRuntime to hide disabled modules.
+  /// 
+  /// Returns false if:
+  /// - moduleId is null or empty
+  /// - module is not in the filtered modules list
+  /// 
+  /// Conservative approach: if plan is null, returns false (hide all WL modules).
+  static bool isModuleEnabled(String? moduleId, RestaurantPlanUnified? plan) {
+    if (moduleId == null || moduleId.isEmpty) return false;
+    final filtered = getFilteredModules(plan);
+    return filtered.contains(moduleId);
+  }
+
   /// Log détaillé des modules filtrés pour debug (méthode statique)
   /// 
   /// Affiche dans la console:
