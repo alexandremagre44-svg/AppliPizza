@@ -8,17 +8,21 @@ import 'delivery_runtime_service.dart';
 import 'delivery_settings.dart';
 import '../../../../src/providers/restaurant_provider.dart';
 
-/// Provider pour les paramètres de livraison du restaurant courant
+/// Provider pour les paramètres de livraison du restaurant courant (White Label Module)
 /// 
 /// Ce provider charge les paramètres de livraison depuis Firestore
 /// pour le restaurant actif.
+/// 
+/// Note: Renommé en wlDeliverySettingsProvider pour éviter les conflits
+/// avec le provider officiel de l'application (deliverySettingsProvider
+/// dans restaurant_plan_provider.dart).
 /// 
 /// TODO: Load from Firestore instead of defaults
 /// Implementation needed:
 /// 1. Query /restaurants/{restaurantId}/settings/delivery
 /// 2. Deserialize DeliverySettings from Firestore document
 /// 3. Handle loading states and errors properly
-final deliverySettingsProvider = FutureProvider<DeliverySettings>((ref) async {
+final wlDeliverySettingsProvider = FutureProvider<DeliverySettings>((ref) async {
   final restaurantConfig = ref.watch(currentRestaurantProvider);
   
   // TODO: Implement Firestore loading
@@ -39,7 +43,7 @@ final deliverySettingsProvider = FutureProvider<DeliverySettings>((ref) async {
 
 /// Provider pour le service runtime de livraison
 final deliveryRuntimeServiceProvider = Provider<DeliveryRuntimeService?>((ref) {
-  final settingsAsync = ref.watch(deliverySettingsProvider);
+  final settingsAsync = ref.watch(wlDeliverySettingsProvider);
   
   return settingsAsync.when(
     data: (settings) => DeliveryRuntimeService(settings),

@@ -17,7 +17,7 @@ class PaymentModuleWrapper extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartService = ref.watch(cartServiceProvider);
-    final deliverySettingsAsync = ref.watch(deliverySettingsProvider);
+    final deliverySettingsAsync = ref.watch(wlDeliverySettingsProvider);
     final planAsync = ref.watch(restaurantPlanUnifiedProvider);
 
     return planAsync.when(
