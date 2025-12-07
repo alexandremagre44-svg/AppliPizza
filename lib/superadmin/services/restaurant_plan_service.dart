@@ -31,50 +31,7 @@ class RestaurantPlanService {
   DocumentReference<Map<String, dynamic>> _planDoc(String restaurantId) =>
       _restaurantsCollection.doc(restaurantId).collection('plan').doc('config');
 
-  /// Référence au document plan unifié d'un restaurant.
-  /// 
-  /// NOUVEAU: Document 'unified' dans la collection 'plan'
-  /// Path: restaurants/{restaurantId}/plan/unified
-  /// Contient le RestaurantPlanUnified avec toutes les configurations consolidées
-  DocumentReference<Map<String, dynamic>> _planUnifiedDoc(String restaurantId) =>
-      _restaurantsCollection.doc(restaurantId).collection('plan').doc('unified');
 
-  /// Charge le RestaurantPlanUnified depuis Firestore.
-  ///
-  /// Cherche d'abord dans restaurants/{id}/plan/unified (nouveau format)
-  /// Si non trouvé, retourne un plan par défaut.
-  Future<RestaurantPlanUnified?> loadUnifiedPlan(String restaurantId) async {
-    try {
-      // Essayer de charger le plan unifié
-      final unifiedDocRef = _planUnifiedDoc(restaurantId);
-      final doc = await unifiedDocRef.get();
-
-      if (doc.exists && doc.data() != null) {
-        return RestaurantPlanUnified.fromJson(doc.data()!);
-      }
-
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Sauvegarde le RestaurantPlanUnified dans Firestore.
-  Future<void> saveUnifiedPlan(RestaurantPlanUnified plan) async {
-    final unifiedDocRef = _planUnifiedDoc(plan.restaurantId);
-    await unifiedDocRef.set(plan.toJson());
-  }
-
-  /// Stream pour écouter les changements du plan unifié en temps réel.
-  Stream<RestaurantPlanUnified?> watchUnifiedPlan(String restaurantId) {
-    final unifiedDocRef = _planUnifiedDoc(restaurantId);
-    return unifiedDocRef.snapshots().map((doc) {
-      if (!doc.exists || doc.data() == null) {
-        return null;
-      }
-      return RestaurantPlanUnified.fromJson(doc.data()!);
-    });
-  }
 
   /// Charge le RestaurantPlan depuis Firestore.
   ///

@@ -117,7 +117,7 @@ final superAdminRestaurantDocProvider =
 
 /// Provider qui stream le plan unifié d'un restaurant depuis Firestore.
 ///
-/// Path: /restaurants/{restaurantId}/plan/unified
+/// Path: /restaurants/{restaurantId}/plan/config
 /// Retourne null si le plan n'existe pas.
 final superAdminRestaurantUnifiedPlanProvider =
     StreamProvider.family<RestaurantPlanUnified?, String>(
