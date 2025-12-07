@@ -28,6 +28,7 @@ import 'widgets/icon_picker_dialog.dart';
 import 'widgets/builder_properties_panel.dart';
 import 'panels/theme_properties_panel.dart';
 import '../debug/diagnostic_dialog.dart';
+import 'widgets/block_add_dialog.dart';
 
 /// Builder Page Editor Screen
 /// 
@@ -3671,112 +3672,23 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
     );
   }
 
-  void _showAddBlockDialog() {
-    // Filter out system type from regular blocks
-    final regularBlocks = BlockType.values.where((t) => t != BlockType.system).toList();
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ajouter un bloc'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Regular blocks section
-                const Text(
-                  'Blocs de contenu',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
-                ),
-                const Divider(),
-                ...regularBlocks.map((type) => ListTile(
-                  leading: Text(
-                    type.icon,
-                    style: const TextStyle(fontSize: 24),
-                  ),
-                  title: Text(type.label),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _addBlock(type);
-                  },
-                )),
-                
-                const SizedBox(height: 16),
-                
-                // System modules section
-                const Text(
-                  'Modules système',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
-                ),
-                const Divider(color: Colors.blue),
-                ListTile(
-                  leading: Icon(Icons.shopping_cart, size: 28, color: Colors.green.shade600),
-                  title: const Text('Ajouter module Panier'),
-                  subtitle: const Text('Panier et validation'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _addSystemBlock('cart_module');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.casino, size: 28, color: Colors.purple.shade600),
-                  title: const Text('Ajouter module Roulette'),
-                  subtitle: const Text('Roue de la chance'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _addSystemBlock('roulette');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.card_giftcard, size: 28, color: Colors.amber.shade600),
-                  title: const Text('Ajouter module Fidélité'),
-                  subtitle: const Text('Points et progression'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _addSystemBlock('loyalty');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.stars, size: 28, color: Colors.orange.shade600),
-                  title: const Text('Ajouter module Récompenses'),
-                  subtitle: const Text('Tickets et bons'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _addSystemBlock('rewards');
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.history, size: 28, color: Colors.blue.shade600),
-                  title: const Text('Ajouter module Activité du compte'),
-                  subtitle: const Text('Commandes et favoris'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _addSystemBlock('accountActivity');
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
-          ),
-        ],
-      ),
+  void _showAddBlockDialog() async {
+    if (_page == null) return;
+
+    final block = await BlockAddDialog.show(
+      context,
+      currentBlockCount: _page!.draftLayout.length,
+      showSystemModules: true,
     );
+    
+    if (block != null) {
+      setState(() {
+        _page = _page!.addBlock(block);
+        _hasChanges = true;
+        _selectedBlock = block;
+      });
+      _scheduleAutoSave();
+    }
   }
 
   /// Add a system block with the specified module type
