@@ -161,7 +161,7 @@ class ModuleRuntimeRegistry {
   static Widget? buildAdmin(String moduleId, BuildContext context) {
     final builder = _adminWidgets[moduleId];
     if (builder == null) return null;
-    return wrapModuleSafe(builder(context));  // ← Wrap automatique
+    return wrapModuleSafe(builder(context));  // ← Auto-wrap
   }
 
   /// Build a CLIENT widget for a White-Label module
@@ -182,7 +182,7 @@ class ModuleRuntimeRegistry {
   static Widget? buildClient(String moduleId, BuildContext context) {
     final builder = _clientWidgets[moduleId];
     if (builder == null) return null;
-    return wrapModuleSafe(builder(context));  // ← Wrap automatique
+    return wrapModuleSafe(builder(context));  // ← Auto-wrap
   }
 
   /// Build a White-Label module widget (legacy method)
