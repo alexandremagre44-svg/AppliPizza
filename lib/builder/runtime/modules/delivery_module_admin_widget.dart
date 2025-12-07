@@ -20,13 +20,14 @@ class DeliveryModuleAdminWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    // No margin on Card - the wrapper handles layout
+    // This prevents layout conflicts in the Builder grid
     return Card(
       elevation: 2,
       shadowColor: AppColors.black.withOpacity(0.1),
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.card,
       ),
-      margin: EdgeInsets.all(AppSpacing.lg),
       child: Padding(
         padding: EdgeInsets.all(AppSpacing.lg),
         child: Column(
@@ -66,12 +67,15 @@ class DeliveryModuleAdminWidget extends StatelessWidget {
                 FilledButton(
                   onPressed: () {
                     // TODO: Navigate to delivery config
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Configuration de livraison - À implémenter'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
+                    // Safe: Check if context is still mounted before showing snackbar
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Configuration de livraison - À implémenter'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: colorScheme.primary,
