@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/builder_block.dart';
+import '../models/builder_enums.dart';
 import '../models/theme_config.dart';
 import '../utils/block_config_helper.dart';
 import '../utils/builder_modules.dart' as builder_modules;
