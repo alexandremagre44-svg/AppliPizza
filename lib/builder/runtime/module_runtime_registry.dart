@@ -60,8 +60,8 @@ Widget wrapModuleSafe(Widget child) {
       return ConstrainedBox(
         constraints: BoxConstraints(
           minWidth: 0,
-          maxWidth: constraints.hasBoundedWidth 
-              ? constraints.maxWidth 
+          maxWidth: constraints.hasBoundedWidth
+              ? constraints.maxWidth
               : double.infinity,
           minHeight: 0,
           maxHeight: constraints.hasBoundedHeight
