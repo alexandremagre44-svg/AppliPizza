@@ -30,6 +30,21 @@ class FirestoreMigrationService {
   final FirebaseFirestore _db;
   final void Function(String)? _logger;
 
+  /// Couleur primaire par défaut pour les restaurants.
+  static const String kDefaultPrimaryColor = '#D32F2F';
+
+  /// Modules activés par défaut pour tous les restaurants.
+  static const List<String> kDefaultModules = [
+    'ordering',
+    'promotions',
+    'click_and_collect',
+  ];
+
+  /// Configuration par défaut de la roulette.
+  static const int kDefaultCooldownHours = 24;
+  static const String kDefaultLimitType = 'per_day';
+  static const int kDefaultLimitValue = 1;
+
   /// Constructeur.
   ///
   /// [db] Instance Firestore (optionnel, pour tests).
@@ -158,7 +173,7 @@ class FirestoreMigrationService {
               activeModules: activeModules,
               branding: BrandingConfig(
                 brandName: restaurantData['name'] as String?,
-                primaryColor: '#D32F2F',
+                primaryColor: kDefaultPrimaryColor,
               ),
               createdAt: DateTime.now(),
               updatedAt: DateTime.now(),
@@ -196,7 +211,7 @@ class FirestoreMigrationService {
     String restaurantId,
     Map<String, dynamic> restaurantData,
   ) async {
-    final modules = <String>['ordering']; // Toujours actif par défaut
+    final modules = <String>[...kDefaultModules];
 
     try {
       // Vérifier si roulette_settings existe
@@ -218,9 +233,6 @@ class FirestoreMigrationService {
         modules.add('loyalty');
         _log('    • Detected loyalty module');
       }
-
-      // Ajouter les modules de base
-      modules.addAll(['promotions', 'click_and_collect']);
     } catch (e) {
       _log('    ⚠ Warning: Error detecting modules for $restaurantId: $e');
     }
@@ -334,9 +346,9 @@ class FirestoreMigrationService {
             if (!hasRouletteConfig) {
               final rouletteConfig = {
                 'enabled': settings['isEnabled'] ?? true,
-                'cooldownHours': settings['cooldownHours'] ?? 24,
-                'limitType': settings['limitType'] ?? 'per_day',
-                'limitValue': settings['limitValue'] ?? 1,
+                'cooldownHours': settings['cooldownHours'] ?? kDefaultCooldownHours,
+                'limitType': settings['limitType'] ?? kDefaultLimitType,
+                'limitValue': settings['limitValue'] ?? kDefaultLimitValue,
                 'settings': settings,
               };
 

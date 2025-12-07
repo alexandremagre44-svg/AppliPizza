@@ -23,12 +23,6 @@ class MigrationPage extends StatefulWidget {
 }
 
 class _MigrationPageState extends State<MigrationPage> {
-  final _service = FirestoreMigrationService(
-    logger: (message) {
-      // Le logger sera utilisé pour afficher les messages dans l'UI
-    },
-  );
-
   bool _isRunning = false;
   bool _isDryRun = true;
   MigrationReport? _report;
