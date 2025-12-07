@@ -141,6 +141,12 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Routes to the appropriate module builder based on type
   Widget _buildModuleWidget(BuildContext context, String moduleType, ThemeConfig theme) {
+    // PRIORITY 0: Check if this is a WL system module (cart, delivery)
+    // These should NOT be rendered in the runtime - they are system pages
+    if (_isWLSystemModule(moduleType)) {
+      return _buildWLSystemModulePlaceholder(moduleType, theme);
+    }
+    
     // PRIORITY 1: Check ModuleRuntimeRegistry for WL modules
     if (ModuleRuntimeRegistry.containsAdmin(moduleType) || 
         ModuleRuntimeRegistry.containsClient(moduleType)) {
@@ -182,6 +188,65 @@ class SystemBlockRuntime extends StatelessWidget {
         return _buildUnknownModule(moduleType, theme);
     }
   }
+  
+  /// Check if a module is a WL system module (should not be rendered)
+  bool _isWLSystemModule(String moduleType) {
+    const wlSystemModules = [
+      'cart_module',
+      'delivery_module',
+      'click_collect_module',
+    ];
+    return wlSystemModules.contains(moduleType);
+  }
+  
+  /// Build placeholder for WL system modules
+  Widget _buildWLSystemModulePlaceholder(String moduleType, ThemeConfig theme) {
+    return Container(
+      padding: EdgeInsets.all(theme.spacing * 1.5),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(theme.cardRadius),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: 48,
+            color: Colors.grey.shade600,
+          ),
+          SizedBox(height: theme.spacing),
+          Text(
+            '[Module système – non disponible ici]',
+            style: TextStyle(
+              fontSize: theme.textBodySize,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade700,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: theme.spacing / 2),
+          Text(
+            'Type: $moduleType',
+            style: TextStyle(
+              fontSize: theme.textBodySize * 0.75,
+              color: Colors.grey.shade500,
+            ),
+          ),
+          SizedBox(height: theme.spacing / 2),
+          Text(
+            'Ce module est une page système et ne peut pas être affiché comme bloc.',
+            style: TextStyle(
+              fontSize: theme.textBodySize * 0.75,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
 
   /// Detect if current context is admin/builder mode
   /// 
@@ -210,10 +275,11 @@ class SystemBlockRuntime extends StatelessWidget {
   /// Check if moduleType is a builder module (from builder_modules.dart)
   ///
   /// Core/legacy modules only. WL modules are now handled via ModuleRuntimeRegistry.
+  /// NOTE: cart_module removed - it's a system page now, not a builder module.
   bool _isBuilderModule(String moduleType) {
     const builderModules = [
       'menu_catalog',
-      'cart_module',
+      // cart_module - REMOVED (system page)
       'profile_module',
       'roulette_module',
     ];
@@ -236,12 +302,12 @@ class SystemBlockRuntime extends StatelessWidget {
   }
   
   /// Get icon for builder module
+  /// NOTE: cart_module removed - it's a system page now
   IconData _getModuleIcon(String moduleType) {
     switch (moduleType) {
       case 'menu_catalog':
         return Icons.restaurant_menu;
-      case 'cart_module':
-        return Icons.shopping_cart;
+      // cart_module - REMOVED (system page)
       case 'profile_module':
         return Icons.person;
       case 'roulette_module':
@@ -252,12 +318,12 @@ class SystemBlockRuntime extends StatelessWidget {
   }
   
   /// Get name for builder module
+  /// NOTE: cart_module removed - it's a system page now
   String _getModuleName(String moduleType) {
     switch (moduleType) {
       case 'menu_catalog':
         return 'Catalogue Menu';
-      case 'cart_module':
-        return 'Module Panier';
+      // cart_module - REMOVED (system page)
       case 'profile_module':
         return 'Profil';
       case 'roulette_module':
@@ -578,13 +644,16 @@ class SystemBlockRuntime extends StatelessWidget {
   Widget _buildUnknownModule(String moduleType, ThemeConfig theme) {
     // Get list of available modules
     // Core modules + legacy aliases + WL modules (via ModuleRuntimeRegistry)
+    // NOTE: cart_module, delivery_module removed - they are system pages
     final availableModules = [
       // Core modules
-      'menu_catalog', 'cart_module', 'profile_module', 'roulette_module',
+      'menu_catalog', 'profile_module', 'roulette_module',
       // Legacy aliases
       'roulette', 'loyalty', 'rewards', 'accountActivity',
       // WL modules (registered in ModuleRuntimeRegistry)
-      'delivery_module', 'click_collect_module', 'loyalty_module', 'rewards_module',
+      // cart_module - REMOVED (system page)
+      // delivery_module - REMOVED (system page)
+      'click_collect_module', 'loyalty_module', 'rewards_module',
       'promotions_module', 'newsletter_module', 'kitchen_module', 'staff_module'
     ];
     
