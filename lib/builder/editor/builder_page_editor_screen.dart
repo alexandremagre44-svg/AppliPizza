@@ -14,6 +14,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../models/theme_config.dart';
 import '../services/services.dart';
@@ -29,6 +30,8 @@ import 'widgets/builder_properties_panel.dart';
 import 'panels/theme_properties_panel.dart';
 import '../debug/diagnostic_dialog.dart';
 import 'widgets/block_add_dialog.dart';
+import '../../src/providers/restaurant_plan_provider.dart';
+import '../../white_label/restaurant/restaurant_plan_unified.dart';
 
 /// Builder Page Editor Screen
 /// 
@@ -39,7 +42,8 @@ import 'widgets/block_add_dialog.dart';
 /// - Reorder blocks (drag & drop)
 /// - Edit block configuration
 /// - Preview page (tab view or full-screen)
-class BuilderPageEditorScreen extends StatefulWidget {
+/// - Access to restaurant plan for module filtering
+class BuilderPageEditorScreen extends ConsumerStatefulWidget {
   final String appId;
   final BuilderPageId? pageId;
   final String? pageKey;
@@ -55,10 +59,10 @@ class BuilderPageEditorScreen extends StatefulWidget {
        );
 
   @override
-  State<BuilderPageEditorScreen> createState() => _BuilderPageEditorScreenState();
+  ConsumerState<BuilderPageEditorScreen> createState() => _BuilderPageEditorScreenState();
 }
 
-class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with SingleTickerProviderStateMixin {
+class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScreen> with SingleTickerProviderStateMixin {
   static const double _mobileEditorPanelHeight = 60.0;
   static const Duration _autoSaveDelay = Duration(seconds: 2);
   
@@ -837,6 +841,45 @@ class _BuilderPageEditorScreenState extends State<BuilderPageEditorScreen> with 
 
   @override
   Widget build(BuildContext context) {
+    // Load restaurant plan for module filtering
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    
+    return planAsync.when(
+      loading: () => Scaffold(
+        appBar: AppBar(
+          title: const Text('Studio Builder'),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Chargement du plan restaurant...'),
+            ],
+          ),
+        ),
+      ),
+      error: (error, stack) {
+        if (kDebugMode) {
+          debugPrint('❌ [BuilderPageEditorScreen] Error loading plan: $error');
+          debugPrint('Stack: $stack');
+        }
+        // Continue without plan (fallback mode)
+        return _buildEditor(context, null);
+      },
+      data: (plan) {
+        if (kDebugMode && plan != null) {
+          debugPrint('✅ [BuilderPageEditorScreen] Plan loaded for ${plan.restaurantId}');
+          debugPrint('   Active modules: ${plan.activeModules.join(", ")}');
+        }
+        return _buildEditor(context, plan);
+      },
+    );
+  }
+  
+  /// Build the editor with optional plan
+  Widget _buildEditor(BuildContext context, RestaurantPlanUnified? plan) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final responsive = ResponsiveBuilder(constraints.maxWidth);

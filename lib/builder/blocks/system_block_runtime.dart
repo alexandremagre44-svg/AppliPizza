@@ -50,6 +50,10 @@ class SystemBlockRuntime extends StatelessWidget {
   /// If null, uses theme from context
   final ThemeConfig? themeConfig;
   
+  /// Optional restaurant plan for filtering modules
+  /// If provided and module is disabled, returns SizedBox.shrink()
+  final dynamic plan; // RestaurantPlanUnified? - dynamic to avoid import cycle
+  
   // Demo data constants for Phase 5 compliance
   // In production, real data comes from parent widgets via providers
   static const int _demoLoyaltyPoints = 350;
@@ -62,6 +66,7 @@ class SystemBlockRuntime extends StatelessWidget {
     required this.block,
     this.maxContentWidth,
     this.themeConfig,
+    this.plan,
   });
 
   @override
@@ -73,6 +78,17 @@ class SystemBlockRuntime extends StatelessWidget {
     
     // Get the module type from config
     final moduleType = helper.getString('moduleType', defaultValue: '');
+    
+    // Filter modules based on plan if provided
+    if (plan != null && moduleType.isNotEmpty) {
+      // Check if module should be hidden based on plan
+      if (!_isModuleEnabled(moduleType)) {
+        if (kDebugMode) {
+          debugPrint('🚫 [SystemBlockRuntime] Module "$moduleType" is disabled in plan - hiding');
+        }
+        return const SizedBox.shrink();
+      }
+    }
     
     // Get styling configuration via BlockConfigHelper - use theme spacing as default
     final padding = helper.getEdgeInsets('padding', defaultValue: EdgeInsets.all(theme.spacing));
@@ -123,6 +139,28 @@ class SystemBlockRuntime extends StatelessWidget {
       width: double.infinity,
       child: moduleWidget,
     );
+  }
+  
+  /// Check if a module is enabled in the plan
+  /// 
+  /// Returns true if:
+  /// - plan is null (no filtering)
+  /// - module is in the filtered modules list from SystemBlock.getFilteredModules
+  bool _isModuleEnabled(String moduleType) {
+    if (plan == null) return true;
+    
+    // Get filtered modules from SystemBlock
+    // Note: plan is dynamic to avoid import cycle, cast it properly
+    try {
+      final filteredModules = SystemBlock.getFilteredModules(plan as dynamic);
+      return filteredModules.contains(moduleType);
+    } catch (e) {
+      // If filtering fails, show the module (fail-open)
+      if (kDebugMode) {
+        debugPrint('⚠️ [SystemBlockRuntime] Error checking module enabled: $e');
+      }
+      return true;
+    }
   }
 
   /// Safely builds the module widget with error handling

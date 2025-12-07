@@ -489,10 +489,27 @@ class SystemBlock extends BuilderBlock {
   /// Utilise le mapping de builder_modules.dart pour vérifier
   /// quels modules sont activés dans le plan.
   /// 
-  /// Returns all modules if plan is null (fallback safe).
-  /// Modules without mapping are always visible (legacy compatibility).
+  /// If plan is null, returns empty list (strict filtering).
+  /// Always visible modules (defined in SystemModules.alwaysVisible) bypass plan check.
   static List<String> getFilteredModules(RestaurantPlanUnified? plan) {
-    return builder_modules.getBuilderModulesForPlan(plan);
+    if (plan == null) return [];
+    
+    return availableModules.where((moduleId) {
+      // Always visible modules bypass plan check
+      if (SystemModules.alwaysVisible.contains(moduleId)) {
+        return true;
+      }
+      
+      // Get the WL ModuleId for this builder module
+      final wlModuleId = builder_modules.getModuleIdForBuilder(moduleId);
+      if (wlModuleId == null) {
+        // Module without WL mapping (legacy) - always visible
+        return true;
+      }
+      
+      // Check if module is enabled in plan
+      return plan.hasModule(wlModuleId);
+    }).toList();
   }
 
   /// Log détaillé des modules filtrés pour debug (méthode statique)
@@ -674,4 +691,26 @@ class SystemBlock extends BuilderBlock {
   String toString() {
     return 'SystemBlock(id: $id, moduleType: $moduleType, order: $order, active: $isActive)';
   }
+}
+
+/// System Modules Configuration
+/// 
+/// Defines which modules are always visible in the Builder regardless of
+/// the restaurant's White Label plan configuration.
+/// 
+/// These modules represent core functionality that should always be available:
+/// - menu_catalog: Core product display (always needed)
+/// - profile_module: User profile (always needed)
+class SystemModules {
+  SystemModules._(); // Private constructor to prevent instantiation
+  
+  /// Modules that are always visible in the Builder
+  /// 
+  /// These modules bypass the plan.hasModule() check and are always
+  /// available for use in the Builder editor.
+  static const List<String> alwaysVisible = [
+    'menu_catalog',    // Core product catalog - always needed
+    'profile_module',  // User profile - always needed
+    // Note: cart_module was removed - it's now a system page
+  ];
 }

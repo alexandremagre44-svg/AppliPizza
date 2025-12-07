@@ -18,9 +18,14 @@ import '../runtime/module_runtime_registry.dart';
 /// - Grey background with module name and icon
 /// - Blue border when debug mode is enabled
 /// - No real widget execution (safe for preview)
+/// - Optional plan-based filtering (hides disabled modules)
 class SystemBlockPreview extends StatelessWidget {
   final BuilderBlock block;
   final bool debugMode;
+  
+  /// Optional restaurant plan for filtering modules
+  /// If provided and module is disabled, returns SizedBox.shrink()
+  final dynamic plan; // RestaurantPlanUnified? - dynamic to avoid import cycle
   
   /// Default height for system block preview
   static const double defaultHeight = 120.0;
@@ -29,6 +34,7 @@ class SystemBlockPreview extends StatelessWidget {
     super.key,
     required this.block,
     this.debugMode = false,
+    this.plan,
   });
   
   /// Get Material Icon for the module type
@@ -67,9 +73,45 @@ class SystemBlockPreview extends StatelessWidget {
   Widget? _buildAdminWidget(BuildContext context, String moduleId) {
     return ModuleRuntimeRegistry.buildAdmin(moduleId, context);
   }
+  
+  /// Check if a module is enabled in the plan
+  /// 
+  /// Returns true if:
+  /// - plan is null (no filtering)
+  /// - module is in the filtered modules list from SystemBlock.getFilteredModules
+  bool _isModuleEnabled(String moduleType) {
+    if (plan == null) return true;
+    
+    // Get filtered modules from SystemBlock
+    // Note: plan is dynamic to avoid import cycle, cast it properly
+    try {
+      final filteredModules = SystemBlock.getFilteredModules(plan as dynamic);
+      return filteredModules.contains(moduleType);
+    } catch (e) {
+      // If filtering fails, show the module (fail-open)
+      if (kDebugMode) {
+        debugPrint('⚠️ [SystemBlockPreview] Error checking module enabled: $e');
+      }
+      return true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Filter modules based on plan if provided
+    if (plan != null && block is SystemBlock) {
+      final systemBlock = block as SystemBlock;
+      final moduleType = systemBlock.moduleType;
+      
+      // Check if module should be hidden based on plan
+      if (!_isModuleEnabled(moduleType)) {
+        if (kDebugMode) {
+          debugPrint('🚫 [SystemBlockPreview] Module "$moduleType" is disabled in plan - hiding');
+        }
+        return const SizedBox.shrink();
+      }
+    }
+    
     // Check if this is a BlockType.module with moduleId
     // These should render the ADMIN widget in preview mode
     if (block.type == BlockType.module && block is SystemBlock) {
