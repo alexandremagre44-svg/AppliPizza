@@ -64,6 +64,12 @@ const List<_SidebarItem> _sidebarItems = [
     route: '/superadmin/logs',
     pageTitle: 'Activity Logs',
   ),
+  _SidebarItem(
+    label: 'Migration',
+    icon: Icons.sync_outlined,
+    route: '/superadmin/migration',
+    pageTitle: 'Firestore Migration',
+  ),
 ];
 
 /// Widget Sidebar pour le layout Super-Admin.
