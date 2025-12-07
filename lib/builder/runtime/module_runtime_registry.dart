@@ -26,6 +26,54 @@ typedef ModuleClientBuilder = Widget Function(BuildContext context);
 @Deprecated('Use ModuleAdminBuilder or ModuleClientBuilder instead')
 typedef ModuleRuntimeBuilder = Widget Function(BuildContext context);
 
+/// Wraps a module widget in a safe layout wrapper to prevent layout exceptions.
+///
+/// This wrapper ensures that:
+/// - The widget is always laid out properly before hit-testing
+/// - The widget has valid constraints
+/// - Invalid constraint scenarios are handled gracefully
+///
+/// Use this wrapper around ALL widgets returned from the registry to prevent
+/// "Cannot hit test a render box that has never been laid out" errors.
+///
+/// Example:
+/// ```dart
+/// return wrapModuleSafe(MyModuleWidget());
+/// ```
+Widget wrapModuleSafe(Widget child) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      // If constraints are completely unbounded, show error widget
+      if (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          alignment: Alignment.center,
+          child: const Text(
+            'Module non disponible (layout invalide)',
+            style: TextStyle(fontSize: 14),
+            textAlign: TextAlign.center,
+          ),
+        );
+      }
+
+      // Apply constraints to ensure proper layout
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: 0,
+          maxWidth: constraints.hasBoundedWidth 
+              ? constraints.maxWidth 
+              : double.infinity,
+          minHeight: 0,
+          maxHeight: constraints.hasBoundedHeight
+              ? constraints.maxHeight
+              : double.infinity,
+        ),
+        child: child,
+      );
+    },
+  );
+}
+
 /// Registry dedicated to White-Label modules.
 ///
 /// Works independently from the BlockType renderer system used for Builder blocks.
@@ -116,6 +164,7 @@ class ModuleRuntimeRegistry {
   /// [context] - The build context
   ///
   /// Returns the admin widget if registered, null otherwise.
+  /// The widget is automatically wrapped in wrapModuleSafe for layout safety.
   ///
   /// Example:
   /// ```dart
@@ -126,7 +175,8 @@ class ModuleRuntimeRegistry {
   /// ```
   static Widget? buildAdmin(String moduleId, BuildContext context) {
     final builder = _adminWidgets[moduleId];
-    return builder?.call(context);
+    if (builder == null) return null;
+    return wrapModuleSafe(builder(context));
   }
 
   /// Build a CLIENT widget for a White-Label module
@@ -135,6 +185,7 @@ class ModuleRuntimeRegistry {
   /// [context] - The build context
   ///
   /// Returns the client widget if registered, null otherwise.
+  /// The widget is automatically wrapped in wrapModuleSafe for layout safety.
   ///
   /// Example:
   /// ```dart
@@ -145,7 +196,8 @@ class ModuleRuntimeRegistry {
   /// ```
   static Widget? buildClient(String moduleId, BuildContext context) {
     final builder = _clientWidgets[moduleId];
-    return builder?.call(context);
+    if (builder == null) return null;
+    return wrapModuleSafe(builder(context));
   }
 
   /// Build a White-Label module widget (legacy method)
@@ -156,6 +208,7 @@ class ModuleRuntimeRegistry {
   /// [context] - The build context
   ///
   /// Returns the module widget if registered, null otherwise.
+  /// The widget is automatically wrapped in wrapModuleSafe for layout safety.
   ///
   /// Example:
   /// ```dart
@@ -167,7 +220,8 @@ class ModuleRuntimeRegistry {
   @Deprecated('Use buildAdmin or buildClient instead')
   static Widget? build(String moduleId, BuildContext context) {
     final builder = _registry[moduleId];
-    return builder?.call(context);
+    if (builder == null) return null;
+    return wrapModuleSafe(builder(context));
   }
 
   /// Check if a module is registered (checks both admin and client registries)
@@ -237,6 +291,9 @@ class ModuleRuntimeRegistry {
 ///
 /// This widget is shown when a SystemBlock references a module ID
 /// that hasn't been registered in the ModuleRuntimeRegistry.
+///
+/// This is an ultra-simple, safe widget with no complex layout,
+/// no Overlay, no MouseRegion, or any other potentially problematic widgets.
 class UnknownModuleWidget extends StatelessWidget {
   /// The module ID that couldn't be found
   final String moduleId;
@@ -249,52 +306,12 @@ class UnknownModuleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.orange.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.orange.shade300,
-          width: 2,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.extension_off,
-            size: 48,
-            color: Colors.orange.shade700,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Module non enregistré',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.orange.shade800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Module ID: "$moduleId"',
-            style: TextStyle(
-              fontSize: 14,
-              fontFamily: 'monospace',
-              color: Colors.orange.shade700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Ce module doit être enregistré dans\nModuleRuntimeRegistry pour être affiché.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.orange.shade600,
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.all(16),
+      alignment: Alignment.center,
+      child: Text(
+        'Module "$moduleId" non disponible',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 14),
       ),
     );
   }
