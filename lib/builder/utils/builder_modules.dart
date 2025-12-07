@@ -89,7 +89,20 @@ const Map<String, ModuleId> moduleIdMapping = {
 /// Obtenir le ModuleId pour un ID builder
 /// 
 /// Returns null if the module ID is not mapped.
+/// 
+/// Special handling for legacy aliases:
+/// - 'roulette' and 'roulette_module' both map to ModuleId.roulette
+/// - 'loyalty' and 'loyalty_module' both map to ModuleId.loyalty
+/// - 'rewards' and 'rewards_module' both map to ModuleId.loyalty
 ModuleId? getModuleIdForBuilder(String builderModuleId) {
+  // Explicit mapping for roulette to ensure Builder recognition
+  switch (builderModuleId) {
+    case 'roulette':
+    case 'roulette_module':
+      return ModuleId.roulette; // White-label ModuleId
+  }
+  
+  // Fallback to existing mapping
   return moduleIdMapping[builderModuleId];
 }
 
