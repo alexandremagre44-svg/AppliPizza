@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/models.dart';
 import '../../../src/providers/restaurant_plan_provider.dart';
+import '../../../white_label/restaurant/restaurant_plan_unified.dart';
 
 /// Dialog for selecting and adding a new block
 /// 
