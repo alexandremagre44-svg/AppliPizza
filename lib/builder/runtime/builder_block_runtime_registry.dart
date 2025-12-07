@@ -35,7 +35,8 @@ import '../../white_label/restaurant/restaurant_feature_flags.dart';
 import '../../white_label/runtime/module_helpers.dart';
 import '../../white_label/core/module_id.dart';
 import 'module_runtime_registry.dart';
-import 'modules/delivery_module_widget.dart';
+import 'modules/delivery_module_admin_widget.dart';
+import 'modules/delivery_module_client_widget.dart';
 
 /// Typedef for a unified block renderer function.
 /// 
@@ -169,6 +170,17 @@ class BuilderBlockRuntimeRegistry {
     },
     
     BlockType.system: (context, block, isPreview, {double? maxContentWidth}) {
+      return isPreview
+        ? SystemBlockPreview(block: block)
+        : SystemBlockRuntime(
+            block: block,
+            maxContentWidth: maxContentWidth,
+          );
+    },
+    
+    BlockType.module: (context, block, isPreview, {double? maxContentWidth}) {
+      // BlockType.module uses the dual admin/client system
+      // Preview mode shows ADMIN widget, runtime shows CLIENT widget
       return isPreview
         ? SystemBlockPreview(block: block)
         : SystemBlockRuntime(
@@ -395,56 +407,92 @@ class BuilderBlockRuntimeRegistry {
 
 /// Register White-Label modules in the ModuleRuntimeRegistry
 ///
-/// This function registers all White-Label modules with the parallel
+/// This function registers all White-Label modules with the dual admin/client
 /// registry system, completely independent from the BlockType renderers.
 ///
 /// This should be called during app initialization (e.g., in main.dart
 /// or at the start of the runtime initialization).
 ///
 /// Currently registered modules:
-/// - delivery_module: DeliveryModuleWidget
+/// - delivery_module: 
+///   - ADMIN: DeliveryModuleAdminWidget (configuration card)
+///   - CLIENT: DeliveryClientWidget (address + time slot selection)
 /// 
 /// Add more modules here as they are implemented.
 void registerWhiteLabelModules() {
-  // Register delivery_module
-  ModuleRuntimeRegistry.register(
+  // Register delivery_module with dual admin/client widgets
+  ModuleRuntimeRegistry.registerAdmin(
     'delivery_module',
-    (ctx) => const DeliveryModuleWidget(),
+    (ctx) => const DeliveryModuleAdminWidget(),
+  );
+  
+  ModuleRuntimeRegistry.registerClient(
+    'delivery_module',
+    (ctx) => const DeliveryClientWidget(),
   );
 
   // TODO: Register other WL modules as they are implemented
-  // ModuleRuntimeRegistry.register(
+  // 
+  // ModuleRuntimeRegistry.registerAdmin(
   //   'click_collect_module',
-  //   (ctx) => const ClickCollectModuleWidget(),
+  //   (ctx) => const ClickCollectModuleAdminWidget(),
+  // );
+  // ModuleRuntimeRegistry.registerClient(
+  //   'click_collect_module',
+  //   (ctx) => const ClickCollectClientWidget(),
   // );
   // 
-  // ModuleRuntimeRegistry.register(
+  // ModuleRuntimeRegistry.registerAdmin(
   //   'loyalty_module',
-  //   (ctx) => const LoyaltyModuleWidget(),
+  //   (ctx) => const LoyaltyModuleAdminWidget(),
+  // );
+  // ModuleRuntimeRegistry.registerClient(
+  //   'loyalty_module',
+  //   (ctx) => const LoyaltyClientWidget(),
   // );
   // 
-  // ModuleRuntimeRegistry.register(
+  // ModuleRuntimeRegistry.registerAdmin(
   //   'rewards_module',
-  //   (ctx) => const RewardsModuleWidget(),
+  //   (ctx) => const RewardsModuleAdminWidget(),
+  // );
+  // ModuleRuntimeRegistry.registerClient(
+  //   'rewards_module',
+  //   (ctx) => const RewardsClientWidget(),
   // );
   // 
-  // ModuleRuntimeRegistry.register(
+  // ModuleRuntimeRegistry.registerAdmin(
   //   'promotions_module',
-  //   (ctx) => const PromotionsModuleWidget(),
+  //   (ctx) => const PromotionsModuleAdminWidget(),
+  // );
+  // ModuleRuntimeRegistry.registerClient(
+  //   'promotions_module',
+  //   (ctx) => const PromotionsClientWidget(),
   // );
   // 
-  // ModuleRuntimeRegistry.register(
+  // ModuleRuntimeRegistry.registerAdmin(
   //   'newsletter_module',
-  //   (ctx) => const NewsletterModuleWidget(),
+  //   (ctx) => const NewsletterModuleAdminWidget(),
+  // );
+  // ModuleRuntimeRegistry.registerClient(
+  //   'newsletter_module',
+  //   (ctx) => const NewsletterClientWidget(),
   // );
   // 
-  // ModuleRuntimeRegistry.register(
+  // ModuleRuntimeRegistry.registerAdmin(
   //   'kitchen_module',
-  //   (ctx) => const KitchenModuleWidget(),
+  //   (ctx) => const KitchenModuleAdminWidget(),
+  // );
+  // ModuleRuntimeRegistry.registerClient(
+  //   'kitchen_module',
+  //   (ctx) => const KitchenClientWidget(),
   // );
   // 
-  // ModuleRuntimeRegistry.register(
+  // ModuleRuntimeRegistry.registerAdmin(
   //   'staff_module',
-  //   (ctx) => const StaffModuleWidget(),
+  //   (ctx) => const StaffModuleAdminWidget(),
+  // );
+  // ModuleRuntimeRegistry.registerClient(
+  //   'staff_module',
+  //   (ctx) => const StaffClientWidget(),
   // );
 }

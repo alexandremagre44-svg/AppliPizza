@@ -1,17 +1,18 @@
-// lib/builder/runtime/modules/delivery_module_widget.dart
-// Runtime widget for delivery_module
+// lib/builder/runtime/modules/delivery_module_admin_widget.dart
+// Admin widget for delivery_module - shown in Builder UI
 // 
-// Full Material 3 implementation for Delivery module
+// Full Material 3 implementation for Delivery module admin view
 
 import 'package:flutter/material.dart';
 import '../../../src/design_system/app_theme.dart';
 
-/// Delivery Module Widget
+/// Delivery Module Admin Widget
 /// 
-/// Theme-aware, Material 3 compliant widget for the Delivery module.
+/// Theme-aware, Material 3 compliant widget for the Delivery module in Builder/Admin mode.
 /// Displays a card with delivery information and configuration button.
-class DeliveryModuleWidget extends StatelessWidget {
-  const DeliveryModuleWidget({super.key});
+/// This widget is shown in the Builder UI for administrators to configure delivery settings.
+class DeliveryModuleAdminWidget extends StatelessWidget {
+  const DeliveryModuleAdminWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

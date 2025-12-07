@@ -167,7 +167,10 @@ enum BlockType {
   html('html', 'HTML Personnalisé', '💻'),
   
   /// System module block (non-configurable, positionable modules)
-  system('system', 'Module Système', '⚙️');
+  system('system', 'Module Système', '⚙️'),
+  
+  /// Module block (White-Label modules with admin/client separation)
+  module('module', 'Module WL', '🔌');
 
   const BlockType(this.value, this.label, this.icon);
   

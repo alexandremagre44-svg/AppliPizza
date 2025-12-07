@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/builder_block.dart';
+import '../runtime/module_runtime_registry.dart';
 
 /// System Block Preview Widget
 /// 
@@ -61,8 +62,27 @@ class SystemBlockPreview extends StatelessWidget {
     }
   }
 
+  /// Build the ADMIN widget for a White-Label module in preview mode
+  Widget? _buildAdminWidget(BuildContext context, String moduleId) {
+    return ModuleRuntimeRegistry.buildAdmin(moduleId, context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Check if this is a BlockType.module with moduleId
+    // These should render the ADMIN widget in preview mode
+    if (block.type == BlockType.module && block is SystemBlock) {
+      final systemBlock = block as SystemBlock;
+      if (systemBlock.moduleId != null) {
+        // Import ModuleRuntimeRegistry to access admin widgets
+        final widget = _buildAdminWidget(context, systemBlock.moduleId!);
+        if (widget != null) {
+          return widget;
+        }
+        // Fallback to preview placeholder if admin widget not registered
+      }
+    }
+    
     // Get the module type from config
     final moduleType = block.config['moduleType'] as String? ?? 'unknown';
     final moduleLabel = SystemBlock.getModuleLabel(moduleType);

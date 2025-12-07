@@ -343,12 +343,36 @@ class BlockAddDialog extends ConsumerWidget {
   }
 
   void _addSystemBlock(BuildContext context, String moduleType) {
-    final newBlock = SystemBlock(
-      id: 'block_${DateTime.now().millisecondsSinceEpoch}',
-      moduleType: moduleType,
-      order: currentBlockCount,
-    );
-    Navigator.pop(context, newBlock);
+    // Check if this is a new-style White-Label module (delivery_module, etc.)
+    // These should use BlockType.module instead of BlockType.system
+    final isWLModule = [
+      'delivery_module',
+      'click_collect_module',
+      'loyalty_module',
+      'rewards_module',
+      'promotions_module',
+      'newsletter_module',
+      'kitchen_module',
+      'staff_module',
+    ].contains(moduleType);
+
+    final BuilderBlock newBlock;
+    if (isWLModule) {
+      // Use the createModule factory for White-Label modules
+      newBlock = SystemBlock.createModule(moduleType);
+      // Update order to current count
+      final updatedBlock = newBlock.copyWith(order: currentBlockCount);
+      Navigator.pop(context, updatedBlock);
+    } else {
+      // Legacy system modules (roulette, loyalty, rewards, etc.)
+      newBlock = SystemBlock(
+        id: 'block_${DateTime.now().millisecondsSinceEpoch}',
+        type: BlockType.system,
+        moduleType: moduleType,
+        order: currentBlockCount,
+      );
+      Navigator.pop(context, newBlock);
+    }
   }
 
   Map<String, dynamic> _getDefaultConfig(BlockType type) {

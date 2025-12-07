@@ -10,9 +10,20 @@
 
 import 'package:flutter/material.dart';
 
-/// Type definition for module runtime widget builders
+/// Type definition for module admin widget builders (for Builder UI)
+///
+/// Takes a BuildContext and returns a Widget to render the module in admin/builder mode.
+typedef ModuleAdminBuilder = Widget Function(BuildContext context);
+
+/// Type definition for module client widget builders (for Client App)
+///
+/// Takes a BuildContext and returns a Widget to render the module in client/runtime mode.
+typedef ModuleClientBuilder = Widget Function(BuildContext context);
+
+/// Type definition for module runtime widget builders (legacy, for backward compatibility)
 ///
 /// Takes a BuildContext and returns a Widget to render the module.
+@Deprecated('Use ModuleAdminBuilder or ModuleClientBuilder instead')
 typedef ModuleRuntimeBuilder = Widget Function(BuildContext context);
 
 /// Registry dedicated to White-Label modules.
@@ -22,16 +33,65 @@ typedef ModuleRuntimeBuilder = Widget Function(BuildContext context);
 /// - Standard builder blocks (hero, text, banner, etc.) → BlockType system
 /// - White-Label modules (delivery, loyalty, etc.) → This registry
 ///
+/// Supports dual widget system:
+/// - ADMIN widgets: Shown in Builder UI (configuration, settings)
+/// - CLIENT widgets: Shown in Client App (user-facing functionality)
+///
 /// Keys are module IDs coming from builder_modules.dart
 /// (ex: "delivery_module", "loyalty_module", etc.)
 class ModuleRuntimeRegistry {
   // Private constructor - this class is not meant to be instantiated
   ModuleRuntimeRegistry._();
 
-  /// Internal registry mapping module IDs to their widget builders
+  /// Internal registry mapping module IDs to their admin widget builders
+  static final Map<String, ModuleAdminBuilder> _adminWidgets = {};
+
+  /// Internal registry mapping module IDs to their client widget builders
+  static final Map<String, ModuleClientBuilder> _clientWidgets = {};
+
+  /// Legacy internal registry mapping module IDs to their widget builders
+  /// @deprecated Use _adminWidgets and _clientWidgets instead
   static final Map<String, ModuleRuntimeBuilder> _registry = {};
 
-  /// Register a White-Label module with its widget builder
+  /// Register an ADMIN widget for a White-Label module
+  ///
+  /// This widget will be shown in the Builder UI (admin/configuration mode).
+  ///
+  /// [moduleId] - The module identifier (e.g., "delivery_module")
+  /// [builder] - Function that creates the admin widget
+  ///
+  /// Example:
+  /// ```dart
+  /// ModuleRuntimeRegistry.registerAdmin(
+  ///   'delivery_module',
+  ///   (ctx) => const DeliveryModuleAdminWidget(),
+  /// );
+  /// ```
+  static void registerAdmin(String moduleId, ModuleAdminBuilder builder) {
+    _adminWidgets[moduleId] = builder;
+  }
+
+  /// Register a CLIENT widget for a White-Label module
+  ///
+  /// This widget will be shown in the Client App (user-facing mode).
+  ///
+  /// [moduleId] - The module identifier (e.g., "delivery_module")
+  /// [builder] - Function that creates the client widget
+  ///
+  /// Example:
+  /// ```dart
+  /// ModuleRuntimeRegistry.registerClient(
+  ///   'delivery_module',
+  ///   (ctx) => const DeliveryClientWidget(),
+  /// );
+  /// ```
+  static void registerClient(String moduleId, ModuleClientBuilder builder) {
+    _clientWidgets[moduleId] = builder;
+  }
+
+  /// Register a White-Label module with its widget builder (legacy method)
+  ///
+  /// @deprecated Use registerAdmin and registerClient instead for dual widget support
   ///
   /// [moduleId] - The module identifier (e.g., "delivery_module")
   /// [builder] - Function that creates the module widget
@@ -43,11 +103,54 @@ class ModuleRuntimeRegistry {
   ///   (ctx) => const DeliveryModuleWidget(),
   /// );
   /// ```
+  @Deprecated('Use registerAdmin and registerClient instead')
   static void register(String moduleId, ModuleRuntimeBuilder builder) {
     _registry[moduleId] = builder;
+    // For backward compatibility, also register as admin widget
+    _adminWidgets[moduleId] = builder;
   }
 
-  /// Build a White-Label module widget
+  /// Build an ADMIN widget for a White-Label module
+  ///
+  /// [moduleId] - The module identifier to build
+  /// [context] - The build context
+  ///
+  /// Returns the admin widget if registered, null otherwise.
+  ///
+  /// Example:
+  /// ```dart
+  /// final widget = ModuleRuntimeRegistry.buildAdmin('delivery_module', context);
+  /// if (widget != null) {
+  ///   return widget;
+  /// }
+  /// ```
+  static Widget? buildAdmin(String moduleId, BuildContext context) {
+    final builder = _adminWidgets[moduleId];
+    return builder?.call(context);
+  }
+
+  /// Build a CLIENT widget for a White-Label module
+  ///
+  /// [moduleId] - The module identifier to build
+  /// [context] - The build context
+  ///
+  /// Returns the client widget if registered, null otherwise.
+  ///
+  /// Example:
+  /// ```dart
+  /// final widget = ModuleRuntimeRegistry.buildClient('delivery_module', context);
+  /// if (widget != null) {
+  ///   return widget;
+  /// }
+  /// ```
+  static Widget? buildClient(String moduleId, BuildContext context) {
+    final builder = _clientWidgets[moduleId];
+    return builder?.call(context);
+  }
+
+  /// Build a White-Label module widget (legacy method)
+  ///
+  /// @deprecated Use buildAdmin or buildClient instead
   ///
   /// [moduleId] - The module identifier to build
   /// [context] - The build context
@@ -61,38 +164,71 @@ class ModuleRuntimeRegistry {
   ///   return widget;
   /// }
   /// ```
+  @Deprecated('Use buildAdmin or buildClient instead')
   static Widget? build(String moduleId, BuildContext context) {
     final builder = _registry[moduleId];
     return builder?.call(context);
   }
 
-  /// Check if a module is registered
+  /// Check if a module is registered (checks both admin and client registries)
   ///
   /// [moduleId] - The module identifier to check
   ///
-  /// Returns true if the module is registered, false otherwise.
+  /// Returns true if the module is registered (in either registry), false otherwise.
   static bool contains(String moduleId) {
-    return _registry.containsKey(moduleId);
+    return _adminWidgets.containsKey(moduleId) || 
+           _clientWidgets.containsKey(moduleId) ||
+           _registry.containsKey(moduleId);
   }
 
-  /// Get all registered module IDs
+  /// Check if an admin widget is registered for a module
+  ///
+  /// [moduleId] - The module identifier to check
+  ///
+  /// Returns true if an admin widget is registered, false otherwise.
+  static bool containsAdmin(String moduleId) {
+    return _adminWidgets.containsKey(moduleId);
+  }
+
+  /// Check if a client widget is registered for a module
+  ///
+  /// [moduleId] - The module identifier to check
+  ///
+  /// Returns true if a client widget is registered, false otherwise.
+  static bool containsClient(String moduleId) {
+    return _clientWidgets.containsKey(moduleId);
+  }
+
+  /// Get all registered module IDs (from all registries)
   ///
   /// Returns a list of all module IDs currently registered.
   static List<String> getRegisteredModules() {
-    return _registry.keys.toList();
+    final allModules = <String>{
+      ..._adminWidgets.keys,
+      ..._clientWidgets.keys,
+      ..._registry.keys,
+    };
+    return allModules.toList();
   }
 
   /// Unregister a module (useful for testing)
   ///
+  /// Removes the module from all registries.
+  ///
   /// [moduleId] - The module identifier to unregister
   ///
-  /// Returns true if the module was unregistered, false if it wasn't registered.
+  /// Returns true if the module was unregistered from any registry, false otherwise.
   static bool unregister(String moduleId) {
-    return _registry.remove(moduleId) != null;
+    final removedAdmin = _adminWidgets.remove(moduleId) != null;
+    final removedClient = _clientWidgets.remove(moduleId) != null;
+    final removedLegacy = _registry.remove(moduleId) != null;
+    return removedAdmin || removedClient || removedLegacy;
   }
 
   /// Clear all registered modules (useful for testing)
   static void clear() {
+    _adminWidgets.clear();
+    _clientWidgets.clear();
     _registry.clear();
   }
 }
