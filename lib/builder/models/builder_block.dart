@@ -331,6 +331,8 @@ class SystemBlock extends BuilderBlock {
   /// Note: Legacy aliases ('roulette', 'loyalty', 'rewards') are kept for
   /// backward compatibility with existing data. Use normalizeModuleType()
   /// to convert legacy names to canonical forms ('roulette_module', etc.)
+  /// 
+  /// IMPORTANT: cart_module and delivery_module REMOVED - they are system pages now.
   static const List<String> availableModules = [
     // Legacy (backward compatibility) - use normalizeModuleType() to convert
     'roulette',
@@ -339,13 +341,13 @@ class SystemBlock extends BuilderBlock {
     'accountActivity',
     // Builder modules (cohérent avec builder_modules.dart)
     'menu_catalog',
-    'cart_module',
+    // cart_module - REMOVED (system page)
     'profile_module',
     'roulette_module',
     // Nouveaux modules WL
     'loyalty_module',
     'rewards_module',
-    'delivery_module',
+    // delivery_module - REMOVED (system page)
     'click_collect_module',
     'kitchen_module',
     'staff_module',
@@ -487,10 +489,38 @@ class SystemBlock extends BuilderBlock {
   /// Utilise le mapping de builder_modules.dart pour vérifier
   /// quels modules sont activés dans le plan.
   /// 
-  /// Returns all modules if plan is null (fallback safe).
-  /// Modules without mapping are always visible (legacy compatibility).
+  /// **Behavior:**
+  /// - If plan is null: returns empty list (strict filtering)
+  ///   This prevents showing modules when plan is not loaded yet.
+  ///   In the editor, the plan should always be loaded before calling this.
+  /// 
+  /// - Always visible modules (SystemModules.alwaysVisible) bypass plan check
+  /// - Legacy modules without WL mapping are always visible
+  /// - Other modules checked via plan.hasModule(wlModuleId)
+  /// 
+  /// **Breaking Change Note:**
+  /// Previous behavior returned all modules when plan was null (fallback-safe).
+  /// New behavior returns empty list to enforce proper plan loading.
+  /// Callers must ensure plan is loaded before calling this method.
   static List<String> getFilteredModules(RestaurantPlanUnified? plan) {
-    return builder_modules.getBuilderModulesForPlan(plan);
+    if (plan == null) return [];
+    
+    return availableModules.where((moduleId) {
+      // Always visible modules bypass plan check
+      if (SystemModules.alwaysVisible.contains(moduleId)) {
+        return true;
+      }
+      
+      // Get the WL ModuleId for this builder module
+      final wlModuleId = builder_modules.getModuleIdForBuilder(moduleId);
+      if (wlModuleId == null) {
+        // Module without WL mapping (legacy) - always visible
+        return true;
+      }
+      
+      // Check if module is enabled in plan
+      return plan.hasModule(wlModuleId);
+    }).toList();
   }
 
   /// Log détaillé des modules filtrés pour debug (méthode statique)
@@ -672,4 +702,26 @@ class SystemBlock extends BuilderBlock {
   String toString() {
     return 'SystemBlock(id: $id, moduleType: $moduleType, order: $order, active: $isActive)';
   }
+}
+
+/// System Modules Configuration
+/// 
+/// Defines which modules are always visible in the Builder regardless of
+/// the restaurant's White Label plan configuration.
+/// 
+/// These modules represent core functionality that should always be available:
+/// - menu_catalog: Core product display (always needed)
+/// - profile_module: User profile (always needed)
+class SystemModules {
+  SystemModules._(); // Private constructor to prevent instantiation
+  
+  /// Modules that are always visible in the Builder
+  /// 
+  /// These modules bypass the plan.hasModule() check and are always
+  /// available for use in the Builder editor.
+  static const List<String> alwaysVisible = [
+    'menu_catalog',    // Core product catalog - always needed
+    'profile_module',  // User profile - always needed
+    // Note: cart_module was removed - it's now a system page
+  ];
 }

@@ -110,6 +110,7 @@ class BuilderNavigationService {
       final now = DateTime.now();
       
       // Create default navigation pages using helper
+      // NOTE: Cart page removed - it's now a system page managed outside Builder
       final defaultPages = [
         _createDefaultPage(
           pageId: BuilderPageId.home,
@@ -127,20 +128,13 @@ class BuilderNavigationService {
           order: 2,
           now: now,
         ),
-        _createDefaultPage(
-          pageId: BuilderPageId.cart,
-          name: 'Panier',
-          description: 'Votre panier',
-          icon: 'shopping_cart',
-          order: 3,
-          now: now,
-        ),
+        // Cart page REMOVED - it's a system page now, not a Builder page
         _createDefaultPage(
           pageId: BuilderPageId.profile,
           name: 'Profil',
           description: 'Votre profil',
           icon: 'person',
-          order: 4,
+          order: 3,
           now: now,
         ),
       ];
@@ -248,14 +242,10 @@ class BuilderNavigationService {
           ),
         ];
       case BuilderPageId.cart:
-        return [
-          SystemBlock(
-            id: 'cart_module_auto_$timestamp',
-            type: BlockType.module,
-            moduleType: 'cart_module',
-            order: 0,
-          ),
-        ];
+        // Cart page is a system page now, should not have Builder blocks
+        // Return empty to prevent Builder from trying to manage it
+        debugPrint('[BuilderNavigationService] ⚠️ Cart page requested but it\'s a system page - returning empty blocks');
+        return [];
       case BuilderPageId.profile:
         return [
           SystemBlock(

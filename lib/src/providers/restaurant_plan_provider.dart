@@ -9,6 +9,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../white_label/core/module_id.dart';
+import '../../white_label/core/system_pages.dart';
 import '../../white_label/modules/core/delivery/delivery_module_config.dart';
 import '../../white_label/modules/core/delivery/delivery_settings.dart';
 import '../../white_label/modules/core/ordering/ordering_module_config.dart';
@@ -277,3 +278,46 @@ final brandingConfigUnifiedProvider = Provider<BrandingConfig?>(
   },
   dependencies: [restaurantPlanUnifiedProvider],
 );
+
+/// Provider for enabled system pages based on restaurant plan
+/// 
+/// Returns a list of SystemPageId that should be enabled based on
+/// the restaurant's White Label plan configuration.
+/// 
+/// System pages are filtered based on:
+/// - ordering module: Enables cart page
+/// - Always enabled: menu, profile, admin (if user has admin role)
+/// 
+/// Example:
+/// ```dart
+/// final enabledPages = ref.watch(enabledSystemPagesProvider);
+/// // Use enabledPages to generate bottom navigation or routes
+/// ```
+final enabledSystemPagesProvider = Provider<List<SystemPageId>>((ref) {
+  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+  final plan = planAsync.asData?.value;
+  
+  // Default pages (always enabled)
+  final List<SystemPageId> enabledPages = [
+    SystemPageId.menu,
+    SystemPageId.profile,
+  ];
+  
+  // Add cart page if ordering module is enabled
+  if (plan?.ordering?.enabled ?? false) {
+    enabledPages.insert(1, SystemPageId.cart); // Insert after menu
+  }
+  
+  // Admin page is always in the list (access is controlled by auth)
+  enabledPages.add(SystemPageId.admin);
+  
+  return enabledPages;
+});
+
+/// Provider to check if cart module/page is enabled
+/// 
+/// This checks if the ordering module is enabled, which includes cart functionality.
+final isCartPageEnabledProvider = Provider<bool>((ref) {
+  final config = ref.watch(orderingConfigUnifiedProvider);
+  return config?.enabled ?? false;
+});

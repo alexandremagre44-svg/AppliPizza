@@ -18,9 +18,14 @@ import '../runtime/module_runtime_registry.dart';
 /// - Grey background with module name and icon
 /// - Blue border when debug mode is enabled
 /// - No real widget execution (safe for preview)
+/// - Optional plan-based filtering (hides disabled modules)
 class SystemBlockPreview extends StatelessWidget {
   final BuilderBlock block;
   final bool debugMode;
+  
+  /// Optional restaurant plan for filtering modules
+  /// If provided and module is disabled, returns SizedBox.shrink()
+  final dynamic plan; // RestaurantPlanUnified? - dynamic to avoid import cycle
   
   /// Default height for system block preview
   static const double defaultHeight = 120.0;
@@ -29,6 +34,7 @@ class SystemBlockPreview extends StatelessWidget {
     super.key,
     required this.block,
     this.debugMode = false,
+    this.plan,
   });
   
   /// Get Material Icon for the module type
@@ -67,16 +73,69 @@ class SystemBlockPreview extends StatelessWidget {
   Widget? _buildAdminWidget(BuildContext context, String moduleId) {
     return ModuleRuntimeRegistry.buildAdmin(moduleId, context);
   }
+  
+  /// Check if a module is enabled in the plan
+  /// 
+  /// Returns true if:
+  /// - plan is null (no filtering)
+  /// - module is in the filtered modules list from SystemBlock.getFilteredModules
+  bool _isModuleEnabled(String moduleType) {
+    if (plan == null) return true;
+    
+    // Get filtered modules from SystemBlock
+    // Note: plan is dynamic to avoid import cycle
+    // We use a try-catch for type safety
+    try {
+      // Type check before using
+      if (plan is! Object) {
+        if (kDebugMode) {
+          debugPrint('⚠️ [SystemBlockPreview] Plan is not a valid object');
+        }
+        return true; // Fail-open
+      }
+      
+      final filteredModules = SystemBlock.getFilteredModules(plan as dynamic);
+      return filteredModules.contains(moduleType);
+    } catch (e) {
+      // If filtering fails, show the module (fail-open)
+      if (kDebugMode) {
+        debugPrint('⚠️ [SystemBlockPreview] Error checking module enabled: $e');
+      }
+      return true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Filter modules based on plan if provided
+    if (plan != null && block is SystemBlock) {
+      final systemBlock = block as SystemBlock;
+      final moduleType = systemBlock.moduleType;
+      
+      // Check if module should be hidden based on plan
+      if (!_isModuleEnabled(moduleType)) {
+        if (kDebugMode) {
+          debugPrint('🚫 [SystemBlockPreview] Module "$moduleType" is disabled in plan - hiding');
+        }
+        return const SizedBox.shrink();
+      }
+    }
+    
     // Check if this is a BlockType.module with moduleId
     // These should render the ADMIN widget in preview mode
     if (block.type == BlockType.module && block is SystemBlock) {
       final systemBlock = block as SystemBlock;
       if (systemBlock.moduleId != null) {
-        // Import ModuleRuntimeRegistry to access admin widgets
-        final widget = _buildAdminWidget(context, systemBlock.moduleId!);
+        final moduleId = systemBlock.moduleId!;
+        
+        // Check if this is a WL system module (cart_module, delivery_module)
+        // These should show a neutral placeholder, NOT try to render
+        if (_isWLSystemModule(moduleId)) {
+          return _buildSystemModulePlaceholder(context, moduleId);
+        }
+        
+        // For other modules, try to render the ADMIN widget
+        final widget = _buildAdminWidget(context, moduleId);
         if (widget != null) {
           return widget;
         }
@@ -86,6 +145,12 @@ class SystemBlockPreview extends StatelessWidget {
     
     // Get the module type from config
     final moduleType = block.config['moduleType'] as String? ?? 'unknown';
+    
+    // Check if this is a WL system module
+    if (_isWLSystemModule(moduleType)) {
+      return _buildSystemModulePlaceholder(context, moduleType);
+    }
+    
     final moduleLabel = SystemBlock.getModuleLabel(moduleType);
     
     // Get icon and color for the module
@@ -143,6 +208,62 @@ class SystemBlockPreview extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// Check if a module ID is a WL system module (should not be rendered in preview)
+  bool _isWLSystemModule(String moduleId) {
+    const wlSystemModules = [
+      'cart_module',
+      'delivery_module',
+      'click_collect_module',
+    ];
+    return wlSystemModules.contains(moduleId);
+  }
+  
+  /// Build a neutral placeholder for WL system modules
+  Widget _buildSystemModulePlaceholder(BuildContext context, String moduleId) {
+    return Container(
+      height: defaultHeight,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: 32,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '[Module système – prévisualisation non disponible]',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Type: $moduleId',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+              ),
             ),
           ],
         ),
