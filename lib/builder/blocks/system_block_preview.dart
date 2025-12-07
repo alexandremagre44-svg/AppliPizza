@@ -75,8 +75,16 @@ class SystemBlockPreview extends StatelessWidget {
     if (block.type == BlockType.module && block is SystemBlock) {
       final systemBlock = block as SystemBlock;
       if (systemBlock.moduleId != null) {
-        // Import ModuleRuntimeRegistry to access admin widgets
-        final widget = _buildAdminWidget(context, systemBlock.moduleId!);
+        final moduleId = systemBlock.moduleId!;
+        
+        // Check if this is a WL system module (cart_module, delivery_module)
+        // These should show a neutral placeholder, NOT try to render
+        if (_isWLSystemModule(moduleId)) {
+          return _buildSystemModulePlaceholder(context, moduleId);
+        }
+        
+        // For other modules, try to render the ADMIN widget
+        final widget = _buildAdminWidget(context, moduleId);
         if (widget != null) {
           return widget;
         }
@@ -86,6 +94,12 @@ class SystemBlockPreview extends StatelessWidget {
     
     // Get the module type from config
     final moduleType = block.config['moduleType'] as String? ?? 'unknown';
+    
+    // Check if this is a WL system module
+    if (_isWLSystemModule(moduleType)) {
+      return _buildSystemModulePlaceholder(context, moduleType);
+    }
+    
     final moduleLabel = SystemBlock.getModuleLabel(moduleType);
     
     // Get icon and color for the module
@@ -143,6 +157,62 @@ class SystemBlockPreview extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// Check if a module ID is a WL system module (should not be rendered in preview)
+  bool _isWLSystemModule(String moduleId) {
+    const wlSystemModules = [
+      'cart_module',
+      'delivery_module',
+      'click_collect_module',
+    ];
+    return wlSystemModules.contains(moduleId);
+  }
+  
+  /// Build a neutral placeholder for WL system modules
+  Widget _buildSystemModulePlaceholder(BuildContext context, String moduleId) {
+    return Container(
+      height: defaultHeight,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: 32,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '[Module système – prévisualisation non disponible]',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Type: $moduleId',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+              ),
             ),
           ],
         ),

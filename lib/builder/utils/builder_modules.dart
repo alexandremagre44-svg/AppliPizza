@@ -66,13 +66,14 @@ Widget _placeholderModule(BuildContext context, String moduleName) {
 const Map<String, ModuleId> moduleIdMapping = {
   // Core ordering system modules
   'menu_catalog': ModuleId.ordering,
-  'cart_module': ModuleId.ordering,
   'profile_module': ModuleId.ordering,
   // Marketing modules
   'roulette_module': ModuleId.roulette,
   'loyalty_module': ModuleId.loyalty,
   'rewards_module': ModuleId.loyalty,
-  'delivery_module': ModuleId.delivery,
+  // NOTE: cart_module and delivery_module REMOVED - they are system pages now
+  // 'cart_module': ModuleId.ordering,  // REMOVED
+  // 'delivery_module': ModuleId.delivery,  // REMOVED
   'click_collect_module': ModuleId.clickAndCollect,
   'kitchen_module': ModuleId.kitchen_tablet,
   'staff_module': ModuleId.staff_tablet,
@@ -103,8 +104,9 @@ ModuleId? getModuleIdForBuilder(String builderModuleId) {
     case 'roulette_module':
       return ModuleId.roulette;
     
-    case 'delivery_module':
-      return ModuleId.delivery;
+    // cart_module and delivery_module REMOVED - they are system pages
+    // case 'cart_module': return ModuleId.ordering;  // REMOVED
+    // case 'delivery_module': return ModuleId.delivery;  // REMOVED
     
     case 'click_collect_module':
       return ModuleId.clickAndCollect;
@@ -172,16 +174,17 @@ bool isBuilderModuleEnabled(String builderModuleId, RestaurantPlanUnified? plan)
 /// 
 /// Core modules in this map:
 /// - menu_catalog: Product catalog widget
-/// - cart_module: Shopping cart widget  
 /// - profile_module: User profile widget
 /// - roulette_module: Roulette game widget
 /// 
-/// Note: All WL modules (delivery, loyalty, rewards, etc.) have been removed
+/// Note: All WL modules (cart, delivery, loyalty, rewards, etc.) have been removed
 /// from this map and are now handled via ModuleRuntimeRegistry with proper
 /// admin/client separation.
+/// 
+/// IMPORTANT: cart_module and delivery_module are NOT in the Builder.
+/// They are system pages managed by the System Page Manager.
 final Map<String, ModuleWidgetBuilder> builderModules = {
   'menu_catalog': (context) => const MenuCatalogRuntimeWidget(),
-  'cart_module': (context) => const CartModuleWidget(),
   'profile_module': (context) => const ProfileModuleWidget(),
   'roulette_module': (context) => const RouletteModuleWidget(),
   // Legacy modules only - NO WL modules here
@@ -211,6 +214,9 @@ class ModuleConfig {
 /// Available module configurations
 /// 
 /// Used by the editor to display module options.
+/// 
+/// NOTE: cart_module and delivery_module have been REMOVED.
+/// They are now system pages managed outside the Builder.
 const List<ModuleConfig> availableModules = [
   // Core modules
   ModuleConfig(
@@ -219,14 +225,6 @@ const List<ModuleConfig> availableModules = [
     description: 'Affiche la liste des produits avec catégories et filtres',
     icon: 'restaurant_menu',
     isSystemModule: false,
-    requiredModuleId: ModuleId.ordering,
-  ),
-  ModuleConfig(
-    id: 'cart_module',
-    name: 'Panier',
-    description: 'Panier et validation de commande',
-    icon: 'shopping_cart',
-    isSystemModule: true,
     requiredModuleId: ModuleId.ordering,
   ),
   ModuleConfig(
@@ -281,22 +279,8 @@ const List<ModuleConfig> availableModules = [
   ),
   
   // Operations modules
-  ModuleConfig(
-    id: 'delivery_module',
-    name: 'Livraison',
-    description: 'Sélection zone et adresse de livraison',
-    icon: 'delivery_dining',
-    isSystemModule: false,
-    requiredModuleId: ModuleId.delivery,
-  ),
-  ModuleConfig(
-    id: 'click_collect_module',
-    name: 'Click & Collect',
-    description: 'Sélection du créneau de retrait',
-    icon: 'store',
-    isSystemModule: false,
-    requiredModuleId: ModuleId.clickAndCollect,
-  ),
+  // NOTE: delivery_module and click_collect_module have been REMOVED from Builder.
+  // They are now managed as system pages.
   ModuleConfig(
     id: 'kitchen_module',
     name: 'Cuisine',
@@ -406,6 +390,7 @@ String normalizeModuleType(String moduleType) {
 List<String> getBuilderModulesForPlan(RestaurantPlanUnified? plan) {
   // Complete list of all builder module IDs including legacy aliases
   // This matches SystemBlock.availableModules to ensure consistency
+  // NOTE: cart_module and delivery_module REMOVED - they are system pages
   const allModuleIds = [
     // Legacy (backward compatibility)
     'roulette',
@@ -414,13 +399,13 @@ List<String> getBuilderModulesForPlan(RestaurantPlanUnified? plan) {
     'accountActivity',
     // Core builder modules
     'menu_catalog',
-    'cart_module',
     'profile_module',
     'roulette_module',
     // WL modules
+    // cart_module - REMOVED (system page)
+    // delivery_module - REMOVED (system page)
     'loyalty_module',
     'rewards_module',
-    'delivery_module',
     'click_collect_module',
     'kitchen_module',
     'staff_module',
@@ -470,65 +455,8 @@ Widget renderModule(BuildContext context, String moduleId) {
   return _placeholderModule(context, 'Module inconnu: $moduleId');
 }
 
-/// Future-proof cart module widget with payment callbacks
-/// 
-/// This widget is designed to be extended with payment integrations (Stripe, PayPal)
-/// Callbacks are optional and not used yet, but ready for future implementation
-class CartModuleWidget extends StatelessWidget {
-  /// Called when user requests checkout (optional, for future use)
-  final VoidCallback? onCheckoutRequested;
-  
-  /// Called when user selects a payment method (optional, for future use)
-  /// paymentMethod can be: 'stripe', 'paypal', 'cash', etc.
-  final void Function(String paymentMethod)? onPaymentSelected;
-  
-  const CartModuleWidget({
-    super.key,
-    this.onCheckoutRequested,
-    this.onPaymentSelected,
-  });
-  
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.shopping_cart,
-              size: 64,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Module Panier',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Widget du panier d\'achat',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Future-proof pour Stripe/PayPal',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.blue[600],
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// CartModuleWidget REMOVED - Cart is now a system page, not a builder module.
+// The cart functionality is handled by CartPageRuntime in the white_label/modules/payment/ folder.
 
 /// Valider le mapping des modules et retourner les résultats
 /// 

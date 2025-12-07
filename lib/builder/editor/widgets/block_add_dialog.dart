@@ -343,11 +343,32 @@ class BlockAddDialog extends ConsumerWidget {
   }
 
   void _addSystemBlock(BuildContext context, String moduleType) {
-    // Check if this is a new-style White-Label module (delivery_module, etc.)
-    // These should use BlockType.module instead of BlockType.system
-    final isWLModule = [
+    // Check if this is a WL system module (cart, delivery, click&collect)
+    // These should NOT be addable from the Builder
+    final isWLSystemModule = [
+      'cart_module',
       'delivery_module',
       'click_collect_module',
+    ].contains(moduleType);
+    
+    if (isWLSystemModule) {
+      // These modules are system pages and should not be added via Builder
+      if (kDebugMode) {
+        debugPrint('⚠️ [BlockAddDialog] Attempted to add system module: $moduleType');
+      }
+      // Show a message and return without adding
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$moduleType est une page système et ne peut pas être ajouté ici.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      Navigator.pop(context);
+      return;
+    }
+    
+    // Check if this is a new-style White-Label module (other WL modules)
+    final isWLModule = [
       'loyalty_module',
       'rewards_module',
       'promotions_module',

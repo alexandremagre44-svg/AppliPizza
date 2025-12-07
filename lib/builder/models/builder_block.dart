@@ -331,6 +331,8 @@ class SystemBlock extends BuilderBlock {
   /// Note: Legacy aliases ('roulette', 'loyalty', 'rewards') are kept for
   /// backward compatibility with existing data. Use normalizeModuleType()
   /// to convert legacy names to canonical forms ('roulette_module', etc.)
+  /// 
+  /// IMPORTANT: cart_module and delivery_module REMOVED - they are system pages now.
   static const List<String> availableModules = [
     // Legacy (backward compatibility) - use normalizeModuleType() to convert
     'roulette',
@@ -339,13 +341,13 @@ class SystemBlock extends BuilderBlock {
     'accountActivity',
     // Builder modules (cohérent avec builder_modules.dart)
     'menu_catalog',
-    'cart_module',
+    // cart_module - REMOVED (system page)
     'profile_module',
     'roulette_module',
     // Nouveaux modules WL
     'loyalty_module',
     'rewards_module',
-    'delivery_module',
+    // delivery_module - REMOVED (system page)
     'click_collect_module',
     'kitchen_module',
     'staff_module',
