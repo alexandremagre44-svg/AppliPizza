@@ -129,34 +129,34 @@ class _DeliveryModuleClientWidgetState extends State<DeliveryModuleClientWidget>
 
             SizedBox(height: AppSpacing.xl),
 
-                // Validation button
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: (addressController.text.isNotEmpty &&
-                            selectedSlot != null)
-                        ? () {
-                            // TODO: Handle delivery validation
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Livraison confirmée pour ${addressController.text} à $selectedSlot',
-                                ),
-                              ),
-                            );
-                          }
-                        : null,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      minimumSize: const Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: AppRadius.button,
-                      ),
-                    ),
-                    child: const Text("Valider la livraison"),
+            // Validation button
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: (addressController.text.isNotEmpty &&
+                        selectedSlot != null)
+                    ? () {
+                        // TODO: Handle delivery validation
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Livraison confirmée pour ${addressController.text} à $selectedSlot',
+                            ),
+                          ),
+                        );
+                      }
+                    : null,
+                style: FilledButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppRadius.button,
                   ),
                 ),
+                child: const Text("Valider la livraison"),
+              ),
+            ),
               ],
             ),
           ),
