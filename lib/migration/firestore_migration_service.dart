@@ -77,6 +77,8 @@ class FirestoreMigrationService {
     int restaurantsNormalized = 0;
     int rouletteSettingsMigrated = 0;
     int usersNormalized = 0;
+    int loyaltySettingsMigrated = 0;
+    int rouletteSegmentsMigrated = 0;
 
     try {
       // Migration 1: Créer plan/unified pour tous les restaurants
@@ -102,6 +104,26 @@ class FirestoreMigrationService {
       usersNormalized =
           await normalizeUserFields(dryRun: dryRun, errors: errors);
       _log('✓ Users normalized: $usersNormalized');
+
+      // Migration 5: Loyalty settings
+      _log('\n--- Migration 5: Loyalty Settings ---');
+      try {
+        loyaltySettingsMigrated = await migrateLoyaltySettings(dryRun: dryRun, errors: errors);
+        _log('✓ Migrated $loyaltySettingsMigrated loyalty settings');
+      } catch (e) {
+        errors.add('Migration 5 failed: $e');
+        _log('✗ Migration 5 failed: $e');
+      }
+
+      // Migration 6: Roulette segments
+      _log('\n--- Migration 6: Roulette Segments ---');
+      try {
+        rouletteSegmentsMigrated = await migrateRouletteSegments(dryRun: dryRun, errors: errors);
+        _log('✓ Migrated $rouletteSegmentsMigrated roulette segments');
+      } catch (e) {
+        errors.add('Migration 6 failed: $e');
+        _log('✗ Migration 6 failed: $e');
+      }
     } catch (e) {
       final errorMsg = 'Unexpected error during migration: $e';
       _log('✗ $errorMsg');
@@ -116,6 +138,8 @@ class FirestoreMigrationService {
       restaurantsNormalized: restaurantsNormalized,
       rouletteSettingsMigrated: rouletteSettingsMigrated,
       usersNormalized: usersNormalized,
+      loyaltySettingsMigrated: loyaltySettingsMigrated,
+      rouletteSegmentsMigrated: rouletteSegmentsMigrated,
       errors: errors,
       duration: duration,
       isDryRun: dryRun,
@@ -431,6 +455,145 @@ class FirestoreMigrationService {
       }
     } catch (e) {
       final errorMsg = 'Error in normalizeUserFields: $e';
+      _log('✗ $errorMsg');
+      errors?.add(errorMsg);
+    }
+
+    return count;
+  }
+
+  /// Migration 5: Copier loyalty_settings de la racine vers chaque restaurant.
+  ///
+  /// Source: loyalty_settings/main
+  /// Destination: restaurants/{appId}/builder_settings/loyalty_settings
+  ///
+  /// Comportement:
+  /// - Lit le document global loyalty_settings/main
+  /// - Pour chaque restaurant, copie vers builder_settings/loyalty_settings
+  /// - Ne crée pas si le document destination existe déjà (idempotent)
+  /// - Ne supprime PAS le document source (rétrocompatibilité)
+  Future<int> migrateLoyaltySettings({
+    bool dryRun = false,
+    List<String>? errors,
+  }) async {
+    int count = 0;
+
+    try {
+      // Lire le document source
+      final sourceDoc = await _db.collection('loyalty_settings').doc('main').get();
+
+      if (!sourceDoc.exists || sourceDoc.data() == null) {
+        _log('ℹ️ No loyalty_settings/main found, skipping');
+        return 0;
+      }
+
+      final sourceData = sourceDoc.data()!;
+      _log('📋 Found loyalty_settings/main with ${sourceData.length} fields');
+
+      // Récupérer tous les restaurants
+      final restaurants = await _db.collection('restaurants').get();
+
+      for (final restaurant in restaurants.docs) {
+        final destRef = _db
+            .collection('restaurants')
+            .doc(restaurant.id)
+            .collection('builder_settings')
+            .doc('loyalty_settings');
+
+        try {
+          // Vérifier si existe déjà
+          final existing = await destRef.get();
+          if (existing.exists) {
+            _log('  ⏭️ ${restaurant.id}: loyalty_settings already exists, skipping');
+            continue;
+          }
+
+          if (!dryRun) {
+            await destRef.set(sourceData);
+          }
+
+          _log('  ✅ ${restaurant.id}: loyalty_settings migrated');
+          count++;
+        } catch (e) {
+          final errorMsg =
+              'Error migrating loyalty_settings for ${restaurant.id}: $e';
+          _log('  ✗ $errorMsg');
+          errors?.add(errorMsg);
+        }
+      }
+    } catch (e) {
+      final errorMsg = 'Error in migrateLoyaltySettings: $e';
+      _log('✗ $errorMsg');
+      errors?.add(errorMsg);
+    }
+
+    return count;
+  }
+
+  /// Migration 6: Copier roulette_segments de la racine vers chaque restaurant.
+  ///
+  /// Source: roulette_segments/{segmentId}
+  /// Destination: restaurants/{appId}/roulette_segments/{segmentId}
+  ///
+  /// Comportement:
+  /// - Lit tous les documents de la collection roulette_segments (racine)
+  /// - Pour chaque restaurant, copie tous les segments
+  /// - Ne remplace pas si le segment existe déjà (merge)
+  /// - Ne supprime PAS les documents source (rétrocompatibilité)
+  Future<int> migrateRouletteSegments({
+    bool dryRun = false,
+    List<String>? errors,
+  }) async {
+    int count = 0;
+
+    try {
+      // Lire les segments source
+      final sourceSegments = await _db.collection('roulette_segments').get();
+
+      if (sourceSegments.docs.isEmpty) {
+        _log('ℹ️ No roulette_segments found at root, skipping');
+        return 0;
+      }
+
+      _log('📋 Found ${sourceSegments.docs.length} segments at root');
+
+      // Récupérer tous les restaurants
+      final restaurants = await _db.collection('restaurants').get();
+
+      for (final restaurant in restaurants.docs) {
+        _log('  📍 Processing ${restaurant.id}...');
+
+        for (final segment in sourceSegments.docs) {
+          final destRef = _db
+              .collection('restaurants')
+              .doc(restaurant.id)
+              .collection('roulette_segments')
+              .doc(segment.id);
+
+          try {
+            // Vérifier si existe déjà
+            final existing = await destRef.get();
+            if (existing.exists) {
+              _log('    ⏭️ Segment ${segment.id} already exists, skipping');
+              continue;
+            }
+
+            if (!dryRun) {
+              await destRef.set(segment.data());
+            }
+
+            _log('    ✅ Segment ${segment.id} migrated');
+            count++;
+          } catch (e) {
+            final errorMsg =
+                'Error migrating segment ${segment.id} for ${restaurant.id}: $e';
+            _log('    ✗ $errorMsg');
+            errors?.add(errorMsg);
+          }
+        }
+      }
+    } catch (e) {
+      final errorMsg = 'Error in migrateRouletteSegments: $e';
       _log('✗ $errorMsg');
       errors?.add(errorMsg);
     }

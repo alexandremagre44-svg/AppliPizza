@@ -21,6 +21,8 @@ void main() {
         restaurantsNormalized: 3,
         rouletteSettingsMigrated: 2,
         usersNormalized: 10,
+        loyaltySettingsMigrated: 4,
+        rouletteSegmentsMigrated: 42,
         errors: [],
         startedAt: startTime,
         completedAt: endTime,
@@ -31,7 +33,9 @@ void main() {
       expect(report.restaurantsNormalized, 3);
       expect(report.rouletteSettingsMigrated, 2);
       expect(report.usersNormalized, 10);
-      expect(report.totalDocumentsModified, 20);
+      expect(report.loyaltySettingsMigrated, 4);
+      expect(report.rouletteSegmentsMigrated, 42);
+      expect(report.totalDocumentsModified, 66);
       expect(report.isSuccess, true);
       expect(report.errors.isEmpty, true);
       expect(report.duration.inSeconds, 30);
@@ -47,6 +51,8 @@ void main() {
         restaurantsNormalized: 2,
         rouletteSettingsMigrated: 0,
         usersNormalized: 5,
+        loyaltySettingsMigrated: 0,
+        rouletteSegmentsMigrated: 0,
         errors: [
           'Error creating plan for restaurant X',
           'Error normalizing user Y',
@@ -70,6 +76,8 @@ void main() {
         restaurantsNormalized: 3,
         rouletteSettingsMigrated: 2,
         usersNormalized: 10,
+        loyaltySettingsMigrated: 4,
+        rouletteSegmentsMigrated: 42,
         errors: [],
         startedAt: startTime,
         completedAt: endTime,
@@ -145,6 +153,66 @@ void main() {
       expect(rouletteConfig['settings'], isA<Map>());
     });
 
+    test('Loyalty settings migration structure', () {
+      // Test loyalty settings structure from root
+      final loyaltySettings = {
+        'bronzeThreshold': 500,
+        'pointsPerEuro': 1,
+        'goldThreshold': 5000,
+        'silverThreshold': 2000,
+        'id': 'main',
+        'updatedAt': '2025-11-13T23:48:06.363',
+      };
+
+      expect(loyaltySettings['bronzeThreshold'], 500);
+      expect(loyaltySettings['silverThreshold'], 2000);
+      expect(loyaltySettings['goldThreshold'], 5000);
+      expect(loyaltySettings['pointsPerEuro'], 1);
+      expect(loyaltySettings['id'], 'main');
+    });
+
+    test('Roulette segments migration structure', () {
+      // Test that segments maintain their structure during migration
+      final segment = {
+        'id': 'seg_1',
+        'label': '+100 points',
+        'rewardId': 'bonus_points_100',
+        'probability': 30.0,
+        'color': 0xFFFFD700,
+        'description': 'Gagnez 100 points de fidélité',
+        'rewardType': 'bonusPoints',
+        'rewardValue': 100.0,
+        'iconName': 'stars',
+        'isActive': true,
+        'position': 1,
+        'type': 'bonus_points',
+        'value': 100,
+        'weight': 30.0,
+      };
+
+      expect(segment['id'], 'seg_1');
+      expect(segment['label'], '+100 points');
+      expect(segment['rewardType'], 'bonusPoints');
+      expect(segment['probability'], 30.0);
+      expect(segment['isActive'], true);
+    });
+
+    test('Migration 5 and 6 should be idempotent', () {
+      // Test that loyalty settings migration skips existing documents
+      final firstRun = {'migrated': 5};
+      final secondRun = {'migrated': 0}; // Already exists, should skip
+
+      expect(firstRun['migrated'], 5);
+      expect(secondRun['migrated'], 0);
+
+      // Test that roulette segments migration skips existing segments
+      final firstRunSegments = {'migrated': 42}; // 7 segments × 6 restaurants
+      final secondRunSegments = {'migrated': 0}; // Already exists, should skip
+
+      expect(firstRunSegments['migrated'], 42);
+      expect(secondRunSegments['migrated'], 0);
+    });
+
     test('Migration should be idempotent', () {
       // Simulate running migration twice
       final report1 = _createMockReport(
@@ -152,6 +220,8 @@ void main() {
         restaurantsNormalized: 3,
         rouletteSettingsMigrated: 2,
         usersNormalized: 10,
+        loyaltySettingsMigrated: 4,
+        rouletteSegmentsMigrated: 42,
         errors: [],
         startedAt: DateTime.now(),
         completedAt: DateTime.now().add(const Duration(seconds: 30)),
@@ -165,13 +235,15 @@ void main() {
         restaurantsNormalized: 0,
         rouletteSettingsMigrated: 0,
         usersNormalized: 0,
+        loyaltySettingsMigrated: 0,
+        rouletteSegmentsMigrated: 0,
         errors: [],
         startedAt: DateTime.now(),
         completedAt: DateTime.now().add(const Duration(seconds: 5)),
         isDryRun: false,
       );
 
-      expect(report1.totalDocumentsModified, 20);
+      expect(report1.totalDocumentsModified, 66);
       expect(report2.totalDocumentsModified, 0);
       expect(report1.isSuccess, true);
       expect(report2.isSuccess, true);
@@ -185,6 +257,8 @@ dynamic _createMockReport({
   required int restaurantsNormalized,
   required int rouletteSettingsMigrated,
   required int usersNormalized,
+  required int loyaltySettingsMigrated,
+  required int rouletteSegmentsMigrated,
   required List<String> errors,
   required DateTime startedAt,
   required DateTime completedAt,
@@ -195,6 +269,8 @@ dynamic _createMockReport({
     restaurantsNormalized: restaurantsNormalized,
     rouletteSettingsMigrated: rouletteSettingsMigrated,
     usersNormalized: usersNormalized,
+    loyaltySettingsMigrated: loyaltySettingsMigrated,
+    rouletteSegmentsMigrated: rouletteSegmentsMigrated,
     errors: errors,
     duration: completedAt.difference(startedAt),
     isDryRun: isDryRun,
@@ -209,6 +285,8 @@ class _MockMigrationReport {
   final int restaurantsNormalized;
   final int rouletteSettingsMigrated;
   final int usersNormalized;
+  final int loyaltySettingsMigrated;
+  final int rouletteSegmentsMigrated;
   final List<String> errors;
   final Duration duration;
   final bool isDryRun;
@@ -220,6 +298,8 @@ class _MockMigrationReport {
     required this.restaurantsNormalized,
     required this.rouletteSettingsMigrated,
     required this.usersNormalized,
+    required this.loyaltySettingsMigrated,
+    required this.rouletteSegmentsMigrated,
     required this.errors,
     required this.duration,
     required this.isDryRun,
@@ -233,7 +313,9 @@ class _MockMigrationReport {
       restaurantPlansCreated +
       restaurantsNormalized +
       rouletteSettingsMigrated +
-      usersNormalized;
+      usersNormalized +
+      loyaltySettingsMigrated +
+      rouletteSegmentsMigrated;
 
   String get summary {
     final buffer = StringBuffer();

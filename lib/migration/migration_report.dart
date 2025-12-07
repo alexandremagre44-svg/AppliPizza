@@ -21,6 +21,12 @@ class MigrationReport {
   /// Nombre d'utilisateurs normalisés (name/displayName, isAdmin).
   final int usersNormalized;
 
+  /// Nombre de configurations loyalty_settings migrées vers builder_settings.
+  final int loyaltySettingsMigrated;
+
+  /// Nombre de segments de roulette migrés vers chaque restaurant.
+  final int rouletteSegmentsMigrated;
+
   /// Liste des erreurs rencontrées pendant la migration.
   final List<String> errors;
 
@@ -42,6 +48,8 @@ class MigrationReport {
     required this.restaurantsNormalized,
     required this.rouletteSettingsMigrated,
     required this.usersNormalized,
+    required this.loyaltySettingsMigrated,
+    required this.rouletteSegmentsMigrated,
     required this.errors,
     required this.duration,
     required this.isDryRun,
@@ -57,7 +65,9 @@ class MigrationReport {
       restaurantPlansCreated +
       restaurantsNormalized +
       rouletteSettingsMigrated +
-      usersNormalized;
+      usersNormalized +
+      loyaltySettingsMigrated +
+      rouletteSegmentsMigrated;
 
   /// Retourne un résumé textuel du rapport.
   String get summary {
@@ -73,6 +83,8 @@ class MigrationReport {
     buffer.writeln('  - Restaurants normalized: $restaurantsNormalized');
     buffer.writeln('  - Roulette settings migrated: $rouletteSettingsMigrated');
     buffer.writeln('  - Users normalized: $usersNormalized');
+    buffer.writeln('  - Loyalty settings migrated: $loyaltySettingsMigrated');
+    buffer.writeln('  - Roulette segments migrated: $rouletteSegmentsMigrated');
     buffer.writeln('  - Total documents modified: $totalDocumentsModified');
     buffer.writeln('');
 
@@ -96,6 +108,8 @@ class MigrationReport {
       'restaurantsNormalized': restaurantsNormalized,
       'rouletteSettingsMigrated': rouletteSettingsMigrated,
       'usersNormalized': usersNormalized,
+      'loyaltySettingsMigrated': loyaltySettingsMigrated,
+      'rouletteSegmentsMigrated': rouletteSegmentsMigrated,
       'errors': errors,
       'duration': duration.inMilliseconds,
       'isDryRun': isDryRun,
@@ -111,6 +125,8 @@ class MigrationReport {
       restaurantsNormalized: json['restaurantsNormalized'] as int,
       rouletteSettingsMigrated: json['rouletteSettingsMigrated'] as int,
       usersNormalized: json['usersNormalized'] as int,
+      loyaltySettingsMigrated: json['loyaltySettingsMigrated'] as int? ?? 0,
+      rouletteSegmentsMigrated: json['rouletteSegmentsMigrated'] as int? ?? 0,
       errors: List<String>.from(json['errors'] as List),
       duration: Duration(milliseconds: json['duration'] as int),
       isDryRun: json['isDryRun'] as bool,

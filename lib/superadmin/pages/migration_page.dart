@@ -119,6 +119,14 @@ class _MigrationPageState extends State<MigrationPage> {
               '4. Normalisation des utilisateurs',
               'Normalise les champs name/displayName et isAdmin',
             ),
+            _buildMigrationItem(
+              '5. Migration des loyalty_settings',
+              'Copie loyalty_settings/main vers builder_settings de chaque restaurant',
+            ),
+            _buildMigrationItem(
+              '6. Migration des roulette_segments',
+              'Copie les segments de la racine vers chaque restaurant',
+            ),
           ],
         ),
       ),
@@ -261,6 +269,8 @@ class _MigrationPageState extends State<MigrationPage> {
             _buildReportRow('Restaurants normalisés', '${_report!.restaurantsNormalized}'),
             _buildReportRow('Roulette migrés', '${_report!.rouletteSettingsMigrated}'),
             _buildReportRow('Utilisateurs normalisés', '${_report!.usersNormalized}'),
+            _buildReportRow('Loyalty settings migrés', '${_report!.loyaltySettingsMigrated}'),
+            _buildReportRow('Segments roulette migrés', '${_report!.rouletteSegmentsMigrated}'),
             _buildReportRow(
               'Total modifié',
               '${_report!.totalDocumentsModified}',
