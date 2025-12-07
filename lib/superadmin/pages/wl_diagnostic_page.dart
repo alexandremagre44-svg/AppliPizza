@@ -65,7 +65,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
       setState(() {
         _plan = plan;
         _rawData = data;
-        _selectedModules = plan.activeModules.map((m) => m.code).toSet();
+        _selectedModules = plan.activeModules.toSet();
         _isLoading = false;
       });
     } catch (e) {
@@ -82,9 +82,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
     setState(() => _isLoading = true);
 
     try {
-      final activeModules = _selectedModules
-          .map((code) => ModuleId.values.firstWhere((m) => m.code == code))
-          .toList();
+      final activeModules = _selectedModules.toList();
 
       final updatedPlan = _plan!.copyWith(
         activeModules: activeModules,
@@ -234,9 +232,13 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: activeModules.map((module) {
+                  final moduleId = ModuleId.values.firstWhere(
+                    (m) => m.code == module,
+                    orElse: () => ModuleId.ordering,
+                  );
                   return Chip(
                     avatar: const Icon(Icons.check, size: 16),
-                    label: Text(module.label),
+                    label: Text(moduleId.label),
                     backgroundColor: Colors.green.shade100,
                   );
                 }).toList(),
