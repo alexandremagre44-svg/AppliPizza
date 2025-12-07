@@ -34,6 +34,8 @@ import '../blocks/system_block_preview.dart';
 import '../../white_label/restaurant/restaurant_feature_flags.dart';
 import '../../white_label/runtime/module_helpers.dart';
 import '../../white_label/core/module_id.dart';
+import 'module_runtime_registry.dart';
+import 'modules/delivery_module_widget.dart';
 
 /// Typedef for a unified block renderer function.
 /// 
@@ -389,4 +391,60 @@ class BuilderBlockRuntimeRegistry {
   static bool unregisterBuilder(BlockType type) {
     return unregisterRenderer(type);
   }
+}
+
+/// Register White-Label modules in the ModuleRuntimeRegistry
+///
+/// This function registers all White-Label modules with the parallel
+/// registry system, completely independent from the BlockType renderers.
+///
+/// This should be called during app initialization (e.g., in main.dart
+/// or at the start of the runtime initialization).
+///
+/// Currently registered modules:
+/// - delivery_module: DeliveryModuleWidget
+/// 
+/// Add more modules here as they are implemented.
+void registerWhiteLabelModules() {
+  // Register delivery_module
+  ModuleRuntimeRegistry.register(
+    'delivery_module',
+    (ctx) => const DeliveryModuleWidget(),
+  );
+
+  // TODO: Register other WL modules as they are implemented
+  // ModuleRuntimeRegistry.register(
+  //   'click_collect_module',
+  //   (ctx) => const ClickCollectModuleWidget(),
+  // );
+  // 
+  // ModuleRuntimeRegistry.register(
+  //   'loyalty_module',
+  //   (ctx) => const LoyaltyModuleWidget(),
+  // );
+  // 
+  // ModuleRuntimeRegistry.register(
+  //   'rewards_module',
+  //   (ctx) => const RewardsModuleWidget(),
+  // );
+  // 
+  // ModuleRuntimeRegistry.register(
+  //   'promotions_module',
+  //   (ctx) => const PromotionsModuleWidget(),
+  // );
+  // 
+  // ModuleRuntimeRegistry.register(
+  //   'newsletter_module',
+  //   (ctx) => const NewsletterModuleWidget(),
+  // );
+  // 
+  // ModuleRuntimeRegistry.register(
+  //   'kitchen_module',
+  //   (ctx) => const KitchenModuleWidget(),
+  // );
+  // 
+  // ModuleRuntimeRegistry.register(
+  //   'staff_module',
+  //   (ctx) => const StaffModuleWidget(),
+  // );
 }

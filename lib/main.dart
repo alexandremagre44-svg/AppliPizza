@@ -75,6 +75,7 @@ import 'white_label/runtime/module_guards.dart';
 // Builder B3 imports for dynamic pages
 import 'builder/models/models.dart';
 import 'builder/runtime/runtime.dart';
+import 'builder/runtime/builder_block_runtime_registry.dart';
 
 // SuperAdmin routes
 import 'superadmin/superadmin_router.dart';
@@ -84,6 +85,10 @@ void main() async {
   
   // Register all module routes before running the app
   registerAllModuleRoutes();
+  
+  // Register White-Label modules in the runtime registry
+  // This must be called before the app starts to ensure modules are available
+  registerWhiteLabelModules();
   
   // Read APP_ID from environment variable with default fallback
   const appId = String.fromEnvironment('APP_ID', defaultValue: 'delizza');

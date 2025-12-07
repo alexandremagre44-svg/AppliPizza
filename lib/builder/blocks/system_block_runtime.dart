@@ -17,6 +17,7 @@ import '../models/theme_config.dart';
 import '../utils/block_config_helper.dart';
 import '../utils/builder_modules.dart' as builder_modules;
 import '../runtime/builder_theme_resolver.dart';
+import '../runtime/module_runtime_registry.dart';
 
 /// System Block Runtime Widget
 /// 
@@ -139,13 +140,24 @@ class SystemBlockRuntime extends StatelessWidget {
 
   /// Routes to the appropriate module builder based on type
   Widget _buildModuleWidget(BuildContext context, String moduleType, ThemeConfig theme) {
-    // First check if it's a new-style module from builder_modules
+    // PRIORITY 1: Check ModuleRuntimeRegistry for White-Label modules
+    // This is the new parallel system for WL modules (delivery, loyalty, etc.)
+    if (ModuleRuntimeRegistry.contains(moduleType)) {
+      final widget = ModuleRuntimeRegistry.build(moduleType, context);
+      if (widget != null) {
+        return widget;
+      }
+      // Fallback if builder returns null
+      return UnknownModuleWidget(moduleId: moduleType);
+    }
+    
+    // PRIORITY 2: Check if it's a new-style module from builder_modules
     // These are: menu_catalog, cart_module, profile_module, roulette_module
     if (_isBuilderModule(moduleType)) {
       return _buildBuilderModule(context, moduleType, theme);
     }
     
-    // Legacy module types (for backward compatibility)
+    // PRIORITY 3: Legacy module types (for backward compatibility)
     switch (moduleType) {
       case 'roulette':
         return _buildRouletteModule(context, theme);
