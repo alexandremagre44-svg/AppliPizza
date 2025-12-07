@@ -38,12 +38,26 @@ class PaymentModuleWrapper extends ConsumerWidget {
             clickCollectEnabled: clickCollectEnabled,
             deliverySettings: deliveryEnabled ? deliverySettings : null,
             onPaymentSuccess: () {
-              // TODO: Navigate to order confirmation
+              // TODO: Implement proper order confirmation navigation
+              // This should:
+              // 1. Create the order via CartService.createOrder()
+              // 2. Navigate to /order-confirmation with orderId
+              // 3. Clear the cart
+              // 
+              // Example implementation:
+              // final restaurantId = ref.read(currentRestaurantProvider).id;
+              // final orderId = await cartService.createOrder(restaurantId);
+              // if (context.mounted) {
+              //   context.go('/order-confirmation/$orderId');
+              // }
+              //
+              // For now, show a simple confirmation
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Paiement confirmé !'),
+                    content: Text('Paiement confirmé ! Commande en cours de création...'),
                     backgroundColor: Colors.green,
+                    duration: Duration(seconds: 3),
                   ),
                 );
               }

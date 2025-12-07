@@ -18,7 +18,7 @@ import '../../../white_label/modules/core/delivery/delivery_settings.dart';
 /// - Form validation
 /// - Pay button
 class PaymentModuleClientWidget extends StatefulWidget {
-  final CartService cartService;
+  final CartService? cartService;
   final bool deliveryEnabled;
   final bool clickCollectEnabled;
   final DeliverySettings? deliverySettings;
@@ -26,7 +26,7 @@ class PaymentModuleClientWidget extends StatefulWidget {
 
   const PaymentModuleClientWidget({
     super.key,
-    required this.cartService,
+    this.cartService,
     this.deliveryEnabled = false,
     this.clickCollectEnabled = false,
     this.deliverySettings,
@@ -54,13 +54,15 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
     }
     
     // Load existing checkout state
-    final checkout = widget.cartService.checkoutState;
-    if (checkout.deliveryAddress != null) {
-      addressController.text = checkout.deliveryAddress!;
+    if (widget.cartService != null) {
+      final checkout = widget.cartService!.checkoutState;
+      if (checkout.deliveryAddress != null) {
+        addressController.text = checkout.deliveryAddress!;
+      }
+      selectedDeliverySlot = checkout.deliverySlot;
+      selectedClickCollectSlot = checkout.clickCollectSlot;
+      deliveryFee = checkout.deliveryFee ?? 0.0;
     }
-    selectedDeliverySlot = checkout.deliverySlot;
-    selectedClickCollectSlot = checkout.clickCollectSlot;
-    deliveryFee = checkout.deliveryFee ?? 0.0;
   }
 
   @override
@@ -91,7 +93,7 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
 
     final fee = await deliveryService!.calculateDeliveryFee(
       address,
-      widget.cartService.subtotal,
+      widget.cartService?.subtotal ?? 0.0,
     );
 
     setState(() {
@@ -100,17 +102,19 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
     });
 
     // Update checkout state
-    widget.cartService.updateCheckoutState(
-      widget.cartService.checkoutState.copyWith(
-        deliveryAddress: address,
-        deliveryFee: fee,
-        isDelivery: true,
-      ),
-    );
+    if (widget.cartService != null) {
+      widget.cartService!.updateCheckoutState(
+        widget.cartService!.checkoutState.copyWith(
+          deliveryAddress: address,
+          deliveryFee: fee,
+          isDelivery: true,
+        ),
+      );
+    }
   }
 
   bool _isFormValid() {
-    if (widget.cartService.items.isEmpty) return false;
+    if (widget.cartService == null || widget.cartService!.items.isEmpty) return false;
 
     if (widget.deliveryEnabled) {
       return addressController.text.isNotEmpty &&
@@ -126,12 +130,12 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
   }
 
   void _handlePayment() {
-    if (!_isFormValid()) return;
+    if (!_isFormValid() || widget.cartService == null) return;
 
     // Update final checkout state
     if (widget.deliveryEnabled) {
-      widget.cartService.updateCheckoutState(
-        widget.cartService.checkoutState.copyWith(
+      widget.cartService!.updateCheckoutState(
+        widget.cartService!.checkoutState.copyWith(
           deliveryAddress: addressController.text,
           deliverySlot: selectedDeliverySlot,
           deliveryFee: deliveryFee,
@@ -139,8 +143,8 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
         ),
       );
     } else if (widget.clickCollectEnabled) {
-      widget.cartService.updateCheckoutState(
-        widget.cartService.checkoutState.copyWith(
+      widget.cartService!.updateCheckoutState(
+        widget.cartService!.checkoutState.copyWith(
           clickCollectSlot: selectedClickCollectSlot,
           isDelivery: false,
         ),
@@ -154,6 +158,25 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+
+    // Handle null cartService
+    if (widget.cartService == null) {
+      return Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
+        child: Padding(
+          padding: EdgeInsets.all(AppSpacing.lg),
+          child: Center(
+            child: Text(
+              'Service de panier non disponible',
+              style: textTheme.bodyLarge?.copyWith(
+                color: colorScheme.error,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Card(
       elevation: 2,
@@ -203,7 +226,7 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
               child: FilledButton(
                 onPressed: _isFormValid() ? _handlePayment : null,
                 child: Text(
-                  'Payer ${(widget.cartService.subtotal + deliveryFee).toStringAsFixed(2)} €',
+                  'Payer ${((widget.cartService?.subtotal ?? 0.0) + deliveryFee).toStringAsFixed(2)} €',
                 ),
               ),
             ),
@@ -214,7 +237,7 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
   }
 
   Widget _buildCartItems() {
-    if (widget.cartService.items.isEmpty) {
+    if (widget.cartService == null || widget.cartService!.items.isEmpty) {
       return Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.lg),
@@ -232,11 +255,11 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Articles (${widget.cartService.items.length})',
+          'Articles (${widget.cartService!.items.length})',
           style: Theme.of(context).textTheme.titleMedium,
         ),
         SizedBox(height: AppSpacing.sm),
-        ...widget.cartService.items.map((item) => Padding(
+        ...widget.cartService!.items.map((item) => Padding(
               padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
               child: Row(
                 children: [
@@ -276,7 +299,7 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
             children: [
               Text('Sous-total', style: textTheme.bodyLarge),
               Text(
-                '${widget.cartService.subtotal.toStringAsFixed(2)} €',
+                '${widget.cartService?.subtotal.toStringAsFixed(2) ?? '0.00'} €',
                 style: textTheme.bodyLarge,
               ),
             ],
@@ -306,7 +329,7 @@ class _PaymentModuleClientWidgetState extends State<PaymentModuleClientWidget> {
                 ),
               ),
               Text(
-                '${(widget.cartService.subtotal + deliveryFee).toStringAsFixed(2)} €',
+                '${((widget.cartService?.subtotal ?? 0.0) + deliveryFee).toStringAsFixed(2)} €',
                 style: textTheme.titleMedium?.copyWith(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.bold,

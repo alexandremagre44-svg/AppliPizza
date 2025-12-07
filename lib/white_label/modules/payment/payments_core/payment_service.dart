@@ -192,13 +192,11 @@ class CartService {
 
   /// Ajoute un produit au panier
   void add(String productId, String productName, double price, int qty, {String? imageUrl, String? customDescription, bool isMenu = false}) {
-    final existingItem = items.where(
-      (item) => item.productId == productId && item.customDescription == customDescription && !item.isMenu,
-    ).firstOrNull;
-
-    if (existingItem != null) {
+    try {
+      final existingItem = items.firstWhere(
+        (item) => item.productId == productId && item.customDescription == customDescription && !item.isMenu,
+      );
       existingItem.quantity += qty;
-    } else {
       items.add(CartItem(
         id: _uuid.v4(),
         productId: productId,
@@ -226,10 +224,12 @@ class CartService {
       return;
     }
 
-    final item = items.where((i) => i.id == itemId).firstOrNull;
-    if (item != null) {
+    try {
+      final item = items.firstWhere((i) => i.id == itemId);
       item.quantity = newQty;
       _saveToPreferences();
+    } catch (_) {
+      // Item not found, ignore
     }
   }
 

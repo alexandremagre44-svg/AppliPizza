@@ -12,11 +12,28 @@ import '../../../../src/providers/restaurant_provider.dart';
 /// 
 /// Ce provider charge les paramètres de livraison depuis Firestore
 /// pour le restaurant actif.
+/// 
+/// TODO: Load from Firestore instead of defaults
+/// Implementation needed:
+/// 1. Query /restaurants/{restaurantId}/settings/delivery
+/// 2. Deserialize DeliverySettings from Firestore document
+/// 3. Handle loading states and errors properly
 final deliverySettingsProvider = FutureProvider<DeliverySettings>((ref) async {
   final restaurantConfig = ref.watch(currentRestaurantProvider);
   
-  // TODO: Charger depuis Firestore
-  // Pour l'instant, retourne des paramètres par défaut
+  // TODO: Implement Firestore loading
+  // Example:
+  // final doc = await FirebaseFirestore.instance
+  //     .collection('restaurants')
+  //     .doc(restaurantConfig.id)
+  //     .collection('settings')
+  //     .doc('delivery')
+  //     .get();
+  // if (doc.exists) {
+  //   return DeliverySettings.fromJson(doc.data()!);
+  // }
+  
+  // For now, return default settings
   return DeliverySettings.defaults();
 });
 
