@@ -20,6 +20,7 @@ import 'pages/modules_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/logs_page.dart';
 import 'pages/migration_page.dart';
+import 'pages/wl_diagnostic_page.dart';
 
 /// Routes du module Super-Admin.
 class SuperAdminRoutes {
@@ -44,6 +45,9 @@ class SuperAdminRoutes {
   /// Route de configuration du module livraison d'un restaurant.
   static const String restaurantDeliverySettings =
       '/superadmin/restaurants/:id/modules/delivery';
+
+  /// Route de diagnostic WL d'un restaurant (avec paramètre :id).
+  static const String restaurantDiagnostic = '/superadmin/restaurants/:id/diagnostic';
 
   /// Route de gestion des utilisateurs.
   static const String users = '/superadmin/users';
@@ -127,6 +131,18 @@ final List<RouteBase> superAdminRoutes = [
             child: DeliverySettingsPage(
               restaurantId: restaurantId,
               restaurantName: restaurantName,
+            ),
+          );
+        },
+      ),
+      // Restaurants - Diagnostic WL
+      GoRoute(
+        path: SuperAdminRoutes.restaurantDiagnostic,
+        pageBuilder: (context, state) {
+          final restaurantId = state.pathParameters['id'] ?? '';
+          return NoTransitionPage(
+            child: WLDiagnosticPage(
+              restaurantId: restaurantId,
             ),
           );
         },

@@ -461,6 +461,24 @@ class RestaurantDetailPage extends ConsumerWidget {
                         ),
                       ),
                     ),
+                    // Diagnostic WL button
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        context.go(
+                          '/superadmin/restaurants/${restaurant.id}/diagnostic',
+                        );
+                      },
+                      icon: const Icon(Icons.bug_report, size: 18),
+                      label: const Text('Diagnostic WL'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
                     // TODO: Add more action buttons
                     OutlinedButton.icon(
                       onPressed: null, // TODO: implement
