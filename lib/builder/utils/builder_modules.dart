@@ -4,6 +4,7 @@
 // This file defines the available modules that can be attached to pages.
 // The runtime will use this mapping to render the appropriate widgets.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../runtime/modules/menu_catalog_runtime_widget.dart';
 import '../runtime/modules/profile_module_widget.dart';
@@ -374,7 +375,7 @@ String normalizeModuleType(String moduleType) {
 /// Retourne les modules Builder visibles selon le plan WL
 /// 
 /// Returns list of builder module IDs that are available based on the plan:
-/// - If plan is null, returns all module IDs (fallback)
+/// - If plan is null, returns EMPTY LIST (strict filtering, no fallback)
 /// - Filters modules based on their ModuleId mapping
 /// - Modules without mapping are always visible (legacy)
 /// 
@@ -413,7 +414,13 @@ List<String> getBuilderModulesForPlan(RestaurantPlanUnified? plan) {
     'newsletter_module',
   ];
   
-  if (plan == null) return allModuleIds; // fallback
+  // STRICT FILTERING: If plan is null, return empty list
+  if (plan == null) {
+    if (kDebugMode) {
+      debugPrint('[BuilderModules] Plan is null, returning empty module list');
+    }
+    return const <String>[];
+  }
   
   return allModuleIds.where((builderId) {
     final moduleId = getModuleIdForBuilder(builderId);
