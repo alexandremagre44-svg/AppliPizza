@@ -15,7 +15,7 @@ class KitchenModuleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        "Preview 'kitchen_tablet' non implémenté",
+        "Preview 'kitchen_module' non implémenté",
         style: TextStyle(fontSize: 16, color: Colors.orange),
       ),
     );

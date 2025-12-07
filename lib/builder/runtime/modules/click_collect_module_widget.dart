@@ -15,7 +15,7 @@ class ClickCollectModuleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        "Preview 'click_and_collect' non implémenté",
+        "Preview 'click_collect_module' non implémenté",
         style: TextStyle(fontSize: 16, color: Colors.orange),
       ),
     );

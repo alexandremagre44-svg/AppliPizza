@@ -102,7 +102,7 @@ const Map<String, ModuleId> moduleIdMapping = {
 /// - 'roulette' and 'roulette_module' both map to ModuleId.roulette
 /// - 'loyalty' and 'loyalty_module' both map to ModuleId.loyalty
 /// - 'rewards' and 'rewards_module' both map to ModuleId.loyalty
-/// 
+///
 /// FIX: Added explicit mappings for all WL modules
 ModuleId? getModuleIdForBuilder(String builderModuleId) {
   // Explicit mapping for all modules to ensure Builder recognition
@@ -176,7 +176,7 @@ bool isBuilderModuleEnabled(String builderModuleId, RestaurantPlanUnified? plan)
 /// Maps module IDs to their widget builders.
 /// 
 /// All runtime widgets are imported and available directly.
-/// 
+///
 /// FIX: Added WL module registrations
 final Map<String, ModuleWidgetBuilder> builderModules = {
   'menu_catalog': (context) => const MenuCatalogRuntimeWidget(),

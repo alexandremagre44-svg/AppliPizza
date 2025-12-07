@@ -15,7 +15,7 @@ class StaffModuleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        "Preview 'staff_tablet' non implémenté",
+        "Preview 'staff_module' non implémenté",
         style: TextStyle(fontSize: 16, color: Colors.orange),
       ),
     );

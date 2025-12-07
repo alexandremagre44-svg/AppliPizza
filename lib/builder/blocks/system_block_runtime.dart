@@ -161,7 +161,7 @@ class SystemBlockRuntime extends StatelessWidget {
   }
   
   /// Check if moduleType is a builder module (from builder_modules.dart)
-  /// 
+  ///
   /// FIX: Added all WL modules to builder modules list
   bool _isBuilderModule(String moduleType) {
     const builderModules = [
@@ -535,7 +535,7 @@ class SystemBlockRuntime extends StatelessWidget {
   /// Build unknown module placeholder
   /// Shows when moduleType is not in the list of available modules
   /// Uses theme for cardRadius, spacing, and font sizes
-  /// 
+  ///
   /// FIX: Safe layout with SizedBox.expand to prevent "RenderBox was not laid out" errors
   Widget _buildUnknownModule(String moduleType, ThemeConfig theme) {
     // Get list of available modules from SystemBlock
