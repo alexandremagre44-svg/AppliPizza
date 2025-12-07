@@ -161,12 +161,23 @@ class SystemBlockRuntime extends StatelessWidget {
   }
   
   /// Check if moduleType is a builder module (from builder_modules.dart)
+  ///
+  /// FIX: Added all WL modules to builder modules list
   bool _isBuilderModule(String moduleType) {
     const builderModules = [
       'menu_catalog',
       'cart_module',
       'profile_module',
       'roulette_module',
+      // WL modules
+      'delivery_module',
+      'click_collect_module',
+      'loyalty_module',
+      'rewards_module',
+      'promotions_module',
+      'newsletter_module',
+      'kitchen_module',
+      'staff_module',
     ];
     return builderModules.contains(moduleType);
   }
@@ -524,57 +535,45 @@ class SystemBlockRuntime extends StatelessWidget {
   /// Build unknown module placeholder
   /// Shows when moduleType is not in the list of available modules
   /// Uses theme for cardRadius, spacing, and font sizes
+  ///
+  /// FIX: Safe layout with SizedBox.expand to prevent "RenderBox was not laid out" errors
   Widget _buildUnknownModule(String moduleType, ThemeConfig theme) {
-    return Container(
-      padding: EdgeInsets.all(theme.spacing * 1.5),
-      decoration: BoxDecoration(
-        color: Colors.amber.shade50,
-        borderRadius: BorderRadius.circular(theme.cardRadius),
-        border: Border.all(color: Colors.amber.shade400, width: 2),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.help_outline,
-            size: 48,
-            color: Colors.amber.shade700,
-          ),
-          SizedBox(height: theme.spacing * 0.75),
-          Text(
-            'Module inconnu',
-            style: TextStyle(
-              fontSize: theme.textBodySize,
-              fontWeight: FontWeight.bold,
-              color: Colors.amber.shade800,
+    // Get list of available modules from SystemBlock
+    final availableModules = [
+      'menu_catalog', 'cart_module', 'profile_module', 'roulette_module',
+      'roulette', 'loyalty', 'rewards', 'accountActivity',
+      'delivery_module', 'click_collect_module', 'loyalty_module', 'rewards_module',
+      'promotions_module', 'newsletter_module', 'kitchen_module', 'staff_module'
+    ];
+    
+    return SizedBox.expand(
+      child: Container(
+        color: Colors.amber[100],
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Icon(Icons.help_outline, size: 48, color: Colors.orange),
+            const SizedBox(height: 12),
+            const Text(
+              "Module inconnu",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-          ),
-          SizedBox(height: theme.spacing / 2),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: theme.spacing * 0.75, vertical: theme.spacing * 0.375),
-            decoration: BoxDecoration(
-              color: Colors.amber.shade100,
-              borderRadius: BorderRadius.circular(theme.buttonRadius / 2),
+            const SizedBox(height: 6),
+            Text("Type: '$moduleType'"),
+            const SizedBox(height: 8),
+            const Text(
+              "Modules disponibles:",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            child: Text(
-              'Type: "$moduleType"',
-              style: TextStyle(
-                fontSize: theme.textBodySize * 0.75,
-                fontFamily: 'monospace',
-                color: Colors.amber.shade900,
-              ),
+            Text(
+              availableModules.join(", "),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12),
             ),
-          ),
-          SizedBox(height: theme.spacing * 0.75),
-          Text(
-            'Modules disponibles:\nmenu_catalog, cart_module, profile_module, roulette_module\nroulette, loyalty, rewards, accountActivity',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: theme.textBodySize * 0.7,
-              color: Colors.amber.shade700,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

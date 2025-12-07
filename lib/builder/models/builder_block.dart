@@ -365,23 +365,24 @@ class SystemBlock extends BuilderBlock {
   /// Get icon for a module type
   /// 
   /// FIX M2/N2: Added icons for new module types
+  /// FIX: Updated icons to match problem statement requirements
   static IconData getModuleIcon(String moduleType) {
     const icons = {
       'cart_module': Icons.shopping_cart,
       'roulette': Icons.casino,
       'roulette_module': Icons.casino,
-      'loyalty': Icons.card_giftcard,
-      'loyalty_module': Icons.card_giftcard,
-      'rewards': Icons.stars,
-      'rewards_module': Icons.stars,
+      'loyalty': Icons.star,
+      'loyalty_module': Icons.star,
+      'rewards': Icons.card_giftcard,
+      'rewards_module': Icons.card_giftcard,
       'accountActivity': Icons.history,
-      'delivery_module': Icons.delivery_dining,
+      'delivery_module': Icons.local_shipping,
       'click_collect_module': Icons.store,
-      'promotions_module': Icons.local_offer,
+      'promotions_module': Icons.percent,
       'menu_catalog': Icons.restaurant_menu,
       'profile_module': Icons.person,
       'kitchen_module': Icons.kitchen,
-      'staff_module': Icons.point_of_sale,
+      'staff_module': Icons.group,
       'newsletter_module': Icons.email,
     };
     return icons[moduleType] ?? Icons.extension;
