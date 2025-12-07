@@ -93,7 +93,7 @@ class BuilderWLDiagnosticService {
     }
 
     final activeModulesCount = plan.activeModules.length;
-    final modulesList = plan.activeModules.map((m) => m.code).toList();
+    final modulesList = plan.activeModules.toList();
 
     return DiagnosticTestResult(
       testName: 'Test 2: restaurantPlanUnifiedProvider',
@@ -228,7 +228,7 @@ class BuilderWLDiagnosticService {
       );
     }
 
-    final activeModuleCodes = plan.activeModules.map((m) => m.code).toSet();
+    final activeModuleCodes = plan.activeModules.toSet();
     final filteredModules = SystemBlock.getFilteredModules(plan);
     final displayedModules = <String>{};
 
@@ -286,7 +286,7 @@ class BuilderWLDiagnosticService {
 
     debugPrint('✅ Plan chargé');
     debugPrint('   restaurantId: ${plan.restaurantId}');
-    debugPrint('   activeModules: ${plan.activeModules.map((m) => m.code).join(", ")}');
+    debugPrint('   activeModules: ${plan.activeModules.join(", ")}');
     debugPrint('');
 
     final allModules = SystemBlock.availableModules;

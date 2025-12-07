@@ -465,7 +465,7 @@ class SystemBlock extends BuilderBlock {
 
     debugPrint('✅ Plan chargé');
     debugPrint('   restaurantId: ${plan.restaurantId}');
-    debugPrint('   activeModules: ${plan.activeModules.map((m) => m.code).join(", ")}');
+    debugPrint('   activeModules: ${plan.activeModules.join(", ")}');
     debugPrint('');
 
     final allModules = SystemBlock.availableModules;

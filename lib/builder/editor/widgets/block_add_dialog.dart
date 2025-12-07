@@ -69,7 +69,7 @@ class BlockAddDialog extends ConsumerWidget {
           if (plan == null) {
             debugPrint('  ⚠️ data: plan is null → fallback (show all modules)');
           } else {
-            final activeModules = plan.activeModules.map((m) => m.code).join(', ');
+            final activeModules = plan.activeModules.join(', ');
             debugPrint('  ✅ data: plan loaded with ${plan.activeModules.length} modules: $activeModules');
           }
         },
@@ -145,7 +145,7 @@ class BlockAddDialog extends ConsumerWidget {
     // DEBUG: Log filtering
     if (kDebugMode && plan != null) {
       debugPrint('🔍 [BlockAddDialog] Filtering modules for plan ${plan.restaurantId}');
-      debugPrint('   Active modules: ${plan.activeModules.map((m) => m.code).join(", ")}');
+      debugPrint('   Active modules: ${plan.activeModules.join(", ")}');
     }
 
     return AlertDialog(
