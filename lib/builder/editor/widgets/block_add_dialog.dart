@@ -79,18 +79,24 @@ class BlockAddDialog extends ConsumerWidget {
     // Use .when() to properly handle loading/error/data states
     return planAsync.when(
       loading: () {
-        debugPrint('📦 [BlockAddDialog] Displaying loading dialog');
+        if (kDebugMode) {
+          debugPrint('📦 [BlockAddDialog] Displaying loading dialog');
+        }
         return _buildLoadingDialog(context);
       },
       error: (e, _) {
-        debugPrint('⚠️ [BlockAddDialog] Error loading plan, fallback to all modules: $e');
+        if (kDebugMode) {
+          debugPrint('⚠️ [BlockAddDialog] Error loading plan, fallback to all modules: $e');
+        }
         return _buildDialogContent(context, null); // Fallback: show all modules
       },
       data: (plan) {
-        if (plan == null) {
-          debugPrint('⚠️ [BlockAddDialog] Plan is null, fallback to all modules');
-        } else {
-          debugPrint('✅ [BlockAddDialog] Plan loaded successfully');
+        if (kDebugMode) {
+          if (plan == null) {
+            debugPrint('⚠️ [BlockAddDialog] Plan is null, fallback to all modules');
+          } else {
+            debugPrint('✅ [BlockAddDialog] Plan loaded successfully');
+          }
         }
         return _buildDialogContent(context, plan);
       },

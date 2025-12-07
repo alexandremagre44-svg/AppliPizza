@@ -213,7 +213,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
           children: [
             Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green),
+                const Icon(Icons.check_circle, color: Colors.green),
                 const SizedBox(width: 8),
                 Text(
                   'Modules actifs (${activeModules.length})',

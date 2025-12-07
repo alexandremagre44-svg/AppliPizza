@@ -88,7 +88,7 @@ class BuilderWLDiagnosticService {
       return const DiagnosticTestResult(
         testName: 'Test 2: restaurantPlanUnifiedProvider',
         passed: false,
-        message: 'Plan est null - vérifier le chargement depuis Firestore',
+        message: 'Plan est null - vérifiez que le document restaurants/{restaurantId}/plan/unified existe dans Firestore et que restaurantPlanUnifiedProvider charge correctement',
       );
     }
 
