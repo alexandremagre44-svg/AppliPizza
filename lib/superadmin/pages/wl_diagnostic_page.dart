@@ -68,13 +68,13 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
           .collection('restaurants')
           .doc(widget.restaurantId)
           .collection('plan')
-          .doc('unified');
+          .doc('config');
 
       final snapshot = await docRef.get();
 
       if (!snapshot.exists) {
         setState(() {
-          _error = 'Document plan/unified n\'existe pas';
+          _error = 'Document plan/config n\'existe pas';
           _isLoading = false;
         });
         return;
@@ -114,7 +114,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
           .collection('restaurants')
           .doc(widget.restaurantId)
           .collection('plan')
-          .doc('unified');
+          .doc('config');
 
       await docRef.update(updatedPlan.toJson());
 

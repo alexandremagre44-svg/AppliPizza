@@ -88,7 +88,7 @@ class BuilderWLDiagnosticService {
       return const DiagnosticTestResult(
         testName: 'Test 2: restaurantPlanUnifiedProvider',
         passed: false,
-        message: 'Plan est null - vérifiez que le document restaurants/{restaurantId}/plan/unified existe dans Firestore et que restaurantPlanUnifiedProvider charge correctement',
+        message: 'Plan est null - vérifiez que le document restaurants/{restaurantId}/plan/config existe dans Firestore et que restaurantPlanUnifiedProvider charge correctement',
       );
     }
 
@@ -107,14 +107,14 @@ class BuilderWLDiagnosticService {
     );
   }
 
-  /// Test 3: Vérifier l'existence du document Firestore plan/unified
+  /// Test 3: Vérifier l'existence du document Firestore plan/config
   Future<DiagnosticTestResult> _testFirestoreDirect(String restaurantId) async {
     try {
       final docRef = _firestore
           .collection('restaurants')
           .doc(restaurantId)
           .collection('plan')
-          .doc('unified');
+          .doc('config');
 
       final snapshot = await docRef.get();
 
@@ -122,7 +122,7 @@ class BuilderWLDiagnosticService {
         return DiagnosticTestResult(
           testName: 'Test 3: Document Firestore',
           passed: false,
-          message: 'Document plan/unified n\'existe pas',
+          message: 'Document plan/config n\'existe pas',
           details: {'path': docRef.path},
         );
       }
