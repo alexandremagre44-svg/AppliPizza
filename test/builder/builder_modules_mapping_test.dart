@@ -167,31 +167,45 @@ void main() {
       expect(filteredIds, isNot(contains('loyalty_module')));
     });
 
-    test('SystemBlock.getFilteredModules returns all when plan is null', () {
+    test('SystemBlock.getFilteredModules returns only always-visible modules when plan is null', () {
       final filtered = SystemBlock.getFilteredModules(null);
-      expect(filtered.length, equals(SystemBlock.availableModules.length));
+      // Should contain always-visible modules
+      expect(filtered, contains('menu_catalog'));
+      expect(filtered, contains('profile_module'));
+      // Should NOT contain WL modules
+      expect(filtered, isNot(contains('loyalty_module')));
+      expect(filtered, isNot(contains('roulette_module')));
     });
 
-    test('SystemBlock.getFilteredModules filters correctly', () {
-      final planWithRoulette = createMockPlan(['roulette']);
-      final filtered = SystemBlock.getFilteredModules(planWithRoulette);
+    test('SystemBlock.getFilteredModules filters correctly with plan', () {
+      final mockPlanData = _MockRestaurantPlanWithModules(['roulette']);
+      final filtered = SystemBlock.getFilteredModules(mockPlanData);
       
-      // Should contain legacy roulette and roulette_module
-      expect(filtered, contains('roulette'));
+      // Should contain always-visible modules
+      expect(filtered, contains('menu_catalog'));
+      expect(filtered, contains('profile_module'));
+      
+      // Should contain roulette_module (enabled in plan)
       expect(filtered, contains('roulette_module'));
       
-      // Should NOT contain loyalty_module
+      // Should NOT contain loyalty_module (not enabled in plan)
       expect(filtered, isNot(contains('loyalty_module')));
     });
 
-    test('SystemBlock.getFilteredModules handles legacy aliases', () {
-      final planWithLoyalty = createMockPlan(['loyalty']);
-      final filtered = SystemBlock.getFilteredModules(planWithLoyalty);
+    test('SystemBlock.getFilteredModules handles loyalty module correctly', () {
+      final mockPlanData = _MockRestaurantPlanWithModules(['loyalty']);
+      final filtered = SystemBlock.getFilteredModules(mockPlanData);
       
-      // Should contain both legacy 'loyalty' and canonical 'loyalty_module'
-      expect(filtered, contains('loyalty'));
+      // Should contain always-visible modules
+      expect(filtered, contains('menu_catalog'));
+      expect(filtered, contains('profile_module'));
+      
+      // Should contain both loyalty_module AND rewards_module (1-to-many mapping)
       expect(filtered, contains('loyalty_module'));
-      expect(filtered, contains('rewards_module')); // Also uses loyalty ModuleId
+      expect(filtered, contains('rewards_module'));
+      
+      // Should NOT contain roulette_module
+      expect(filtered, isNot(contains('roulette_module')));
     });
   });
 }
@@ -226,4 +240,38 @@ class _MockRestaurantPlan {
     }
     return activeModules.contains(code);
   }
+}
+
+/// Mock RestaurantPlanUnified with modules list for testing new implementation
+class _MockRestaurantPlanWithModules {
+  final List<String> activeModuleIds;
+  
+  _MockRestaurantPlanWithModules(this.activeModuleIds);
+  
+  // Create mock ModuleConfig objects for each enabled module
+  List<dynamic> get modules {
+    return activeModuleIds.map((id) => _MockModuleConfig(id, true)).toList();
+  }
+  
+  bool hasModule(dynamic moduleId) {
+    String code;
+    if (moduleId is String) {
+      code = moduleId;
+    } else {
+      try {
+        code = (moduleId as dynamic).code as String;
+      } catch (e) {
+        return false;
+      }
+    }
+    return activeModuleIds.contains(code);
+  }
+}
+
+/// Mock ModuleConfig for testing
+class _MockModuleConfig {
+  final String id;
+  final bool enabled;
+  
+  _MockModuleConfig(this.id, this.enabled);
 }
