@@ -294,6 +294,10 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
     });
   }
 
+  String _getModuleName(String moduleCode) {
+    return ModuleRegistry.ofString(moduleCode)?.name ?? moduleCode;
+  }
+
   Color _getCategoryColor(ModuleCategory category) {
     switch (category) {
       case ModuleCategory.core:
@@ -679,7 +683,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Dépend de: ${module.dependencies.map((d) => ModuleRegistry.ofString(d.code)?.name ?? d.code).join(", ")}',
+                        'Dépend de: ${module.dependencies.map((d) => _getModuleName(d.code)).join(", ")}',
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,
