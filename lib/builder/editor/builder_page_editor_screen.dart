@@ -115,6 +115,15 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
   /// Panel is shown when a block is selected AND we're showing the blocks list (not preview)
   bool get _shouldShowMobileEditorPanel => _selectedBlock != null && !_showPreviewInMobile;
 
+  /// Whether the publish button should be enabled
+  /// Only enabled when page has unpublished changes
+  bool get _canPublish => _page != null && _page!.hasUnpublishedChanges;
+  
+  /// Tooltip for the publish button
+  String get _publishTooltip => !_canPublish 
+      ? 'Aucune modification à publier' 
+      : 'Publier';
+
   @override
   void initState() {
     super.initState();
@@ -243,7 +252,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Publier le thème'),
-        content: const Text('Voulez-vous publier le thème ? Les modifications seront visibles par tous les utilisateurs de l\'application.'),
+        content: const Text('Voulez-vous publier le thème ? Les modifications seront visibles par tous les utilisateurs de l'application.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -586,7 +595,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Publier la page'),
-        content: const Text('Voulez-vous publier cette page ? Les modifications seront visibles par tous les utilisateurs de l\'application.'),
+        content: const Text('Voulez-vous publier cette page ? Les modifications seront visibles par tous les utilisateurs de l'application.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -1025,14 +1034,10 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
           children: [
             IconButton(
               icon: const Icon(Icons.cloud_upload),
-              tooltip: _page != null && !_page!.hasUnpublishedChanges 
-                  ? 'Aucune modification à publier' 
-                  : 'Publier',
-              onPressed: _page != null && _page!.hasUnpublishedChanges 
-                  ? _publishPage 
-                  : null,
+              tooltip: _publishTooltip,
+              onPressed: _canPublish ? _publishPage : null,
             ),
-            if (_page != null && _page!.hasUnpublishedChanges)
+            if (_canPublish)
               Positioned(
                 right: 8,
                 top: 8,
