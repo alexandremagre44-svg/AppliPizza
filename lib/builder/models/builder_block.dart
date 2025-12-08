@@ -486,41 +486,26 @@ class SystemBlock extends BuilderBlock {
 
   /// Retourne les modules filtrés selon le plan WL du restaurant
   /// 
-  /// Utilise le mapping de builder_modules.dart pour vérifier
-  /// quels modules sont activés dans le plan.
+  /// Uses the proper WL → Builder mapping from builder_modules.dart.
   /// 
   /// **Behavior:**
-  /// - If plan is null: returns empty list (strict filtering)
-  ///   This prevents showing modules when plan is not loaded yet.
-  ///   In the editor, the plan should always be loaded before calling this.
+  /// - If plan is null: returns only always-visible modules (strict filtering)
+  /// - Always visible modules (SystemModules.alwaysVisible) are always included
+  /// - Other modules come from getBuilderModulesForPlan(plan) which uses
+  ///   the wlToBuilderModule mapping
   /// 
-  /// - Always visible modules (SystemModules.alwaysVisible) bypass plan check
-  /// - Legacy modules without WL mapping are always visible
-  /// - Other modules checked via plan.hasModule(wlModuleId)
-  /// 
-  /// **Breaking Change Note:**
-  /// Previous behavior returned all modules when plan was null (fallback-safe).
-  /// New behavior returns empty list to enforce proper plan loading.
-  /// Callers must ensure plan is loaded before calling this method.
+  /// **No fallback behavior:**
+  /// - Does NOT show all modules when plan is null
+  /// - Does NOT use old reverse-lookup logic
+  /// - Uses the new WL → Builder mapping exclusively
   static List<String> getFilteredModules(RestaurantPlanUnified? plan) {
-    if (plan == null) return [];
+    // Always include system modules that are always visible
+    final result = List<String>.from(SystemModules.alwaysVisible);
     
-    return availableModules.where((moduleId) {
-      // Always visible modules bypass plan check
-      if (SystemModules.alwaysVisible.contains(moduleId)) {
-        return true;
-      }
-      
-      // Get the WL ModuleId for this builder module
-      final wlModuleId = builder_modules.getModuleIdForBuilder(moduleId);
-      if (wlModuleId == null) {
-        // Module without WL mapping (legacy) - always visible
-        return true;
-      }
-      
-      // Check if module is enabled in plan
-      return plan.hasModule(wlModuleId);
-    }).toList();
+    // Add modules from the plan using proper WL → Builder mapping
+    result.addAll(builder_modules.getBuilderModulesForPlan(plan));
+    
+    return result;
   }
 
   /// Check if a specific module is enabled in the plan
