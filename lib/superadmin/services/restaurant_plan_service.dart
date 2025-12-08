@@ -158,9 +158,6 @@ class RestaurantPlanService {
     String? templateId,
   }) async {
     try {
-      // Use module IDs directly as they are already strings
-      final activeModules = enabledModuleIds;
-
       // Créer la configuration de branding depuis le map
       final branding = BrandingConfig(
         brandName: brand['brandName'] as String?,
@@ -182,7 +179,7 @@ class RestaurantPlanService {
         name: name,
         slug: slug,
         templateId: templateId,
-        activeModules: activeModules,
+        activeModules: enabledModuleIds,
         branding: branding,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
