@@ -178,22 +178,25 @@ class SystemBlockRuntime extends StatelessWidget {
   /// Routes to the appropriate module builder based on type
   Widget _buildModuleWidget(BuildContext context, String moduleType, ThemeConfig theme) {
     // --- WL module handling (BlockType.module) ---
+    // Priority handling for White Label modules that use BlockType.module
+    // These modules require block.moduleId instead of moduleType for proper rendering
     if (block.type == BlockType.module) {
-      final id = block.config['moduleId'] as String?;
+      final id = block.config?['moduleId'] as String?;
 
       if (id != null && id.isNotEmpty) {
         final isAdminContext = _isAdminContext(context);
 
-        // Try client widget first
-        Widget? wlWidget = isAdminContext
+        // Try context-appropriate widget first (client for runtime, admin for builder)
+        Widget? moduleWidget = isAdminContext
             ? ModuleRuntimeRegistry.buildAdmin(id, context)
             : ModuleRuntimeRegistry.buildClient(id, context);
 
-        // Fallback: admin widget
-        wlWidget ??= ModuleRuntimeRegistry.buildAdmin(id, context);
+        // Fallback: admin widget if client widget not available
+        // This ensures modules with only admin widgets registered can still display
+        moduleWidget ??= ModuleRuntimeRegistry.buildAdmin(id, context);
 
-        // Final fallback: Unknown widget
-        return wlWidget ?? UnknownModuleWidget(moduleId: id);
+        // Final fallback: Unknown widget if module not registered at all
+        return moduleWidget ?? UnknownModuleWidget(moduleId: id);
       }
     }
     
