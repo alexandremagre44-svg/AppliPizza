@@ -2,7 +2,7 @@
 ///
 /// Étape 3 du Wizard: Sélection du template.
 /// Permet de choisir un template de départ pour le restaurant.
-/// Chaque template définit un ensemble de modules pré-configurés basé sur ModuleId.
+/// Chaque template définit un ensemble de modules pré-configurés basé sur String module IDs.
 library;
 
 import 'package:flutter/material.dart';
