@@ -5,7 +5,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pizza_delizza_clean/superadmin/pages/restaurant_wizard/wizard_step_template.dart';
 import 'package:pizza_delizza_clean/superadmin/pages/restaurant_wizard/wizard_state.dart';
-import 'package:pizza_delizza_clean/white_label/core/module_id.dart';
 
 void main() {
   group('RestaurantTemplate Tests', () {
@@ -19,13 +18,13 @@ void main() {
       );
       
       expect(template.name, 'Pizzeria Classic');
-      expect(template.modules, contains(ModuleId.ordering));
-      expect(template.modules, contains(ModuleId.delivery));
-      expect(template.modules, contains(ModuleId.clickAndCollect));
-      expect(template.modules, contains(ModuleId.loyalty));
-      expect(template.modules, contains(ModuleId.roulette));
-      expect(template.modules, contains(ModuleId.promotions));
-      expect(template.modules, contains(ModuleId.kitchen_tablet));
+      expect(template.modules, contains('ordering'));
+      expect(template.modules, contains('delivery'));
+      expect(template.modules, contains('click_and_collect'));
+      expect(template.modules, contains('loyalty'));
+      expect(template.modules, contains('roulette'));
+      expect(template.modules, contains('promotions'));
+      expect(template.modules, contains('kitchen_tablet'));
     });
 
     test('Fast Food Express template has correct modules', () {
@@ -34,10 +33,10 @@ void main() {
       );
       
       expect(template.name, 'Fast Food Express');
-      expect(template.modules, contains(ModuleId.ordering));
-      expect(template.modules, contains(ModuleId.clickAndCollect));
-      expect(template.modules, contains(ModuleId.staff_tablet));
-      expect(template.modules, contains(ModuleId.promotions));
+      expect(template.modules, contains('ordering'));
+      expect(template.modules, contains('click_and_collect'));
+      expect(template.modules, contains('staff_tablet'));
+      expect(template.modules, contains('promotions'));
     });
 
     test('Restaurant Premium template has correct modules', () {
@@ -46,16 +45,16 @@ void main() {
       );
       
       expect(template.name, 'Restaurant Premium');
-      expect(template.modules, contains(ModuleId.ordering));
-      expect(template.modules, contains(ModuleId.delivery));
-      expect(template.modules, contains(ModuleId.clickAndCollect));
-      expect(template.modules, contains(ModuleId.loyalty));
-      expect(template.modules, contains(ModuleId.promotions));
-      expect(template.modules, contains(ModuleId.campaigns));
-      expect(template.modules, contains(ModuleId.timeRecorder));
-      expect(template.modules, contains(ModuleId.reporting));
-      expect(template.modules, contains(ModuleId.theme));
-      expect(template.modules, contains(ModuleId.pagesBuilder));
+      expect(template.modules, contains('ordering'));
+      expect(template.modules, contains('delivery'));
+      expect(template.modules, contains('click_and_collect'));
+      expect(template.modules, contains('loyalty'));
+      expect(template.modules, contains('promotions'));
+      expect(template.modules, contains('campaigns'));
+      expect(template.modules, contains('time_recorder'));
+      expect(template.modules, contains('reporting'));
+      expect(template.modules, contains('theme'));
+      expect(template.modules, contains('pages_builder'));
     });
 
     test('Blank template has no modules', () {
@@ -90,8 +89,8 @@ void main() {
       
       expect(notifier.state.blueprint.templateId, 'pizzeria-classic');
       expect(notifier.state.enabledModuleIds.length, greaterThan(0));
-      expect(notifier.state.enabledModuleIds, contains(ModuleId.ordering));
-      expect(notifier.state.enabledModuleIds, contains(ModuleId.delivery));
+      expect(notifier.state.enabledModuleIds, contains('ordering'));
+      expect(notifier.state.enabledModuleIds, contains('delivery'));
     });
 
     test('selectTemplate with blank template sets no modules', () {
