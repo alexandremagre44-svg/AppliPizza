@@ -97,9 +97,12 @@ class RestaurantPlanService {
 
   /// Active ou désactive un module.
   /// 
-  /// @deprecated This method is deprecated and will be removed in a future version.
-  /// Use updateModule(restaurantId, moduleId, enabled) instead.
-  /// Example: updateModule(restaurantId, "delivery", true)
+  /// @deprecated This method is deprecated and will be removed in version 2.0.0.
+  /// Use updateModule(restaurantId, moduleId, enabled) instead (see line 272).
+  /// Example: 
+  /// ```dart
+  /// await service.updateModule(restaurantId, "delivery", true);
+  /// ```
   Future<void> toggleModule(
     String restaurantId,
     String moduleId,

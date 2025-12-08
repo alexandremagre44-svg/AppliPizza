@@ -194,13 +194,17 @@ class ModuleRegistry {
 
   /// Retourne la définition d'un module par son identifiant string.
   ///
-  /// Retourne null si le module n'existe pas.
+  /// Retourne null si le module n'existe pas dans le registre.
+  /// Exemples d'identifiants valides: 'ordering', 'delivery', 'loyalty', etc.
   static ModuleDefinition? of(String id) {
     return definitions[id];
   }
   
   /// Alias pour of() pour compatibilité avec le code existant.
-  @Deprecated('Use of() instead')
+  /// 
+  /// @deprecated Use of() instead. This method will be removed in version 2.0.0.
+  /// Migration: Replace `ModuleRegistry.ofString(id)` with `ModuleRegistry.of(id)`.
+  @Deprecated('Use of() instead. Will be removed in version 2.0.0')
   static ModuleDefinition? ofString(String id) {
     return of(id);
   }
