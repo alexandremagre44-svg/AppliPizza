@@ -403,7 +403,8 @@ const Map<String, List<String>> wlToBuilderModules = {
 /// Retourne les modules Builder visibles selon le plan WL
 /// 
 /// Returns list of builder module IDs that are available based on the plan:
-/// - If plan is null, returns EMPTY LIST (strict filtering, no fallback)
+/// - If plan is null, returns EMPTY LIST (no WL modules)
+///   Note: SystemBlock.getFilteredModules() adds always-visible modules on top of this
 /// - Converts enabled WL modules to Builder modules using wlToBuilderModules mapping
 /// - Only returns modules that are actually defined in the Builder
 /// - Handles 1-to-many mappings (e.g., loyalty → [loyalty_module, rewards_module])

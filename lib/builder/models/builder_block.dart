@@ -489,10 +489,10 @@ class SystemBlock extends BuilderBlock {
   /// Uses the proper WL → Builder mapping from builder_modules.dart.
   /// 
   /// **Behavior:**
-  /// - If plan is null: returns only always-visible modules (strict filtering)
-  /// - Always visible modules (SystemModules.alwaysVisible) are always included
-  /// - Other modules come from getBuilderModulesForPlan(plan) which uses
-  ///   the wlToBuilderModule mapping
+  /// - Always includes SystemModules.alwaysVisible (menu_catalog, profile_module)
+  /// - If plan is null: returns ONLY always-visible modules (strict filtering)
+  /// - If plan is provided: adds WL modules from getBuilderModulesForPlan(plan)
+  ///   which uses the wlToBuilderModules mapping
   /// 
   /// **No fallback behavior:**
   /// - Does NOT show all modules when plan is null
