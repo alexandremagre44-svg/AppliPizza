@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../white_label/core/module_id.dart';
 import '../../../../white_label/core/module_config.dart';
 import '../../../../white_label/modules/core/delivery/delivery_area.dart';
 import '../../../../white_label/modules/core/delivery/delivery_settings.dart';
@@ -84,7 +83,7 @@ class _DeliverySettingsPageState extends State<DeliverySettingsPage> {
 
     try {
       final plan = await _planService.loadPlan(widget.restaurantId);
-      final moduleConfig = plan.getModuleConfig(ModuleId.delivery);
+      final moduleConfig = plan.getModuleConfig("delivery");
 
       if (moduleConfig != null && moduleConfig.settings.isNotEmpty) {
         // Parse settings from the generic ModuleConfig
@@ -172,27 +171,12 @@ class _DeliverySettingsPageState extends State<DeliverySettingsPage> {
       // Load current plan
       final plan = await _planService.loadPlan(widget.restaurantId);
       
-      // Update delivery module config with new settings
-      final updatedModules = List.of(plan.modules);
-      final deliveryIndex = updatedModules.indexWhere(
-        (m) => m.id == ModuleId.delivery,
+      // Update delivery module settings using the new service method
+      await _planService.updateModuleSettings(
+        widget.restaurantId,
+        "delivery",
+        newSettings.toJson(),
       );
-      
-      final newConfig = ModuleConfig(
-        id: ModuleId.delivery,
-        enabled: deliveryIndex >= 0 ? updatedModules[deliveryIndex].enabled : false,
-        settings: newSettings.toJson(),
-      );
-      
-      if (deliveryIndex >= 0) {
-        updatedModules[deliveryIndex] = newConfig;
-      } else {
-        updatedModules.add(newConfig);
-      }
-      
-      // Save updated plan
-      final updatedPlan = plan.copyWith(modules: updatedModules);
-      await _planService.savePlan(updatedPlan);
 
       setState(() {
         _settings = newSettings;

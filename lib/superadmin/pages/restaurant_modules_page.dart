@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import '../../white_label/core/module_category.dart';
 import '../../white_label/core/module_config.dart';
 import '../../white_label/core/module_definition.dart';
-import '../../white_label/core/module_id.dart';
 import '../../white_label/core/module_registry.dart';
 import '../../white_label/restaurant/restaurant_plan.dart';
 import '../services/restaurant_plan_service.dart';
@@ -37,7 +36,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   final RestaurantPlanService _planService = RestaurantPlanService();
 
   RestaurantPlan? _plan;
-  Map<ModuleId, bool> _pendingChanges = {};
+  Map<String, bool> _pendingChanges = {};
   bool _isLoading = true;
   bool _isSaving = false;
   String? _error;
@@ -69,7 +68,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
     }
   }
 
-  bool _isModuleEnabled(ModuleId id) {
+  bool _isModuleEnabled(String id) {
     // D'abord vérifier les changements en attente
     if (_pendingChanges.containsKey(id)) {
       return _pendingChanges[id]!;
@@ -78,15 +77,17 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
     return _plan?.hasModule(id) ?? false;
   }
 
-  void _toggleModule(ModuleId id, bool enabled) {
-    final definition = ModuleRegistry.of(id);
+  void _toggleModule(String id, bool enabled) {
+    final definition = ModuleRegistry.ofString(id);
+    if (definition == null) return;
 
     // Vérifier les dépendances si on active
     if (enabled) {
-      final missingDeps = <ModuleId>[];
+      final missingDeps = <String>[];
       for (final depId in definition.dependencies) {
-        if (!_isModuleEnabled(depId)) {
-          missingDeps.add(depId);
+        final depCode = depId.code;
+        if (!_isModuleEnabled(depCode)) {
+          missingDeps.add(depCode);
         }
       }
 
@@ -96,12 +97,14 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
       }
     } else {
       // Vérifier si d'autres modules dépendent de celui-ci
-      final dependents = <ModuleId>[];
-      for (final moduleId in ModuleId.values) {
-        if (_isModuleEnabled(moduleId)) {
-          final def = ModuleRegistry.of(moduleId);
-          if (def.dependencies.contains(id)) {
-            dependents.add(moduleId);
+      final dependents = <String>[];
+      // Check all modules in the registry
+      for (final entry in ModuleRegistry.definitions.entries) {
+        final moduleCode = entry.key.code;
+        if (_isModuleEnabled(moduleCode)) {
+          final def = entry.value;
+          if (def.dependencies.any((d) => d.code == id)) {
+            dependents.add(moduleCode);
           }
         }
       }
@@ -117,7 +120,10 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
     });
   }
 
-  void _showDependencyDialog(ModuleId moduleId, List<ModuleId> missingDeps) {
+  void _showDependencyDialog(String moduleId, List<String> missingDeps) {
+    final moduleDef = ModuleRegistry.ofString(moduleId);
+    if (moduleDef == null) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -127,20 +133,23 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Pour activer "${ModuleRegistry.of(moduleId).name}", '
+              'Pour activer "${moduleDef.name}", '
               'vous devez d\'abord activer :',
             ),
             const SizedBox(height: 12),
-            ...missingDeps.map((dep) => Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 4),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.subdirectory_arrow_right, size: 18),
-                      const SizedBox(width: 8),
-                      Text(ModuleRegistry.of(dep).name),
-                    ],
-                  ),
-                )),
+            ...missingDeps.map((dep) {
+              final depDef = ModuleRegistry.ofString(dep);
+              return Padding(
+                padding: const EdgeInsets.only(left: 16, top: 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.subdirectory_arrow_right, size: 18),
+                    const SizedBox(width: 8),
+                    Text(depDef?.name ?? dep),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
         actions: [
@@ -165,7 +174,10 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
     );
   }
 
-  void _showDependentModulesDialog(ModuleId moduleId, List<ModuleId> dependents) {
+  void _showDependentModulesDialog(String moduleId, List<String> dependents) {
+    final moduleDef = ModuleRegistry.ofString(moduleId);
+    if (moduleDef == null) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -175,20 +187,23 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Les modules suivants dépendent de "${ModuleRegistry.of(moduleId).name}" '
+              'Les modules suivants dépendent de "${moduleDef.name}" '
               'et seront désactivés :',
             ),
             const SizedBox(height: 12),
-            ...dependents.map((dep) => Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 4),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.subdirectory_arrow_right, size: 18),
-                      const SizedBox(width: 8),
-                      Text(ModuleRegistry.of(dep).name),
-                    ],
-                  ),
-                )),
+            ...dependents.map((dep) {
+              final depDef = ModuleRegistry.ofString(dep);
+              return Padding(
+                padding: const EdgeInsets.only(left: 16, top: 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.subdirectory_arrow_right, size: 18),
+                    const SizedBox(width: 8),
+                    Text(depDef?.name ?? dep),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
         actions: [
@@ -224,42 +239,38 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
     });
 
     try {
-      // Appliquer les changements au plan
-      final modules = List<ModuleConfig>.from(_plan!.modules);
-
+      // Appliquer les changements au plan en utilisant le nouveau service
       for (final entry in _pendingChanges.entries) {
         final moduleId = entry.key;
         final enabled = entry.value;
-
-        final existingIndex = modules.indexWhere((m) => m.id == moduleId);
-        if (existingIndex >= 0) {
-          modules[existingIndex] =
-              modules[existingIndex].copyWith(enabled: enabled);
-        } else {
-          modules.add(ModuleConfig(
-            id: moduleId,
-            enabled: enabled,
-            settings: {},
-          ));
-        }
+        await _planService.updateModule(widget.restaurantId, moduleId, enabled);
       }
 
-      final updatedPlan = _plan!.copyWith(modules: modules);
-      await _planService.savePlan(updatedPlan);
-
-      setState(() {
-        _plan = updatedPlan;
-        _pendingChanges = {};
-        _isSaving = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Configuration enregistrée avec succès'),
-            backgroundColor: Colors.green,
-          ),
-        );
+      // Recharger le plan
+      try {
+        await _loadPlan();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Configuration enregistrée avec succès'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        // Failed to reload, but changes were saved
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Modifications enregistrées mais erreur lors du rechargement: $e'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        setState(() {
+          _isSaving = false;
+        });
       }
     } catch (e) {
       setState(() {
@@ -667,7 +678,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Dépend de: ${module.dependencies.map((d) => ModuleRegistry.of(d).name).join(", ")}',
+                        'Dépend de: ${module.dependencies.map((d) => d.label).join(", ")}',
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,

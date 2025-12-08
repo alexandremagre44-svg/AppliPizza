@@ -207,6 +207,20 @@ class ModuleRegistry {
     return definition;
   }
 
+  /// Retourne la définition d'un module par son code string.
+  ///
+  /// Accepte des codes string comme "delivery", "loyalty", etc.
+  /// Lève une exception si le module n'existe pas.
+  static ModuleDefinition? ofString(String moduleId) {
+    // Find the ModuleId enum that matches the string code
+    for (final entry in definitions.entries) {
+      if (entry.key.code == moduleId) {
+        return entry.value;
+      }
+    }
+    return null;
+  }
+
   /// Retourne la liste des modules appartenant à une catégorie donnée.
   static List<ModuleDefinition> byCategory(ModuleCategory category) {
     return definitions.values
