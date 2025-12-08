@@ -238,13 +238,14 @@ To verify `BlockType.module` support is working:
 
 ### When Modifying Rendering Logic
 
-⚠️ **DO NOT modify `system_block_runtime.dart`** - It's already correct!
+⚠️ **Important**: Verify the existing implementation in `system_block_runtime.dart` before making changes - it contains the core rendering logic that is already working correctly.
 
-If changes needed:
-- Modify registry configuration
-- Update `ModuleRuntimeRegistry` if needed
-- Update module widgets
-- Never bypass the established rendering pipeline
+If changes are needed:
+- First understand the existing implementation
+- Modify registry configuration if adding new block types
+- Update `ModuleRuntimeRegistry` for new module registration
+- Update module widgets for UI changes
+- Follow the established rendering pipeline pattern
 
 ## Performance Considerations
 
