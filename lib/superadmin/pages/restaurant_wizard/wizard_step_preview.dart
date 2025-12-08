@@ -8,7 +8,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../white_label/core/module_id.dart';
+import '../../../white_label/core/module_registry.dart';
 import '../../models/restaurant_blueprint.dart';
 import 'wizard_state.dart';
 import 'wizard_step_template.dart';
@@ -25,7 +25,7 @@ class WizardStepPreview extends ConsumerWidget {
 
     // Utiliser les méthodes de validation du state
     final isReady = wizardState.isReadyForCreation;
-    final missingDeps = isReady ? <ModuleId>[] : getMissingDependencies(enabledModules);
+    final missingDeps = isReady ? <String>[] : getMissingDependencies(enabledModules);
 
     // Récupérer le template sélectionné
     final selectedTemplate = getTemplateById(blueprint.templateId);
@@ -188,9 +188,9 @@ class WizardStepPreview extends ConsumerWidget {
 /// Indicateur de validation (avec vérification des dépendances des modules).
 class _ValidationStatus extends StatelessWidget {
   final RestaurantBlueprintLight blueprint;
-  final List<ModuleId> enabledModules;
+  final List<String> enabledModules;
   final bool isValid;
-  final List<ModuleId> missingDeps;
+  final List<String> missingDeps;
 
   const _ValidationStatus({
     required this.blueprint,
@@ -207,7 +207,8 @@ class _ValidationStatus extends StatelessWidget {
     if (blueprint.slug.isEmpty) issues.add('Slug manquant');
     if (blueprint.brand.brandName.isEmpty) issues.add('Nom de marque manquant');
     if (missingDeps.isNotEmpty) {
-      issues.add('Dépendances modules: ${missingDeps.map((m) => m.label).join(', ')}');
+      issues.add('Dépendances modules: ${missingDeps.map((m) => 
+          ModuleRegistry.of(m)?.name ?? m).join(', ')}');
     }
 
     return Container(
@@ -521,9 +522,9 @@ class _PreviewModulesRow extends StatelessWidget {
   }
 }
 
-/// Ligne de prévisualisation pour les modules (version avec ModuleId).
+/// Ligne de prévisualisation pour les modules (version avec String IDs).
 class _PreviewModulesRowNew extends StatelessWidget {
-  final List<ModuleId> enabledModules;
+  final List<String> enabledModules;
 
   const _PreviewModulesRowNew({required this.enabledModules});
 
@@ -544,6 +545,7 @@ class _PreviewModulesRowNew extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: enabledModules.map((moduleId) {
+        final moduleName = ModuleRegistry.of(moduleId)?.name ?? moduleId;
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
@@ -557,7 +559,7 @@ class _PreviewModulesRowNew extends StatelessWidget {
               Icon(Icons.check, size: 14, color: Colors.green.shade600),
               const SizedBox(width: 4),
               Text(
-                moduleId.label,
+                moduleName,
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.green.shade700,

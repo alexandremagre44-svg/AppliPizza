@@ -6,7 +6,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pizza_delizza_clean/superadmin/pages/restaurant_wizard/wizard_state.dart';
 import 'package:pizza_delizza_clean/superadmin/models/restaurant_blueprint.dart';
-import 'package:pizza_delizza_clean/white_label/core/module_id.dart';
 
 void main() {
   group('RestaurantWizardState Validation Tests', () {
@@ -63,8 +62,8 @@ void main() {
       final state = RestaurantWizardState(
         blueprint: RestaurantBlueprintLight.empty(),
         enabledModuleIds: [
-          ModuleId.ordering,
-          ModuleId.delivery, // depends on ordering
+          'ordering',
+          'delivery', // depends on ordering
         ],
       );
       expect(state.isModulesValid, true);
@@ -74,7 +73,7 @@ void main() {
       final state = RestaurantWizardState(
         blueprint: RestaurantBlueprintLight.empty(),
         enabledModuleIds: [
-          ModuleId.delivery, // depends on ordering, which is not enabled
+          'delivery', // depends on ordering, which is not enabled
         ],
       );
       expect(state.isModulesValid, false);
@@ -95,21 +94,21 @@ void main() {
           brand: const RestaurantBrandLight(brandName: 'Test Brand'),
         ),
         enabledModuleIds: [
-          ModuleId.ordering,
-          ModuleId.payments,
+          'ordering',
+          'payments',
         ],
       );
       expect(state.isReadyForCreation, true);
     });
 
     test('validateModuleDependencies correctly identifies missing dependencies', () {
-      final modules = [ModuleId.delivery]; // missing ordering dependency
+      final modules = ['delivery']; // missing ordering dependency
       final missingDeps = getMissingDependencies(modules);
-      expect(missingDeps, contains(ModuleId.ordering));
+      expect(missingDeps, contains('ordering'));
     });
 
     test('validateModuleDependencies passes when all dependencies are present', () {
-      final modules = [ModuleId.ordering, ModuleId.delivery];
+      final modules = ['ordering', 'delivery'];
       final isValid = validateModuleDependencies(modules);
       expect(isValid, true);
     });
@@ -137,36 +136,36 @@ void main() {
 
     test('toggleModule adds module when enabled', () {
       final notifier = RestaurantWizardNotifier();
-      notifier.toggleModule(ModuleId.ordering, true);
+      notifier.toggleModule('ordering', true);
       
-      expect(notifier.state.enabledModuleIds, contains(ModuleId.ordering));
+      expect(notifier.state.enabledModuleIds, contains('ordering'));
     });
 
     test('toggleModule removes module when disabled', () {
       final notifier = RestaurantWizardNotifier();
-      notifier.toggleModule(ModuleId.ordering, true);
-      notifier.toggleModule(ModuleId.ordering, false);
+      notifier.toggleModule('ordering', true);
+      notifier.toggleModule('ordering', false);
       
-      expect(notifier.state.enabledModuleIds, isNot(contains(ModuleId.ordering)));
+      expect(notifier.state.enabledModuleIds, isNot(contains('ordering')));
     });
 
     test('toggleModule adds dependencies automatically', () {
       final notifier = RestaurantWizardNotifier();
-      notifier.toggleModule(ModuleId.delivery, true);
+      notifier.toggleModule('delivery', true);
       
       // delivery depends on ordering, so ordering should be added
-      expect(notifier.state.enabledModuleIds, contains(ModuleId.ordering));
-      expect(notifier.state.enabledModuleIds, contains(ModuleId.delivery));
+      expect(notifier.state.enabledModuleIds, contains('ordering'));
+      expect(notifier.state.enabledModuleIds, contains('delivery'));
     });
 
     test('toggleModule removes dependent modules when disabling', () {
       final notifier = RestaurantWizardNotifier();
-      notifier.toggleModule(ModuleId.delivery, true);
-      notifier.toggleModule(ModuleId.ordering, false);
+      notifier.toggleModule('delivery', true);
+      notifier.toggleModule('ordering', false);
       
       // disabling ordering should also disable delivery
-      expect(notifier.state.enabledModuleIds, isNot(contains(ModuleId.ordering)));
-      expect(notifier.state.enabledModuleIds, isNot(contains(ModuleId.delivery)));
+      expect(notifier.state.enabledModuleIds, isNot(contains('ordering')));
+      expect(notifier.state.enabledModuleIds, isNot(contains('delivery')));
     });
   });
 }

@@ -10,30 +10,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../white_label/core/module_category.dart';
 import '../../../white_label/core/module_definition.dart' as core;
-import '../../../white_label/core/module_id.dart';
 import '../../../white_label/core/module_registry.dart';
 import 'wizard_state.dart';
 
-/// Retourne une icône pour un ModuleId.
-IconData _getModuleIcon(ModuleId moduleId) {
+/// Retourne une icône pour un module ID.
+IconData _getModuleIcon(String moduleId) {
   switch (moduleId) {
-    case ModuleId.ordering:
+    case 'ordering':
       return Icons.shopping_cart;
-    case ModuleId.delivery:
+    case 'delivery':
       return Icons.delivery_dining;
-    case ModuleId.clickAndCollect:
+    case 'click_and_collect':
       return Icons.store;
-    case ModuleId.loyalty:
+    case 'loyalty':
       return Icons.card_giftcard;
-    case ModuleId.roulette:
+    case 'roulette':
       return Icons.casino;
-    case ModuleId.promotions:
+    case 'promotions':
       return Icons.local_offer;
-    case ModuleId.theme:
+    case 'theme':
       return Icons.palette;
-    case ModuleId.pagesBuilder:
+    case 'pages_builder':
       return Icons.web;
-    case ModuleId.kitchen_tablet:
+    case 'kitchen_tablet':
       return Icons.kitchen;
     default:
       return Icons.block;
@@ -77,15 +76,15 @@ class WizardStepModules extends ConsumerWidget {
     // Modules pertinents pour les restaurants, exclusion des modules
     // internes (POS, Kitchen, etc.) et de gestion avancée
     const restaurantVisibleModules = {
-      ModuleId.ordering,
-      ModuleId.delivery,
-      ModuleId.clickAndCollect,
-      ModuleId.loyalty,
-      ModuleId.roulette,
-      ModuleId.promotions,
-      ModuleId.pagesBuilder,
-      ModuleId.theme,
-      ModuleId.kitchen_tablet,
+      'ordering',
+      'delivery',
+      'click_and_collect',
+      'loyalty',
+      'roulette',
+      'promotions',
+      'pages_builder',
+      'theme',
+      'kitchen_tablet',
     };
 
     // Filtrer pour n'afficher que les modules destinés aux restaurants
@@ -165,7 +164,7 @@ class WizardStepModules extends ConsumerWidget {
                 onEnableAll: () {
                   ref
                       .read(restaurantWizardProvider.notifier)
-                      .setEnabledModules(ModuleId.values.toList());
+                      .setEnabledModules(ModuleRegistry.definitions.keys.toList());
                 },
                 onDisableAll: () {
                   ref
@@ -174,8 +173,8 @@ class WizardStepModules extends ConsumerWidget {
                 },
                 onEnableCore: () {
                   ref.read(restaurantWizardProvider.notifier).setEnabledModules([
-                    ModuleId.ordering,
-                    ModuleId.payments,
+                    'ordering',
+                    'payments',
                   ]);
                 },
               ),
@@ -191,7 +190,7 @@ class WizardStepModules extends ConsumerWidget {
 class _ModulesSummary extends StatelessWidget {
   final int enabledCount;
   final int totalCount;
-  final List<ModuleId> enabledModules;
+  final List<String> enabledModules;
 
   const _ModulesSummary({
     required this.enabledCount,
@@ -242,7 +241,8 @@ class _ModulesSummary extends StatelessWidget {
                 const SizedBox(height: 4),
                 if (enabledCount > 0)
                   Text(
-                    enabledModules.take(5).map((m) => m.label).join(', ') +
+                    enabledModules.take(5).map((m) => 
+                        ModuleRegistry.of(m)?.name ?? m).join(', ') +
                         (enabledModules.length > 5
                             ? ' +${enabledModules.length - 5}'
                             : ''),
@@ -272,7 +272,7 @@ class _ModulesSummary extends StatelessWidget {
 
 /// Avertissement pour les dépendances manquantes.
 class _DependencyWarning extends StatelessWidget {
-  final List<ModuleId> missingDeps;
+  final List<String> missingDeps;
 
   const _DependencyWarning({required this.missingDeps});
 
@@ -303,7 +303,8 @@ class _DependencyWarning extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Modules requis: ${missingDeps.map((m) => m.label).join(', ')}',
+                  'Modules requis: ${missingDeps.map((m) => 
+                      ModuleRegistry.of(m)?.name ?? m).join(', ')}',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.orange.shade700,
@@ -322,8 +323,8 @@ class _DependencyWarning extends StatelessWidget {
 class _ModuleCategorySection extends StatelessWidget {
   final ModuleCategory category;
   final List<core.ModuleDefinition> modules;
-  final Set<ModuleId> enabledModulesSet;
-  final Function(ModuleId, bool) onToggle;
+  final Set<String> enabledModulesSet;
+  final Function(String, bool) onToggle;
 
   const _ModuleCategorySection({
     required this.category,
@@ -499,7 +500,8 @@ class _ModuleToggleCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Flexible(
                         child: Text(
-                          'Requiert: ${deps.map((d) => d.label).join(', ')}',
+                          'Requiert: ${deps.map((d) => 
+                              ModuleRegistry.of(d)?.name ?? d).join(', ')}',
                           style: TextStyle(
                             fontSize: 11,
                             color: Colors.grey.shade500,
