@@ -247,15 +247,30 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
       }
 
       // Recharger le plan
-      await _loadPlan();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Configuration enregistrée avec succès'),
-            backgroundColor: Colors.green,
-          ),
-        );
+      try {
+        await _loadPlan();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Configuration enregistrée avec succès'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        // Failed to reload, but changes were saved
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Modifications enregistrées mais erreur lors du rechargement: $e'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        setState(() {
+          _isSaving = false;
+        });
       }
     } catch (e) {
       setState(() {

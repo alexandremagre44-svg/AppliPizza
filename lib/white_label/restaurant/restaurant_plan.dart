@@ -70,14 +70,26 @@ class RestaurantPlan {
   /// Vérifie si un module est activé pour ce restaurant.
   /// Accepte soit un String (ex: "delivery") soit un ModuleId enum.
   bool hasModule(dynamic id) {
-    final moduleId = id is ModuleId ? id.code : id as String;
-    return modules.any((m) => m.id == moduleId && m.enabled);
+    if (id is ModuleId) {
+      return modules.any((m) => m.id == id.code && m.enabled);
+    } else if (id is String) {
+      return modules.any((m) => m.id == id && m.enabled);
+    }
+    throw ArgumentError('id must be either a ModuleId or String, got ${id.runtimeType}');
   }
 
   /// Retourne la configuration d'un module spécifique, ou null si non trouvé.
   /// Accepte soit un String (ex: "delivery") soit un ModuleId enum.
   ModuleConfig? getModuleConfig(dynamic id) {
-    final moduleId = id is ModuleId ? id.code : id as String;
+    final String moduleId;
+    if (id is ModuleId) {
+      moduleId = id.code;
+    } else if (id is String) {
+      moduleId = id;
+    } else {
+      throw ArgumentError('id must be either a ModuleId or String, got ${id.runtimeType}');
+    }
+    
     for (final module in modules) {
       if (module.id == moduleId) {
         return module;

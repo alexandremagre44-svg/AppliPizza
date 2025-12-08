@@ -97,7 +97,10 @@ class RestaurantPlanService {
   }
 
   /// Active ou désactive un module.
-  /// @deprecated Use updateModule with String moduleId instead
+  /// 
+  /// @deprecated This method is deprecated and will be removed in a future version.
+  /// Use updateModule(restaurantId, moduleId.code, enabled) instead.
+  /// Example: updateModule(restaurantId, "delivery", true)
   Future<void> toggleModule(
     String restaurantId,
     ModuleId moduleId,
@@ -234,8 +237,10 @@ class RestaurantPlanService {
         try {
           final moduleEnumId = ModuleId.values.firstWhere((m) => m.code == module.id);
           dependents.add(moduleEnumId);
-        } catch (_) {
-          // Module ID not found in enum, skip it
+        } catch (e) {
+          // Module ID not found in enum - this can happen if a module was
+          // added to Firestore but not yet added to the ModuleId enum.
+          // We skip it safely as it won't have dependencies on legacy ModuleId enums.
         }
       }
     }
