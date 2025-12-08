@@ -137,7 +137,7 @@ class RestaurantPlanService {
   /// 
   /// Cette méthode crée les documents Firestore suivants:
   /// 1. restaurants/{id} - document principal du restaurant
-  /// 2. restaurants/{id}/plan/unified - plan unifié (RestaurantPlanUnified)
+  /// 2. restaurants/{id}/plan/config - plan unifié (RestaurantPlanUnified)
   /// 
   /// Paramètres:
   /// - restaurantId: ID du restaurant à créer
