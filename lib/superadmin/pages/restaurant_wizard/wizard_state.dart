@@ -8,7 +8,6 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../white_label/core/module_id.dart';
 import '../../../white_label/core/module_registry.dart';
 import '../../models/restaurant_blueprint.dart';
 import '../../services/superadmin_restaurant_service.dart';
@@ -122,8 +121,8 @@ class RestaurantWizardState {
   /// Blueprint en cours de construction.
   final RestaurantBlueprintLight blueprint;
 
-  /// Liste des modules activés (basée sur ModuleId).
-  final List<ModuleId> enabledModuleIds;
+  /// Liste des modules activés (basée sur String module IDs).
+  final List<String> enabledModuleIds;
 
   /// Étape courante du wizard.
   final WizardStep currentStep;
@@ -158,7 +157,7 @@ class RestaurantWizardState {
   /// Crée une copie avec des valeurs modifiées.
   RestaurantWizardState copyWith({
     RestaurantBlueprintLight? blueprint,
-    List<ModuleId>? enabledModuleIds,
+    List<String>? enabledModuleIds,
     WizardStep? currentStep,
     bool? isSubmitting,
     String? error,
@@ -226,9 +225,9 @@ class RestaurantWizardState {
 
 /// Valide les dépendances des modules.
 /// Retourne true si toutes les dépendances sont satisfaites.
-bool validateModuleDependencies(List<ModuleId> modules) {
+bool validateModuleDependencies(List<String> modules) {
   for (final moduleId in modules) {
-    final definition = ModuleRegistry.definitions[moduleId];
+    final definition = ModuleRegistry.of(moduleId);
     if (definition != null) {
       for (final dep in definition.dependencies) {
         if (!modules.contains(dep)) {
@@ -241,10 +240,10 @@ bool validateModuleDependencies(List<ModuleId> modules) {
 }
 
 /// Récupère les dépendances manquantes pour une liste de modules.
-List<ModuleId> getMissingDependencies(List<ModuleId> modules) {
-  final missing = <ModuleId>[];
+List<String> getMissingDependencies(List<String> modules) {
+  final missing = <String>[];
   for (final moduleId in modules) {
-    final definition = ModuleRegistry.definitions[moduleId];
+    final definition = ModuleRegistry.of(moduleId);
     if (definition != null) {
       for (final dep in definition.dependencies) {
         if (!modules.contains(dep) && !missing.contains(dep)) {
@@ -259,6 +258,10 @@ List<ModuleId> getMissingDependencies(List<ModuleId> modules) {
 /// Notifier pour gérer l'état du wizard.
 class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   RestaurantWizardNotifier() : super(RestaurantWizardState.initial());
+
+  /// Helper pour obtenir le nom d'un module depuis son ID.
+  String _getModuleName(String id) =>
+      ModuleRegistry.of(id)?.name ?? id;
 
   /// Réinitialise le wizard.
   void reset() {
@@ -320,19 +323,19 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
         templateId: template.id,
         modules: _moduleIdsToModulesLight(template.modules),
       ),
-      enabledModuleIds: List<ModuleId>.from(template.modules),
+      enabledModuleIds: List<String>.from(template.modules),
     );
   }
 
   /// Active ou désactive un module par son ID.
-  void toggleModule(ModuleId moduleId, bool enabled) {
-    final currentModules = List<ModuleId>.from(state.enabledModuleIds);
+  void toggleModule(String moduleId, bool enabled) {
+    final currentModules = List<String>.from(state.enabledModuleIds);
     
     if (enabled) {
       if (!currentModules.contains(moduleId)) {
         currentModules.add(moduleId);
         // Ajouter automatiquement les dépendances requises
-        final definition = ModuleRegistry.definitions[moduleId];
+        final definition = ModuleRegistry.of(moduleId);
         if (definition != null) {
           for (final dep in definition.dependencies) {
             if (!currentModules.contains(dep)) {
@@ -345,7 +348,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
       currentModules.remove(moduleId);
       // Désactiver les modules qui dépendent de celui-ci
       final dependentModules = currentModules.where((m) {
-        final def = ModuleRegistry.definitions[m];
+        final def = ModuleRegistry.of(m);
         return def != null && def.dependencies.contains(moduleId);
       }).toList();
       for (final dep in dependentModules) {
@@ -362,7 +365,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   }
 
   /// Remplace entièrement la liste des modules activés.
-  void setEnabledModules(List<ModuleId> moduleIds) {
+  void setEnabledModules(List<String> moduleIds) {
     state = state.copyWith(
       enabledModuleIds: moduleIds,
       blueprint: state.blueprint.copyWith(
@@ -371,34 +374,34 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     );
   }
 
-  /// Convertit une liste de ModuleId en RestaurantModulesLight.
+  /// Convertit une liste de String module IDs en RestaurantModulesLight.
   /// Note: RestaurantModulesLight only supports 8 modules currently.
-  /// Additional ModuleId values are stored in enabledModuleIds for future use.
-  RestaurantModulesLight _moduleIdsToModulesLight(List<ModuleId> moduleIds) {
+  /// Additional module IDs are stored in enabledModuleIds for future use.
+  RestaurantModulesLight _moduleIdsToModulesLight(List<String> moduleIds) {
     return RestaurantModulesLight(
-      ordering: moduleIds.contains(ModuleId.ordering),
-      delivery: moduleIds.contains(ModuleId.delivery),
-      clickAndCollect: moduleIds.contains(ModuleId.clickAndCollect),
-      payments: moduleIds.contains(ModuleId.payments),
-      loyalty: moduleIds.contains(ModuleId.loyalty),
-      roulette: moduleIds.contains(ModuleId.roulette),
-      kitchenTablet: moduleIds.contains(ModuleId.kitchen_tablet),
-      staffTablet: moduleIds.contains(ModuleId.staff_tablet),
+      ordering: moduleIds.contains('ordering'),
+      delivery: moduleIds.contains('delivery'),
+      clickAndCollect: moduleIds.contains('click_and_collect'),
+      payments: moduleIds.contains('payments'),
+      loyalty: moduleIds.contains('loyalty'),
+      roulette: moduleIds.contains('roulette'),
+      kitchenTablet: moduleIds.contains('kitchen_tablet'),
+      staffTablet: moduleIds.contains('staff_tablet'),
     );
   }
 
-  /// Convertit un RestaurantModulesLight en liste de ModuleId.
+  /// Convertit un RestaurantModulesLight en liste de String module IDs.
   /// Note: Only extracts the 8 modules supported by RestaurantModulesLight.
-  List<ModuleId> _modulesLightToModuleIds(RestaurantModulesLight modules) {
-    final result = <ModuleId>[];
-    if (modules.ordering) result.add(ModuleId.ordering);
-    if (modules.delivery) result.add(ModuleId.delivery);
-    if (modules.clickAndCollect) result.add(ModuleId.clickAndCollect);
-    if (modules.payments) result.add(ModuleId.payments);
-    if (modules.loyalty) result.add(ModuleId.loyalty);
-    if (modules.roulette) result.add(ModuleId.roulette);
-    if (modules.kitchenTablet) result.add(ModuleId.kitchen_tablet);
-    if (modules.staffTablet) result.add(ModuleId.staff_tablet);
+  List<String> _modulesLightToModuleIds(RestaurantModulesLight modules) {
+    final result = <String>[];
+    if (modules.ordering) result.add('ordering');
+    if (modules.delivery) result.add('delivery');
+    if (modules.clickAndCollect) result.add('click_and_collect');
+    if (modules.payments) result.add('payments');
+    if (modules.loyalty) result.add('loyalty');
+    if (modules.roulette) result.add('roulette');
+    if (modules.kitchenTablet) result.add('kitchen_tablet');
+    if (modules.staffTablet) result.add('staff_tablet');
     return result;
   }
 
@@ -471,7 +474,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     // Valider les dépendances des modules
     if (!validateModuleDependencies(state.enabledModuleIds)) {
       final missing = getMissingDependencies(state.enabledModuleIds);
-      final missingNames = missing.map((m) => m.label).join(', ');
+      final missingNames = missing.map(_getModuleName).join(', ');
       state = state.copyWith(
         error: 'Configuration incomplète: dépendances manquantes ($missingNames)',
       );
@@ -535,7 +538,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     // Valider les dépendances des modules
     if (!validateModuleDependencies(state.enabledModuleIds)) {
       final missing = getMissingDependencies(state.enabledModuleIds);
-      final missingNames = missing.map((m) => m.label).join(', ');
+      final missingNames = missing.map(_getModuleName).join(', ');
       state = state.copyWith(
         error: 'Configuration incomplète: dépendances manquantes ($missingNames)',
       );

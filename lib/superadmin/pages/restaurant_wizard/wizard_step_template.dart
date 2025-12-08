@@ -8,17 +8,17 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../white_label/core/module_id.dart';
+import '../../../white_label/core/module_registry.dart';
 import 'wizard_state.dart';
 
 /// Template disponible pour la création de restaurant.
-/// Utilise ModuleId pour définir les modules inclus.
+/// Utilise String module IDs pour définir les modules inclus.
 class RestaurantTemplate {
   final String id;
   final String name;
   final String description;
   final String iconName;
-  final List<ModuleId> modules;
+  final List<String> modules;
 
   const RestaurantTemplate({
     required this.id,
@@ -29,7 +29,9 @@ class RestaurantTemplate {
   });
 
   /// Liste des noms de modules inclus pour l'affichage.
-  List<String> get includedModuleNames => modules.map((m) => m.label).toList();
+  List<String> get includedModuleNames => modules.map((moduleId) {
+    return ModuleRegistry.of(moduleId)?.name ?? moduleId;
+  }).toList();
 }
 
 /// Templates disponibles pour la création de restaurant.
@@ -43,13 +45,13 @@ const List<RestaurantTemplate> availableTemplates = [
         'Template complet pour pizzeria avec commande en ligne, livraison, fidélité et jeux promotionnels.',
     iconName: 'local_pizza',
     modules: [
-      ModuleId.ordering,
-      ModuleId.delivery,
-      ModuleId.clickAndCollect,
-      ModuleId.loyalty,
-      ModuleId.roulette,
-      ModuleId.promotions,
-      ModuleId.kitchen_tablet,
+      'ordering',
+      'delivery',
+      'click_and_collect',
+      'loyalty',
+      'roulette',
+      'promotions',
+      'kitchen_tablet',
     ],
   ),
   // 2) Fast Food Express
@@ -60,10 +62,10 @@ const List<RestaurantTemplate> availableTemplates = [
         'Template optimisé pour la restauration rapide avec click & collect et gestion du staff.',
     iconName: 'fastfood',
     modules: [
-      ModuleId.ordering,
-      ModuleId.clickAndCollect,
-      ModuleId.staff_tablet,
-      ModuleId.promotions,
+      'ordering',
+      'click_and_collect',
+      'staff_tablet',
+      'promotions',
     ],
   ),
   // 3) Restaurant Premium
@@ -74,16 +76,16 @@ const List<RestaurantTemplate> availableTemplates = [
         'Template haut de gamme avec toutes les fonctionnalités avancées incluses.',
     iconName: 'restaurant',
     modules: [
-      ModuleId.ordering,
-      ModuleId.delivery,
-      ModuleId.clickAndCollect,
-      ModuleId.loyalty,
-      ModuleId.promotions,
-      ModuleId.campaigns,
-      ModuleId.timeRecorder,
-      ModuleId.reporting,
-      ModuleId.theme,
-      ModuleId.pagesBuilder,
+      'ordering',
+      'delivery',
+      'click_and_collect',
+      'loyalty',
+      'promotions',
+      'campaigns',
+      'time_recorder',
+      'reporting',
+      'theme',
+      'pages_builder',
     ],
   ),
   // 4) Blank
@@ -352,6 +354,7 @@ class _TemplateDetails extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: template.modules.map((moduleId) {
+                final moduleName = ModuleRegistry.of(moduleId)?.name ?? moduleId;
                 return Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -363,7 +366,7 @@ class _TemplateDetails extends StatelessWidget {
                     border: Border.all(color: Colors.blue.shade200),
                   ),
                   child: Text(
-                    moduleId.label,
+                    moduleName,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.blue.shade700,
