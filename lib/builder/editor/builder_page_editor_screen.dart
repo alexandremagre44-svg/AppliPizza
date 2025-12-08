@@ -115,6 +115,15 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
   /// Panel is shown when a block is selected AND we're showing the blocks list (not preview)
   bool get _shouldShowMobileEditorPanel => _selectedBlock != null && !_showPreviewInMobile;
 
+  /// Whether the publish button should be enabled
+  /// Only enabled when page has unpublished changes
+  bool get _canPublish => _page != null && _page!.hasUnpublishedChanges;
+  
+  /// Tooltip for the publish button
+  String get _publishTooltip => !_canPublish 
+      ? 'Aucune modification à publier' 
+      : 'Publier';
+
   @override
   void initState() {
     super.initState();
@@ -243,7 +252,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Publier le thème'),
-        content: const Text('Voulez-vous publier le thème ? Les modifications seront visibles par tous les utilisateurs de l\'application.'),
+        content: const Text('Voulez-vous publier le thème ? Les modifications seront visibles par tous les utilisateurs de l'application.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -586,7 +595,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Publier la page'),
-        content: const Text('Voulez-vous publier cette page ?'),
+        content: const Text('Voulez-vous publier cette page ? Les modifications seront visibles par tous les utilisateurs de l'application.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -603,24 +612,47 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
     if (confirm != true) return;
 
     try {
-      await _service.publishPage(
-        _page!,
-        userId: 'admin', // TODO: Get from auth
-        shouldDeleteDraft: false,
-      );
+      // Use pageService for publishing to get updated page back
+      BuilderPage? publishedPage;
       
-      setState(() {
-        _hasChanges = false;
-        // Reset cached published page so it will be reloaded from pages_published
-        _publishedPage = null;
-      });
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Page publiée avec succès')),
+      if (widget.pageId != null) {
+        // System page: use pageService with BuilderPageId
+        publishedPage = await _pageService.publishPage(
+          widget.pageId!,
+          widget.appId,
+          userId: 'admin', // TODO: Get from auth
         );
+      } else {
+        // Custom page: use direct layoutService approach
+        final published = _page!.publish(userId: 'admin');
+        await _service.publishPage(
+          published,
+          userId: 'admin',
+          shouldDeleteDraft: false,
+        );
+        // Update draft with published state
+        await _service.saveDraft(published.copyWith(isDraft: true));
+        publishedPage = published.copyWith(isDraft: true);
+      }
+      
+      if (publishedPage != null) {
+        setState(() {
+          _page = publishedPage;
+          _hasChanges = false;
+          // Reset cached published page so it will be reloaded from pages_published
+          _publishedPage = null;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('✅ Page publiée avec succès')),
+          );
+        }
+      } else {
+        throw Exception('Échec de la publication de la page');
       }
     } catch (e) {
+      debugPrint('❌ [EditorScreen] Error publishing page: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('❌ Erreur: $e')),
@@ -1001,11 +1033,11 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         Stack(
           children: [
             IconButton(
-              icon: const Icon(Icons.publish),
-              tooltip: 'Publier',
-              onPressed: _publishPage,
+              icon: const Icon(Icons.cloud_upload),
+              tooltip: _publishTooltip,
+              onPressed: _canPublish ? _publishPage : null,
             ),
-            if (_page != null && _page!.hasUnpublishedChanges)
+            if (_canPublish)
               Positioned(
                 right: 8,
                 top: 8,
