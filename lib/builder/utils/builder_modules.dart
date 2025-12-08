@@ -384,12 +384,19 @@ String normalizeModuleType(String moduleType) {
 /// Special cases:
 /// - loyalty WL module enables both loyalty_module AND rewards_module in Builder
 /// - roulette WL module enables roulette_module in Builder
+/// - All roulette aliases (roulette, roulette_module, rewards, wheel) map to roulette_module
 const Map<String, List<String>> wlToBuilderModules = {
   'ordering': ['cart_module'],
   'delivery': ['delivery_module'],
   'click_and_collect': ['click_collect_module'],
-  'loyalty': ['loyalty_module', 'rewards_module'], // Loyalty enables both
+  'loyalty': ['loyalty_module', 'rewards_module'],
+
+  // 🔥 Correctifs Roulette — accepter toutes les variantes rencontrées dans le plan WL
   'roulette': ['roulette_module'],
+  'roulette_module': ['roulette_module'],
+  'rewards': ['roulette_module'],
+  'wheel': ['roulette_module'],
+
   'promotions': ['promotions_module'],
   'newsletter': ['newsletter_module'],
   'kitchen_tablet': ['kitchen_module'],
@@ -433,6 +440,11 @@ List<String> getBuilderModulesForPlan(RestaurantPlanUnified? plan) {
   if (kDebugMode) {
     debugPrint('[BuilderModules] Plan has ${plan.modules.length} modules, ${result.length} mapped to Builder');
     debugPrint('[BuilderModules] Builder modules: ${result.join(", ")}');
+  }
+  
+  if (kDebugMode) {
+    debugPrint('WL RAW MODULE IDS = ${plan.modules.map((m) => m.id).toList()}');
+    debugPrint('BUILDER MODULES (mapped) = $result');
   }
   
   return result;
