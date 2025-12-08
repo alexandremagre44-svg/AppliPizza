@@ -78,7 +78,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   void _toggleModule(String id, bool enabled) {
-    final definition = ModuleRegistry.ofString(id);
+    final definition = ModuleRegistry.of(id);
     if (definition == null) return;
 
     // Vérifier les dépendances si on active
@@ -120,7 +120,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   void _showDependencyDialog(String moduleId, List<String> missingDeps) {
-    final moduleDef = ModuleRegistry.ofString(moduleId);
+    final moduleDef = ModuleRegistry.of(moduleId);
     if (moduleDef == null) return;
 
     showDialog(
@@ -137,7 +137,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
             ),
             const SizedBox(height: 12),
             ...missingDeps.map((dep) {
-              final depDef = ModuleRegistry.ofString(dep);
+              final depDef = ModuleRegistry.of(dep);
               return Padding(
                 padding: const EdgeInsets.only(left: 16, top: 4),
                 child: Row(
@@ -174,7 +174,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   void _showDependentModulesDialog(String moduleId, List<String> dependents) {
-    final moduleDef = ModuleRegistry.ofString(moduleId);
+    final moduleDef = ModuleRegistry.of(moduleId);
     if (moduleDef == null) return;
 
     showDialog(
@@ -191,7 +191,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
             ),
             const SizedBox(height: 12),
             ...dependents.map((dep) {
-              final depDef = ModuleRegistry.ofString(dep);
+              final depDef = ModuleRegistry.of(dep);
               return Padding(
                 padding: const EdgeInsets.only(left: 16, top: 4),
                 child: Row(
@@ -294,7 +294,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   String _getModuleName(String moduleCode) {
-    return ModuleRegistry.ofString(moduleCode)?.name ?? moduleCode;
+    return ModuleRegistry.of(moduleCode)?.name ?? moduleCode;
   }
 
   Color _getCategoryColor(ModuleCategory category) {

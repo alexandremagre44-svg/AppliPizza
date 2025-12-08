@@ -209,7 +209,7 @@ class RestaurantPlanService {
 
   /// Vérifie si un module a des dépendances non satisfaites.
   List<String> checkDependencies(RestaurantPlan plan, String moduleId) {
-    final definition = ModuleRegistry.ofString(moduleId);
+    final definition = ModuleRegistry.of(moduleId);
     if (definition == null) return [];
     
     final missingDeps = <String>[];
@@ -228,7 +228,7 @@ class RestaurantPlanService {
     final dependents = <String>[];
 
     for (final module in plan.enabledModules) {
-      final definition = ModuleRegistry.ofString(module.id);
+      final definition = ModuleRegistry.of(module.id);
       if (definition != null && definition.dependencies.contains(moduleId)) {
         dependents.add(module.id);
       }

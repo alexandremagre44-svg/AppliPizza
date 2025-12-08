@@ -195,8 +195,14 @@ class ModuleRegistry {
   /// Retourne la définition d'un module par son identifiant string.
   ///
   /// Retourne null si le module n'existe pas.
-  static ModuleDefinition? ofString(String id) {
+  static ModuleDefinition? of(String id) {
     return definitions[id];
+  }
+  
+  /// Alias pour of() pour compatibilité avec le code existant.
+  @Deprecated('Use of() instead')
+  static ModuleDefinition? ofString(String id) {
+    return of(id);
   }
 
   /// Retourne la liste des modules appartenant à une catégorie donnée.
