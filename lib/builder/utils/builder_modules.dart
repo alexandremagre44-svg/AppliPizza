@@ -372,48 +372,46 @@ String normalizeModuleType(String moduleType) {
   return aliases[moduleType] ?? moduleType;
 }
 
+/// Mapping WL module ID → Builder module ID(s)
+/// 
+/// This is the source of truth for converting White Label module IDs
+/// to Builder module IDs. Used by getBuilderModulesForPlan() to determine
+/// which Builder modules should be visible based on the plan configuration.
+/// 
+/// WL modules not in this map will NOT appear in the Builder.
+/// Note: pages_builder intentionally omitted (not displayed in Builder).
+/// 
+/// Special cases:
+/// - loyalty WL module enables both loyalty_module AND rewards_module in Builder
+/// - roulette WL module enables roulette_module in Builder
+const Map<String, List<String>> wlToBuilderModules = {
+  'ordering': ['cart_module'],
+  'delivery': ['delivery_module'],
+  'click_and_collect': ['click_collect_module'],
+  'loyalty': ['loyalty_module', 'rewards_module'], // Loyalty enables both
+  'roulette': ['roulette_module'],
+  'promotions': ['promotions_module'],
+  'newsletter': ['newsletter_module'],
+  'kitchen_tablet': ['kitchen_module'],
+  'staff_tablet': ['staff_module'],
+  'theme': ['theme_module'],
+  'reporting': ['reporting_module'],
+  'exports': ['exports_module'],
+  'campaigns': ['campaigns_module'],
+};
+
 /// Retourne les modules Builder visibles selon le plan WL
 /// 
 /// Returns list of builder module IDs that are available based on the plan:
-/// - If plan is null, returns EMPTY LIST (strict filtering, no fallback)
-/// - Filters modules based on their ModuleId mapping
-/// - Modules without mapping are always visible (legacy)
+/// - If plan is null, returns EMPTY LIST (no WL modules)
+///   Note: SystemBlock.getFilteredModules() adds always-visible modules on top of this
+/// - Converts enabled WL modules to Builder modules using wlToBuilderModules mapping
+/// - Only returns modules that are actually defined in the Builder
+/// - Handles 1-to-many mappings (e.g., loyalty → [loyalty_module, rewards_module])
 /// 
-/// This function filters the complete set of builder modules including:
-/// - Core modules from ModuleConfig (menu_catalog, cart_module, etc.)
-/// - Legacy aliases (roulette, loyalty, rewards)
-/// - All WL-integrated modules
-/// 
-/// Note: The module list is intentionally duplicated here (rather than
-/// referencing SystemBlock.availableModules) to keep this utility function
-/// self-contained and avoid circular dependencies. This ensures the function
-/// can be used independently without requiring the full SystemBlock class.
+/// This is the NEW implementation that uses the proper WL → Builder mapping
+/// instead of checking moduleIdMapping in reverse.
 List<String> getBuilderModulesForPlan(RestaurantPlanUnified? plan) {
-  // Complete list of all builder module IDs including legacy aliases
-  // This matches SystemBlock.availableModules to ensure consistency
-  // NOTE: cart_module and delivery_module REMOVED - they are system pages
-  const allModuleIds = [
-    // Legacy (backward compatibility)
-    'roulette',
-    'loyalty',
-    'rewards',
-    'accountActivity',
-    // Core builder modules
-    'menu_catalog',
-    'profile_module',
-    'roulette_module',
-    // WL modules
-    // cart_module - REMOVED (system page)
-    // delivery_module - REMOVED (system page)
-    'loyalty_module',
-    'rewards_module',
-    'click_collect_module',
-    'kitchen_module',
-    'staff_module',
-    'promotions_module',
-    'newsletter_module',
-  ];
-  
   // STRICT FILTERING: If plan is null, return empty list
   if (plan == null) {
     if (kDebugMode) {
@@ -422,11 +420,22 @@ List<String> getBuilderModulesForPlan(RestaurantPlanUnified? plan) {
     return const <String>[];
   }
   
-  return allModuleIds.where((builderId) {
-    final moduleId = getModuleIdForBuilder(builderId);
-    if (moduleId == null) return true; // legacy
-    return plan.hasModule(moduleId);
-  }).toList();
+  final List<String> result = [];
+  
+  // Convert each enabled WL module to its Builder module ID(s)
+  for (final moduleConfig in plan.modules.where((m) => m.enabled)) {
+    final builderIds = wlToBuilderModules[moduleConfig.id];
+    if (builderIds != null) {
+      result.addAll(builderIds);
+    }
+  }
+  
+  if (kDebugMode) {
+    debugPrint('[BuilderModules] Plan has ${plan.modules.length} modules, ${result.length} mapped to Builder');
+    debugPrint('[BuilderModules] Builder modules: ${result.join(", ")}');
+  }
+  
+  return result;
 }
 
 /// Register a custom module widget builder

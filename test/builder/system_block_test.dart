@@ -131,9 +131,15 @@ void main() {
     });
 
     group('getFilteredModules', () {
-      test('retourne une liste vide quand plan est null', () {
+      test('retourne seulement les modules toujours visibles quand plan est null', () {
         final filtered = SystemBlock.getFilteredModules(null);
-        expect(filtered, isEmpty);
+        // Should only contain always-visible modules (menu_catalog, profile_module)
+        expect(filtered, isNotEmpty);
+        expect(filtered, contains('menu_catalog'));
+        expect(filtered, contains('profile_module'));
+        // Should NOT contain WL modules like loyalty_module, roulette_module
+        expect(filtered, isNot(contains('loyalty_module')));
+        expect(filtered, isNot(contains('roulette_module')));
       });
 
       // Note: Additional tests would require mocking RestaurantPlanUnified
