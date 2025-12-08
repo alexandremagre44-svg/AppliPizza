@@ -56,7 +56,7 @@ class RestaurantPlanService {
   RestaurantPlan _createDefaultPlan(String restaurantId) {
     final defaultModules = ModuleId.values.map((id) {
       return ModuleConfig(
-        id: id,
+        id: id.code,
         enabled: false,
         settings: {},
       );
@@ -97,6 +97,7 @@ class RestaurantPlanService {
   }
 
   /// Active ou désactive un module.
+  /// @deprecated Use updateModule with String moduleId instead
   Future<void> toggleModule(
     String restaurantId,
     ModuleId moduleId,
@@ -105,13 +106,14 @@ class RestaurantPlanService {
     final plan = await loadPlan(restaurantId);
     
     final modules = List<ModuleConfig>.from(plan.modules);
-    final existingIndex = modules.indexWhere((m) => m.id == moduleId);
+    final moduleCode = moduleId.code;
+    final existingIndex = modules.indexWhere((m) => m.id == moduleCode);
     
     if (existingIndex >= 0) {
       modules[existingIndex] = modules[existingIndex].copyWith(enabled: enabled);
     } else {
       modules.add(ModuleConfig(
-        id: moduleId,
+        id: moduleCode,
         enabled: enabled,
         settings: {},
       ));
@@ -226,9 +228,15 @@ class RestaurantPlanService {
     final dependents = <ModuleId>[];
 
     for (final module in plan.enabledModules) {
-      final definition = ModuleRegistry.of(module.id);
-      if (definition.dependencies.contains(moduleId)) {
-        dependents.add(module.id);
+      final definition = ModuleRegistry.ofString(module.id);
+      if (definition != null && definition.dependencies.contains(moduleId)) {
+        // Find the ModuleId enum that matches this string
+        try {
+          final moduleEnumId = ModuleId.values.firstWhere((m) => m.code == module.id);
+          dependents.add(moduleEnumId);
+        } catch (_) {
+          // Module ID not found in enum, skip it
+        }
       }
     }
 
