@@ -78,16 +78,15 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   void _toggleModule(String id, bool enabled) {
-    final definition = ModuleRegistry.ofString(id);
+    final definition = ModuleRegistry.of(id);
     if (definition == null) return;
 
     // Vérifier les dépendances si on active
     if (enabled) {
       final missingDeps = <String>[];
       for (final d in definition.dependencies) {
-        final depString = d.code;
-        if (!_isModuleEnabled(depString)) {
-          missingDeps.add(depString);
+        if (!_isModuleEnabled(d)) {
+          missingDeps.add(d);
         }
       }
 
@@ -100,10 +99,10 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
       final dependents = <String>[];
       // Check all modules in the registry
       for (final entry in ModuleRegistry.definitions.entries) {
-        final moduleCode = entry.key.code;
+        final moduleCode = entry.key;
         if (_isModuleEnabled(moduleCode)) {
           final def = entry.value;
-          if (def.dependencies.any((d) => d.code == id)) {
+          if (def.dependencies.any((d) => d == id)) {
             dependents.add(moduleCode);
           }
         }
@@ -121,7 +120,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   void _showDependencyDialog(String moduleId, List<String> missingDeps) {
-    final moduleDef = ModuleRegistry.ofString(moduleId);
+    final moduleDef = ModuleRegistry.of(moduleId);
     if (moduleDef == null) return;
 
     showDialog(
@@ -138,7 +137,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
             ),
             const SizedBox(height: 12),
             ...missingDeps.map((dep) {
-              final depDef = ModuleRegistry.ofString(dep);
+              final depDef = ModuleRegistry.of(dep);
               return Padding(
                 padding: const EdgeInsets.only(left: 16, top: 4),
                 child: Row(
@@ -175,7 +174,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   void _showDependentModulesDialog(String moduleId, List<String> dependents) {
-    final moduleDef = ModuleRegistry.ofString(moduleId);
+    final moduleDef = ModuleRegistry.of(moduleId);
     if (moduleDef == null) return;
 
     showDialog(
@@ -192,7 +191,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
             ),
             const SizedBox(height: 12),
             ...dependents.map((dep) {
-              final depDef = ModuleRegistry.ofString(dep);
+              final depDef = ModuleRegistry.of(dep);
               return Padding(
                 padding: const EdgeInsets.only(left: 16, top: 4),
                 child: Row(
@@ -295,7 +294,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   String _getModuleName(String moduleCode) {
-    return ModuleRegistry.ofString(moduleCode)?.name ?? moduleCode;
+    return ModuleRegistry.of(moduleCode)?.name ?? moduleCode;
   }
 
   Color _getCategoryColor(ModuleCategory category) {
@@ -590,7 +589,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   Widget _buildModuleTile(ModuleDefinition module, Color categoryColor) {
-    final moduleId = module.id.code;
+    final moduleId = module.id;
     final isEnabled = _isModuleEnabled(moduleId);
     final hasChange = _pendingChanges.containsKey(moduleId);
     final hasDependencies = module.dependencies.isNotEmpty;
@@ -683,7 +682,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Dépend de: ${module.dependencies.map((d) => _getModuleName(d.code)).join(", ")}',
+                        'Dépend de: ${module.dependencies.map((d) => _getModuleName(d)).join(", ")}',
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,
