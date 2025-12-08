@@ -123,5 +123,5 @@ final superAdminRestaurantUnifiedPlanProvider =
     StreamProvider.family<RestaurantPlanUnified?, String>(
         (ref, restaurantId) {
   final service = ref.watch(restaurantPlanServiceProvider);
-  return service.watchUnifiedPlan(restaurantId);
+  return service.watchConfigPlan(restaurantId);
 });

@@ -26,7 +26,6 @@ class RestaurantPlanService {
 
   /// Référence au document plan d'un restaurant.
   /// 
-  /// LEGACY: Collection 'plan' avec document 'config'
   /// Path: restaurants/{restaurantId}/plan/config
   DocumentReference<Map<String, dynamic>> _planDoc(String restaurantId) =>
       _restaurantsCollection.doc(restaurantId).collection('plan').doc('config');
@@ -186,8 +185,8 @@ class RestaurantPlanService {
         updatedAt: DateTime.now(),
       );
 
-      // Sauvegarder dans Firestore: restaurants/{id}/plan/unified
-      final planDocRef = _planUnifiedDoc(restaurantId);
+      // Sauvegarder dans Firestore: restaurants/{id}/plan/config
+      final planDocRef = _planDoc(restaurantId);
       await planDocRef.set(unifiedPlan.toJson());
 
       // Créer aussi le document principal du restaurant pour compatibilité
@@ -234,5 +233,127 @@ class RestaurantPlanService {
     }
 
     return dependents;
+  }
+
+  /// Stream pour écouter les changements du plan unifié en temps réel.
+  /// 
+  /// Path: restaurants/{restaurantId}/plan/config
+  /// Retourne null si le document n'existe pas.
+  Stream<RestaurantPlanUnified?> watchConfigPlan(String restaurantId) {
+    return _planDoc(restaurantId).snapshots().map((doc) {
+      if (!doc.exists || doc.data() == null) {
+        return null;
+      }
+      try {
+        return RestaurantPlanUnified.fromJson(doc.data()!);
+      } catch (e) {
+        // Si le parsing échoue, retourner null
+        return null;
+      }
+    });
+  }
+
+  /// Met à jour l'état enabled/disabled d'un module.
+  /// 
+  /// moduleId doit être un String (ex: "delivery", "loyalty")
+  Future<void> updateModule(
+    String restaurantId,
+    String moduleId,
+    bool enabled,
+  ) async {
+    final docRef = _planDoc(restaurantId);
+    final doc = await docRef.get();
+    
+    if (!doc.exists || doc.data() == null) {
+      // Créer un nouveau document avec le module
+      final newPlan = RestaurantPlanUnified(
+        restaurantId: restaurantId,
+        name: '',
+        slug: '',
+        modules: [
+          ModuleConfig(
+            id: moduleId,
+            enabled: enabled,
+            settings: {},
+          ),
+        ],
+        activeModules: enabled ? [moduleId] : [],
+      );
+      await docRef.set(newPlan.toJson());
+      return;
+    }
+
+    // Charger le plan existant
+    final plan = RestaurantPlanUnified.fromJson(doc.data()!);
+    
+    // Mettre à jour ou ajouter le module
+    final modules = List<ModuleConfig>.from(plan.modules);
+    final existingIndex = modules.indexWhere((m) => m.id == moduleId);
+    
+    if (existingIndex >= 0) {
+      modules[existingIndex] = modules[existingIndex].copyWith(enabled: enabled);
+    } else {
+      modules.add(ModuleConfig(
+        id: moduleId,
+        enabled: enabled,
+        settings: {},
+      ));
+    }
+    
+    // Recalculer activeModules
+    final activeModules = modules
+        .where((m) => m.enabled)
+        .map((m) => m.id)
+        .toList();
+    
+    // Sauvegarder
+    final updatedPlan = plan.copyWith(
+      modules: modules,
+      activeModules: activeModules,
+      updatedAt: DateTime.now(),
+    );
+    
+    await docRef.set(updatedPlan.toJson());
+  }
+
+  /// Met à jour les settings d'un module spécifique.
+  /// 
+  /// moduleId doit être un String (ex: "delivery", "loyalty")
+  Future<void> updateModuleSettings(
+    String restaurantId,
+    String moduleId,
+    Map<String, dynamic> settings,
+  ) async {
+    final docRef = _planDoc(restaurantId);
+    final doc = await docRef.get();
+    
+    if (!doc.exists || doc.data() == null) {
+      throw Exception('Restaurant plan not found for $restaurantId');
+    }
+
+    final plan = RestaurantPlanUnified.fromJson(doc.data()!);
+    
+    // Mettre à jour les settings du module
+    final modules = List<ModuleConfig>.from(plan.modules);
+    final existingIndex = modules.indexWhere((m) => m.id == moduleId);
+    
+    if (existingIndex >= 0) {
+      modules[existingIndex] = modules[existingIndex].copyWith(settings: settings);
+    } else {
+      // Créer le module s'il n'existe pas
+      modules.add(ModuleConfig(
+        id: moduleId,
+        enabled: false,
+        settings: settings,
+      ));
+    }
+    
+    // Sauvegarder
+    final updatedPlan = plan.copyWith(
+      modules: modules,
+      updatedAt: DateTime.now(),
+    );
+    
+    await docRef.set(updatedPlan.toJson());
   }
 }
