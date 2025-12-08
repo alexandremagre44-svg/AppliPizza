@@ -84,10 +84,10 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
     // Vérifier les dépendances si on active
     if (enabled) {
       final missingDeps = <String>[];
-      for (final depId in definition.dependencies) {
-        final depCode = depId.code;
-        if (!_isModuleEnabled(depCode)) {
-          missingDeps.add(depCode);
+      for (final d in definition.dependencies) {
+        final depString = d.code;
+        if (!_isModuleEnabled(depString)) {
+          missingDeps.add(depString);
         }
       }
 
@@ -292,6 +292,10 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
     setState(() {
       _pendingChanges = {};
     });
+  }
+
+  String _getModuleName(String moduleCode) {
+    return ModuleRegistry.ofString(moduleCode)?.name ?? moduleCode;
   }
 
   Color _getCategoryColor(ModuleCategory category) {
@@ -586,8 +590,9 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   Widget _buildModuleTile(ModuleDefinition module, Color categoryColor) {
-    final isEnabled = _isModuleEnabled(module.id);
-    final hasChange = _pendingChanges.containsKey(module.id);
+    final moduleId = module.id.code;
+    final isEnabled = _isModuleEnabled(moduleId);
+    final hasChange = _pendingChanges.containsKey(moduleId);
     final hasDependencies = module.dependencies.isNotEmpty;
 
     return Container(
@@ -678,7 +683,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Dépend de: ${module.dependencies.map((d) => d.label).join(", ")}',
+                        'Dépend de: ${module.dependencies.map((d) => _getModuleName(d.code)).join(", ")}',
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,
@@ -695,7 +700,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
           // Toggle switch
           Switch(
             value: isEnabled,
-            onChanged: (value) => _toggleModule(module.id, value),
+            onChanged: (value) => _toggleModule(moduleId, value),
             activeColor: categoryColor,
           ),
         ],
