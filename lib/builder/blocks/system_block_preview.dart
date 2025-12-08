@@ -44,8 +44,22 @@ class SystemBlockPreview extends StatelessWidget {
         return Icons.casino;
       case 'loyalty':
         return Icons.card_giftcard;
+      case 'loyalty_module':
+        return Icons.star;
       case 'rewards':
         return Icons.stars;
+      case 'promotions_module':
+        return Icons.local_offer;
+      case 'newsletter_module':
+        return Icons.email;
+      case 'kitchen_module':
+        return Icons.kitchen;
+      case 'staff_module':
+        return Icons.point_of_sale;
+      case 'menu_catalog':
+        return Icons.restaurant_menu;
+      case 'profile_module':
+        return Icons.person;
       case 'accountActivity':
         return Icons.history;
       default:
@@ -60,8 +74,22 @@ class SystemBlockPreview extends StatelessWidget {
         return Colors.purple.shade600;
       case 'loyalty':
         return Colors.amber.shade600;
+      case 'loyalty_module':
+        return Colors.amber.shade600;
       case 'rewards':
         return Colors.orange.shade600;
+      case 'promotions_module':
+        return Colors.red.shade600;
+      case 'newsletter_module':
+        return Colors.teal.shade600;
+      case 'kitchen_module':
+        return Colors.brown.shade600;
+      case 'staff_module':
+        return Colors.cyan.shade600;
+      case 'menu_catalog':
+        return Colors.deepOrange.shade600;
+      case 'profile_module':
+        return Colors.blueGrey.shade600;
       case 'accountActivity':
         return Colors.blue.shade600;
       default:
