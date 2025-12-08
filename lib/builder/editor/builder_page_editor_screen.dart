@@ -3742,14 +3742,38 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
     );
   }
 
+  /// Get the current restaurant plan from the provider
+  /// 
+  /// Returns the plan if loaded, or null if still loading or error.
+  /// This is used to pass the plan to dialogs without triggering rebuilds.
+  RestaurantPlanUnified? _getCurrentPlan() {
+    final async = ref.read(restaurantPlanUnifiedProvider);
+    return async.maybeWhen(
+      data: (p) => p,
+      orElse: () => null,
+    );
+  }
+
   void _showAddBlockDialog() async {
     if (_page == null) return;
+
+    // Get the current plan to pass to the dialog
+    final plan = _getCurrentPlan();
+    
+    // Debug logging in kDebugMode
+    if (kDebugMode) {
+      if (plan == null) {
+        debugPrint('[BuilderPageEditor] _showAddBlockDialog with plan: null');
+      } else {
+        debugPrint('[BuilderPageEditor] _showAddBlockDialog with plan: ${plan.restaurantId} (${plan.activeModules.length} active modules)');
+      }
+    }
 
     final block = await BlockAddDialog.show(
       context,
       currentBlockCount: _page!.draftLayout.length,
       showSystemModules: true,
-      restaurantPlan: _restaurantPlan,
+      restaurantPlan: plan,
     );
     
     if (block != null) {
