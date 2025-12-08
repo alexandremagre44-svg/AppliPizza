@@ -85,9 +85,8 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
     if (enabled) {
       final missingDeps = <String>[];
       for (final d in definition.dependencies) {
-        final depString = d.code;
-        if (!_isModuleEnabled(depString)) {
-          missingDeps.add(depString);
+        if (!_isModuleEnabled(d)) {
+          missingDeps.add(d);
         }
       }
 
@@ -100,10 +99,10 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
       final dependents = <String>[];
       // Check all modules in the registry
       for (final entry in ModuleRegistry.definitions.entries) {
-        final moduleCode = entry.key.code;
+        final moduleCode = entry.key;
         if (_isModuleEnabled(moduleCode)) {
           final def = entry.value;
-          if (def.dependencies.any((d) => d.code == id)) {
+          if (def.dependencies.any((d) => d == id)) {
             dependents.add(moduleCode);
           }
         }
@@ -590,7 +589,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
   }
 
   Widget _buildModuleTile(ModuleDefinition module, Color categoryColor) {
-    final moduleId = module.id.code;
+    final moduleId = module.id;
     final isEnabled = _isModuleEnabled(moduleId);
     final hasChange = _pendingChanges.containsKey(moduleId);
     final hasDependencies = module.dependencies.isNotEmpty;
@@ -683,7 +682,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Dépend de: ${module.dependencies.map((d) => _getModuleName(d.code)).join(", ")}',
+                        'Dépend de: ${module.dependencies.map((d) => ModuleRegistry.ofString(d)?.name ?? d).join(", ")}',
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,

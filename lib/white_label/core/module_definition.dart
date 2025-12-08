@@ -1,5 +1,4 @@
 import 'module_category.dart';
-import 'module_id.dart';
 
 /// Définition complète d'un module de l'application white-label.
 ///
@@ -11,7 +10,7 @@ import 'module_id.dart';
 /// générateur d'app pour savoir quels modules inclure.
 class ModuleDefinition {
   /// Identifiant unique du module.
-  final ModuleId id;
+  final String id;
 
   /// Catégorie du module (core, payment, marketing, etc.).
   final ModuleCategory category;
@@ -29,7 +28,7 @@ class ModuleDefinition {
   final bool requiresConfiguration;
 
   /// Liste des modules dont celui-ci dépend.
-  final List<ModuleId> dependencies;
+  final List<String> dependencies;
 
   /// Constructeur const pour une définition de module.
   const ModuleDefinition({
@@ -45,12 +44,12 @@ class ModuleDefinition {
   @override
   String toString() {
     return 'ModuleDefinition('
-        'id: ${id.code}, '
+        'id: $id, '
         'category: ${category.label}, '
         'name: $name, '
         'isPremium: $isPremium, '
         'requiresConfiguration: $requiresConfiguration, '
-        'dependencies: ${dependencies.map((d) => d.code).toList()}'
+        'dependencies: $dependencies'
         ')';
   }
 

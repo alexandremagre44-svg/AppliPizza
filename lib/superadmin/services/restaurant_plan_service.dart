@@ -6,7 +6,6 @@ library;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../white_label/core/module_id.dart';
 import '../../white_label/core/module_config.dart';
 import '../../white_label/core/module_registry.dart';
 import '../../white_label/restaurant/restaurant_plan.dart';
@@ -54,9 +53,9 @@ class RestaurantPlanService {
 
   /// Crée un plan par défaut avec tous les modules désactivés.
   RestaurantPlan _createDefaultPlan(String restaurantId) {
-    final defaultModules = ModuleId.values.map((id) {
+    final defaultModules = ModuleRegistry.definitions.keys.map((id) {
       return ModuleConfig(
-        id: id.code,
+        id: id,
         enabled: false,
         settings: {},
       );
@@ -99,24 +98,23 @@ class RestaurantPlanService {
   /// Active ou désactive un module.
   /// 
   /// @deprecated This method is deprecated and will be removed in a future version.
-  /// Use updateModule(restaurantId, moduleId.code, enabled) instead.
+  /// Use updateModule(restaurantId, moduleId, enabled) instead.
   /// Example: updateModule(restaurantId, "delivery", true)
   Future<void> toggleModule(
     String restaurantId,
-    ModuleId moduleId,
+    String moduleId,
     bool enabled,
   ) async {
     final plan = await loadPlan(restaurantId);
     
     final modules = List<ModuleConfig>.from(plan.modules);
-    final moduleCode = moduleId.code;
-    final existingIndex = modules.indexWhere((m) => m.id == moduleCode);
+    final existingIndex = modules.indexWhere((m) => m.id == moduleId);
     
     if (existingIndex >= 0) {
       modules[existingIndex] = modules[existingIndex].copyWith(enabled: enabled);
     } else {
       modules.add(ModuleConfig(
-        id: moduleCode,
+        id: moduleId,
         enabled: enabled,
         settings: {},
       ));
@@ -155,13 +153,13 @@ class RestaurantPlanService {
     required String restaurantId,
     required String name,
     required String slug,
-    required List<ModuleId> enabledModuleIds,
+    required List<String> enabledModuleIds,
     required Map<String, dynamic> brand,
     String? templateId,
   }) async {
     try {
-      // Convertir les modules en codes
-      final activeModules = enabledModuleIds.map((id) => id.code).toList();
+      // Use module IDs directly as they are already strings
+      final activeModules = enabledModuleIds;
 
       // Créer la configuration de branding depuis le map
       final branding = BrandingConfig(
@@ -213,9 +211,11 @@ class RestaurantPlanService {
   }
 
   /// Vérifie si un module a des dépendances non satisfaites.
-  List<ModuleId> checkDependencies(RestaurantPlan plan, ModuleId moduleId) {
-    final definition = ModuleRegistry.of(moduleId);
-    final missingDeps = <ModuleId>[];
+  List<String> checkDependencies(RestaurantPlan plan, String moduleId) {
+    final definition = ModuleRegistry.ofString(moduleId);
+    if (definition == null) return [];
+    
+    final missingDeps = <String>[];
 
     for (final depId in definition.dependencies) {
       if (!plan.hasModule(depId)) {
@@ -227,21 +227,13 @@ class RestaurantPlanService {
   }
 
   /// Retourne les modules qui dépendent d'un module donné.
-  List<ModuleId> getDependentModules(RestaurantPlan plan, ModuleId moduleId) {
-    final dependents = <ModuleId>[];
+  List<String> getDependentModules(RestaurantPlan plan, String moduleId) {
+    final dependents = <String>[];
 
     for (final module in plan.enabledModules) {
       final definition = ModuleRegistry.ofString(module.id);
       if (definition != null && definition.dependencies.contains(moduleId)) {
-        // Find the ModuleId enum that matches this string
-        try {
-          final moduleEnumId = ModuleId.values.firstWhere((m) => m.code == module.id);
-          dependents.add(moduleEnumId);
-        } catch (e) {
-          // Module ID not found in enum - this can happen if a module was
-          // added to Firestore but not yet added to the ModuleId enum.
-          // We skip it safely as it won't have dependencies on legacy ModuleId enums.
-        }
+        dependents.add(module.id);
       }
     }
 

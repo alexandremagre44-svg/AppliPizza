@@ -1,6 +1,5 @@
 import 'module_category.dart';
 import 'module_definition.dart';
-import 'module_id.dart';
 
 /// Registre central de tous les modules disponibles dans l'application white-label.
 ///
@@ -11,10 +10,10 @@ import 'module_id.dart';
 /// - Le générateur d'app pour savoir quels modules inclure
 class ModuleRegistry {
   /// Map statique contenant toutes les définitions de modules.
-  static final Map<ModuleId, ModuleDefinition> definitions = {
+  static final Map<String, ModuleDefinition> definitions = {
     // === CORE ===
-    ModuleId.ordering: const ModuleDefinition(
-      id: ModuleId.ordering,
+    'ordering': const ModuleDefinition(
+      id: 'ordering',
       category: ModuleCategory.core,
       name: 'Commandes en ligne',
       description:
@@ -23,30 +22,30 @@ class ModuleRegistry {
       requiresConfiguration: true,
       dependencies: [],
     ),
-    ModuleId.delivery: const ModuleDefinition(
-      id: ModuleId.delivery,
+    'delivery': const ModuleDefinition(
+      id: 'delivery',
       category: ModuleCategory.core,
       name: 'Livraison',
       description:
           'Gestion des livraisons avec zones, frais et suivi des livreurs.',
       isPremium: false,
       requiresConfiguration: true,
-      dependencies: [ModuleId.ordering],
+      dependencies: ['ordering'],
     ),
-    ModuleId.clickAndCollect: const ModuleDefinition(
-      id: ModuleId.clickAndCollect,
+    'click_and_collect': const ModuleDefinition(
+      id: 'click_and_collect',
       category: ModuleCategory.core,
       name: 'Click & Collect',
       description:
           'Permet aux clients de commander en ligne et récupérer sur place.',
       isPremium: false,
       requiresConfiguration: true,
-      dependencies: [ModuleId.ordering],
+      dependencies: ['ordering'],
     ),
 
     // === PAYMENT ===
-    ModuleId.payments: const ModuleDefinition(
-      id: ModuleId.payments,
+    'payments': const ModuleDefinition(
+      id: 'payments',
       category: ModuleCategory.payment,
       name: 'Paiements',
       description: 'Gestion des paiements en ligne (CB, etc.).',
@@ -54,29 +53,29 @@ class ModuleRegistry {
       requiresConfiguration: true,
       dependencies: [],
     ),
-    ModuleId.paymentTerminal: const ModuleDefinition(
-      id: ModuleId.paymentTerminal,
+    'payment_terminal': const ModuleDefinition(
+      id: 'payment_terminal',
       category: ModuleCategory.payment,
       name: 'Terminal de paiement',
       description: 'Intégration avec les terminaux de paiement physiques.',
       isPremium: true,
       requiresConfiguration: true,
-      dependencies: [ModuleId.payments],
+      dependencies: ['payments'],
     ),
-    ModuleId.wallet: const ModuleDefinition(
-      id: ModuleId.wallet,
+    'wallet': const ModuleDefinition(
+      id: 'wallet',
       category: ModuleCategory.payment,
       name: 'Portefeuille',
       description:
           'Portefeuille client pour stocker du crédit et payer rapidement.',
       isPremium: true,
       requiresConfiguration: true,
-      dependencies: [ModuleId.payments],
+      dependencies: ['payments'],
     ),
 
     // === MARKETING ===
-    ModuleId.loyalty: const ModuleDefinition(
-      id: ModuleId.loyalty,
+    'loyalty': const ModuleDefinition(
+      id: 'loyalty',
       category: ModuleCategory.marketing,
       name: 'Fidélité',
       description: 'Programme de fidélité avec points et récompenses.',
@@ -84,8 +83,8 @@ class ModuleRegistry {
       requiresConfiguration: true,
       dependencies: [],
     ),
-    ModuleId.roulette: const ModuleDefinition(
-      id: ModuleId.roulette,
+    'roulette': const ModuleDefinition(
+      id: 'roulette',
       category: ModuleCategory.marketing,
       name: 'Roulette',
       description: 'Jeu de la roulette pour gagner des réductions.',
@@ -93,8 +92,8 @@ class ModuleRegistry {
       requiresConfiguration: true,
       dependencies: [],
     ),
-    ModuleId.promotions: const ModuleDefinition(
-      id: ModuleId.promotions,
+    'promotions': const ModuleDefinition(
+      id: 'promotions',
       category: ModuleCategory.marketing,
       name: 'Promotions',
       description: 'Gestion des codes promo et réductions.',
@@ -102,8 +101,8 @@ class ModuleRegistry {
       requiresConfiguration: true,
       dependencies: [],
     ),
-    ModuleId.campaigns: const ModuleDefinition(
-      id: ModuleId.campaigns,
+    'campaigns': const ModuleDefinition(
+      id: 'campaigns',
       category: ModuleCategory.marketing,
       name: 'Campagnes',
       description: 'Création et gestion de campagnes marketing ciblées.',
@@ -111,8 +110,8 @@ class ModuleRegistry {
       requiresConfiguration: true,
       dependencies: [],
     ),
-    ModuleId.newsletter: const ModuleDefinition(
-      id: ModuleId.newsletter,
+    'newsletter': const ModuleDefinition(
+      id: 'newsletter',
       category: ModuleCategory.marketing,
       name: 'Newsletter',
       description: 'Envoi de newsletters et communications marketing.',
@@ -122,28 +121,28 @@ class ModuleRegistry {
     ),
 
     // === OPERATIONS ===
-    ModuleId.kitchen_tablet: const ModuleDefinition(
-      id: ModuleId.kitchen_tablet,
+    'kitchen_tablet': const ModuleDefinition(
+      id: 'kitchen_tablet',
       category: ModuleCategory.operations,
       name: 'Tablette cuisine',
       description:
           'Affichage des commandes en cuisine sur tablette dédiée.',
       isPremium: true,
       requiresConfiguration: true,
-      dependencies: [ModuleId.ordering],
+      dependencies: ['ordering'],
     ),
-    ModuleId.staff_tablet: const ModuleDefinition(
-      id: ModuleId.staff_tablet,
+    'staff_tablet': const ModuleDefinition(
+      id: 'staff_tablet',
       category: ModuleCategory.operations,
       name: 'Tablette staff',
       description:
           'Application pour les serveurs et le personnel de salle.',
       isPremium: true,
       requiresConfiguration: true,
-      dependencies: [ModuleId.ordering],
+      dependencies: ['ordering'],
     ),
-    ModuleId.timeRecorder: const ModuleDefinition(
-      id: ModuleId.timeRecorder,
+    'time_recorder': const ModuleDefinition(
+      id: 'time_recorder',
       category: ModuleCategory.operations,
       name: 'Pointeuse',
       description: 'Gestion du temps de travail et pointage du personnel.',
@@ -153,8 +152,8 @@ class ModuleRegistry {
     ),
 
     // === APPEARANCE ===
-    ModuleId.theme: const ModuleDefinition(
-      id: ModuleId.theme,
+    'theme': const ModuleDefinition(
+      id: 'theme',
       category: ModuleCategory.appearance,
       name: 'Thème',
       description: 'Personnalisation des couleurs et du style de l\'app.',
@@ -162,8 +161,8 @@ class ModuleRegistry {
       requiresConfiguration: true,
       dependencies: [],
     ),
-    ModuleId.pagesBuilder: const ModuleDefinition(
-      id: ModuleId.pagesBuilder,
+    'pages_builder': const ModuleDefinition(
+      id: 'pages_builder',
       category: ModuleCategory.appearance,
       name: 'Constructeur de pages',
       description: 'Création de pages personnalisées avec blocs visuels.',
@@ -173,8 +172,8 @@ class ModuleRegistry {
     ),
 
     // === ANALYTICS ===
-    ModuleId.reporting: const ModuleDefinition(
-      id: ModuleId.reporting,
+    'reporting': const ModuleDefinition(
+      id: 'reporting',
       category: ModuleCategory.analytics,
       name: 'Reporting',
       description: 'Tableaux de bord et statistiques de ventes.',
@@ -182,43 +181,22 @@ class ModuleRegistry {
       requiresConfiguration: false,
       dependencies: [],
     ),
-    ModuleId.exports: const ModuleDefinition(
-      id: ModuleId.exports,
+    'exports': const ModuleDefinition(
+      id: 'exports',
       category: ModuleCategory.analytics,
       name: 'Exports',
       description: 'Export des données en CSV, Excel, etc.',
       isPremium: true,
       requiresConfiguration: true,
-      dependencies: [ModuleId.reporting],
+      dependencies: ['reporting'],
     ),
   };
 
-  /// Retourne la définition d'un module par son identifiant.
+  /// Retourne la définition d'un module par son identifiant string.
   ///
-  /// Lève une exception si le module n'existe pas.
-  static ModuleDefinition of(ModuleId id) {
-    final definition = definitions[id];
-    if (definition == null) {
-      throw ArgumentError(
-        'Module with ID "${id.code}" not found in registry. '
-        'Available modules: ${definitions.keys.map((k) => k.code).join(", ")}',
-      );
-    }
-    return definition;
-  }
-
-  /// Retourne la définition d'un module par son code string.
-  ///
-  /// Accepte des codes string comme "delivery", "loyalty", etc.
-  /// Lève une exception si le module n'existe pas.
-  static ModuleDefinition? ofString(String moduleId) {
-    // Find the ModuleId enum that matches the string code
-    for (final entry in definitions.entries) {
-      if (entry.key.code == moduleId) {
-        return entry.value;
-      }
-    }
-    return null;
+  /// Retourne null si le module n'existe pas.
+  static ModuleDefinition? ofString(String id) {
+    return definitions[id];
   }
 
   /// Retourne la liste des modules appartenant à une catégorie donnée.
