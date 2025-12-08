@@ -682,7 +682,7 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Dépend de: ${module.dependencies.map((d) => ModuleRegistry.ofString(d)?.name ?? d).join(", ")}',
+                        'Dépend de: ${module.dependencies.map((d) => _getModuleName(d)).join(", ")}',
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,
