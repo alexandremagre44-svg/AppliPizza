@@ -56,7 +56,7 @@ class NewsletterModuleWidget extends StatelessWidget {
               // Newsletter subscription action
             },
             icon: const Icon(Icons.send, size: 18),
-            label: const Text('S\'inscrire'),
+            label: const Text("S'inscrire"),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.teal.shade600,
               foregroundColor: Colors.white,
