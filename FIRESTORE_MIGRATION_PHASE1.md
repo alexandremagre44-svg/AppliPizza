@@ -121,10 +121,13 @@ For existing restaurant documents, you have two options:
 
 **Option B: Batch update (recommended)**
 - Add default values for new fields to all existing restaurant plans
-- Use a Firestore migration script:
+- Use a Firestore migration script
+
+**Note:** This script uses Firebase Admin SDK (Node.js) for server-side administration.
+For Flutter/Dart implementation, use the Firestore Flutter plugin with similar logic.
 
 ```javascript
-// Firebase Admin SDK migration script
+// Firebase Admin SDK migration script (Node.js)
 const admin = require('firebase-admin');
 const db = admin.firestore();
 

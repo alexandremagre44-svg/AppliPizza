@@ -34,7 +34,7 @@ class SubscribeNewsletterScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Restez informé de nos actualités et promotions',
+                'Restez informés de nos actualités et promotions',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,

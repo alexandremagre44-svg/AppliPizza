@@ -55,5 +55,7 @@ class KitchenWebSocketService {
 
   /// Stream of new orders
   /// TODO: Implement order stream
+  /// Note: Order type should be defined based on the app's order model
+  /// Example: Stream<Map<String, dynamic>> for generic order data
   // Stream<Order> get orders => _ordersController.stream;
 }

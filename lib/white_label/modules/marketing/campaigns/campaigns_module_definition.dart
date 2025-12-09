@@ -17,6 +17,17 @@ ModuleDefinition get campaignsModuleDefinition => const ModuleDefinition(
     );
 
 // TODO: Ajouter les routes spécifiques au module
-// TODO: Ajouter les widgets/screens du module (CampaignsAdminScreen, CampaignEditorScreen)
+// TODO: Ajouter les widgets/screens du module
+//       - CampaignsAdminScreen: Liste et gestion des campagnes
+//       - CampaignEditorScreen: Création/édition de campagne
+//       - CampaignTemplatesScreen: Templates prédéfinis
 // TODO: Ajouter les providers Riverpod du module
-// TODO: Ajouter les modèles de données (Campaign, CampaignTemplate, CampaignStats)
+//       - campaignsProvider: Liste des campagnes
+//       - campaignStatsProvider: Statistiques d'une campagne
+// TODO: Ajouter les modèles de données
+//       - Campaign: {id, name, type, status, targetSegments, content, schedule}
+//       - CampaignTemplate: {id, name, category, defaultContent}
+//       - CampaignStats: {sent, opened, clicked, converted}
+// TODO: Intégration avec services d'emailing (Mailchimp, SendGrid, Brevo)
+//       - API endpoints for campaign management
+//       - Webhook handlers for delivery status
