@@ -225,24 +225,41 @@ class _PaymentAdminSettingsScreenState
             ),
             const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.shade50,
+                color: Colors.red.shade50,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange.shade200),
+                border: Border.all(color: Colors.red.shade300, width: 2),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.warning_amber, color: Colors.orange.shade700, size: 20),
-                  const SizedBox(width: 8),
+                  Icon(Icons.security, color: Colors.red.shade700, size: 24),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      '⚠️ SÉCURITÉ: La clé secrète ne doit JAMAIS être stockée client-side. '
-                      'En production, migrez vers Cloud Functions + Secret Manager.',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.orange.shade900,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'AVERTISSEMENT SÉCURITÉ',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red.shade900,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'La clé secrète Stripe ne doit JAMAIS être stockée côté client. '
+                          'Cette fonctionnalité est uniquement pour le développement. '
+                          'En production, utilisez Cloud Functions avec Secret Manager pour sécuriser vos clés.',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.red.shade800,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

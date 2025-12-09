@@ -30,6 +30,22 @@ class _SubscribeNewsletterScreenState extends State<SubscribeNewsletterScreen> {
   bool _isLoading = false;
   bool _acceptsMarketing = false;
 
+  /// RFC 5322 compliant email validation regex
+  /// 
+  /// This pattern accepts most valid email formats including:
+  /// - Plus signs: user+tag@example.com
+  /// - Dots: user.name@example.com
+  /// - Special chars: user!#$%@example.com
+  /// - Subdomains: user@mail.example.com
+  /// - Long TLDs: user@example.technology
+  static const String _emailPattern = 
+      r'^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$';
+
+  /// Validates email address according to RFC 5322
+  bool _isValidEmail(String email) {
+    return RegExp(_emailPattern).hasMatch(email);
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -120,12 +136,8 @@ class _SubscribeNewsletterScreenState extends State<SubscribeNewsletterScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer votre email';
                   }
-                  // More permissive email validation (RFC 5322 compatible)
-                  // Accepts most valid email formats including + and subdomains
-                  final emailRegex = RegExp(
-                    r'^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'
-                  );
-                  if (!emailRegex.hasMatch(value)) {
+                  // RFC 5322 compatible email validation
+                  if (!_isValidEmail(value)) {
                     return 'Email invalide';
                   }
                   return null;
