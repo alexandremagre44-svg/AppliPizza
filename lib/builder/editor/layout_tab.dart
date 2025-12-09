@@ -3,11 +3,14 @@
 // Part of Builder B3 modular UI layer
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 import '../preview/preview.dart';
 import 'widgets/block_list_view.dart';
 import 'widgets/block_add_dialog.dart';
+import '../../src/providers/restaurant_plan_provider.dart';
+import '../../white_label/restaurant/restaurant_plan_unified.dart';
 
 /// Layout Tab for the Page Editor
 /// 
@@ -21,7 +24,8 @@ import 'widgets/block_add_dialog.dart';
 /// - Select block for editing
 /// - Auto-save after changes
 /// - Optional live preview panel
-class LayoutTab extends StatefulWidget {
+/// - Restaurant plan integration for module filtering
+class LayoutTab extends ConsumerStatefulWidget {
   /// The page being edited
   final BuilderPage page;
   
@@ -51,10 +55,10 @@ class LayoutTab extends StatefulWidget {
   });
 
   @override
-  State<LayoutTab> createState() => _LayoutTabState();
+  ConsumerState<LayoutTab> createState() => _LayoutTabState();
 }
 
-class _LayoutTabState extends State<LayoutTab> {
+class _LayoutTabState extends ConsumerState<LayoutTab> {
   final BuilderLayoutService _service = BuilderLayoutService();
   late BuilderPage _page;
   bool _isSaving = false;
@@ -139,11 +143,27 @@ class _LayoutTabState extends State<LayoutTab> {
     _updatePage(updatedPage);
   }
 
+  /// Get the current restaurant plan from the provider
+  /// 
+  /// This is used to pass the plan to dialogs without triggering rebuilds.
+  /// Returns null if the plan is still loading or in error state.
+  RestaurantPlanUnified? _getCurrentPlan() {
+    final async = ref.read(restaurantPlanUnifiedProvider);
+    return async.maybeWhen(
+      data: (p) => p,
+      orElse: () => null,
+    );
+  }
+
   /// Handle add block
   Future<void> _showAddBlockDialog() async {
+    // Get the current plan to pass to the dialog
+    final plan = _getCurrentPlan();
+    
     final newBlock = await BlockAddDialog.show(
       context,
       currentBlockCount: _page.draftLayout.length,
+      restaurantPlan: plan,
     );
     
     if (newBlock != null) {
