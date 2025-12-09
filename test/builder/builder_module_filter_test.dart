@@ -70,12 +70,18 @@ void main() {
       expect(filteredModules.contains('loyalty_module'), false);
     });
 
-    test('null plan → empty list (strict filtering)', () {
+    test('null plan → only always-visible modules (strict filtering)', () {
       // Get filtered modules with null plan
       final filteredModules = SystemBlock.getFilteredModules(null);
 
-      // Should return empty list (strict filtering)
-      expect(filteredModules, isEmpty);
+      // Should return only always-visible modules (menu_catalog, profile_module)
+      expect(filteredModules.contains('menu_catalog'), true);
+      expect(filteredModules.contains('profile_module'), true);
+      
+      // WL modules should NOT be present
+      expect(filteredModules.contains('roulette_module'), false);
+      expect(filteredModules.contains('loyalty_module'), false);
+      expect(filteredModules.contains('promotions_module'), false);
     });
 
     test('plan with multiple WL modules', () {
@@ -118,7 +124,7 @@ void main() {
       expect(SystemModules.alwaysVisible, isNot(contains('cart_module')));
     });
 
-    test('legacy module without WL mapping → always visible', () {
+    test('legacy module without WL mapping → NOT visible in filtered list', () {
       // Create a plan with no modules
       final plan = RestaurantPlanUnified(
         restaurantId: 'test_resto',
@@ -131,9 +137,14 @@ void main() {
       final filteredModules = SystemBlock.getFilteredModules(plan);
 
       // accountActivity is a legacy module without WL mapping
-      // It should be visible even though no modules are enabled
-      expect(filteredModules.contains('accountActivity'), true,
-          reason: 'Legacy modules without WL mapping are always visible');
+      // It's NOT in SystemModules.alwaysVisible and NOT in wlToBuilderModules
+      // Therefore it should NOT appear in the filtered list
+      expect(filteredModules.contains('accountActivity'), false,
+          reason: 'Legacy modules without WL mapping are not automatically filtered in');
+      
+      // But always-visible modules should still be there
+      expect(filteredModules.contains('menu_catalog'), true);
+      expect(filteredModules.contains('profile_module'), true);
     });
   });
 
