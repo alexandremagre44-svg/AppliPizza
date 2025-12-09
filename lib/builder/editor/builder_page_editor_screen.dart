@@ -252,7 +252,9 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Publier le thème'),
-        content: const Text('Voulez-vous publier le thème ? Les modifications seront visibles par tous les utilisateurs de l'application.'),
+        content: const Text(
+          '''Voulez-vous publier le thème ? Les modifications seront visibles par tous les utilisateurs de l'application.''',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -595,7 +597,9 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Publier la page'),
-        content: const Text('Voulez-vous publier cette page ? Les modifications seront visibles par tous les utilisateurs de l'application.'),
+        content: const Text(
+          '''Voulez-vous publier cette page ? Les modifications seront visibles par tous les utilisateurs de l'application.''',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
