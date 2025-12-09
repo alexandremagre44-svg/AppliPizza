@@ -223,6 +223,31 @@ class _PaymentAdminSettingsScreenState
               'Acceptez les paiements par carte bancaire en ligne',
               style: TextStyle(color: Colors.grey),
             ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber, color: Colors.orange.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '⚠️ SÉCURITÉ: La clé secrète ne doit JAMAIS être stockée client-side. '
+                      'En production, migrez vers Cloud Functions + Secret Manager.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.orange.shade900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
             SwitchListTile(
               value: _stripeEnabled,
@@ -250,6 +275,13 @@ class _PaymentAdminSettingsScreenState
                         if (value == null || value.isEmpty) {
                           return 'Clé publique requise';
                         }
+                        // Validate Stripe key format
+                        if (_stripeTestMode && !value.startsWith('pk_test_')) {
+                          return 'Clé test doit commencer par pk_test_';
+                        }
+                        if (!_stripeTestMode && !value.startsWith('pk_live_')) {
+                          return 'Clé live doit commencer par pk_live_';
+                        }
                         return null;
                       }
                     : null,
@@ -260,6 +292,8 @@ class _PaymentAdminSettingsScreenState
                 decoration: InputDecoration(
                   labelText: 'Clé secrète Stripe *',
                   hintText: 'sk_test_...',
+                  helperText: 'IMPORTANT: À configurer côté serveur (Cloud Functions)',
+                  helperMaxLines: 2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -269,6 +303,13 @@ class _PaymentAdminSettingsScreenState
                     ? (value) {
                         if (value == null || value.isEmpty) {
                           return 'Clé secrète requise';
+                        }
+                        // Validate Stripe key format
+                        if (_stripeTestMode && !value.startsWith('sk_test_')) {
+                          return 'Clé test doit commencer par sk_test_';
+                        }
+                        if (!_stripeTestMode && !value.startsWith('sk_live_')) {
+                          return 'Clé live doit commencer par sk_live_';
                         }
                         return null;
                       }

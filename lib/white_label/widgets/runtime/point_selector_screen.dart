@@ -332,10 +332,14 @@ class _PointSelectorScreenState extends State<PointSelectorScreen> {
 
   void _confirmSelection() {
     if (_selectedPoint != null) {
-      if (widget.onPointSelected != null) {
-        widget.onPointSelected!(_selectedPoint!);
-      }
+      // Pop first to avoid callback after widget disposal
       Navigator.of(context).pop(_selectedPoint);
+      
+      // Call callback after navigation to prevent state updates on disposed widget
+      // Using Future.microtask to ensure it happens after the pop
+      Future.microtask(() {
+        widget.onPointSelected?.call(_selectedPoint!);
+      });
     }
   }
 }

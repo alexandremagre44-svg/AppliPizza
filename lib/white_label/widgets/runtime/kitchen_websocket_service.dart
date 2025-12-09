@@ -149,10 +149,10 @@ class KitchenWebSocketService {
           .doc(restaurantId)
           .collection('orders')
           .where('status', whereIn: [
-            'pending',
-            'received',
-            'preparing',
-            'ready'
+            OrderStatus.pending.code,
+            OrderStatus.received.code,
+            OrderStatus.preparing.code,
+            OrderStatus.ready.code,
           ]) // Exclude completed/cancelled
           .orderBy('createdAt', descending: true)
           .limit(50) // Limit to recent orders

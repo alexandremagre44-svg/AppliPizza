@@ -120,8 +120,11 @@ class _SubscribeNewsletterScreenState extends State<SubscribeNewsletterScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Veuillez entrer votre email';
                   }
-                  // Simple email validation
-                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                  // More permissive email validation (RFC 5322 compatible)
+                  // Accepts most valid email formats including + and subdomains
+                  final emailRegex = RegExp(
+                    r'^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'
+                  );
                   if (!emailRegex.hasMatch(value)) {
                     return 'Email invalide';
                   }
@@ -246,8 +249,8 @@ class _SubscribeNewsletterScreenState extends State<SubscribeNewsletterScreen> {
       // Call callback
       widget.onSubscriptionSuccess?.call();
 
-      // Navigate back after short delay
-      await Future.delayed(const Duration(seconds: 2));
+      // Navigate back after delay (increased to 3s for better UX)
+      await Future.delayed(const Duration(seconds: 3));
       if (mounted) {
         Navigator.of(context).pop();
       }
