@@ -3808,7 +3808,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
     final block = await BlockAddDialog.show(
       context,
       currentBlockCount: _page!.draftLayout.length,
-      showSystemModules: true,
+      // showSystemModules: false (default) - Builder shows only visual blocks
       restaurantPlan: plan,
     );
     

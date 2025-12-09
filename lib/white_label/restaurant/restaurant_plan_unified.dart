@@ -22,6 +22,15 @@ import '../modules/marketing/loyalty/loyalty_module_config.dart';
 import '../modules/marketing/promotions/promotions_module_config.dart';
 import '../modules/marketing/roulette/roulette_module_config.dart';
 import '../modules/marketing/newsletter/newsletter_module_config.dart';
+import '../modules/marketing/campaigns/campaigns_module_config.dart';
+import '../modules/payment/payments_core/payments_module_config.dart';
+import '../modules/payment/terminals/payment_terminal_module_config.dart';
+import '../modules/payment/wallets/wallet_module_config.dart';
+import '../modules/analytics/reporting/reporting_module_config.dart';
+import '../modules/analytics/exports/exports_module_config.dart';
+import '../modules/operations/kitchen_tablet/kitchen_tablet_module_config.dart';
+import '../modules/operations/staff_tablet/staff_tablet_module_config.dart';
+import '../modules/operations/time_recorder/time_recorder_module_config.dart';
 
 /// Configuration de branding pour un restaurant.
 ///
@@ -283,6 +292,33 @@ class RestaurantPlanUnified {
   /// Configuration du module newsletter.
   final NewsletterModuleConfig? newsletter;
 
+  /// Configuration du module campagnes marketing.
+  final CampaignsModuleConfig? campaigns;
+
+  /// Configuration du module paiements.
+  final PaymentsModuleConfig? payments;
+
+  /// Configuration du module terminal de paiement.
+  final PaymentTerminalModuleConfig? paymentTerminal;
+
+  /// Configuration du module portefeuille.
+  final WalletModuleConfig? wallet;
+
+  /// Configuration du module reporting.
+  final ReportingModuleConfig? reporting;
+
+  /// Configuration du module exports.
+  final ExportsModuleConfig? exports;
+
+  /// Configuration du module tablette cuisine.
+  final KitchenTabletModuleConfig? kitchenTablet;
+
+  /// Configuration du module tablette staff.
+  final StaffTabletModuleConfig? staffTablet;
+
+  /// Configuration du module pointeuse.
+  final TimeRecorderModuleConfig? timeRecorder;
+
   /// Configuration du module thème.
   final ThemeModuleConfig? theme;
 
@@ -313,6 +349,15 @@ class RestaurantPlanUnified {
     this.promotions,
     this.roulette,
     this.newsletter,
+    this.campaigns,
+    this.payments,
+    this.paymentTerminal,
+    this.wallet,
+    this.reporting,
+    this.exports,
+    this.kitchenTablet,
+    this.staffTablet,
+    this.timeRecorder,
     this.theme,
     this.pages,
     this.tablets,
@@ -337,6 +382,15 @@ class RestaurantPlanUnified {
     PromotionsModuleConfig? promotions,
     RouletteModuleConfig? roulette,
     NewsletterModuleConfig? newsletter,
+    CampaignsModuleConfig? campaigns,
+    PaymentsModuleConfig? payments,
+    PaymentTerminalModuleConfig? paymentTerminal,
+    WalletModuleConfig? wallet,
+    ReportingModuleConfig? reporting,
+    ExportsModuleConfig? exports,
+    KitchenTabletModuleConfig? kitchenTablet,
+    StaffTabletModuleConfig? staffTablet,
+    TimeRecorderModuleConfig? timeRecorder,
     ThemeModuleConfig? theme,
     PagesBuilderModuleConfig? pages,
     TabletConfig? tablets,
@@ -359,6 +413,15 @@ class RestaurantPlanUnified {
       promotions: promotions ?? this.promotions,
       roulette: roulette ?? this.roulette,
       newsletter: newsletter ?? this.newsletter,
+      campaigns: campaigns ?? this.campaigns,
+      payments: payments ?? this.payments,
+      paymentTerminal: paymentTerminal ?? this.paymentTerminal,
+      wallet: wallet ?? this.wallet,
+      reporting: reporting ?? this.reporting,
+      exports: exports ?? this.exports,
+      kitchenTablet: kitchenTablet ?? this.kitchenTablet,
+      staffTablet: staffTablet ?? this.staffTablet,
+      timeRecorder: timeRecorder ?? this.timeRecorder,
       theme: theme ?? this.theme,
       pages: pages ?? this.pages,
       tablets: tablets ?? this.tablets,
@@ -388,6 +451,15 @@ class RestaurantPlanUnified {
       if (promotions != null) 'promotions': promotions!.toJson(),
       if (roulette != null) 'roulette': roulette!.toJson(),
       if (newsletter != null) 'newsletter': newsletter!.toJson(),
+      if (campaigns != null) 'campaigns': campaigns!.toJson(),
+      if (payments != null) 'payments': payments!.toJson(),
+      if (paymentTerminal != null) 'paymentTerminal': paymentTerminal!.toJson(),
+      if (wallet != null) 'wallet': wallet!.toJson(),
+      if (reporting != null) 'reporting': reporting!.toJson(),
+      if (exports != null) 'exports': exports!.toJson(),
+      if (kitchenTablet != null) 'kitchenTablet': kitchenTablet!.toJson(),
+      if (staffTablet != null) 'staffTablet': staffTablet!.toJson(),
+      if (timeRecorder != null) 'timeRecorder': timeRecorder!.toJson(),
       if (theme != null) 'theme': theme!.toJson(),
       if (pages != null) 'pages': pages!.toJson(),
       if (tablets != null) 'tablets': tablets!.toJson(),
@@ -528,6 +600,114 @@ class RestaurantPlanUnified {
       }
     }
 
+    CampaignsModuleConfig? campaigns;
+    if (json['campaigns'] != null) {
+      try {
+        campaigns = CampaignsModuleConfig.fromJson(
+            json['campaigns'] as Map<String, dynamic>);
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
+      }
+    }
+
+    PaymentsModuleConfig? payments;
+    if (json['payments'] != null) {
+      try {
+        payments = PaymentsModuleConfig.fromJson(
+            json['payments'] as Map<String, dynamic>);
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
+      }
+    }
+
+    PaymentTerminalModuleConfig? paymentTerminal;
+    if (json['paymentTerminal'] != null) {
+      try {
+        paymentTerminal = PaymentTerminalModuleConfig.fromJson(
+            json['paymentTerminal'] as Map<String, dynamic>);
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
+      }
+    }
+
+    WalletModuleConfig? wallet;
+    if (json['wallet'] != null) {
+      try {
+        wallet = WalletModuleConfig.fromJson(
+            json['wallet'] as Map<String, dynamic>);
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
+      }
+    }
+
+    ReportingModuleConfig? reporting;
+    if (json['reporting'] != null) {
+      try {
+        reporting = ReportingModuleConfig.fromJson(
+            json['reporting'] as Map<String, dynamic>);
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
+      }
+    }
+
+    ExportsModuleConfig? exports;
+    if (json['exports'] != null) {
+      try {
+        exports = ExportsModuleConfig.fromJson(
+            json['exports'] as Map<String, dynamic>);
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
+      }
+    }
+
+    KitchenTabletModuleConfig? kitchenTablet;
+    if (json['kitchenTablet'] != null) {
+      try {
+        kitchenTablet = KitchenTabletModuleConfig.fromJson(
+            json['kitchenTablet'] as Map<String, dynamic>);
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
+      }
+    }
+
+    StaffTabletModuleConfig? staffTablet;
+    if (json['staffTablet'] != null) {
+      try {
+        staffTablet = StaffTabletModuleConfig.fromJson(
+            json['staffTablet'] as Map<String, dynamic>);
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
+      }
+    }
+
+    TimeRecorderModuleConfig? timeRecorder;
+    if (json['timeRecorder'] != null) {
+      try {
+        timeRecorder = TimeRecorderModuleConfig.fromJson(
+            json['timeRecorder'] as Map<String, dynamic>);
+      } on TypeError catch (_) {
+        // Type mismatch in JSON data
+      } on FormatException catch (_) {
+        // Invalid data format
+      }
+    }
+
     ThemeModuleConfig? theme;
     if (json['theme'] != null) {
       try {
@@ -581,6 +761,15 @@ class RestaurantPlanUnified {
       promotions: promotions,
       roulette: roulette,
       newsletter: newsletter,
+      campaigns: campaigns,
+      payments: payments,
+      paymentTerminal: paymentTerminal,
+      wallet: wallet,
+      reporting: reporting,
+      exports: exports,
+      kitchenTablet: kitchenTablet,
+      staffTablet: staffTablet,
+      timeRecorder: timeRecorder,
       theme: theme,
       pages: pages,
       tablets: tablets,
@@ -642,6 +831,15 @@ class RestaurantPlanUnified {
       promotions: null,
       roulette: null,
       newsletter: null,
+      campaigns: null,
+      payments: null,
+      paymentTerminal: null,
+      wallet: null,
+      reporting: null,
+      exports: null,
+      kitchenTablet: null,
+      staffTablet: null,
+      timeRecorder: null,
       theme: null,
       pages: null,
       tablets: null,

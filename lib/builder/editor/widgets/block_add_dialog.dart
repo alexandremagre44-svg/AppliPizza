@@ -52,6 +52,9 @@ class BlockAddDialog extends StatelessWidget {
   final List<BlockType>? allowedTypes;
   
   /// Whether to show system modules section
+  /// 
+  /// Default: false - System modules should be managed through white-label
+  /// configuration, not added directly in the page builder.
   final bool showSystemModules;
   
   /// Restaurant plan for filtering modules
@@ -64,16 +67,20 @@ class BlockAddDialog extends StatelessWidget {
     super.key,
     required this.currentBlockCount,
     this.allowedTypes,
-    this.showSystemModules = true,
+    this.showSystemModules = false,
     this.restaurantPlan,
   });
 
   /// Show the dialog and return the created block
+  /// 
+  /// By default, system modules are hidden. The Builder should focus on
+  /// visual content blocks. System modules are configured through the
+  /// white-label system.
   static Future<BuilderBlock?> show(
     BuildContext context, {
     required int currentBlockCount,
     List<BlockType>? allowedTypes,
-    bool showSystemModules = true,
+    bool showSystemModules = false,
     RestaurantPlanUnified? restaurantPlan,
   }) {
     return showDialog<BuilderBlock>(
@@ -108,9 +115,10 @@ class BlockAddDialog extends StatelessWidget {
 
   /// Build dialog content with plan data (or null for strict filtering)
   Widget _buildDialogContent(BuildContext context, RestaurantPlanUnified? plan) {
-    // Filter out system type from regular blocks
+    // Filter out system and module types - keep only visual content blocks
+    // System modules are managed through white-label configuration
     final regularBlocks = (allowedTypes ?? BlockType.values)
-        .where((t) => t != BlockType.system)
+        .where((t) => t != BlockType.system && t != BlockType.module)
         .toList();
     
     // DEBUG: Log filtering
