@@ -146,8 +146,12 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
   /// Handle add block
   Future<void> _showAddBlockDialog() async {
     // Load restaurant plan for module filtering
+    // Use maybeWhen to safely handle loading/error states
     final planAsync = ref.read(restaurantPlanUnifiedProvider);
-    final plan = planAsync.value; // Get the current value (may be null)
+    final plan = planAsync.maybeWhen(
+      data: (plan) => plan,
+      orElse: () => null,
+    );
     
     final newBlock = await BlockAddDialog.show(
       context,
