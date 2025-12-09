@@ -28,15 +28,21 @@ class _SubscribeNewsletterScreenState
   @override
   void initState() {
     super.initState();
+    // Note: Using ref.read() in initState is intentional here
+    // We only need the initial state, not reactive updates
+    // The build method uses ref.watch() for reactive UI updates
     _checkSubscriptionStatus();
   }
 
   void _checkSubscriptionStatus() {
     // TODO: Check if user is already subscribed
     // Load from user profile or Firestore
+    // Note: ref.read() is appropriate here as this is a one-time check
+    // The UI will reactively update via ref.watch() in build()
     final isSubscribed = ref.read(newsletterSubscriptionProvider);
     if (isSubscribed) {
       // Pre-fill email if user is logged in
+      // TODO: Uncomment when user provider is available
       // final user = ref.read(userProvider);
       // _emailController.text = user?.email ?? '';
     }
