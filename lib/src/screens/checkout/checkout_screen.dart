@@ -17,6 +17,7 @@ import '../../theme/app_theme.dart';
 import '../../../white_label/core/module_id.dart';
 import '../delivery/delivery_summary_widget.dart';
 import '../delivery/delivery_not_available_widget.dart';
+import '../../../white_label/widgets/runtime/point_selector_screen.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -33,6 +34,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? _selectedFreePizzaRewardType;
   String? _selectedFreeDrinkRewardType;
   String? _selectedFreeDessertRewardType;
+  
+  // Click & Collect - Selected pickup point
+  PickupPoint? _selectedPickupPoint;
   
   // Créneaux horaires disponibles
   final List<String> _timeSlots = [
@@ -80,6 +84,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez sélectionner un créneau'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    // Validate Click & Collect if module is active
+    final plan = ref.read(restaurantPlanUnifiedProvider).asData?.value;
+    if (plan?.hasModule(ModuleId.clickAndCollect) == true && _selectedPickupPoint == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez sélectionner un point de retrait'),
           backgroundColor: Colors.red,
         ),
       );
@@ -327,6 +343,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             // Delivery summary (if delivery is selected and configured)
             if (deliveryState.isDeliveryConfigured) ...[
               const DeliverySummaryWidget(),
+              const SizedBox(height: 24),
+            ],
+            
+            // Click & Collect point selector (if module is enabled)
+            if (flags?.has(ModuleId.clickAndCollect) ?? false) ...[
+              _buildClickAndCollectSection(),
               const SizedBox(height: 24),
             ],
             
@@ -924,5 +946,117 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
     
     return cartTotal >= deliveryState.selectedArea!.minimumOrderAmount;
+  }
+
+  /// Build Click & Collect pickup point selection section
+  Widget _buildClickAndCollectSection() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: _selectedPickupPoint != null
+              ? Theme.of(context).primaryColor
+              : Colors.grey.shade300,
+          width: _selectedPickupPoint != null ? 2 : 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: _selectPickupPoint,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: _selectedPickupPoint != null
+                        ? Theme.of(context).primaryColor
+                        : Colors.grey,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Point de retrait',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _selectedPickupPoint != null
+                              ? _selectedPickupPoint!.name
+                              : 'Sélectionner un point',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: _selectedPickupPoint != null
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    _selectedPickupPoint != null
+                        ? Icons.check_circle
+                        : Icons.chevron_right,
+                    color: _selectedPickupPoint != null
+                        ? Theme.of(context).primaryColor
+                        : Colors.grey,
+                  ),
+                ],
+              ),
+              if (_selectedPickupPoint != null) ...[
+                const Divider(height: 24),
+                Text(
+                  _selectedPickupPoint!.address,
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+                if (_selectedPickupPoint!.phone != null) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(Icons.phone, size: 14, color: Colors.grey),
+                      const SizedBox(width: 6),
+                      Text(
+                        _selectedPickupPoint!.phone!,
+                        style: const TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Open point selector screen and update selected point
+  Future<void> _selectPickupPoint() async {
+    final point = await Navigator.push<PickupPoint>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PointSelectorScreen(),
+      ),
+    );
+
+    if (point != null) {
+      setState(() {
+        _selectedPickupPoint = point;
+      });
+      
+      // Update provider if available (optional for now since cart provider doesn't have this method)
+      // ref.read(cartProvider.notifier).setPickupPoint(point);
+    }
   }
 }

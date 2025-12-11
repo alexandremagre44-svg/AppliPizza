@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../src/providers/restaurant_provider.dart';
+import '../../modules/payment/payments_core/payments_module_config.dart';
 
 /// Payment method type
 enum PaymentMethod {
@@ -61,17 +64,66 @@ class _PaymentAdminSettingsScreenState
       return;
     }
 
-    // TODO: Save to Firestore
-    // final restaurantId = ref.read(currentRestaurantProvider)?.id;
-    // await ref.read(paymentsServiceProvider).updateSettings(...);
+    try {
+      // Get restaurant ID from provider
+      final restaurantConfig = ref.read(restaurantConfigProvider);
+      final restaurantId = restaurantConfig?.id;
+      
+      if (restaurantId == null) {
+        throw Exception('Restaurant ID not found');
+      }
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Configuration enregistrée avec succès'),
-          backgroundColor: Colors.green,
-        ),
+      // Create PaymentsModuleConfig
+      final config = PaymentsModuleConfig(
+        enabled: _stripeEnabled || _offlineEnabled || _terminalEnabled,
+        settings: {
+          'stripe': {
+            'enabled': _stripeEnabled,
+            'testMode': _stripeTestMode,
+            'publicKey': _stripePublicKeyController.text,
+            'secretKey': _stripeSecretKeyController.text,
+            'acceptedMethods': {
+              'card': _acceptCard,
+              'applePay': _acceptApplePay,
+              'googlePay': _acceptGooglePay,
+            },
+          },
+          'offline': {
+            'enabled': _offlineEnabled,
+          },
+          'terminal': {
+            'enabled': _terminalEnabled,
+            'provider': _terminalProviderController.text,
+          },
+          'currency': _currency,
+        },
       );
+
+      // Save to Firestore
+      await FirebaseFirestore.instance
+          .collection('restaurants')
+          .doc(restaurantId)
+          .update({
+        'plan.payments': config.toJson(),
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Configuration enregistrée avec succès'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la sauvegarde: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

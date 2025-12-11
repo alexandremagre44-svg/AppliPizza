@@ -40,6 +40,12 @@ import 'src/screens/admin/ingredient_form_screen.dart';
 import 'src/screens/admin/studio/roulette_admin_settings_screen.dart';
 import 'src/screens/admin/studio/roulette_segments_list_screen.dart';
 
+// White-Label Admin Widgets
+import 'white_label/widgets/admin/payment_admin_settings_screen.dart';
+
+// White-Label Runtime Widgets
+import 'white_label/widgets/runtime/subscribe_newsletter_screen.dart';
+
 // Staff Tablet imports
 import 'src/staff_tablet/screens/staff_tablet_pin_screen.dart';
 import 'src/staff_tablet/screens/staff_tablet_catalog_screen.dart';
@@ -383,6 +389,35 @@ class MyApp extends ConsumerWidget {
                   );
                 }
                 return const IngredientsAdminScreen();
+              },
+            ),
+            // Payment Admin Route (White-Label Module)
+            GoRoute(
+              path: '/admin/payments',
+              name: 'adminPayments',
+              builder: (context, state) {
+                // PROTECTION: Admin only
+                final authState = ref.read(authProvider);
+                if (!authState.isAdmin) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    context.go(AppRoutes.menu);
+                  });
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return const PaymentAdminSettingsScreen();
+              },
+            ),
+            // Newsletter Route (White-Label Module - Client)
+            GoRoute(
+              path: '/newsletter',
+              name: 'newsletter',
+              builder: (context, state) {
+                return ModuleGuard(
+                  module: ModuleId.newsletter,
+                  child: const SubscribeNewsletterScreen(),
+                );
               },
             ),
             // Roulette Admin Routes

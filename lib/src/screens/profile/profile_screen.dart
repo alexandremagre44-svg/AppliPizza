@@ -273,6 +273,45 @@ class ProfileScreen extends ConsumerWidget {
 
             SizedBox(height: AppSpacing.xxl),
 
+            // ═══════════════════════════════════════════════════════════
+            // SECTION 5 — Newsletter (White-Label Module)
+            // Module guard: requires newsletter module
+            // ═══════════════════════════════════════════════════════════
+            if (flags?.has(ModuleId.newsletter) ?? false) ...[
+              Padding(
+                padding: AppSpacing.paddingHorizontalLG,
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.email, color: Colors.blue.shade700),
+                    ),
+                    title: const Text(
+                      'Newsletter',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Restez informé de nos actualités',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/newsletter'),
+                  ),
+                ),
+              ),
+              SizedBox(height: AppSpacing.xxl),
+            ],
+
             // Admin Panel Section (for admins only)
             if (authState.isAdmin) ...[
               Padding(

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../src/providers/restaurant_provider.dart';
+import '../../../src/providers/auth_provider.dart';
 
 /// Newsletter subscription status provider
 final newsletterSubscriptionProvider = StateProvider<bool>((ref) => false);
@@ -66,15 +69,44 @@ class _SubscribeNewsletterScreenState
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Save to Firestore newsletter collection
-      // await ref.read(newsletterServiceProvider).subscribe(
-      //   email: _emailController.text,
-      //   name: _nameController.text,
-      //   acceptPromotions: _acceptPromotions,
-      // );
+      // Get restaurant and user info
+      final restaurantConfig = ref.read(restaurantConfigProvider);
+      final restaurantId = restaurantConfig?.id;
+      final authState = ref.read(authProvider);
+      final userId = authState.userId;
+      
+      if (restaurantId == null) {
+        throw Exception('Restaurant ID not found');
+      }
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+      // Save to Firestore newsletter_subscribers collection
+      final subscriberData = {
+        'email': _emailController.text,
+        'name': _nameController.text,
+        'userId': userId,
+        'acceptPromotions': _acceptPromotions,
+        'subscribedAt': FieldValue.serverTimestamp(),
+        'source': 'app',
+        'isActive': true,
+      };
+
+      await FirebaseFirestore.instance
+          .collection('restaurants')
+          .doc(restaurantId)
+          .collection('newsletter_subscribers')
+          .doc(_emailController.text)
+          .set(subscriberData);
+
+      // Update user profile if logged in
+      if (userId != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .update({
+          'newsletterSubscribed': true,
+          'newsletterRestaurants': FieldValue.arrayUnion([restaurantId]),
+        });
+      }
 
       // Update subscription status
       ref.read(newsletterSubscriptionProvider.notifier).state = true;
