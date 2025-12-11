@@ -66,10 +66,10 @@ class _PaymentAdminSettingsScreenState
 
     try {
       // Get restaurant ID from provider
-      final restaurantConfig = ref.read(restaurantConfigProvider);
-      final restaurantId = restaurantConfig?.id;
+      final restaurantConfig = ref.read(currentRestaurantProvider);
+      final restaurantId = restaurantConfig.id;
       
-      if (restaurantId == null) {
+      if (restaurantId.isEmpty) {
         throw Exception('Restaurant ID not found');
       }
 

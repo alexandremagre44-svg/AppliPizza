@@ -70,12 +70,12 @@ class _SubscribeNewsletterScreenState
 
     try {
       // Get restaurant and user info
-      final restaurantConfig = ref.read(restaurantConfigProvider);
-      final restaurantId = restaurantConfig?.id;
+      final restaurantConfig = ref.read(currentRestaurantProvider);
+      final restaurantId = restaurantConfig.id;
       final authState = ref.read(authProvider);
       final userId = authState.userId;
       
-      if (restaurantId == null) {
+      if (restaurantId.isEmpty) {
         throw Exception('Restaurant ID not found');
       }
 
