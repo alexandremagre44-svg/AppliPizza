@@ -67,6 +67,7 @@ class WizardStepTemplate extends ConsumerWidget {
 
               // Grille de templates
               GridView.builder(
+                key: const ValueKey('template-grid'),
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -83,6 +84,7 @@ class WizardStepTemplate extends ConsumerWidget {
                   debugPrint('[WizardStepTemplate] Building card: id=${template.id}, isSelected=$isSelected, selectedTemplateId=$selectedTemplateId');
 
                   return _TemplateCard(
+                    key: ValueKey(template.id),
                     template: template,
                     isSelected: isSelected,
                     onSelect: () {
