@@ -129,9 +129,6 @@ final restaurantFeatureFlagsUnifiedProvider =
     Provider<RestaurantFeatureFlags?>(
   (ref) {
     final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-    
-    // Import auth provider to get isSuperAdmin status
-    // We need to import authProvider from auth_provider.dart
     final authState = ref.watch(authProvider);
     final isSuperAdmin = authState.isSuperAdmin;
 
