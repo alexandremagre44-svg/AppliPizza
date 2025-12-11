@@ -53,8 +53,9 @@ import 'src/staff_tablet/screens/staff_tablet_checkout_screen.dart';
 import 'src/staff_tablet/screens/staff_tablet_history_screen.dart';
 import 'src/staff_tablet/providers/staff_tablet_auth_provider.dart';
 
-// POS (Caisse) Module - Phase 1
-import 'src/screens/admin/pos/pos_screen.dart';
+// POS (Caisse) Module - V1 Complete
+import 'pos/screens/pos_screen.dart';
+import 'pos/pos_guard.dart';
 
 // Kitchen Module - Minimal screen
 import 'src/screens/kitchen/kitchen_screen.dart';
@@ -605,15 +606,14 @@ class MyApp extends ConsumerWidget {
             );
           },
         ),
-        // POS Route - Protected by module guard
+        // POS Route - Protected by custom POS guard
+        // Admin can ALWAYS access POS, regardless of module status
         GoRoute(
           path: AppRoutes.pos,
           name: 'pos',
           builder: (context, state) {
-            return ModuleAndRoleGuard(
-              module: ModuleId.staff_tablet,
-              requiresAdmin: true,
-              child: const PosScreen(),
+            return const PosGuard(
+              child: PosScreen(),
             );
           },
         ),
