@@ -3,77 +3,79 @@
 /// This test verifies that templates correctly define and apply default modules.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pizza_delizza_clean/superadmin/pages/restaurant_wizard/wizard_step_template.dart';
-import 'package:pizza_delizza_clean/superadmin/pages/restaurant_wizard/wizard_state.dart';
+import 'package:pizza_delizza/superadmin/pages/restaurant_wizard/wizard_state.dart';
+import 'package:pizza_delizza/white_label/restaurant/restaurant_template.dart';
 
 void main() {
   group('RestaurantTemplate Tests', () {
-    test('availableTemplates contains exactly 4 templates', () {
-      expect(availableTemplates.length, 4);
+    test('RestaurantTemplates.all contains exactly 5 templates', () {
+      expect(RestaurantTemplates.all.length, 5);
     });
 
     test('Pizzeria Classic template has correct modules', () {
-      final template = availableTemplates.firstWhere(
+      final template = RestaurantTemplates.all.firstWhere(
         (t) => t.id == 'pizzeria-classic',
       );
       
       expect(template.name, 'Pizzeria Classic');
-      expect(template.modules, contains('ordering'));
-      expect(template.modules, contains('delivery'));
-      expect(template.modules, contains('click_and_collect'));
-      expect(template.modules, contains('loyalty'));
-      expect(template.modules, contains('roulette'));
-      expect(template.modules, contains('promotions'));
-      expect(template.modules, contains('kitchen_tablet'));
+      final moduleCodes = template.recommendedModules.map((m) => m.code).toList();
+      expect(moduleCodes, contains('ordering'));
+      expect(moduleCodes, contains('delivery'));
+      expect(moduleCodes, contains('click_and_collect'));
+      expect(moduleCodes, contains('loyalty'));
+      expect(moduleCodes, contains('roulette'));
+      expect(moduleCodes, contains('promotions'));
+      expect(moduleCodes, contains('kitchen_tablet'));
     });
 
     test('Fast Food Express template has correct modules', () {
-      final template = availableTemplates.firstWhere(
+      final template = RestaurantTemplates.all.firstWhere(
         (t) => t.id == 'fast-food-express',
       );
       
       expect(template.name, 'Fast Food Express');
-      expect(template.modules, contains('ordering'));
-      expect(template.modules, contains('click_and_collect'));
-      expect(template.modules, contains('staff_tablet'));
-      expect(template.modules, contains('promotions'));
+      final moduleCodes = template.recommendedModules.map((m) => m.code).toList();
+      expect(moduleCodes, contains('ordering'));
+      expect(moduleCodes, contains('click_and_collect'));
+      expect(moduleCodes, contains('staff_tablet'));
+      expect(moduleCodes, contains('promotions'));
     });
 
     test('Restaurant Premium template has correct modules', () {
-      final template = availableTemplates.firstWhere(
+      final template = RestaurantTemplates.all.firstWhere(
         (t) => t.id == 'restaurant-premium',
       );
       
       expect(template.name, 'Restaurant Premium');
-      expect(template.modules, contains('ordering'));
-      expect(template.modules, contains('delivery'));
-      expect(template.modules, contains('click_and_collect'));
-      expect(template.modules, contains('loyalty'));
-      expect(template.modules, contains('promotions'));
-      expect(template.modules, contains('campaigns'));
-      expect(template.modules, contains('time_recorder'));
-      expect(template.modules, contains('reporting'));
-      expect(template.modules, contains('theme'));
-      expect(template.modules, contains('pages_builder'));
+      final moduleCodes = template.recommendedModules.map((m) => m.code).toList();
+      expect(moduleCodes, contains('ordering'));
+      expect(moduleCodes, contains('delivery'));
+      expect(moduleCodes, contains('loyalty'));
+      expect(moduleCodes, contains('promotions'));
+      expect(moduleCodes, contains('campaigns'));
+      expect(moduleCodes, contains('time_recorder'));
+      expect(moduleCodes, contains('reporting'));
+      expect(moduleCodes, contains('theme'));
+      expect(moduleCodes, contains('pages_builder'));
     });
 
     test('Blank template has no modules', () {
-      final template = availableTemplates.firstWhere(
+      final template = RestaurantTemplates.all.firstWhere(
         (t) => t.id == 'blank-template',
       );
       
       expect(template.name, 'Template Vide');
-      expect(template.modules, isEmpty);
+      expect(template.recommendedModules, isEmpty);
     });
 
     test('getTemplateById returns correct template', () {
-      final template = getTemplateById('pizzeria-classic');
+      final template = RestaurantTemplates.getById('pizzeria-classic');
       expect(template, isNotNull);
       expect(template!.id, 'pizzeria-classic');
     });
 
     test('getTemplateById returns null for invalid ID', () {
-      final template = getTemplateById('invalid-id');
+      final template = RestaurantTemplates.getById('invalid-id');
       expect(template, isNull);
     });
   });
@@ -81,7 +83,7 @@ void main() {
   group('Template Selection in Wizard', () {
     test('selectTemplate updates templateId and enables modules', () {
       final notifier = RestaurantWizardNotifier();
-      final template = availableTemplates.firstWhere(
+      final template = RestaurantTemplates.all.firstWhere(
         (t) => t.id == 'pizzeria-classic',
       );
       
@@ -95,7 +97,7 @@ void main() {
 
     test('selectTemplate with blank template sets no modules', () {
       final notifier = RestaurantWizardNotifier();
-      final template = availableTemplates.firstWhere(
+      final template = RestaurantTemplates.all.firstWhere(
         (t) => t.id == 'blank-template',
       );
       
@@ -109,14 +111,14 @@ void main() {
       final notifier = RestaurantWizardNotifier();
       
       // First select Pizzeria Classic
-      final pizzeriaTemplate = availableTemplates.firstWhere(
+      final pizzeriaTemplate = RestaurantTemplates.all.firstWhere(
         (t) => t.id == 'pizzeria-classic',
       );
       notifier.selectTemplate(pizzeriaTemplate);
       final pizzeriaModuleCount = notifier.state.enabledModuleIds.length;
       
       // Then switch to Fast Food Express
-      final fastFoodTemplate = availableTemplates.firstWhere(
+      final fastFoodTemplate = RestaurantTemplates.all.firstWhere(
         (t) => t.id == 'fast-food-express',
       );
       notifier.selectTemplate(fastFoodTemplate);
