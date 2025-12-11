@@ -16,6 +16,7 @@ import 'promotions_admin_screen.dart';
 import '../../../builder/builder_entry.dart';
 import '../../providers/restaurant_plan_provider.dart';
 import '../../../white_label/core/module_id.dart';
+import '../../../white_label/restaurant/restaurant_feature_flags.dart';
 
 /// Admin Menu - Point d'entrée principal pour tous les outils d'administration
 /// 
@@ -33,6 +34,7 @@ class AdminStudioScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final flags = ref.watch(restaurantFeatureFlagsUnifiedProvider);
     final unifiedPlanAsync = ref.watch(restaurantPlanUnifiedProvider);
     final unifiedPlan = unifiedPlanAsync.asData?.value;
     return Scaffold(
@@ -53,18 +55,19 @@ class AdminStudioScreen extends ConsumerWidget {
           SizedBox(height: AppSpacing.md),
           
           // Builder B3 - NEW - Page Builder System
-          _buildBuilderB3Block(
-            context,
-            iconData: Icons.dashboard_customize_rounded,
-            title: '🎨 Builder B3 - Constructeur de Pages',
-            subtitle: 'Nouveau système modulaire • Multi-pages • Multi-resto\nArchitecture propre • Blocs réutilisables • Prêt pour implémentation',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BuilderStudioScreen()),
-              );
-            },
-          ),
+          if (flags?.has(ModuleId.pagesBuilder) ?? false)
+            _buildBuilderB3Block(
+              context,
+              iconData: Icons.dashboard_customize_rounded,
+              title: '🎨 Builder B3 - Constructeur de Pages',
+              subtitle: 'Nouveau système modulaire • Multi-pages • Multi-resto\nArchitecture propre • Blocs réutilisables • Prêt pour implémentation',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const BuilderStudioScreen()),
+                );
+              },
+            ),
           
           SizedBox(height: AppSpacing.lg),
           
@@ -105,35 +108,39 @@ class AdminStudioScreen extends ConsumerWidget {
               );
             },
           ),
-          SizedBox(height: AppSpacing.md),
-          _buildStudioBlock(
-            context,
-            iconData: Icons.local_offer_rounded,
-            title: 'Promotions',
-            subtitle: 'Gérer les promotions et réductions',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PromotionsAdminScreen()),
-              );
-            },
-          ),
-          SizedBox(height: AppSpacing.md),
-          _buildStudioBlock(
-            context,
-            iconData: Icons.email_rounded,
-            title: 'Mailing',
-            subtitle: 'Gérer les abonnés et campagnes email',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const MailingAdminScreen()),
-              );
-            },
-          ),
+          if (flags?.has(ModuleId.promotions) ?? false) ...[
+            SizedBox(height: AppSpacing.md),
+            _buildStudioBlock(
+              context,
+              iconData: Icons.local_offer_rounded,
+              title: 'Promotions',
+              subtitle: 'Gérer les promotions et réductions',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PromotionsAdminScreen()),
+                );
+              },
+            ),
+          ],
+          if (flags?.has(ModuleId.newsletter) ?? false) ...[
+            SizedBox(height: AppSpacing.md),
+            _buildStudioBlock(
+              context,
+              iconData: Icons.email_rounded,
+              title: 'Mailing',
+              subtitle: 'Gérer les abonnés et campagnes email',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MailingAdminScreen()),
+                );
+              },
+            ),
+          ],
           
           // Payment Configuration (White-Label Module - conditionally shown)
-          if (unifiedPlan?.hasModule(ModuleId.payments) ?? false) ...[
+          if (flags?.has(ModuleId.payments) ?? false) ...[
             SizedBox(height: AppSpacing.md),
             _buildStudioBlock(
               context,
@@ -155,53 +162,59 @@ class AdminStudioScreen extends ConsumerWidget {
               ),
             ),
           ),
-          SizedBox(height: AppSpacing.md),
-          
-          _buildStudioBlock(
-            context,
-            iconData: Icons.casino_rounded,
-            title: 'Roue de la chance',
-            subtitle: 'Gérer les segments de la roulette',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RouletteSegmentsListScreen()),
-              );
-            },
-          ),
-          SizedBox(height: AppSpacing.md),
-          _buildStudioBlock(
-            context,
-            iconData: Icons.settings_outlined,
-            title: 'Paramètres de la roulette',
-            subtitle: 'Configuration, règles et limites d\'utilisation',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RouletteAdminSettingsScreen()),
-              );
-            },
-          ),
+          if (flags?.has(ModuleId.roulette) ?? false) ...[
+            SizedBox(height: AppSpacing.md),
+            _buildStudioBlock(
+              context,
+              iconData: Icons.casino_rounded,
+              title: 'Roue de la chance',
+              subtitle: 'Gérer les segments de la roulette',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RouletteSegmentsListScreen()),
+                );
+              },
+            ),
+            SizedBox(height: AppSpacing.md),
+            _buildStudioBlock(
+              context,
+              iconData: Icons.settings_outlined,
+              title: 'Paramètres de la roulette',
+              subtitle: 'Configuration, règles et limites d\'utilisation',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RouletteAdminSettingsScreen()),
+                );
+              },
+            ),
+          ],
           
           // POS Module - Accessible via Admin only
-          SizedBox(height: AppSpacing.md),
-          _buildStudioBlock(
-            context,
-            iconData: Icons.point_of_sale,
-            title: 'Accéder au POS',
-            subtitle: 'Module Point de Vente • Interface simplifiée',
-            onTap: () => context.push('/pos'),
-          ),
+          if ((flags?.has(ModuleId.staff_tablet) ?? false) ||
+              (flags?.has(ModuleId.payment_terminal) ?? false)) ...[
+            SizedBox(height: AppSpacing.md),
+            _buildStudioBlock(
+              context,
+              iconData: Icons.point_of_sale,
+              title: 'Accéder au POS',
+              subtitle: 'Module Point de Vente • Interface simplifiée',
+              onTap: () => context.push('/pos'),
+            ),
+          ],
           
           // Kitchen Module - Accessible via Admin only
-          SizedBox(height: AppSpacing.md),
-          _buildStudioBlock(
-            context,
-            iconData: Icons.kitchen,
-            title: 'Accéder à la Cuisine',
-            subtitle: 'Module Cuisine • Interface simplifiée',
-            onTap: () => context.push('/kitchen'),
-          ),
+          if (flags?.has(ModuleId.kitchen_tablet) ?? false) ...[
+            SizedBox(height: AppSpacing.md),
+            _buildStudioBlock(
+              context,
+              iconData: Icons.kitchen,
+              title: 'Accéder à la Cuisine',
+              subtitle: 'Module Cuisine • Interface simplifiée',
+              onTap: () => context.push('/kitchen'),
+            ),
+          ],
           
           SizedBox(height: AppSpacing.md),
         ],
