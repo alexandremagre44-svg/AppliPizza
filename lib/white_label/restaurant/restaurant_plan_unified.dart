@@ -13,6 +13,7 @@ library;
 
 import '../core/module_id.dart';
 import '../core/module_config.dart';
+import 'restaurant_template.dart';
 import '../modules/appearance/theme/theme_module_config.dart';
 import '../modules/appearance/pages_builder/pages_builder_module_config.dart';
 import '../modules/core/delivery/delivery_module_config.dart';
@@ -807,6 +808,16 @@ class RestaurantPlanUnified {
         })
         .whereType<ModuleId>()
         .toList();
+  }
+
+  /// Retourne le template métier associé à ce restaurant.
+  /// 
+  /// Le template définit la logique métier (workflow, types de service, etc.)
+  /// mais NE contrôle PAS les modules activés.
+  RestaurantTemplate? get template {
+    if (templateId == null) return null;
+    // Import required at top of file
+    return RestaurantTemplates.getById(templateId);
   }
 
   /// Crée un plan unifié par défaut avec des valeurs minimales.

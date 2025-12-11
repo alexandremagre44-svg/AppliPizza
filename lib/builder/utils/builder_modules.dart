@@ -78,7 +78,7 @@ const Map<String, ModuleId> moduleIdMapping = {
   'click_collect_module': ModuleId.clickAndCollect,
   'kitchen_module': ModuleId.kitchen_tablet,
   'staff_module': ModuleId.staff_tablet,
-  'pos_module': ModuleId.staff_tablet,
+  'pos_module': ModuleId.pos,
   'promotions_module': ModuleId.promotions,
   'newsletter_module': ModuleId.newsletter,
   // Aliases for backward compatibility

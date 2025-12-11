@@ -10,7 +10,71 @@ import 'package:pizza_delizza/white_label/core/module_runtime_mapping.dart';
 import 'package:pizza_delizza/white_label/runtime/module_route_resolver.dart';
 
 void main() {
-  group('staff_tablet Module Tests (maps to /pos route)', () {
+  group('POS Module Tests (maps to /pos route)', () {
+    test('ModuleId.pos exists', () {
+      expect(ModuleId.values.contains(ModuleId.pos), isTrue);
+    });
+
+    test('ModuleId.pos has correct code', () {
+      expect(ModuleId.pos.code, equals('pos'));
+    });
+
+    test('ModuleId.pos has correct label', () {
+      expect(ModuleId.pos.label, equals('POS / Caisse'));
+    });
+
+    test('ModuleId.pos has correct category', () {
+      expect(ModuleId.pos.category, equals(ModuleCategory.operations));
+    });
+
+    test('pos module exists in module matrix', () {
+      final meta = moduleMatrix['pos'];
+      expect(meta, isNotNull);
+      expect(meta!.id, equals('pos'));
+      expect(meta.label, equals('POS / Caisse'));
+      expect(meta.status, equals(ModuleStatus.implemented));
+      expect(meta.hasPage, isTrue);
+      expect(meta.hasBuilderBlock, isFalse);
+      expect(meta.defaultRoute, equals('/pos'));
+      expect(meta.tags, contains('pos'));
+      expect(meta.tags, contains('operations'));
+    });
+
+    test('ModuleRuntimeMapping returns correct route for pos', () {
+      final route = ModuleRuntimeMapping.getRuntimeRoute(ModuleId.pos);
+      expect(route, equals('/pos'));
+    });
+
+    test('ModuleRuntimeMapping indicates pos has a page', () {
+      final hasPage = ModuleRuntimeMapping.getRuntimePage(ModuleId.pos);
+      expect(hasPage, isTrue);
+    });
+
+    test('ModuleRuntimeMapping indicates pos has no builder block', () {
+      final hasBlock = ModuleRuntimeMapping.hasBuilderBlock(ModuleId.pos);
+      expect(hasBlock, isFalse);
+    });
+
+    test('ModuleRuntimeMapping indicates pos is implemented', () {
+      final isImplemented = ModuleRuntimeMapping.isImplemented(ModuleId.pos);
+      expect(isImplemented, isTrue);
+    });
+
+    test('ModuleRouteResolver resolves /pos to ModuleId.pos', () {
+      final moduleId = ModuleRouteResolver.resolve('/pos');
+      expect(moduleId, equals(ModuleId.pos));
+    });
+
+    test('ModuleRouteResolver.resolveDetailed provides full info for /pos', () {
+      final result = ModuleRouteResolver.resolveDetailed('/pos');
+      expect(result.isResolved, isTrue);
+      expect(result.moduleId, equals(ModuleId.pos));
+      expect(result.route, equals('/pos'));
+      expect(result.requiresModule, isTrue);
+    });
+  });
+
+  group('staff_tablet Module Tests (separate from POS)', () {
     test('ModuleId.staff_tablet exists', () {
       expect(ModuleId.values.contains(ModuleId.staff_tablet), isTrue);
     });
@@ -33,44 +97,14 @@ void main() {
       expect(meta!.id, equals('staff_tablet'));
       expect(meta.label, equals('Caisse / Staff Tablet'));
       expect(meta.status, equals(ModuleStatus.implemented));
-      expect(meta.hasPage, isTrue);
+      expect(meta.hasPage, isFalse); // No longer has dedicated page (POS has it)
       expect(meta.hasBuilderBlock, isFalse);
-      expect(meta.defaultRoute, equals('/pos'));
       expect(meta.tags, contains('staff'));
       expect(meta.tags, contains('operations'));
     });
 
-    test('ModuleRuntimeMapping returns correct route for staff_tablet', () {
-      final route = ModuleRuntimeMapping.getRuntimeRoute(ModuleId.staff_tablet);
-      expect(route, equals('/pos'));
-    });
-
-    test('ModuleRuntimeMapping indicates staff_tablet has a page', () {
-      final hasPage = ModuleRuntimeMapping.getRuntimePage(ModuleId.staff_tablet);
-      expect(hasPage, isTrue);
-    });
-
-    test('ModuleRuntimeMapping indicates staff_tablet has no builder block', () {
-      final hasBlock = ModuleRuntimeMapping.hasBuilderBlock(ModuleId.staff_tablet);
-      expect(hasBlock, isFalse);
-    });
-
-    test('ModuleRuntimeMapping indicates staff_tablet is implemented', () {
-      final isImplemented = ModuleRuntimeMapping.isImplemented(ModuleId.staff_tablet);
-      expect(isImplemented, isTrue);
-    });
-
-    test('ModuleRouteResolver resolves /pos to ModuleId.staff_tablet', () {
-      final moduleId = ModuleRouteResolver.resolve('/pos');
-      expect(moduleId, equals(ModuleId.staff_tablet));
-    });
-
-    test('ModuleRouteResolver.resolveDetailed provides full info for /pos', () {
-      final result = ModuleRouteResolver.resolveDetailed('/pos');
-      expect(result.isResolved, isTrue);
-      expect(result.moduleId, equals(ModuleId.staff_tablet));
-      expect(result.route, equals('/pos'));
-      expect(result.requiresModule, isTrue);
+    test('POS and staff_tablet are independent modules', () {
+      expect(ModuleId.pos, isNot(equals(ModuleId.staff_tablet)));
     });
   });
 

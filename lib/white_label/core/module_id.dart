@@ -41,6 +41,9 @@ enum ModuleId {
   /// Module tablette staff / serveur
   staff_tablet,
 
+  /// Module POS / Caisse (Point de Vente)
+  pos,
+
   /// Module pointeuse / gestion du temps
   timeRecorder,
 
@@ -89,6 +92,8 @@ extension ModuleIdX on ModuleId {
         return 'kitchen_tablet';
       case ModuleId.staff_tablet:
         return 'staff_tablet';
+      case ModuleId.pos:
+        return 'pos';
       case ModuleId.timeRecorder:
         return 'time_recorder';
       case ModuleId.theme:
@@ -131,6 +136,8 @@ extension ModuleIdX on ModuleId {
         return 'Tablette cuisine';
       case ModuleId.staff_tablet:
         return 'Caisse / Staff Tablet';
+      case ModuleId.pos:
+        return 'POS / Caisse';
       case ModuleId.timeRecorder:
         return 'Pointeuse';
       case ModuleId.theme:
@@ -164,6 +171,7 @@ extension ModuleIdX on ModuleId {
         return ModuleCategory.marketing;
       case ModuleId.kitchen_tablet:
       case ModuleId.staff_tablet:
+      case ModuleId.pos:
       case ModuleId.timeRecorder:
         return ModuleCategory.operations;
       case ModuleId.theme:

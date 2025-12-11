@@ -2,111 +2,22 @@
 ///
 /// Étape 3 du Wizard: Sélection du template.
 /// Permet de choisir un template de départ pour le restaurant.
-/// Chaque template définit un ensemble de modules pré-configurés basé sur String module IDs.
+/// 
+/// ⚠️ IMPORTANT: Le template définit la LOGIQUE MÉTIER uniquement.
+/// Les modules sont recommandés mais DOIVENT être activés manuellement
+/// par le SuperAdmin à l'étape suivante.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../white_label/core/module_registry.dart';
+import '../../../white_label/restaurant/restaurant_template.dart';
 import 'wizard_state.dart';
 
-/// Template disponible pour la création de restaurant.
-/// Utilise String module IDs pour définir les modules inclus.
-class RestaurantTemplate {
-  final String id;
-  final String name;
-  final String description;
-  final String iconName;
-  final List<String> modules;
-
-  const RestaurantTemplate({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.iconName,
-    required this.modules,
-  });
-
-  /// Liste des noms de modules inclus pour l'affichage.
-  List<String> get includedModuleNames => modules.map((moduleId) {
-    return ModuleRegistry.of(moduleId)?.name ?? moduleId;
-  }).toList();
-}
-
-/// Templates disponibles pour la création de restaurant.
-/// Basés sur les 4 templates définis dans le problème.
-const List<RestaurantTemplate> availableTemplates = [
-  // 1) Pizzeria Classic
-  RestaurantTemplate(
-    id: 'pizzeria-classic',
-    name: 'Pizzeria Classic',
-    description:
-        'Template complet pour pizzeria avec commande en ligne, livraison, fidélité et jeux promotionnels.',
-    iconName: 'local_pizza',
-    modules: [
-      'ordering',
-      'delivery',
-      'click_and_collect',
-      'loyalty',
-      'roulette',
-      'promotions',
-      'kitchen_tablet',
-    ],
-  ),
-  // 2) Fast Food Express
-  RestaurantTemplate(
-    id: 'fast-food-express',
-    name: 'Fast Food Express',
-    description:
-        'Template optimisé pour la restauration rapide avec click & collect et gestion du staff.',
-    iconName: 'fastfood',
-    modules: [
-      'ordering',
-      'click_and_collect',
-      'staff_tablet',
-      'promotions',
-    ],
-  ),
-  // 3) Restaurant Premium
-  RestaurantTemplate(
-    id: 'restaurant-premium',
-    name: 'Restaurant Premium',
-    description:
-        'Template haut de gamme avec toutes les fonctionnalités avancées incluses.',
-    iconName: 'restaurant',
-    modules: [
-      'ordering',
-      'delivery',
-      'click_and_collect',
-      'loyalty',
-      'promotions',
-      'campaigns',
-      'time_recorder',
-      'reporting',
-      'theme',
-      'pages_builder',
-    ],
-  ),
-  // 4) Blank
-  RestaurantTemplate(
-    id: 'blank-template',
-    name: 'Template Vide',
-    description:
-        'Commencez de zéro et configurez manuellement tous les modules.',
-    iconName: 'add_box',
-    modules: [],
-  ),
-];
-
 /// Récupère un template par son ID.
+/// Utilise le nouveau système de templates métier.
 RestaurantTemplate? getTemplateById(String? id) {
-  if (id == null) return null;
-  try {
-    return availableTemplates.firstWhere((t) => t.id == id);
-  } catch (_) {
-    return null;
-  }
+  return RestaurantTemplates.getById(id);
 }
 
 /// Étape 3: Sélection du template.
@@ -128,7 +39,7 @@ class WizardStepTemplate extends ConsumerWidget {
             children: [
               // Titre de la section
               const Text(
-                'Choisir un template',
+                'Choisir un template métier',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -137,7 +48,7 @@ class WizardStepTemplate extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Sélectionnez un template de départ pour votre restaurant. Vous pourrez personnaliser les modules ensuite.',
+                'Le template définit la logique métier (workflow, types de service, etc.).\nLes modules business seront activés à l\'étape suivante.',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey.shade600,
@@ -155,9 +66,9 @@ class WizardStepTemplate extends ConsumerWidget {
                   crossAxisSpacing: 16,
                   childAspectRatio: 0.85,
                 ),
-                itemCount: availableTemplates.length,
+                itemCount: RestaurantTemplates.all.length,
                 itemBuilder: (context, index) {
-                  final template = availableTemplates[index];
+                  final template = RestaurantTemplates.all[index];
                   final isSelected = template.id == selectedTemplateId;
 
                   return _TemplateCard(
@@ -177,7 +88,7 @@ class WizardStepTemplate extends ConsumerWidget {
               if (selectedTemplateId != null)
                 _TemplateDetails(
                   template: getTemplateById(selectedTemplateId) ??
-                      availableTemplates.last,
+                      RestaurantTemplates.defaultTemplate,
                 ),
             ],
           ),
@@ -300,9 +211,9 @@ class _TemplateCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // Modules inclus
+            // Modules recommandés
             Text(
-              '${template.modules.length} modules inclus',
+              '${template.recommendedModules.length} modules recommandés',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -338,23 +249,46 @@ class _TemplateDetails extends StatelessWidget {
             children: [
               Icon(Icons.info_outline, color: Colors.blue.shade600),
               const SizedBox(width: 12),
-              Text(
-                'Modules inclus dans "${template.name}"',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blue.shade800,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Configuration du template "${template.name}"',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blue.shade800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Type de service: ${_getServiceTypeLabel(template.serviceType)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue.shade700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          if (template.modules.isNotEmpty) ...[
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
+          Text(
+            'Modules recommandés (à activer à l\'étape suivante):',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.blue.shade800,
+            ),
+          ),
+          if (template.recommendedModules.isNotEmpty) ...[
+            const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: template.modules.map((moduleId) {
-                final moduleName = ModuleRegistry.of(moduleId)?.name ?? moduleId;
+              children: template.recommendedModules.map((moduleId) {
                 return Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -365,12 +299,23 @@ class _TemplateDetails extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.blue.shade200),
                   ),
-                  child: Text(
-                    moduleName,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.blue.shade700,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.lightbulb_outline,
+                        size: 14,
+                        color: Colors.amber.shade700,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        moduleId.label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }).toList(),
@@ -379,7 +324,7 @@ class _TemplateDetails extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                'Aucun module pré-configuré. Vous pourrez activer les modules à l\'étape suivante.',
+                'Aucun module recommandé. Vous pourrez activer les modules à l\'étape suivante.',
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.blue.shade700,
@@ -389,5 +334,18 @@ class _TemplateDetails extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getServiceTypeLabel(ServiceType type) {
+    switch (type) {
+      case ServiceType.tableService:
+        return 'Service à table';
+      case ServiceType.counterService:
+        return 'Service au comptoir';
+      case ServiceType.deliveryOnly:
+        return 'Livraison uniquement';
+      case ServiceType.mixed:
+        return 'Mixte (table + comptoir + livraison)';
+    }
   }
 }

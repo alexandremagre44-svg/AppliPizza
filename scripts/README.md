@@ -141,3 +141,73 @@ Add to `.gitignore`:
 serviceAccountKey.json
 *-firebase-adminsdk-*.json
 ```
+
+---
+
+## migrate_template_modules.mjs
+
+Script to migrate the restaurant configuration to the new template and module system.
+
+### What it does
+
+1. **Module Migration**:
+   - Normalizes module IDs (snake_case compatibility)
+   - Converts old `modules` array to `activeModules` list
+   - Ensures backward compatibility
+
+2. **Template Assignment**:
+   - Infers appropriate template based on active modules
+   - Assigns default template if none matches
+   - Preserves existing templateId if present
+
+3. **Legacy Field Handling**:
+   - Keeps old fields for backward compatibility
+   - Adds new fields without removing old ones
+
+### Prerequisites
+
+Same as `normalize_builder_firestore.mjs`:
+1. Install Firebase Admin SDK
+2. Download service account key
+3. Set environment variable or use default path
+
+### Usage
+
+**Preview changes (dry-run):**
+```bash
+node scripts/migrate_template_modules.mjs
+# or explicitly:
+node scripts/migrate_template_modules.mjs --dry-run
+```
+
+**Apply changes to all restaurants:**
+```bash
+node scripts/migrate_template_modules.mjs --apply
+```
+
+**Target a specific restaurant:**
+```bash
+node scripts/migrate_template_modules.mjs --restaurant=delizza
+node scripts/migrate_template_modules.mjs --restaurant=delizza --apply
+```
+
+### Example Output
+
+```
+═══════════════════════════════════════════════════════════════
+  TEMPLATE & MODULE MIGRATION SCRIPT
+═══════════════════════════════════════════════════════════════
+  Mode: 🔍 DRY RUN (preview only)
+  Target: ALL RESTAURANTS
+═══════════════════════════════════════════════════════════════
+
+📦 Processing restaurant: delizza
+   📝 Changes detected:
+      templateId:
+        OLD: undefined
+        NEW: "pizzeria-classic"
+      activeModules:
+        OLD: ["ordering","delivery","loyalty","roulette"]
+        NEW: ["ordering","delivery","loyalty","roulette","kitchen_tablet"]
+   🔍 Would update (dry-run)
+```

@@ -322,10 +322,10 @@ class AnyModuleRouteGuard extends ConsumerWidget {
 }
 
 /// Guard pour le module POS (Point de Vente).
-/// Accepte soit staff_tablet soit payment_terminal.
+/// Vérifie que le module POS est activé.
 Widget posRouteGuard(Widget child, {String? fallbackRoute}) {
-  return AnyModuleRouteGuard(
-    requiredModules: [ModuleId.staff_tablet, ModuleId.paymentTerminal],
+  return ModuleRouteGuard(
+    requiredModule: ModuleId.pos,
     fallbackRoute: fallbackRoute ?? AppRoutes.home,
     child: child,
   );
