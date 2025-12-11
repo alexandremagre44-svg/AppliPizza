@@ -15,6 +15,7 @@ import 'mailing_admin_screen.dart';
 import 'promotions_admin_screen.dart';
 import '../../../builder/builder_entry.dart';
 import '../../providers/restaurant_plan_provider.dart';
+import '../../../white_label/core/module_id.dart';
 
 /// Admin Menu - Point d'entrée principal pour tous les outils d'administration
 /// 
@@ -130,6 +131,19 @@ class AdminStudioScreen extends ConsumerWidget {
               );
             },
           ),
+          
+          // Payment Configuration (White-Label Module - conditionally shown)
+          if (unifiedPlan?.hasModule(ModuleId.payments) ?? false) ...[
+            SizedBox(height: AppSpacing.md),
+            _buildStudioBlock(
+              context,
+              iconData: Icons.payment_rounded,
+              title: 'Configuration Paiements',
+              subtitle: 'Stripe, paiement offline, terminal',
+              onTap: () => context.push('/admin/payments'),
+            ),
+          ],
+          
           SizedBox(height: AppSpacing.lg),
           
           Padding(
