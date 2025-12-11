@@ -80,8 +80,12 @@ class _SubscribeNewsletterScreenState
       }
 
       // Save to Firestore newsletter_subscribers collection
+      final email = _emailController.text;
+      // Sanitize email for use as document ID (replace invalid characters)
+      final docId = email.replaceAll(RegExp(r'[\/\s]'), '_');
+      
       final subscriberData = {
-        'email': _emailController.text,
+        'email': email,
         'name': _nameController.text,
         'userId': userId,
         'acceptPromotions': _acceptPromotions,
@@ -94,7 +98,7 @@ class _SubscribeNewsletterScreenState
           .collection('restaurants')
           .doc(restaurantId)
           .collection('newsletter_subscribers')
-          .doc(_emailController.text)
+          .doc(docId)
           .set(subscriberData);
 
       // Update user profile if logged in

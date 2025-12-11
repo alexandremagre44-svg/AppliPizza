@@ -1055,8 +1055,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         _selectedPickupPoint = point;
       });
       
-      // Update provider if available (optional for now since cart provider doesn't have this method)
-      // ref.read(cartProvider.notifier).setPickupPoint(point);
+      // Note: Cart provider integration for pickup point storage can be added later
+      // when CartNotifier is extended with setPickupPoint method
     }
   }
 }

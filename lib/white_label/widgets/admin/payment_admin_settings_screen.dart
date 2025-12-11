@@ -99,12 +99,14 @@ class _PaymentAdminSettingsScreenState
         },
       );
 
-      // Save to Firestore
+      // Save to Firestore using nested structure
       await FirebaseFirestore.instance
           .collection('restaurants')
           .doc(restaurantId)
           .update({
-        'plan.payments': config.toJson(),
+        'plan': {
+          'payments': config.toJson(),
+        },
       });
 
       if (mounted) {

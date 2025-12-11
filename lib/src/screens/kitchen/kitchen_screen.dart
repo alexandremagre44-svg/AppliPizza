@@ -38,8 +38,12 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen> {
     final kitchenConfig = plan?.kitchenTablet;
     
     if (kitchenConfig?.settings['useWebSocket'] == true) {
-      final url = kitchenConfig?.settings['webSocketUrl'] as String? ?? 
-          'ws://localhost:8080/kitchen';
+      final url = kitchenConfig?.settings['webSocketUrl'] as String?;
+      
+      if (url == null || url.isEmpty) {
+        debugPrint('⚠️ [KitchenScreen] WebSocket URL not configured, falling back to Firestore only');
+        return;
+      }
       
       _wsService = KitchenWebSocketService();
       
@@ -104,10 +108,22 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen> {
   Future<void> _updateOrderStatus(String orderId, KitchenStatus newStatus) async {
     // Update via WebSocket if connected
     if (_wsService != null && _isConnected) {
-      final wsStatus = OrderStatus.values.firstWhere(
-        (s) => s.name == newStatus.toOrderStatus(),
-        orElse: () => OrderStatus.received,
-      );
+      // Map KitchenStatus to OrderStatus enum
+      OrderStatus wsStatus;
+      switch (newStatus) {
+        case KitchenStatus.pending:
+          wsStatus = OrderStatus.received;
+          break;
+        case KitchenStatus.preparing:
+          wsStatus = OrderStatus.preparing;
+          break;
+        case KitchenStatus.ready:
+          wsStatus = OrderStatus.ready;
+          break;
+        case KitchenStatus.delivered:
+          wsStatus = OrderStatus.completed;
+          break;
+      }
       await _wsService!.updateOrderStatus(orderId, wsStatus);
     }
     
