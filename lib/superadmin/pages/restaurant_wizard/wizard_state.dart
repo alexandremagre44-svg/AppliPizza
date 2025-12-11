@@ -315,15 +315,27 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     );
   }
 
-  /// Sélectionne un template et applique ses modules.
-  void selectTemplate(RestaurantTemplate template) {
-    // Mettre à jour le template ID et les modules activés
+  /// Sélectionne un template et suggère ses modules recommandés.
+  /// 
+  /// ⚠️ IMPORTANT: Le template NE contrôle PAS les modules.
+  /// Les modules recommandés sont pré-cochés mais peuvent être modifiés
+  /// par le SuperAdmin à l'étape suivante.
+  void selectTemplate(dynamic template) {
+    // Support both old and new template types during migration
+    final templateId = template.id as String;
+    
+    // Get recommended modules from the new template system
+    final recommendedModuleIds = template.recommendedModules
+        .map((m) => m.code as String)
+        .toList();
+    
+    // Mettre à jour le template ID et les modules recommandés (pas forcés)
     state = state.copyWith(
       blueprint: state.blueprint.copyWith(
-        templateId: template.id,
-        modules: _moduleIdsToModulesLight(template.modules),
+        templateId: templateId,
+        modules: _moduleIdsToModulesLight(recommendedModuleIds),
       ),
-      enabledModuleIds: List<String>.from(template.modules),
+      enabledModuleIds: List<String>.from(recommendedModuleIds),
     );
   }
 
