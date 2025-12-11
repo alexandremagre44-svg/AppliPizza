@@ -108,6 +108,9 @@ class RestaurantFeatureFlags {
   /// Vérifie si le module constructeur de pages est activé.
   bool get pagesBuilderEnabled => plan.hasModule(ModuleId.pagesBuilder);
 
+  /// Vérifie si le module terminal de paiement est activé.
+  bool get paymentTerminalEnabled => plan.hasModule(ModuleId.paymentTerminal);
+
   // ========== Méthodes publiques (délèguent au plan) ==========
 
   /// Vérifie si un module est activé.

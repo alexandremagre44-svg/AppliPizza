@@ -236,3 +236,97 @@ Widget staffTabletRouteGuard(Widget child, {String? fallbackRoute}) {
     child: child,
   );
 }
+
+/// Guard pour le module terminal de paiement.
+Widget paymentTerminalRouteGuard(Widget child, {String? fallbackRoute}) {
+  return ModuleRouteGuard(
+    requiredModule: ModuleId.paymentTerminal,
+    fallbackRoute: fallbackRoute ?? AppRoutes.home,
+    child: child,
+  );
+}
+
+/// Guard générique qui accepte plusieurs modules (OR logic).
+/// Le child est affiché si AU MOINS UN des modules requis est actif.
+class AnyModuleRouteGuard extends ConsumerWidget {
+  final List<ModuleId> requiredModules;
+  final Widget child;
+  final String? fallbackRoute;
+  final bool silentRedirect;
+
+  const AnyModuleRouteGuard({
+    required this.requiredModules,
+    required this.child,
+    this.fallbackRoute,
+    this.silentRedirect = false,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+
+    return planAsync.when(
+      data: (plan) {
+        if (plan == null) {
+          // Pas de plan chargé, afficher fallback
+          if (silentRedirect && fallbackRoute != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.go(fallbackRoute!);
+            });
+            return const SizedBox.shrink();
+          }
+          return ModuleDisabledScreen(
+            moduleName: requiredModules.map((m) => m.label).join(' ou '),
+            redirectRoute: fallbackRoute,
+          );
+        }
+
+        // Vérifier si AU MOINS UN module est actif
+        final isAnyActive = requiredModules.any((module) => plan.hasModule(module));
+        
+        if (isAnyActive) {
+          return child;
+        } else {
+          // Aucun module actif
+          if (silentRedirect && fallbackRoute != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.go(fallbackRoute!);
+            });
+            return const SizedBox.shrink();
+          }
+          return ModuleDisabledScreen(
+            moduleName: requiredModules.map((m) => m.label).join(' ou '),
+            redirectRoute: fallbackRoute,
+          );
+        }
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (_, __) {
+        // En cas d'erreur, rediriger ou afficher fallback
+        if (fallbackRoute != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.go(fallbackRoute!);
+          });
+          return const SizedBox.shrink();
+        }
+        return ModuleDisabledScreen(
+          moduleName: requiredModules.map((m) => m.label).join(' ou '),
+          redirectRoute: AppRoutes.home,
+        );
+      },
+    );
+  }
+}
+
+/// Guard pour le module POS (Point de Vente).
+/// Accepte soit staff_tablet soit payment_terminal.
+Widget posRouteGuard(Widget child, {String? fallbackRoute}) {
+  return AnyModuleRouteGuard(
+    requiredModules: [ModuleId.staff_tablet, ModuleId.paymentTerminal],
+    fallbackRoute: fallbackRoute ?? AppRoutes.home,
+    child: child,
+  );
+}
