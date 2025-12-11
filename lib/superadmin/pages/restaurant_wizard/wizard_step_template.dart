@@ -75,7 +75,7 @@ class WizardStepTemplate extends ConsumerWidget {
                   return _TemplateCard(
                     template: template,
                     isSelected: isSelected,
-                    onTap: () {
+                    onSelect: () {
                       ref
                           .read(restaurantWizardProvider.notifier)
                           .selectTemplate(template);
@@ -103,12 +103,12 @@ class WizardStepTemplate extends ConsumerWidget {
 class _TemplateCard extends StatelessWidget {
   final RestaurantTemplate template;
   final bool isSelected;
-  final VoidCallback onTap;
+  final VoidCallback onSelect;
 
   const _TemplateCard({
     required this.template,
     required this.isSelected,
-    required this.onTap,
+    required this.onSelect,
   });
 
   IconData _getIcon() {
@@ -130,31 +130,33 @@ class _TemplateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF1A1A2E) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF1A1A2E) : Colors.grey.shade300,
-            width: isSelected ? 2 : 1,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onSelect,
+        borderRadius: BorderRadius.circular(12),
+        child: Ink(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF1A1A2E) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? const Color(0xFF1A1A2E) : Colors.grey.shade300,
+              width: isSelected ? 2 : 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF1A1A2E).withValues(alpha: 0.2),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: const Color(0xFF1A1A2E).withValues(alpha: 0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Icône et sélection
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -221,7 +223,8 @@ class _TemplateCard extends StatelessWidget {
                 color: isSelected ? Colors.white60 : Colors.grey.shade500,
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
