@@ -1,16 +1,19 @@
 // lib/src/screens/admin/pos/pos_screen.dart
-// Main POS (Point of Sale) screen - Phase 1 skeleton
+// Main POS (Point of Sale) screen
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'pos_shell_scaffold.dart';
+import 'widgets/pos_catalog_view.dart';
+import 'widgets/pos_cart_panel.dart';
+import 'widgets/pos_actions_panel.dart';
 
 /// Écran principal de la caisse (POS)
 /// 
-/// Phase 1: Structure squelette avec layout 3 colonnes
-/// - Colonne 1: Catégories / Produits (à implémenter)
-/// - Colonne 2: Panier (à implémenter)
-/// - Colonne 3: Actions caisse (à implémenter)
+/// Utilise une structure à 3 colonnes:
+/// - Colonne 1: Catalogue produits (réutilise la logique staff tablet)
+/// - Colonne 2: Panier avec résumé
+/// - Colonne 3: Actions caisse (Encaisser, Annuler, Paiement)
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
 
@@ -46,24 +49,33 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Colonne 1: Catégories / Produits
+        // Colonne 1: Catalogue produits
         Expanded(
           flex: 2,
-          child: _buildProductsColumn(context, colorScheme),
+          child: Container(
+            color: Colors.grey[100],
+            child: const PosCatalogView(),
+          ),
         ),
         const VerticalDivider(width: 1),
         
         // Colonne 2: Panier
         Expanded(
           flex: 1,
-          child: _buildCartColumn(context, colorScheme),
+          child: Container(
+            color: Colors.white,
+            child: const PosCartPanel(),
+          ),
         ),
         const VerticalDivider(width: 1),
         
         // Colonne 3: Actions caisse
         SizedBox(
-          width: 280,
-          child: _buildActionsColumn(context, colorScheme),
+          width: 300,
+          child: Container(
+            color: Colors.white,
+            child: const PosActionsPanel(),
+          ),
         ),
       ],
     );
@@ -71,169 +83,40 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
   /// Layout mobile (colonnes empilées)
   Widget _buildMobileLayout(BuildContext context, ColorScheme colorScheme) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _buildProductsColumn(context, colorScheme),
-          const Divider(height: 1),
-          _buildCartColumn(context, colorScheme),
-          const Divider(height: 1),
-          _buildActionsColumn(context, colorScheme),
-        ],
-      ),
-    );
-  }
-
-  /// Colonne 1: Produits (placeholder)
-  Widget _buildProductsColumn(BuildContext context, ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Produits',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-            ),
+    return Column(
+      children: [
+        // Catalog takes most of the space
+        Expanded(
+          flex: 3,
+          child: Container(
+            color: Colors.grey[100],
+            child: const PosCatalogView(),
           ),
-          const SizedBox(height: 16),
-          Card(
-            elevation: 1,
-            color: colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.inventory_2_outlined,
-                    size: 48,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Catégories et produits',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'À implémenter en Phase 2',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+        ),
+        const Divider(height: 1),
+        // Cart and actions split the bottom
+        Expanded(
+          flex: 2,
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  color: Colors.white,
+                  child: const PosCartPanel(),
+                ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Colonne 2: Panier (placeholder)
-  Widget _buildCartColumn(BuildContext context, ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Panier',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            elevation: 1,
-            color: colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.shopping_cart_outlined,
-                    size: 48,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Panier de commande',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'À implémenter en Phase 2',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              const VerticalDivider(width: 1),
+              SizedBox(
+                width: 200,
+                child: Container(
+                  color: Colors.white,
+                  child: const PosActionsPanel(),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-
-  /// Colonne 3: Actions caisse (placeholder)
-  Widget _buildActionsColumn(BuildContext context, ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Actions',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            elevation: 1,
-            color: colorScheme.surfaceContainerHighest,
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.point_of_sale,
-                    size: 48,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Actions caisse',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Paiement, infos client, etc.\nÀ implémenter en Phase 2',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
