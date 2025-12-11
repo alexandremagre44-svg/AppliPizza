@@ -67,6 +67,10 @@ class WizardStepModules extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final wizardState = ref.watch(restaurantWizardProvider);
     final enabledModules = wizardState.enabledModuleIds;
+    
+    debugPrint('[WizardStepModules] Building with enabled modules: $enabledModules');
+    debugPrint('[WizardStepModules] Template ID: ${wizardState.blueprint.templateId}');
+    
     // Use a Set for O(1) lookup performance
     final enabledModulesSet = enabledModules.toSet();
 

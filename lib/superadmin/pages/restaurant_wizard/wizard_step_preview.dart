@@ -23,6 +23,9 @@ class WizardStepPreview extends ConsumerWidget {
     final blueprint = wizardState.blueprint;
     final enabledModules = wizardState.enabledModuleIds;
 
+    debugPrint('[WizardStepPreview] Building with templateId: ${blueprint.templateId}');
+    debugPrint('[WizardStepPreview] Enabled modules: $enabledModules');
+
     // Utiliser les méthodes de validation du state
     final isReady = wizardState.isReadyForCreation;
     final missingDeps = isReady ? <String>[] : getMissingDependencies(enabledModules);
