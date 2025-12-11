@@ -75,8 +75,17 @@ class _SubscribeNewsletterScreenState
       final authState = ref.read(authProvider);
       final userId = authState.userId;
       
+      // Defensive check: ensure restaurant ID is valid
       if (restaurantId.isEmpty) {
-        throw Exception('Restaurant ID not found');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur: ID du restaurant non trouvé'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
       }
 
       // Save to Firestore newsletter_subscribers collection

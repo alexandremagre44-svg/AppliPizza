@@ -69,8 +69,17 @@ class _PaymentAdminSettingsScreenState
       final restaurantConfig = ref.read(currentRestaurantProvider);
       final restaurantId = restaurantConfig.id;
       
+      // Defensive check: ensure restaurant ID is valid
       if (restaurantId.isEmpty) {
-        throw Exception('Restaurant ID not found');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur: ID du restaurant non trouvé'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
       }
 
       // Create PaymentsModuleConfig
