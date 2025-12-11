@@ -6,8 +6,8 @@ import '../../../../models/product.dart';
 import '../../../../providers/product_provider.dart';
 import '../../../../design_system/app_theme.dart';
 import '../providers/pos_cart_provider.dart';
-import '../../../../staff_tablet/widgets/staff_pizza_customization_modal.dart';
-import '../../../../staff_tablet/widgets/staff_menu_customization_modal.dart';
+import 'pos_pizza_customization_modal.dart';
+import 'pos_menu_customization_modal.dart';
 
 /// POS Catalog View - displays products catalog for POS mode
 /// Reuses the same product display logic as staff tablet but adapted for POS
@@ -184,7 +184,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
-              builder: (context) => StaffMenuCustomizationModal(menu: product),
+              builder: (context) => PosMenuCustomizationModal(menu: product),
             );
           }
           // Show customization modal for pizzas
@@ -193,7 +193,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
               context: context,
               isScrollControlled: true,
               backgroundColor: Colors.transparent,
-              builder: (context) => StaffPizzaCustomizationModal(pizza: product),
+              builder: (context) => PosPizzaCustomizationModal(pizza: product),
             );
           } else {
             // Direct add for other items (drinks, desserts, etc.)
