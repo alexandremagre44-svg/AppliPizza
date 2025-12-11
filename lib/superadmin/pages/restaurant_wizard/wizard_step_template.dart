@@ -11,6 +11,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:pizza_delizza/white_label/core/module_id.dart';
 import '../../../white_label/restaurant/restaurant_template.dart';
 import 'wizard_state.dart';
 
