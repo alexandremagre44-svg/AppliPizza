@@ -49,8 +49,8 @@ final restaurantPlanProvider = FutureProvider<RestaurantPlan?>(
 
 /// Provider pour charger le RestaurantPlanUnified du restaurant courant.
 ///
-/// Lit depuis restaurants/{id} avec la structure complète du restaurant.
-/// Utilise les champs modules[], activeModules[], branding, name, slug du document principal.
+/// Lit depuis restaurants/{id}/plan/config avec la structure complète du restaurant.
+/// Utilise les champs modules[], activeModules[], branding, name, slug du document config.
 /// 
 /// Retourne un plan vide si le document restaurant n'existe pas (backward compatibility).
 final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
@@ -65,6 +65,8 @@ final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
     final configDoc = await firestore
         .collection('restaurants')
         .doc(restaurantId)
+        .collection('plan')
+        .doc('config')
         .get();
 
     if (!configDoc.exists) {
@@ -83,9 +85,15 @@ final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
         .map((e) => ModuleConfig.fromJson(Map<String, dynamic>.from(e)))
         .toList();
 
-    final activeModules = (data['activeModules'] as List<dynamic>? ?? [])
+    // Si activeModules est présent dans le doc, utilise-le.
+    // Sinon, calcule-le à partir des modules.enabled.
+    final activeModulesFromDoc = (data['activeModules'] as List<dynamic>? ?? [])
         .map((e) => e.toString())
         .toList();
+
+    final activeModules = activeModulesFromDoc.isNotEmpty
+        ? activeModulesFromDoc
+        : modules.where((m) => m.enabled == true).map((m) => m.id).toList();
 
     return RestaurantPlanUnified(
       restaurantId: restaurantId,
