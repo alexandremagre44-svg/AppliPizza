@@ -38,6 +38,7 @@ import '../providers/restaurant_provider.dart';
 import '../providers/restaurant_plan_provider.dart';
 import '../core/constants.dart';
 import '../navigation/dynamic_navbar_builder.dart';
+import '../navigation/unified_navbar_controller.dart';
 import '../../builder/models/models.dart';
 import '../../builder/services/builder_navigation_service.dart';
 import '../../builder/utils/icon_helper.dart';
@@ -89,29 +90,21 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           // Debug: trace loaded pages (using pageKey instead of pageId)
           debugPrint('📱 [BottomNav] Loaded ${builderPages.length} pages: ${builderPages.map((p) => "${p.pageKey}(route:${p.route}, system:${p.systemId?.value ?? 'null'})").join(", ")}');
           
-          // Build navigation items dynamically from Builder B3
-          // Builder B3 controls what appears in navigation
-          // White-label only validates route access via _applyModuleFiltering below
-          final navItems = _buildNavigationItems(
-            context,
-            ref,
-            builderPages,
-            isAdmin,
-            totalItems,
-            flags,
+          // NEW: Use UnifiedNavBarController to compute navigation items
+          // This centralizes all visibility logic in one place
+          final navBarItems = UnifiedNavBarController.computeNavBarItems(
+            builderPages: builderPages,
+            plan: unifiedPlan,
+            isAdmin: isAdmin,
           );
           
-          // Phase 3: Apply DynamicNavbarBuilder filtering based on active modules
-          final filteredNavItems = _applyModuleFiltering(
-            navItems,
-            unifiedPlan,
-            totalItems,
-          );
+          // Convert NavBarItem list to BottomNavigationBarItem list
+          final bottomNavItems = _convertToBottomNavItems(navBarItems, totalItems);
           
           // Runtime safety: If less than 2 items, show fallback navigation
           // This prevents Flutter crash: 'items.length >= 2' assertion
-          if (filteredNavItems.items.length < 2) {
-            debugPrint('⚠️ Bottom bar has < 2 items (${filteredNavItems.items.length}), showing fallback navigation');
+          if (bottomNavItems.length < 2) {
+            debugPrint('⚠️ Bottom bar has < 2 items (${bottomNavItems.length}), showing fallback navigation');
             return Container(
               decoration: BoxDecoration(
                 boxShadow: [
@@ -156,16 +149,26 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           }
           
           // Calculate current index based on location
-          final currentIndex = _calculateSelectedIndex(
+          final currentIndex = _calculateSelectedIndexFromNavBarItems(
             context,
-            filteredNavItems.pages,
+            navBarItems,
           );
           
+          // Add admin tab if user is admin
+          if (isAdmin) {
+            bottomNavItems.add(
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.admin_panel_settings),
+                label: 'Admin',
+              ),
+            );
+          }
+          
           // Get adaptive styling based on item count (supports up to 6 items)
-          final adaptiveStyle = _BottomNavAdaptiveStyle.forItemCount(filteredNavItems.items.length);
+          final adaptiveStyle = _BottomNavAdaptiveStyle.forItemCount(bottomNavItems.length);
           
           // Debug: log rendered items count
-          debugPrint('[BottomNav] Rendered ${filteredNavItems.items.length} items (after module filtering)');
+          debugPrint('[BottomNav] Rendered ${bottomNavItems.length} items (after unified filtering)');
 
           return Container(
             decoration: BoxDecoration(
@@ -187,8 +190,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               iconSize: adaptiveStyle.iconSize,
               selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w800),
               unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
-              onTap: (int index) => _onItemTapped(context, index, filteredNavItems.pages, filteredNavItems.items, isAdmin),
-              items: filteredNavItems.items,
+              onTap: (int index) => _onItemTappedFromNavBarItems(context, index, navBarItems, isAdmin),
+              items: bottomNavItems,
             ),
           );
         },
@@ -270,6 +273,99 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  /// Convert NavBarItem list to BottomNavigationBarItem list
+  ///
+  /// Converts the unified NavBarItem format to Flutter's BottomNavigationBarItem
+  /// with proper icon handling and badge support.
+  List<BottomNavigationBarItem> _convertToBottomNavItems(
+    List<NavBarItem> navBarItems,
+    int cartItemCount,
+  ) {
+    final items = <BottomNavigationBarItem>[];
+
+    for (final navItem in navBarItems) {
+      // Get icon pair (outlined/filled)
+      final iconPair = IconHelper.getIconPair(navItem.icon);
+      final outlinedIcon = iconPair.$1;
+      final filledIcon = iconPair.$2;
+
+      // Special handling for cart page - add badge
+      if (navItem.route == '/cart') {
+        items.add(
+          BottomNavigationBarItem(
+            icon: badges.Badge(
+              showBadge: cartItemCount > 0,
+              badgeContent: Text(
+                cartItemCount.toString(),
+                style: const TextStyle(color: Colors.white, fontSize: 10),
+              ),
+              child: Icon(outlinedIcon),
+            ),
+            activeIcon: Icon(filledIcon),
+            label: navItem.label,
+          ),
+        );
+      } else {
+        items.add(
+          BottomNavigationBarItem(
+            icon: Icon(outlinedIcon),
+            activeIcon: Icon(filledIcon),
+            label: navItem.label,
+          ),
+        );
+      }
+    }
+
+    return items;
+  }
+
+  /// Calculate selected index from NavBarItem list based on current location
+  int _calculateSelectedIndexFromNavBarItems(
+    BuildContext context,
+    List<NavBarItem> navBarItems,
+  ) {
+    final String location = GoRouterState.of(context).uri.toString();
+
+    // Find matching item by route
+    for (var i = 0; i < navBarItems.length; i++) {
+      if (location.startsWith(navBarItems[i].route)) {
+        return i;
+      }
+    }
+
+    // Default to first item
+    return 0;
+  }
+
+  /// Handle navigation tap from NavBarItem list
+  void _onItemTappedFromNavBarItems(
+    BuildContext context,
+    int index,
+    List<NavBarItem> navBarItems,
+    bool isAdmin,
+  ) {
+    // If it's the last item AND user is admin → open AdminStudio
+    // (Admin tab is added after nav items)
+    if (isAdmin && index == navBarItems.length) {
+      context.go(AppRoutes.adminStudio);
+      return;
+    }
+
+    // Otherwise → normal navigation
+    if (index >= 0 && index < navBarItems.length) {
+      final route = navBarItems[index].route;
+
+      // Safety check: never navigate to root '/' as it triggers login redirect
+      if (route.isEmpty || route == '/') {
+        debugPrint('⚠️ Attempted navigation to invalid route: "$route". Navigating to /menu instead.');
+        context.go(AppRoutes.menu);
+        return;
+      }
+
+      context.go(route);
+    }
   }
 
   /// Build navigation items from Builder pages
