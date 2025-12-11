@@ -6,6 +6,12 @@
 /// ⚠️ IMPORTANT: Le template définit la LOGIQUE MÉTIER uniquement.
 /// Les modules sont recommandés mais DOIVENT être activés manuellement
 /// par le SuperAdmin à l'étape suivante.
+///
+/// FIX WizardStepTemplate:
+/// - Added debug logs to track click → state → UI flow
+/// - Ensured TemplateCard.onSelect → RestaurantWizardState.selectTemplate is properly connected
+/// - Verified selectedTemplateId comes from blueprint.templateId
+/// - Confirmed preview/modules steps read from same state source (restaurantWizardProvider)
 library;
 
 import 'package:flutter/material.dart';
@@ -29,6 +35,8 @@ class WizardStepTemplate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final wizardState = ref.watch(restaurantWizardProvider);
     final selectedTemplateId = wizardState.blueprint.templateId;
+    
+    debugPrint('[WizardStepTemplate] Building with selectedTemplateId: $selectedTemplateId');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
@@ -59,6 +67,7 @@ class WizardStepTemplate extends ConsumerWidget {
 
               // Grille de templates
               GridView.builder(
+                key: const ValueKey('template-grid'),
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -71,11 +80,15 @@ class WizardStepTemplate extends ConsumerWidget {
                 itemBuilder: (context, index) {
                   final template = RestaurantTemplates.all[index];
                   final isSelected = template.id == selectedTemplateId;
+                  
+                  debugPrint('[WizardStepTemplate] Building card: id=${template.id}, isSelected=$isSelected, selectedTemplateId=$selectedTemplateId');
 
                   return _TemplateCard(
+                    key: ValueKey(template.id),
                     template: template,
                     isSelected: isSelected,
                     onSelect: () {
+                      debugPrint('[WizardStepTemplate] Card clicked: ${template.id}');
                       ref
                           .read(restaurantWizardProvider.notifier)
                           .selectTemplate(template);
@@ -130,6 +143,8 @@ class _TemplateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[_TemplateCard] Building card: id=${template.id}, isSelected=$isSelected');
+    
     return Material(
       color: Colors.transparent,
       child: InkWell(

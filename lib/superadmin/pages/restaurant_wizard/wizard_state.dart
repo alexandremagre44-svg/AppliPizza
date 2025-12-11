@@ -324,10 +324,18 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     // Support both old and new template types during migration
     final templateId = template.id as String;
     
+    if (kDebugMode) {
+      print('[Wizard] selectTemplate called: id=$templateId');
+    }
+    
     // Get recommended modules from the new template system
     final recommendedModuleIds = template.recommendedModules
         .map((m) => m.code as String)
         .toList();
+    
+    if (kDebugMode) {
+      print('[Wizard] Recommended modules: $recommendedModuleIds');
+    }
     
     // Mettre à jour le template ID et les modules recommandés (pas forcés)
     state = state.copyWith(
@@ -337,6 +345,11 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
       ),
       enabledModuleIds: List<String>.from(recommendedModuleIds),
     );
+    
+    if (kDebugMode) {
+      print('[Wizard] State updated: templateId=${state.blueprint.templateId}');
+      print('[Wizard] Enabled modules: ${state.enabledModuleIds}');
+    }
   }
 
   /// Active ou désactive un module par son ID.
