@@ -5,6 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../white_label/core/module_category.dart';
@@ -12,10 +13,11 @@ import '../../white_label/core/module_config.dart';
 import '../../white_label/core/module_definition.dart';
 import '../../white_label/core/module_registry.dart';
 import '../../white_label/restaurant/restaurant_plan.dart';
+import '../../src/providers/restaurant_plan_provider.dart';
 import '../services/restaurant_plan_service.dart';
 
 /// Page de gestion des modules pour un restaurant spécifique.
-class RestaurantModulesPage extends StatefulWidget {
+class RestaurantModulesPage extends ConsumerStatefulWidget {
   /// Identifiant du restaurant.
   final String restaurantId;
 
@@ -29,10 +31,10 @@ class RestaurantModulesPage extends StatefulWidget {
   });
 
   @override
-  State<RestaurantModulesPage> createState() => _RestaurantModulesPageState();
+  ConsumerState<RestaurantModulesPage> createState() => _RestaurantModulesPageState();
 }
 
-class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
+class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
   final RestaurantPlanService _planService = RestaurantPlanService();
 
   RestaurantPlan? _plan;
@@ -244,6 +246,12 @@ class _RestaurantModulesPageState extends State<RestaurantModulesPage> {
         final enabled = entry.value;
         await _planService.updateModule(widget.restaurantId, moduleId, enabled);
       }
+
+      // PATCH 1: Invalidate Riverpod providers for instant WL plan refresh
+      // This ensures the runtime reloads immediately without Flutter restart
+      ref.invalidate(restaurantPlanProvider);
+      ref.invalidate(restaurantPlanUnifiedProvider);
+      ref.invalidate(restaurantFeatureFlagsUnifiedProvider);
 
       // Recharger le plan
       try {

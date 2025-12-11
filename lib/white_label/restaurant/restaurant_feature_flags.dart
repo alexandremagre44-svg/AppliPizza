@@ -14,11 +14,17 @@ class RestaurantFeatureFlags {
   /// Plan unifié du restaurant (source unique de vérité).
   final RestaurantPlanUnified plan;
 
+  /// SuperAdmin override: if true, ALL modules are visible in UI.
+  final bool isSuperAdmin;
+
   /// Constructeur principal.
   /// 
   /// C'est le SEUL constructeur qui doit être utilisé.
   /// Le plan unifié est la source unique de vérité.
-  const RestaurantFeatureFlags(this.plan);
+  /// 
+  /// [isSuperAdmin] enables SuperAdmin override: when true, all modules
+  /// appear enabled in the UI regardless of plan.activeModules.
+  const RestaurantFeatureFlags(this.plan, {this.isSuperAdmin = false});
 
   /// Identifiant du restaurant (délégué au plan).
   String get restaurantId => plan.restaurantId;
@@ -79,42 +85,47 @@ class RestaurantFeatureFlags {
   // ========== Getters pour compatibilité avec l'ancien code ==========
 
   /// Vérifie si le module fidélité est activé.
-  bool get loyaltyEnabled => plan.hasModule(ModuleId.loyalty);
+  bool get loyaltyEnabled => has(ModuleId.loyalty);
 
   /// Vérifie si le module roulette est activé.
-  bool get rouletteEnabled => plan.hasModule(ModuleId.roulette);
+  bool get rouletteEnabled => has(ModuleId.roulette);
 
   /// Vérifie si le module promotions est activé.
-  bool get promotionsEnabled => plan.hasModule(ModuleId.promotions);
+  bool get promotionsEnabled => has(ModuleId.promotions);
 
   /// Vérifie si le module tablette cuisine est activé.
-  bool get kitchenEnabled => plan.hasModule(ModuleId.kitchen_tablet);
+  bool get kitchenEnabled => has(ModuleId.kitchen_tablet);
 
   /// Vérifie si le module thème est activé.
-  bool get themeEnabled => plan.hasModule(ModuleId.theme);
+  bool get themeEnabled => has(ModuleId.theme);
 
   /// Vérifie si le module livraison est activé.
-  bool get deliveryEnabled => plan.hasModule(ModuleId.delivery);
+  bool get deliveryEnabled => has(ModuleId.delivery);
 
   /// Vérifie si le module commandes en ligne est activé.
-  bool get orderingEnabled => plan.hasModule(ModuleId.ordering);
+  bool get orderingEnabled => has(ModuleId.ordering);
 
   /// Vérifie si le module Click & Collect est activé.
-  bool get clickAndCollectEnabled => plan.hasModule(ModuleId.clickAndCollect);
+  bool get clickAndCollectEnabled => has(ModuleId.clickAndCollect);
 
   /// Vérifie si le module newsletter est activé.
-  bool get newsletterEnabled => plan.hasModule(ModuleId.newsletter);
+  bool get newsletterEnabled => has(ModuleId.newsletter);
 
   /// Vérifie si le module constructeur de pages est activé.
-  bool get pagesBuilderEnabled => plan.hasModule(ModuleId.pagesBuilder);
+  bool get pagesBuilderEnabled => has(ModuleId.pagesBuilder);
 
   /// Vérifie si le module terminal de paiement est activé.
-  bool get paymentTerminalEnabled => plan.hasModule(ModuleId.paymentTerminal);
+  bool get paymentTerminalEnabled => has(ModuleId.paymentTerminal);
 
   // ========== Méthodes publiques (délèguent au plan) ==========
 
   /// Vérifie si un module est activé.
+  /// 
+  /// SuperAdmin override: if [isSuperAdmin] is true, always returns true
+  /// regardless of plan.activeModules. This ensures SuperAdmin users always
+  /// see ALL modules in the UI (admin studio, builder, navbar).
   bool has(ModuleId id) {
+    if (isSuperAdmin) return true;  // SUPERADMIN OVERRIDE
     return plan.hasModule(id);
   }
 

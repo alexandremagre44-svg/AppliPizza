@@ -22,6 +22,7 @@ import '../../white_label/restaurant/restaurant_feature_flags.dart';
 import '../../white_label/restaurant/restaurant_plan.dart';
 import '../../white_label/restaurant/restaurant_plan_unified.dart';
 import '../services/restaurant_plan_runtime_service.dart';
+import 'auth_provider.dart';
 import 'restaurant_provider.dart';
 
 /// Provider pour le service RestaurantPlanRuntimeService.
@@ -121,17 +122,24 @@ final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
 /// 
 /// IMPORTANT: C'est le SEUL endroit où RestaurantFeatureFlags doit être instancié.
 /// RestaurantFeatureFlags est maintenant un proxy vers RestaurantPlanUnified.
+/// 
+/// SuperAdmin users will see ALL modules enabled in the UI regardless of
+/// plan.activeModules, thanks to the isSuperAdmin override.
 final restaurantFeatureFlagsUnifiedProvider =
     Provider<RestaurantFeatureFlags?>(
   (ref) {
     final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final authState = ref.watch(authProvider);
+    final isSuperAdmin = authState.isSuperAdmin;
 
     return planAsync.maybeWhen(
-      data: (plan) => plan != null ? RestaurantFeatureFlags(plan) : null,
+      data: (plan) => plan != null 
+          ? RestaurantFeatureFlags(plan, isSuperAdmin: isSuperAdmin) 
+          : null,
       orElse: () => null,
     );
   },
-  dependencies: [restaurantPlanUnifiedProvider],
+  dependencies: [restaurantPlanUnifiedProvider, authProvider],
 );
 
 /// Provider dérivé pour les feature flags du restaurant courant.
