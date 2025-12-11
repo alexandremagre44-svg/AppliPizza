@@ -200,7 +200,7 @@ class UnifiedNavBarController {
     ));
 
     // Cart - only if ordering module is active
-    if (plan?.ordering?.enabled ?? false) {
+    if (plan?.activeModules.contains('ordering') ?? false) {
       items.add(const NavBarItem(
         route: '/cart',
         label: 'Panier',
@@ -379,7 +379,7 @@ class UnifiedNavBarController {
   }) {
     // Check system page visibility
     if (route == '/cart') {
-      return plan?.ordering?.enabled ?? false;
+      return plan?.activeModules.contains('ordering') ?? false;
     }
 
     // Check builder page visibility
