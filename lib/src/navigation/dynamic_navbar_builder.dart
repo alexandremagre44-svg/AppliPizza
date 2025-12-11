@@ -131,6 +131,9 @@ class DynamicNavbarBuilder {
       return ModuleId.kitchen_tablet;
     }
     if (route.startsWith('/pos') || route == '/pos') {
+      // Note: POS est accessible via staff_tablet OU payment_terminal
+      // Cette méthode retourne staff_tablet pour compatibilité navbar
+      // Pour vérifier l'accès POS complet, utiliser posRouteGuard() qui accepte les deux modules
       return ModuleId.staff_tablet;
     }
 
