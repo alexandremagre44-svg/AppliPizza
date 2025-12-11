@@ -116,7 +116,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           );
         },
         loading: () {
-          // Show minimal loading indicator without navigation
+          // Hide navigation bar during loading
           return null;
         },
         error: (error, stack) {
@@ -181,6 +181,9 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   ///
   /// Matches the current route with navItems routes using startsWith
   /// to handle dynamic pages (e.g., /menu/item/123 matches /menu)
+  ///
+  /// Returns 0 (first item) as fallback when no route matches. This ensures
+  /// the navbar always has a valid selection, preventing navigation confusion.
   int _calculateSelectedIndex(
     BuildContext context,
     List<NavBarItem> navItems,
@@ -194,7 +197,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       }
     }
 
-    // Default to first item
+    // Fallback to first item if no match found (e.g., on unknown routes)
     return 0;
   }
 
