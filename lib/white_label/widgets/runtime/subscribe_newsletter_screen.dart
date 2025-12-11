@@ -70,13 +70,22 @@ class _SubscribeNewsletterScreenState
 
     try {
       // Get restaurant and user info
-      final restaurantConfig = ref.read(restaurantConfigProvider);
-      final restaurantId = restaurantConfig?.id;
+      final restaurantConfig = ref.read(currentRestaurantProvider);
+      final restaurantId = restaurantConfig.id;
       final authState = ref.read(authProvider);
       final userId = authState.userId;
       
-      if (restaurantId == null) {
-        throw Exception('Restaurant ID not found');
+      // Defensive check: ensure restaurant ID is valid
+      if (restaurantId.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur: ID du restaurant non trouvé'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
       }
 
       // Save to Firestore newsletter_subscribers collection
