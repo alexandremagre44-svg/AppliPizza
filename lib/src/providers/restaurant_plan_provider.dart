@@ -49,10 +49,10 @@ final restaurantPlanProvider = FutureProvider<RestaurantPlan?>(
 
 /// Provider pour charger le RestaurantPlanUnified du restaurant courant.
 ///
-/// Lit UNIQUEMENT depuis restaurants/{id}/plan/config avec la structure modules[].
-/// Calcule activeModules depuis modules.where(enabled).
+/// Lit depuis restaurants/{id} avec la structure complète du restaurant.
+/// Utilise les champs modules[], activeModules[], branding, name, slug du document principal.
 /// 
-/// Retourne un plan vide si le document config n'existe pas (backward compatibility).
+/// Retourne un plan vide si le document restaurant n'existe pas (backward compatibility).
 final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
   (ref) async {
     final restaurantConfig = ref.watch(currentRestaurantProvider);
@@ -65,8 +65,6 @@ final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
     final configDoc = await firestore
         .collection('restaurants')
         .doc(restaurantId)
-        .collection('plan')
-        .doc('config')
         .get();
 
     if (!configDoc.exists) {
@@ -82,12 +80,11 @@ final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
 
     final data = configDoc.data()!;
     final modules = (data['modules'] as List<dynamic>? ?? [])
-        .map((e) => ModuleConfig.fromJson(e as Map<String, dynamic>))
+        .map((e) => ModuleConfig.fromJson(Map<String, dynamic>.from(e)))
         .toList();
 
-    final activeModules = modules
-        .where((m) => m.enabled == true)
-        .map((m) => m.id)
+    final activeModules = (data['activeModules'] as List<dynamic>? ?? [])
+        .map((e) => e.toString())
         .toList();
 
     return RestaurantPlanUnified(
@@ -97,7 +94,7 @@ final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
       modules: modules,
       activeModules: activeModules,
       branding: data['branding'] != null
-          ? BrandingConfig.fromJson(data['branding'] as Map<String, dynamic>)
+          ? BrandingConfig.fromJson(Map<String, dynamic>.from(data['branding']))
           : BrandingConfig.empty(),
     );
   },
