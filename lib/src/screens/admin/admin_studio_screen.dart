@@ -192,8 +192,7 @@ class AdminStudioScreen extends ConsumerWidget {
           ],
           
           // POS Module - Accessible via Admin only
-          if ((flags?.has(ModuleId.staff_tablet) ?? false) ||
-              (flags?.has(ModuleId.paymentTerminal) ?? false)) ...[
+          if (flags?.has(ModuleId.pos) ?? false) ...[
             SizedBox(height: AppSpacing.md),
             _buildStudioBlock(
               context,

@@ -303,11 +303,23 @@ const Map<String, ModuleDefinitionMeta> moduleMatrix = {
     label: 'Caisse / Staff Tablet',
     category: ModuleCategory.operations,
     status: ModuleStatus.implemented,
+    hasPage: false,
+    hasBuilderBlock: false,
+    premium: true,
+    defaultRoute: null,
+    tags: ['operations', 'staff', 'tablet', 'premium'],
+  ),
+  
+  'pos': ModuleDefinitionMeta(
+    id: 'pos',
+    label: 'POS / Caisse',
+    category: ModuleCategory.operations,
+    status: ModuleStatus.implemented,
     hasPage: true,
     hasBuilderBlock: false,
     premium: true,
     defaultRoute: '/pos',
-    tags: ['operations', 'staff', 'tablet', 'pos', 'caisse', 'premium'],
+    tags: ['operations', 'pos', 'caisse', 'premium', 'point-de-vente'],
   ),
   
   'time_recorder': ModuleDefinitionMeta(
