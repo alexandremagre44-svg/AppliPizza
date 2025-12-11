@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/pos_context.dart';
 import '../providers/pos_context_provider.dart';
 import '../screens/pos_table_selector.dart';
 
@@ -96,15 +97,14 @@ class PosContextBar extends ConsumerWidget {
   IconData _getContextIcon(dynamic context) {
     if (context == null) return Icons.help_outline;
     
-    switch (context.type.toString().split('.').last) {
-      case 'table':
+    // Use pattern matching on enum type directly
+    switch (context.type) {
+      case PosOrderType.table:
         return Icons.table_restaurant;
-      case 'surPlace':
+      case PosOrderType.surPlace:
         return Icons.restaurant_menu;
-      case 'emporter':
+      case PosOrderType.emporter:
         return Icons.shopping_bag;
-      default:
-        return Icons.help_outline;
     }
   }
 }

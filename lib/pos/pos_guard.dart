@@ -132,19 +132,19 @@ class PosGuard extends ConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      final context = this.child.key as GlobalKey?;
-                      if (context?.currentContext?.mounted == true) {
-                        context!.currentContext!.go(AppRoutes.menu);
-                      }
-                    },
-                    icon: const Icon(Icons.home),
-                    label: const Text('Retour au menu'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
+                  // Note: Context will be available when this screen is built
+                  Builder(
+                    builder: (context) => ElevatedButton.icon(
+                      onPressed: () {
+                        context.go(AppRoutes.menu);
+                      },
+                      icon: const Icon(Icons.home),
+                      label: const Text('Retour au menu'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
                       ),
                     ),
                   ),

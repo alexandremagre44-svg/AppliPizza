@@ -18,7 +18,9 @@ class PosCartItem {
   /// Unit price
   final double price;
   
-  /// Quantity
+  /// Quantity (mutable for performance in state management)
+  /// Note: While immutability is preferred, Riverpod state updates
+  /// benefit from direct mutation followed by state copy
   int quantity;
   
   /// Product image URL

@@ -54,7 +54,7 @@ class PosTableSelector extends ConsumerWidget {
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
-              itemCount: 40,
+              itemCount: 40, // TODO: Use PosConstants.maxTableCount when configurable per restaurant
               itemBuilder: (context, index) {
                 final tableNumber = index + 1;
                 return _TableNumberButton(

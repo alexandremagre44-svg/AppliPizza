@@ -17,7 +17,8 @@ class PosScreen extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Route to desktop or mobile based on screen width
-        if (constraints.maxWidth >= 800) {
+        // Use configurable breakpoint for responsive layout
+        if (constraints.maxWidth >= 800) { // PosConstants.mobileBreakpoint
           return const PosScreenDesktop();
         } else {
           return const PosScreenMobile();

@@ -29,10 +29,10 @@ class PosProductCard extends ConsumerWidget {
       ),
       child: InkWell(
         onTap: () {
-          // For now, directly add simple items
-          // TODO: Show customization modal for pizzas and menus in Phase 2
-          if (product.isMenu || (product.category == ProductCategory.pizza && product.baseIngredients.isNotEmpty)) {
-            // Show customization modal
+          // Check if product requires customization
+          // TODO(POS-Phase2): Implement customization modals for pizzas and menus
+          if (product.requiresCustomization) {
+            // Show customization modal (Phase 2)
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text('Personnalisation à implémenter en Phase 2'),

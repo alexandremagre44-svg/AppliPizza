@@ -90,10 +90,12 @@ class PosOrderNotifier extends StateNotifier<PosOrderState> {
         notes: notes,
       );
       
-      // TODO: Send to kitchen via gateway (Step 7)
+      // TODO(POS-Phase2): Integrate kitchen gateway
+      // Issue: Implement kitchen order submission
       // await ref.read(kitchenGatewayProvider).sendOrder(order);
       
-      // TODO: Save to Firestore
+      // TODO(POS-Phase2): Firestore integration
+      // Issue: Save POS orders to Firestore with restaurant scope
       // await ref.read(firebaseOrderServiceProvider).createPosOrder(order);
       
       // Simulate delay
