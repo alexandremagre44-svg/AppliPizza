@@ -250,6 +250,25 @@ String _toRegistryFormat(String moduleIdName) {
   }
 }
 
+/// Convertit un module ID depuis le format registry (snake_case) vers le format `.name`.
+/// Inverse de _toRegistryFormat.
+String _fromRegistryFormat(String registryId) {
+  // Convert snake_case to camelCase for modules that need it
+  switch (registryId) {
+    case 'click_and_collect':
+      return 'clickAndCollect';
+    case 'payment_terminal':
+      return 'paymentTerminal';
+    case 'time_recorder':
+      return 'timeRecorder';
+    case 'pages_builder':
+      return 'pagesBuilder';
+    // For modules already in correct format or simple names, return as-is
+    default:
+      return registryId;
+  }
+}
+
 /// Valide les dépendances des modules.
 /// Retourne true si toutes les dépendances sont satisfaites.
 bool validateModuleDependencies(List<String> modules) {
@@ -401,11 +420,14 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
       if (!currentModules.contains(moduleId)) {
         currentModules.add(moduleId);
         // Ajouter automatiquement les dépendances requises
-        final definition = ModuleRegistry.of(moduleId);
+        final definition = ModuleRegistry.of(_toRegistryFormat(moduleId));
         if (definition != null) {
           for (final dep in definition.dependencies) {
-            if (!currentModules.contains(dep)) {
-              currentModules.add(dep);
+            // Dependencies are in registry format (snake_case)
+            // Convert to .name format before checking/adding
+            final depInNameFormat = _fromRegistryFormat(dep);
+            if (!currentModules.contains(depInNameFormat)) {
+              currentModules.add(depInNameFormat);
             }
           }
         }
@@ -414,8 +436,8 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
       currentModules.remove(moduleId);
       // Désactiver les modules qui dépendent de celui-ci
       final dependentModules = currentModules.where((m) {
-        final def = ModuleRegistry.of(m);
-        return def != null && def.dependencies.contains(moduleId);
+        final def = ModuleRegistry.of(_toRegistryFormat(m));
+        return def != null && def.dependencies.contains(_toRegistryFormat(moduleId));
       }).toList();
       for (final dep in dependentModules) {
         currentModules.remove(dep);
