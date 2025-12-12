@@ -3,12 +3,19 @@
 /// State management pour le Wizard de création de restaurant.
 /// Utilise StateNotifier pour gérer l'état du formulaire multi-étapes.
 /// Connecté à Firestore pour la persistance des données.
+///
+/// FIX: selectTemplate method
+/// - Changed parameter type from 'dynamic' to 'RestaurantTemplate' for type safety
+/// - Removed redundant type casts (as String)
+/// - Added debug logs to track state updates
+/// - Ensures proper state notification to trigger UI rebuilds
 library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../white_label/core/module_registry.dart';
+import '../../../white_label/restaurant/restaurant_template.dart';
 import '../../models/restaurant_blueprint.dart';
 import '../../services/superadmin_restaurant_service.dart';
 import '../../services/restaurant_plan_service.dart';
@@ -316,18 +323,28 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   }
 
   /// Sélectionne un template et suggère ses modules recommandés.
+  ///
+  /// [template] Le template métier à appliquer (RestaurantTemplate)
   /// 
   /// ⚠️ IMPORTANT: Le template NE contrôle PAS les modules.
   /// Les modules recommandés sont pré-cochés mais peuvent être modifiés
   /// par le SuperAdmin à l'étape suivante.
-  void selectTemplate(dynamic template) {
-    // Support both old and new template types during migration
-    final templateId = template.id as String;
+  void selectTemplate(RestaurantTemplate template) {
+    if (kDebugMode) {
+      debugPrint('[Wizard] selectTemplate called: ${template.id}');
+      debugPrint('[Wizard] Current templateId: ${state.blueprint.templateId}');
+    }
+    
+    final templateId = template.id;
     
     // Get recommended modules from the new template system
     final recommendedModuleIds = template.recommendedModules
-        .map((m) => m.code as String)
+        .map((m) => m.code)
         .toList();
+    
+    if (kDebugMode) {
+      debugPrint('[Wizard] Recommended modules: $recommendedModuleIds');
+    }
     
     // Mettre à jour le template ID et les modules recommandés (pas forcés)
     state = state.copyWith(
@@ -335,8 +352,14 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
         templateId: templateId,
         modules: _moduleIdsToModulesLight(recommendedModuleIds),
       ),
-      enabledModuleIds: List<String>.from(recommendedModuleIds),
+      // Create defensive copy to prevent unintended mutations
+      enabledModuleIds: List.of(recommendedModuleIds),
     );
+    
+    if (kDebugMode) {
+      debugPrint('[Wizard] New templateId: ${state.blueprint.templateId}');
+      debugPrint('[Wizard] State updated successfully');
+    }
   }
 
   /// Active ou désactive un module par son ID.
