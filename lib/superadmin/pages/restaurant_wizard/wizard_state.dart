@@ -278,12 +278,8 @@ bool validateModuleDependencies(List<String> modules) {
     if (definition != null) {
       for (final dep in definition.dependencies) {
         // Dependencies from registry are in snake_case format
-        // Need to check if the equivalent .name format exists in modules list
-        final depInNameFormat = modules.firstWhere(
-          (m) => _toRegistryFormat(m) == dep,
-          orElse: () => '',
-        );
-        if (depInNameFormat.isEmpty) {
+        // Check if the equivalent .name format exists in modules list
+        if (!modules.any((m) => _toRegistryFormat(m) == dep)) {
           return false;
         }
       }
@@ -293,6 +289,7 @@ bool validateModuleDependencies(List<String> modules) {
 }
 
 /// Récupère les dépendances manquantes pour une liste de modules.
+/// Retourne les dépendances en format .name pour cohérence avec la liste d'entrée.
 List<String> getMissingDependencies(List<String> modules) {
   final missing = <String>[];
   for (final moduleId in modules) {
@@ -301,9 +298,12 @@ List<String> getMissingDependencies(List<String> modules) {
     if (definition != null) {
       for (final dep in definition.dependencies) {
         // Check if dependency exists in modules (considering name format conversion)
-        final depExists = modules.any((m) => _toRegistryFormat(m) == dep);
-        if (!depExists && !missing.contains(dep)) {
-          missing.add(dep);
+        if (!modules.any((m) => _toRegistryFormat(m) == dep)) {
+          // Convert dependency to .name format before adding
+          final depInNameFormat = _fromRegistryFormat(dep);
+          if (!missing.contains(depInNameFormat)) {
+            missing.add(depInNameFormat);
+          }
         }
       }
     }
