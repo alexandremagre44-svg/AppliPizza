@@ -323,6 +323,8 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   }
 
   /// Sélectionne un template et suggère ses modules recommandés.
+  ///
+  /// [template] Le template métier à appliquer (RestaurantTemplate)
   /// 
   /// ⚠️ IMPORTANT: Le template NE contrôle PAS les modules.
   /// Les modules recommandés sont pré-cochés mais peuvent être modifiés
