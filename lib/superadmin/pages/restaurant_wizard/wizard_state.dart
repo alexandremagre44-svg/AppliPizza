@@ -231,8 +231,9 @@ class RestaurantWizardState {
 }
 
 /// Convertit un module ID depuis le format `.name` vers le format registry (snake_case).
-/// Nécessaire car ModuleRegistry utilise des clés en snake_case
-/// mais ModuleId.name produit des valeurs mixtes (camelCase pour certains, snake_case pour d'autres).
+/// Nécessaire car ModuleRegistry utilise des clés en snake_case mais les valeurs enum
+/// sont déclarées en formats mixtes (ex: 'clickAndCollect' camelCase, 'kitchen_tablet' snake_case).
+/// ModuleId.name retourne le nom exact tel que déclaré dans l'enum.
 String _toRegistryFormat(String moduleIdName) {
   // Convert camelCase to snake_case for modules that need it
   switch (moduleIdName) {
