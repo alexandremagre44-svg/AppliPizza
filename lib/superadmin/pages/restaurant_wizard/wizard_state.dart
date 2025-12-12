@@ -352,7 +352,8 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
         templateId: templateId,
         modules: _moduleIdsToModulesLight(recommendedModuleIds),
       ),
-      enabledModuleIds: recommendedModuleIds,
+      // Create defensive copy to prevent unintended mutations
+      enabledModuleIds: List.of(recommendedModuleIds),
     );
     
     if (kDebugMode) {
