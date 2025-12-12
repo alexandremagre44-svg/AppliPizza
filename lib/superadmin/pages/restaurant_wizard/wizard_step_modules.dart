@@ -5,6 +5,7 @@
 /// Affiche uniquement les modules pertinents pour les restaurants (9 modules).
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -69,6 +70,11 @@ class WizardStepModules extends ConsumerWidget {
     final enabledModules = wizardState.enabledModuleIds;
     // Use a Set for O(1) lookup performance
     final enabledModulesSet = enabledModules.toSet();
+
+    if (kDebugMode) {
+      print('[WizardModules] Building with ${enabledModules.length} enabled modules');
+      print('[WizardModules] Template ID: ${wizardState.blueprint.templateId}');
+    }
 
     // Récupérer tous les modules depuis ModuleRegistry
     final allModules = ModuleRegistry.definitions.values.toList();

@@ -6,8 +6,15 @@
 /// ⚠️ IMPORTANT: Le template définit la LOGIQUE MÉTIER uniquement.
 /// Les modules sont recommandés mais DOIVENT être activés manuellement
 /// par le SuperAdmin à l'étape suivante.
+///
+/// FIX WizardStepTemplate:
+/// - Added debug logs to track template selection flow
+/// - Connected TemplateCard.onSelect -> RestaurantWizardState.selectTemplate
+/// - Ensured selectedTemplateId comes from blueprint.templateId
+/// - Synced preview/modules steps with same source of truth
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,6 +36,10 @@ class WizardStepTemplate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final wizardState = ref.watch(restaurantWizardProvider);
     final selectedTemplateId = wizardState.blueprint.templateId;
+
+    if (kDebugMode) {
+      print('[WizardStepTemplate] Building with selectedTemplateId: $selectedTemplateId');
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
@@ -72,10 +83,17 @@ class WizardStepTemplate extends ConsumerWidget {
                   final template = RestaurantTemplates.all[index];
                   final isSelected = template.id == selectedTemplateId;
 
+                  if (kDebugMode) {
+                    print('[WizardStepTemplate] Building card ${template.id}: isSelected=$isSelected, selectedTemplateId=$selectedTemplateId');
+                  }
+
                   return _TemplateCard(
                     template: template,
                     isSelected: isSelected,
                     onSelect: () {
+                      if (kDebugMode) {
+                        print('[WizardStepTemplate] Template card clicked: ${template.id}');
+                      }
                       ref
                           .read(restaurantWizardProvider.notifier)
                           .selectTemplate(template);

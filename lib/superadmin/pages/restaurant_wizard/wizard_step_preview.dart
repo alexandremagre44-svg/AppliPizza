@@ -5,6 +5,7 @@
 /// Inclut une validation des dépendances des modules.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,6 +30,11 @@ class WizardStepPreview extends ConsumerWidget {
 
     // Récupérer le template sélectionné
     final selectedTemplate = getTemplateById(blueprint.templateId);
+
+    if (kDebugMode) {
+      print('[WizardPreview] Building with templateId: ${blueprint.templateId}');
+      print('[WizardPreview] Selected template: ${selectedTemplate?.name ?? "none"}');
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
