@@ -331,8 +331,8 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   /// par le SuperAdmin à l'étape suivante.
   void selectTemplate(RestaurantTemplate template) {
     if (kDebugMode) {
-      print('[Wizard] selectTemplate called: ${template.id}');
-      print('[Wizard] Current templateId: ${state.blueprint.templateId}');
+      debugPrint('[Wizard] selectTemplate called: ${template.id}');
+      debugPrint('[Wizard] Current templateId: ${state.blueprint.templateId}');
     }
     
     final templateId = template.id;
@@ -343,7 +343,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
         .toList();
     
     if (kDebugMode) {
-      print('[Wizard] Recommended modules: $recommendedModuleIds');
+      debugPrint('[Wizard] Recommended modules: $recommendedModuleIds');
     }
     
     // Mettre à jour le template ID et les modules recommandés (pas forcés)
@@ -352,12 +352,12 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
         templateId: templateId,
         modules: _moduleIdsToModulesLight(recommendedModuleIds),
       ),
-      enabledModuleIds: List<String>.from(recommendedModuleIds),
+      enabledModuleIds: recommendedModuleIds,
     );
     
     if (kDebugMode) {
-      print('[Wizard] New templateId: ${state.blueprint.templateId}');
-      print('[Wizard] State updated successfully');
+      debugPrint('[Wizard] New templateId: ${state.blueprint.templateId}');
+      debugPrint('[Wizard] State updated successfully');
     }
   }
 

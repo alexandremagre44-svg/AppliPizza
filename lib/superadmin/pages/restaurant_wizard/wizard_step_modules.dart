@@ -72,8 +72,8 @@ class WizardStepModules extends ConsumerWidget {
     final enabledModulesSet = enabledModules.toSet();
 
     if (kDebugMode) {
-      print('[WizardModules] Building with ${enabledModules.length} enabled modules');
-      print('[WizardModules] Template ID: ${wizardState.blueprint.templateId}');
+      debugPrint('[WizardModules] Building with ${enabledModules.length} enabled modules');
+      debugPrint('[WizardModules] Template ID: ${wizardState.blueprint.templateId}');
     }
 
     // Récupérer tous les modules depuis ModuleRegistry

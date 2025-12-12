@@ -32,8 +32,8 @@ class WizardStepPreview extends ConsumerWidget {
     final selectedTemplate = getTemplateById(blueprint.templateId);
 
     if (kDebugMode) {
-      print('[WizardPreview] Building with templateId: ${blueprint.templateId}');
-      print('[WizardPreview] Selected template: ${selectedTemplate?.name ?? "none"}');
+      debugPrint('[WizardPreview] Building with templateId: ${blueprint.templateId}');
+      debugPrint('[WizardPreview] Selected template: ${selectedTemplate?.name ?? "none"}');
     }
 
     return SingleChildScrollView(

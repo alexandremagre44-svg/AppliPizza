@@ -38,7 +38,7 @@ class WizardStepTemplate extends ConsumerWidget {
     final selectedTemplateId = wizardState.blueprint.templateId;
 
     if (kDebugMode) {
-      print('[WizardStepTemplate] Building with selectedTemplateId: $selectedTemplateId');
+      debugPrint('[WizardStepTemplate] Building with selectedTemplateId: $selectedTemplateId');
     }
 
     return SingleChildScrollView(
@@ -84,7 +84,7 @@ class WizardStepTemplate extends ConsumerWidget {
                   final isSelected = template.id == selectedTemplateId;
 
                   if (kDebugMode) {
-                    print('[WizardStepTemplate] Building card ${template.id}: isSelected=$isSelected, selectedTemplateId=$selectedTemplateId');
+                    debugPrint('[WizardStepTemplate] Building card ${template.id}: isSelected=$isSelected, selectedTemplateId=$selectedTemplateId');
                   }
 
                   return _TemplateCard(
@@ -92,7 +92,7 @@ class WizardStepTemplate extends ConsumerWidget {
                     isSelected: isSelected,
                     onSelect: () {
                       if (kDebugMode) {
-                        print('[WizardStepTemplate] Template card clicked: ${template.id}');
+                        debugPrint('[WizardStepTemplate] Template card clicked: ${template.id}');
                       }
                       ref
                           .read(restaurantWizardProvider.notifier)
