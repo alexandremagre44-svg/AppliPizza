@@ -230,14 +230,41 @@ class RestaurantWizardState {
       (currentStep.index + 1) / WizardStepExtension.totalSteps;
 }
 
+/// Convertit un module ID depuis le format `.name` vers le format registry (snake_case).
+/// Nécessaire car ModuleRegistry utilise des clés en snake_case
+/// mais ModuleId.name produit des valeurs mixtes (camelCase pour certains, snake_case pour d'autres).
+String _toRegistryFormat(String moduleIdName) {
+  // Convert camelCase to snake_case for modules that need it
+  switch (moduleIdName) {
+    case 'clickAndCollect':
+      return 'click_and_collect';
+    case 'paymentTerminal':
+      return 'payment_terminal';
+    case 'timeRecorder':
+      return 'time_recorder';
+    case 'pagesBuilder':
+      return 'pages_builder';
+    // For modules already in snake_case or simple names, return as-is
+    default:
+      return moduleIdName;
+  }
+}
+
 /// Valide les dépendances des modules.
 /// Retourne true si toutes les dépendances sont satisfaites.
 bool validateModuleDependencies(List<String> modules) {
   for (final moduleId in modules) {
-    final definition = ModuleRegistry.of(moduleId);
+    final registryId = _toRegistryFormat(moduleId);
+    final definition = ModuleRegistry.of(registryId);
     if (definition != null) {
       for (final dep in definition.dependencies) {
-        if (!modules.contains(dep)) {
+        // Dependencies from registry are in snake_case format
+        // Need to check if the equivalent .name format exists in modules list
+        final depInNameFormat = modules.firstWhere(
+          (m) => _toRegistryFormat(m) == dep,
+          orElse: () => '',
+        );
+        if (depInNameFormat.isEmpty) {
           return false;
         }
       }
@@ -250,10 +277,13 @@ bool validateModuleDependencies(List<String> modules) {
 List<String> getMissingDependencies(List<String> modules) {
   final missing = <String>[];
   for (final moduleId in modules) {
-    final definition = ModuleRegistry.of(moduleId);
+    final registryId = _toRegistryFormat(moduleId);
+    final definition = ModuleRegistry.of(registryId);
     if (definition != null) {
       for (final dep in definition.dependencies) {
-        if (!modules.contains(dep) && !missing.contains(dep)) {
+        // Check if dependency exists in modules (considering name format conversion)
+        final depExists = modules.any((m) => _toRegistryFormat(m) == dep);
+        if (!depExists && !missing.contains(dep)) {
           missing.add(dep);
         }
       }
@@ -267,8 +297,9 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   RestaurantWizardNotifier() : super(RestaurantWizardState.initial());
 
   /// Helper pour obtenir le nom d'un module depuis son ID.
+  /// Convertit le format .name vers le format registry si nécessaire.
   String _getModuleName(String id) =>
-      ModuleRegistry.of(id)?.name ?? id;
+      ModuleRegistry.of(_toRegistryFormat(id))?.name ?? id;
 
   /// Réinitialise le wizard.
   void reset() {
