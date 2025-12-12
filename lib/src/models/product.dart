@@ -94,6 +94,12 @@ class Product {
   });
 
   // Méthode pour créer une copie d'un produit avec des modifications
+  /// Check if this product requires customization before adding to cart
+  /// Returns true for menus and pizzas with ingredients
+  bool get requiresCustomization {
+    return isMenu || (category == ProductCategory.pizza && baseIngredients.isNotEmpty);
+  }
+
   Product copyWith({
     String? id,
     String? name,
