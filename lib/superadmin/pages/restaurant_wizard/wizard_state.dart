@@ -339,7 +339,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     
     // Get recommended modules from the new template system
     final recommendedModuleIds = template.recommendedModules
-        .map((m) => m.code)
+        .map((m) => m.name)
         .toList();
     
     if (kDebugMode) {
@@ -416,7 +416,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     return RestaurantModulesLight(
       ordering: moduleIds.contains('ordering'),
       delivery: moduleIds.contains('delivery'),
-      clickAndCollect: moduleIds.contains('click_and_collect'),
+      clickAndCollect: moduleIds.contains('clickAndCollect'),
       payments: moduleIds.contains('payments'),
       loyalty: moduleIds.contains('loyalty'),
       roulette: moduleIds.contains('roulette'),
@@ -431,7 +431,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     final result = <String>[];
     if (modules.ordering) result.add('ordering');
     if (modules.delivery) result.add('delivery');
-    if (modules.clickAndCollect) result.add('click_and_collect');
+    if (modules.clickAndCollect) result.add('clickAndCollect');
     if (modules.payments) result.add('payments');
     if (modules.loyalty) result.add('loyalty');
     if (modules.roulette) result.add('roulette');
