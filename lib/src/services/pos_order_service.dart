@@ -269,12 +269,12 @@ class PosOrderService {
   }
   
   /// Validate cart items for required options
+  /// Basic validation checking that menus have selections
   ValidationResult validateCartItems(List<CartItem> items) {
     final errors = <String>[];
     
     for (final item in items) {
-      // Check if item has required selections
-      // This is a placeholder - actual validation would check against product options
+      // Check if menu items have required selections
       if (item.selections.isEmpty && item.isMenu) {
         errors.add('Le menu "${item.productName}" nécessite une personnalisation');
       }

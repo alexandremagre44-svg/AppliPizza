@@ -69,6 +69,7 @@ class PosCartNotifier extends StateNotifier<CartState> {
   }
 
   /// Duplicate an existing item in cart
+  /// Note: selections are the source of truth for customization
   void duplicateItem(String itemId) {
     final itemToDuplicate = state.items.firstWhere((i) => i.id == itemId);
     final duplicatedItem = CartItem(
@@ -79,7 +80,7 @@ class PosCartNotifier extends StateNotifier<CartState> {
       quantity: itemToDuplicate.quantity,
       imageUrl: itemToDuplicate.imageUrl,
       selections: List.from(itemToDuplicate.selections),
-      // No customDescription needed - selections are the source of truth
+      // selections are the source of truth; no need for customDescription
       isMenu: itemToDuplicate.isMenu,
     );
     state = CartState([...state.items, duplicatedItem]);
