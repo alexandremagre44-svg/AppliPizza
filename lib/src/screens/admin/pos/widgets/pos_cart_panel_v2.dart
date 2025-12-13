@@ -424,28 +424,39 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                 ],
               ),
 
-              // Price
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLighter,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.primarySwatch[200]!,
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  '${item.total.toStringAsFixed(2)} €',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
-                  ),
-                ),
+              // Price with selections delta
+              Builder(
+                builder: (context) {
+                  // Calculate total with selections
+                  double itemTotal = item.price;
+                  for (final selection in item.selections) {
+                    itemTotal += selection.priceDelta / 100.0;
+                  }
+                  itemTotal *= item.quantity;
+                  
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLighter,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.primaryContainer,
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '${itemTotal.toStringAsFixed(2)} €',
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),
