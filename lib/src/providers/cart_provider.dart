@@ -7,7 +7,8 @@ import '../models/product.dart';
 import '../models/reward_ticket.dart';
 import '../models/reward_action.dart';
 import '../models/order_option_selection.dart';
-import '../services/reward_service.dart'; 
+import '../services/reward_service.dart';
+import '../services/selection_formatter.dart'; 
 
 const _uuid = Uuid();
 
@@ -58,11 +59,12 @@ class CartItem {
   
   /// Helper to get a display description from selections
   /// Falls back to legacyDescription if selections is empty
+  /// PHASE B: Uses centralized formatter service
   String? get displayDescription {
-    if (selections.isNotEmpty) {
-      return selections.map((s) => s.label).join(', ');
-    }
-    return legacyDescription;
+    return formatSelectionsWithFallback(
+      selections: selections,
+      legacyDescription: legacyDescription,
+    );
   }
   
   /// Backward compatibility getter for code still using customDescription
