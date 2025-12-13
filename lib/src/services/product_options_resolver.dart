@@ -1,33 +1,40 @@
 /// lib/src/services/product_options_resolver.dart
 ///
-/// PHASE B: Pure function to resolve option groups for a product.
+/// PHASE B/C: Pure function to resolve option groups for a product.
 /// 
 /// This service provides a centralized way to determine what customization
 /// options are available for each product type. It unifies existing pizza
 /// customization logic and can be extended for other product types.
 /// 
-/// IMPORTANT: This phase does NOT depend on CashierProfile.
+/// PHASE C: Now supports CashierProfile for business logic (e.g., cooking for restaurants).
 library;
 
 import '../models/product.dart';
 import '../models/product_option.dart';
+import '../../white_label/restaurant/cashier_profile.dart';
 
 /// Resolves the list of option groups available for a given product.
 /// 
 /// This is a pure function that takes a product and returns the applicable
-/// option groups based on product category and configuration.
+/// option groups based on product category, configuration, and cashier profile.
+/// 
+/// PHASE C: Now accepts optional CashierProfile for business logic.
 /// 
 /// Example usage:
 /// ```dart
 /// final product = Product(...);  // A pizza product
-/// final optionGroups = resolveOptionGroupsForProduct(product: product);
-/// // Returns: [sizeGroup, toppingsGroup, ...]
+/// final optionGroups = resolveOptionGroupsForProduct(
+///   product: product,
+///   cashierProfile: CashierProfile.restaurant,
+/// );
+/// // Returns: [sizeGroup, toppingsGroup, cookingGroup (if meat), ...]
 /// ```
 /// 
 /// Returns an empty list if the product has no customization options.
 List<OptionGroup> resolveOptionGroupsForProduct({
   required Product product,
   List<Ingredient>? availableIngredients,
+  CashierProfile? cashierProfile,
 }) {
   final groups = <OptionGroup>[];
 
@@ -39,6 +46,12 @@ List<OptionGroup> resolveOptionGroupsForProduct({
   // Menu-specific options
   if (product.isMenu) {
     groups.addAll(_resolveMenuOptions(product));
+  }
+
+  // PHASE C2: Restaurant-specific business logic
+  // Add cooking options for meat products in restaurant profile
+  if (cashierProfile == CashierProfile.restaurant && product.isMeat) {
+    groups.add(_resolveCookingOptions());
   }
 
   // Sort by displayOrder
@@ -271,6 +284,46 @@ List<OptionGroup> _resolveMenuOptions(Product product) {
   }
 
   return groups;
+}
+
+/// PHASE C2: Resolves cooking options for meat products in restaurants.
+/// 
+/// This is the first real business logic implementation using CashierProfile.
+/// Only shown for restaurants serving meat products.
+OptionGroup _resolveCookingOptions() {
+  return OptionGroup(
+    id: 'cooking',
+    name: 'Cuisson',
+    required: true, // Cooking selection is mandatory for meat
+    multiSelect: false, // Single choice
+    displayOrder: 10, // Show after main product options
+    options: [
+      OptionItem(
+        id: 'rare',
+        label: 'Bleu',
+        priceDelta: 0,
+        displayOrder: 0,
+      ),
+      OptionItem(
+        id: 'medium_rare',
+        label: 'Saignant',
+        priceDelta: 0,
+        displayOrder: 1,
+      ),
+      OptionItem(
+        id: 'medium',
+        label: 'À point',
+        priceDelta: 0,
+        displayOrder: 2,
+      ),
+      OptionItem(
+        id: 'well_done',
+        label: 'Bien cuit',
+        priceDelta: 0,
+        displayOrder: 3,
+      ),
+    ],
+  );
 }
 
 /// Formats an ingredient ID into a readable label.

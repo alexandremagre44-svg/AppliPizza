@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pizza_delizza/src/models/product.dart';
 import 'package:pizza_delizza/src/services/product_options_resolver.dart';
+import 'package:pizza_delizza/white_label/restaurant/cashier_profile.dart';
 
 void main() {
   group('resolveOptionGroupsForProduct - Pizza', () {
@@ -347,6 +348,126 @@ void main() {
       final toppingsGroup = groups.firstWhere((g) => g.id == 'toppings');
 
       expect(toppingsGroup.options[0].label, 'Mushrooms');
+    });
+  });
+
+  group('PHASE C2: Cooking options for restaurant profile', () {
+    test('restaurant with meat product includes cooking group', () {
+      final steak = Product(
+        id: 'steak-1',
+        name: 'Entrecôte',
+        description: 'Premium steak',
+        price: 18.0,
+        imageUrl: 'url',
+        category: ProductCategory.pizza, // Any category
+        isMeat: true,
+      );
+
+      final groups = resolveOptionGroupsForProduct(
+        product: steak,
+        cashierProfile: CashierProfile.restaurant,
+      );
+
+      // Should have cooking group
+      final cookingGroup = groups.firstWhere((g) => g.id == 'cooking');
+      expect(cookingGroup.name, 'Cuisson');
+      expect(cookingGroup.required, true);
+      expect(cookingGroup.multiSelect, false);
+      expect(cookingGroup.options.length, 4);
+      
+      // Check cooking options
+      expect(cookingGroup.options[0].id, 'rare');
+      expect(cookingGroup.options[0].label, 'Bleu');
+      expect(cookingGroup.options[1].id, 'medium_rare');
+      expect(cookingGroup.options[1].label, 'Saignant');
+      expect(cookingGroup.options[2].id, 'medium');
+      expect(cookingGroup.options[2].label, 'À point');
+      expect(cookingGroup.options[3].id, 'well_done');
+      expect(cookingGroup.options[3].label, 'Bien cuit');
+    });
+
+    test('restaurant with non-meat product does NOT include cooking', () {
+      final salad = Product(
+        id: 'salad-1',
+        name: 'Salade César',
+        description: 'Fresh salad',
+        price: 8.0,
+        imageUrl: 'url',
+        category: ProductCategory.pizza,
+        isMeat: false,
+      );
+
+      final groups = resolveOptionGroupsForProduct(
+        product: salad,
+        cashierProfile: CashierProfile.restaurant,
+      );
+
+      // Should NOT have cooking group
+      expect(groups.where((g) => g.id == 'cooking'), isEmpty);
+    });
+
+    test('pizzeria with meat product does NOT include cooking', () {
+      final meatPizza = Product(
+        id: 'pizza-1',
+        name: 'Pizza Carnivore',
+        description: 'Meat lovers pizza',
+        price: 12.0,
+        imageUrl: 'url',
+        category: ProductCategory.pizza,
+        isMeat: true, // Has meat but it's pizza, not steak
+      );
+
+      final groups = resolveOptionGroupsForProduct(
+        product: meatPizza,
+        cashierProfile: CashierProfile.pizzeria,
+      );
+
+      // Pizzeria should NOT have cooking options
+      expect(groups.where((g) => g.id == 'cooking'), isEmpty);
+    });
+
+    test('generic profile with meat does NOT include cooking', () {
+      final burger = Product(
+        id: 'burger-1',
+        name: 'Burger',
+        description: 'Tasty burger',
+        price: 10.0,
+        imageUrl: 'url',
+        category: ProductCategory.pizza,
+        isMeat: true,
+      );
+
+      final groups = resolveOptionGroupsForProduct(
+        product: burger,
+        cashierProfile: CashierProfile.generic,
+      );
+
+      // Generic profile should NOT have cooking options
+      expect(groups.where((g) => g.id == 'cooking'), isEmpty);
+    });
+
+    test('cooking options have zero price delta', () {
+      final steak = Product(
+        id: 'steak-1',
+        name: 'Entrecôte',
+        description: 'Premium steak',
+        price: 18.0,
+        imageUrl: 'url',
+        category: ProductCategory.pizza,
+        isMeat: true,
+      );
+
+      final groups = resolveOptionGroupsForProduct(
+        product: steak,
+        cashierProfile: CashierProfile.restaurant,
+      );
+
+      final cookingGroup = groups.firstWhere((g) => g.id == 'cooking');
+      
+      // All cooking options should have no extra cost
+      for (final option in cookingGroup.options) {
+        expect(option.priceDelta, 0);
+      }
     });
   });
 }

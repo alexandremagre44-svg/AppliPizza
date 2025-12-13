@@ -70,6 +70,8 @@ class Product {
   final bool isNew; // Nouveau produit
   final bool isChefSpecial; // Spécialité du chef
   final bool isKidFriendly; // Adapté aux enfants
+  // PHASE C: Métier restaurant - produit viande nécessitant cuisson
+  final bool isMeat; // Produit contenant de la viande (nécessite cuisson pour restaurants)
 
   Product({
     required this.id,
@@ -91,6 +93,7 @@ class Product {
     this.isNew = false,
     this.isChefSpecial = false,
     this.isKidFriendly = false,
+    this.isMeat = false, // PHASE C: Par défaut non viande
   });
 
   // Méthode pour créer une copie d'un produit avec des modifications
@@ -114,6 +117,7 @@ class Product {
     bool? isNew,
     bool? isChefSpecial,
     bool? isKidFriendly,
+    bool? isMeat,
   }) {
     return Product(
       id: id ?? this.id,
@@ -135,6 +139,7 @@ class Product {
       isNew: isNew ?? this.isNew,
       isChefSpecial: isChefSpecial ?? this.isChefSpecial,
       isKidFriendly: isKidFriendly ?? this.isKidFriendly,
+      isMeat: isMeat ?? this.isMeat,
     );
   }
 
@@ -160,6 +165,7 @@ class Product {
       'isNew': isNew,
       'isChefSpecial': isChefSpecial,
       'isKidFriendly': isKidFriendly,
+      'isMeat': isMeat,
     };
   }
 
@@ -192,6 +198,7 @@ class Product {
       isNew: json['isNew'] as bool? ?? false,
       isChefSpecial: json['isChefSpecial'] as bool? ?? false,
       isKidFriendly: json['isKidFriendly'] as bool? ?? false,
+      isMeat: json['isMeat'] as bool? ?? false, // PHASE C: Par défaut non viande
     );
   }
 }
