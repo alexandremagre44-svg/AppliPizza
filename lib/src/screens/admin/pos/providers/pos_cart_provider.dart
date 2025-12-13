@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../models/product.dart';
 import '../../../../providers/cart_provider.dart';
+import '../../../../models/order_option_selection.dart';
 
 const _uuid = Uuid();
 
@@ -24,7 +25,7 @@ class PosCartNotifier extends StateNotifier<CartState> {
   PosCartNotifier() : super(CartState([]));
 
   /// Add a product to the cart
-  void addItem(Product product, {String? customDescription}) {
+  void addItem(Product product, {String? customDescription, List<OrderOptionSelection>? selections}) {
     final existingItem = state.items.firstWhere(
       (item) => item.productId == product.id && item.customDescription == customDescription && !item.isMenu,
       orElse: () => CartItem(
@@ -49,6 +50,7 @@ class PosCartNotifier extends StateNotifier<CartState> {
         price: product.price,
         quantity: 1,
         imageUrl: product.imageUrl,
+        selections: selections ?? [],
         customDescription: customDescription,
         isMenu: product.isMenu,
       );
@@ -64,6 +66,34 @@ class PosCartNotifier extends StateNotifier<CartState> {
   /// Remove an item from cart
   void removeItem(String itemId) {
     state = CartState(state.items.where((item) => item.id != itemId).toList());
+  }
+
+  /// Duplicate an existing item in cart
+  void duplicateItem(String itemId) {
+    final itemToDuplicate = state.items.firstWhere((i) => i.id == itemId);
+    final duplicatedItem = CartItem(
+      id: _uuid.v4(),
+      productId: itemToDuplicate.productId,
+      productName: itemToDuplicate.productName,
+      price: itemToDuplicate.price,
+      quantity: itemToDuplicate.quantity,
+      imageUrl: itemToDuplicate.imageUrl,
+      selections: List.from(itemToDuplicate.selections),
+      customDescription: itemToDuplicate.legacyDescription,
+      isMenu: itemToDuplicate.isMenu,
+    );
+    state = CartState([...state.items, duplicatedItem]);
+  }
+
+  /// Update an existing item (used for modify functionality)
+  void updateItem(String itemId, CartItem updatedItem) {
+    final updatedItems = state.items.map((item) {
+      if (item.id == itemId) {
+        return updatedItem;
+      }
+      return item;
+    }).toList();
+    state = CartState([...updatedItems]);
   }
 
   /// Update quantity of an item
@@ -105,5 +135,40 @@ class PosCartNotifier extends StateNotifier<CartState> {
   /// Clear the entire cart
   void clearCart() {
     state = CartState([]);
+  }
+
+  /// Validate cart items for required options
+  /// Returns list of validation errors, empty if valid
+  List<String> validateCart() {
+    final errors = <String>[];
+    
+    for (final item in state.items) {
+      // Check if menu items have proper customization
+      if (item.isMenu && item.selections.isEmpty) {
+        errors.add('Le menu "${item.productName}" nécessite une personnalisation');
+      }
+    }
+    
+    return errors;
+  }
+
+  /// Calculate total with price deltas from selections
+  double calculateTotalWithSelections() {
+    double total = 0.0;
+    
+    for (final item in state.items) {
+      // Base price
+      double itemTotal = item.price;
+      
+      // Add price deltas from selections
+      for (final selection in item.selections) {
+        itemTotal += selection.priceDelta / 100.0; // Convert cents to euros
+      }
+      
+      // Multiply by quantity
+      total += itemTotal * item.quantity;
+    }
+    
+    return total;
   }
 }
