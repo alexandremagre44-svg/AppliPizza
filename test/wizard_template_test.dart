@@ -18,10 +18,10 @@ void main() {
       );
       
       expect(template.name, 'Pizzeria Classic');
-      final moduleCodes = template.recommendedModules.map((m) => m.code).toList();
+      final moduleCodes = template.recommendedModules.map((m) => m.name).toList();
       expect(moduleCodes, contains('ordering'));
       expect(moduleCodes, contains('delivery'));
-      expect(moduleCodes, contains('click_and_collect'));
+      expect(moduleCodes, contains('clickAndCollect'));
       expect(moduleCodes, contains('loyalty'));
       expect(moduleCodes, contains('roulette'));
       expect(moduleCodes, contains('promotions'));
@@ -34,9 +34,9 @@ void main() {
       );
       
       expect(template.name, 'Fast Food Express');
-      final moduleCodes = template.recommendedModules.map((m) => m.code).toList();
+      final moduleCodes = template.recommendedModules.map((m) => m.name).toList();
       expect(moduleCodes, contains('ordering'));
-      expect(moduleCodes, contains('click_and_collect'));
+      expect(moduleCodes, contains('clickAndCollect'));
       expect(moduleCodes, contains('staff_tablet'));
       expect(moduleCodes, contains('promotions'));
     });
@@ -47,16 +47,16 @@ void main() {
       );
       
       expect(template.name, 'Restaurant Premium');
-      final moduleCodes = template.recommendedModules.map((m) => m.code).toList();
+      final moduleCodes = template.recommendedModules.map((m) => m.name).toList();
       expect(moduleCodes, contains('ordering'));
       expect(moduleCodes, contains('delivery'));
       expect(moduleCodes, contains('loyalty'));
       expect(moduleCodes, contains('promotions'));
       expect(moduleCodes, contains('campaigns'));
-      expect(moduleCodes, contains('time_recorder'));
+      expect(moduleCodes, contains('timeRecorder'));
       expect(moduleCodes, contains('reporting'));
       expect(moduleCodes, contains('theme'));
-      expect(moduleCodes, contains('pages_builder'));
+      expect(moduleCodes, contains('pagesBuilder'));
     });
 
     test('Blank template has no modules', () {
@@ -93,6 +93,7 @@ void main() {
       expect(notifier.state.enabledModuleIds.length, greaterThan(0));
       expect(notifier.state.enabledModuleIds, contains('ordering'));
       expect(notifier.state.enabledModuleIds, contains('delivery'));
+      expect(notifier.state.enabledModuleIds, contains('clickAndCollect'));
     });
 
     test('selectTemplate with blank template sets no modules', () {

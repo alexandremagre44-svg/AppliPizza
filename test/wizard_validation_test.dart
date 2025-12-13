@@ -4,8 +4,8 @@
 /// for all steps and that the isReadyForCreation check is comprehensive.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pizza_delizza_clean/superadmin/pages/restaurant_wizard/wizard_state.dart';
-import 'package:pizza_delizza_clean/superadmin/models/restaurant_blueprint.dart';
+import 'package:pizza_delizza/superadmin/pages/restaurant_wizard/wizard_state.dart';
+import 'package:pizza_delizza/superadmin/models/restaurant_blueprint.dart';
 
 void main() {
   group('RestaurantWizardState Validation Tests', () {

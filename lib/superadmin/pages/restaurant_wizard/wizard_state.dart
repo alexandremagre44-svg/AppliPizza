@@ -230,14 +230,57 @@ class RestaurantWizardState {
       (currentStep.index + 1) / WizardStepExtension.totalSteps;
 }
 
+/// Convertit un module ID depuis le format `.name` vers le format registry (snake_case).
+/// Nécessaire car ModuleRegistry utilise des clés en snake_case mais les valeurs enum
+/// sont déclarées en formats mixtes (ex: 'clickAndCollect' camelCase, 'kitchen_tablet' snake_case).
+/// ModuleId.name retourne le nom exact tel que déclaré dans l'enum.
+String _toRegistryFormat(String moduleIdName) {
+  // Convert camelCase to snake_case for modules that need it
+  switch (moduleIdName) {
+    case 'clickAndCollect':
+      return 'click_and_collect';
+    case 'paymentTerminal':
+      return 'payment_terminal';
+    case 'timeRecorder':
+      return 'time_recorder';
+    case 'pagesBuilder':
+      return 'pages_builder';
+    // For modules already in snake_case or simple names, return as-is
+    default:
+      return moduleIdName;
+  }
+}
+
+/// Convertit un module ID depuis le format registry (snake_case) vers le format `.name`.
+/// Inverse de _toRegistryFormat.
+String _fromRegistryFormat(String registryId) {
+  // Convert snake_case to camelCase for modules that need it
+  switch (registryId) {
+    case 'click_and_collect':
+      return 'clickAndCollect';
+    case 'payment_terminal':
+      return 'paymentTerminal';
+    case 'time_recorder':
+      return 'timeRecorder';
+    case 'pages_builder':
+      return 'pagesBuilder';
+    // For modules already in correct format or simple names, return as-is
+    default:
+      return registryId;
+  }
+}
+
 /// Valide les dépendances des modules.
 /// Retourne true si toutes les dépendances sont satisfaites.
 bool validateModuleDependencies(List<String> modules) {
   for (final moduleId in modules) {
-    final definition = ModuleRegistry.of(moduleId);
+    final registryId = _toRegistryFormat(moduleId);
+    final definition = ModuleRegistry.of(registryId);
     if (definition != null) {
       for (final dep in definition.dependencies) {
-        if (!modules.contains(dep)) {
+        // Dependencies from registry are in snake_case format
+        // Check if the equivalent .name format exists in modules list
+        if (!modules.any((m) => _toRegistryFormat(m) == dep)) {
           return false;
         }
       }
@@ -247,14 +290,21 @@ bool validateModuleDependencies(List<String> modules) {
 }
 
 /// Récupère les dépendances manquantes pour une liste de modules.
+/// Retourne les dépendances en format .name pour cohérence avec la liste d'entrée.
 List<String> getMissingDependencies(List<String> modules) {
   final missing = <String>[];
   for (final moduleId in modules) {
-    final definition = ModuleRegistry.of(moduleId);
+    final registryId = _toRegistryFormat(moduleId);
+    final definition = ModuleRegistry.of(registryId);
     if (definition != null) {
       for (final dep in definition.dependencies) {
-        if (!modules.contains(dep) && !missing.contains(dep)) {
-          missing.add(dep);
+        // Check if dependency exists in modules (considering name format conversion)
+        if (!modules.any((m) => _toRegistryFormat(m) == dep)) {
+          // Convert dependency to .name format before adding
+          final depInNameFormat = _fromRegistryFormat(dep);
+          if (!missing.contains(depInNameFormat)) {
+            missing.add(depInNameFormat);
+          }
         }
       }
     }
@@ -267,8 +317,9 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   RestaurantWizardNotifier() : super(RestaurantWizardState.initial());
 
   /// Helper pour obtenir le nom d'un module depuis son ID.
+  /// Convertit le format .name vers le format registry si nécessaire.
   String _getModuleName(String id) =>
-      ModuleRegistry.of(id)?.name ?? id;
+      ModuleRegistry.of(_toRegistryFormat(id))?.name ?? id;
 
   /// Réinitialise le wizard.
   void reset() {
@@ -339,7 +390,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     
     // Get recommended modules from the new template system
     final recommendedModuleIds = template.recommendedModules
-        .map((m) => m.code)
+        .map((m) => m.name)
         .toList();
     
     if (kDebugMode) {
@@ -370,11 +421,14 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
       if (!currentModules.contains(moduleId)) {
         currentModules.add(moduleId);
         // Ajouter automatiquement les dépendances requises
-        final definition = ModuleRegistry.of(moduleId);
+        final definition = ModuleRegistry.of(_toRegistryFormat(moduleId));
         if (definition != null) {
           for (final dep in definition.dependencies) {
-            if (!currentModules.contains(dep)) {
-              currentModules.add(dep);
+            // Dependencies are in registry format (snake_case)
+            // Convert to .name format before checking/adding
+            final depInNameFormat = _fromRegistryFormat(dep);
+            if (!currentModules.contains(depInNameFormat)) {
+              currentModules.add(depInNameFormat);
             }
           }
         }
@@ -383,8 +437,8 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
       currentModules.remove(moduleId);
       // Désactiver les modules qui dépendent de celui-ci
       final dependentModules = currentModules.where((m) {
-        final def = ModuleRegistry.of(m);
-        return def != null && def.dependencies.contains(moduleId);
+        final def = ModuleRegistry.of(_toRegistryFormat(m));
+        return def != null && def.dependencies.contains(_toRegistryFormat(moduleId));
       }).toList();
       for (final dep in dependentModules) {
         currentModules.remove(dep);
@@ -416,7 +470,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     return RestaurantModulesLight(
       ordering: moduleIds.contains('ordering'),
       delivery: moduleIds.contains('delivery'),
-      clickAndCollect: moduleIds.contains('click_and_collect'),
+      clickAndCollect: moduleIds.contains('clickAndCollect'),
       payments: moduleIds.contains('payments'),
       loyalty: moduleIds.contains('loyalty'),
       roulette: moduleIds.contains('roulette'),
@@ -431,7 +485,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     final result = <String>[];
     if (modules.ordering) result.add('ordering');
     if (modules.delivery) result.add('delivery');
-    if (modules.clickAndCollect) result.add('click_and_collect');
+    if (modules.clickAndCollect) result.add('clickAndCollect');
     if (modules.payments) result.add('payments');
     if (modules.loyalty) result.add('loyalty');
     if (modules.roulette) result.add('roulette');
