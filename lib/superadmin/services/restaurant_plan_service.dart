@@ -10,6 +10,7 @@ import '../../white_label/core/module_config.dart';
 import '../../white_label/core/module_registry.dart';
 import '../../white_label/restaurant/restaurant_plan.dart';
 import '../../white_label/restaurant/restaurant_plan_unified.dart';
+import '../../white_label/restaurant/cashier_profile.dart';
 
 /// Service pour gérer les plans de restaurant (modules activés/désactivés).
 ///
@@ -150,6 +151,7 @@ class RestaurantPlanService {
   /// - enabledModuleIds: Liste des modules activés
   /// - brand: Configuration de la marque (Map avec brandName, colors, etc.)
   /// - templateId: ID du template utilisé (optionnel)
+  /// - cashierProfile: Profil métier POS (optionnel, défaut: generic)
   /// 
   /// Retourne l'ID du restaurant créé.
   Future<String> saveFullRestaurantCreation({
@@ -159,6 +161,7 @@ class RestaurantPlanService {
     required List<String> enabledModuleIds,
     required Map<String, dynamic> brand,
     String? templateId,
+    String? cashierProfile,
   }) async {
     try {
       // Créer la configuration de branding depuis le map
@@ -176,12 +179,18 @@ class RestaurantPlanService {
         borderRadius: (brand['borderRadius'] as num?)?.toDouble(),
       );
 
+      // Parse cashierProfile
+      final parsedCashierProfile = cashierProfile != null
+          ? CashierProfileExtension.fromString(cashierProfile)
+          : CashierProfile.generic;
+
       // Créer le RestaurantPlanUnified
       final unifiedPlan = RestaurantPlanUnified(
         restaurantId: restaurantId,
         name: name,
         slug: slug,
         templateId: templateId,
+        cashierProfile: parsedCashierProfile,
         activeModules: enabledModuleIds,
         branding: branding,
         createdAt: DateTime.now(),
@@ -199,6 +208,7 @@ class RestaurantPlanService {
         'name': name,
         'slug': slug,
         if (templateId != null) 'templateId': templateId,
+        'cashierProfile': parsedCashierProfile.value,
         'status': 'ACTIVE',
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),

@@ -12,6 +12,7 @@ import 'wizard_state.dart';
 import 'wizard_step_identity.dart';
 import 'wizard_step_brand.dart';
 import 'wizard_step_template.dart';
+import 'wizard_step_cashier_profile.dart';
 import 'wizard_step_modules.dart';
 import 'wizard_step_preview.dart';
 
@@ -84,6 +85,8 @@ class WizardEntryPage extends ConsumerWidget {
         return const WizardStepBrand();
       case WizardStep.template:
         return const WizardStepTemplate();
+      case WizardStep.cashierProfile:
+        return const WizardStepCashierProfile();
       case WizardStep.modules:
         return const WizardStepModules();
       case WizardStep.preview:
@@ -120,7 +123,7 @@ class WizardEntryPage extends ConsumerWidget {
 }
 
 /// Header du wizard avec le stepper.
-class _WizardHeader extends StatelessWidget {
+class _WizardHeader extends ConsumerWidget {
   final WizardStep currentStep;
   final Function(WizardStep) onStepTap;
 
@@ -130,7 +133,18 @@ class _WizardHeader extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final wizardState = ref.watch(restaurantWizardProvider);
+    
+    // Filter steps to show based on template selection
+    final visibleSteps = WizardStep.values.where((step) {
+      // Hide cashierProfile step if template is not blank
+      if (step == WizardStep.cashierProfile) {
+        return wizardState.shouldShowCashierProfileStep;
+      }
+      return true;
+    }).toList();
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -166,7 +180,9 @@ class _WizardHeader extends StatelessWidget {
           const SizedBox(height: 24),
           // Stepper horizontal
           Row(
-            children: WizardStep.values.map((step) {
+            children: visibleSteps.asMap().entries.map((entry) {
+              final step = entry.value;
+              final displayIndex = entry.key;
               final isActive = step.index <= currentStep.index;
               final isCurrent = step == currentStep;
 
@@ -195,7 +211,7 @@ class _WizardHeader extends StatelessWidget {
                                   color: Colors.white,
                                 )
                               : Text(
-                                  '${step.index + 1}',
+                                  '${displayIndex + 1}',
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
@@ -227,7 +243,7 @@ class _WizardHeader extends StatelessWidget {
                         ),
                       ),
                       // Ligne de connexion
-                      if (step.index < WizardStep.values.length - 1)
+                      if (displayIndex < visibleSteps.length - 1)
                         Expanded(
                           child: Container(
                             height: 2,
