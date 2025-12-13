@@ -180,7 +180,7 @@ class CashierSessionService {
       cashTotal: session.paymentTotals[PaymentMethod.cash] ?? 0.0,
       cardTotal: session.paymentTotals[PaymentMethod.card] ?? 0.0,
       offlineTotal: session.paymentTotals[PaymentMethod.offline] ?? 0.0,
-      otherTotal: session.paymentTotals['other'] ?? 0.0, // Use string literal for 'other'
+      otherTotal: session.paymentTotals[PaymentMethod.other] ?? 0.0,
       expectedCash: session.expectedCash ?? session.calculatedExpectedCash,
       actualCash: session.closingCash ?? 0.0,
       variance: session.variance ?? 0.0,

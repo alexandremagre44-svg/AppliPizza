@@ -79,7 +79,7 @@ class PosCartNotifier extends StateNotifier<CartState> {
       quantity: itemToDuplicate.quantity,
       imageUrl: itemToDuplicate.imageUrl,
       selections: List.from(itemToDuplicate.selections),
-      customDescription: itemToDuplicate.legacyDescription,
+      // No customDescription needed - selections are the source of truth
       isMenu: itemToDuplicate.isMenu,
     );
     state = CartState([...state.items, duplicatedItem]);
