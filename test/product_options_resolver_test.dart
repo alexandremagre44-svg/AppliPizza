@@ -353,13 +353,15 @@ void main() {
 
   group('PHASE C2: Cooking options for restaurant profile', () {
     test('restaurant with meat product includes cooking group', () {
+      // Note: Using menus category as placeholder for restaurant dishes
+      // In production, consider adding ProductCategory.dishes or similar
       final steak = Product(
         id: 'steak-1',
         name: 'Entrecôte',
         description: 'Premium steak',
         price: 18.0,
         imageUrl: 'url',
-        category: ProductCategory.pizza, // Any category
+        category: ProductCategory.menus, // Restaurant dish
         isMeat: true,
       );
 
@@ -393,7 +395,7 @@ void main() {
         description: 'Fresh salad',
         price: 8.0,
         imageUrl: 'url',
-        category: ProductCategory.pizza,
+        category: ProductCategory.menus, // Restaurant dish
         isMeat: false,
       );
 
@@ -407,6 +409,8 @@ void main() {
     });
 
     test('pizzeria with meat product does NOT include cooking', () {
+      // Meat pizza - has meat toppings but doesn't need cooking choice
+      // (cooking is for grilled meats in restaurants, not pizza toppings)
       final meatPizza = Product(
         id: 'pizza-1',
         name: 'Pizza Carnivore',
@@ -414,7 +418,7 @@ void main() {
         price: 12.0,
         imageUrl: 'url',
         category: ProductCategory.pizza,
-        isMeat: true, // Has meat but it's pizza, not steak
+        isMeat: true, // Has meat toppings
       );
 
       final groups = resolveOptionGroupsForProduct(
@@ -433,7 +437,7 @@ void main() {
         description: 'Tasty burger',
         price: 10.0,
         imageUrl: 'url',
-        category: ProductCategory.pizza,
+        category: ProductCategory.menus, // Fast-food item
         isMeat: true,
       );
 
@@ -453,7 +457,7 @@ void main() {
         description: 'Premium steak',
         price: 18.0,
         imageUrl: 'url',
-        category: ProductCategory.pizza,
+        category: ProductCategory.menus, // Restaurant dish
         isMeat: true,
       );
 

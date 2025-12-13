@@ -95,13 +95,14 @@ void main() {
     });
 
     test('builds cart item with cooking selection (Phase C2)', () {
+      // Restaurant dish requiring cooking choice
       final steak = Product(
         id: 'steak-1',
         name: 'Entrecôte',
         description: 'Premium steak',
         price: 18.0,
         imageUrl: 'url',
-        category: ProductCategory.pizza,
+        category: ProductCategory.menus, // Restaurant dish
         isMeat: true,
       );
 
