@@ -18,6 +18,7 @@ import '../providers/pos_order_provider.dart';
 import 'pos_cash_payment_modal.dart';
 import 'pos_session_open_modal.dart';
 import 'pos_session_close_modal.dart';
+import '../../../../../white_label/runtime/module_gate_provider.dart';
 
 const _uuid = Uuid();
 
@@ -166,6 +167,9 @@ class PosActionsPanelV2 extends ConsumerWidget {
   }
 
   Widget _buildOrderTypeSelector(BuildContext context, WidgetRef ref, dynamic posState) {
+    // MODULARITÉ: Utiliser ModuleGate pour filtrer les types autorisés
+    final allowedOrderTypes = ref.watch(allowedOrderTypesProvider);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -181,7 +185,8 @@ class PosActionsPanelV2 extends ConsumerWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: OrderType.all.map((type) {
+          // MODULARITÉ: Afficher uniquement les types autorisés selon les modules actifs
+          children: allowedOrderTypes.map((type) {
             final isSelected = posState.selectedOrderType == type;
             return InkWell(
               onTap: () => ref.read(posStateProvider.notifier).setOrderType(type),

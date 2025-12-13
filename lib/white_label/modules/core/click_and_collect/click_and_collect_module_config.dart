@@ -1,25 +1,28 @@
 /// Configuration spécifique au module Click & Collect.
 ///
 /// Cette classe contient les paramètres configurables pour le module
-/// Click & Collect. Elle peut être utilisée à la place de la configuration
-/// générique ModuleConfig pour typer les settings.
+/// Click & Collect avec des settings typés.
+library;
+
+import 'click_and_collect_settings.dart';
+
 class ClickAndCollectModuleConfig {
   /// Indique si le module est activé.
   final bool enabled;
 
-  /// Paramètres spécifiques au module.
-  final Map<String, dynamic> settings;
+  /// Paramètres typés du module Click & Collect.
+  final ClickAndCollectSettings settings;
 
   /// Constructeur.
   const ClickAndCollectModuleConfig({
     this.enabled = false,
-    this.settings = const {},
+    this.settings = const ClickAndCollectSettings(),
   });
 
   /// Crée une copie de cette configuration avec les champs modifiés.
   ClickAndCollectModuleConfig copyWith({
     bool? enabled,
-    Map<String, dynamic>? settings,
+    ClickAndCollectSettings? settings,
   }) {
     return ClickAndCollectModuleConfig(
       enabled: enabled ?? this.enabled,
@@ -31,15 +34,24 @@ class ClickAndCollectModuleConfig {
   Map<String, dynamic> toJson() {
     return {
       'enabled': enabled,
-      'settings': settings,
+      'settings': settings.toJson(),
     };
   }
 
   /// Désérialise une configuration depuis un JSON.
   factory ClickAndCollectModuleConfig.fromJson(Map<String, dynamic> json) {
+    final settingsJson = json['settings'] as Map<String, dynamic>? ?? {};
     return ClickAndCollectModuleConfig(
       enabled: json['enabled'] as bool? ?? false,
-      settings: Map<String, dynamic>.from(json['settings'] as Map? ?? {}),
+      settings: ClickAndCollectSettings.fromJson(settingsJson),
+    );
+  }
+
+  /// Crée une configuration par défaut.
+  factory ClickAndCollectModuleConfig.defaults() {
+    return ClickAndCollectModuleConfig(
+      enabled: false,
+      settings: ClickAndCollectSettings.defaults(),
     );
   }
 
@@ -47,10 +59,4 @@ class ClickAndCollectModuleConfig {
   String toString() {
     return 'ClickAndCollectModuleConfig(enabled: $enabled, settings: $settings)';
   }
-
-  // TODO: Ajouter des champs typés spécifiques :
-  // - int preparationTimeMinutes (temps de préparation)
-  // - List<TimeSlot> pickupSlots (créneaux de retrait)
-  // - bool allowSameDayPickup (retrait le jour même)
-  // - int maxOrdersPerSlot (commandes max par créneau)
 }
