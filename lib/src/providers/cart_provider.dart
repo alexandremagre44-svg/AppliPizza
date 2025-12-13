@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../models/product.dart';
 import '../models/reward_ticket.dart';
 import '../models/reward_action.dart';
+import '../models/order_option_selection.dart';
 import '../services/reward_service.dart'; 
 
 const _uuid = Uuid();
@@ -13,7 +14,13 @@ const _uuid = Uuid();
 // =============================================
 // MODÈLE DE DONNÉES DU PANIER (CartItem)
 // =============================================
-
+//
+// PHASE A REFACTORING:
+// - Added 'selections' field for structured option data (SOURCE OF TRUTH)
+// - Renamed 'customDescription' to 'legacyDescription' for clarity
+// - legacyDescription is kept ONLY for backward compatibility and display
+// - All new business logic MUST use 'selections', NOT legacyDescription
+//
 class CartItem {
   final String id;
   final String productId;
@@ -21,7 +28,17 @@ class CartItem {
   final double price;
   int quantity; // La quantité est mutable pour être mise à jour facilement
   final String imageUrl;
-  final String? customDescription;
+  
+  /// Structured option selections - SOURCE OF TRUTH for business logic
+  /// Empty list for simple products with no customization
+  final List<OrderOptionSelection> selections;
+  
+  /// Legacy description field - kept ONLY for backward compatibility
+  /// MUST NOT be used for business logic - use selections instead
+  /// Will be used to display old orders that don't have selections
+  @Deprecated('Use selections for business logic. This field is for display only.')
+  final String? legacyDescription;
+  
   final bool isMenu;
 
   CartItem({
@@ -31,12 +48,26 @@ class CartItem {
     required this.price,
     required this.quantity,
     required this.imageUrl,
-    this.customDescription,
+    this.selections = const [],
+    @Deprecated('Use selections parameter instead') String? customDescription,
     this.isMenu = false,
-  });
+  }) : legacyDescription = customDescription;
 
   // Propriété calculée
   double get total => price * quantity;
+  
+  /// Helper to get a display description from selections
+  /// Falls back to legacyDescription if selections is empty
+  String? get displayDescription {
+    if (selections.isNotEmpty) {
+      return selections.map((s) => s.label).join(', ');
+    }
+    return legacyDescription;
+  }
+  
+  /// Backward compatibility getter for code still using customDescription
+  @Deprecated('Use displayDescription or selections instead')
+  String? get customDescription => displayDescription;
 }
 
 // =============================================
