@@ -718,9 +718,7 @@ Les modules suivants ont été identifiés dans le code:
 ☐ Élevée
 ☐ Très élevée
 
-**Justification:** Déjà bien avancé, juste améliora
-
-tions à ajouter.
+**Justification:** Déjà bien avancé, juste améliorations à ajouter.
 
 ---
 
@@ -1880,7 +1878,7 @@ tions à ajouter.
 ### Comptage:
 - **Total modules:** 19
 - **Modules prêts production:** 0 ❌
-- **Modules codés et utilisables:** 6 (Loyalty, Roulette, Kitchen Tablet, Staff Tablet, POS, Theme, Pages Builder)
+- **Modules codés et utilisables:** 7 (Loyalty, Roulette, Kitchen Tablet, Staff Tablet, POS, Theme, Pages Builder)
 - **Modules partiels:** 8 (Ordering, Delivery, Click & Collect, Payments, Promotions, Newsletter, Reporting)
 - **Modules non codés:** 5 (Payment Terminal, Wallet, Campaigns, Time Recorder, Exports)
 
