@@ -1879,7 +1879,7 @@ Les modules suivants ont été identifiés dans le code:
 - **Total modules:** 19
 - **Modules prêts production:** 0 ❌
 - **Modules codés et utilisables:** 7 (Loyalty, Roulette, Kitchen Tablet, Staff Tablet, POS, Theme, Pages Builder)
-- **Modules partiels:** 8 (Ordering, Delivery, Click & Collect, Payments, Promotions, Newsletter, Reporting)
+- **Modules partiels:** 7 (Ordering, Delivery, Click & Collect, Payments, Promotions, Newsletter, Reporting)
 - **Modules non codés:** 5 (Payment Terminal, Wallet, Campaigns, Time Recorder, Exports)
 
 ---
@@ -2148,8 +2148,8 @@ Les modules suivants ont été identifiés dans le code:
 
 **État actuel:**
 - 19 modules identifiés
-- 6 modules utilisables (Loyalty, Roulette, Kitchen, Staff, POS, Theme, Builder)
-- 8 modules partiels (nécessitent finalisation)
+- 7 modules utilisables (Loyalty, Roulette, Kitchen Tablet, Staff Tablet, POS, Theme, Pages Builder)
+- 7 modules partiels (nécessitent finalisation)
 - 5 modules non codés
 
 **Bloquages critiques:**
