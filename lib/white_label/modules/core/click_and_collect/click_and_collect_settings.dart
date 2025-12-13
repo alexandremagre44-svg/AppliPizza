@@ -143,7 +143,7 @@ class TimeSlot {
   }
 
   @override
-  String toString() => '$startTime - $endTime';
+  String toString() => '$startTime-$endTime';
 }
 
 /// Paramètres de configuration du module Click & Collect.
