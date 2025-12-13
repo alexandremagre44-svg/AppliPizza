@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'pos_shell_scaffold.dart';
 import 'widgets/pos_catalog_view.dart';
-import 'widgets/pos_cart_panel.dart';
-import 'widgets/pos_actions_panel.dart';
+import 'widgets/pos_cart_panel_v2.dart';
+import 'widgets/pos_actions_panel_v2.dart';
 
 /// Écran principal de la caisse (POS)
 /// 
@@ -64,7 +64,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           flex: 1,
           child: Container(
             color: Colors.white,
-            child: const PosCartPanel(),
+            child: const PosCartPanelV2(),
           ),
         ),
         const VerticalDivider(width: 1),
@@ -74,7 +74,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           width: 300,
           child: Container(
             color: Colors.white,
-            child: const PosActionsPanel(),
+            child: const PosActionsPanelV2(),
           ),
         ),
       ],
@@ -102,7 +102,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               Expanded(
                 child: Container(
                   color: Colors.white,
-                  child: const PosCartPanel(),
+                  child: const PosCartPanelV2(),
                 ),
               ),
               const VerticalDivider(width: 1),
@@ -110,7 +110,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 width: 200,
                 child: Container(
                   color: Colors.white,
-                  child: const PosActionsPanel(),
+                  child: const PosActionsPanelV2(),
                 ),
               ),
             ],
