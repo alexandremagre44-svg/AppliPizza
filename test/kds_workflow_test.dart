@@ -59,12 +59,22 @@ void main() {
       // Arrange
       final selections = [
         OrderOptionSelection(
-          optionGroupName: 'Taille',
-          selectedChoices: ['Grande'],
+          optionGroupId: 'size',
+          optionId: 'large',
+          label: 'Grande',
+          priceDelta: 200,
         ),
         OrderOptionSelection(
-          optionGroupName: 'Suppléments',
-          selectedChoices: ['Extra fromage', 'Olives'],
+          optionGroupId: 'supplements',
+          optionId: 'extra-cheese',
+          label: 'Extra fromage',
+          priceDelta: 150,
+        ),
+        OrderOptionSelection(
+          optionGroupId: 'supplements',
+          optionId: 'olives',
+          label: 'Olives',
+          priceDelta: 100,
         ),
       ];
       
@@ -82,9 +92,7 @@ void main() {
       final formatted = formatSelections(selections);
       
       // Assert
-      expect(formatted, contains('Taille'));
       expect(formatted, contains('Grande'));
-      expect(formatted, contains('Suppléments'));
       expect(formatted, contains('Extra fromage'));
       expect(formatted, contains('Olives'));
     });
@@ -206,8 +214,10 @@ PosOrder _createTestPosOrderWithItems() {
       imageUrl: '',
       selections: [
         OrderOptionSelection(
-          optionGroupName: 'Taille',
-          selectedChoices: ['Grande'],
+          optionGroupId: 'size',
+          optionId: 'large',
+          label: 'Grande',
+          priceDelta: 200,
         ),
       ],
     ),
