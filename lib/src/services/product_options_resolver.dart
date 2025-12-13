@@ -206,9 +206,10 @@ List<OptionGroup> _resolvePizzaOptions(
       maxSelections: null,
       displayOrder: 3,
       options: product.allowedSupplements.asMap().entries.map((entry) {
+        final ingredientId = entry.value;
         return OptionItem(
-          id: entry.value,
-          label: entry.value, // Use ID as label (not ideal but fallback)
+          id: ingredientId,
+          label: _formatIngredientLabel(ingredientId), // Capitalize and format
           priceDelta: 150, // Default +1.50€
           displayOrder: entry.key,
         );
@@ -270,6 +271,22 @@ List<OptionGroup> _resolveMenuOptions(Product product) {
   }
 
   return groups;
+}
+
+/// Formats an ingredient ID into a readable label.
+/// 
+/// Converts underscores/hyphens to spaces and capitalizes words.
+String _formatIngredientLabel(String ingredientId) {
+  // Replace underscores and hyphens with spaces
+  final words = ingredientId.replaceAll(RegExp(r'[_-]'), ' ').split(' ');
+  
+  // Capitalize each word
+  final capitalized = words.map((word) {
+    if (word.isEmpty) return word;
+    return word[0].toUpperCase() + word.substring(1).toLowerCase();
+  }).join(' ');
+  
+  return capitalized;
 }
 
 /// Helper to calculate the total price including option selections.

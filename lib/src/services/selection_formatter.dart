@@ -111,19 +111,14 @@ String? formatSelectionsCompact(List<OrderOptionSelection> selections) {
   }
 
   // Find size selection (most important)
-  final sizeSelection = selections.firstWhere(
-    (s) => s.optionGroupId == 'size',
-    orElse: () => OrderOptionSelection(
-      optionGroupId: '',
-      optionId: '',
-      label: '',
-      priceDelta: 0,
-    ),
+  final sizeSelection = selections.cast<OrderOptionSelection?>().firstWhere(
+    (s) => s?.optionGroupId == 'size',
+    orElse: () => null,
   );
 
   final parts = <String>[];
   
-  if (sizeSelection.optionGroupId.isNotEmpty) {
+  if (sizeSelection != null) {
     parts.add(sizeSelection.label);
   }
 

@@ -295,4 +295,58 @@ void main() {
       expect(finalPrice, 10.0);
     });
   });
+
+  group('Ingredient label formatting (fallback)', () {
+    test('formats ingredient IDs with underscores', () {
+      final pizza = Product(
+        id: 'pizza-1',
+        name: 'Custom',
+        description: 'Test',
+        price: 10.0,
+        imageUrl: 'url',
+        category: ProductCategory.pizza,
+        allowedSupplements: ['extra_cheese', 'black_olives'],
+      );
+
+      final groups = resolveOptionGroupsForProduct(product: pizza);
+      final toppingsGroup = groups.firstWhere((g) => g.id == 'toppings');
+
+      expect(toppingsGroup.options[0].label, 'Extra Cheese');
+      expect(toppingsGroup.options[1].label, 'Black Olives');
+    });
+
+    test('formats ingredient IDs with hyphens', () {
+      final pizza = Product(
+        id: 'pizza-1',
+        name: 'Custom',
+        description: 'Test',
+        price: 10.0,
+        imageUrl: 'url',
+        category: ProductCategory.pizza,
+        allowedSupplements: ['sun-dried-tomatoes'],
+      );
+
+      final groups = resolveOptionGroupsForProduct(product: pizza);
+      final toppingsGroup = groups.firstWhere((g) => g.id == 'toppings');
+
+      expect(toppingsGroup.options[0].label, 'Sun Dried Tomatoes');
+    });
+
+    test('formats simple ingredient IDs', () {
+      final pizza = Product(
+        id: 'pizza-1',
+        name: 'Custom',
+        description: 'Test',
+        price: 10.0,
+        imageUrl: 'url',
+        category: ProductCategory.pizza,
+        allowedSupplements: ['mushrooms'],
+      );
+
+      final groups = resolveOptionGroupsForProduct(product: pizza);
+      final toppingsGroup = groups.firstWhere((g) => g.id == 'toppings');
+
+      expect(toppingsGroup.options[0].label, 'Mushrooms');
+    });
+  });
 }
