@@ -1,7 +1,8 @@
 // lib/src/models/order.dart
 
 import 'package:uuid/uuid.dart';
-import '../providers/cart_provider.dart'; 
+import '../providers/cart_provider.dart';
+import 'order_option_selection.dart';
 // Assurez-vous d'avoir 'package:uuid/uuid.dart' dans votre pubspec.yaml
 
 /// Statuts possibles pour une commande
@@ -160,6 +161,7 @@ class Order {
     String? deliveryAreaId,
     double? deliveryFee,
   }) {
+    // PHASE A: Copy items with structured selections
     final itemsCopy = cartItems.map((item) => CartItem(
       id: item.id,
       productId: item.productId,
@@ -167,7 +169,8 @@ class Order {
       price: item.price,
       quantity: item.quantity,
       imageUrl: item.imageUrl,
-      customDescription: item.customDescription,
+      selections: item.selections, // New structured data
+      customDescription: item.legacyDescription, // Backward compatibility
       isMenu: item.isMenu,
     )).toList();
     
@@ -260,7 +263,10 @@ class Order {
       'price': item.price,
       'quantity': item.quantity,
       'imageUrl': item.imageUrl,
-      'customDescription': item.customDescription,
+      // PHASE A: Serialize selections as source of truth
+      'selections': item.selections.map((s) => s.toJson()).toList(),
+      // Keep legacyDescription for backward compatibility with old orders
+      'customDescription': item.legacyDescription,
       'isMenu': item.isMenu,
     }).toList(),
     'status': status,
@@ -285,16 +291,26 @@ class Order {
     id: json['id'] as String,
     total: (json['total'] as num).toDouble(),
     date: DateTime.parse(json['date'] as String),
-    items: (json['items'] as List).map((item) => CartItem(
-      id: item['id'] as String,
-      productId: item['productId'] as String,
-      productName: item['productName'] as String,
-      price: (item['price'] as num).toDouble(),
-      quantity: item['quantity'] as int,
-      imageUrl: item['imageUrl'] as String,
-      customDescription: item['customDescription'] as String?,
-      isMenu: item['isMenu'] as bool? ?? false,
-    )).toList(),
+    items: (json['items'] as List).map((item) {
+      // PHASE A: Handle both old and new formats
+      // New format has 'selections' array, old format only has 'customDescription'
+      final selectionsJson = item['selections'] as List?;
+      final selections = selectionsJson != null
+          ? selectionsJson.map((s) => OrderOptionSelection.fromJson(s as Map<String, dynamic>)).toList()
+          : <OrderOptionSelection>[]; // Empty list for old orders
+      
+      return CartItem(
+        id: item['id'] as String,
+        productId: item['productId'] as String,
+        productName: item['productName'] as String,
+        price: (item['price'] as num).toDouble(),
+        quantity: item['quantity'] as int,
+        imageUrl: item['imageUrl'] as String,
+        selections: selections, // New structured data
+        customDescription: item['customDescription'] as String?, // Backward compatibility
+        isMenu: item['isMenu'] as bool? ?? false,
+      );
+    }).toList(),
     status: json['status'] as String? ?? OrderStatus.pending,
     customerName: json['customerName'] as String?,
     customerPhone: json['customerPhone'] as String?,

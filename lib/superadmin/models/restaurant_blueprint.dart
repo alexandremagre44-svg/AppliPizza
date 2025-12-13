@@ -7,6 +7,8 @@
 /// et reste en Dart pur (pas de dépendances Firestore).
 library;
 
+import '../../white_label/restaurant/cashier_profile.dart';
+
 /// Configuration des modules activés pour un restaurant.
 /// 
 /// Représente les fonctionnalités disponibles dans l'application du restaurant.
@@ -335,6 +337,10 @@ class RestaurantBlueprintLight {
   /// Identifiant du template utilisé (ex: "pizzeria-template-1").
   final String? templateId;
 
+  /// Profil métier POS pour orienter le comportement de la caisse.
+  /// Valeur par défaut: CashierProfile.generic
+  final CashierProfile cashierProfile;
+
   // ==========================================================================
   // Brand
   // ==========================================================================
@@ -366,6 +372,7 @@ class RestaurantBlueprintLight {
     required this.slug,
     this.type = RestaurantType.custom,
     this.templateId,
+    this.cashierProfile = CashierProfile.generic,
     this.brand = const RestaurantBrandLight(),
     this.modules = const RestaurantModulesLight(),
     required this.createdAt,
@@ -380,6 +387,9 @@ class RestaurantBlueprintLight {
       slug: json['slug'] as String? ?? '',
       type: RestaurantTypeExtension.fromString(json['type'] as String?),
       templateId: json['templateId'] as String?,
+      cashierProfile: CashierProfileExtension.fromString(
+        json['cashierProfile'] as String?,
+      ),
       brand: json['brand'] != null
           ? RestaurantBrandLight.fromJson(json['brand'] as Map<String, dynamic>)
           : const RestaurantBrandLight(),
@@ -409,6 +419,7 @@ class RestaurantBlueprintLight {
       'slug': slug,
       'type': type.value,
       if (templateId != null) 'templateId': templateId,
+      'cashierProfile': cashierProfile.value,
       'brand': brand.toJson(),
       'modules': modules.toJson(),
       'createdAt': createdAt.toIso8601String(),
@@ -423,6 +434,7 @@ class RestaurantBlueprintLight {
     String? slug,
     RestaurantType? type,
     String? templateId,
+    CashierProfile? cashierProfile,
     RestaurantBrandLight? brand,
     RestaurantModulesLight? modules,
     DateTime? createdAt,
@@ -434,6 +446,7 @@ class RestaurantBlueprintLight {
       slug: slug ?? this.slug,
       type: type ?? this.type,
       templateId: templateId ?? this.templateId,
+      cashierProfile: cashierProfile ?? this.cashierProfile,
       brand: brand ?? this.brand,
       modules: modules ?? this.modules,
       createdAt: createdAt ?? this.createdAt,
@@ -464,7 +477,7 @@ class RestaurantBlueprintLight {
   @override
   String toString() {
     return 'RestaurantBlueprintLight(id: $id, name: $name, slug: $slug, '
-        'type: ${type.value}, modules: ${modules.enabledCount} enabled)';
+        'type: ${type.value}, cashierProfile: ${cashierProfile.value}, modules: ${modules.enabledCount} enabled)';
   }
 
   @override
@@ -476,6 +489,7 @@ class RestaurantBlueprintLight {
         other.slug == slug &&
         other.type == type &&
         other.templateId == templateId &&
+        other.cashierProfile == cashierProfile &&
         other.brand == brand &&
         other.modules == modules &&
         other.createdAt == createdAt &&
@@ -490,6 +504,7 @@ class RestaurantBlueprintLight {
       slug,
       type,
       templateId,
+      cashierProfile,
       brand,
       modules,
       createdAt,

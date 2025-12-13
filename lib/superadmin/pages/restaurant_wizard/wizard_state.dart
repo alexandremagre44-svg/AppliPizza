@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../white_label/core/module_registry.dart';
 import '../../../white_label/restaurant/restaurant_template.dart';
+import '../../../white_label/restaurant/cashier_profile.dart';
 import '../../models/restaurant_blueprint.dart';
 import '../../services/superadmin_restaurant_service.dart';
 import '../../services/restaurant_plan_service.dart';
@@ -32,16 +33,20 @@ enum WizardStep {
   /// Étape 3: Sélection du template.
   template,
 
-  /// Étape 4: Activation des modules.
+  /// Étape 4: Choix du profil métier caisse (conditionnelle, uniquement pour template vide).
+  cashierProfile,
+
+  /// Étape 5: Activation des modules.
   modules,
 
-  /// Étape 5: Aperçu et validation.
+  /// Étape 6: Aperçu et validation.
   preview,
 }
 
 /// Extension pour WizardStep.
 extension WizardStepExtension on WizardStep {
   /// Index de l'étape (0-based).
+  /// Note: L'étape cashierProfile est conditionnelle et son index peut être skippé.
   int get index {
     switch (this) {
       case WizardStep.identity:
@@ -50,10 +55,12 @@ extension WizardStepExtension on WizardStep {
         return 1;
       case WizardStep.template:
         return 2;
-      case WizardStep.modules:
+      case WizardStep.cashierProfile:
         return 3;
-      case WizardStep.preview:
+      case WizardStep.modules:
         return 4;
+      case WizardStep.preview:
+        return 5;
     }
   }
 
@@ -66,6 +73,8 @@ extension WizardStepExtension on WizardStep {
         return 'Marque';
       case WizardStep.template:
         return 'Template';
+      case WizardStep.cashierProfile:
+        return 'Profil Métier';
       case WizardStep.modules:
         return 'Modules';
       case WizardStep.preview:
@@ -82,6 +91,8 @@ extension WizardStepExtension on WizardStep {
         return 'Personnalisez les couleurs et le logo';
       case WizardStep.template:
         return 'Choisissez un template de départ';
+      case WizardStep.cashierProfile:
+        return 'Choisissez votre profil métier caisse';
       case WizardStep.modules:
         return 'Activez les fonctionnalités souhaitées';
       case WizardStep.preview:
@@ -98,6 +109,8 @@ extension WizardStepExtension on WizardStep {
         return 'palette';
       case WizardStep.template:
         return 'dashboard';
+      case WizardStep.cashierProfile:
+        return 'point_of_sale';
       case WizardStep.modules:
         return 'extension';
       case WizardStep.preview:
@@ -191,6 +204,15 @@ class RestaurantWizardState {
   /// Le template est optionnel, donc toujours valide.
   bool get isTemplateValid => true;
 
+  /// Vérifie si l'étape cashierProfile est affichée.
+  /// Uniquement affichée si le template vide est sélectionné.
+  bool get shouldShowCashierProfileStep =>
+      blueprint.templateId == 'blank-template';
+
+  /// Vérifie si le profil caisse est valide (Step 4).
+  /// Toujours valide car un profil par défaut est toujours défini.
+  bool get isCashierProfileValid => true;
+
   /// Vérifie si les modules sont valides (Step 4).
   /// Valide les dépendances des modules activés.
   bool get isModulesValid => validateModuleDependencies(enabledModuleIds);
@@ -209,6 +231,8 @@ class RestaurantWizardState {
         return isBrandValid;
       case WizardStep.template:
         return isTemplateValid;
+      case WizardStep.cashierProfile:
+        return isCashierProfileValid;
       case WizardStep.modules:
         return isModulesValid;
       case WizardStep.preview:
@@ -380,6 +404,9 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   /// ⚠️ IMPORTANT: Le template NE contrôle PAS les modules.
   /// Les modules recommandés sont pré-cochés mais peuvent être modifiés
   /// par le SuperAdmin à l'étape suivante.
+  /// 
+  /// Si un template métier est sélectionné (non vide), un CashierProfile
+  /// cohérent est automatiquement attribué.
   void selectTemplate(RestaurantTemplate template) {
     if (kDebugMode) {
       debugPrint('[Wizard] selectTemplate called: ${template.id}');
@@ -393,14 +420,20 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
         .map((m) => m.name)
         .toList();
     
+    // Auto-assign CashierProfile based on template
+    // For blank template, keep generic (will be set in cashierProfile step)
+    final cashierProfile = _getCashierProfileFromTemplate(template);
+    
     if (kDebugMode) {
       debugPrint('[Wizard] Recommended modules: $recommendedModuleIds');
+      debugPrint('[Wizard] Auto-assigned cashierProfile: ${cashierProfile.value}');
     }
     
-    // Mettre à jour le template ID et les modules recommandés (pas forcés)
+    // Mettre à jour le template ID, le cashierProfile et les modules recommandés
     state = state.copyWith(
       blueprint: state.blueprint.copyWith(
         templateId: templateId,
+        cashierProfile: cashierProfile,
         modules: _moduleIdsToModulesLight(recommendedModuleIds),
       ),
       // Create defensive copy to prevent unintended mutations
@@ -409,8 +442,37 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
     
     if (kDebugMode) {
       debugPrint('[Wizard] New templateId: ${state.blueprint.templateId}');
+      debugPrint('[Wizard] New cashierProfile: ${state.blueprint.cashierProfile.value}');
       debugPrint('[Wizard] State updated successfully');
     }
+  }
+
+  /// Détermine le CashierProfile à partir d'un template.
+  /// Pour le template vide, retourne generic (sera choisi manuellement).
+  CashierProfile _getCashierProfileFromTemplate(RestaurantTemplate template) {
+    switch (template.id) {
+      case 'pizzeria-classic':
+        return CashierProfile.pizzeria;
+      case 'fast-food-express':
+        return CashierProfile.fastFood;
+      case 'restaurant-premium':
+        return CashierProfile.restaurant;
+      case 'sushi-bar':
+        return CashierProfile.sushi;
+      case 'blank-template':
+      default:
+        return CashierProfile.generic;
+    }
+  }
+
+  /// Met à jour le profil caisse manuellement.
+  /// Utilisé dans l'étape conditionnelle pour le template vide.
+  void updateCashierProfile(CashierProfile profile) {
+    state = state.copyWith(
+      blueprint: state.blueprint.copyWith(
+        cashierProfile: profile,
+      ),
+    );
   }
 
   /// Active ou désactive un module par son ID.
@@ -532,15 +594,35 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
   }
 
   /// Passe à l'étape suivante.
+  /// Skip l'étape cashierProfile si elle ne doit pas être affichée.
   void nextStep() {
     if (!state.canGoNext) return;
-    state = state.copyWith(currentStep: state.currentStep.next);
+    
+    var nextStep = state.currentStep.next;
+    if (nextStep == null) return;
+    
+    // Skip cashierProfile step if not needed (template is not blank)
+    if (nextStep == WizardStep.cashierProfile && !state.shouldShowCashierProfileStep) {
+      nextStep = WizardStep.modules;
+    }
+    
+    state = state.copyWith(currentStep: nextStep);
   }
 
   /// Revient à l'étape précédente.
+  /// Skip l'étape cashierProfile si elle ne doit pas être affichée.
   void previousStep() {
     if (!state.canGoBack) return;
-    state = state.copyWith(currentStep: state.currentStep.previous);
+    
+    var prevStep = state.currentStep.previous;
+    if (prevStep == null) return;
+    
+    // Skip cashierProfile step if not needed (template is not blank)
+    if (prevStep == WizardStep.cashierProfile && !state.shouldShowCashierProfileStep) {
+      prevStep = WizardStep.template;
+    }
+    
+    state = state.copyWith(currentStep: prevStep);
   }
 
   /// Va directement à une étape spécifique.
@@ -588,6 +670,7 @@ class RestaurantWizardNotifier extends StateNotifier<RestaurantWizardState> {
         enabledModuleIds: state.enabledModuleIds,
         brand: brandData,
         templateId: state.blueprint.templateId,
+        cashierProfile: state.blueprint.cashierProfile.value,
       );
 
       // Met à jour le blueprint avec l'ID généré

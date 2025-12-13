@@ -14,6 +14,7 @@ library;
 import '../core/module_id.dart';
 import '../core/module_config.dart';
 import 'restaurant_template.dart';
+import 'cashier_profile.dart';
 import '../modules/appearance/theme/theme_module_config.dart';
 import '../modules/appearance/pages_builder/pages_builder_module_config.dart';
 import '../modules/core/delivery/delivery_module_config.dart';
@@ -247,6 +248,9 @@ class RestaurantPlanUnified {
   /// Identifiant du template utilisé (optionnel).
   final String? templateId;
 
+  /// Profil métier POS pour orienter le comportement de la caisse.
+  final CashierProfile cashierProfile;
+
   /// Date de création du plan.
   final DateTime? createdAt;
 
@@ -338,6 +342,7 @@ class RestaurantPlanUnified {
     required this.name,
     required this.slug,
     this.templateId,
+    this.cashierProfile = CashierProfile.generic,
     this.createdAt,
     this.updatedAt,
     this.modules = const [],
@@ -371,6 +376,7 @@ class RestaurantPlanUnified {
     String? name,
     String? slug,
     String? templateId,
+    CashierProfile? cashierProfile,
     DateTime? createdAt,
     DateTime? updatedAt,
     List<ModuleConfig>? modules,
@@ -402,6 +408,7 @@ class RestaurantPlanUnified {
       name: name ?? this.name,
       slug: slug ?? this.slug,
       templateId: templateId ?? this.templateId,
+      cashierProfile: cashierProfile ?? this.cashierProfile,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       modules: modules ?? this.modules,
@@ -440,6 +447,7 @@ class RestaurantPlanUnified {
       'name': name,
       'slug': slug,
       if (templateId != null) 'templateId': templateId,
+      'cashierProfile': cashierProfile.value,
       if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
       if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
       'modules': modules.map((m) => m.toJson()).toList(),
@@ -750,6 +758,9 @@ class RestaurantPlanUnified {
       name: json['name'] as String? ?? '',
       slug: json['slug'] as String? ?? '',
       templateId: json['templateId'] as String?,
+      cashierProfile: CashierProfileExtension.fromString(
+        json['cashierProfile'] as String?,
+      ),
       createdAt: createdAt,
       updatedAt: updatedAt,
       modules: modules,
