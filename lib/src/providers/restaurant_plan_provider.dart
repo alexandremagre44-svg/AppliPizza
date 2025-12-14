@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../white_label/core/module_id.dart';
 import '../../white_label/core/module_config.dart';
 import '../../white_label/core/system_pages.dart';
+import '../../white_label/modules/core/click_and_collect/click_and_collect_module_config.dart';
 import '../../white_label/modules/core/delivery/delivery_module_config.dart';
 import '../../white_label/modules/core/delivery/delivery_settings.dart';
 import '../../white_label/modules/core/ordering/ordering_module_config.dart';
@@ -371,5 +372,39 @@ final enabledSystemPagesProvider = Provider<List<SystemPageId>>((ref) {
 /// This checks if the ordering module is enabled, which includes cart functionality.
 final isCartPageEnabledProvider = Provider<bool>((ref) {
   final config = ref.watch(orderingConfigUnifiedProvider);
+  return config?.enabled ?? false;
+});
+
+/// Provider pour les paramètres de Click & Collect depuis le plan unifié.
+///
+/// Retourne null si:
+/// - Le plan unifié n'est pas chargé
+/// - Le module clickAndCollect n'existe pas dans le plan
+///
+/// Exemple d'utilisation:
+/// ```dart
+/// final clickAndCollectConfig = ref.watch(clickAndCollectConfigUnifiedProvider);
+/// if (clickAndCollectConfig != null && clickAndCollectConfig.enabled) {
+///   final settings = clickAndCollectConfig.settings;
+///   // Utiliser les settings
+/// }
+/// ```
+final clickAndCollectConfigUnifiedProvider = Provider<ClickAndCollectModuleConfig?>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.asData?.value;
+
+    if (plan == null) return null;
+
+    return plan.clickAndCollect;
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);
+
+/// Provider pour vérifier si le module Click & Collect est activé (version unifiée).
+///
+/// Shortcut pratique pour les vérifications rapides.
+final isClickAndCollectEnabledUnifiedProvider = Provider<bool>((ref) {
+  final config = ref.watch(clickAndCollectConfigUnifiedProvider);
   return config?.enabled ?? false;
 });
