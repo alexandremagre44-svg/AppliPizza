@@ -33,6 +33,8 @@ import '../../models/models.dart';
 import '../../utils/builder_modules.dart' as builder_modules;
 import '../../../src/providers/restaurant_plan_provider.dart';
 import '../../../white_label/restaurant/restaurant_plan_unified.dart';
+import '../../../white_label/core/module_id.dart';
+import '../../../white_label/core/module_category.dart';
 
 /// Dialog for selecting and adding a new block
 /// 
