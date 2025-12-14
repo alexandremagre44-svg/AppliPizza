@@ -11,8 +11,8 @@
 ///
 /// Architecture:
 /// UnifiedNavBarController
-///  ├─ gathers: system pages (menu, cart, profile)
-///  ├─ gathers: builder dynamic pages
+///  ├─ gathers: system pages (menu, cart)
+///  ├─ gathers: builder dynamic pages (including profile)
 ///  ├─ gathers: WL module pages
 ///  ├─ filters visibility (WL + builder + role)
 ///  └─ returns final tab list
@@ -80,8 +80,8 @@ class NavBarItem {
 
 /// Source type for navigation items
 enum NavItemSource {
-  system,   // System pages (menu, cart, profile)
-  builder,  // Builder dynamic pages
+  system,   // System pages (menu, cart only)
+  builder,  // Builder dynamic pages (including profile)
   module,   // Module-driven pages
 }
 
@@ -340,7 +340,7 @@ class UnifiedNavBarController {
   ///
   /// Ordering rules:
   /// 1. Builder custom tabs appear first (by bottomNavIndex)
-  /// 2. System pages appear next (menu, cart, profile)
+  /// 2. System pages appear next (menu, cart only)
   /// 3. Module tabs appear last (if any)
   static List<NavBarItem> _orderItems(List<NavBarItem> items) {
     final sorted = List<NavBarItem>.from(items);
