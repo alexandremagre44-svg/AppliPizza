@@ -67,7 +67,7 @@ Widget _placeholderModule(BuildContext context, String moduleName) {
 const Map<String, ModuleId> moduleIdMapping = {
   // Core ordering system modules
   'menu_catalog': ModuleId.ordering,
-  'profile_module': ModuleId.ordering,
+  // NOTE: profile_module has no ModuleId mapping - it's a business page, always available
   // Marketing modules
   'roulette_module': ModuleId.roulette,
   'loyalty_module': ModuleId.loyalty,
@@ -233,8 +233,8 @@ const List<ModuleConfig> availableModules = [
     name: 'Profil Utilisateur',
     description: 'Widget du profil avec informations et paramètres',
     icon: 'person',
-    isSystemModule: true,
-    requiredModuleId: null, // Toujours disponible
+    isSystemModule: false,
+    requiredModuleId: null, // Business page - always available
   ),
   
   // Marketing modules
