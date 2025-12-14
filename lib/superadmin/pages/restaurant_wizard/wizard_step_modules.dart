@@ -43,6 +43,12 @@ IconData _getModuleIcon(String moduleId) {
 /// Retourne une couleur pour une catégorie de module.
 Color _getCategoryColor(ModuleCategory category) {
   switch (category) {
+    case ModuleCategory.system:
+      return Colors.red;
+    case ModuleCategory.business:
+      return Colors.blue;
+    case ModuleCategory.visual:
+      return Colors.purple;
     case ModuleCategory.core:
       return Colors.blue;
     case ModuleCategory.payment:
