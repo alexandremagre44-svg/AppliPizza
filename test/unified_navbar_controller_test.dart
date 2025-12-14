@@ -303,8 +303,9 @@ void main() {
         true,
       );
 
-      // Profile is not a system page - it should come from Builder
-      // Default visibility is true when not in Builder pages
+      // Profile is not gathered as a system page, but this method
+      // returns true by default for unknown routes (legacy behavior)
+      // In practice, Profile will only appear if present in Builder pages
       expect(
         UnifiedNavBarController.isPageVisible(
           route: '/profile',
@@ -387,7 +388,8 @@ void main() {
       expect(profileItems.length, 1);
       expect(profileItems[0].source, NavItemSource.builder);
       expect(profileItems[0].label, 'Mon Profil');
-      expect(profileItems[0].isSystemPage, false); // Profile is NOT a system page
+      // isSystemPage is true because page.systemId is set (Builder override of system page)
+      expect(profileItems[0].isSystemPage, true);
     });
 
     test('Profile does NOT appear when not in Builder pages', () {
