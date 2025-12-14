@@ -310,7 +310,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
       case ModuleCategory.system:
         return Colors.red;
       case ModuleCategory.business:
-        return Colors.blue;
+        return Colors.indigo;
       case ModuleCategory.visual:
         return Colors.purple;
       case ModuleCategory.core:
@@ -320,13 +320,13 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
       case ModuleCategory.marketing:
         return Colors.orange;
       case ModuleCategory.operations:
-        return Colors.purple;
+        return Colors.brown;
       case ModuleCategory.appearance:
         return Colors.pink;
       case ModuleCategory.staff:
         return Colors.teal;
       case ModuleCategory.analytics:
-        return Colors.indigo;
+        return Colors.deepPurple;
     }
   }
 
