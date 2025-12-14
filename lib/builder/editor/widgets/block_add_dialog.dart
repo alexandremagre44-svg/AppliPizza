@@ -9,7 +9,7 @@
 //   - Disable: Fidélité, Roulette, Promotions, Newsletter, Tablette, etc.
 //   - In Builder, open "Ajouter un bloc" modal
 //   - Expected: "Modules système" section should show only modules corresponding to 
-//     enabled features (plus always-visible modules like menu_catalog and profile_module)
+//     enabled features (plus always-visible modules like menu_catalog)
 //   - The disabled modules should NOT appear in the list
 //
 // Test Case 2: Minimal configuration
@@ -22,7 +22,7 @@
 // Test Case 3: Plan not loaded (null)
 //   - If plan is not loaded or fails to load
 //   - Expected: BlockAddDialog should behave safely
-//     - Show only always-visible modules (menu_catalog, profile_module)
+//     - Show only always-visible modules (menu_catalog)
 //     - OR show nothing in system modules section
 //     - Should NOT show all modules like before (current behavior)
 
@@ -63,7 +63,7 @@ class BlockAddDialog extends StatelessWidget {
   /// Restaurant plan for filtering modules
   /// 
   /// If provided, only modules enabled in this plan will be shown.
-  /// If null, only always-visible modules (menu_catalog, profile_module) are shown.
+  /// If null, only always-visible modules (menu_catalog) are shown.
   final RestaurantPlanUnified? restaurantPlan;
 
   const BlockAddDialog({

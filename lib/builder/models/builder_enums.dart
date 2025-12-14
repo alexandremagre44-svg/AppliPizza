@@ -23,12 +23,12 @@ enum BuilderPageId {
   /// Contact page
   contact('contact', 'Contact'),
   
-  // ==================== SYSTEM PAGES ====================
+  // ==================== BUSINESS & SYSTEM PAGES ====================
   
-  /// User profile page (system page)
+  /// User profile page (business page - editable in Builder)
   profile('profile', 'Profil'),
   
-  /// Shopping cart page (system page)
+  /// Shopping cart page (system page - NOT editable in Builder)
   cart('cart', 'Panier'),
   
   /// Rewards page (system page)
@@ -94,7 +94,8 @@ enum BuilderPageId {
   /// 
   /// This list includes all BuilderPageId values:
   /// - home, menu, promo, about, contact (content pages, isSystemPage: false)
-  /// - profile, cart, rewards, roulette (protected functional pages, isSystemPage: true)
+  /// - profile (business page, isSystemPage: false, editable in Builder)
+  /// - cart, rewards, roulette (system pages, isSystemPage: true, NOT editable)
   /// 
   /// Note: The isSystemPage property is determined by the SystemPages registry,
   /// not by membership in this list. This list is primarily used for ID validation.
@@ -115,8 +116,8 @@ enum BuilderPageId {
   /// FIX M3: Aligned with SystemPages registry to use a single source of truth.
   /// This getter now delegates to SystemPages.isSystemPage() when the config exists.
   /// 
-  /// Protected system pages (cart, profile, rewards, roulette) return true.
-  /// Content pages (home, menu, promo, about, contact) return false per SystemPages config.
+  /// Protected system pages (cart, rewards, roulette) return true - NOT editable in Builder.
+  /// Business/Content pages (home, menu, promo, about, contact, profile) return false.
   /// 
   /// Note: "protected" means the page cannot be deleted and its pageId cannot be changed.
   bool get isSystemPage {
