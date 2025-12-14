@@ -18,25 +18,25 @@ enum ModuleCategory {
   visual,
 
   // Legacy categories kept for backward compatibility but deprecated
-  @Deprecated('Use ModuleCategory.business instead')
+  @Deprecated('Use ModuleCategory.business instead. Will be removed in v2.0.')
   core,
 
-  @Deprecated('Use ModuleCategory.system instead')
+  @Deprecated('Use ModuleCategory.system instead. Will be removed in v2.0.')
   payment,
 
-  @Deprecated('Use ModuleCategory.business instead')
+  @Deprecated('Use ModuleCategory.business instead. Will be removed in v2.0.')
   marketing,
 
-  @Deprecated('Use ModuleCategory.system instead')
+  @Deprecated('Use ModuleCategory.system instead. Will be removed in v2.0.')
   operations,
 
-  @Deprecated('Use ModuleCategory.visual instead')
+  @Deprecated('Use ModuleCategory.visual instead. Will be removed in v2.0.')
   appearance,
 
-  @Deprecated('Use ModuleCategory.business instead')
+  @Deprecated('Use ModuleCategory.business instead. Will be removed in v2.0.')
   staff,
 
-  @Deprecated('Use ModuleCategory.business instead')
+  @Deprecated('Use ModuleCategory.business instead. Will be removed in v2.0.')
   analytics,
 }
 
