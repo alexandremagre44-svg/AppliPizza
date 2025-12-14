@@ -182,10 +182,14 @@ class UnifiedNavBarController {
     return items;
   }
 
-  /// Gather system pages (menu, cart, profile)
+  /// Gather system pages (menu, cart)
   ///
   /// System pages are core application pages that should appear
   /// in the navbar based on module activation.
+  /// 
+  /// IMPORTANT: Profile is NOT a system page - it's a BUSINESS page
+  /// that should be managed by the Builder (gathered in _gatherBuilderPages).
+  /// Only Cart and Menu are true system pages for navigation purposes.
   static List<NavBarItem> _gatherSystemPages(RestaurantPlanUnified? plan) {
     final items = <NavBarItem>[];
 
@@ -211,15 +215,9 @@ class UnifiedNavBarController {
       ));
     }
 
-    // Profile - always visible
-    items.add(const NavBarItem(
-      route: '/profile',
-      label: 'Profil',
-      icon: 'person',
-      source: NavItemSource.system,
-      order: 102,
-      isSystemPage: true,
-    ));
+    // REMOVED: Profile is a BUSINESS page, not a system page.
+    // Profile should be managed by the Builder via _gatherBuilderPages().
+    // This ensures Profile is rendered by BuilderPageLoader, not system placeholders.
 
     debugPrint('[UnifiedNavBarController] Gathered ${items.length} system pages');
     return items;
