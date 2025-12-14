@@ -73,7 +73,7 @@ extension ModuleCategoryX on ModuleCategory {
   String get description {
     switch (this) {
       case ModuleCategory.system:
-        return 'Modules système (POS, cart, ordering, payments) - Routes fixes, non ajoutables au Builder';
+        return 'Modules système (POS, ordering, payments, etc.) - Routes fixes, non ajoutables au Builder';
       case ModuleCategory.business:
         return 'Modules métier (delivery, loyalty, promotions, etc.)';
       case ModuleCategory.visual:

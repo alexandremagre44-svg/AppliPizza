@@ -494,7 +494,8 @@ class SystemBlock extends BuilderBlock {
   /// - If plan is provided: adds WL modules from getBuilderModulesForPlan(plan)
   ///   which uses the wlToBuilderModules mapping
   /// - **FILTERS OUT system modules** (category == ModuleCategory.system)
-  ///   to prevent POS, cart, ordering, payments from appearing in Builder
+  ///   to prevent pos, ordering, payments, paymentTerminal, wallet,
+  ///   kitchen_tablet, staff_tablet from appearing in Builder
   /// 
   /// **No fallback behavior:**
   /// - Does NOT show all modules when plan is null

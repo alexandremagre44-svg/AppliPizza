@@ -62,8 +62,10 @@ void main() {
           reason: 'cart_module maps to ordering (system module)');
       
       // Business modules SHOULD appear if enabled
+      // Note: delivery_module is currently a system page (not in builder_modules mapping)
+      // but delivery is a business module, not a system module
       expect(filteredModules.contains('delivery_module'), false,
-          reason: 'delivery_module is a system page now, not a builder module');
+          reason: 'delivery_module is currently implemented as a system page');
       expect(filteredModules.contains('loyalty_module'), true,
           reason: 'loyalty is a business module');
       expect(filteredModules.contains('roulette_module'), true,
