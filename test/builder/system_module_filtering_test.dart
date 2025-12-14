@@ -12,23 +12,25 @@ void main() {
   group('System Module Filtering', () {
     test('system modules are correctly identified', () {
       // Verify that system modules are categorized correctly
+      // According to WL Doctrine: pos, ordering, cart, payments, kitchen_tablet, staff_tablet
       expect(ModuleId.pos.isSystemModule, true);
       expect(ModuleId.ordering.isSystemModule, true);
       expect(ModuleId.payments.isSystemModule, true);
       expect(ModuleId.paymentTerminal.isSystemModule, true);
-      expect(ModuleId.wallet.isSystemModule, true);
       expect(ModuleId.kitchen_tablet.isSystemModule, true);
       expect(ModuleId.staff_tablet.isSystemModule, true);
     });
 
     test('business modules are NOT system modules', () {
       // Verify that business modules are NOT system modules
+      // According to WL Doctrine: delivery, loyalty, promotions, wallet, etc.
       expect(ModuleId.delivery.isSystemModule, false);
       expect(ModuleId.clickAndCollect.isSystemModule, false);
       expect(ModuleId.loyalty.isSystemModule, false);
       expect(ModuleId.roulette.isSystemModule, false);
       expect(ModuleId.promotions.isSystemModule, false);
       expect(ModuleId.newsletter.isSystemModule, false);
+      expect(ModuleId.wallet.isSystemModule, false); // wallet is BUSINESS per doctrine
     });
 
     test('visual modules are NOT system modules', () {
@@ -96,23 +98,23 @@ void main() {
     });
 
     test('ModuleCategory.system is correctly assigned', () {
-      // Verify category assignment
+      // Verify category assignment per WL Doctrine
       expect(ModuleId.pos.category, ModuleCategory.system);
       expect(ModuleId.ordering.category, ModuleCategory.system);
       expect(ModuleId.payments.category, ModuleCategory.system);
       expect(ModuleId.paymentTerminal.category, ModuleCategory.system);
-      expect(ModuleId.wallet.category, ModuleCategory.system);
       expect(ModuleId.kitchen_tablet.category, ModuleCategory.system);
       expect(ModuleId.staff_tablet.category, ModuleCategory.system);
     });
 
     test('ModuleCategory.business is correctly assigned', () {
-      // Verify business category assignment
+      // Verify business category assignment per WL Doctrine
       expect(ModuleId.delivery.category, ModuleCategory.business);
       expect(ModuleId.clickAndCollect.category, ModuleCategory.business);
       expect(ModuleId.loyalty.category, ModuleCategory.business);
       expect(ModuleId.roulette.category, ModuleCategory.business);
       expect(ModuleId.promotions.category, ModuleCategory.business);
+      expect(ModuleId.wallet.category, ModuleCategory.business); // wallet is BUSINESS per doctrine
     });
 
     test('ModuleCategory.visual is correctly assigned', () {
@@ -164,13 +166,15 @@ void main() {
       expect(filteredModules.contains('roulette_module'), false);
     });
 
-    test('payment modules are system modules', () {
-      // Verify all payment-related modules are system modules
+    test('payment core modules are system modules', () {
+      // Verify payment CORE modules are system modules per WL Doctrine
       expect(ModuleId.payments.isSystemModule, true);
       expect(ModuleId.paymentTerminal.isSystemModule, true);
-      expect(ModuleId.wallet.isSystemModule, true);
       
-      // They should never appear in Builder even if enabled
+      // But wallet is a BUSINESS module per WL Doctrine
+      expect(ModuleId.wallet.isSystemModule, false);
+      
+      // Payment CORE modules should never appear in Builder even if enabled
       final plan = RestaurantPlanUnified(
         restaurantId: 'test_resto',
         name: 'Test Restaurant',
@@ -180,10 +184,12 @@ void main() {
 
       final filteredModules = SystemBlock.getFilteredModules(plan);
       
-      // Payment modules should not have builder equivalents
+      // Payment core modules should not have builder equivalents
       // and should not appear in filtered modules
-      expect(filteredModules.any((m) => m.contains('payment')), false);
-      expect(filteredModules.any((m) => m.contains('wallet')), false);
+      expect(filteredModules.any((m) => m.contains('payment') && m != 'wallet'), false);
+      
+      // Wallet could appear in Builder if it has a builder module mapping
+      // (wallet is business, not system)
     });
   });
 }

@@ -1,5 +1,23 @@
 # System Module Categorization Implementation
 
+## White-Label Doctrine
+
+This implementation follows the **White-Label Doctrine** - a comprehensive set of rules ensuring coherent, extensible module management:
+
+### Core Principles
+
+1. **SuperAdmin = Total Control**: ALL modules (including system) are activatable/deactivatable
+2. **ModuleGate = Single Source of Truth**: All runtime decisions go through ModuleGate
+3. **System Modules ≠ Builder Blocks**: System modules never appear in Pages Builder
+4. **No Silent Auto-Activation**: No module is forced ON by code
+5. **Silent Failures**: Disabled modules redirect silently without error UI
+
+### Module Categories
+
+- **SYSTEM**: Runtime core (routes, services) - pos, ordering, cart, payments, tablets
+- **BUSINESS**: Optional business features - delivery, loyalty, promotions, wallet
+- **VISUAL**: Pages/Builder/Content - pages_builder, theme
+
 ## Overview
 
 This implementation enforces strict separation between system modules and builder modules in the Pizza Deli'Zza Flutter White-Label application. System modules (POS, cart, ordering, payments) are prevented from appearing in the Pages Builder while maintaining full SuperAdmin control.
@@ -69,17 +87,20 @@ Enhanced `BlockAddDialog` to:
 
 ### System Modules (Never in Builder)
 
+Runtime core modules - fixed routes and services
+
 | Module ID | Code | Description |
 |-----------|------|-------------|
 | pos | pos | Point of Sale/Caisse |
-| ordering | ordering | Online ordering (includes cart) |
+| ordering | ordering | Online ordering (includes cart/checkout) |
 | payments | payments | Payment core |
 | paymentTerminal | payment_terminal | Payment terminal |
-| wallet | wallet | Electronic wallet |
 | kitchen_tablet | kitchen_tablet | Kitchen display |
 | staff_tablet | staff_tablet | Staff tablet |
 
 ### Business Modules (Builder if Enabled)
+
+Optional business features - can appear in Builder when activated
 
 | Module ID | Code | Description |
 |-----------|------|-------------|
@@ -89,6 +110,7 @@ Enhanced `BlockAddDialog` to:
 | roulette | roulette | Roulette game |
 | promotions | promotions | Promotions |
 | newsletter | newsletter | Newsletter |
+| wallet | wallet | Electronic wallet |
 | timeRecorder | time_recorder | Time tracking |
 | reporting | reporting | Reports |
 | exports | exports | Data exports |

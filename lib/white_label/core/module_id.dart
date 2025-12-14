@@ -157,32 +157,39 @@ extension ModuleIdX on ModuleId {
   /// 
   /// IMPORTANT: Les modules de catégorie `system` ne doivent JAMAIS
   /// apparaître dans le Pages Builder.
+  /// 
+  /// Classification selon la DOCTRINE WL:
+  /// - SYSTEM: pos, ordering, cart (via ordering), payments, kitchen_tablet, staff_tablet
+  /// - BUSINESS: delivery, click_and_collect, loyalty, promotions, roulette, wallet, campaigns, time_recorder
+  /// - VISUAL: pages_builder, theme
   ModuleCategory get category {
     switch (this) {
       // Modules SYSTÈME - Routes fixes, JAMAIS dans le Builder
+      // Ces modules représentent le runtime core (routes, services)
       case ModuleId.pos:
-      case ModuleId.ordering:
+      case ModuleId.ordering:           // inclut cart/checkout
       case ModuleId.payments:
       case ModuleId.paymentTerminal:
-      case ModuleId.wallet:
       case ModuleId.kitchen_tablet:
       case ModuleId.staff_tablet:
         return ModuleCategory.system;
       
-      // Modules MÉTIER - Peuvent être ajoutés au Builder si activés
+      // Modules MÉTIER - Fonctionnalités business optionnelles
+      // Peuvent être ajoutés au Builder si activés
       case ModuleId.delivery:
       case ModuleId.clickAndCollect:
       case ModuleId.loyalty:
       case ModuleId.roulette:
       case ModuleId.promotions:
       case ModuleId.newsletter:
+      case ModuleId.wallet:              // wallet est BUSINESS selon doctrine
       case ModuleId.timeRecorder:
       case ModuleId.reporting:
       case ModuleId.exports:
       case ModuleId.campaigns:
         return ModuleCategory.business;
       
-      // Modules VISUELS
+      // Modules VISUELS - Pages / Builder / Contenu
       case ModuleId.theme:
       case ModuleId.pagesBuilder:
         return ModuleCategory.visual;
@@ -194,8 +201,8 @@ extension ModuleIdX on ModuleId {
   /// Les modules système sont des routes/pages FIXES qui ne doivent
   /// JAMAIS être ajoutables comme blocs ou pages dans le Builder.
   /// 
-  /// Retourne `true` pour: pos, ordering, payments, paymentTerminal,
-  /// wallet, kitchen_tablet, staff_tablet
+  /// Retourne `true` pour: pos, ordering (inclut cart), payments,
+  /// paymentTerminal, kitchen_tablet, staff_tablet
   bool get isSystemModule => category == ModuleCategory.system;
 
   // TODO: Ajouter une icône (IconData) pour chaque module
