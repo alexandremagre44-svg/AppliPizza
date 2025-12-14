@@ -347,7 +347,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
       case ModuleCategory.operations:
         return Icons.restaurant;
       case ModuleCategory.appearance:
-        return Icons.palette;
+        return Icons.color_lens;
       case ModuleCategory.staff:
         return Icons.people;
       case ModuleCategory.analytics:
