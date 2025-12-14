@@ -90,15 +90,18 @@ enum BuilderPageId {
   /// Throws: [FormatException] if value is not a known page ID
   static BuilderPageId fromJson(String json) => fromString(json);
   
-  /// List of known page IDs for the Builder system
+  /// List of reserved page IDs that cannot be used for custom pages
   /// 
-  /// This list includes all BuilderPageId values:
+  /// This list includes all predefined BuilderPageId values to prevent ID conflicts:
   /// - home, menu, promo, about, contact (content pages, isSystemPage: false)
   /// - profile (business page, isSystemPage: false, editable in Builder)
   /// - cart, rewards, roulette (system pages, isSystemPage: true, NOT editable)
   /// 
-  /// Note: The isSystemPage property is determined by the SystemPages registry,
-  /// not by membership in this list. This list is primarily used for ID validation.
+  /// Note: Being in this list does NOT mean a page is a system page.
+  /// The isSystemPage property is determined by the SystemPages registry.
+  /// This list is used for ID validation to prevent custom pages from conflicting with predefined pages.
+  /// 
+  /// TODO: Consider renaming to `reservedPageIds` or `knownPageIds` for clarity.
   static const List<String> systemPageIds = [
     'home',
     'menu', 
