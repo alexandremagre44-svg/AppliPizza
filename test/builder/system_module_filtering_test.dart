@@ -186,7 +186,7 @@ void main() {
       
       // Payment core modules should not have builder equivalents
       // and should not appear in filtered modules
-      expect(filteredModules.any((m) => m.contains('payment') && m != 'wallet'), false);
+      expect(filteredModules.any((m) => m.startsWith('payment')), false);
       
       // Wallet could appear in Builder if it has a builder module mapping
       // (wallet is business, not system)

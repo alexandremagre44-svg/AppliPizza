@@ -159,9 +159,12 @@ extension ModuleIdX on ModuleId {
   /// apparaître dans le Pages Builder.
   /// 
   /// Classification selon la DOCTRINE WL:
-  /// - SYSTEM: pos, ordering, cart (via ordering), payments, kitchen_tablet, staff_tablet
+  /// - SYSTEM: pos, ordering (includes cart/checkout functionality), payments, kitchen_tablet, staff_tablet
   /// - BUSINESS: delivery, click_and_collect, loyalty, promotions, roulette, wallet, campaigns, time_recorder
   /// - VISUAL: pages_builder, theme
+  /// 
+  /// Note: Cart and checkout are not separate ModuleId values - they are functionality
+  /// provided by the ordering module. When ordering is enabled, cart/checkout are available.
   ModuleCategory get category {
     switch (this) {
       // Modules SYSTÈME - Routes fixes, JAMAIS dans le Builder
