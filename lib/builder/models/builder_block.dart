@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'builder_enums.dart';
 import '../utils/firestore_parsing_helpers.dart';
 import '../../white_label/core/module_id.dart';
+import '../../white_label/core/module_category.dart';
 import '../../white_label/restaurant/restaurant_plan_unified.dart';
 import '../utils/builder_modules.dart' as builder_modules;
 
