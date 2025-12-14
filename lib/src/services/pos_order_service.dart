@@ -3,7 +3,7 @@
 /// Service for managing POS orders with complete workflow
 library;
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:uuid/uuid.dart';
 import '../models/order.dart';
 import '../models/pos_order.dart';
@@ -17,13 +17,13 @@ const _uuid = Uuid();
 
 /// POS Order Service
 class PosOrderService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final firestore.FirebaseFirestore _firestore = firestore.FirebaseFirestore.instance;
   final String appId;
   
   PosOrderService({required this.appId});
   
   /// Orders collection
-  CollectionReference get _ordersCollection => FirestorePaths.orders(appId);
+  firestore.CollectionReference get _ordersCollection => FirestorePaths.orders(appId);
   
   /// Create a new POS order (draft state)
   Future<String> createDraftOrder({
@@ -68,8 +68,8 @@ class PosOrderService {
     final docData = posOrder.toJson();
     docData['staffId'] = staffId;
     docData['staffName'] = staffName;
-    docData['createdAt'] = FieldValue.serverTimestamp();
-    docData['updatedAt'] = FieldValue.serverTimestamp();
+    docData['createdAt'] = firestore.FieldValue.serverTimestamp();
+    docData['updatedAt'] = firestore.FieldValue.serverTimestamp();
     
     final docRef = await _ordersCollection.add(docData);
     return docRef.id;
@@ -110,7 +110,7 @@ class PosOrderService {
       'payment': payment.toJson(),
       'paymentMethod': payment.method,
       'statusHistory': statusHistory,
-      'updatedAt': FieldValue.serverTimestamp(),
+      'updatedAt': firestore.FieldValue.serverTimestamp(),
     });
   }
   
@@ -145,7 +145,7 @@ class PosOrderService {
     await _ordersCollection.doc(orderId).update({
       'status': newStatus,
       'statusHistory': statusHistory,
-      'updatedAt': FieldValue.serverTimestamp(),
+      'updatedAt': firestore.FieldValue.serverTimestamp(),
     });
   }
   
@@ -184,9 +184,9 @@ class PosOrderService {
       'status': PosOrderStatus.cancelled,
       'cancellationReason': reason,
       'cancelledBy': staffId,
-      'cancelledAt': FieldValue.serverTimestamp(),
+      'cancelledAt': firestore.FieldValue.serverTimestamp(),
       'statusHistory': statusHistory,
-      'updatedAt': FieldValue.serverTimestamp(),
+      'updatedAt': firestore.FieldValue.serverTimestamp(),
     });
   }
   
@@ -225,9 +225,9 @@ class PosOrderService {
       'status': PosOrderStatus.refunded,
       'refundReason': reason,
       'refundedBy': staffId,
-      'refundedAt': FieldValue.serverTimestamp(),
+      'refundedAt': firestore.FieldValue.serverTimestamp(),
       'statusHistory': statusHistory,
-      'updatedAt': FieldValue.serverTimestamp(),
+      'updatedAt': firestore.FieldValue.serverTimestamp(),
     });
   }
   
