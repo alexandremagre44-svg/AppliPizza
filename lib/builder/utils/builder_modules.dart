@@ -55,19 +55,19 @@ Widget _placeholderModule(BuildContext context, String moduleName) {
 /// validated against the restaurant's white-label plan.
 /// 
 /// Note: Multiple builder modules can map to the same ModuleId:
-/// - 'menu_catalog', 'cart_module', 'profile_module' → ModuleId.ordering
-///   (all part of the core ordering system)
+/// - 'menu_catalog' → ModuleId.ordering (core ordering system)
 /// - 'loyalty_module', 'rewards_module' → ModuleId.loyalty
 ///   (both require the loyalty feature)
 /// 
-/// Legacy modules without mapping:
+/// Modules without mapping (always available):
+/// - 'profile_module': Business page, always available (no ModuleId mapping)
 /// - 'accountActivity': Legacy module, always visible (no White-Label mapping)
 ///   This module represents account activity history and is kept for backward
 ///   compatibility. It's always displayed regardless of plan configuration.
 const Map<String, ModuleId> moduleIdMapping = {
   // Core ordering system modules
   'menu_catalog': ModuleId.ordering,
-  'profile_module': ModuleId.ordering,
+  // NOTE: profile_module has no ModuleId mapping - it's a business page, always available
   // Marketing modules
   'roulette_module': ModuleId.roulette,
   'loyalty_module': ModuleId.loyalty,
@@ -233,8 +233,8 @@ const List<ModuleConfig> availableModules = [
     name: 'Profil Utilisateur',
     description: 'Widget du profil avec informations et paramètres',
     icon: 'person',
-    isSystemModule: true,
-    requiredModuleId: null, // Toujours disponible
+    isSystemModule: false,
+    requiredModuleId: null, // Business page - always available
   ),
   
   // Marketing modules

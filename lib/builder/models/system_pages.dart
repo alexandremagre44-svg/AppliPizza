@@ -85,15 +85,16 @@ class SystemPages {
       firestoreId: 'cart',
       defaultName: 'Panier',
       defaultIcon: Icons.shopping_cart,
-      isSystemPage: true, // Protected: cart functionality
+      isSystemPage: true, // Protected: cart functionality - SYSTEM module
     ),
+    // Business pages (editable in Builder)
     BuilderPageId.profile: SystemPageConfig(
       pageId: BuilderPageId.profile,
       route: '/profile',
       firestoreId: 'profile',
       defaultName: 'Profil',
       defaultIcon: Icons.person,
-      isSystemPage: true, // Protected: user profile functionality
+      isSystemPage: false, // Business page - editable in Builder
     ),
     BuilderPageId.rewards: SystemPageConfig(
       pageId: BuilderPageId.rewards,

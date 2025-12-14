@@ -490,7 +490,7 @@ class SystemBlock extends BuilderBlock {
   /// Uses the proper WL → Builder mapping from builder_modules.dart.
   /// 
   /// **Behavior:**
-  /// - Always includes SystemModules.alwaysVisible (menu_catalog, profile_module)
+  /// - Always includes SystemModules.alwaysVisible (menu_catalog)
   /// - If plan is null: returns ONLY always-visible modules (strict filtering)
   /// - If plan is provided: adds WL modules from getBuilderModulesForPlan(plan)
   ///   which uses the wlToBuilderModules mapping
@@ -503,7 +503,7 @@ class SystemBlock extends BuilderBlock {
   /// - Does NOT use old reverse-lookup logic
   /// - Uses the new WL → Builder mapping exclusively
   static List<String> getFilteredModules(RestaurantPlanUnified? plan) {
-    // Always include system modules that are always visible
+    // Always include core modules that are always visible
     final result = List<String>.from(SystemModules.alwaysVisible);
     
     // Add modules from the plan using proper WL → Builder mapping
@@ -749,7 +749,8 @@ class SystemBlock extends BuilderBlock {
 /// 
 /// These modules represent core functionality that should always be available:
 /// - menu_catalog: Core product display (always needed)
-/// - profile_module: User profile (always needed)
+/// 
+/// NOTE: profile_module removed - it's a business page, not a system module
 class SystemModules {
   SystemModules._(); // Private constructor to prevent instantiation
   
@@ -759,7 +760,7 @@ class SystemModules {
   /// available for use in the Builder editor.
   static const List<String> alwaysVisible = [
     'menu_catalog',    // Core product catalog - always needed
-    'profile_module',  // User profile - always needed
-    // Note: cart_module was removed - it's now a system page
+    // Note: cart_module was removed - it's a system page
+    // Note: profile_module removed - it's a business page, not a system module
   ];
 }

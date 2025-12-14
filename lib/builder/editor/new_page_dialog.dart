@@ -243,9 +243,9 @@ class _NewPageDialogState extends State<NewPageDialog> {
                     if (v == null || v.trim().isEmpty) {
                       return 'L\'ID est obligatoire';
                     }
-                    // Prevent creating system pages
+                    // Prevent creating pages with reserved IDs
                     if (BuilderPageId.systemPageIds.contains(v.trim().toLowerCase())) {
-                      return 'Cet ID est réservé aux pages système (profile, cart, rewards, roulette)';
+                      return 'Cet ID est réservé (home, menu, profile, cart, etc.)';
                     }
                     return null;
                   },

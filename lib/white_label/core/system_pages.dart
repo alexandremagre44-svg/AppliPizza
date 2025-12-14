@@ -1,38 +1,39 @@
 // lib/white_label/core/system_pages.dart
 /// System Page Manager
 /// 
-/// Manages system pages that are activated/deactivated based on the restaurant's
-/// White Label plan. These pages are not editable via the Builder.
+/// Manages runtime pages that are activated/deactivated based on the restaurant's
+/// White Label plan.
 /// 
-/// System pages include:
-/// - Menu: Product catalog (always active)
-/// - Cart: Shopping cart and checkout
-/// - Profile: User profile and settings
-/// - Admin: Admin panel access
+/// Pages include:
+/// - Menu: Product catalog (always active) - editable via Builder
+/// - Cart: Shopping cart and checkout - SYSTEM page (not editable via Builder)
+/// - Profile: User profile and settings - BUSINESS page (editable via Builder)
+/// - Admin: Admin panel access - SYSTEM page
 /// 
 /// Each page is configured with:
 /// - route: The URL path
 /// - title: Display name
 /// - icon: Bottom navigation icon
-/// - isSystem: Whether this is a non-editable system page
+/// - isSystem: Whether this is a non-editable system page (true for cart/admin, false for profile/menu)
 /// - widgetBuilder: Function to build the runtime widget
 
 import 'package:flutter/material.dart';
 
-/// System Page Identifiers
+/// Runtime Page Identifiers
 /// 
-/// Enum representing all possible system pages in the application.
+/// Enum representing all runtime pages in the application.
+/// Note: "System" in the enum name is legacy - not all pages are system pages.
 enum SystemPageId {
-  /// Product menu/catalog page (always active)
+  /// Product menu/catalog page (always active) - editable via Builder
   menu,
   
-  /// Shopping cart and checkout page (requires cart module in plan)
+  /// Shopping cart and checkout page (requires cart module in plan) - SYSTEM page
   cart,
   
-  /// User profile and settings page (always active)
+  /// User profile and settings page (always active) - BUSINESS page, editable via Builder
   profile,
   
-  /// Admin panel page (requires admin role)
+  /// Admin panel page (requires admin role) - SYSTEM page
   admin,
 }
 
@@ -134,7 +135,7 @@ class SystemPageManager {
       route: '/profile',
       title: 'Profil',
       icon: Icons.person,
-      isSystem: true,
+      isSystem: false, // Business page - editable via Builder, not a system page
       widgetBuilder: (context) {
         // NOTE: Placeholder widget used for initial implementation.
         // To wire up actual profile page, replace with:
