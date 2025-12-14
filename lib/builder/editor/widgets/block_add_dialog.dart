@@ -30,6 +30,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/models.dart';
+import '../../utils/builder_modules.dart' as builder_modules;
 import '../../../src/providers/restaurant_plan_provider.dart';
 import '../../../white_label/restaurant/restaurant_plan_unified.dart';
 
@@ -234,6 +235,7 @@ class BlockAddDialog extends StatelessWidget {
   Widget _buildSystemModulesList(BuildContext context, RestaurantPlanUnified? plan) {
     // Get filtered module IDs based on restaurant plan
     // This is the KEY CHANGE: using SystemBlock.getFilteredModules() to respect the plan
+    // SystemBlock.getFilteredModules() now filters out system modules automatically
     final moduleIds = SystemBlock.getFilteredModules(plan);
     
     // Dynamically construct module info using SystemBlock helper methods
@@ -251,8 +253,9 @@ class BlockAddDialog extends StatelessWidget {
     
     // DEBUG: Log filtered modules
     if (kDebugMode) {
-      debugPrint('   Available module IDs: ${moduleIds.join(", ")}');
+      debugPrint('🔍 [BlockAddDialog] SystemBlock.getFilteredModules returned: ${moduleIds.join(", ")}');
       debugPrint('   Filtered modules: ${filteredModules.map((m) => m.id).join(", ")}');
+      debugPrint('   Note: System modules (pos, cart, ordering, payments) are automatically filtered out');
     }
 
     return Column(
@@ -349,6 +352,26 @@ class BlockAddDialog extends StatelessWidget {
   }
 
   void _addSystemBlock(BuildContext context, String moduleType) {
+    // CRITICAL SAFETY CHECK: Prevent adding system modules
+    // Get the ModuleId for this builder module to check if it's a system module
+    final moduleId = builder_modules.getModuleIdForBuilder(moduleType);
+    
+    if (moduleId != null && moduleId.isSystemModule) {
+      // This is a system module and should NEVER be addable via Builder
+      if (kDebugMode) {
+        debugPrint('🚫 [BlockAddDialog] BLOCKED: Attempted to add system module: $moduleType (${moduleId.code})');
+      }
+      // Show a message and return without adding
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${moduleId.label} est un module système et ne peut pas être ajouté ici.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      Navigator.pop(context);
+      return;
+    }
+    
     // Check if this is a WL system module (cart, delivery, click&collect)
     // These should NOT be addable from the Builder
     final isWLSystemModule = [
@@ -360,7 +383,7 @@ class BlockAddDialog extends StatelessWidget {
     if (isWLSystemModule) {
       // These modules are system pages and should not be added via Builder
       if (kDebugMode) {
-        debugPrint('⚠️ [BlockAddDialog] Attempted to add system module: $moduleType');
+        debugPrint('⚠️ [BlockAddDialog] Attempted to add WL system module: $moduleType');
       }
       // Show a message and return without adding
       ScaffoldMessenger.of(context).showSnackBar(

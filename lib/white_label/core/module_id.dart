@@ -154,36 +154,59 @@ extension ModuleIdX on ModuleId {
   }
 
   /// Retourne la catégorie du module.
+  /// 
+  /// IMPORTANT: Les modules de catégorie `system` ne doivent JAMAIS
+  /// apparaître dans le Pages Builder.
+  /// 
+  /// Classification selon la DOCTRINE WL:
+  /// - SYSTEM: pos, ordering (includes cart/checkout functionality), payments, kitchen_tablet, staff_tablet
+  /// - BUSINESS: delivery, click_and_collect, loyalty, promotions, roulette, wallet, campaigns, time_recorder
+  /// - VISUAL: pages_builder, theme
+  /// 
+  /// Note: Cart and checkout are not separate ModuleId values - they are functionality
+  /// provided by the ordering module. When ordering is enabled, cart/checkout are available.
   ModuleCategory get category {
     switch (this) {
-      case ModuleId.ordering:
-      case ModuleId.delivery:
-      case ModuleId.clickAndCollect:
-        return ModuleCategory.core;
+      // Modules SYSTÈME - Routes fixes, JAMAIS dans le Builder
+      // Ces modules représentent le runtime core (routes, services)
+      case ModuleId.pos:
+      case ModuleId.ordering:           // inclut cart/checkout
       case ModuleId.payments:
       case ModuleId.paymentTerminal:
-      case ModuleId.wallet:
-        return ModuleCategory.payment;
+      case ModuleId.kitchen_tablet:
+      case ModuleId.staff_tablet:
+        return ModuleCategory.system;
+      
+      // Modules MÉTIER - Fonctionnalités business optionnelles
+      // Peuvent être ajoutés au Builder si activés
+      case ModuleId.delivery:
+      case ModuleId.clickAndCollect:
       case ModuleId.loyalty:
       case ModuleId.roulette:
       case ModuleId.promotions:
       case ModuleId.newsletter:
-        return ModuleCategory.marketing;
-      case ModuleId.kitchen_tablet:
-      case ModuleId.staff_tablet:
-      case ModuleId.pos:
+      case ModuleId.wallet:              // wallet est BUSINESS selon doctrine
       case ModuleId.timeRecorder:
-        return ModuleCategory.operations;
-      case ModuleId.theme:
-      case ModuleId.pagesBuilder:
-        return ModuleCategory.appearance;
       case ModuleId.reporting:
       case ModuleId.exports:
-        return ModuleCategory.analytics;
       case ModuleId.campaigns:
-        return ModuleCategory.marketing;
+        return ModuleCategory.business;
+      
+      // Modules VISUELS - Pages / Builder / Contenu
+      case ModuleId.theme:
+      case ModuleId.pagesBuilder:
+        return ModuleCategory.visual;
     }
   }
+
+  /// Vérifie si ce module est un module système.
+  /// 
+  /// Les modules système sont des routes/pages FIXES qui ne doivent
+  /// JAMAIS être ajoutables comme blocs ou pages dans le Builder.
+  /// 
+  /// Retourne `true` pour: pos, ordering (inclut cart), payments,
+  /// paymentTerminal, kitchen_tablet, staff_tablet
+  bool get isSystemModule => category == ModuleCategory.system;
 
   // TODO: Ajouter une icône (IconData) pour chaque module
   // TODO: Ajouter un routeName pour le routing runtime

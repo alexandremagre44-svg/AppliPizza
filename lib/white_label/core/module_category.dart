@@ -2,26 +2,41 @@
 ///
 /// Chaque module appartient à une catégorie qui permet de regrouper les fonctionnalités
 /// par domaine métier.
+///
+/// IMPORTANT: Les modules `system` ne doivent JAMAIS apparaître dans le Pages Builder.
+/// Ils représentent des routes/pages FIXES, hors builder.
 enum ModuleCategory {
-  /// Modules essentiels au fonctionnement de base (commandes, livraison, click & collect)
+  /// Modules système (POS, cart, ordering, payments)
+  /// Ces modules sont des routes/pages FIXES et ne doivent JAMAIS être ajoutables
+  /// comme blocs ou pages dans le Builder, même si activés par le SuperAdmin.
+  system,
+
+  /// Modules métier (delivery, loyalty, promotions, etc.)
+  business,
+
+  /// Modules visuels (pages_builder, theme)
+  visual,
+
+  // Legacy categories kept for backward compatibility but deprecated
+  @Deprecated('Use ModuleCategory.business instead. Will be removed in v2.0.')
   core,
 
-  /// Modules de paiement (paiements, terminaux, portefeuilles)
+  @Deprecated('Use ModuleCategory.system instead. Will be removed in v2.0.')
   payment,
 
-  /// Modules marketing (fidélité, roulette, promotions, newsletter)
+  @Deprecated('Use ModuleCategory.business instead. Will be removed in v2.0.')
   marketing,
 
-  /// Modules opérationnels (tablette cuisine, tablette staff, pointeuse)
+  @Deprecated('Use ModuleCategory.system instead. Will be removed in v2.0.')
   operations,
 
-  /// Modules d'apparence (thème, constructeur de pages)
+  @Deprecated('Use ModuleCategory.visual instead. Will be removed in v2.0.')
   appearance,
 
-  /// Modules staff (gestion du personnel)
+  @Deprecated('Use ModuleCategory.business instead. Will be removed in v2.0.')
   staff,
 
-  /// Modules d'analytics (reporting, exports)
+  @Deprecated('Use ModuleCategory.business instead. Will be removed in v2.0.')
   analytics,
 }
 
@@ -30,6 +45,13 @@ extension ModuleCategoryX on ModuleCategory {
   /// Retourne un libellé lisible pour la catégorie.
   String get label {
     switch (this) {
+      case ModuleCategory.system:
+        return 'Système';
+      case ModuleCategory.business:
+        return 'Métier';
+      case ModuleCategory.visual:
+        return 'Visuel';
+      // Legacy
       case ModuleCategory.core:
         return 'Cœur métier';
       case ModuleCategory.payment:
@@ -50,6 +72,13 @@ extension ModuleCategoryX on ModuleCategory {
   /// Retourne une description de la catégorie.
   String get description {
     switch (this) {
+      case ModuleCategory.system:
+        return 'Modules système (POS, ordering, payments, etc.) - Routes fixes, non ajoutables au Builder';
+      case ModuleCategory.business:
+        return 'Modules métier (delivery, loyalty, promotions, etc.)';
+      case ModuleCategory.visual:
+        return 'Modules visuels (pages_builder, theme)';
+      // Legacy
       case ModuleCategory.core:
         return 'Fonctionnalités essentielles pour la prise de commandes et la gestion des ventes.';
       case ModuleCategory.payment:
