@@ -154,36 +154,49 @@ extension ModuleIdX on ModuleId {
   }
 
   /// Retourne la catégorie du module.
+  /// 
+  /// IMPORTANT: Les modules de catégorie `system` ne doivent JAMAIS
+  /// apparaître dans le Pages Builder.
   ModuleCategory get category {
     switch (this) {
+      // Modules SYSTÈME - Routes fixes, JAMAIS dans le Builder
+      case ModuleId.pos:
       case ModuleId.ordering:
-      case ModuleId.delivery:
-      case ModuleId.clickAndCollect:
-        return ModuleCategory.core;
       case ModuleId.payments:
       case ModuleId.paymentTerminal:
       case ModuleId.wallet:
-        return ModuleCategory.payment;
+      case ModuleId.kitchen_tablet:
+      case ModuleId.staff_tablet:
+        return ModuleCategory.system;
+      
+      // Modules MÉTIER - Peuvent être ajoutés au Builder si activés
+      case ModuleId.delivery:
+      case ModuleId.clickAndCollect:
       case ModuleId.loyalty:
       case ModuleId.roulette:
       case ModuleId.promotions:
       case ModuleId.newsletter:
-        return ModuleCategory.marketing;
-      case ModuleId.kitchen_tablet:
-      case ModuleId.staff_tablet:
-      case ModuleId.pos:
       case ModuleId.timeRecorder:
-        return ModuleCategory.operations;
-      case ModuleId.theme:
-      case ModuleId.pagesBuilder:
-        return ModuleCategory.appearance;
       case ModuleId.reporting:
       case ModuleId.exports:
-        return ModuleCategory.analytics;
       case ModuleId.campaigns:
-        return ModuleCategory.marketing;
+        return ModuleCategory.business;
+      
+      // Modules VISUELS
+      case ModuleId.theme:
+      case ModuleId.pagesBuilder:
+        return ModuleCategory.visual;
     }
   }
+
+  /// Vérifie si ce module est un module système.
+  /// 
+  /// Les modules système sont des routes/pages FIXES qui ne doivent
+  /// JAMAIS être ajoutables comme blocs ou pages dans le Builder.
+  /// 
+  /// Retourne `true` pour: pos, ordering, payments, paymentTerminal,
+  /// wallet, kitchen_tablet, staff_tablet
+  bool get isSystemModule => category == ModuleCategory.system;
 
   // TODO: Ajouter une icône (IconData) pour chaque module
   // TODO: Ajouter un routeName pour le routing runtime

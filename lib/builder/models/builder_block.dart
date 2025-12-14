@@ -493,6 +493,8 @@ class SystemBlock extends BuilderBlock {
   /// - If plan is null: returns ONLY always-visible modules (strict filtering)
   /// - If plan is provided: adds WL modules from getBuilderModulesForPlan(plan)
   ///   which uses the wlToBuilderModules mapping
+  /// - **FILTERS OUT system modules** (category == ModuleCategory.system)
+  ///   to prevent POS, cart, ordering, payments from appearing in Builder
   /// 
   /// **No fallback behavior:**
   /// - Does NOT show all modules when plan is null
@@ -503,7 +505,40 @@ class SystemBlock extends BuilderBlock {
     final result = List<String>.from(SystemModules.alwaysVisible);
     
     // Add modules from the plan using proper WL → Builder mapping
-    result.addAll(builder_modules.getBuilderModulesForPlan(plan));
+    final builderModules = builder_modules.getBuilderModulesForPlan(plan);
+    
+    // CRITICAL: Filter out system modules to prevent them from appearing in Builder
+    final filteredBuilderModules = builderModules.where((moduleId) {
+      // Get the ModuleId for this builder module
+      final wlModuleId = builder_modules.getModuleIdForBuilder(moduleId);
+      
+      // If no mapping exists, allow it (legacy modules)
+      if (wlModuleId == null) {
+        if (kDebugMode) {
+          debugPrint('🔍 [SystemBlock.getFilteredModules] $moduleId: no WL mapping, allowing (legacy)');
+        }
+        return true;
+      }
+      
+      // Filter out system modules
+      if (wlModuleId.isSystemModule) {
+        if (kDebugMode) {
+          debugPrint('🚫 [SystemBlock.getFilteredModules] $moduleId: FILTERED OUT (system module: ${wlModuleId.code})');
+        }
+        return false;
+      }
+      
+      if (kDebugMode) {
+        debugPrint('✅ [SystemBlock.getFilteredModules] $moduleId: allowed (${wlModuleId.code}, category: ${wlModuleId.category.label})');
+      }
+      return true;
+    }).toList();
+    
+    result.addAll(filteredBuilderModules);
+    
+    if (kDebugMode) {
+      debugPrint('📦 [SystemBlock.getFilteredModules] Final modules: ${result.join(", ")}');
+    }
     
     return result;
   }

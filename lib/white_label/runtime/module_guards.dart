@@ -63,7 +63,7 @@ class ModuleGuard extends ConsumerWidget {
             debugPrint('🔒 [ModuleGuard] No plan loaded, redirecting from ${module.label}');
           }
           _redirect(context, fallbackRoute);
-          return _buildRedirectScreen();
+          return _buildRedirectScreen(module.isSystemModule);
         }
 
         // Check if module is enabled
@@ -74,7 +74,7 @@ class ModuleGuard extends ConsumerWidget {
             debugPrint('🔒 [ModuleGuard] Module ${module.label} is disabled, redirecting to $fallbackRoute');
           }
           _redirect(context, fallbackRoute);
-          return _buildRedirectScreen();
+          return _buildRedirectScreen(module.isSystemModule);
         }
 
         // Check if module is implemented
@@ -83,7 +83,7 @@ class ModuleGuard extends ConsumerWidget {
             debugPrint('⚠️ [ModuleGuard] Module ${module.label} is planned but not implemented, redirecting');
           }
           _redirect(context, fallbackRoute);
-          return _buildRedirectScreen();
+          return _buildRedirectScreen(module.isSystemModule);
         }
 
         if (logAccess && kDebugMode) {
@@ -108,7 +108,7 @@ class ModuleGuard extends ConsumerWidget {
           debugPrint('❌ [ModuleGuard] Error loading plan: $error');
         }
         _redirect(context, fallbackRoute);
-        return _buildRedirectScreen();
+        return _buildRedirectScreen(module.isSystemModule);
       },
     );
   }
@@ -121,7 +121,24 @@ class ModuleGuard extends ConsumerWidget {
     });
   }
 
-  Widget _buildRedirectScreen() {
+  /// Build redirect screen for disabled modules
+  /// 
+  /// For system modules (POS, cart, ordering, payments):
+  /// - Returns SizedBox.shrink() for silent redirection (no visible UI)
+  /// - No error message shown to end users
+  /// 
+  /// For other modules:
+  /// - Shows a loading indicator during redirect
+  Widget _buildRedirectScreen(bool isSystemModule) {
+    // For system modules: silent redirection with no UI
+    if (isSystemModule) {
+      if (kDebugMode) {
+        debugPrint('🚫 [ModuleGuard] System module OFF → silent redirection (no UI)');
+      }
+      return const SizedBox.shrink();
+    }
+    
+    // For other modules: show loading during redirect
     return const Scaffold(
       body: Center(
         child: CircularProgressIndicator(),
