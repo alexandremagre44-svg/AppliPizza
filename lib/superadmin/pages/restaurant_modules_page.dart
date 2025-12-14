@@ -307,6 +307,12 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
 
   Color _getCategoryColor(ModuleCategory category) {
     switch (category) {
+      case ModuleCategory.system:
+        return Colors.red;
+      case ModuleCategory.business:
+        return Colors.indigo;
+      case ModuleCategory.visual:
+        return Colors.purple;
       case ModuleCategory.core:
         return Colors.blue;
       case ModuleCategory.payment:
@@ -314,18 +320,24 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
       case ModuleCategory.marketing:
         return Colors.orange;
       case ModuleCategory.operations:
-        return Colors.purple;
+        return Colors.brown;
       case ModuleCategory.appearance:
         return Colors.pink;
       case ModuleCategory.staff:
         return Colors.teal;
       case ModuleCategory.analytics:
-        return Colors.indigo;
+        return Colors.deepPurple;
     }
   }
 
   IconData _getCategoryIcon(ModuleCategory category) {
     switch (category) {
+      case ModuleCategory.system:
+        return Icons.settings_system_daydream;
+      case ModuleCategory.business:
+        return Icons.business_center;
+      case ModuleCategory.visual:
+        return Icons.palette;
       case ModuleCategory.core:
         return Icons.shopping_cart;
       case ModuleCategory.payment:
@@ -335,7 +347,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
       case ModuleCategory.operations:
         return Icons.restaurant;
       case ModuleCategory.appearance:
-        return Icons.palette;
+        return Icons.color_lens;
       case ModuleCategory.staff:
         return Icons.people;
       case ModuleCategory.analytics:

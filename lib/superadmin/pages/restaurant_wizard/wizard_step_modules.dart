@@ -43,6 +43,12 @@ IconData _getModuleIcon(String moduleId) {
 /// Retourne une couleur pour une catégorie de module.
 Color _getCategoryColor(ModuleCategory category) {
   switch (category) {
+    case ModuleCategory.system:
+      return Colors.red;
+    case ModuleCategory.business:
+      return Colors.indigo;
+    case ModuleCategory.visual:
+      return Colors.purple;
     case ModuleCategory.core:
       return Colors.blue;
     case ModuleCategory.payment:
@@ -50,13 +56,13 @@ Color _getCategoryColor(ModuleCategory category) {
     case ModuleCategory.marketing:
       return Colors.orange;
     case ModuleCategory.operations:
-      return Colors.purple;
+      return Colors.brown;
     case ModuleCategory.appearance:
       return Colors.pink;
     case ModuleCategory.staff:
       return Colors.teal;
     case ModuleCategory.analytics:
-      return Colors.indigo;
+      return Colors.deepPurple;
   }
 }
 
