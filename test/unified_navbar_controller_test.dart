@@ -61,11 +61,11 @@ void main() {
         isAdmin: false,
       );
 
-      // Should have Menu, Cart (ordering active), Profile
-      expect(items.length, 3);
+      // Should have Menu, Cart (ordering active) - Profile is no longer a system page
+      expect(items.length, 2);
       expect(items.any((item) => item.route == '/menu'), true);
       expect(items.any((item) => item.route == '/cart'), true);
-      expect(items.any((item) => item.route == '/profile'), true);
+      expect(items.any((item) => item.route == '/profile'), false); // Profile is NOT a system page
     });
 
     test('computeNavBarItems hides cart when ordering module is inactive', () {
@@ -78,11 +78,11 @@ void main() {
         isAdmin: false,
       );
 
-      // Should have Menu and Profile, but NOT Cart
-      expect(items.length, 2);
+      // Should have Menu only, NOT Cart or Profile (Profile is a Builder page)
+      expect(items.length, 1);
       expect(items.any((item) => item.route == '/menu'), true);
       expect(items.any((item) => item.route == '/cart'), false);
-      expect(items.any((item) => item.route == '/profile'), true);
+      expect(items.any((item) => item.route == '/profile'), false); // Profile is NOT a system page
     });
 
     test('computeNavBarItems includes builder pages marked for bottomBar', () {
@@ -103,10 +103,10 @@ void main() {
         isAdmin: false,
       );
 
-      // Should have builder page + system pages
+      // Should have builder page + system pages (Menu only, no Profile)
       expect(items.any((item) => item.route == '/promo'), true);
       expect(items.any((item) => item.route == '/menu'), true);
-      expect(items.any((item) => item.route == '/profile'), true);
+      expect(items.any((item) => item.route == '/profile'), false); // Profile must come from Builder
     });
 
     test('computeNavBarItems filters out disabled builder pages', () {
@@ -225,7 +225,7 @@ void main() {
 
       // System pages should follow
       final systemItems = items.where((item) => item.source == NavItemSource.system).toList();
-      expect(systemItems.length, 3); // Menu, Cart, Profile
+      expect(systemItems.length, 2); // Menu, Cart only (Profile is NOT a system page)
     });
 
     test('computeNavBarItems removes duplicates, preferring builder over system', () {
@@ -303,6 +303,9 @@ void main() {
         true,
       );
 
+      // Profile is not gathered as a system page, but this method
+      // returns true by default for unknown routes (legacy behavior)
+      // In practice, Profile will only appear if present in Builder pages
       expect(
         UnifiedNavBarController.isPageVisible(
           route: '/profile',
@@ -358,6 +361,53 @@ void main() {
       // Loyalty and roulette should NOT have tabs (they're in Profile)
       expect(items.any((item) => item.moduleId == ModuleId.loyalty), false);
       expect(items.any((item) => item.moduleId == ModuleId.roulette), false);
+    });
+
+    test('Profile page comes from Builder, not system pages', () {
+      final plan = createTestPlan(activeModules: ['ordering']);
+      final builderPages = [
+        createBuilderPage(
+          pageKey: 'profile',
+          route: '/profile',
+          name: 'Mon Profil',
+          icon: 'person',
+          order: 3,
+          displayLocation: 'bottomBar',
+          systemId: BuilderPageId.profile,
+        ),
+      ];
+
+      final items = UnifiedNavBarController.computeNavBarItems(
+        builderPages: builderPages,
+        plan: plan,
+        isAdmin: false,
+      );
+
+      // Profile should appear and come from Builder
+      final profileItems = items.where((item) => item.route == '/profile').toList();
+      expect(profileItems.length, 1);
+      expect(profileItems[0].source, NavItemSource.builder);
+      expect(profileItems[0].label, 'Mon Profil');
+      // isSystemPage is true because page.systemId is set (Builder override of system page)
+      expect(profileItems[0].isSystemPage, true);
+    });
+
+    test('Profile does NOT appear when not in Builder pages', () {
+      final plan = createTestPlan(activeModules: ['ordering']);
+      final builderPages = <BuilderPage>[]; // No Builder pages
+
+      final items = UnifiedNavBarController.computeNavBarItems(
+        builderPages: builderPages,
+        plan: plan,
+        isAdmin: false,
+      );
+
+      // Profile should NOT appear (no longer a system page, must come from Builder)
+      expect(items.any((item) => item.route == '/profile'), false);
+      // Only Menu and Cart should be present
+      expect(items.length, 2);
+      expect(items.any((item) => item.route == '/menu'), true);
+      expect(items.any((item) => item.route == '/cart'), true);
     });
   });
 }
