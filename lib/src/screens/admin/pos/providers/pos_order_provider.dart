@@ -10,25 +10,34 @@ import '../../../../services/pos_order_service.dart';
 import '../../../../providers/restaurant_provider.dart';
 
 /// Provider for POS order service
-final posOrderServiceProvider = Provider<PosOrderService>((ref) {
-  final restaurant = ref.watch(currentRestaurantProvider);
-  if (restaurant == null) {
-    throw Exception('No active restaurant');
-  }
-  return PosOrderService(appId: restaurant.id);
-});
+final posOrderServiceProvider = Provider<PosOrderService>(
+  (ref) {
+    final restaurant = ref.watch(currentRestaurantProvider);
+    if (restaurant == null) {
+      throw Exception('No active restaurant');
+    }
+    return PosOrderService(appId: restaurant.id);
+  },
+  dependencies: [currentRestaurantProvider],
+);
 
 /// Provider for watching session orders
-final sessionOrdersProvider = StreamProvider.family<List<PosOrder>, String>((ref, sessionId) {
-  final service = ref.watch(posOrderServiceProvider);
-  return service.watchSessionOrders(sessionId);
-});
+final sessionOrdersProvider = StreamProvider.family<List<PosOrder>, String>(
+  (ref, sessionId) {
+    final service = ref.watch(posOrderServiceProvider);
+    return service.watchSessionOrders(sessionId);
+  },
+  dependencies: [posOrderServiceProvider],
+);
 
 /// Provider for watching orders by status
-final ordersByStatusProvider = StreamProvider.family<List<PosOrder>, String>((ref, status) {
-  final service = ref.watch(posOrderServiceProvider);
-  return service.watchOrdersByStatus(status);
-});
+final ordersByStatusProvider = StreamProvider.family<List<PosOrder>, String>(
+  (ref, status) {
+    final service = ref.watch(posOrderServiceProvider);
+    return service.watchOrdersByStatus(status);
+  },
+  dependencies: [posOrderServiceProvider],
+);
 
 /// Provider for current order being processed
 final currentPosOrderProvider = StateProvider<PosOrder?>((ref) => null);
