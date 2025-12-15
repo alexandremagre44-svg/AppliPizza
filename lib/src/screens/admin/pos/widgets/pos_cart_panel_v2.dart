@@ -1,11 +1,13 @@
 // lib/src/screens/admin/pos/widgets/pos_cart_panel_v2.dart
 /// 
 /// Enhanced POS cart panel with validation feedback and item actions
+/// ShopCaisse Theme (#5557F6)
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../design_system/app_theme.dart';
+import '../design/pos_theme.dart';
+import '../design/pos_components.dart';
 import '../providers/pos_cart_provider.dart';
 
 /// Enhanced POS Cart Panel
@@ -21,22 +23,12 @@ class PosCartPanelV2 extends ConsumerWidget {
 
     return Column(
       children: [
-        // Cart header
+        // Cart header with ShopCaisse gradient
         Container(
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.primarySwatch[600]!, AppColors.primaryDark!],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            gradient: PosColors.primaryGradient,
+            boxShadow: PosShadows.primaryGlow,
           ),
           child: Row(
             children: [
@@ -105,43 +97,10 @@ class PosCartPanelV2 extends ConsumerWidget {
         // Cart items
         Expanded(
           child: cart.items.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.shopping_cart_outlined,
-                          size: 72,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Panier vide',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.grey[700],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Ajoutez des produits\npour commencer',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.grey[500],
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
-                  ),
+              ? PosEmptyState(
+                  icon: Icons.shopping_cart_outlined,
+                  title: 'Panier vide',
+                  subtitle: 'Ajoutez des produits\npour commencer',
                 )
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
@@ -188,27 +147,12 @@ class PosCartPanelV2 extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.calculate_rounded, color: Colors.grey[700], size: 24),
+                        Icon(Icons.calculate_rounded, color: PosColors.textSecondary, size: 24),
                         const SizedBox(width: 10),
-                        Text(
-                          'Total',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.grey[800],
-                          ),
-                        ),
+                        Text('Total', style: PosTextStyles.h3),
                       ],
                     ),
-                    Text(
-                      '${total.toStringAsFixed(2)} €',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
+                    PosPriceTag(price: total, isLarge: true),
                   ],
                 ),
               ),
@@ -227,13 +171,9 @@ class _PosCartItemTileV2 extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
+    return PosCard(
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!, width: 1),
-      ),
+      backgroundColor: PosColors.surfaceVariant,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -351,7 +291,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           child: Icon(Icons.remove_rounded,
-                              size: 18, color: Colors.red[600]),
+                              size: 18, color: PosColors.danger),
                         ),
                       ),
                     ),
@@ -360,17 +300,15 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                       decoration: BoxDecoration(
                         border: Border.symmetric(
                           vertical: BorderSide(
-                            color: Colors.grey[300]!,
+                            color: PosColors.border,
                             width: 1,
                           ),
                         ),
                       ),
                       child: Text(
                         '${item.quantity}',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: PosTextStyles.labelLarge.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: Colors.grey[800],
                         ),
                       ),
                     ),
@@ -385,7 +323,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           child: Icon(Icons.add_rounded,
-                              size: 18, color: Colors.green[600]),
+                              size: 18, color: PosColors.success),
                         ),
                       ),
                     ),
@@ -400,7 +338,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                   // Duplicate button
                   IconButton(
                     icon: const Icon(Icons.content_copy, size: 18),
-                    color: Colors.blue[600],
+                    color: PosColors.info,
                     tooltip: 'Dupliquer',
                     onPressed: () {
                       ref.read(posCartProvider.notifier).duplicateItem(item.id);
@@ -415,7 +353,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                   // Delete button
                   IconButton(
                     icon: const Icon(Icons.delete, size: 18),
-                    color: Colors.red[600],
+                    color: PosColors.danger,
                     tooltip: 'Supprimer',
                     onPressed: () {
                       ref.read(posCartProvider.notifier).removeItem(item.id);
@@ -434,28 +372,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                   }
                   itemTotal *= item.quantity;
                   
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLighter,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: AppColors.primaryContainer,
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      '${itemTotal.toStringAsFixed(2)} €',
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  );
+                  return PosPriceTag(price: itemTotal);
                 },
               ),
             ],

@@ -1,13 +1,15 @@
 // lib/src/screens/admin/pos/widgets/pos_session_close_modal.dart
 /// 
 /// Modal for closing a cashier session with variance report
+/// ShopCaisse Theme (#5557F6)
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../models/cashier_session.dart';
-import '../../../../design_system/app_theme.dart';
+import '../design/pos_theme.dart';
+import '../design/pos_components.dart';
 
 /// Session closing modal
 class PosSessionCloseModal extends ConsumerStatefulWidget {

@@ -1,13 +1,15 @@
 // lib/src/screens/admin/pos/widgets/pos_actions_panel_v2.dart
 /// 
 /// Complete POS Actions Panel with all functionality
+/// ShopCaisse Theme (#5557F6)
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../design_system/app_theme.dart';
+import '../design/pos_theme.dart';
+import '../design/pos_components.dart';
 import '../../../../models/order_type.dart';
 import '../../../../models/payment_method.dart';
 import '../../../../models/pos_order_status.dart';
@@ -48,42 +50,16 @@ class PosActionsPanelV2 extends ConsumerWidget {
   }
 
   Widget _buildNoSessionView(BuildContext context, WidgetRef ref) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.store_mall_directory_outlined, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            'Aucune session active',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Ouvrez une session pour commencer',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => _openSession(context, ref),
-            icon: const Icon(Icons.play_arrow),
-            label: const Text('Ouvrir la caisse'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green[600],
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ],
+    return PosEmptyState(
+      icon: Icons.store_mall_directory_outlined,
+      title: 'Aucune session active',
+      subtitle: 'Ouvrez une session pour commencer',
+      action: PosButton(
+        label: 'Ouvrir la caisse',
+        icon: Icons.play_arrow,
+        variant: PosButtonVariant.success,
+        size: PosButtonSize.large,
+        onPressed: () => _openSession(context, ref),
       ),
     );
   }
@@ -175,41 +151,19 @@ class PosActionsPanelV2 extends ConsumerWidget {
       children: [
         Text(
           'Type de commande',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
-          ),
+          style: PosTextStyles.labelLarge,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: PosSpacing.sm),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: PosSpacing.sm,
+          runSpacing: PosSpacing.sm,
           // MODULARITÉ: Afficher uniquement les types autorisés selon les modules actifs
           children: allowedOrderTypes.map((type) {
             final isSelected = posState.selectedOrderType == type;
-            return InkWell(
+            return PosChip(
+              label: OrderType.getLabel(type),
+              isSelected: isSelected,
               onTap: () => ref.read(posStateProvider.notifier).setOrderType(type),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryLighter : Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected ? AppColors.primary : Colors.grey[300]!,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Text(
-                  OrderType.getLabel(type),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? AppColors.primary : Colors.grey[700],
-                  ),
-                ),
-              ),
             );
           }).toList(),
         ),
@@ -232,67 +186,35 @@ class PosActionsPanelV2 extends ConsumerWidget {
   }
 
   Widget _buildCheckoutButton(BuildContext context, WidgetRef ref, bool hasItems, dynamic session) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: hasItems
-            ? LinearGradient(
-                colors: [Colors.green[600]!, Colors.green[800]!],
-              )
-            : null,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: hasItems
-            ? [
-                BoxShadow(
-                  color: Colors.green.withOpacity(0.4),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ]
-            : null,
-      ),
-      child: ElevatedButton.icon(
-        onPressed: hasItems
-            ? () => _processCheckout(context, ref, session)
-            : null,
-        icon: const Icon(Icons.check_circle_rounded, size: 28),
-        label: const Text(
-          'Encaisser',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.5,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: hasItems ? Colors.transparent : null,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: Colors.grey[300],
-          disabledForegroundColor: Colors.grey[500],
-          minimumSize: const Size(double.infinity, 70),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          elevation: 0,
-          shadowColor: Colors.transparent,
-        ),
-      ),
+    return PosButton(
+      label: 'Encaisser',
+      icon: Icons.check_circle_rounded,
+      variant: PosButtonVariant.success,
+      size: PosButtonSize.large,
+      isFullWidth: true,
+      onPressed: hasItems ? () => _processCheckout(context, ref, session) : null,
     );
   }
 
   Widget _buildClearCartButton(BuildContext context, WidgetRef ref, bool hasItems) {
-    return OutlinedButton.icon(
+    return PosButton(
+      label: 'Annuler',
+      icon: Icons.delete_sweep_rounded,
+      variant: PosButtonVariant.danger,
+      size: PosButtonSize.large,
+      isFullWidth: true,
       onPressed: hasItems
           ? () {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(PosRadii.lg),
                   ),
                   title: Row(
                     children: [
-                      Icon(Icons.delete_outline, color: Colors.red[700]),
-                      const SizedBox(width: 12),
+                      Icon(Icons.delete_outline, color: PosColors.danger),
+                      const SizedBox(width: PosSpacing.sm),
                       const Text('Annuler la commande'),
                     ],
                   ),
@@ -308,7 +230,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red[600],
+                        backgroundColor: PosColors.danger,
                         foregroundColor: Colors.white,
                       ),
                       child: const Text('Vider'),
@@ -318,43 +240,17 @@ class PosActionsPanelV2 extends ConsumerWidget {
               );
             }
           : null,
-      icon: const Icon(Icons.delete_sweep_rounded, size: 22),
-      label: const Text(
-        'Annuler',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: hasItems ? Colors.red[600] : Colors.grey[400],
-        side: BorderSide(
-          color: hasItems ? Colors.red[300]! : Colors.grey[300]!,
-          width: 1.5,
-        ),
-        minimumSize: const Size(double.infinity, 56),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
     );
   }
 
   Widget _buildCloseSessionButton(BuildContext context, WidgetRef ref, dynamic session, bool hasItems) {
-    return OutlinedButton.icon(
-      onPressed: hasItems
-          ? null
-          : () => _closeSession(context, ref, session),
-      icon: const Icon(Icons.store_mall_directory, size: 20),
-      label: const Text(
-        'Fermer la caisse',
-        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-      ),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.orange[700],
-        side: BorderSide(color: Colors.orange[300]!),
-        minimumSize: const Size(double.infinity, 48),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
+    return PosButton(
+      label: 'Fermer la caisse',
+      icon: Icons.store_mall_directory,
+      variant: PosButtonVariant.secondary,
+      size: PosButtonSize.medium,
+      isFullWidth: true,
+      onPressed: hasItems ? null : () => _closeSession(context, ref, session),
     );
   }
 
