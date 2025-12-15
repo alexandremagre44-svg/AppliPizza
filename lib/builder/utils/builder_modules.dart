@@ -76,8 +76,8 @@ const Map<String, ModuleId> moduleIdMapping = {
   // 'cart_module': ModuleId.ordering,  // REMOVED
   // 'delivery_module': ModuleId.delivery,  // REMOVED
   'click_collect_module': ModuleId.clickAndCollect,
-  'kitchen_module': ModuleId.kitchen_tablet,
-  'staff_module': ModuleId.staff_tablet,
+  // NOTE: kitchen_module and staff_module REMOVED - they are internal POS components
+  // All POS functionality (kitchen, staff, checkout) is controlled by ModuleId.pos
   'pos_module': ModuleId.pos,
   'promotions_module': ModuleId.promotions,
   'newsletter_module': ModuleId.newsletter,
@@ -124,11 +124,8 @@ ModuleId? getModuleIdForBuilder(String builderModuleId) {
     case 'newsletter_module':
       return ModuleId.newsletter;
     
-    case 'kitchen_module':
-      return ModuleId.kitchen_tablet;
-    
-    case 'staff_module':
-      return ModuleId.staff_tablet;
+    // kitchen_module and staff_module removed - internal POS components
+    // All POS functionality controlled by ModuleId.pos
   }
   
   // Fallback to existing mapping
@@ -280,24 +277,9 @@ const List<ModuleConfig> availableModules = [
   ),
   
   // Operations modules
-  // NOTE: delivery_module and click_collect_module have been REMOVED from Builder.
-  // They are now managed as system pages.
-  ModuleConfig(
-    id: 'kitchen_module',
-    name: 'Cuisine',
-    description: 'Affichage commandes cuisine (admin uniquement)',
-    icon: 'kitchen',
-    isSystemModule: true,
-    requiredModuleId: ModuleId.kitchen_tablet,
-  ),
-  ModuleConfig(
-    id: 'staff_module',
-    name: 'Caisse Staff',
-    description: 'Interface tablette staff (admin uniquement)',
-    icon: 'point_of_sale',
-    isSystemModule: true,
-    requiredModuleId: ModuleId.staff_tablet,
-  ),
+  // NOTE: delivery_module, click_collect_module, kitchen_module, and staff_module 
+  // have been REMOVED from Builder. They are system modules/components.
+  // POS module (including kitchen and staff) is never shown in Builder.
 ];
 
 /// Get module configuration by ID
@@ -399,8 +381,8 @@ const Map<String, List<String>> wlToBuilderModules = {
 
   'promotions': ['promotions_module'],
   'newsletter': ['newsletter_module'],
-  'kitchen_tablet': ['kitchen_module'],
-  'staff_tablet': ['staff_module'],
+  // kitchen_tablet and staff_tablet removed - they are internal POS components
+  // POS is a system module and should NEVER appear in Builder
   'theme': ['theme_module'],
   'reporting': ['reporting_module'],
   'exports': ['exports_module'],

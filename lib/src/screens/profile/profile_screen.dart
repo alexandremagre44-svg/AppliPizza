@@ -506,8 +506,8 @@ class ProfileScreen extends ConsumerWidget {
             ],
 
             // Staff Tablet Access (for all staff)
-            // Module guard: requires staff_tablet module
-            if (flags?.has(ModuleId.staff_tablet) ?? false)
+            // Module guard: requires POS module
+            if (flags?.has(ModuleId.pos) ?? false)
               Padding(
                 padding: AppSpacing.paddingHorizontalLG,
                 child: SizedBox(
@@ -535,12 +535,12 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
 
-            if (flags?.has(ModuleId.staff_tablet) ?? false)
+            if (flags?.has(ModuleId.pos) ?? false)
               SizedBox(height: AppSpacing.md),
 
             // Kitchen Mode Access (for kitchen role users)
-            // Module guard: requires kitchen_tablet module
-            if ((authState.isKitchen || authState.isAdmin) && (flags?.has(ModuleId.kitchen_tablet) ?? false))
+            // Module guard: requires POS module
+            if ((authState.isKitchen || authState.isAdmin) && (flags?.has(ModuleId.pos) ?? false))
               Padding(
                 padding: AppSpacing.paddingHorizontalLG,
                 child: SizedBox(
@@ -568,7 +568,7 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
 
-            if ((authState.isKitchen || authState.isAdmin) && (flags?.has(ModuleId.kitchen_tablet) ?? false))
+            if ((authState.isKitchen || authState.isAdmin) && (flags?.has(ModuleId.pos) ?? false))
               SizedBox(height: AppSpacing.md),
 
             SizedBox(height: AppSpacing.xxl),

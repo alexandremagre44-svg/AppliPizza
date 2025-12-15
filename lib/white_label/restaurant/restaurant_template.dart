@@ -282,8 +282,7 @@ class RestaurantTemplates {
       ModuleId.ordering,
       ModuleId.delivery,
       ModuleId.clickAndCollect,
-      ModuleId.kitchen_tablet,
-      ModuleId.pos,
+      ModuleId.pos,  // POS includes kitchen display and staff tablet
       ModuleId.loyalty,
       ModuleId.roulette,
       ModuleId.promotions,
@@ -315,8 +314,7 @@ class RestaurantTemplates {
     recommendedModules: [
       ModuleId.ordering,
       ModuleId.clickAndCollect,
-      ModuleId.pos,
-      ModuleId.staff_tablet,
+      ModuleId.pos,  // POS includes staff tablet functionality
       ModuleId.promotions,
     ],
   );
@@ -351,7 +349,7 @@ class RestaurantTemplates {
     recommendedModules: [
       ModuleId.ordering,
       ModuleId.delivery,
-      ModuleId.kitchen_tablet,
+      ModuleId.pos,  // POS includes kitchen display
       ModuleId.loyalty,
       ModuleId.promotions,
       ModuleId.campaigns,
@@ -390,8 +388,7 @@ class RestaurantTemplates {
       ModuleId.ordering,
       ModuleId.delivery,
       ModuleId.clickAndCollect,
-      ModuleId.kitchen_tablet,
-      ModuleId.pos,
+      ModuleId.pos,  // POS includes kitchen display and staff tablet
       ModuleId.loyalty,
       ModuleId.promotions,
     ],

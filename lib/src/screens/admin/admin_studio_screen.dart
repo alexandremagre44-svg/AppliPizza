@@ -203,8 +203,8 @@ class AdminStudioScreen extends ConsumerWidget {
             ),
           ],
           
-          // Kitchen Module - Accessible via Admin only
-          if (flags?.has(ModuleId.kitchen_tablet) ?? false) ...[
+          // Kitchen Module - Accessible via Admin only (part of POS)
+          if (flags?.has(ModuleId.pos) ?? false) ...[
             SizedBox(height: AppSpacing.md),
             _buildStudioBlock(
               context,

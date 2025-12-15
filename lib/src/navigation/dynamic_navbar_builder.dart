@@ -127,11 +127,10 @@ class DynamicNavbarBuilder {
     if (route.startsWith('/newsletter') || route == '/newsletter') {
       return ModuleId.newsletter;
     }
-    if (route.startsWith('/kitchen') || route == '/kitchen') {
-      return ModuleId.kitchen_tablet;
-    }
-    if (route.startsWith('/pos') || route == '/pos') {
-      // Module POS dédié
+    if (route.startsWith('/kitchen') || route == '/kitchen' ||
+        route.startsWith('/staff-tablet') || route == '/staff-tablet' ||
+        route.startsWith('/pos') || route == '/pos') {
+      // All POS-related routes require the pos module
       return ModuleId.pos;
     }
 

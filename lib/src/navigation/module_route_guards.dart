@@ -219,19 +219,21 @@ Widget newsletterRouteGuard(Widget child, {String? fallbackRoute}) {
   );
 }
 
-/// Guard pour le module tablette cuisine.
+/// Guard pour le module tablette cuisine (part of POS).
+/// Kitchen display requires POS module to be enabled.
 Widget kitchenRouteGuard(Widget child, {String? fallbackRoute}) {
   return ModuleRouteGuard(
-    requiredModule: ModuleId.kitchen_tablet,
+    requiredModule: ModuleId.pos,
     fallbackRoute: fallbackRoute ?? AppRoutes.home,
     child: child,
   );
 }
 
-/// Guard pour le module tablette staff.
+/// Guard pour le module tablette staff (part of POS).
+/// Staff tablet requires POS module to be enabled.
 Widget staffTabletRouteGuard(Widget child, {String? fallbackRoute}) {
   return ModuleRouteGuard(
-    requiredModule: ModuleId.staff_tablet,
+    requiredModule: ModuleId.pos,
     fallbackRoute: fallbackRoute ?? AppRoutes.home,
     child: child,
   );

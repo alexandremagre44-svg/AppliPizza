@@ -145,10 +145,11 @@ void _registerDeliveryRoutes() {
   );
 }
 
-/// Register kitchen tablet module routes.
+/// Register POS module routes (includes kitchen display and staff tablet).
+/// All POS-related routes are gated by the single ModuleId.pos.
 void _registerKitchenRoutes() {
   ModuleNavigationRegistry.registerModuleRoutes(
-    ModuleId.kitchen_tablet,
+    ModuleId.pos,
     [
       ModuleRouteDefinition(
         route: GoRoute(
@@ -156,7 +157,7 @@ void _registerKitchenRoutes() {
           name: 'kitchen',
           builder: (context, state) => const KitchenScreen(),
         ),
-        moduleId: ModuleId.kitchen_tablet,
+        moduleId: ModuleId.pos,
         accessLevel: ModuleAccessLevel.kitchen,
         isMainRoute: true,
       ),
@@ -165,9 +166,10 @@ void _registerKitchenRoutes() {
 }
 
 /// Register staff tablet (POS/Caisse) module routes.
+/// All staff tablet routes are part of the POS module.
 void _registerStaffTabletRoutes() {
   ModuleNavigationRegistry.registerModuleRoutes(
-    ModuleId.staff_tablet,
+    ModuleId.pos,
     [
       ModuleRouteDefinition(
         route: GoRoute(
@@ -175,7 +177,7 @@ void _registerStaffTabletRoutes() {
           name: 'pos',
           builder: (context, state) => const PosScreen(),
         ),
-        moduleId: ModuleId.staff_tablet,
+        moduleId: ModuleId.pos,
         accessLevel: ModuleAccessLevel.admin,
         isMainRoute: true,
       ),
@@ -184,7 +186,7 @@ void _registerStaffTabletRoutes() {
           path: AppRoutes.staffTabletPin,
           builder: (context, state) => const StaffTabletPinScreen(),
         ),
-        moduleId: ModuleId.staff_tablet,
+        moduleId: ModuleId.pos,
         accessLevel: ModuleAccessLevel.admin,
       ),
       ModuleRouteDefinition(
@@ -192,7 +194,7 @@ void _registerStaffTabletRoutes() {
           path: AppRoutes.staffTabletCatalog,
           builder: (context, state) => const StaffTabletCatalogScreen(),
         ),
-        moduleId: ModuleId.staff_tablet,
+        moduleId: ModuleId.pos,
         accessLevel: ModuleAccessLevel.admin,
       ),
       ModuleRouteDefinition(
@@ -200,7 +202,7 @@ void _registerStaffTabletRoutes() {
           path: AppRoutes.staffTabletCheckout,
           builder: (context, state) => const StaffTabletCheckoutScreen(),
         ),
-        moduleId: ModuleId.staff_tablet,
+        moduleId: ModuleId.pos,
         accessLevel: ModuleAccessLevel.admin,
       ),
       ModuleRouteDefinition(
@@ -208,7 +210,7 @@ void _registerStaffTabletRoutes() {
           path: AppRoutes.staffTabletHistory,
           builder: (context, state) => const StaffTabletHistoryScreen(),
         ),
-        moduleId: ModuleId.staff_tablet,
+        moduleId: ModuleId.pos,
         accessLevel: ModuleAccessLevel.admin,
       ),
     ],

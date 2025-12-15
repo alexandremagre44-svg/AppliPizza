@@ -121,25 +121,15 @@ class ModuleRegistry {
     ),
 
     // === OPERATIONS ===
-    'kitchen_tablet': const ModuleDefinition(
-      id: 'kitchen_tablet',
+    'pos': const ModuleDefinition(
+      id: 'pos',
       category: ModuleCategory.operations,
-      name: 'Tablette cuisine',
+      name: 'POS / Caisse',
       description:
-          'Affichage des commandes en cuisine sur tablette dédiée.',
+          'Point de vente complet avec interface staff, affichage cuisine, gestion des commandes et paiements.',
       isPremium: true,
       requiresConfiguration: true,
-      dependencies: ['ordering'],
-    ),
-    'staff_tablet': const ModuleDefinition(
-      id: 'staff_tablet',
-      category: ModuleCategory.operations,
-      name: 'Tablette staff',
-      description:
-          'Application pour les serveurs et le personnel de salle.',
-      isPremium: true,
-      requiresConfiguration: true,
-      dependencies: ['ordering'],
+      dependencies: ['ordering', 'payments'],
     ),
     'time_recorder': const ModuleDefinition(
       id: 'time_recorder',
