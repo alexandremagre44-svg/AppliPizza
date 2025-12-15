@@ -71,7 +71,7 @@ class PosButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
             side: variant == PosButtonVariant.ghost
-                ? BorderSide(color: colors.background, width: 1.5)
+                ? BorderSide(color: colors.foreground, width: 1.5)
                 : BorderSide.none,
           ),
         ).copyWith(
@@ -127,8 +127,8 @@ class PosButton extends StatelessWidget {
         );
       case PosButtonVariant.ghost:
         return _ButtonColors(
-          background: PosColors.textPrimary,
-          foreground: PosColors.textPrimary,
+          background: Colors.transparent,
+          foreground: PosColors.primary,
         );
     }
   }
@@ -149,9 +149,7 @@ class PosButton extends StatelessWidget {
         ? PosTextStyles.buttonLarge
         : PosTextStyles.buttonMedium;
     return baseStyle.copyWith(
-      color: variant == PosButtonVariant.ghost
-          ? PosColors.textPrimary
-          : PosColors.textOnPrimary,
+      color: _getColors().foreground,
     );
   }
 

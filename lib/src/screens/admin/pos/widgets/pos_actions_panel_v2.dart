@@ -240,16 +240,6 @@ class PosActionsPanelV2 extends ConsumerWidget {
               );
             }
           : null,
-        foregroundColor: hasItems ? Colors.red[600] : Colors.grey[400],
-        side: BorderSide(
-          color: hasItems ? Colors.red[300]! : Colors.grey[300]!,
-          width: 1.5,
-        ),
-        minimumSize: const Size(double.infinity, 56),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
     );
   }
 
