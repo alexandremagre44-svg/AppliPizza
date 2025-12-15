@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../models/product.dart';
 import '../../../../providers/product_provider.dart';
-import '../../../../design_system/app_theme.dart';
+import '../../../../design_system/pos_design_system.dart';
+import '../../../../design_system/pos_components.dart';
 import '../providers/pos_cart_provider.dart';
 import 'pos_pizza_customization_modal.dart';
 import 'pos_menu_customization_modal.dart';
@@ -27,26 +28,27 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
 
     return Column(
       children: [
-        // Category tabs
+        // Category tabs - ShopCaisse style
         Container(
-          color: Colors.white,
+          color: PosColors.surface,
+          padding: const EdgeInsets.symmetric(vertical: PosSpacing.md),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: PosSpacing.md),
             child: Row(
               children: [
                 _buildCategoryChip(ProductCategory.pizza, 'Pizzas', Icons.local_pizza),
-                const SizedBox(width: 12),
+                const SizedBox(width: PosSpacing.md),
                 _buildCategoryChip(ProductCategory.menus, 'Menus', Icons.restaurant_menu),
-                const SizedBox(width: 12),
+                const SizedBox(width: PosSpacing.md),
                 _buildCategoryChip(ProductCategory.boissons, 'Boissons', Icons.local_drink),
-                const SizedBox(width: 12),
+                const SizedBox(width: PosSpacing.md),
                 _buildCategoryChip(ProductCategory.desserts, 'Desserts', Icons.cake),
               ],
             ),
           ),
         ),
-        const Divider(height: 1),
+        Divider(height: 1, color: PosColors.border),
 
         // Products grid
         Expanded(
@@ -57,28 +59,20 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                   .toList();
 
               if (filteredProducts.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[400]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Aucun produit dans cette catégorie',
-                        style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
+                return const PosEmptyState(
+                  icon: Icons.inventory_2_outlined,
+                  title: 'Aucun produit',
+                  subtitle: 'Aucun produit dans cette catégorie',
                 );
               }
 
               return GridView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(PosSpacing.md),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   childAspectRatio: 0.85,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
+                  crossAxisSpacing: PosSpacing.md,
+                  mainAxisSpacing: PosSpacing.md,
                 ),
                 itemCount: filteredProducts.length,
                 itemBuilder: (context, index) {
@@ -87,9 +81,10 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                 },
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(
-              child: Text('Erreur: $error', style: const TextStyle(color: Colors.red)),
+            loading: () => const PosLoadingState(message: 'Chargement des produits...'),
+            error: (error, stack) => PosErrorState(
+              title: 'Erreur de chargement',
+              subtitle: error.toString(),
             ),
           ),
         ),
@@ -110,55 +105,32 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
               _selectedCategory = category;
             });
           },
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: PosRadii.mdRadius,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: PosSpacing.lg, vertical: PosSpacing.md),
             decoration: BoxDecoration(
-              gradient: isSelected
-                  ? const LinearGradient(
-                      colors: [AppColors.primary, AppColors.primaryDark],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : null,
-              color: isSelected ? null : Colors.white,
-              borderRadius: BorderRadius.circular(14),
+              color: isSelected ? PosColors.primary : PosColors.surface,
+              borderRadius: PosRadii.mdRadius,
               border: Border.all(
-                color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                color: isSelected ? PosColors.primary : PosColors.border,
                 width: isSelected ? 2 : 1.5,
               ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+              boxShadow: isSelected ? PosShadows.md : PosShadows.sm,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   icon,
-                  size: 22,
-                  color: isSelected ? Colors.white : AppColors.primary,
+                  size: PosIconSize.sm,
+                  color: isSelected ? PosColors.textOnPrimary : PosColors.primary,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: PosSpacing.sm),
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 17,
+                  style: PosTypography.labelLarge.copyWith(
+                    color: isSelected ? PosColors.textOnPrimary : PosColors.textPrimary,
                     fontWeight: FontWeight.w700,
-                    color: isSelected ? Colors.white : Colors.grey[800],
-                    letterSpacing: 0.2,
                   ),
                 ),
               ],
@@ -170,19 +142,14 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
   }
 
   Widget _buildProductCard(Product product) {
-    return Card(
-      elevation: 3,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: InkWell(
-        onTap: () {
-          // Show customization modal for menus
-          if (product.isMenu) {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
+    return PosCard(
+      padding: EdgeInsets.zero,
+      onTap: () {
+        // Show customization modal for menus
+        if (product.isMenu) {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
               backgroundColor: Colors.transparent,
               builder: (context) => PosMenuCustomizationModal(menu: product),
             );
@@ -192,37 +159,39 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (context) => PosPizzaCustomizationModal(pizza: product),
-            );
-          } else {
-            // Direct add for other items (drinks, desserts, etc.)
-            ref.read(posCartProvider.notifier).addItem(product);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.check_circle, color: Colors.white),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        '${product.name} ajouté au panier',
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            backgroundColor: Colors.transparent,
+            builder: (context) => PosPizzaCustomizationModal(pizza: product),
+          );
+        } else {
+          // Direct add for other items (drinks, desserts, etc.)
+          ref.read(posCartProvider.notifier).addItem(product);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: PosColors.textOnPrimary),
+                  const SizedBox(width: PosSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      '${product.name} ajouté au panier',
+                      style: PosTypography.bodyMedium.copyWith(
+                        color: PosColors.textOnPrimary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
-                ),
-                duration: const Duration(milliseconds: 1200),
-                backgroundColor: AppColors.success,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                margin: const EdgeInsets.all(16),
+                  ),
+                ],
               ),
-            );
-          }
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
+              duration: const Duration(milliseconds: 1200),
+              backgroundColor: PosColors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: PosRadii.mdRadius),
+              margin: const EdgeInsets.all(PosSpacing.md),
+            ),
+          );
+        }
+      },
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Product image
@@ -231,7 +200,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
               child: Stack(
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(PosRadii.md)),
                     child: product.imageUrl.isNotEmpty
                         ? Image.network(
                             product.imageUrl,
@@ -241,35 +210,28 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return Container(
-                                color: Colors.grey[100],
-                                child: Center(
+                                color: PosColors.surfaceVariant,
+                                child: const Center(
                                   child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                        : null,
                                     strokeWidth: 3,
-                                    valueColor: const AlwaysStoppedAnimation<Color>(
-                                      AppColors.primary,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      PosColors.primary,
                                     ),
                                   ),
                                 ),
                               );
                             },
                             errorBuilder: (context, error, stackTrace) => Container(
-                              color: Colors.grey[100],
+                              color: PosColors.surfaceVariant,
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.image_not_supported_rounded,
-                                      size: 48, color: Colors.grey[400]),
-                                  const SizedBox(height: 8),
+                                  const Icon(Icons.image_not_supported_rounded,
+                                      size: PosIconSize.xl, color: PosColors.textTertiary),
+                                  const SizedBox(height: PosSpacing.sm),
                                   Text(
                                     'Image non disponible',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey[500],
-                                    ),
+                                    style: PosTypography.labelSmall,
                                   ),
                                 ],
                               ),
