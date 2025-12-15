@@ -65,18 +65,25 @@ bool isNewsletterEnabled(WidgetRef ref) {
   return ModuleRuntimeAdapter.isModuleActiveById(plan, ModuleId.newsletter);
 }
 
-/// Vérifie si le module tablette cuisine est activé.
-bool isKitchenEnabled(WidgetRef ref) {
+/// Vérifie si le module POS est activé (includes kitchen display and staff tablet).
+bool isPosEnabled(WidgetRef ref) {
   final planAsync = ref.watch(restaurantPlanUnifiedProvider);
   final plan = planAsync.asData?.value;
-  return ModuleRuntimeAdapter.isModuleActiveById(plan, ModuleId.kitchen_tablet);
+  return ModuleRuntimeAdapter.isModuleActiveById(plan, ModuleId.pos);
+}
+
+/// Vérifie si le module tablette cuisine est activé.
+/// Kitchen display is part of POS, so this checks if POS is enabled.
+@Deprecated('Use isPosEnabled instead - kitchen is part of POS module')
+bool isKitchenEnabled(WidgetRef ref) {
+  return isPosEnabled(ref);
 }
 
 /// Vérifie si le module tablette staff est activé.
+/// Staff tablet is part of POS, so this checks if POS is enabled.
+@Deprecated('Use isPosEnabled instead - staff tablet is part of POS module')
 bool isStaffTabletEnabled(WidgetRef ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  final plan = planAsync.asData?.value;
-  return ModuleRuntimeAdapter.isModuleActiveById(plan, ModuleId.staff_tablet);
+  return isPosEnabled(ref);
 }
 
 /// Vérifie si le module de paiement est activé.

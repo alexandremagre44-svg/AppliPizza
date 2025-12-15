@@ -85,8 +85,8 @@ class WizardStepModules extends ConsumerWidget {
     // Récupérer tous les modules depuis ModuleRegistry
     final allModules = ModuleRegistry.definitions.values.toList();
 
-    // Modules pertinents pour les restaurants, exclusion des modules
-    // internes (POS, Kitchen, etc.) et de gestion avancée
+    // Modules pertinents pour les restaurants
+    // POS is now a single root module (includes kitchen and staff functionality)
     const restaurantVisibleModules = {
       'ordering',
       'delivery',
@@ -96,7 +96,7 @@ class WizardStepModules extends ConsumerWidget {
       'promotions',
       'pages_builder',
       'theme',
-      'kitchen_tablet',
+      'pos',  // Single POS module replaces kitchen_tablet and staff_tablet
     };
 
     // Filtrer pour n'afficher que les modules destinés aux restaurants

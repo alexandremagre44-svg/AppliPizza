@@ -522,18 +522,18 @@ class MyApp extends ConsumerWidget {
           name: 'kitchen',
           builder: (context, state) {
             return ModuleAndRoleGuard(
-              module: ModuleId.kitchen_tablet,
+              module: ModuleId.pos,
               requiresKitchen: true,
               child: const KitchenScreen(),
             );
           },
         ),
-        // Staff Tablet Routes (with guards)
+        // Staff Tablet Routes (with guards) - All part of POS module
         GoRoute(
           path: AppRoutes.staffTabletPin,
           builder: (context, state) {
             return ModuleAndRoleGuard(
-              module: ModuleId.staff_tablet,
+              module: ModuleId.pos,
               requiresAdmin: true,
               child: const StaffTabletPinScreen(),
             );
@@ -555,7 +555,7 @@ class MyApp extends ConsumerWidget {
               );
             }
             return ModuleAndRoleGuard(
-              module: ModuleId.staff_tablet,
+              module: ModuleId.pos,
               requiresAdmin: true,
               child: const StaffTabletCatalogScreen(),
             );
@@ -576,7 +576,7 @@ class MyApp extends ConsumerWidget {
               );
             }
             return ModuleAndRoleGuard(
-              module: ModuleId.staff_tablet,
+              module: ModuleId.pos,
               requiresAdmin: true,
               child: const StaffTabletCheckoutScreen(),
             );
@@ -597,7 +597,7 @@ class MyApp extends ConsumerWidget {
               );
             }
             return ModuleAndRoleGuard(
-              module: ModuleId.staff_tablet,
+              module: ModuleId.pos,
               requiresAdmin: true,
               child: const StaffTabletHistoryScreen(),
             );
@@ -609,7 +609,7 @@ class MyApp extends ConsumerWidget {
           name: 'pos',
           builder: (context, state) {
             return ModuleAndRoleGuard(
-              module: ModuleId.staff_tablet,
+              module: ModuleId.pos,
               requiresAdmin: true,
               child: const PosScreen(),
             );

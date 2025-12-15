@@ -35,13 +35,8 @@ enum ModuleId {
   /// Module newsletter
   newsletter,
 
-  /// Module tablette cuisine
-  kitchen_tablet,
-
-  /// Module tablette staff / serveur
-  staff_tablet,
-
   /// Module POS / Caisse (Point de Vente)
+  /// Includes all POS functionality: staff tablet, kitchen display, cart, checkout, sessions
   pos,
 
   /// Module pointeuse / gestion du temps
@@ -88,10 +83,6 @@ extension ModuleIdX on ModuleId {
         return 'promotions';
       case ModuleId.newsletter:
         return 'newsletter';
-      case ModuleId.kitchen_tablet:
-        return 'kitchen_tablet';
-      case ModuleId.staff_tablet:
-        return 'staff_tablet';
       case ModuleId.pos:
         return 'pos';
       case ModuleId.timeRecorder:
@@ -132,10 +123,6 @@ extension ModuleIdX on ModuleId {
         return 'Promotions';
       case ModuleId.newsletter:
         return 'Newsletter';
-      case ModuleId.kitchen_tablet:
-        return 'Tablette cuisine';
-      case ModuleId.staff_tablet:
-        return 'Caisse / Staff Tablet';
       case ModuleId.pos:
         return 'POS / Caisse';
       case ModuleId.timeRecorder:
@@ -169,12 +156,11 @@ extension ModuleIdX on ModuleId {
     switch (this) {
       // Modules SYSTÈME - Routes fixes, JAMAIS dans le Builder
       // Ces modules représentent le runtime core (routes, services)
+      // POS includes: staff UI, kitchen display, cart system, checkout, sessions
       case ModuleId.pos:
       case ModuleId.ordering:           // inclut cart/checkout
       case ModuleId.payments:
       case ModuleId.paymentTerminal:
-      case ModuleId.kitchen_tablet:
-      case ModuleId.staff_tablet:
         return ModuleCategory.system;
       
       // Modules MÉTIER - Fonctionnalités business optionnelles
@@ -204,8 +190,7 @@ extension ModuleIdX on ModuleId {
   /// Les modules système sont des routes/pages FIXES qui ne doivent
   /// JAMAIS être ajoutables comme blocs ou pages dans le Builder.
   /// 
-  /// Retourne `true` pour: pos, ordering (inclut cart), payments,
-  /// paymentTerminal, kitchen_tablet, staff_tablet
+  /// Retourne `true` pour: pos (includes staff, kitchen, cart), ordering, payments, paymentTerminal
   bool get isSystemModule => category == ModuleCategory.system;
 
   // TODO: Ajouter une icône (IconData) pour chaque module

@@ -93,8 +93,13 @@ class RestaurantFeatureFlags {
   /// Vérifie si le module promotions est activé.
   bool get promotionsEnabled => has(ModuleId.promotions);
 
+  /// Vérifie si le module POS est activé (includes kitchen display and staff tablet).
+  bool get posEnabled => has(ModuleId.pos);
+
   /// Vérifie si le module tablette cuisine est activé.
-  bool get kitchenEnabled => has(ModuleId.kitchen_tablet);
+  /// @deprecated Use posEnabled instead - kitchen is part of POS module
+  @Deprecated('Use posEnabled instead - kitchen is part of POS module')
+  bool get kitchenEnabled => has(ModuleId.pos);
 
   /// Vérifie si le module thème est activé.
   bool get themeEnabled => has(ModuleId.theme);
