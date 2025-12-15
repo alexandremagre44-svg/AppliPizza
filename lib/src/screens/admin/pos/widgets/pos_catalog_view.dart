@@ -196,7 +196,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                                         : null,
                                     strokeWidth: 3,
                                     valueColor: const AlwaysStoppedAnimation<Color>(
-                                      AppColors.primary,
+                                      PosColors.primary,
                                     ),
                                   ),
                                 ),

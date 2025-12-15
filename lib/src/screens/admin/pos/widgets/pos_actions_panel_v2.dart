@@ -21,6 +21,10 @@ import 'pos_session_open_modal.dart';
 import 'pos_session_close_modal.dart';
 import '../../../../../white_label/runtime/module_gate_provider.dart';
 
+// Ignore unused import - used for type compatibility
+// ignore: unused_import
+import '../../../../design_system/app_theme.dart';
+
 const _uuid = Uuid();
 
 /// Complete POS Actions Panel
@@ -189,28 +193,10 @@ class PosActionsPanelV2 extends ConsumerWidget {
           // MODULARITÉ: Afficher uniquement les types autorisés selon les modules actifs
           children: allowedOrderTypes.map((type) {
             final isSelected = posState.selectedOrderType == type;
-            return InkWell(
+            return PosChip(
+              label: OrderType.getLabel(type),
+              isSelected: isSelected,
               onTap: () => ref.read(posStateProvider.notifier).setOrderType(type),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryLighter : Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected ? AppColors.primary : Colors.grey[300]!,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Text(
-                  OrderType.getLabel(type),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? AppColors.primary : Colors.grey[700],
-                  ),
-                ),
-              ),
             );
           }).toList(),
         ),
