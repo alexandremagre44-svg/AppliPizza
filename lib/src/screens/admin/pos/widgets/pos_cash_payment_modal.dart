@@ -1,12 +1,14 @@
 // lib/src/screens/admin/pos/widgets/pos_cash_payment_modal.dart
 /// 
 /// Cash payment modal with change calculation
+/// ShopCaisse Theme (#5557F6)
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../design_system/app_theme.dart';
+import '../design/pos_theme.dart';
+import '../design/pos_components.dart';
 
 /// Cash payment modal
 class PosCashPaymentModal extends ConsumerStatefulWidget {

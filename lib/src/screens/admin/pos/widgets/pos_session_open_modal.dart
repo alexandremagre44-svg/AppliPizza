@@ -1,12 +1,14 @@
 // lib/src/screens/admin/pos/widgets/pos_session_open_modal.dart
 /// 
 /// Modal for opening a cashier session
+/// ShopCaisse Theme (#5557F6)
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../design_system/app_theme.dart';
+import '../design/pos_theme.dart';
+import '../design/pos_components.dart';
 
 /// Session opening modal
 class PosSessionOpenModal extends ConsumerStatefulWidget {
