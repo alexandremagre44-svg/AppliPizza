@@ -5,7 +5,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../design_system/app_theme.dart';
+import '../../../../design_system/pos_design_system.dart';
+import '../../../../design_system/pos_components.dart';
 import '../providers/pos_cart_provider.dart';
 
 /// Enhanced POS Cart Panel
@@ -21,56 +22,41 @@ class PosCartPanelV2 extends ConsumerWidget {
 
     return Column(
       children: [
-        // Cart header
+        // Cart header - ShopCaisse style
         Container(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.all(PosSpacing.lg),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.primarySwatch[600]!, AppColors.primaryDark!],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            color: PosColors.primary,
+            boxShadow: PosShadows.sm,
           ),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(PosSpacing.sm),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color: PosColors.textOnPrimary.withOpacity(0.2),
+                  borderRadius: PosRadii.mdRadius,
                 ),
                 child: const Icon(
                   Icons.shopping_cart_rounded,
-                  color: Colors.white,
-                  size: 26,
+                  color: PosColors.textOnPrimary,
+                  size: PosIconSize.md,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: PosSpacing.md),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Panier',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
+                    style: PosTypography.headingSmall.copyWith(
+                      color: PosColors.textOnPrimary,
                     ),
                   ),
                   Text(
                     '${cart.totalItems} article${cart.totalItems > 1 ? 's' : ''}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white.withOpacity(0.9),
-                      fontWeight: FontWeight.w500,
+                    style: PosTypography.bodySmall.copyWith(
+                      color: PosColors.textOnPrimary.withOpacity(0.9),
                     ),
                   ),
                 ],
@@ -79,21 +65,20 @@ class PosCartPanelV2 extends ConsumerWidget {
           ),
         ),
 
-        // Validation errors banner
+        // Validation errors banner - ShopCaisse style
         if (validationErrors.isNotEmpty)
           Container(
-            padding: const EdgeInsets.all(12),
-            color: Colors.orange[50],
+            padding: const EdgeInsets.all(PosSpacing.md),
+            color: PosColors.warningLight,
             child: Row(
               children: [
-                Icon(Icons.warning, color: Colors.orange[700], size: 20),
-                const SizedBox(width: 8),
+                const Icon(Icons.warning_amber_rounded, color: PosColors.warning, size: PosIconSize.sm),
+                const SizedBox(width: PosSpacing.sm),
                 Expanded(
                   child: Text(
                     validationErrors.first,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.orange[900],
+                    style: PosTypography.labelMedium.copyWith(
+                      color: PosColors.warning,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -146,10 +131,10 @@ class PosCartPanelV2 extends ConsumerWidget {
               : ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: cart.items.length,
-                  separatorBuilder: (context, index) => const Divider(
-                    height: 28,
+                  separatorBuilder: (context, index) => Divider(
+                    height: PosSpacing.lg,
                     thickness: 1,
-                    color: Color(0xFFEEEEEE),
+                    color: PosColors.border,
                   ),
                   itemBuilder: (context, index) {
                     final item = cart.items[index];
@@ -158,55 +143,39 @@ class PosCartPanelV2 extends ConsumerWidget {
                 ),
         ),
 
-        // Cart summary footer
+        // Cart summary footer - ShopCaisse style
         Container(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.all(PosSpacing.lg),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              top: BorderSide(color: Colors.grey[200]!, width: 2),
+            color: PosColors.surface,
+            border: const Border(
+              top: BorderSide(color: PosColors.border, width: 2),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 12,
-                offset: const Offset(0, -4),
-              ),
-            ],
+            boxShadow: PosShadows.md,
           ),
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(PosSpacing.md),
                 decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[200]!, width: 1.5),
+                  color: PosColors.surfaceVariant,
+                  borderRadius: PosRadii.mdRadius,
+                  border: Border.all(color: PosColors.border, width: 1.5),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.calculate_rounded, color: Colors.grey[700], size: 24),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Total',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.grey[800],
-                          ),
-                        ),
+                        const Icon(Icons.calculate_rounded, color: PosColors.textSecondary, size: PosIconSize.md),
+                        const SizedBox(width: PosSpacing.sm),
+                        Text('Total', style: PosTypography.headingMedium),
                       ],
                     ),
                     Text(
                       '${total.toStringAsFixed(2)} €',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
-                        letterSpacing: -0.5,
+                      style: PosTypography.priceLarge.copyWith(
+                        color: PosColors.primary,
                       ),
                     ),
                   ],
