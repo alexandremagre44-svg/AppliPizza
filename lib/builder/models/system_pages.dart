@@ -79,13 +79,15 @@ class SystemPages {
       isSystemPage: false, // contact is not protected - can be freely edited
     ),
     // Protected system pages (cannot be deleted, pageId cannot be changed)
+    // CRITICAL: Cart MUST NEVER exist as a Builder page (WL Doctrine violation)
+    // This entry exists ONLY for route mapping - page should NEVER be created in Firestore
     BuilderPageId.cart: SystemPageConfig(
       pageId: BuilderPageId.cart,
       route: '/cart',
       firestoreId: 'cart',
       defaultName: 'Panier',
       defaultIcon: Icons.shopping_cart,
-      isSystemPage: true, // Protected: cart functionality - SYSTEM module
+      isSystemPage: true, // Protected: cart functionality - SYSTEM module - NEVER in Builder
     ),
     // Business pages (editable in Builder)
     BuilderPageId.profile: SystemPageConfig(

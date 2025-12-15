@@ -38,6 +38,9 @@ class SystemPagesInitializer {
   final BuilderLayoutService _layoutService;
   
   /// Configuration for all system pages
+  /// 
+  /// CRITICAL: Cart is NOT included here - it MUST NEVER be created in Builder (WL Doctrine)
+  /// Cart page MUST bypass Builder completely and use CartScreen() directly
   static const List<SystemPageConfig> systemPages = [
     SystemPageConfig(
       pageId: BuilderPageId.profile,
@@ -46,13 +49,14 @@ class SystemPagesInitializer {
       icon: 'person',
       description: 'Page de profil utilisateur (page système)',
     ),
-    SystemPageConfig(
-      pageId: BuilderPageId.cart,
-      title: 'Panier',
-      route: '/cart',
-      icon: 'shopping_cart',
-      description: 'Page panier (page système)',
-    ),
+    // REMOVED: Cart - MUST NEVER be created as a Builder page
+    // SystemPageConfig(
+    //   pageId: BuilderPageId.cart,
+    //   title: 'Panier',
+    //   route: '/cart',
+    //   icon: 'shopping_cart',
+    //   description: 'Page panier (page système)',
+    // ),
     SystemPageConfig(
       pageId: BuilderPageId.rewards,
       title: 'Récompenses',

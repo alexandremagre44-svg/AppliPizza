@@ -1197,6 +1197,14 @@ class BuilderPageService {
     // Truncate to max 20 characters, using processed string length to avoid IndexError
     processed = processed.substring(0, processed.length > 20 ? 20 : processed.length);
     
+    // CRITICAL: CART PROTECTION - Cart pages MUST NEVER be created (WL Doctrine)
+    // Use word boundary matching to avoid false positives (e.g., "discount" or "cards")
+    final cartPattern = RegExp(r'\bcart\b', caseSensitive: false);
+    if (processed == 'cart' || cartPattern.hasMatch(name.toLowerCase())) {
+      debugPrint('❌ ERROR: Attempt to create page with name containing "cart" - this violates WL Doctrine!');
+      throw Exception('FORBIDDEN: Cart pages MUST NEVER be created in Builder. Cart is a system page that bypasses Builder completely.');
+    }
+    
     // FIX F1: COLLISION PREVENTION - Never allow custom pages to use system page IDs
     // Check if generated ID matches any system page
     final potentialCollision = BuilderPageId.tryFromString(processed);
