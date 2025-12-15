@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../models/product.dart';
 import '../../../../providers/product_provider.dart';
-import '../../../../design_system/app_theme.dart';
+import '../design/pos_theme.dart';
+import '../design/pos_components.dart';
 import '../providers/pos_cart_provider.dart';
 import 'pos_pizza_customization_modal.dart';
 import 'pos_menu_customization_modal.dart';
@@ -99,72 +100,17 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
 
   Widget _buildCategoryChip(ProductCategory category, String label, IconData icon) {
     final isSelected = _selectedCategory == category;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      margin: const EdgeInsets.only(right: 2),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            setState(() {
-              _selectedCategory = category;
-            });
-          },
-          borderRadius: BorderRadius.circular(14),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            decoration: BoxDecoration(
-              gradient: isSelected
-                  ? const LinearGradient(
-                      colors: [AppColors.primary, AppColors.primaryDark],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : null,
-              color: isSelected ? null : Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isSelected ? AppColors.primary : Colors.grey[300]!,
-                width: isSelected ? 2 : 1.5,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  icon,
-                  size: 22,
-                  color: isSelected ? Colors.white : AppColors.primary,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: isSelected ? Colors.white : Colors.grey[800],
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: PosChip(
+        label: label,
+        icon: icon,
+        isSelected: isSelected,
+        onTap: () {
+          setState(() {
+            _selectedCategory = category;
+          });
+        },
       ),
     );
   }
@@ -213,7 +159,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                   ],
                 ),
                 duration: const Duration(milliseconds: 1200),
-                backgroundColor: AppColors.success,
+                backgroundColor: PosColors.success,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 margin: const EdgeInsets.all(16),
@@ -345,38 +291,13 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryLighter,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            '${product.price.toStringAsFixed(2)} €',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
+                        PosPriceTag(price: product.price),
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [AppColors.primary, AppColors.primaryDark],
-                            ),
+                            gradient: PosColors.primaryGradient,
                             shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            boxShadow: PosShadows.primaryGlow,
                           ),
                           child: const Icon(
                             Icons.add_rounded,

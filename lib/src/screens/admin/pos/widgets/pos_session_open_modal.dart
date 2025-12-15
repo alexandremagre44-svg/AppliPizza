@@ -6,7 +6,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../design_system/app_theme.dart';
+import '../design/pos_theme.dart';
+import '../design/pos_components.dart';
 
 /// Session opening modal
 class PosSessionOpenModal extends ConsumerStatefulWidget {
@@ -42,10 +43,10 @@ class _PosSessionOpenModalState extends ConsumerState<PosSessionOpenModal> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PosRadii.lg)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(PosSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -148,23 +149,17 @@ class _PosSessionOpenModalState extends ConsumerState<PosSessionOpenModal> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: PosButton(
+                    label: 'Annuler',
+                    variant: PosButtonVariant.secondary,
                     onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Annuler',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: PosSpacing.sm),
                 Expanded(
-                  child: ElevatedButton(
+                  child: PosButton(
+                    label: 'Ouvrir la caisse',
+                    variant: PosButtonVariant.success,
                     onPressed: () {
                       widget.onConfirm(
                         _openingCash,
@@ -174,21 +169,6 @@ class _PosSessionOpenModalState extends ConsumerState<PosSessionOpenModal> {
                       );
                       Navigator.pop(context);
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[600],
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Ouvrir la caisse',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
                   ),
                 ),
               ],

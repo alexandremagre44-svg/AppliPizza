@@ -2,6 +2,7 @@
 // Reusable scaffold for POS screens
 
 import 'package:flutter/material.dart';
+import 'design/pos_theme.dart';
 
 /// Scaffold réutilisable spécifique pour les écrans POS
 /// 
@@ -10,27 +11,36 @@ import 'package:flutter/material.dart';
 class PosShellScaffold extends StatelessWidget {
   final Widget child;
   final String? title;
-  // Plus tard: restoName, currentUser, actions, etc.
+  final List<Widget>? actions;
 
   const PosShellScaffold({
     super.key,
     required this.child,
     this.title,
+    this.actions,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: PosColors.background,
       appBar: AppBar(
-        title: Text(title ?? 'Caisse'),
-        backgroundColor: colorScheme.primaryContainer,
-        foregroundColor: colorScheme.onPrimaryContainer,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.point_of_sale,
+              color: PosColors.onPrimary,
+              size: 24,
+            ),
+            SizedBox(width: PosSpacing.sm),
+            Text(title ?? 'Caisse'),
+          ],
+        ),
+        backgroundColor: PosColors.primary,
+        foregroundColor: PosColors.onPrimary,
         elevation: 0,
-        // Plus tard: bouton retour admin, bouton paramètres, infos utilisateur, etc.
+        actions: actions,
       ),
       body: child,
     );

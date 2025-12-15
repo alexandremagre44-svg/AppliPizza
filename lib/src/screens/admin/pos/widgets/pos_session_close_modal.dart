@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../models/cashier_session.dart';
-import '../../../../design_system/app_theme.dart';
+import '../design/pos_theme.dart';
+import '../design/pos_components.dart';
 
 /// Session closing modal
 class PosSessionCloseModal extends ConsumerStatefulWidget {
@@ -52,10 +53,10 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PosRadii.lg)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 600),
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(PosSpacing.xl),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -245,23 +246,17 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
+                    child: PosButton(
+                      label: 'Annuler',
+                      variant: PosButtonVariant.secondary,
                       onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Annuler',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: PosSpacing.sm),
                   Expanded(
-                    child: ElevatedButton(
+                    child: PosButton(
+                      label: 'Fermer la caisse',
+                      variant: PosButtonVariant.primary,
                       onPressed: _closingCash != null
                           ? () {
                               widget.onConfirm(
@@ -273,21 +268,6 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                               Navigator.pop(context);
                             }
                           : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange[600],
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Fermer la caisse',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
                     ),
                   ),
                 ],

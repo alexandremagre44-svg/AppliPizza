@@ -6,7 +6,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../design_system/app_theme.dart';
+import '../design/pos_theme.dart';
+import '../design/pos_components.dart';
 
 /// Cash payment modal
 class PosCashPaymentModal extends ConsumerStatefulWidget {
@@ -85,10 +86,10 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(PosRadii.lg)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(PosSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -97,14 +98,14 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(PosSpacing.sm),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryLighter,
-                    borderRadius: BorderRadius.circular(12),
+                    color: PosColors.primaryContainer,
+                    borderRadius: BorderRadius.circular(PosRadii.md),
                   ),
                   child: Icon(
                     Icons.euro,
-                    color: AppColors.primary,
+                    color: PosColors.primary,
                     size: 32,
                   ),
                 ),
@@ -143,13 +144,9 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Text(
-                    '${widget.orderTotal.toStringAsFixed(2)} €',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
+                  PosPriceTag(
+                    price: widget.orderTotal,
+                    large: true,
                   ),
                 ],
               ),
@@ -259,44 +256,23 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: PosButton(
+                    label: 'Annuler',
+                    variant: PosButtonVariant.secondary,
                     onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Annuler',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: PosSpacing.sm),
                 Expanded(
-                  child: ElevatedButton(
+                  child: PosButton(
+                    label: 'Valider',
+                    variant: PosButtonVariant.success,
                     onPressed: _canConfirm
                         ? () {
                             widget.onConfirm(_amountGiven!, _change!);
                             Navigator.pop(context);
                           }
                         : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[600],
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Valider',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
                   ),
                 ),
               ],
