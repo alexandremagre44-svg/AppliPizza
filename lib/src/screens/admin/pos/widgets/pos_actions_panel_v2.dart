@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../design_system/app_theme.dart';
+import '../design/pos_theme.dart';
+import '../design/pos_components.dart';
 import '../../../../models/order_type.dart';
 import '../../../../models/payment_method.dart';
 import '../../../../models/pos_order_status.dart';
@@ -188,28 +189,10 @@ class PosActionsPanelV2 extends ConsumerWidget {
           // MODULARITÉ: Afficher uniquement les types autorisés selon les modules actifs
           children: allowedOrderTypes.map((type) {
             final isSelected = posState.selectedOrderType == type;
-            return InkWell(
+            return PosChip(
+              label: OrderType.getLabel(type),
+              isSelected: isSelected,
               onTap: () => ref.read(posStateProvider.notifier).setOrderType(type),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryLighter : Colors.grey[100],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected ? AppColors.primary : Colors.grey[300]!,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Text(
-                  OrderType.getLabel(type),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? AppColors.primary : Colors.grey[700],
-                  ),
-                ),
-              ),
             );
           }).toList(),
         ),
@@ -232,67 +215,35 @@ class PosActionsPanelV2 extends ConsumerWidget {
   }
 
   Widget _buildCheckoutButton(BuildContext context, WidgetRef ref, bool hasItems, dynamic session) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: hasItems
-            ? LinearGradient(
-                colors: [Colors.green[600]!, Colors.green[800]!],
-              )
-            : null,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: hasItems
-            ? [
-                BoxShadow(
-                  color: Colors.green.withOpacity(0.4),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ]
-            : null,
-      ),
-      child: ElevatedButton.icon(
-        onPressed: hasItems
-            ? () => _processCheckout(context, ref, session)
-            : null,
-        icon: const Icon(Icons.check_circle_rounded, size: 28),
-        label: const Text(
-          'Encaisser',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.5,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: hasItems ? Colors.transparent : null,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: Colors.grey[300],
-          disabledForegroundColor: Colors.grey[500],
-          minimumSize: const Size(double.infinity, 70),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          elevation: 0,
-          shadowColor: Colors.transparent,
-        ),
-      ),
+    return PosButton(
+      label: 'Encaisser',
+      icon: Icons.check_circle_rounded,
+      variant: PosButtonVariant.success,
+      size: PosButtonSize.large,
+      fullWidth: true,
+      onPressed: hasItems ? () => _processCheckout(context, ref, session) : null,
     );
   }
 
   Widget _buildClearCartButton(BuildContext context, WidgetRef ref, bool hasItems) {
-    return OutlinedButton.icon(
+    return PosButton(
+      label: 'Annuler',
+      icon: Icons.delete_sweep_rounded,
+      variant: PosButtonVariant.danger,
+      size: PosButtonSize.medium,
+      fullWidth: true,
       onPressed: hasItems
           ? () {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(PosRadii.lg),
                   ),
                   title: Row(
                     children: [
-                      Icon(Icons.delete_outline, color: Colors.red[700]),
-                      const SizedBox(width: 12),
+                      Icon(Icons.delete_outline, color: PosColors.danger),
+                      SizedBox(width: PosSpacing.sm),
                       const Text('Annuler la commande'),
                     ],
                   ),
@@ -302,38 +253,19 @@ class PosActionsPanelV2 extends ConsumerWidget {
                       onPressed: () => Navigator.pop(context),
                       child: const Text('Annuler'),
                     ),
-                    ElevatedButton(
+                    PosButton(
+                      label: 'Vider',
+                      variant: PosButtonVariant.danger,
                       onPressed: () {
                         ref.read(posCartProvider.notifier).clearCart();
                         Navigator.pop(context);
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red[600],
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text('Vider'),
                     ),
                   ],
                 ),
               );
             }
           : null,
-      icon: const Icon(Icons.delete_sweep_rounded, size: 22),
-      label: const Text(
-        'Annuler',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: hasItems ? Colors.red[600] : Colors.grey[400],
-        side: BorderSide(
-          color: hasItems ? Colors.red[300]! : Colors.grey[300]!,
-          width: 1.5,
-        ),
-        minimumSize: const Size(double.infinity, 56),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
     );
   }
 
