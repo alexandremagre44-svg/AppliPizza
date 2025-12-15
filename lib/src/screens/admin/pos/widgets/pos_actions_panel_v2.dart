@@ -21,10 +21,6 @@ import 'pos_session_open_modal.dart';
 import 'pos_session_close_modal.dart';
 import '../../../../../white_label/runtime/module_gate_provider.dart';
 
-// Ignore unused import - used for type compatibility
-// ignore: unused_import
-import '../../../../design_system/app_theme.dart';
-
 const _uuid = Uuid();
 
 /// Complete POS Actions Panel
