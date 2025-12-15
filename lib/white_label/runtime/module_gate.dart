@@ -22,11 +22,30 @@ import '../restaurant/restaurant_plan_unified.dart';
 /// Ce service expose des méthodes pures pour vérifier l'état des modules
 /// et déterminer quelles fonctionnalités sont disponibles.
 ///
+/// IMPORTANT - MODULE POS:
+/// Le module POS (ModuleId.pos) est un module SYSTÈME RACINE qui contrôle:
+/// - Interface staff / tablette caisse
+/// - Affichage cuisine (Kitchen Display System)
+/// - Gestion des commandes et sessions caisse
+/// - Paiements locaux
+///
+/// Si POS = OFF → AUCUNE fonctionnalité POS n'est accessible:
+/// - Aucune route /pos, /staff-tablet, /kitchen
+/// - Aucun provider POS monté
+/// - Aucun écran staff/kitchen visible
+/// - Aucune option caisse dans la navigation
+///
+/// Si POS = ON → Tout le sous-système POS est activé
+///
 /// Usage:
 /// ```dart
 /// final gate = ModuleGate(plan);
 /// if (gate.isModuleEnabled(ModuleId.delivery)) {
 ///   // Module livraison activé
+/// }
+/// 
+/// if (gate.isModuleEnabled(ModuleId.pos)) {
+///   // Module POS activé - toutes les fonctionnalités POS disponibles
 /// }
 /// 
 /// final types = gate.allowedOrderTypes();
