@@ -1198,7 +1198,9 @@ class BuilderPageService {
     processed = processed.substring(0, processed.length > 20 ? 20 : processed.length);
     
     // CRITICAL: CART PROTECTION - Cart pages MUST NEVER be created (WL Doctrine)
-    if (processed == 'cart' || processed.contains('cart')) {
+    // Use word boundary matching to avoid false positives (e.g., "discount" or "cards")
+    final cartPattern = RegExp(r'\bcart\b', caseSensitive: false);
+    if (processed == 'cart' || cartPattern.hasMatch(name.toLowerCase())) {
       debugPrint('❌ ERROR: Attempt to create page with name containing "cart" - this violates WL Doctrine!');
       throw Exception('FORBIDDEN: Cart pages MUST NEVER be created in Builder. Cart is a system page that bypasses Builder completely.');
     }

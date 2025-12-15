@@ -130,7 +130,7 @@ void main() {
       // Since it's private, we test it indirectly through createBlankPage
       final service = BuilderPageService();
       
-      // Names that should trigger the cart protection
+      // Names that should trigger the cart protection (word boundary matching)
       final forbiddenNames = [
         'Cart',
         'cart',
@@ -138,6 +138,7 @@ void main() {
         'Shopping Cart',
         'My Cart',
         'cart page',
+        'The Cart',
       ];
       
       for (final name in forbiddenNames) {
@@ -156,6 +157,7 @@ void main() {
       final service = BuilderPageService();
       
       // These names should NOT trigger the cart protection
+      // Including names with "cart" substring but not as whole word
       final validNames = [
         'Home',
         'Menu',
@@ -163,6 +165,9 @@ void main() {
         'Promotions',
         'About Us',
         'Contact',
+        'Discount Cards',  // "cart" substring but not whole word
+        'Gift Cards',      // "cart" substring but not whole word
+        'McCarthy Store',  // "cart" substring but not whole word
       ];
       
       for (final name in validNames) {

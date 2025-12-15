@@ -286,6 +286,12 @@ if (isDryRun) {
 } else {
   console.log('⚠️  WARNING: This script will DELETE cart pages from Firestore!');
   console.log('   Use --dry-run flag to preview changes without deleting.\n');
+  console.log('⚠️  IMPORTANT: Before running in production:');
+  console.log('   1. Create a backup of your Firestore database');
+  console.log('   2. Test the script on a non-production environment first');
+  console.log('   3. Review the dry-run output carefully');
+  console.log('   4. Have a rollback plan ready\n');
+  console.log('   Firestore backups: https://console.firebase.google.com/project/_/firestore/backups\n');
   
   cleanupCartPages()
     .then(() => process.exit(0))
