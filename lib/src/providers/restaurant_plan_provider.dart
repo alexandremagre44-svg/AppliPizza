@@ -202,18 +202,24 @@ final deliverySettingsProvider = Provider<DeliverySettings?>(
 /// Provider pour vérifier si le module de livraison est activé.
 ///
 /// Shortcut pratique pour les vérifications rapides.
-final isDeliveryEnabledProvider = Provider<bool>((ref) {
-  final flags = ref.watch(restaurantFeatureFlagsProvider);
-  return flags?.has(ModuleId.delivery) ?? false;
-});
+final isDeliveryEnabledProvider = Provider<bool>(
+  (ref) {
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
+    return flags?.has(ModuleId.delivery) ?? false;
+  },
+  dependencies: [restaurantFeatureFlagsProvider],
+);
 
 /// Provider pour vérifier si le module Click & Collect est activé.
 ///
 /// Shortcut pratique pour les vérifications rapides.
-final isClickAndCollectEnabledProvider = Provider<bool>((ref) {
-  final flags = ref.watch(restaurantFeatureFlagsProvider);
-  return flags?.has(ModuleId.clickAndCollect) ?? false;
-});
+final isClickAndCollectEnabledProvider = Provider<bool>(
+  (ref) {
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
+    return flags?.has(ModuleId.clickAndCollect) ?? false;
+  },
+  dependencies: [restaurantFeatureFlagsProvider],
+);
 
 /// Provider pour les paramètres de livraison depuis le plan unifié.
 ///
@@ -244,10 +250,13 @@ final deliveryConfigUnifiedProvider = Provider<DeliveryModuleConfig?>(
 /// Provider pour vérifier si le module de livraison est activé (version unifiée).
 ///
 /// Shortcut pratique pour les vérifications rapides.
-final isDeliveryEnabledUnifiedProvider = Provider<bool>((ref) {
-  final config = ref.watch(deliveryConfigUnifiedProvider);
-  return config?.enabled ?? false;
-});
+final isDeliveryEnabledUnifiedProvider = Provider<bool>(
+  (ref) {
+    final config = ref.watch(deliveryConfigUnifiedProvider);
+    return config?.enabled ?? false;
+  },
+  dependencies: [deliveryConfigUnifiedProvider],
+);
 
 /// Provider pour les paramètres de commande depuis le plan unifié.
 final orderingConfigUnifiedProvider = Provider<OrderingModuleConfig?>(
@@ -276,10 +285,13 @@ final loyaltyConfigUnifiedProvider = Provider<LoyaltyModuleConfig?>(
 );
 
 /// Provider pour vérifier si le module fidélité est activé (version unifiée).
-final isLoyaltyEnabledUnifiedProvider = Provider<bool>((ref) {
-  final config = ref.watch(loyaltyConfigUnifiedProvider);
-  return config?.enabled ?? false;
-});
+final isLoyaltyEnabledUnifiedProvider = Provider<bool>(
+  (ref) {
+    final config = ref.watch(loyaltyConfigUnifiedProvider);
+    return config?.enabled ?? false;
+  },
+  dependencies: [loyaltyConfigUnifiedProvider],
+);
 
 /// Provider pour les paramètres de roulette depuis le plan unifié.
 final rouletteConfigUnifiedProvider = Provider<RouletteModuleConfig?>(
@@ -295,10 +307,13 @@ final rouletteConfigUnifiedProvider = Provider<RouletteModuleConfig?>(
 );
 
 /// Provider pour vérifier si le module roulette est activé (version unifiée).
-final isRouletteEnabledUnifiedProvider = Provider<bool>((ref) {
-  final config = ref.watch(rouletteConfigUnifiedProvider);
-  return config?.enabled ?? false;
-});
+final isRouletteEnabledUnifiedProvider = Provider<bool>(
+  (ref) {
+    final config = ref.watch(rouletteConfigUnifiedProvider);
+    return config?.enabled ?? false;
+  },
+  dependencies: [rouletteConfigUnifiedProvider],
+);
 
 /// Provider pour les paramètres de promotions depuis le plan unifié.
 final promotionsConfigUnifiedProvider = Provider<PromotionsModuleConfig?>(
@@ -314,10 +329,13 @@ final promotionsConfigUnifiedProvider = Provider<PromotionsModuleConfig?>(
 );
 
 /// Provider pour vérifier si le module promotions est activé (version unifiée).
-final isPromotionsEnabledUnifiedProvider = Provider<bool>((ref) {
-  final config = ref.watch(promotionsConfigUnifiedProvider);
-  return config?.enabled ?? false;
-});
+final isPromotionsEnabledUnifiedProvider = Provider<bool>(
+  (ref) {
+    final config = ref.watch(promotionsConfigUnifiedProvider);
+    return config?.enabled ?? false;
+  },
+  dependencies: [promotionsConfigUnifiedProvider],
+);
 
 /// Provider pour le branding depuis le plan unifié.
 final brandingConfigUnifiedProvider = Provider<BrandingConfig?>(
@@ -346,34 +364,40 @@ final brandingConfigUnifiedProvider = Provider<BrandingConfig?>(
 /// final enabledPages = ref.watch(enabledSystemPagesProvider);
 /// // Use enabledPages to generate bottom navigation or routes
 /// ```
-final enabledSystemPagesProvider = Provider<List<SystemPageId>>((ref) {
-  final planAsync = ref.watch(restaurantPlanUnifiedProvider);
-  final plan = planAsync.asData?.value;
-  
-  // Default pages (always enabled)
-  final List<SystemPageId> enabledPages = [
-    SystemPageId.menu,
-    SystemPageId.profile,
-  ];
-  
-  // Add cart page if ordering module is enabled
-  if (plan?.ordering?.enabled ?? false) {
-    enabledPages.insert(1, SystemPageId.cart); // Insert after menu
-  }
-  
-  // Admin page is always in the list (access is controlled by auth)
-  enabledPages.add(SystemPageId.admin);
-  
-  return enabledPages;
-});
+final enabledSystemPagesProvider = Provider<List<SystemPageId>>(
+  (ref) {
+    final planAsync = ref.watch(restaurantPlanUnifiedProvider);
+    final plan = planAsync.asData?.value;
+    
+    // Default pages (always enabled)
+    final List<SystemPageId> enabledPages = [
+      SystemPageId.menu,
+      SystemPageId.profile,
+    ];
+    
+    // Add cart page if ordering module is enabled
+    if (plan?.ordering?.enabled ?? false) {
+      enabledPages.insert(1, SystemPageId.cart); // Insert after menu
+    }
+    
+    // Admin page is always in the list (access is controlled by auth)
+    enabledPages.add(SystemPageId.admin);
+    
+    return enabledPages;
+  },
+  dependencies: [restaurantPlanUnifiedProvider],
+);
 
 /// Provider to check if cart module/page is enabled
 /// 
 /// This checks if the ordering module is enabled, which includes cart functionality.
-final isCartPageEnabledProvider = Provider<bool>((ref) {
-  final config = ref.watch(orderingConfigUnifiedProvider);
-  return config?.enabled ?? false;
-});
+final isCartPageEnabledProvider = Provider<bool>(
+  (ref) {
+    final config = ref.watch(orderingConfigUnifiedProvider);
+    return config?.enabled ?? false;
+  },
+  dependencies: [orderingConfigUnifiedProvider],
+);
 
 /// Provider pour les paramètres de Click & Collect depuis le plan unifié.
 ///
@@ -404,7 +428,10 @@ final clickAndCollectConfigUnifiedProvider = Provider<ClickAndCollectModuleConfi
 /// Provider pour vérifier si le module Click & Collect est activé (version unifiée).
 ///
 /// Shortcut pratique pour les vérifications rapides.
-final isClickAndCollectEnabledUnifiedProvider = Provider<bool>((ref) {
-  final config = ref.watch(clickAndCollectConfigUnifiedProvider);
-  return config?.enabled ?? false;
-});
+final isClickAndCollectEnabledUnifiedProvider = Provider<bool>(
+  (ref) {
+    final config = ref.watch(clickAndCollectConfigUnifiedProvider);
+    return config?.enabled ?? false;
+  },
+  dependencies: [clickAndCollectConfigUnifiedProvider],
+);

@@ -20,34 +20,40 @@ final loyaltySettingsServiceProvider = Provider<LoyaltySettingsService>(
 
 /// Stream provider for loyalty settings
 /// Module guard: requires loyalty module
-final loyaltySettingsProvider = StreamProvider<LoyaltySettings>((ref) {
-  // Module guard: loyalty module required
-  final flags = ref.watch(restaurantFeatureFlagsProvider);
-  if (flags != null && !flags.has(ModuleId.loyalty)) {
-    return Stream.value(LoyaltySettings.defaultSettings());
-  }
-  
-  final service = ref.watch(loyaltySettingsServiceProvider);
-  return service.watchLoyaltySettings();
-});
+final loyaltySettingsProvider = StreamProvider<LoyaltySettings>(
+  (ref) {
+    // Module guard: loyalty module required
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
+    if (flags != null && !flags.has(ModuleId.loyalty)) {
+      return Stream.value(LoyaltySettings.defaultSettings());
+    }
+    
+    final service = ref.watch(loyaltySettingsServiceProvider);
+    return service.watchLoyaltySettings();
+  },
+  dependencies: [restaurantFeatureFlagsProvider, loyaltySettingsServiceProvider],
+);
 
 /// Future provider for one-time fetch
 /// Module guard: requires loyalty module
-final loyaltySettingsFutureProvider = FutureProvider<LoyaltySettings>((ref) async {
-  // Module guard: loyalty module required
-  final flags = ref.watch(restaurantFeatureFlagsProvider);
-  if (flags != null && !flags.has(ModuleId.loyalty)) {
-    return LoyaltySettings.defaultSettings();
-  }
-  
-  final service = ref.watch(loyaltySettingsServiceProvider);
-  final settings = await service.getLoyaltySettings();
-  
-  // Initialize default settings if none exists
-  if (settings == LoyaltySettings.defaultSettings()) {
-    await service.initializeDefaultSettings();
-    return await service.getLoyaltySettings();
-  }
-  
-  return settings;
-});
+final loyaltySettingsFutureProvider = FutureProvider<LoyaltySettings>(
+  (ref) async {
+    // Module guard: loyalty module required
+    final flags = ref.watch(restaurantFeatureFlagsProvider);
+    if (flags != null && !flags.has(ModuleId.loyalty)) {
+      return LoyaltySettings.defaultSettings();
+    }
+    
+    final service = ref.watch(loyaltySettingsServiceProvider);
+    final settings = await service.getLoyaltySettings();
+    
+    // Initialize default settings if none exists
+    if (settings == LoyaltySettings.defaultSettings()) {
+      await service.initializeDefaultSettings();
+      return await service.getLoyaltySettings();
+    }
+    
+    return settings;
+  },
+  dependencies: [restaurantFeatureFlagsProvider, loyaltySettingsServiceProvider],
+);
