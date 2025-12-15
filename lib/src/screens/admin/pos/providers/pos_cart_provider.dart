@@ -104,32 +104,69 @@ class PosCartNotifier extends StateNotifier<CartState> {
       return;
     }
 
-    final updatedItems = state.items.map((item) {
-      if (item.id == itemId) {
-        item.quantity = newQuantity;
-      }
-      return item;
-    }).toList();
-
-    state = CartState([...updatedItems]);
+    final index = state.items.indexWhere((i) => i.id == itemId);
+    if (index >= 0) {
+      final item = state.items[index];
+      final updatedItems = List<CartItem>.from(state.items);
+      updatedItems[index] = CartItem(
+        id: item.id,
+        productId: item.productId,
+        productName: item.productName,
+        price: item.price,
+        quantity: newQuantity,
+        imageUrl: item.imageUrl,
+        selections: item.selections,
+        customDescription: item.customDescription,
+        isMenu: item.isMenu,
+      );
+      state = CartState(updatedItems);
+    }
   }
 
   /// Increment quantity of an item
   void incrementQuantity(String itemId) {
-    final itemToUpdate = state.items.firstWhere((i) => i.id == itemId);
-    itemToUpdate.quantity++;
-    state = CartState([...state.items]);
+    final index = state.items.indexWhere((i) => i.id == itemId);
+    if (index >= 0) {
+      final item = state.items[index];
+      final updatedItems = List<CartItem>.from(state.items);
+      updatedItems[index] = CartItem(
+        id: item.id,
+        productId: item.productId,
+        productName: item.productName,
+        price: item.price,
+        quantity: item.quantity + 1,
+        imageUrl: item.imageUrl,
+        selections: item.selections,
+        customDescription: item.customDescription,
+        isMenu: item.isMenu,
+      );
+      state = CartState(updatedItems);
+    }
   }
 
   /// Decrement quantity of an item
   void decrementQuantity(String itemId) {
-    final itemToUpdate = state.items.firstWhere((i) => i.id == itemId);
-    
-    if (itemToUpdate.quantity <= 1) {
-      removeItem(itemId);
-    } else {
-      itemToUpdate.quantity--;
-      state = CartState([...state.items]);
+    final index = state.items.indexWhere((i) => i.id == itemId);
+    if (index >= 0) {
+      final item = state.items[index];
+      
+      if (item.quantity <= 1) {
+        removeItem(itemId);
+      } else {
+        final updatedItems = List<CartItem>.from(state.items);
+        updatedItems[index] = CartItem(
+          id: item.id,
+          productId: item.productId,
+          productName: item.productName,
+          price: item.price,
+          quantity: item.quantity - 1,
+          imageUrl: item.imageUrl,
+          selections: item.selections,
+          customDescription: item.customDescription,
+          isMenu: item.isMenu,
+        );
+        state = CartState(updatedItems);
+      }
     }
   }
 
