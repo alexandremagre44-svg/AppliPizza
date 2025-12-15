@@ -24,6 +24,9 @@ class DynamicPageResolver {
   /// Loads the published version of the page from Firestore.
   /// Returns null if the page doesn't exist, isn't published, or isn't enabled.
   /// 
+  /// CRITICAL SAFETY GUARD: Cart pages are NEVER returned (WL Doctrine)
+  /// If a cart page is detected in Firestore, it's logged as an error and ignored.
+  /// 
   /// Note: loadPublished() already returns only published pages (not drafts).
   /// The isEnabled check ensures the page is active.
   /// 
@@ -33,8 +36,22 @@ class DynamicPageResolver {
   /// final homePage = await resolver.resolve(BuilderPageId.home, 'pizza_delizza');
   /// ```
   Future<BuilderPage?> resolve(BuilderPageId pageId, String appId) async {
+    // CRITICAL: Cart MUST NEVER be resolved from Builder (WL Doctrine)
+    if (pageId == BuilderPageId.cart) {
+      debugPrint('❌ ERROR: Attempt to resolve cart page from Builder - this violates WL Doctrine!');
+      debugPrint('❌ Cart must bypass Builder completely. Returning null to force fallback.');
+      return null;
+    }
+    
     try {
       final page = await _layoutService.loadPublished(appId, pageId);
+      
+      // Additional safety check: if somehow a cart page was loaded, reject it
+      if (page != null && page.pageId == BuilderPageId.cart) {
+        debugPrint('❌ ERROR: Cart page found in Firestore for app $appId - this should NOT exist!');
+        debugPrint('❌ Ignoring cart page to comply with WL Doctrine.');
+        return null;
+      }
       
       // loadPublished returns only published pages (not drafts)
       // We additionally check isEnabled to ensure the page is active

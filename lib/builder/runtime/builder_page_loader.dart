@@ -51,6 +51,14 @@ class BuilderPageLoader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // CRITICAL SAFETY GUARD: Cart MUST NEVER use BuilderPageLoader (WL Doctrine)
+    // If cart is requested, log error and use fallback immediately
+    if (pageId == BuilderPageId.cart) {
+      debugPrint('❌ ERROR: Attempt to load cart via BuilderPageLoader - this violates WL Doctrine!');
+      debugPrint('❌ Cart must bypass Builder completely. Using fallback screen.');
+      return fallback;
+    }
+    
     // Read appId from the restaurant provider
     final appId = ref.watch(currentRestaurantProvider).id;
     

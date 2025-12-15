@@ -267,13 +267,11 @@ class MyApp extends ConsumerWidget {
                 return DynamicBuilderPageScreen(pageKey: pageId);
               },
             ),
-            // System pages - Builder-first with legacy fallback
+            // System pages - Cart MUST bypass Builder (WL Doctrine)
+            // Cart is a system page that should NEVER exist in Builder
             GoRoute(
               path: AppRoutes.cart,
-              builder: (context, state) => const BuilderPageLoader(
-                pageId: BuilderPageId.cart,
-                fallback: CartScreen(),
-              ),
+              builder: (context, state) => const CartScreen(),
             ),
             GoRoute(
               path: AppRoutes.profile,
