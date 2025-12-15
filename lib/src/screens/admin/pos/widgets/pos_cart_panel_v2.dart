@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/pos_design_system.dart';
 import '../../../../design_system/pos_components.dart';
+import '../../../../design_system/colors.dart';
 import '../providers/pos_cart_provider.dart';
 
 /// Enhanced POS Cart Panel
@@ -24,7 +25,7 @@ class PosCartPanelV2 extends ConsumerWidget {
       children: [
         // Cart header - ShopCaisse style
         Container(
-          padding: const EdgeInsets.all(PosSpacing.lg),
+          padding: EdgeInsets.all(PosSpacing.lg),
           decoration: BoxDecoration(
             color: PosColors.primary,
             boxShadow: PosShadows.sm,
@@ -32,18 +33,18 @@ class PosCartPanelV2 extends ConsumerWidget {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(PosSpacing.sm),
+                padding: EdgeInsets.all(PosSpacing.sm),
                 decoration: BoxDecoration(
                   color: PosColors.textOnPrimary.withOpacity(0.2),
                   borderRadius: PosRadii.mdRadius,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.shopping_cart_rounded,
                   color: PosColors.textOnPrimary,
                   size: PosIconSize.md,
                 ),
               ),
-              const SizedBox(width: PosSpacing.md),
+              SizedBox(width: PosSpacing.md),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -68,12 +69,12 @@ class PosCartPanelV2 extends ConsumerWidget {
         // Validation errors banner - ShopCaisse style
         if (validationErrors.isNotEmpty)
           Container(
-            padding: const EdgeInsets.all(PosSpacing.md),
+            padding: EdgeInsets.all(PosSpacing.md),
             color: PosColors.warningLight,
             child: Row(
               children: [
-                const Icon(Icons.warning_amber_rounded, color: PosColors.warning, size: PosIconSize.sm),
-                const SizedBox(width: PosSpacing.sm),
+                Icon(Icons.warning_amber_rounded, color: PosColors.warning, size: PosIconSize.sm),
+                SizedBox(width: PosSpacing.sm),
                 Expanded(
                   child: Text(
                     validationErrors.first,
@@ -145,10 +146,10 @@ class PosCartPanelV2 extends ConsumerWidget {
 
         // Cart summary footer - ShopCaisse style
         Container(
-          padding: const EdgeInsets.all(PosSpacing.lg),
+          padding: EdgeInsets.all(PosSpacing.lg),
           decoration: BoxDecoration(
             color: PosColors.surface,
-            border: const Border(
+            border: Border(
               top: BorderSide(color: PosColors.border, width: 2),
             ),
             boxShadow: PosShadows.md,
@@ -156,7 +157,7 @@ class PosCartPanelV2 extends ConsumerWidget {
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.all(PosSpacing.md),
+                padding: EdgeInsets.all(PosSpacing.md),
                 decoration: BoxDecoration(
                   color: PosColors.surfaceVariant,
                   borderRadius: PosRadii.mdRadius,
@@ -167,8 +168,8 @@ class PosCartPanelV2 extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.calculate_rounded, color: PosColors.textSecondary, size: PosIconSize.md),
-                        const SizedBox(width: PosSpacing.sm),
+                        Icon(Icons.calculate_rounded, color: PosColors.textSecondary, size: PosIconSize.md),
+                        SizedBox(width: PosSpacing.sm),
                         Text('Total', style: PosTypography.headingMedium),
                       ],
                     ),

@@ -6,6 +6,7 @@ import '../../../../models/product.dart';
 import '../../../../providers/product_provider.dart';
 import '../../../../design_system/pos_design_system.dart';
 import '../../../../design_system/pos_components.dart';
+import '../../../../design_system/colors.dart';
 import '../providers/pos_cart_provider.dart';
 import 'pos_pizza_customization_modal.dart';
 import 'pos_menu_customization_modal.dart';
@@ -31,18 +32,18 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
         // Category tabs - ShopCaisse style
         Container(
           color: PosColors.surface,
-          padding: const EdgeInsets.symmetric(vertical: PosSpacing.md),
+          padding: EdgeInsets.symmetric(vertical: PosSpacing.md),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: PosSpacing.md),
+            padding: EdgeInsets.symmetric(horizontal: PosSpacing.md),
             child: Row(
               children: [
                 _buildCategoryChip(ProductCategory.pizza, 'Pizzas', Icons.local_pizza),
-                const SizedBox(width: PosSpacing.md),
+                SizedBox(width: PosSpacing.md),
                 _buildCategoryChip(ProductCategory.menus, 'Menus', Icons.restaurant_menu),
-                const SizedBox(width: PosSpacing.md),
+                SizedBox(width: PosSpacing.md),
                 _buildCategoryChip(ProductCategory.boissons, 'Boissons', Icons.local_drink),
-                const SizedBox(width: PosSpacing.md),
+                SizedBox(width: PosSpacing.md),
                 _buildCategoryChip(ProductCategory.desserts, 'Desserts', Icons.cake),
               ],
             ),
@@ -67,8 +68,8 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
               }
 
               return GridView.builder(
-                padding: const EdgeInsets.all(PosSpacing.md),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                padding: EdgeInsets.all(PosSpacing.md),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   childAspectRatio: 0.85,
                   crossAxisSpacing: PosSpacing.md,
@@ -107,7 +108,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
           },
           borderRadius: PosRadii.mdRadius,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: PosSpacing.lg, vertical: PosSpacing.md),
+            padding: EdgeInsets.symmetric(horizontal: PosSpacing.lg, vertical: PosSpacing.md),
             decoration: BoxDecoration(
               color: isSelected ? PosColors.primary : PosColors.surface,
               borderRadius: PosRadii.mdRadius,
@@ -125,7 +126,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                   size: PosIconSize.sm,
                   color: isSelected ? PosColors.textOnPrimary : PosColors.primary,
                 ),
-                const SizedBox(width: PosSpacing.sm),
+                SizedBox(width: PosSpacing.sm),
                 Text(
                   label,
                   style: PosTypography.labelLarge.copyWith(
@@ -169,8 +170,8 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: PosColors.textOnPrimary),
-                  const SizedBox(width: PosSpacing.sm),
+                  Icon(Icons.check_circle, color: PosColors.textOnPrimary),
+                  SizedBox(width: PosSpacing.sm),
                   Expanded(
                     child: Text(
                       '${product.name} ajouté au panier',
@@ -186,7 +187,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
               backgroundColor: PosColors.success,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(borderRadius: PosRadii.mdRadius),
-              margin: const EdgeInsets.all(PosSpacing.md),
+              margin: EdgeInsets.all(PosSpacing.md),
             ),
           );
         }
@@ -200,7 +201,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
               child: Stack(
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(PosRadii.md)),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(PosRadii.md)),
                     child: product.imageUrl.isNotEmpty
                         ? Image.network(
                             product.imageUrl,
@@ -226,9 +227,9 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(Icons.image_not_supported_rounded,
+                                  Icon(Icons.image_not_supported_rounded,
                                       size: PosIconSize.xl, color: PosColors.textTertiary),
-                                  const SizedBox(height: PosSpacing.sm),
+                                  SizedBox(height: PosSpacing.sm),
                                   Text(
                                     'Image non disponible',
                                     style: PosTypography.labelSmall,
@@ -308,7 +309,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding: EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 6,
                           ),
@@ -326,9 +327,9 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
+                            gradient: LinearGradient(
                               colors: [AppColors.primary, AppColors.primaryDark],
                             ),
                             shape: BoxShape.circle,
@@ -336,11 +337,11 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                               BoxShadow(
                                 color: AppColors.primary.withOpacity(0.4),
                                 blurRadius: 8,
-                                offset: const Offset(0, 2),
+                                offset: Offset(0, 2),
                               ),
                             ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.add_rounded,
                             color: Colors.white,
                             size: 22,
