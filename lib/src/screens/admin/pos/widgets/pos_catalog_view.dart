@@ -355,7 +355,6 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
             ),
           ],
         ),
-      ),
     );
   }
 }
