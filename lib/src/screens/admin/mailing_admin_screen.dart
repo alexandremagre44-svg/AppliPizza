@@ -470,8 +470,8 @@ class _AddSubscriberDialogState extends State<_AddSubscriberDialog> {
       } else {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cet email est déjà inscrit'),
+          SnackBar(
+            content: const Text('Cet email est déjà inscrit'),
             backgroundColor: Theme.of(context).colorScheme.secondary,
           ),
         );
