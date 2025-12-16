@@ -343,7 +343,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
                     onPressed: () => _navigateToPromotionForm(promotion),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                    icon: Icon(Icons.delete, size: 20, color: Theme.of(context).colorScheme.error),
                     onPressed: () => _confirmDelete(promotion),
                   ),
                 ],
@@ -407,7 +407,7 @@ class _PromotionsAdminScreenState extends ConsumerState<PromotionsAdminScreen> {
               Navigator.pop(context);
               _deletePromotion(promotion);
             },
-            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+            child: Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),

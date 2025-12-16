@@ -276,14 +276,16 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Supprimer', style: TextStyle(color: Colors.red)),
-                      ],
+                    child: Builder(
+                      builder: (context) => Row(
+                        children: [
+                          Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                          const SizedBox(width: 8),
+                          Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -356,7 +358,7 @@ class _ProductsAdminScreenState extends ConsumerState<ProductsAdminScreen> with 
               Navigator.pop(context);
               _deleteProduct(product);
             },
-            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+            child: Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),

@@ -265,13 +265,13 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
                       ),
                     )
                   : Text(
                       isEditing ? 'Enregistrer les modifications' : 'Créer le produit',
                       style: AppTextStyles.titleMedium.copyWith(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
             ),
@@ -608,9 +608,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Erreur lors de la sauvegarde'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: const Text('Erreur lors de la sauvegarde'),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -620,7 +620,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

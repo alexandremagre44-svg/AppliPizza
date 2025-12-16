@@ -302,14 +302,16 @@ class _MailingAdminScreenState extends State<MailingAdminScreen> with SingleTick
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Supprimer', style: TextStyle(color: Colors.red)),
-                ],
+              child: Builder(
+                builder: (context) => Row(
+                  children: [
+                    Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                    const SizedBox(width: 8),
+                    Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                  ],
+                ),
               ),
             ),
           ],
@@ -470,7 +472,7 @@ class _AddSubscriberDialogState extends State<_AddSubscriberDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Cet email est déjà inscrit'),
-            backgroundColor: Colors.orange,
+            backgroundColor: Theme.of(context).colorScheme.secondary,
           ),
         );
       }

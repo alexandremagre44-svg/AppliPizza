@@ -202,12 +202,12 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
                       ),
                     )
                   : Text(
                       isEditing ? 'Enregistrer les modifications' : 'Créer la promotion',
-                      style: AppTextStyles.titleMedium.copyWith(color: Colors.white),
+                      style: AppTextStyles.titleMedium.copyWith(color: Theme.of(context).colorScheme.onPrimary),
                     ),
             ),
           ],
@@ -407,9 +407,9 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Erreur lors de la sauvegarde'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: const Text('Erreur lors de la sauvegarde'),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -419,7 +419,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

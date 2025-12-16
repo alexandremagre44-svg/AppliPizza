@@ -52,9 +52,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         // Colonne 1: Catalogue produits
         Expanded(
           flex: 2,
-          child: Container(
-            color: Colors.grey[100],
-            child: const PosCatalogView(),
+          child: Builder(
+            builder: (context) => Container(
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              child: const PosCatalogView(),
+            ),
           ),
         ),
         const VerticalDivider(width: 1),
@@ -62,9 +64,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         // Colonne 2: Panier
         Expanded(
           flex: 1,
-          child: Container(
-            color: Colors.white,
-            child: const PosCartPanelV2(),
+          child: Builder(
+            builder: (context) => Container(
+              color: Theme.of(context).colorScheme.surface,
+              child: const PosCartPanelV2(),
+            ),
           ),
         ),
         const VerticalDivider(width: 1),
@@ -72,9 +76,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         // Colonne 3: Actions caisse
         SizedBox(
           width: 300,
-          child: Container(
-            color: Colors.white,
-            child: const PosActionsPanelV2(),
+          child: Builder(
+            builder: (context) => Container(
+              color: Theme.of(context).colorScheme.surface,
+              child: const PosActionsPanelV2(),
+            ),
           ),
         ),
       ],
@@ -88,9 +94,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         // Catalog takes most of the space
         Expanded(
           flex: 3,
-          child: Container(
-            color: Colors.grey[100],
-            child: const PosCatalogView(),
+          child: Builder(
+            builder: (context) => Container(
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              child: const PosCatalogView(),
+            ),
           ),
         ),
         const Divider(height: 1),
@@ -100,17 +108,21 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           child: Row(
             children: [
               Expanded(
-                child: Container(
-                  color: Colors.white,
-                  child: const PosCartPanelV2(),
+                child: Builder(
+                  builder: (context) => Container(
+                    color: Theme.of(context).colorScheme.surface,
+                    child: const PosCartPanelV2(),
+                  ),
                 ),
               ),
               const VerticalDivider(width: 1),
               SizedBox(
                 width: 200,
-                child: Container(
-                  color: Colors.white,
-                  child: const PosActionsPanelV2(),
+                child: Builder(
+                  builder: (context) => Container(
+                    color: Theme.of(context).colorScheme.surface,
+                    child: const PosActionsPanelV2(),
+                  ),
                 ),
               ),
             ],

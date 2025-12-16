@@ -318,7 +318,7 @@ class AdminStudioScreen extends ConsumerWidget {
                 ),
                 child: Icon(
                   iconData,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                   size: 32,
                 ),
               ),
