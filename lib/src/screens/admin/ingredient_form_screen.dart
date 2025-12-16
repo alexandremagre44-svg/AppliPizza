@@ -144,21 +144,21 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
             Container(
               padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: AppRadius.radiusSmall,
-                border: Border.all(color: Colors.blue.shade200),
+                border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+                  Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary, size: 20),
                   SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       'Cet ingrédient sera disponible pour toutes les pizzas. '
                       'Les clients pourront l\'ajouter lors de la personnalisation.',
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.blue.shade900,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
                       ),
                     ),
                   ),
@@ -181,13 +181,13 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
                       ),
                     )
                   : Text(
                       isEditing ? 'Enregistrer les modifications' : 'Créer l\'ingrédient',
                       style: AppTextStyles.titleMedium.copyWith(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
             ),
@@ -318,9 +318,9 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
           Navigator.of(context).pop(true); // Retourne true pour indiquer le succès
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Erreur lors de la sauvegarde'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: const Text('Erreur lors de la sauvegarde'),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -331,7 +331,7 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
