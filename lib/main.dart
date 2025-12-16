@@ -69,7 +69,6 @@ import 'src/theme/app_theme.dart';
 import 'src/core/constants.dart';
 import 'src/providers/auth_provider.dart';
 import 'src/providers/restaurant_provider.dart';
-import 'src/providers/theme_providers.dart';
 import 'src/providers/restaurant_plan_provider.dart';
 import 'src/navigation/module_route_guards.dart';
 import 'white_label/core/module_id.dart';
@@ -77,6 +76,8 @@ import 'white_label/runtime/module_runtime_adapter.dart';
 import 'white_label/runtime/router_guard.dart';
 import 'white_label/runtime/register_module_routes.dart';
 import 'white_label/runtime/module_guards.dart';
+// WHITE-LABEL V2: Unified Theme System (Single Source of Truth)
+import 'white_label/theme/unified_theme_provider.dart' show unifiedThemeProvider as unifiedThemeProviderV2;
 
 // Builder B3 imports for dynamic pages
 import 'builder/models/models.dart';
@@ -165,12 +166,14 @@ class MyApp extends ConsumerWidget {
       ModuleRuntimeAdapter.applyAll(runtimeContext, unifiedPlan);
     }
     
-    // Phase 4: Use unified theme provider (WhiteLabel integration)
-    // The unified theme provider handles:
-    // - No plan → legacy theme
-    // - Theme module OFF → template theme
-    // - Theme module ON → WhiteLabel theme
-    final theme = ref.watch(unifiedThemeProvider);
+    // WHITE-LABEL V2: Use unified theme provider (SINGLE SOURCE OF TRUTH)
+    // Workflow:
+    // 1. ThemeSettingsProvider reads from RestaurantPlanUnified.modules.theme.settings
+    // 2. UnifiedThemeAdapter converts ThemeSettings → ThemeData Material 3
+    // 3. Fallback to AppTheme.lightTheme if module disabled or error
+    //
+    // This replaces the old unifiedThemeProvider from src/providers/theme_providers.dart
+    final theme = ref.watch(unifiedThemeProviderV2);
     
     return MaterialApp.router(
       title: 'Pizza Deli\'Zza',
