@@ -1,8 +1,8 @@
 # WHITE-LABEL V2 - Architecture de Thème Unifiée
 
 **Date**: 16 Décembre 2025  
-**Version**: 2.0  
-**Statut**: FONDATION IMPLÉMENTÉE (Aucune UI)
+**Version**: 2.1  
+**Statut**: FONDATION + PHASE 2 ADMIN IMPLÉMENTÉE
 
 ---
 
@@ -663,6 +663,155 @@ white_label/theme/theme_settings.dart
 - [WCAG Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html)
 - [Flutter ThemeData](https://api.flutter.dev/flutter/material/ThemeData-class.html)
 - [Riverpod Providers](https://riverpod.dev/docs/concepts/providers)
+
+---
+
+## 🎨 PHASE 2 — ADMIN UI CONSUMPTION (IMPLÉMENTÉE)
+
+### Objectif
+
+Faire en sorte que **TOUTE l'UI Admin** consomme exclusivement le `ThemeData` issu du thème White-Label V2, sans aucune couleur hardcodée (`Colors.*` ou `AppColors.*`).
+
+### Périmètre
+
+**Screens Modifiés (9 fichiers):**
+
+1. `lib/src/screens/admin/products_admin_screen.dart`
+2. `lib/src/screens/admin/ingredients_admin_screen.dart`
+3. `lib/src/screens/admin/promotions_admin_screen.dart`
+4. `lib/src/screens/admin/mailing_admin_screen.dart`
+5. `lib/src/screens/admin/product_form_screen.dart`
+6. `lib/src/screens/admin/ingredient_form_screen.dart`
+7. `lib/src/screens/admin/promotion_form_screen.dart`
+8. `lib/src/screens/admin/admin_studio_screen.dart`
+9. `lib/src/screens/admin/pos/pos_screen.dart` (visual containers only, POS logic unchanged)
+
+### Changements Appliqués
+
+#### Mapping Couleurs
+
+| Ancienne Couleur | Nouvelle Source ThemeData | Utilisation |
+|------------------|---------------------------|-------------|
+| `Colors.red` | `colorScheme.error` | Actions de suppression, messages d'erreur |
+| `Colors.white` (sur primary) | `colorScheme.onPrimary` | Texte sur boutons primaires, spinner |
+| `Colors.white` (backgrounds) | `colorScheme.surface` | Fond de cartes, panneaux |
+| `Colors.grey[100]` | `colorScheme.surfaceContainerLow` | Fond secondaires, zones de catalogue |
+| `Colors.blue.*` | `colorScheme.primaryContainer` + `onPrimaryContainer` | Boîtes d'information |
+| `Colors.orange` | `colorScheme.secondary` | SnackBar warning |
+
+#### Pattern de Remplacement
+
+**Cas Simple (contexte disponible):**
+```dart
+// Avant
+Text('Supprimer', style: TextStyle(color: Colors.red))
+
+// Après
+Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error))
+```
+
+**Cas PopupMenuItem (besoin de Builder):**
+```dart
+// Avant
+const PopupMenuItem(
+  child: Row(
+    children: [
+      Icon(Icons.delete, color: Colors.red),
+      Text('Supprimer', style: TextStyle(color: Colors.red)),
+    ],
+  ),
+)
+
+// Après
+PopupMenuItem(
+  child: Builder(
+    builder: (context) => Row(
+      children: [
+        Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+        Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+      ],
+    ),
+  ),
+)
+```
+
+**Cas Container avec couleur:**
+```dart
+// Avant
+Container(
+  color: Colors.grey[100],
+  child: PosCatalogView(),
+)
+
+// Après
+Builder(
+  builder: (context) => Container(
+    color: Theme.of(context).colorScheme.surfaceContainerLow,
+    child: PosCatalogView(),
+  ),
+)
+```
+
+### Statistiques
+
+- **28+ occurrences** de `Colors.*` remplacées
+- **9 fichiers** modifiés
+- **0 changement fonctionnel** (uniquement source des couleurs)
+- **0 changement de layout**
+
+### Règles Respectées
+
+✅ **Autorisé:**
+- Remplacer `AppColors.*` / `Colors.*` par `Theme.of(context)`
+- Utiliser `colorScheme`, `textTheme`, `dividerColor`
+- Ajuster uniquement la source des styles
+
+❌ **Interdit (respecté):**
+- Modifier wizard (logique ou stockage)
+- Modifier POS (widgets/logic, seulement containers visuels dans pos_screen.dart)
+- Modifier app client
+- Changer layouts
+- Refactor widgets
+- Toucher ModuleGate ou WL core
+
+### Impact
+
+**Admin UI est maintenant 100% thème-aware:**
+- Changement de couleur primary dans Firestore → immédiatement visible dans Admin
+- Cohérence visuelle garantie avec le reste de l'app
+- Aucun hardcoding résiduel dans Admin
+
+### Tests de Validation
+
+**Manuel:**
+1. Modifier `modules.theme.settings.primaryColor` dans Firestore
+2. Observer changement immédiat dans Admin UI:
+   - Boutons principaux prennent la nouvelle couleur
+   - Texte sur boutons s'adapte (contraste automatique)
+   - Boîtes d'information utilisent `primaryContainer`
+
+**Visuel:**
+- Actions de suppression: toujours rouge (`colorScheme.error`)
+- Boutons primaires: couleur custom du thème
+- Backgrounds: nuances de gris cohérentes (`surface`, `surfaceContainerLow`)
+- Info boxes: teinte primaire (`primaryContainer`)
+
+### Fichiers Non Modifiés (Par Design)
+
+**Wizard UI:**
+- `lib/superadmin/pages/restaurant_wizard/*` - Non modifié (logique de stockage intacte)
+- Changement visuel possible en Phase 3 (hors scope actuel)
+
+**Client App:**
+- `lib/src/screens/home/*` - Non modifié
+- `lib/src/screens/menu/*` - Non modifié
+- `lib/src/screens/cart/*` - Non modifié
+- Phase 3 possible pour client (hors scope actuel)
+
+**POS Widgets:**
+- `lib/src/screens/admin/pos/widgets/*` - Non modifié
+- Design system POS (`pos_design_system.dart`) intact
+- Seul `pos_screen.dart` modifié (containers visuels seulement)
 
 ---
 
