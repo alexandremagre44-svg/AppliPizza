@@ -15,7 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'theme_settings.dart';
-import '../../src/design_system/app_theme.dart' show AppColors;
+import '../../src/design_system/app_theme.dart' show AppColors, AppTheme;
 
 /// Adaptateur unifié pour convertir ThemeSettings en ThemeData Flutter.
 ///

@@ -197,7 +197,7 @@ class _PromotionFormScreenState extends ConsumerState<PromotionFormScreen> {
                 backgroundColor: colorScheme.primary,
               ),
               child: _isSaving
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(

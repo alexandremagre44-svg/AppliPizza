@@ -77,7 +77,7 @@ import 'white_label/runtime/router_guard.dart';
 import 'white_label/runtime/register_module_routes.dart';
 import 'white_label/runtime/module_guards.dart';
 // WHITE-LABEL V2: Unified Theme System (Single Source of Truth)
-import 'white_label/theme/unified_theme_provider.dart' show unifiedThemeProvider as unifiedThemeProviderV2;
+import 'white_label/theme/unified_theme_provider.dart';
 
 // Builder B3 imports for dynamic pages
 import 'builder/models/models.dart';
@@ -173,7 +173,7 @@ class MyApp extends ConsumerWidget {
     // 3. Fallback to AppTheme.lightTheme if module disabled or error
     //
     // This replaces the old unifiedThemeProvider from src/providers/theme_providers.dart
-    final theme = ref.watch(unifiedThemeProviderV2);
+    final theme = ref.watch(unifiedThemeProvider);
     
     return MaterialApp.router(
       title: 'Pizza Deli\'Zza',

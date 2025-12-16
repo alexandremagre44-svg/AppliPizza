@@ -176,7 +176,7 @@ class _IngredientFormScreenState extends ConsumerState<IngredientFormScreen> {
                 backgroundColor: colorScheme.primary,
               ),
               child: _isSaving
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
