@@ -391,7 +391,7 @@ class RestaurantPlanService {
   /// synchronisé avec le module 'theme' dans modules[], permettant au
   /// unifiedThemeProvider de lire correctement la configuration.
   ///
-  /// Retourne null si moduleId != 'theme' ou si le module n'existe pas.
+  /// Retourne null si moduleId != 'theme' ou si le module n'existe pas dans la liste.
   ThemeModuleConfig? _syncThemeModule(
     List<ModuleConfig> modules,
     String moduleId,
@@ -399,20 +399,15 @@ class RestaurantPlanService {
     // Seulement pour le module 'theme'
     if (moduleId != 'theme') return null;
 
-    // Trouver le module theme dans la liste (avec fallback sûr)
-    try {
-      final themeModuleConfig = modules.firstWhere(
-        (m) => m.id == 'theme',
-        orElse: () => throw StateError('Theme module not found'),
-      );
+    // Trouver le module theme dans la liste
+    final themeModuleConfig = modules.firstWhere(
+      (m) => m.id == 'theme',
+      orElse: () => ModuleConfig(id: 'theme', enabled: false, settings: {}),
+    );
 
-      return ThemeModuleConfig(
-        enabled: themeModuleConfig.enabled,
-        settings: themeModuleConfig.settings,
-      );
-    } catch (e) {
-      // Si le module n'existe pas (ne devrait pas arriver), retourner null
-      return null;
-    }
+    return ThemeModuleConfig(
+      enabled: themeModuleConfig.enabled,
+      settings: themeModuleConfig.settings,
+    );
   }
 }
