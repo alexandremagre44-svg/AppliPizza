@@ -30,16 +30,23 @@ Migrer l'intégralité du code Flutter pour utiliser exclusivement le thème WL 
 | ✅ section_header.dart | Migré | Header "Voir tout" link |
 | ✅ info_banner.dart | Migré | Banner with custom color support |
 
-#### Batch 3 - À venir
+#### Batch 3 - Widgets Complexes (3 fichiers) ✅
 | Fichier | Statut | Notes |
 |---------|--------|-------|
-| ⏳ ingredient_selector.dart | À faire | 18 Colors.* |
-| ⏳ product_detail_modal.dart | À faire | 6 Colors.* |
-| ⏳ newsletter_subscription_widget.dart | À faire | 12 Colors.* |
+| ✅ ingredient_selector.dart | Migré | 18 Colors.* - Complex ingredient UI |
+| ✅ product_detail_modal.dart | Migré | 6 Colors.* - Modal avec customization |
+| ✅ newsletter_subscription_widget.dart | Migré | 12 Colors.* - Newsletter form |
+
+#### Batch 4 - À venir
+| Fichier | Statut | Notes |
+|---------|--------|-------|
 | ⏳ order_detail_panel.dart | À faire | 21 Colors.* |
 | ⏳ promo_banner_carousel.dart | À faire | 10 Colors.* |
+| ⏳ promo_card_compact.dart | À faire | 11 Colors.* |
+| ⏳ hero_banner.dart | À faire | 8 Colors.* |
+| ⏳ category_shortcuts.dart | À faire | 5 Colors.* |
 
-**Progression**: 8/250 fichiers (3.2%) - **Batch 2 COMPLETE**
+**Progression**: 11/250 fichiers (4.4%) - **Batch 3 COMPLETE**
 
 ### Violations Identifiées
 | Type | Occurrences | Impact |

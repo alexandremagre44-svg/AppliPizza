@@ -1,11 +1,13 @@
 // lib/src/widgets/newsletter_subscription_widget.dart
 // Widget pour permettre aux utilisateurs de s'abonner à la newsletter
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/subscriber.dart';
 import '../services/mailing_service.dart';
 import '../theme/app_theme.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 class NewsletterSubscriptionWidget extends StatefulWidget {
   final String? userEmail;
@@ -100,7 +102,7 @@ class _NewsletterSubscriptionWidgetState
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.white),
+                Icon(Icons.check_circle, color: context.onPrimary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text('Inscription réussie ! 🎉'),
@@ -197,11 +199,11 @@ class _NewsletterSubscriptionWidgetState
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.primaryRed,
+        color: context.primaryColor, // WL V2: Theme primary
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: context.colorScheme.shadow.withOpacity(0.1), // WL V2: Theme shadow
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -218,12 +220,12 @@ class _NewsletterSubscriptionWidgetState
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryRed,
+                    color: context.primaryColor, // WL V2: Theme primary
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.email,
-                    color: Colors.white,
+                    color: context.onPrimary,
                     size: 24,
                   ),
                 ),
@@ -258,7 +260,7 @@ class _NewsletterSubscriptionWidgetState
                 hintText: 'votre@email.com',
                 prefixIcon: Icon(Icons.email_outlined, color: AppTheme.primaryRed),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.surfaceColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -280,12 +282,12 @@ class _NewsletterSubscriptionWidgetState
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.backgroundLight,
+                color: context.surfaceColor, // WL V2: Theme surface
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: _consentGiven
-                      ? AppTheme.primaryRed
-                      : Colors.grey.shade300,
+                      ? context.primaryColor // WL V2: Theme primary
+                      : context.outlineVariant, // WL V2: Theme outline
                   width: _consentGiven ? 2 : 1,
                 ),
               ),
@@ -347,7 +349,7 @@ class _NewsletterSubscriptionWidgetState
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(context.onPrimary),
                         ),
                       )
                     : Row(
@@ -393,12 +395,12 @@ class _NewsletterSubscriptionWidgetState
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primaryRed,
+              color: context.primaryColor, // WL V2: Theme primary
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.check_circle,
-              color: Colors.white,
+              color: context.onPrimary,
               size: 40,
             ),
           ),
