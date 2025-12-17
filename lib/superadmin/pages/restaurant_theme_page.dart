@@ -38,6 +38,12 @@ class RestaurantThemePage extends ConsumerStatefulWidget {
 class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
   final _service = RestaurantPlanService();
   
+  // Constantes pour la validation
+  static const int _hexColorLength = 6; // RRGGBB (sans le #)
+  static const double _minBorderRadius = 4.0;
+  static const double _maxBorderRadius = 32.0;
+  static const double _nestedBorderRadiusRatio = 0.67; // Pour les éléments imbriqués
+  
   // Controllers pour les couleurs
   late TextEditingController _primaryColorController;
   late TextEditingController _secondaryColorController;
@@ -454,9 +460,9 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
                                 const SizedBox(height: 8),
                                 Slider(
                                   value: _borderRadius,
-                                  min: 4,
-                                  max: 32,
-                                  divisions: 28,
+                                  min: _minBorderRadius,
+                                  max: _maxBorderRadius,
+                                  divisions: (_maxBorderRadius - _minBorderRadius).toInt(),
                                   label: '${_borderRadius.toInt()}px',
                                   onChanged: (value) {
                                     setState(() {
@@ -603,7 +609,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
                                         ),
                                         decoration: BoxDecoration(
                                           color: _parseColor(_ensureHashPrefix(_primaryColorController.text)),
-                                          borderRadius: BorderRadius.circular(_borderRadius * 0.67),
+                                          borderRadius: BorderRadius.circular(_borderRadius * _nestedBorderRadiusRatio),
                                         ),
                                         child: const Text(
                                           'Bouton',
@@ -685,7 +691,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
                 ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[0-9A-Fa-f]')),
-                  LengthLimitingTextInputFormatter(6), // RRGGBB (without #)
+                  LengthLimitingTextInputFormatter(_hexColorLength), // RRGGBB (without #)
                 ],
                 onChanged: (value) {
                   setState(() {}); // Rebuild pour mettre à jour le preview
