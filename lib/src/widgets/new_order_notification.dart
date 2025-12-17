@@ -1,9 +1,11 @@
 // lib/src/widgets/new_order_notification.dart
 // Notification popup et son pour nouvelles commandes
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../theme/app_theme.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 class NewOrderNotification extends StatefulWidget {
   final VoidCallback onDismiss;
@@ -90,8 +92,8 @@ class _NewOrderNotificationState extends State<NewOrderNotification>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.primaryRed,
-                  AppColors.primaryRedLight,
+                  context.primaryColor,
+                  context.primaryContainer,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -106,12 +108,12 @@ class _NewOrderNotificationState extends State<NewOrderNotification>
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: context.onPrimary.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.notifications_active,
-                    color: Colors.white,
+                    color: context.onPrimary,
                     size: 28,
                   ),
                 ),
@@ -128,7 +130,7 @@ class _NewOrderNotificationState extends State<NewOrderNotification>
                             ? 'Nouvelles commandes !'
                             : 'Nouvelle commande !',
                         style: AppTextStyles.titleLarge.copyWith(
-                          color: Colors.white,
+                          color: context.onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -138,7 +140,7 @@ class _NewOrderNotificationState extends State<NewOrderNotification>
                             ? '${widget.orderCount} commandes en attente'
                             : 'Une commande vient d\'arriver',
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.white.withOpacity(0.9),
+                          color: context.onPrimary.withOpacity(0.9),
                         ),
                       ),
                     ],
@@ -150,7 +152,7 @@ class _NewOrderNotificationState extends State<NewOrderNotification>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.visibility, color: Colors.white),
+                      icon: const Icon(Icons.visibility, color: context.onPrimary),
                       onPressed: widget.onViewOrder,
                       tooltip: 'Voir',
                       padding: EdgeInsets.zero,
@@ -158,7 +160,7 @@ class _NewOrderNotificationState extends State<NewOrderNotification>
                     ),
                     const SizedBox(height: 8),
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: const Icon(Icons.close, color: context.onPrimary),
                       onPressed: widget.onDismiss,
                       tooltip: 'Fermer',
                       padding: EdgeInsets.zero,

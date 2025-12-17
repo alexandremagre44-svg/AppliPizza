@@ -43,16 +43,24 @@ Migrer l'intégralité du code Flutter pour utiliser exclusivement le thème WL 
 | ✅ order_detail_panel.dart | Migré | 21 Colors.* - Order detail panel |
 | ✅ promo_banner_carousel.dart | Migré | 10 Colors.* - Promo carousel |
 
-#### Batch 5 - À venir
+#### Batch 5 - Home Widgets (5 fichiers) ✅
 | Fichier | Statut | Notes |
 |---------|--------|-------|
-| ⏳ promo_card_compact.dart | À faire | 11 Colors.* |
-| ⏳ hero_banner.dart | À faire | 8 Colors.* |
-| ⏳ category_shortcuts.dart | À faire | 5 Colors.* |
-| ⏳ home_shimmer_loading.dart | À faire | 9 Colors.* |
-| ⏳ new_order_notification.dart | À faire | 8 Colors.* |
+| ✅ promo_card_compact.dart | Migré | 11 Colors.* - Promo cards |
+| ✅ hero_banner.dart | Migré | 8 Colors.* - Hero banner |
+| ✅ category_shortcuts.dart | Migré | 5 Colors.* - Category buttons |
+| ✅ home_shimmer_loading.dart | Migré | 9 Colors.* - Loading skeleton |
+| ✅ new_order_notification.dart | Migré | 8 Colors.* - Order notifications |
 
-**Progression**: 13/250 fichiers (5.2%) - **Batch 4 COMPLETE**
+#### Batch 6 - À venir
+| Fichier | Statut | Notes |
+|---------|--------|-------|
+| ⏳ pizza_roulette_wheel.dart | À faire | 4 Colors.* |
+| ⏳ Screens - home_screen.dart | À faire | ~30 Colors.* |
+| ⏳ Screens - menu_screen.dart | À faire | ~25 Colors.* |
+| ⏳ Screens - cart_screen.dart | À faire | ~20 Colors.* |
+
+**Progression**: 18/250 fichiers (7.2%) - **Batch 5 COMPLETE**
 
 ### Violations Identifiées
 | Type | Occurrences | Impact |

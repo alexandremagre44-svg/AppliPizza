@@ -1,9 +1,11 @@
 // lib/src/widgets/home/home_shimmer_loading.dart
 // Shimmer loading effect that mimics the home page structure
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 /// Shimmer loading widget that mimics the home page structure
 /// Shows animated placeholder for Hero, Banner, and blocks
@@ -90,11 +92,11 @@ class HomeShimmerLoading extends StatelessWidget {
 
   Widget _buildProductCardShimmer() {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: context.colorScheme.surfaceVariant,
+      highlightColor: context.surfaceColor,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.surfaceColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -104,7 +106,7 @@ class HomeShimmerLoading extends StatelessWidget {
             Container(
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: context.colorScheme.surfaceVariant,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               ),
             ),
@@ -117,14 +119,14 @@ class HomeShimmerLoading extends StatelessWidget {
                   Container(
                     height: 16,
                     width: double.infinity,
-                    color: Colors.grey[300],
+                    color: context.colorScheme.surfaceVariant,
                   ),
                   const SizedBox(height: 8),
                   // Price placeholder
                   Container(
                     height: 14,
                     width: 60,
-                    color: Colors.grey[300],
+                    color: context.colorScheme.surfaceVariant,
                   ),
                 ],
               ),
@@ -142,14 +144,14 @@ class HomeShimmerLoading extends StatelessWidget {
     BorderRadius? borderRadius,
   }) {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: context.colorScheme.surfaceVariant,
+      highlightColor: context.surfaceColor,
       child: Container(
         height: height,
         width: width,
         margin: margin,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.surfaceColor,
           borderRadius: borderRadius ?? BorderRadius.circular(8),
         ),
       ),
