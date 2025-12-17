@@ -338,6 +338,21 @@ class RestaurantPlanService {
       updatedAt: DateTime.now(),
     );
     
+    if (kDebugMode) {
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      debugPrint('💾 [RestaurantPlanService] updateModule');
+      debugPrint('   Restaurant: $restaurantId');
+      debugPrint('   Module: $moduleId');
+      debugPrint('   Enabled: $enabled');
+      debugPrint('   Firestore path: restaurants/$restaurantId/plan/config');
+      if (moduleId == 'theme') {
+        debugPrint('   Theme top-level field: ${themeConfig != null ? "SYNCED" : "KEPT EXISTING"}');
+        debugPrint('   Theme enabled: ${updatedPlan.theme?.enabled ?? false}');
+        debugPrint('   Theme settings keys: ${updatedPlan.theme?.settings.keys.toList()}');
+      }
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    }
+    
     await docRef.set(updatedPlan.toJson());
   }
 
