@@ -51,7 +51,7 @@ final themeSettingsProvider = Provider<ThemeSettings>(
         debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         debugPrint('🎨 [ThemeSettings] PLAN NOT LOADED');
         debugPrint('   Restaurant plan is null, using default config');
-        debugPrint('   Firestore path: restaurants/{id}/config/plan_unified');
+        debugPrint('   Firestore path: restaurants/{id}/plan/config');
         debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       }
       return ThemeSettings.defaultConfig();
@@ -64,11 +64,13 @@ final themeSettingsProvider = Provider<ThemeSettings>(
     if (themeModule == null || !themeModule.enabled) {
       if (kDebugMode) {
         debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        debugPrint('🎨 [ThemeSettings] MODULE DISABLED');
+        debugPrint('🎨 [ThemeSettings] MODULE DISABLED OR NULL');
         debugPrint('   Restaurant: ${plan.restaurantId}');
-        debugPrint('   Theme module: ${themeModule?.enabled ?? false}');
+        debugPrint('   Theme module exists: ${themeModule != null}');
+        debugPrint('   Theme module enabled: ${themeModule?.enabled ?? false}');
         debugPrint('   Using default config');
-        debugPrint('   Firestore path: restaurants/${plan.restaurantId}/config/plan_unified');
+        debugPrint('   Firestore path: restaurants/${plan.restaurantId}/plan/config');
+        debugPrint('   Expected field: theme.settings');
         debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       }
       return ThemeSettings.defaultConfig();
@@ -112,9 +114,11 @@ final themeSettingsProvider = Provider<ThemeSettings>(
         debugPrint('   Restaurant: ${plan.restaurantId}');
         debugPrint('   Primary: ${settings.primaryColor}');
         debugPrint('   Secondary: ${settings.secondaryColor}');
+        debugPrint('   Background: ${settings.backgroundColor}');
+        debugPrint('   Surface: ${settings.surfaceColor}');
         debugPrint('   Radius: ${settings.radiusBase}');
         debugPrint('   Updated: ${settings.updatedAt}');
-        debugPrint('   Firestore path: restaurants/${plan.restaurantId}/config/plan_unified → modules.theme.settings');
+        debugPrint('   Firestore path: restaurants/${plan.restaurantId}/plan/config → theme.settings');
         debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       }
       return settings;
@@ -170,9 +174,12 @@ final unifiedThemeProvider = Provider<ThemeData>(
       final themeData = UnifiedThemeAdapter.toThemeData(settings);
 
       if (kDebugMode) {
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         debugPrint('🎨 [UnifiedTheme] MaterialApp theme applied');
         debugPrint('   Primary: ${settings.primaryColor}');
+        debugPrint('   Secondary: ${settings.secondaryColor}');
         debugPrint('   This ThemeData is used by MaterialApp in main.dart');
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       }
       return themeData;
     } catch (e, stackTrace) {

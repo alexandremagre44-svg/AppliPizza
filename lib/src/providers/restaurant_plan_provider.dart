@@ -52,7 +52,7 @@ final restaurantPlanProvider = FutureProvider<RestaurantPlan?>(
 /// Provider pour charger le RestaurantPlanUnified du restaurant courant.
 ///
 /// Lit depuis restaurants/{id}/plan/config avec la structure complète du restaurant.
-/// Utilise les champs modules[], activeModules[], branding, name, slug du document config.
+/// UTILISE RestaurantPlanUnified.fromJson() pour parser TOUS les champs incluant theme.
 /// 
 /// Retourne un plan vide si le document restaurant n'existe pas (backward compatibility).
 final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
@@ -83,30 +83,10 @@ final restaurantPlanUnifiedProvider = FutureProvider<RestaurantPlanUnified?>(
     }
 
     final data = configDoc.data()!;
-    final modules = (data['modules'] as List<dynamic>? ?? [])
-        .map((e) => ModuleConfig.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
-
-    // Si activeModules est présent dans le doc, utilise-le.
-    // Sinon, calcule-le à partir des modules.enabled.
-    final activeModulesFromDoc = (data['activeModules'] as List<dynamic>? ?? [])
-        .map((e) => e.toString())
-        .toList();
-
-    final activeModules = activeModulesFromDoc.isNotEmpty
-        ? activeModulesFromDoc
-        : modules.where((m) => m.enabled == true).map((m) => m.id).toList();
-
-    return RestaurantPlanUnified(
-      restaurantId: restaurantId,
-      name: data['name'] as String? ?? '',
-      slug: data['slug'] as String? ?? '',
-      modules: modules,
-      activeModules: activeModules,
-      branding: data['branding'] != null
-          ? BrandingConfig.fromJson(Map<String, dynamic>.from(data['branding']))
-          : BrandingConfig.empty(),
-    );
+    
+    // FIX THEME WL V2: Utiliser fromJson() pour parser TOUS les champs
+    // incluant le champ top-level 'theme' écrit par RestaurantPlanService
+    return RestaurantPlanUnified.fromJson(data);
   },
   dependencies: [currentRestaurantProvider],
 );
