@@ -311,26 +311,25 @@ final themeSavingProvider = StateProvider<bool>((ref) => false);
 // PHASE 4: Unified Theme Provider (WhiteLabel Integration)
 // ========================================================================
 
-/// Provider unifié pour le thème basé sur RestaurantPlanUnified.
+/// DEPRECATED: Provider unifié pour le thème basé sur RestaurantPlanUnified (LEGACY).
 ///
-/// Cette provider implémente la logique suivante:
-/// 1. Si RestaurantPlanUnified absent → utiliser le thème legacy (AppTheme.lightTheme)
-/// 2. Si module thème OFF → utiliser le thème par défaut du template
-/// 3. Si module thème ON → utiliser ThemeAdapter.toAppTheme(plan.theme!)
+/// ⚠️ NE PLUS UTILISER CE PROVIDER ! ⚠️
 ///
-/// Le thème legacy reste le fallback total si aucune configuration n'est disponible.
+/// Ce provider est obsolète et a été remplacé par:
+/// white_label/theme/unified_theme_provider.dart::unifiedThemeProvider
 ///
-/// Usage dans MaterialApp:
+/// Le nouveau provider utilise ThemeSettings (WL V2) au lieu de ThemeAdapter (legacy).
+/// 
+/// Ce provider reste ici pour rétrocompatibilité temporaire mais ne doit plus être utilisé.
+/// Il sera supprimé dans une version future.
+///
+/// Pour utiliser le thème WL V2, importez:
 /// ```dart
-/// Widget build(BuildContext context, WidgetRef ref) {
-///   final theme = ref.watch(unifiedThemeProvider);
-///   return MaterialApp(
-///     theme: theme,
-///     ...
-///   );
-/// }
+/// import 'package:appli_pizza/white_label/theme/unified_theme_provider.dart';
+/// final theme = ref.watch(unifiedThemeProvider);
 /// ```
-final unifiedThemeProvider = Provider<ThemeData>(
+@Deprecated('Use white_label/theme/unified_theme_provider.dart::unifiedThemeProvider instead')
+final legacyUnifiedThemeProvider = Provider<ThemeData>(
   (ref) {
     // Charger le plan unifié du restaurant
     final planAsync = ref.watch(restaurantPlanUnifiedProvider);

@@ -11,6 +11,7 @@ import '../../white_label/core/module_registry.dart';
 import '../../white_label/restaurant/restaurant_plan.dart';
 import '../../white_label/restaurant/restaurant_plan_unified.dart';
 import '../../white_label/restaurant/cashier_profile.dart';
+import '../../white_label/modules/appearance/theme/theme_module_config.dart';
 
 /// Service pour gérer les plans de restaurant (modules activés/désactivés).
 ///
@@ -281,18 +282,28 @@ class RestaurantPlanService {
     
     if (!doc.exists || doc.data() == null) {
       // Créer un nouveau document avec le module
+      final moduleConfig = ModuleConfig(
+        id: moduleId,
+        enabled: enabled,
+        settings: {},
+      );
+      
+      // FIX THEME WL V2: Si le module est 'theme', créer aussi le champ top-level
+      ThemeModuleConfig? themeConfig;
+      if (moduleId == 'theme') {
+        themeConfig = ThemeModuleConfig(
+          enabled: enabled,
+          settings: {},
+        );
+      }
+      
       final newPlan = RestaurantPlanUnified(
         restaurantId: restaurantId,
         name: '',
         slug: '',
-        modules: [
-          ModuleConfig(
-            id: moduleId,
-            enabled: enabled,
-            settings: {},
-          ),
-        ],
+        modules: [moduleConfig],
         activeModules: enabled ? [moduleId] : [],
+        theme: themeConfig,
       );
       await docRef.set(newPlan.toJson());
       return;
@@ -321,10 +332,22 @@ class RestaurantPlanService {
         .map((m) => m.id)
         .toList();
     
+    // FIX THEME WL V2: Si le module est 'theme', mettre à jour aussi le champ top-level
+    // pour que RestaurantPlanUnified.theme soit correctement peuplé
+    ThemeModuleConfig? themeConfig;
+    if (moduleId == 'theme') {
+      final themeModuleConfig = modules.firstWhere((m) => m.id == 'theme');
+      themeConfig = ThemeModuleConfig(
+        enabled: themeModuleConfig.enabled,
+        settings: themeModuleConfig.settings,
+      );
+    }
+    
     // Sauvegarder
     final updatedPlan = plan.copyWith(
       modules: modules,
       activeModules: activeModules,
+      theme: themeConfig ?? plan.theme, // Mettre à jour theme si nécessaire
       updatedAt: DateTime.now(),
     );
     
@@ -363,9 +386,22 @@ class RestaurantPlanService {
       ));
     }
     
+    // FIX THEME WL V2: Si le module est 'theme', mettre à jour aussi le champ top-level
+    // pour que RestaurantPlanUnified.theme soit correctement peuplé
+    ThemeModuleConfig? themeConfig;
+    if (moduleId == 'theme') {
+      // Récupérer le module theme depuis la liste modules
+      final themeModuleConfig = modules.firstWhere((m) => m.id == 'theme');
+      themeConfig = ThemeModuleConfig(
+        enabled: themeModuleConfig.enabled,
+        settings: themeModuleConfig.settings,
+      );
+    }
+    
     // Sauvegarder
     final updatedPlan = plan.copyWith(
       modules: modules,
+      theme: themeConfig ?? plan.theme, // Mettre à jour theme si nécessaire
       updatedAt: DateTime.now(),
     );
     
