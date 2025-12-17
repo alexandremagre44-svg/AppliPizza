@@ -60,15 +60,26 @@ Migrer l'intégralité du code Flutter pour utiliser exclusivement le thème WL 
 | ✅ splash_screen.dart | Migré | 7 Colors.* - Splash screen |
 | ✅ product_detail_screen.dart | Migré | 5 Colors.* - Product details |
 
-#### Batch 7 - À venir
+#### Batch 7 - Large Batch: Screens & Widgets (17 fichiers) ✅
+| Module | Fichiers | Notes |
+|--------|----------|-------|
+| ✅ Auth screens | 2 | login_screen, signup_screen |
+| ✅ Checkout | 1 | checkout_screen |
+| ✅ Rewards | 2 | rewards_screen, reward_product_selector |
+| ✅ Delivery | 5 | address, area selector, tracking, summary, not available |
+| ✅ Kitchen/KDS | 2 | kitchen_screen, kds_screen |
+| ✅ Profile widgets | 4 | account_activity, loyalty, rewards_tickets, roulette_card |
+| ✅ Roulette | 1 | roulette_screen |
+
+#### Batch 8 - À venir
 | Fichier | Statut | Notes |
 |---------|--------|-------|
 | ⏳ Screens - home_screen.dart | À faire | ~30 Colors.* |
 | ⏳ Screens - menu_screen.dart | À faire | ~25 Colors.* |
 | ⏳ Screens - profile_screen.dart | À faire | ~15 Colors.* |
-| ⏳ Profile widgets | À faire | ~40 Colors.* combinés |
+| ⏳ Admin screens | À faire | ~100+ Colors.* combinés |
 
-**Progression**: 22/250 fichiers (8.8%) - **Batch 6 COMPLETE**
+**Progression**: 39/250 fichiers (15.6%) - **Batch 7 COMPLETE** 🎉
 
 ### Violations Identifiées
 | Type | Occurrences | Impact |

@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/kds/kds_screen.dart
 /// 
 /// Kitchen Display System Screen
@@ -21,7 +22,7 @@ class KdsScreen extends ConsumerWidget {
     final ordersAsync = ref.watch(kdsOrdersProvider);
     
     return Scaffold(
-      backgroundColor: Colors.grey[900],
+      backgroundColor: context.colorScheme.surfaceVariant[900],
       appBar: AppBar(
         title: const Text('Cuisine - KDS'),
         backgroundColor: Colors.black,
@@ -34,7 +35,7 @@ class KdsScreen extends ConsumerWidget {
               child: Text(
                 'Aucune commande en cours',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: context.onPrimary70,
                   fontSize: 20,
                 ),
               ),
@@ -64,7 +65,7 @@ class KdsScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
                 ],
                 if (readyOrders.isNotEmpty) ...[
-                  _buildSectionHeader('Prêtes', readyOrders.length, Colors.green),
+                  _buildSectionHeader('Prêtes', readyOrders.length, AppColors.success),
                   const SizedBox(height: 12),
                   _buildOrderGrid(context, ref, readyOrders),
                 ],
@@ -76,7 +77,7 @@ class KdsScreen extends ConsumerWidget {
         error: (error, stack) => Center(
           child: Text(
             'Erreur: ${error.toString()}',
-            style: const TextStyle(color: Colors.red),
+            style: const TextStyle(color: AppColors.error),
           ),
         ),
       ),
@@ -95,7 +96,7 @@ class KdsScreen extends ConsumerWidget {
         Text(
           '$title ($count)',
           style: const TextStyle(
-            color: Colors.white,
+            color: context.onPrimary,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -130,10 +131,10 @@ class _KdsOrderCard extends ConsumerWidget {
     return Container(
       width: 320,
       decoration: BoxDecoration(
-        color: Colors.grey[850],
+        color: context.colorScheme.surfaceVariant[850],
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isUrgent ? Colors.red : _getStatusColor(order.status),
+          color: isUrgent ? AppColors.error : _getStatusColor(order.status),
           width: 2,
         ),
       ),
@@ -153,7 +154,7 @@ class _KdsOrderCard extends ConsumerWidget {
                 Text(
                   'Commande #${order.id.substring(0, 8).toUpperCase()}',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: context.onPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -161,7 +162,7 @@ class _KdsOrderCard extends ConsumerWidget {
                 Text(
                   '${elapsedMinutes}min',
                   style: TextStyle(
-                    color: isUrgent ? Colors.red : Colors.white70,
+                    color: isUrgent ? AppColors.error : context.onPrimary70,
                     fontWeight: isUrgent ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
@@ -180,14 +181,14 @@ class _KdsOrderCard extends ConsumerWidget {
                   children: [
                     Icon(
                       _getOrderTypeIcon(order.orderType),
-                      color: Colors.white70,
+                      color: context.onPrimary70,
                       size: 16,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       OrderType.getLabel(order.orderType),
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: context.onPrimary70,
                         fontSize: 14,
                       ),
                     ),
@@ -196,7 +197,7 @@ class _KdsOrderCard extends ConsumerWidget {
                       Text(
                         'Table ${order.tableNumber}',
                         style: const TextStyle(
-                          color: Colors.white70,
+                          color: context.onPrimary70,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
@@ -210,7 +211,7 @@ class _KdsOrderCard extends ConsumerWidget {
                   Text(
                     order.customerName!,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: context.onPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -218,7 +219,7 @@ class _KdsOrderCard extends ConsumerWidget {
                 ],
                 
                 const SizedBox(height: 12),
-                const Divider(color: Colors.white24),
+                const Divider(color: context.onPrimary24),
                 const SizedBox(height: 8),
                 
                 // Items
@@ -230,7 +231,7 @@ class _KdsOrderCard extends ConsumerWidget {
                       Text(
                         '${item.quantity}x ${item.productName}',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: context.onPrimary,
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
@@ -241,7 +242,7 @@ class _KdsOrderCard extends ConsumerWidget {
                           child: Text(
                             formatSelections(item.selections),
                             style: const TextStyle(
-                              color: Colors.white70,
+                              color: context.onPrimary70,
                               fontSize: 13,
                             ),
                           ),
@@ -252,7 +253,7 @@ class _KdsOrderCard extends ConsumerWidget {
                 
                 if (order.baseOrder.comment != null && order.baseOrder.comment!.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  const Divider(color: Colors.white24),
+                  const Divider(color: context.onPrimary24),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(8),
@@ -302,7 +303,7 @@ class _KdsOrderCard extends ConsumerWidget {
               label: const Text('Commencer'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
+                foregroundColor: context.onPrimary,
               ),
             ),
           ),
@@ -313,8 +314,8 @@ class _KdsOrderCard extends ConsumerWidget {
               icon: const Icon(Icons.check),
               label: const Text('Prêt'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.success,
+                foregroundColor: context.onPrimary,
               ),
             ),
           ),
@@ -324,18 +325,18 @@ class _KdsOrderCard extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(vertical: 12),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.2),
+                color: AppColors.success.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green),
+                  Icon(Icons.check_circle, color: AppColors.success),
                   SizedBox(width: 8),
                   Text(
                     'Prêt pour service',
                     style: TextStyle(
-                      color: Colors.green,
+                      color: AppColors.success,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -388,9 +389,9 @@ class _KdsOrderCard extends ConsumerWidget {
       case PosOrderStatus.inPreparation:
         return Colors.blue;
       case PosOrderStatus.ready:
-        return Colors.green;
+        return AppColors.success;
       default:
-        return Colors.grey;
+        return context.colorScheme.surfaceVariant;
     }
   }
   

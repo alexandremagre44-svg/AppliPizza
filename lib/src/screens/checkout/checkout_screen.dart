@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/checkout/checkout_screen.dart
 // P11 & P12: Flux commande complet avec créneaux
 
@@ -14,6 +15,7 @@ import '../../services/loyalty_service.dart';
 import '../../models/loyalty_reward.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../../white_label/core/module_id.dart';
 import '../delivery/delivery_summary_widget.dart';
 import '../delivery/delivery_not_available_widget.dart';
@@ -84,7 +86,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez sélectionner un créneau'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -96,7 +98,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez sélectionner un point de retrait'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -113,7 +115,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Veuillez configurer votre adresse de livraison'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
         context.push('/delivery/address');
@@ -132,7 +134,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Minimum de commande pour la livraison : ${minimumAmount.toStringAsFixed(2)} €'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
         return;
@@ -195,7 +197,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         builder: (dialogContext) => AlertDialog(
           title: const Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.green, size: 32),
+              Icon(Icons.check_circle, color: AppColors.success, size: 32),
               SizedBox(width: 12),
               Text('Commande confirmée !'),
             ],
@@ -255,7 +257,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erreur lors de la commande: ${e.toString()}'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
     }
@@ -404,7 +406,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               child: ElevatedButton(
                 onPressed: minimumOk ? _confirmOrder : null,
                 style: ElevatedButton.styleFrom(
-                  disabledBackgroundColor: Colors.grey.shade300,
+                  disabledBackgroundColor: context.colorScheme.surfaceVariant.shade300,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -439,7 +441,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primaryRed.withOpacity(0.1),
+            color: context.primaryColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -521,7 +523,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
                   Text(
                     '-${vipDiscount.toStringAsFixed(2)} €',
-                    style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: AppColors.success, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -542,7 +544,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.delivery_dining, size: 16, color: Colors.grey),
+                      const Icon(Icons.delivery_dining, size: 16, color: context.colorScheme.surfaceVariant),
                       const SizedBox(width: 4),
                       const Text('Frais de livraison'),
                     ],
@@ -552,7 +554,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         ? '${deliveryFee.toStringAsFixed(2)} €'
                         : 'Gratuit',
                     style: TextStyle(
-                      color: deliveryFee == 0 ? Colors.green : null,
+                      color: deliveryFee == 0 ? AppColors.success : null,
                       fontWeight: deliveryFee == 0 ? FontWeight.bold : null,
                     ),
                   ),
@@ -608,7 +610,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             case RewardType.freePizza:
               label = 'Pizza Gratuite';
               icon = Icons.local_pizza;
-              color = AppColors.primaryRed;
+              color = context.primaryColor;
               isSelected = _selectedFreePizzaRewardType != null;
               break;
             case RewardType.freeDrink:
@@ -626,7 +628,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             default:
               label = 'Récompense';
               icon = Icons.card_giftcard;
-              color = Colors.grey;
+              color = context.colorScheme.surfaceVariant;
           }
 
           return CheckboxListTile(
@@ -694,7 +696,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : null,
+                  color: isSelected ? context.onPrimary : null,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -702,7 +704,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               Text(
                 '${date.day}/${date.month}',
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.grey[600],
+                  color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant[600],
                 ),
               ),
             ],
@@ -730,15 +732,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   });
                 }
               : null,
-          backgroundColor: isAvailable ? null : Colors.grey[200],
+          backgroundColor: isAvailable ? null : context.colorScheme.surfaceVariant[200],
           selectedColor: Theme.of(context).colorScheme.primary,
-          checkmarkColor: Colors.white,
+          checkmarkColor: context.onPrimary,
           labelStyle: TextStyle(
             color: isSelected
-                ? Colors.white
+                ? context.onPrimary
                 : isAvailable
                     ? Colors.black87
-                    : Colors.grey,
+                    : context.colorScheme.surfaceVariant,
           ),
         );
       }).toList(),
@@ -758,7 +760,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryRed.withOpacity(0.1),
+                    color: context.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -810,7 +812,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 }
               },
               trailing: deliveryState.isDeliverySelected && !deliveryState.isDeliveryConfigured
-                  ? const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey)
+                  ? const Icon(Icons.arrow_forward_ios, size: 16, color: context.colorScheme.surfaceVariant)
                   : null,
             ),
           ],
@@ -837,7 +839,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           border: Border.all(
             color: isSelected 
                 ? Theme.of(context).colorScheme.primary 
-                : Colors.grey.shade300,
+                : context.colorScheme.surfaceVariant.shade300,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -852,14 +854,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               decoration: BoxDecoration(
                 color: isSelected
                     ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                    : Colors.grey.shade100,
+                    : context.colorScheme.surfaceVariant.shade100,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 icon,
                 color: isSelected
                     ? Theme.of(context).colorScheme.primary
-                    : Colors.grey.shade600,
+                    : context.colorScheme.surfaceVariant.shade600,
                 size: 24,
               ),
             ),
@@ -881,7 +883,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   Text(
                     subtitle,
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: Colors.grey.shade600,
+                          color: context.colorScheme.surfaceVariant.shade600,
                         ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -957,7 +959,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         side: BorderSide(
           color: _selectedPickupPoint != null
               ? Theme.of(context).primaryColor
-              : Colors.grey.shade300,
+              : context.colorScheme.surfaceVariant.shade300,
           width: _selectedPickupPoint != null ? 2 : 1,
         ),
       ),
@@ -975,7 +977,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     Icons.location_on,
                     color: _selectedPickupPoint != null
                         ? Theme.of(context).primaryColor
-                        : Colors.grey,
+                        : context.colorScheme.surfaceVariant,
                     size: 28,
                   ),
                   const SizedBox(width: 12),
@@ -998,7 +1000,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             fontSize: 14,
                             color: _selectedPickupPoint != null
                                 ? Theme.of(context).primaryColor
-                                : Colors.grey,
+                                : context.colorScheme.surfaceVariant,
                           ),
                         ),
                       ],
@@ -1010,7 +1012,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         : Icons.chevron_right,
                     color: _selectedPickupPoint != null
                         ? Theme.of(context).primaryColor
-                        : Colors.grey,
+                        : context.colorScheme.surfaceVariant,
                   ),
                 ],
               ),
@@ -1018,17 +1020,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 const Divider(height: 24),
                 Text(
                   _selectedPickupPoint!.address,
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
+                  style: const TextStyle(fontSize: 13, color: context.colorScheme.surfaceVariant),
                 ),
                 if (_selectedPickupPoint!.phone != null) ...[
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.phone, size: 14, color: Colors.grey),
+                      const Icon(Icons.phone, size: 14, color: context.colorScheme.surfaceVariant),
                       const SizedBox(width: 6),
                       Text(
                         _selectedPickupPoint!.phone!,
-                        style: const TextStyle(fontSize: 13, color: Colors.grey),
+                        style: const TextStyle(fontSize: 13, color: context.colorScheme.surfaceVariant),
                       ),
                     ],
                   ),

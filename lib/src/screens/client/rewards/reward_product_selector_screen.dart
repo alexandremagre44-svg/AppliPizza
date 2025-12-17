@@ -1,9 +1,11 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/client/rewards/reward_product_selector_screen.dart
 // Screen for selecting a free product when using a reward ticket
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/app_theme.dart';
+import '../../../../white_label/theme/theme_extensions.dart';
 import '../../../models/reward_ticket.dart';
 import '../../../models/reward_action.dart';
 import '../../../models/product.dart';
@@ -45,7 +47,7 @@ class _RewardProductSelectorScreenState
       appBar: AppBar(
         title: const Text('Choisissez votre produit'),
         backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: context.onPrimary,
       ),
       body: productsAsync.when(
         data: (products) {
@@ -255,7 +257,7 @@ class _RewardProductSelectorScreenState
                         child: Text(
                           'OFFERT',
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: Colors.white,
+                            color: context.onPrimary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

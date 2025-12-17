@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/src/screens/delivery/delivery_tracking_screen.dart
 ///
 /// Écran de suivi de livraison.
@@ -239,7 +240,7 @@ class DeliveryTrackingScreen extends ConsumerWidget {
                   child: Icon(
                     status.$3,
                     size: 18,
-                    color: isCompleted ? Colors.white : AppColors.neutral500,
+                    color: isCompleted ? context.onPrimary : AppColors.neutral500,
                   ),
                 ),
                 if (index < statuses.length - 1)
@@ -476,7 +477,7 @@ class DeliveryTrackingButton extends ConsumerWidget {
       label: const Text('Suivre ma livraison'),
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: context.onPrimary,
       ),
     );
   }

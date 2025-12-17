@@ -1,8 +1,10 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/profile/widgets/account_activity_widget.dart
 // Account activity section (orders and favorites) for profile screen (Material 3)
 
 import 'package:flutter/material.dart';
 import '../../../design_system/app_theme.dart';
+import '../../../../white_label/theme/theme_extensions.dart';
 import '../../../models/app_texts_config.dart';
 
 /// Display account activity: orders count and favorites count

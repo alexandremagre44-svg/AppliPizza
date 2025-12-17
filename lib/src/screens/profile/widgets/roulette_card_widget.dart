@@ -1,9 +1,11 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/profile/widgets/roulette_card_widget.dart
 // Roulette card for profile screen (Material 3)
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../design_system/app_theme.dart';
+import '../../../../white_label/theme/theme_extensions.dart';
 import '../../../core/constants.dart';
 import '../../../models/app_texts_config.dart';
 import '../../../models/roulette_config.dart';
@@ -268,13 +270,13 @@ class _RouletteCardWidgetState extends ConsumerState<RouletteCardWidget> {
                         padding: EdgeInsets.all(20),
                         child: CircularProgressIndicator(
                           strokeWidth: 3,
-                          color: Colors.white,
+                          color: context.onPrimary,
                         ),
                       )
                     : Icon(
                         Icons.casino,
                         size: 40,
-                        color: Colors.white,
+                        color: context.onPrimary,
                       ),
               ),
               

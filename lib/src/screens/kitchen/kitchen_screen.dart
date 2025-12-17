@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/kitchen/kitchen_screen.dart
 // Kitchen Screen with WebSocket integration
 
@@ -89,7 +90,7 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Nouvelle commande : $orderId'),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
         duration: const Duration(seconds: 5),
       ),
     );
@@ -158,7 +159,7 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen> {
                 width: 10,
                 height: 10,
                 decoration: BoxDecoration(
-                  color: _isConnected ? Colors.green : Colors.red,
+                  color: _isConnected ? AppColors.success : AppColors.error,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -167,7 +168,7 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen> {
                 _isConnected ? 'En ligne' : 'Hors ligne',
                 style: TextStyle(
                   fontSize: 12,
-                  color: _isConnected ? Colors.green : Colors.red,
+                  color: _isConnected ? AppColors.success : AppColors.error,
                 ),
               ),
             ],
@@ -280,7 +281,7 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen> {
             if (order.pickupTime != null)
               Text(
                 'Retrait: ${_formatTime(order.pickupTime!)}',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: const TextStyle(fontSize: 12, color: context.colorScheme.surfaceVariant),
               ),
             
             const SizedBox(height: 16),
@@ -296,7 +297,7 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen> {
                     label: const Text('Commencer'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
+                      foregroundColor: context.onPrimary,
                     ),
                   ),
                 if (order.status == KitchenStatus.preparing)
@@ -305,8 +306,8 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen> {
                     icon: const Icon(Icons.check, size: 18),
                     label: const Text('Prêt'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.success,
+                      foregroundColor: context.onPrimary,
                     ),
                   ),
                 if (order.status == KitchenStatus.ready)
@@ -316,7 +317,7 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen> {
                     label: const Text('Livré'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.purple,
-                      foregroundColor: Colors.white,
+                      foregroundColor: context.onPrimary,
                     ),
                   ),
               ],
@@ -334,7 +335,7 @@ class _KitchenScreenState extends ConsumerState<KitchenScreen> {
       case KitchenStatus.preparing:
         return Colors.blue;
       case KitchenStatus.ready:
-        return Colors.green;
+        return AppColors.success;
       case KitchenStatus.delivered:
         return Colors.purple;
     }

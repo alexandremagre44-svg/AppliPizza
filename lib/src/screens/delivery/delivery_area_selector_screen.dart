@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/src/screens/delivery/delivery_area_selector_screen.dart
 ///
 /// Écran de sélection de la zone de livraison.

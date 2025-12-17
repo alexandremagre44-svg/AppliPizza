@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/auth/login_screen.dart
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/restaurant_provider.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../../builder/services/builder_navigation_service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -96,7 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.error, color: Colors.white),
+                  const Icon(Icons.error, color: context.onPrimary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(ref.read(authProvider).error ?? 'Erreur de connexion'),
@@ -120,7 +122,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       body: Container(
         decoration: const BoxDecoration(
           // Fond rouge uni (pas de gradient) selon la charte officielle
-          color: AppColors.primaryRed,
+          color: context.primaryColor,
         ),
         child: SafeArea(
           child: Center(
@@ -141,11 +143,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       width: 140,
                       height: 140,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.onPrimary,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: context.colorScheme.shadow.withOpacity(0.3),
                             blurRadius: 30,
                             offset: const Offset(0, 15),
                           ),
@@ -165,13 +167,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     Text(
                       'Pizza Deli\'Zza',
                       style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                            color: Colors.white,
+                            color: context.onPrimary,
                             fontWeight: FontWeight.w900,
                             fontSize: 36,
                             letterSpacing: 1.2,
                             shadows: [
                               Shadow(
-                                color: Colors.black.withOpacity(0.3),
+                                color: context.colorScheme.shadow.withOpacity(0.3),
                                 offset: const Offset(0, 4),
                                 blurRadius: 8,
                               ),
@@ -183,7 +185,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     Text(
                       'Votre pizza à portée de main',
                       style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                            color: Colors.white.withOpacity(0.95),
+                            color: context.onPrimary.withOpacity(0.95),
                             fontWeight: FontWeight.w500,
                           ),
                       textAlign: TextAlign.center,
@@ -194,11 +196,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.onPrimary,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: context.colorScheme.shadow.withOpacity(0.2),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -279,7 +281,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                       width: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 3,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        valueColor: AlwaysStoppedAnimation<Color>(context.onPrimary),
                                       ),
                                     )
                                   : const Text('Se connecter', style: TextStyle(fontSize: 18)),
