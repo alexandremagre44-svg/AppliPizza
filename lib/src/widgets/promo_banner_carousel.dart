@@ -1,8 +1,10 @@
 // lib/src/widgets/promo_banner_carousel.dart
 // Carousel de bannières promotionnelles avec animations
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Carousel de bannières promotionnelles
 /// - Images pleine largeur
@@ -108,10 +110,10 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
                 return Container(
-                  color: AppColors.primaryRedLight,
+                  color: context.primaryContainer,
                   child: Center(
                     child: CircularProgressIndicator(
-                      color: AppColors.surfaceWhite,
+                      color: context.onPrimary,
                       value: loadingProgress.expectedTotalBytes != null
                           ? loadingProgress.cumulativeBytesLoaded /
                               loadingProgress.expectedTotalBytes!
@@ -122,12 +124,12 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
               },
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  color: AppColors.primaryRedLight,
+                  color: context.primaryContainer,
                   child: const Center(
                     child: Icon(
                       Icons.local_pizza,
                       size: 60,
-                      color: AppColors.surfaceWhite,
+                      color: context.onPrimary,
                     ),
                   ),
                 );
@@ -136,7 +138,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
             // Gradient overlay
             Container(
               decoration: BoxDecoration(
-                color: AppColors.primaryRed,
+                color: context.primaryColor,
               ),
             ),
             // Contenu texte
@@ -151,7 +153,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
                   Text(
                     banner.title,
                     style: AppTextStyles.headlineMedium.copyWith(
-                      color: AppColors.surfaceWhite,
+                      color: context.onPrimary,
                     ),
                   ),
                   if (banner.subtitle != null) ...[
@@ -159,7 +161,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
                     Text(
                       banner.subtitle!,
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.surfaceWhite.withOpacity(0.9),
+                        color: context.onPrimary.withOpacity(0.9),
                       ),
                     ),
                   ],
@@ -167,8 +169,8 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
                   ElevatedButton(
                     onPressed: banner.onTap,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.surfaceWhite,
-                      foregroundColor: AppColors.primaryRed,
+                      backgroundColor: context.surfaceColor,
+                      foregroundColor: context.primaryColor,
                       padding: AppSpacing.buttonPadding.copyWith(
                         top: AppSpacing.md,
                         bottom: AppSpacing.md,
@@ -193,7 +195,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
       width: isActive ? 24 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.primaryRed : AppColors.textLight,
+        color: isActive ? AppColors.primaryRed : context.textSecondary,
         borderRadius: AppRadius.radiusXS,
       ),
     );

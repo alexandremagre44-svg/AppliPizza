@@ -37,16 +37,22 @@ Migrer l'intégralité du code Flutter pour utiliser exclusivement le thème WL 
 | ✅ product_detail_modal.dart | Migré | 6 Colors.* - Modal avec customization |
 | ✅ newsletter_subscription_widget.dart | Migré | 12 Colors.* - Newsletter form |
 
-#### Batch 4 - À venir
+#### Batch 4 - Panels & Carousels (2 fichiers) ✅
 | Fichier | Statut | Notes |
 |---------|--------|-------|
-| ⏳ order_detail_panel.dart | À faire | 21 Colors.* |
-| ⏳ promo_banner_carousel.dart | À faire | 10 Colors.* |
+| ✅ order_detail_panel.dart | Migré | 21 Colors.* - Order detail panel |
+| ✅ promo_banner_carousel.dart | Migré | 10 Colors.* - Promo carousel |
+
+#### Batch 5 - À venir
+| Fichier | Statut | Notes |
+|---------|--------|-------|
 | ⏳ promo_card_compact.dart | À faire | 11 Colors.* |
 | ⏳ hero_banner.dart | À faire | 8 Colors.* |
 | ⏳ category_shortcuts.dart | À faire | 5 Colors.* |
+| ⏳ home_shimmer_loading.dart | À faire | 9 Colors.* |
+| ⏳ new_order_notification.dart | À faire | 8 Colors.* |
 
-**Progression**: 11/250 fichiers (4.4%) - **Batch 3 COMPLETE**
+**Progression**: 13/250 fichiers (5.2%) - **Batch 4 COMPLETE**
 
 ### Violations Identifiées
 | Type | Occurrences | Impact |

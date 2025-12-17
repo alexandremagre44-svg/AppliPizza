@@ -1,5 +1,6 @@
 // lib/src/widgets/order_detail_panel.dart
 // Panneau de détail d'une commande avec slide animation
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import '../theme/app_theme.dart';
 import '../services/firebase_order_service.dart';
 import '../providers/order_provider.dart';
 import 'order_status_badge.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 class OrderDetailPanel extends ConsumerStatefulWidget {
   final Order order;
@@ -74,7 +76,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Statut changé: $newStatus'),
-          backgroundColor: AppColors.successGreen,
+          backgroundColor: AppColors.success,
         ),
       );
     }
@@ -94,7 +96,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.errorRed,
+              backgroundColor: AppColors.error,
             ),
             child: const Text('Oui, annuler'),
           ),
@@ -112,7 +114,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Fonction d\'impression à venir...'),
-        backgroundColor: AppColors.infoBlue,
+        backgroundColor: AppColors.info,
       ),
     );
   }
@@ -127,7 +129,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          color: AppColors.surfaceWhite,
+          color: context.surfaceColor,
           boxShadow: AppShadows.deep,
         ),
         child: Column(
@@ -136,7 +138,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
             Container(
               padding: AppSpacing.paddingLG,
               decoration: BoxDecoration(
-                color: AppColors.primaryRed,
+                color: context.primaryColor,
                 boxShadow: AppShadows.soft,
               ),
               child: SafeArea(
@@ -144,7 +146,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: const Icon(Icons.close, color: context.onPrimary),
                       onPressed: _close,
                     ),
                     const SizedBox(width: 8),
@@ -155,20 +157,20 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                           Text(
                             'Commande #${widget.order.id.substring(0, 8)}',
                             style: AppTextStyles.titleLarge.copyWith(
-                              color: Colors.white,
+                              color: context.onPrimary,
                             ),
                           ),
                           Text(
                             dateFormat.format(widget.order.date),
                             style: AppTextStyles.bodySmall.copyWith(
-                              color: Colors.white.withOpacity(0.9),
+                              color: context.onPrimary.withOpacity(0.9),
                             ),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.print, color: Colors.white),
+                      icon: const Icon(Icons.print, color: context.onPrimary),
                       onPressed: _printOrder,
                       tooltip: 'Imprimer',
                     ),
@@ -249,7 +251,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                             margin: const EdgeInsets.only(bottom: 12),
                             padding: AppSpacing.paddingMD,
                             decoration: BoxDecoration(
-                              color: AppColors.backgroundLight,
+                              color: context.backgroundColor,
                               borderRadius: AppRadius.card,
                             ),
                             child: Row(
@@ -258,7 +260,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                                   width: 50,
                                   height: 50,
                                   decoration: BoxDecoration(
-                                    color: AppColors.surfaceWhite,
+                                    color: context.surfaceColor,
                                     borderRadius: AppRadius.radiusSM,
                                     image: item.imageUrl.isNotEmpty
                                         ? DecorationImage(
@@ -312,7 +314,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                         child: Container(
                           padding: AppSpacing.paddingMD,
                           decoration: BoxDecoration(
-                            color: AppColors.backgroundLight,
+                            color: context.backgroundColor,
                             borderRadius: AppRadius.card,
                           ),
                           child: Text(
@@ -328,7 +330,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                     Container(
                       padding: AppSpacing.paddingLG,
                       decoration: BoxDecoration(
-                        color: AppColors.primaryRed.withOpacity(0.1),
+                        color: context.primaryColor.withOpacity(0.1),
                         borderRadius: AppRadius.card,
                       ),
                       child: Row(
@@ -358,7 +360,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
                               margin: const EdgeInsets.only(bottom: 8),
                               padding: AppSpacing.paddingSM,
                               decoration: BoxDecoration(
-                                color: AppColors.backgroundLight,
+                                color: context.backgroundColor,
                                 borderRadius: AppRadius.radiusSM,
                               ),
                               child: Row(
@@ -392,7 +394,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
             Container(
               padding: AppSpacing.paddingLG,
               decoration: BoxDecoration(
-                color: AppColors.surfaceWhite,
+                color: context.surfaceColor,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -469,7 +471,7 @@ class _OrderDetailPanelState extends ConsumerState<OrderDetailPanel>
         Text(
           title,
           style: AppTextStyles.titleMedium.copyWith(
-            color: AppColors.primaryRed,
+            color: context.primaryColor,
           ),
         ),
         const SizedBox(height: 12),
