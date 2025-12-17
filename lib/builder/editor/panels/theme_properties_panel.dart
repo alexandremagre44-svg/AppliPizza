@@ -1,16 +1,19 @@
 // lib/builder/editor/panels/theme_properties_panel.dart
 // Theme configuration panel for Builder B3 system
 //
-// Allows editing theme configuration values:
-// - primaryColor
-// - secondaryColor
-// - backgroundColor
-// - buttonRadius
-// - cardRadius
-// - textHeadingSize
-// - textBodySize
-// - spacing
-// - brightnessMode
+// ⚠️ DEPRECATED - THIS PANEL SHOULD NOT BE USED FOR GLOBAL THEME ⚠️
+//
+// Global application theme is now managed through:
+// - SuperAdmin > Restaurant Theme page
+// - RestaurantPlanUnified.modules.theme.settings
+// - white_label/theme/unified_theme_provider.dart
+//
+// This panel was originally designed for editing ThemeConfig values
+// for Builder blocks, but it was mistakenly exposed as a global theme editor.
+// It should NOT be accessible from the Builder UI anymore.
+//
+// The theme button has been removed from builder_page_editor_screen.dart
+// to prevent confusion and ensure single source of truth.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -18,18 +21,13 @@ import '../../models/theme_config.dart';
 
 /// Theme properties panel for Builder B3 editor
 ///
-/// This panel provides controls for editing ThemeConfig values.
-/// All changes are reported via [onThemeChanged] callback.
+/// ⚠️ DEPRECATED - Use SuperAdmin theme editor instead ⚠️
 ///
-/// Usage in the editor:
-/// ```dart
-/// ThemePropertiesPanel(
-///   theme: currentTheme,
-///   onThemeChanged: (updates) {
-///     // Apply updates to draft theme
-///   },
-/// )
-/// ```
+/// This panel is kept for backward compatibility but should not be used.
+/// Global theme editing is done through SuperAdmin > Restaurant Theme.
+///
+/// @deprecated Use SuperAdmin > Restaurant Theme page instead
+@Deprecated('Use SuperAdmin theme editor instead')
 class ThemePropertiesPanel extends StatefulWidget {
   /// Current theme configuration
   final ThemeConfig theme;

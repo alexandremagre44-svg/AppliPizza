@@ -14,21 +14,29 @@ import '../../white_label/restaurant/restaurant_plan_unified.dart';
 
 /// Service for managing Builder theme configuration in Firestore
 ///
-/// Follows the same draft/publish workflow as pages:
-/// - Builder uses theme_draft for editing
-/// - Client runtime uses theme_published
-/// - Publish action copies draft → published
+/// ⚠️ DEPRECATED - THEME MANAGEMENT IS NOW DONE VIA SUPERADMIN ⚠️
 ///
-/// Firestore structure:
+/// This service is NO LONGER USED for global application theming.
+/// Global theme is now managed through:
+/// - SuperAdmin > Restaurant Theme page
+/// - RestaurantPlanUnified.modules.theme.settings
+/// - white_label/theme/unified_theme_provider.dart
+///
+/// This service is kept for backward compatibility with existing blocks
+/// that may read ThemeConfig for block-level styling, but it should NOT
+/// be used to modify the global application theme.
+///
+/// Firestore structure (LEGACY - DO NOT USE FOR NEW CODE):
 /// ```
-/// restaurants/{appId}/theme_draft     (single document)
-/// restaurants/{appId}/theme_published (single document)
+/// restaurants/{appId}/theme_draft     (single document) - DEPRECATED
+/// restaurants/{appId}/theme_published (single document) - DEPRECATED
 /// ```
 ///
 /// White-label integration:
 /// - Checks if ModuleId.theme is enabled before performing operations
 /// - Fails silently in release mode when module is disabled
 /// - Throws assertion errors in debug mode when module is disabled
+@Deprecated('Use SuperAdmin theme editor and white_label/theme/unified_theme_provider.dart instead')
 class ThemeService {
   final FirebaseFirestore _firestore;
   final RestaurantPlanUnified? _restaurantPlan;
@@ -134,28 +142,28 @@ class ThemeService {
 
   /// Save the draft theme configuration
   ///
-  /// Updates the theme_draft document with the new configuration.
-  /// This is called on every change in the Builder editor.
+  /// ⚠️ DISABLED - DO NOT USE FOR GLOBAL THEME ⚠️
   ///
-  /// White-label guard: Silently returns if theme module is disabled.
+  /// This method is now a NO-OP. Global theme should be edited via:
+  /// SuperAdmin > Restaurant Theme page which writes to
+  /// RestaurantPlanUnified.modules.theme.settings
+  ///
+  /// White-label guard: Always returns without saving.
+  @Deprecated('Use SuperAdmin theme editor instead')
   Future<void> saveDraftTheme(String appId, ThemeConfig config) async {
-    // Check if theme module is enabled
-    if (!_isThemeModuleEnabled()) {
-      debugPrint('[ThemeService] ⚠️  Theme module disabled for $appId, skipping save');
-      return;
+    if (kDebugMode) {
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      debugPrint('⚠️  [ThemeService] SAVE BLOCKED');
+      debugPrint('   saveDraftTheme() is deprecated and disabled');
+      debugPrint('   Use SuperAdmin > Restaurant Theme instead');
+      debugPrint('   Path: SuperAdmin > Restaurant > Theme');
+      debugPrint('   This writes to RestaurantPlanUnified.modules.theme.settings');
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
-
-    try {
-      final ref = _getDraftRef(appId);
-      final data = config.copyWith(updatedAt: DateTime.now()).toMap();
-
-      await ref.set(data, SetOptions(merge: true));
-      debugPrint('[ThemeService] ✅ Draft theme saved for $appId');
-    } catch (e, stackTrace) {
-      debugPrint('[ThemeService] ❌ Error saving draft theme: $e');
-      debugPrint('Stack trace: $stackTrace');
-      rethrow;
-    }
+    
+    // NO-OP: Do not write to Firestore
+    // Theme should only be managed via SuperAdmin
+    return;
   }
 
   /// Watch draft theme changes in real-time
@@ -248,41 +256,26 @@ class ThemeService {
 
   /// Publish the theme configuration
   ///
-  /// Copies the draft theme to the published theme.
-  /// This makes the theme changes visible to the client app.
+  /// ⚠️ DISABLED - DO NOT USE FOR GLOBAL THEME ⚠️
   ///
-  /// Parameters:
-  /// - appId: The restaurant/app identifier
-  /// - userId: The user performing the publish action (for audit)
+  /// This method is now a NO-OP. Global theme changes are automatically
+  /// published when saved via SuperAdmin > Restaurant Theme page.
   ///
-  /// White-label guard: Silently returns if theme module is disabled.
+  /// White-label guard: Always returns without publishing.
+  @Deprecated('Use SuperAdmin theme editor instead')
   Future<void> publishTheme(String appId, {String? userId}) async {
-    // Check if theme module is enabled
-    if (!_isThemeModuleEnabled()) {
-      debugPrint('[ThemeService] ⚠️  Theme module disabled for $appId, skipping publish');
-      return;
+    if (kDebugMode) {
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      debugPrint('⚠️  [ThemeService] PUBLISH BLOCKED');
+      debugPrint('   publishTheme() is deprecated and disabled');
+      debugPrint('   Theme changes via SuperAdmin are automatically live');
+      debugPrint('   No publish step needed for WL V2 theme system');
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
-
-    try {
-      // Load draft
-      final draft = await loadDraftTheme(appId);
-
-      // Update with publish metadata
-      final publishedConfig = draft.copyWith(
-        updatedAt: DateTime.now(),
-        lastModifiedBy: userId,
-      );
-
-      // Save to published
-      final ref = _getPublishedRef(appId);
-      await ref.set(publishedConfig.toMap());
-
-      debugPrint('[ThemeService] ✅ Theme published for $appId by $userId');
-    } catch (e, stackTrace) {
-      debugPrint('[ThemeService] ❌ Error publishing theme: $e');
-      debugPrint('Stack trace: $stackTrace');
-      rethrow;
-    }
+    
+    // NO-OP: Do not write to Firestore
+    // Theme is managed via SuperAdmin and auto-synced
+    return;
   }
 
   /// Check if a published theme exists

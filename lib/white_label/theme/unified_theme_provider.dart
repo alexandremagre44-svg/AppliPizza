@@ -13,6 +13,7 @@
 /// - Garantie zéro crash
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'theme_settings.dart';
@@ -46,7 +47,13 @@ final themeSettingsProvider = Provider<ThemeSettings>(
 
     // Cas 1: Pas de plan → utiliser config par défaut
     if (plan == null) {
-      debugPrint('[ThemeSettings] No restaurant plan, using default config');
+      if (kDebugMode) {
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        debugPrint('🎨 [ThemeSettings] PLAN NOT LOADED');
+        debugPrint('   Restaurant plan is null, using default config');
+        debugPrint('   Firestore path: restaurants/{id}/config/plan_unified');
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      }
       return ThemeSettings.defaultConfig();
     }
 
@@ -55,7 +62,15 @@ final themeSettingsProvider = Provider<ThemeSettings>(
 
     // Cas 2a: Module thème absent ou désactivé → config par défaut
     if (themeModule == null || !themeModule.enabled) {
-      debugPrint('[ThemeSettings] Theme module disabled, using default config');
+      if (kDebugMode) {
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        debugPrint('🎨 [ThemeSettings] MODULE DISABLED');
+        debugPrint('   Restaurant: ${plan.restaurantId}');
+        debugPrint('   Theme module: ${themeModule?.enabled ?? false}');
+        debugPrint('   Using default config');
+        debugPrint('   Firestore path: restaurants/${plan.restaurantId}/config/plan_unified');
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      }
       return ThemeSettings.defaultConfig();
     }
 
@@ -63,7 +78,15 @@ final themeSettingsProvider = Provider<ThemeSettings>(
     try {
       final settingsMap = themeModule.settings;
       if (settingsMap.isEmpty) {
-        debugPrint('[ThemeSettings] Theme settings empty, using default config');
+        if (kDebugMode) {
+          debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+          debugPrint('🎨 [ThemeSettings] SETTINGS EMPTY');
+          debugPrint('   Restaurant: ${plan.restaurantId}');
+          debugPrint('   Theme module enabled but settings empty');
+          debugPrint('   Using default config');
+          debugPrint('   Firestore path: restaurants/${plan.restaurantId}/config/plan_unified → modules.theme.settings');
+          debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        }
         return ThemeSettings.defaultConfig();
       }
 
@@ -72,15 +95,39 @@ final themeSettingsProvider = Provider<ThemeSettings>(
 
       // Valider les settings
       if (!settings.validate()) {
-        debugPrint('[ThemeSettings] Theme settings validation failed, using default config');
+        if (kDebugMode) {
+          debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+          debugPrint('🎨 [ThemeSettings] VALIDATION FAILED');
+          debugPrint('   Restaurant: ${plan.restaurantId}');
+          debugPrint('   Settings: $settingsMap');
+          debugPrint('   Using default config');
+          debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        }
         return ThemeSettings.defaultConfig();
       }
 
-      debugPrint('[ThemeSettings] Loaded custom theme: ${settings.primaryColor}');
+      if (kDebugMode) {
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        debugPrint('✅ [ThemeSettings] CUSTOM THEME LOADED');
+        debugPrint('   Restaurant: ${plan.restaurantId}');
+        debugPrint('   Primary: ${settings.primaryColor}');
+        debugPrint('   Secondary: ${settings.secondaryColor}');
+        debugPrint('   Radius: ${settings.radiusBase}');
+        debugPrint('   Updated: ${settings.updatedAt}');
+        debugPrint('   Firestore path: restaurants/${plan.restaurantId}/config/plan_unified → modules.theme.settings');
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      }
       return settings;
     } catch (e, stackTrace) {
-      debugPrint('[ThemeSettings] Error loading theme settings: $e');
-      debugPrint('Stack trace: $stackTrace');
+      if (kDebugMode) {
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        debugPrint('❌ [ThemeSettings] ERROR LOADING');
+        debugPrint('   Restaurant: ${plan.restaurantId}');
+        debugPrint('   Error: $e');
+        debugPrint('   Stack: $stackTrace');
+        debugPrint('   Using default config');
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      }
       return ThemeSettings.defaultConfig();
     }
   },
@@ -122,11 +169,21 @@ final unifiedThemeProvider = Provider<ThemeData>(
       // Convertir en ThemeData
       final themeData = UnifiedThemeAdapter.toThemeData(settings);
 
-      debugPrint('[UnifiedTheme] Theme applied: ${settings.primaryColor}');
+      if (kDebugMode) {
+        debugPrint('🎨 [UnifiedTheme] MaterialApp theme applied');
+        debugPrint('   Primary: ${settings.primaryColor}');
+        debugPrint('   This ThemeData is used by MaterialApp in main.dart');
+      }
       return themeData;
     } catch (e, stackTrace) {
-      debugPrint('[UnifiedTheme] Critical error, using AppTheme.lightTheme: $e');
-      debugPrint('Stack trace: $stackTrace');
+      if (kDebugMode) {
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        debugPrint('❌ [UnifiedTheme] CRITICAL ERROR');
+        debugPrint('   Error: $e');
+        debugPrint('   Stack: $stackTrace');
+        debugPrint('   Fallback: AppTheme.lightTheme');
+        debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      }
       
       // Fallback ultime sur le thème legacy
       return AppTheme.lightTheme;
