@@ -55,13 +55,31 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
   void initState() {
     super.initState();
     
-    // Initialiser avec les valeurs par défaut
+    // Initialiser avec les valeurs par défaut (sans le # car le prefixText l'ajoute)
     final defaults = ThemeSettings.defaultConfig();
-    _primaryColorController = TextEditingController(text: defaults.primaryColor);
-    _secondaryColorController = TextEditingController(text: defaults.secondaryColor);
-    _backgroundColorController = TextEditingController(text: defaults.backgroundColor);
-    _surfaceColorController = TextEditingController(text: defaults.surfaceColor);
+    _primaryColorController = TextEditingController(
+      text: _removeHashPrefix(defaults.primaryColor),
+    );
+    _secondaryColorController = TextEditingController(
+      text: _removeHashPrefix(defaults.secondaryColor),
+    );
+    _backgroundColorController = TextEditingController(
+      text: _removeHashPrefix(defaults.backgroundColor),
+    );
+    _surfaceColorController = TextEditingController(
+      text: _removeHashPrefix(defaults.surfaceColor),
+    );
     _borderRadius = defaults.radiusBase;
+  }
+  
+  /// Enlève le préfixe # d'une couleur hex.
+  String _removeHashPrefix(String hex) {
+    return hex.startsWith('#') ? hex.substring(1) : hex;
+  }
+  
+  /// Ajoute le préfixe # à une couleur hex si nécessaire.
+  String _ensureHashPrefix(String hex) {
+    return hex.startsWith('#') ? hex : '#$hex';
   }
   
   @override
@@ -106,31 +124,38 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
     });
     
     try {
+      // Ajouter le # pour la validation et la sauvegarde
+      final primaryColor = _ensureHashPrefix(_primaryColorController.text);
+      final secondaryColor = _ensureHashPrefix(_secondaryColorController.text);
+      final backgroundColor = _ensureHashPrefix(_backgroundColorController.text);
+      final surfaceColor = _ensureHashPrefix(_surfaceColorController.text);
+      
       // Valider les couleurs
-      if (!_isValidHex(_primaryColorController.text)) {
+      if (!_isValidHex(primaryColor)) {
         throw Exception('Couleur primaire invalide');
       }
-      if (!_isValidHex(_secondaryColorController.text)) {
+      if (!_isValidHex(secondaryColor)) {
         throw Exception('Couleur secondaire invalide');
       }
-      if (!_isValidHex(_backgroundColorController.text)) {
+      if (!_isValidHex(backgroundColor)) {
         throw Exception('Couleur de fond invalide');
       }
-      if (!_isValidHex(_surfaceColorController.text)) {
+      if (!_isValidHex(surfaceColor)) {
         throw Exception('Couleur de surface invalide');
       }
       
-      // Créer les settings
+      // Créer les settings (utiliser les valeurs par défaut pour les champs non exposés)
+      final defaults = ThemeSettings.defaultConfig();
       final settings = ThemeSettings(
-        primaryColor: _primaryColorController.text,
-        secondaryColor: _secondaryColorController.text,
-        surfaceColor: _surfaceColorController.text,
-        backgroundColor: _backgroundColorController.text,
-        textPrimary: '#323232', // Valeurs fixes pour Phase 3
-        textSecondary: '#5A5A5A',
+        primaryColor: primaryColor,
+        secondaryColor: secondaryColor,
+        surfaceColor: surfaceColor,
+        backgroundColor: backgroundColor,
+        textPrimary: defaults.textPrimary, // Valeurs par défaut pour Phase 3
+        textSecondary: defaults.textSecondary,
         radiusBase: _borderRadius,
-        spacingBase: 8.0,
-        typographyScale: TypographyScale.normal,
+        spacingBase: defaults.spacingBase,
+        typographyScale: defaults.typographyScale,
         updatedAt: DateTime.now(),
       );
       
@@ -211,11 +236,11 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
     try {
       final defaults = ThemeSettings.defaultConfig();
       
-      // Mettre à jour les controllers
-      _primaryColorController.text = defaults.primaryColor;
-      _secondaryColorController.text = defaults.secondaryColor;
-      _backgroundColorController.text = defaults.backgroundColor;
-      _surfaceColorController.text = defaults.surfaceColor;
+      // Mettre à jour les controllers (sans le # car le prefixText l'ajoute)
+      _primaryColorController.text = _removeHashPrefix(defaults.primaryColor);
+      _secondaryColorController.text = _removeHashPrefix(defaults.secondaryColor);
+      _backgroundColorController.text = _removeHashPrefix(defaults.backgroundColor);
+      _surfaceColorController.text = _removeHashPrefix(defaults.surfaceColor);
       _borderRadius = defaults.radiusBase;
       
       // Sauvegarder dans Firestore
@@ -283,19 +308,24 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
           if (plan != null && plan.theme != null && plan.theme!.enabled) {
             final settings = ThemeSettings.fromJson(plan.theme!.settings);
             
-            // Mettre à jour les controllers si nécessaire
+            // Mettre à jour les controllers si nécessaire (sans le # car le prefixText l'ajoute)
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_primaryColorController.text != settings.primaryColor) {
-                _primaryColorController.text = settings.primaryColor;
+              final primaryWithoutHash = _removeHashPrefix(settings.primaryColor);
+              final secondaryWithoutHash = _removeHashPrefix(settings.secondaryColor);
+              final backgroundWithoutHash = _removeHashPrefix(settings.backgroundColor);
+              final surfaceWithoutHash = _removeHashPrefix(settings.surfaceColor);
+              
+              if (_primaryColorController.text != primaryWithoutHash) {
+                _primaryColorController.text = primaryWithoutHash;
               }
-              if (_secondaryColorController.text != settings.secondaryColor) {
-                _secondaryColorController.text = settings.secondaryColor;
+              if (_secondaryColorController.text != secondaryWithoutHash) {
+                _secondaryColorController.text = secondaryWithoutHash;
               }
-              if (_backgroundColorController.text != settings.backgroundColor) {
-                _backgroundColorController.text = settings.backgroundColor;
+              if (_backgroundColorController.text != backgroundWithoutHash) {
+                _backgroundColorController.text = backgroundWithoutHash;
               }
-              if (_surfaceColorController.text != settings.surfaceColor) {
-                _surfaceColorController.text = settings.surfaceColor;
+              if (_surfaceColorController.text != surfaceWithoutHash) {
+                _surfaceColorController.text = surfaceWithoutHash;
               }
               if (_borderRadius != settings.radiusBase) {
                 setState(() {
@@ -520,25 +550,25 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
                                 // Preview des couleurs
                                 _buildColorPreview(
                                   'Primaire',
-                                  _parseColor(_primaryColorController.text),
+                                  _parseColor(_ensureHashPrefix(_primaryColorController.text)),
                                 ),
                                 const SizedBox(height: 12),
                                 
                                 _buildColorPreview(
                                   'Secondaire',
-                                  _parseColor(_secondaryColorController.text),
+                                  _parseColor(_ensureHashPrefix(_secondaryColorController.text)),
                                 ),
                                 const SizedBox(height: 12),
                                 
                                 _buildColorPreview(
                                   'Fond',
-                                  _parseColor(_backgroundColorController.text),
+                                  _parseColor(_ensureHashPrefix(_backgroundColorController.text)),
                                 ),
                                 const SizedBox(height: 12),
                                 
                                 _buildColorPreview(
                                   'Surface',
-                                  _parseColor(_surfaceColorController.text),
+                                  _parseColor(_ensureHashPrefix(_surfaceColorController.text)),
                                 ),
                                 
                                 const SizedBox(height: 24),
@@ -557,7 +587,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
                                   width: double.infinity,
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: _parseColor(_surfaceColorController.text),
+                                    color: _parseColor(_ensureHashPrefix(_surfaceColorController.text)),
                                     borderRadius: BorderRadius.circular(_borderRadius),
                                     border: Border.all(
                                       color: theme.colorScheme.outline,
@@ -572,7 +602,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
                                           vertical: 8,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: _parseColor(_primaryColorController.text),
+                                          color: _parseColor(_ensureHashPrefix(_primaryColorController.text)),
                                           borderRadius: BorderRadius.circular(_borderRadius * 0.67),
                                         ),
                                         child: const Text(
@@ -630,7 +660,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: _parseColor(controller.text),
+                color: _parseColor(_ensureHashPrefix(controller.text)),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: theme.colorScheme.outline,
@@ -644,18 +674,18 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
               child: TextField(
                 controller: controller,
                 decoration: InputDecoration(
-                  hintText: '#RRGGBB',
-                  prefixText: '# ',
+                  hintText: 'RRGGBB',
+                  prefixText: '#',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  errorText: !_isValidHex(controller.text)
+                  errorText: !_isValidHex(_ensureHashPrefix(controller.text))
                       ? 'Format invalide'
                       : null,
                 ),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9A-Fa-f#]')),
-                  LengthLimitingTextInputFormatter(7), // #RRGGBB
+                  FilteringTextInputFormatter.allow(RegExp(r'[0-9A-Fa-f]')),
+                  LengthLimitingTextInputFormatter(6), // RRGGBB (without #)
                 ],
                 onChanged: (value) {
                   setState(() {}); // Rebuild pour mettre à jour le preview
