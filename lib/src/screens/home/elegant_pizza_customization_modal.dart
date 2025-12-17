@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/home/elegant_pizza_customization_modal.dart
 // Ultra-professional pizza customization modal with modern design
 
@@ -10,6 +11,7 @@ import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/ingredient_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 const _uuid = Uuid();
 
@@ -188,14 +190,14 @@ class _ElegantPizzaCustomizationModalState
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle, color: Colors.white),
+              const Icon(Icons.check_circle, color: context.onPrimary),
               const SizedBox(width: 12),
               Expanded(
                 child: Text('${widget.pizza.name} ajouté au panier !'),
               ),
             ],
           ),
-          backgroundColor: Colors.green[600],
+          backgroundColor: AppColors.success[600],
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           duration: const Duration(seconds: 2),
@@ -217,7 +219,7 @@ class _ElegantPizzaCustomizationModalState
           child: Container(
             height: MediaQuery.of(context).size.height * 0.92,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.onPrimary,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
               boxShadow: [
                 BoxShadow(
@@ -269,7 +271,7 @@ class _ElegantPizzaCustomizationModalState
             width: 60,
             height: 6,
             decoration: BoxDecoration(
-              color: AppColors.primaryRed,
+              color: context.primaryColor,
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
@@ -284,7 +286,7 @@ class _ElegantPizzaCustomizationModalState
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.primaryRed,
+              color: context.primaryColor,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -328,7 +330,7 @@ class _ElegantPizzaCustomizationModalState
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.onPrimary,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -348,7 +350,7 @@ class _ElegantPizzaCustomizationModalState
                 height: 110,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: AppColors.primaryRed,
+                  color: context.primaryColor,
                   boxShadow: [
                     BoxShadow(
                       color: AppTheme.primaryRed.withOpacity(0.4),
@@ -368,9 +370,9 @@ class _ElegantPizzaCustomizationModalState
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           decoration: BoxDecoration(
-                            color: AppColors.primaryRed,
+                            color: context.primaryColor,
                           ),
-                          child: const Icon(Icons.local_pizza, size: 50, color: Colors.white),
+                          child: const Icon(Icons.local_pizza, size: 50, color: context.onPrimary),
                         );
                       },
                     ),
@@ -411,13 +413,13 @@ class _ElegantPizzaCustomizationModalState
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryRed,
+                      color: context.primaryColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       'Prix de base: ${widget.pizza.price.toStringAsFixed(2)}€',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: context.onPrimary,
                         fontWeight: FontWeight.w900,
                         fontSize: 13,
                       ),
@@ -437,11 +439,11 @@ class _ElegantPizzaCustomizationModalState
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: AppColors.primaryRed,
+        color: context.primaryColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: context.colorScheme.shadow.withOpacity(0.08),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -450,7 +452,7 @@ class _ElegantPizzaCustomizationModalState
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: AppColors.primaryRed,
+          color: context.primaryColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -460,7 +462,7 @@ class _ElegantPizzaCustomizationModalState
             ),
           ],
         ),
-        labelColor: Colors.white,
+        labelColor: context.onPrimary,
         unselectedLabelColor: AppTheme.textMedium,
         labelStyle: const TextStyle(
           fontWeight: FontWeight.w900,
@@ -542,7 +544,7 @@ class _ElegantPizzaCustomizationModalState
             ),
             error: (error, stack) => Text(
               'Erreur lors du chargement des ingrédients',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: AppColors.error),
             ),
           ),
           
@@ -602,7 +604,7 @@ class _ElegantPizzaCustomizationModalState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryRed,
+        color: context.primaryColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: AppTheme.primaryRed.withOpacity(0.2),
@@ -614,7 +616,7 @@ class _ElegantPizzaCustomizationModalState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primaryRed,
+              color: context.primaryColor,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
@@ -624,7 +626,7 @@ class _ElegantPizzaCustomizationModalState
                 ),
               ],
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: context.onPrimary, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -720,7 +722,7 @@ class _ElegantPizzaCustomizationModalState
         child: Text(
           'Erreur lors du chargement des suppléments',
           style: TextStyle(
-            color: Colors.red,
+            color: AppColors.error,
             fontSize: 14,
           ),
           textAlign: TextAlign.center,
@@ -753,12 +755,12 @@ class _ElegantPizzaCustomizationModalState
           curve: Curves.easeInOut,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryRed : Colors.white,
+            color: isSelected ? context.primaryColor : context.onPrimary,
             borderRadius: BorderRadius.circular(25),
             border: Border.all(
               color: isSelected
                   ? AppTheme.primaryRed
-                  : Colors.grey[300]!,
+                  : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
               width: 2.5,
             ),
             boxShadow: isSelected
@@ -771,7 +773,7 @@ class _ElegantPizzaCustomizationModalState
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: context.colorScheme.shadow.withOpacity(0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -786,14 +788,14 @@ class _ElegantPizzaCustomizationModalState
                   isSelected ? Icons.check_circle : Icons.cancel,
                   key: ValueKey(isSelected),
                   size: 20,
-                  color: isSelected ? Colors.white : AppTheme.textMedium,
+                  color: isSelected ? context.onPrimary : AppTheme.textMedium,
                 ),
               ),
               const SizedBox(width: 10),
               Text(
                 ingredient,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : AppTheme.textDark,
+                  color: isSelected ? context.onPrimary : AppTheme.textDark,
                   fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
                   fontSize: 15,
                   letterSpacing: 0.3,
@@ -814,19 +816,19 @@ class _ElegantPizzaCustomizationModalState
       curve: Curves.easeInOut,
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primaryRed : Colors.white,
+        color: isSelected ? context.primaryColor : context.onPrimary,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: isSelected
               ? AppTheme.primaryRed
-              : Colors.grey[200]!,
+              : context.colorScheme.surfaceVariant // was Colors.grey[200]!,
           width: 2.5,
         ),
         boxShadow: [
           BoxShadow(
             color: isSelected
                 ? AppTheme.primaryRed.withOpacity(0.2)
-                : Colors.black.withOpacity(0.04),
+                : context.colorScheme.shadow.withOpacity(0.04),
             blurRadius: isSelected ? 15 : 6,
             offset: Offset(0, isSelected ? 6 : 2),
           ),
@@ -849,7 +851,7 @@ class _ElegantPizzaCustomizationModalState
                 width: 54,
                 height: 54,
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryRed : Colors.white,
+                  color: isSelected ? context.primaryColor : context.onPrimary,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: isSelected
                       ? [
@@ -866,7 +868,7 @@ class _ElegantPizzaCustomizationModalState
                   child: Icon(
                     isSelected ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
                     key: ValueKey(isSelected),
-                    color: isSelected ? Colors.white : AppTheme.textMedium,
+                    color: isSelected ? context.onPrimary : AppTheme.textMedium,
                     size: 30,
                   ),
                 ),
@@ -903,7 +905,7 @@ class _ElegantPizzaCustomizationModalState
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primaryRed : Colors.grey[100],
+                    color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant // was Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: isSelected
                         ? [
@@ -919,7 +921,7 @@ class _ElegantPizzaCustomizationModalState
                     '+${ingredient.extraCost.toStringAsFixed(2)}€',
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
-                      color: isSelected ? Colors.white : AppTheme.textMedium,
+                      color: isSelected ? context.onPrimary : AppTheme.textMedium,
                       fontSize: 15,
                     ),
                   ),
@@ -967,12 +969,12 @@ class _ElegantPizzaCustomizationModalState
                   curve: Curves.easeInOut,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primaryRed : Colors.white,
+                    color: isSelected ? context.primaryColor : context.onPrimary,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
                           ? AppTheme.primaryRed
-                          : Colors.grey[300]!,
+                          : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
                       width: 2.5,
                     ),
                     boxShadow: isSelected
@@ -985,7 +987,7 @@ class _ElegantPizzaCustomizationModalState
                           ]
                         : [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: context.colorScheme.shadow.withOpacity(0.05),
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
@@ -998,7 +1000,7 @@ class _ElegantPizzaCustomizationModalState
                         child: Icon(
                           Icons.local_pizza,
                           size: iconSize,
-                          color: isSelected ? Colors.white : AppTheme.textMedium,
+                          color: isSelected ? context.onPrimary : AppTheme.textMedium,
                         ),
                       ),
                       const SizedBox(height: 14),
@@ -1007,7 +1009,7 @@ class _ElegantPizzaCustomizationModalState
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 18,
-                          color: isSelected ? Colors.white : AppTheme.textDark,
+                          color: isSelected ? context.onPrimary : AppTheme.textDark,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -1018,7 +1020,7 @@ class _ElegantPizzaCustomizationModalState
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: isSelected
-                              ? Colors.white.withOpacity(0.9)
+                              ? context.onPrimary.withOpacity(0.9)
                               : AppTheme.textMedium,
                         ),
                       ),
@@ -1028,7 +1030,7 @@ class _ElegantPizzaCustomizationModalState
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? Colors.white.withOpacity(0.25)
+                                ? context.onPrimary.withOpacity(0.25)
                                 : AppTheme.primaryRed.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -1038,7 +1040,7 @@ class _ElegantPizzaCustomizationModalState
                               fontSize: 14,
                               fontWeight: FontWeight.w900,
                               color: isSelected
-                                  ? Colors.white
+                                  ? context.onPrimary
                                   : AppTheme.primaryRed,
                             ),
                           ),
@@ -1058,15 +1060,15 @@ class _ElegantPizzaCustomizationModalState
   Widget _buildElegantTextField() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.onPrimary,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: Colors.grey[200]!,
+          color: context.colorScheme.surfaceVariant // was Colors.grey[200]!,
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: context.colorScheme.shadow.withOpacity(0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1098,7 +1100,7 @@ class _ElegantPizzaCustomizationModalState
             ),
           ),
           filled: true,
-          fillColor: Colors.grey.shade50,
+          fillColor: context.colorScheme.surfaceVariant // was Colors.grey.shade50,
           contentPadding: const EdgeInsets.all(18),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),
@@ -1117,10 +1119,10 @@ class _ElegantPizzaCustomizationModalState
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.onPrimary,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: context.colorScheme.shadow.withOpacity(0.1),
             blurRadius: 25,
             offset: const Offset(0, -5),
           ),
@@ -1135,7 +1137,7 @@ class _ElegantPizzaCustomizationModalState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primaryRed,
+                color: context.primaryColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: AppTheme.primaryRed.withOpacity(0.2),
@@ -1179,7 +1181,7 @@ class _ElegantPizzaCustomizationModalState
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryRed,
+                      color: context.primaryColor,
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
@@ -1191,7 +1193,7 @@ class _ElegantPizzaCustomizationModalState
                     ),
                     child: const Icon(
                       Icons.euro,
-                      color: Colors.white,
+                      color: context.onPrimary,
                       size: 32,
                     ),
                   ),
@@ -1206,7 +1208,7 @@ class _ElegantPizzaCustomizationModalState
               width: double.infinity,
               height: 64,
               decoration: BoxDecoration(
-                color: AppColors.primaryRed,
+                color: context.primaryColor,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -1220,7 +1222,7 @@ class _ElegantPizzaCustomizationModalState
                 onPressed: _addToCart,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
+                  foregroundColor: context.onPrimary,
                   shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),

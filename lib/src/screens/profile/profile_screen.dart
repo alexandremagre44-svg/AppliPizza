@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/profile/profile_screen.dart
 
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import '../../providers/cart_provider.dart';
 import '../../services/loyalty_service.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../../white_label/core/module_id.dart';
 import 'widgets/loyalty_section_widget.dart';
 import 'widgets/rewards_tickets_widget.dart';
@@ -69,10 +71,10 @@ class ProfileScreen extends ConsumerWidget {
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white,
+                      color: context.onPrimary,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: context.colorScheme.shadow.withOpacity(0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -89,7 +91,7 @@ class ProfileScreen extends ConsumerWidget {
                   Text(
                     authState.userEmail ?? userProfile.name,
                     style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                          color: Colors.white,
+                          color: context.onPrimary,
                           fontWeight: FontWeight.w900,
                           fontSize: 24,
                         ),
@@ -129,12 +131,12 @@ class ProfileScreen extends ConsumerWidget {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.restaurant, size: 16, color: Colors.white),
+                          Icon(Icons.restaurant, size: 16, color: context.onPrimary),
                           SizedBox(width: 4),
                           Text(
                             'CUISINE',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: context.onPrimary,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -148,7 +150,7 @@ class ProfileScreen extends ConsumerWidget {
                   Text(
                     authState.userEmail ?? userProfile.email,
                     style: AppTextStyles.bodyLarge.copyWith(
-                          color: Colors.white70,
+                          color: context.onPrimary70,
                         ),
                   ),
                 ],
@@ -340,7 +342,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple[700],
-                      foregroundColor: Colors.white,
+                      foregroundColor: context.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -367,7 +369,7 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue[700],
-                          foregroundColor: Colors.white,
+                          foregroundColor: context.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -388,8 +390,8 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green[700],
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.success[700],
+                          foregroundColor: context.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -418,7 +420,7 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.purple[700],
-                          foregroundColor: Colors.white,
+                          foregroundColor: context.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -439,8 +441,8 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[700],
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.error[700],
+                          foregroundColor: context.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -469,7 +471,7 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal[700],
-                          foregroundColor: Colors.white,
+                          foregroundColor: context.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -491,7 +493,7 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.indigo[700],
-                          foregroundColor: Colors.white,
+                          foregroundColor: context.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -524,8 +526,8 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange[700],
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.warning[700],
+                      foregroundColor: context.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -558,7 +560,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
+                      foregroundColor: context.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -613,7 +615,7 @@ class ProfileScreen extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(40),
         decoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: context.colorScheme.surfaceVariant // was Colors.grey[100],
           borderRadius: BorderRadius.circular(16),
         ),
         child: Center(
@@ -622,20 +624,20 @@ class ProfileScreen extends ConsumerWidget {
               Icon(
                 Icons.shopping_bag_outlined,
                 size: 60,
-                color: Colors.grey[400],
+                color: context.colorScheme.surfaceVariant // was Colors.grey[400],
               ),
               const SizedBox(height: 16),
               Text(
                 'Aucune commande',
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: Colors.grey[600],
+                      color: context.colorScheme.surfaceVariant // was Colors.grey[600],
                     ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Vos commandes apparaîtront ici',
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Colors.grey[500],
+                      color: context.colorScheme.surfaceVariant // was Colors.grey[500],
                     ),
               ),
             ],
@@ -717,7 +719,7 @@ class ProfileScreen extends ConsumerWidget {
                               Text(
                                 '${item.quantity} x ${item.price.toStringAsFixed(2)}€',
                                 style: TextStyle(
-                                  color: Colors.grey[600],
+                                  color: context.colorScheme.surfaceVariant // was Colors.grey[600],
                                   fontSize: 13,
                                 ),
                               ),
@@ -744,11 +746,11 @@ class ProfileScreen extends ConsumerWidget {
 
     switch (status.toLowerCase()) {
       case 'livrée':
-        statusColor = Colors.green;
+        statusColor = AppColors.success;
         statusIcon = Icons.check_circle;
         break;
       case 'en préparation':
-        statusColor = Colors.orange;
+        statusColor = AppColors.warning;
         statusIcon = Icons.restaurant;
         break;
       case 'en livraison':

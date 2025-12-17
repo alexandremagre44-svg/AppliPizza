@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/admin_studio_screen.dart
 // Admin Menu - Point d'entrée principal pour tous les outils d'administration
 
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../core/constants.dart';
 import 'studio/roulette_segments_list_screen.dart';
 import 'studio/roulette_admin_settings_screen.dart';

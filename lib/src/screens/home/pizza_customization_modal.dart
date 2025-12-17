@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/home/pizza_customization_modal.dart
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/ingredient_provider.dart';
 import '../../design_system/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 const _uuid = Uuid();
 
@@ -541,7 +543,7 @@ class _PizzaCustomizationModalState
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Text(
         'Erreur lors du chargement des ingrédients',
-        style: TextStyle(color: Colors.red),
+        style: TextStyle(color: AppColors.error),
       ),
     );
   }

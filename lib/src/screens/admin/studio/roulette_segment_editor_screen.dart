@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/studio/roulette_segment_editor_screen.dart
 // Editor screen for creating/editing roulette segments - Material 3 + Pizza Deli'Zza
 
@@ -12,6 +13,7 @@ import '../../../models/product.dart';
 import '../../../services/roulette_segment_service.dart';
 import '../../../services/firestore_product_service.dart';
 import '../../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
+import '../../../../white_label/theme/theme_extensions.dart';
 
 /// Screen to create or edit a roulette segment
 /// Follows Material 3 and Pizza Deli'Zza Brand Guidelines
@@ -297,7 +299,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                  context.onPrimary,
                                 ),
                               ),
                             )
@@ -531,7 +533,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
                       ),
                     ),
                     child: isSelected
-                        ? const Icon(Icons.check, color: Colors.white, size: 20)
+                        ? const Icon(Icons.check, color: context.onPrimary, size: 20)
                         : null,
                   ),
                 );
@@ -803,7 +805,7 @@ class _RouletteSegmentEditorScreenState extends ConsumerState<RouletteSegmentEdi
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? colorScheme.error : Colors.green,
+        backgroundColor: isError ? colorScheme.error : AppColors.success,
         behavior: SnackBarBehavior.floating,
       ),
     );
