@@ -1264,8 +1264,10 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
           // Separator
           Divider(height: 1, color: Theme.of(context).dividerColor),
           
-          // 🎨 Theme button - GLOBAL THEME SELECTION
-          _buildThemeEntryButton(),
+          // 🎨 Theme button - DISABLED: Theme is now managed by SuperAdmin only
+          // Global theme should be edited via SuperAdmin > Restaurant Theme page
+          // Builder theme was causing confusion and conflicts with WL V2 theme system
+          // _buildThemeEntryButton(),
           
           // Add block button
           Container(
