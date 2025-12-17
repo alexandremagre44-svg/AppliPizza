@@ -19,7 +19,7 @@ import '../../white_label/restaurant/restaurant_plan_unified.dart';
 /// This service is NO LONGER USED for global application theming.
 /// Global theme is now managed through:
 /// - SuperAdmin > Restaurant Theme page
-/// - RestaurantPlanUnified.modules.theme.settings
+/// - RestaurantPlanUnified.theme.settings (top-level field)
 /// - white_label/theme/unified_theme_provider.dart
 ///
 /// This service is kept for backward compatibility with existing blocks
@@ -146,7 +146,7 @@ class ThemeService {
   ///
   /// This method is now a NO-OP. Global theme should be edited via:
   /// SuperAdmin > Restaurant Theme page which writes to
-  /// RestaurantPlanUnified.modules.theme.settings
+  /// RestaurantPlanUnified.theme.settings (top-level field)
   ///
   /// White-label guard: Always returns without saving.
   @Deprecated('Use SuperAdmin theme editor instead')
@@ -157,7 +157,7 @@ class ThemeService {
       debugPrint('   saveDraftTheme() is deprecated and disabled');
       debugPrint('   Use SuperAdmin > Restaurant Theme instead');
       debugPrint('   Path: SuperAdmin > Restaurant > Theme');
-      debugPrint('   This writes to RestaurantPlanUnified.modules.theme.settings');
+      debugPrint('   This writes to RestaurantPlanUnified.theme.settings');
       debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
     

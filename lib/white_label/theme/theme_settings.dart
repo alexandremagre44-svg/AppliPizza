@@ -5,7 +5,7 @@
 /// Ce modèle définit l'unique source de configuration de thème
 /// pour tous les restaurants dans le système multi-tenant.
 ///
-/// Intégré dans: RestaurantPlanUnified.modules.theme.settings
+/// Intégré dans: RestaurantPlanUnified.theme.settings (champ top-level)
 /// Supporte: Draft / Published workflow via Firestore
 /// Garantit: Valeurs sûres avec fallback produit
 library;
@@ -65,11 +65,14 @@ enum TypographyScale {
 ///
 /// Stockage Firestore:
 /// ```
-/// restaurants/{restaurantId}/config/plan_unified
-///   → modules.theme.settings: {
-///       primaryColor: "#D32F2F",
-///       secondaryColor: "#8E4C4C",
-///       ...
+/// restaurants/{restaurantId}/plan/config
+///   → theme: {
+///       enabled: true,
+///       settings: {
+///         primaryColor: "#D32F2F",
+///         secondaryColor: "#8E4C4C",
+///         ...
+///       }
 ///     }
 /// ```
 class ThemeSettings {

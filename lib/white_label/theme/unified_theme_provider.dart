@@ -6,7 +6,7 @@
 /// Support hot reload Firestore et fallback automatique.
 ///
 /// Responsabilités:
-/// - Lecture depuis RestaurantPlanUnified.modules.theme.settings
+/// - Lecture depuis RestaurantPlanUnified.theme.settings (champ top-level)
 /// - Conversion Map<String, dynamic> → ThemeSettings
 /// - Fallback sur thème par défaut si module désactivé
 /// - Support stream temps réel
@@ -24,10 +24,11 @@ import '../../src/design_system/app_theme.dart' show AppTheme;
 
 /// Provider pour ThemeSettings depuis RestaurantPlanUnified.
 ///
-/// Lit la configuration de thème depuis modules.theme.settings du plan unifié.
+/// Lit la configuration de thème depuis le champ top-level theme.settings du plan unifié.
+/// Path Firestore: restaurants/{restaurantId}/plan/config → theme.settings
 /// Retourne ThemeSettings.defaultConfig() si:
 /// - Le plan n'est pas chargé
-/// - Le module theme est désactivé
+/// - Le module theme est désactivé ou absent
 /// - Les settings sont invalides ou absents
 ///
 /// Usage:
@@ -86,7 +87,7 @@ final themeSettingsProvider = Provider<ThemeSettings>(
           debugPrint('   Restaurant: ${plan.restaurantId}');
           debugPrint('   Theme module enabled but settings empty');
           debugPrint('   Using default config');
-          debugPrint('   Firestore path: restaurants/${plan.restaurantId}/config/plan_unified → modules.theme.settings');
+          debugPrint('   Firestore path: restaurants/${plan.restaurantId}/plan/config → theme.settings');
           debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         }
         return ThemeSettings.defaultConfig();

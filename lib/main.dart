@@ -168,7 +168,8 @@ class MyApp extends ConsumerWidget {
     
     // WHITE-LABEL V2: Use unified theme provider (SINGLE SOURCE OF TRUTH)
     // Workflow:
-    // 1. ThemeSettingsProvider reads from RestaurantPlanUnified.modules.theme.settings
+    // 1. ThemeSettingsProvider reads from RestaurantPlanUnified.theme.settings (top-level field)
+    //    Path: restaurants/{restaurantId}/plan/config → theme.settings
     // 2. UnifiedThemeAdapter converts ThemeSettings → ThemeData Material 3
     // 3. Fallback to AppTheme.lightTheme if module disabled or error
     //
