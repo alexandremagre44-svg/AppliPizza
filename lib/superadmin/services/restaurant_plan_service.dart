@@ -11,6 +11,7 @@ import '../../white_label/core/module_registry.dart';
 import '../../white_label/restaurant/restaurant_plan.dart';
 import '../../white_label/restaurant/restaurant_plan_unified.dart';
 import '../../white_label/restaurant/cashier_profile.dart';
+import '../../white_label/modules/appearance/theme/theme_module_config.dart';
 
 /// Service pour gérer les plans de restaurant (modules activés/désactivés).
 ///
@@ -281,18 +282,22 @@ class RestaurantPlanService {
     
     if (!doc.exists || doc.data() == null) {
       // Créer un nouveau document avec le module
+      final moduleConfig = ModuleConfig(
+        id: moduleId,
+        enabled: enabled,
+        settings: {},
+      );
+      
+      // FIX THEME WL V2: Synchroniser le champ top-level theme avec modules[]
+      final themeConfig = _syncThemeModule([moduleConfig], moduleId);
+      
       final newPlan = RestaurantPlanUnified(
         restaurantId: restaurantId,
         name: '',
         slug: '',
-        modules: [
-          ModuleConfig(
-            id: moduleId,
-            enabled: enabled,
-            settings: {},
-          ),
-        ],
+        modules: [moduleConfig],
         activeModules: enabled ? [moduleId] : [],
+        theme: themeConfig,
       );
       await docRef.set(newPlan.toJson());
       return;
@@ -321,10 +326,14 @@ class RestaurantPlanService {
         .map((m) => m.id)
         .toList();
     
+    // FIX THEME WL V2: Synchroniser le champ top-level theme avec modules[]
+    final themeConfig = _syncThemeModule(modules, moduleId);
+    
     // Sauvegarder
     final updatedPlan = plan.copyWith(
       modules: modules,
       activeModules: activeModules,
+      theme: themeConfig ?? plan.theme, // Mettre à jour theme si nécessaire
       updatedAt: DateTime.now(),
     );
     
@@ -363,12 +372,42 @@ class RestaurantPlanService {
       ));
     }
     
+    // FIX THEME WL V2: Synchroniser le champ top-level theme avec modules[]
+    final themeConfig = _syncThemeModule(modules, moduleId);
+    
     // Sauvegarder
     final updatedPlan = plan.copyWith(
       modules: modules,
+      theme: themeConfig ?? plan.theme, // Mettre à jour theme si nécessaire
       updatedAt: DateTime.now(),
     );
     
     await docRef.set(updatedPlan.toJson());
+  }
+
+  /// Helper privé pour synchroniser le champ top-level theme avec modules[].
+  ///
+  /// Cette méthode garantit que le champ RestaurantPlanUnified.theme reste
+  /// synchronisé avec le module 'theme' dans modules[], permettant au
+  /// unifiedThemeProvider de lire correctement la configuration.
+  ///
+  /// Retourne null si moduleId != 'theme' ou si le module n'existe pas dans la liste.
+  ThemeModuleConfig? _syncThemeModule(
+    List<ModuleConfig> modules,
+    String moduleId,
+  ) {
+    // Seulement pour le module 'theme'
+    if (moduleId != 'theme') return null;
+
+    // Trouver le module theme dans la liste
+    final themeModuleConfig = modules.firstWhere(
+      (m) => m.id == 'theme',
+      orElse: () => ModuleConfig(id: 'theme', enabled: false, settings: {}),
+    );
+
+    return ThemeModuleConfig(
+      enabled: themeModuleConfig.enabled,
+      settings: themeModuleConfig.settings,
+    );
   }
 }
