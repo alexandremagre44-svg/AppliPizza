@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/pos/widgets/pos_cart_panel_v2.dart
 /// 
 /// Enhanced POS cart panel with validation feedback and item actions
@@ -98,13 +99,13 @@ class PosCartPanelV2 extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
+                          color: context.colorScheme.surfaceVariant // was Colors.grey[100],
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.shopping_cart_outlined,
                           size: 72,
-                          color: Colors.grey[400],
+                          color: context.colorScheme.surfaceVariant // was Colors.grey[400],
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -113,7 +114,7 @@ class PosCartPanelV2 extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: Colors.grey[700],
+                          color: context.colorScheme.surfaceVariant // was Colors.grey[700],
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -122,7 +123,7 @@ class PosCartPanelV2 extends ConsumerWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
-                          color: Colors.grey[500],
+                          color: context.colorScheme.surfaceVariant // was Colors.grey[500],
                           height: 1.4,
                         ),
                       ),
@@ -200,9 +201,9 @@ class _PosCartItemTileV2 extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: context.colorScheme.surfaceVariant // was Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!, width: 1),
+        border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey[200]!, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +218,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: context.colorScheme.shadow.withOpacity(0.1),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -232,17 +233,17 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                           errorBuilder: (context, error, stackTrace) => Container(
                             width: 70,
                             height: 70,
-                            color: Colors.grey[200],
+                            color: context.colorScheme.surfaceVariant // was Colors.grey[200],
                             child: Icon(Icons.image_not_supported_rounded,
-                                color: Colors.grey[400], size: 30),
+                                color: context.colorScheme.surfaceVariant // was Colors.grey[400], size: 30),
                           ),
                         )
                       : Container(
                           width: 70,
                           height: 70,
-                          color: Colors.grey[200],
+                          color: context.colorScheme.surfaceVariant // was Colors.grey[200],
                           child: Icon(Icons.fastfood_rounded,
-                              color: Colors.grey[400], size: 32),
+                              color: context.colorScheme.surfaceVariant // was Colors.grey[400], size: 32),
                         ),
                 ),
               ),
@@ -258,7 +259,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.grey[900],
+                        color: context.colorScheme.surfaceVariant // was Colors.grey[900],
                         height: 1.2,
                       ),
                       maxLines: 2,
@@ -275,7 +276,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                           item.displayDescription!,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: context.colorScheme.surfaceVariant // was Colors.grey[600],
                             fontStyle: FontStyle.italic,
                           ),
                           maxLines: 2,
@@ -296,12 +297,12 @@ class _PosCartItemTileV2 extends ConsumerWidget {
               // Quantity controls
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey[300]!, width: 1.5),
+                  color: context.onPrimary,
+                  border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey[300]!, width: 1.5),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: context.colorScheme.shadow.withOpacity(0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -321,7 +322,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           child: Icon(Icons.remove_rounded,
-                              size: 18, color: Colors.red[600]),
+                              size: 18, color: AppColors.error[600]),
                         ),
                       ),
                     ),
@@ -330,7 +331,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                       decoration: BoxDecoration(
                         border: Border.symmetric(
                           vertical: BorderSide(
-                            color: Colors.grey[300]!,
+                            color: context.colorScheme.surfaceVariant // was Colors.grey[300]!,
                             width: 1,
                           ),
                         ),
@@ -340,7 +341,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
-                          color: Colors.grey[800],
+                          color: context.colorScheme.surfaceVariant // was Colors.grey[800],
                         ),
                       ),
                     ),
@@ -355,7 +356,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           child: Icon(Icons.add_rounded,
-                              size: 18, color: Colors.green[600]),
+                              size: 18, color: AppColors.success[600]),
                         ),
                       ),
                     ),
@@ -370,7 +371,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                   // Duplicate button
                   IconButton(
                     icon: const Icon(Icons.content_copy, size: 18),
-                    color: Colors.blue[600],
+                    color: context.primaryColor[600],
                     tooltip: 'Dupliquer',
                     onPressed: () {
                       ref.read(posCartProvider.notifier).duplicateItem(item.id);
@@ -385,7 +386,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                   // Delete button
                   IconButton(
                     icon: const Icon(Icons.delete, size: 18),
-                    color: Colors.red[600],
+                    color: AppColors.error[600],
                     tooltip: 'Supprimer',
                     onPressed: () {
                       ref.read(posCartProvider.notifier).removeItem(item.id);

@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/staff_tablet/widgets/staff_menu_customization_modal.dart
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import '../../providers/product_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../models/product.dart';
 import '../../design_system/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 const _uuid = Uuid();
 
@@ -87,7 +89,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle, color: Colors.white),
+              const Icon(Icons.check_circle, color: context.onPrimary),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -141,10 +143,10 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primaryLight.withOpacity(0.1) : Colors.white,
+        color: isSelected ? AppColors.primaryLight.withOpacity(0.1) : context.onPrimary,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isSelected ? AppColors.primary : Colors.grey.shade300,
+          color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey.shade300,
           width: isSelected ? 2.5 : 1.5,
         ),
         boxShadow: [
@@ -156,7 +158,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
             )
           else
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: context.colorScheme.shadow.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -174,7 +176,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : Colors.grey.shade200,
+                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       if (isSelected)
@@ -187,7 +189,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                   ),
                   child: Icon(
                     isSelected ? Icons.check_circle : Icons.add_circle_outline,
-                    color: isSelected ? Colors.white : Colors.grey.shade600,
+                    color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                     size: 24,
                   ),
                 ),
@@ -201,7 +203,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                          color: Colors.grey.shade800,
+                          color: context.colorScheme.surfaceVariant // was Colors.grey.shade800,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -210,7 +212,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected ? AppColors.primary : Colors.grey.shade600,
+                          color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                         ),
                       ),
                     ],
@@ -219,7 +221,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
-                  color: isSelected ? AppColors.primary : Colors.grey.shade400,
+                  color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey.shade400,
                 ),
               ],
             ),
@@ -274,7 +276,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
+            Icon(Icons.error_outline, size: 60, color: AppColors.error[300]),
             const SizedBox(height: 16),
             Text('Erreur: $error'),
           ],
@@ -390,7 +392,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                           ),
                           child: const Icon(
                             Icons.local_pizza,
-                            color: Colors.white,
+                            color: context.onPrimary,
                             size: 24,
                           ),
                         ),
@@ -451,7 +453,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                           ),
                           child: const Icon(
                             Icons.local_drink,
-                            color: Colors.white,
+                            color: context.onPrimary,
                             size: 24,
                           ),
                         ),
@@ -490,10 +492,10 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
           Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.onPrimary,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: context.colorScheme.shadow.withOpacity(0.15),
                   blurRadius: 20,
                   offset: const Offset(0, -5),
                 ),
@@ -501,7 +503,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
             ),
             child: Container(
               decoration: BoxDecoration(
-                color: _isSelectionComplete ? AppColors.primary : Colors.grey.shade400,
+                color: _isSelectionComplete ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey.shade400,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: _isSelectionComplete
                     ? [
@@ -530,7 +532,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                     const Icon(
                       Icons.shopping_cart,
                       size: 24,
-                      color: Colors.white,
+                      color: context.onPrimary,
                     ),
                     const SizedBox(width: 12),
                     const Text(
@@ -538,7 +540,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
-                        color: Colors.white,
+                        color: context.onPrimary,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -546,7 +548,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.25),
+                        color: context.onPrimary.withOpacity(0.25),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -554,7 +556,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
-                          color: Colors.white,
+                          color: context.onPrimary,
                         ),
                       ),
                     ),
@@ -584,11 +586,11 @@ class _SelectionOptionsModal extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.onPrimary,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: context.colorScheme.shadow.withOpacity(0.2),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -658,7 +660,7 @@ class _SelectionOptionsModal extends StatelessWidget {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.onPrimary,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: AppColors.primary.withOpacity(0.3),
@@ -666,7 +668,7 @@ class _SelectionOptionsModal extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
+                        color: context.colorScheme.shadow.withOpacity(0.06),
                         blurRadius: 10,
                         offset: const Offset(0, 3),
                       ),
@@ -708,8 +710,8 @@ class _SelectionOptionsModal extends StatelessWidget {
                                       return Container(
                                         width: 60,
                                         height: 60,
-                                        color: Colors.grey.shade200,
-                                        child: Icon(Icons.image_not_supported, color: Colors.grey.shade400),
+                                        color: context.colorScheme.surfaceVariant // was Colors.grey.shade200,
+                                        child: Icon(Icons.image_not_supported, color: context.colorScheme.surfaceVariant // was Colors.grey.shade400),
                                       );
                                     },
                                   ),
@@ -725,7 +727,7 @@ class _SelectionOptionsModal extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w900,
-                                      color: Colors.grey.shade800,
+                                      color: context.colorScheme.surfaceVariant // was Colors.grey.shade800,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -736,7 +738,7 @@ class _SelectionOptionsModal extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
-                                      color: Colors.grey.shade600,
+                                      color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                                     ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
