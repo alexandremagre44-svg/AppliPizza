@@ -1,4 +1,5 @@
 // lib/src/screens/splash/splash_screen.dart
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/restaurant_provider.dart';
 import '../../../builder/services/builder_navigation_service.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -137,11 +139,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                     width: 160,
                     height: 160,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.onPrimary,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: context.colorScheme.shadow.withOpacity(0.3),
                           blurRadius: 30,
                           offset: const Offset(0, 15),
                         ),
@@ -160,12 +162,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                     style: const TextStyle(
                       fontSize: 42,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                      color: context.onPrimary,
                       letterSpacing: 2.0,
                       fontFamily: 'Poppins',
                       shadows: [
                         Shadow(
-                          color: Colors.black38,
+                          color: context.colorScheme.shadow.withOpacity(0.38),
                           offset: Offset(0, 4),
                           blurRadius: 8,
                         ),
@@ -189,7 +191,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                     width: 50,
                     height: 50,
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(context.onPrimary),
                       strokeWidth: 4,
                     ),
                   ),

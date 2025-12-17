@@ -1,11 +1,13 @@
 // lib/src/widgets/pizza_roulette_wheel.dart
 // FortuneWheel-based pizza roulette wheel widget - Clean and stable implementation
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_fortune_wheel/flutter_fortune_wheel.dart';
 import '../models/roulette_config.dart';
 import '../design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// FortuneWheel-based widget that displays an animated pizza-style roulette wheel
 /// 
@@ -175,7 +177,7 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel> {
         FortuneIndicator(
           alignment: Alignment.topCenter,
           child: TriangleIndicator(
-            color: AppColors.primary, // Deli'Zza primary red #D32F2F
+            color: context.primaryColor, // Deli'Zza primary red #D32F2F
             width: 30.0,
             height: 40.0,
           ),
@@ -190,13 +192,13 @@ class PizzaRouletteWheelState extends State<PizzaRouletteWheel> {
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: segment.color.computeLuminance() > 0.5
-                    ? AppColors.textPrimary // Deli'Zza dark text for light backgrounds
-                    : AppColors.white, // Deli'Zza white for dark backgrounds
+                    ? context.onSurface // Deli'Zza dark text for light backgrounds
+                    : context.onPrimary, // Deli'Zza white for dark backgrounds
               ),
             ),
             style: FortuneItemStyle(
               color: segment.color,
-              borderColor: AppColors.white, // Deli'Zza design system white
+              borderColor: Colors.white, // Deli'Zza design system white
               borderWidth: 3, // Slightly thicker for better visual separation
               textAlign: TextAlign.center,
             ),

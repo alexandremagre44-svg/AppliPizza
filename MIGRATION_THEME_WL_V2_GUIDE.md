@@ -52,15 +52,23 @@ Migrer l'intégralité du code Flutter pour utiliser exclusivement le thème WL 
 | ✅ home_shimmer_loading.dart | Migré | 9 Colors.* - Loading skeleton |
 | ✅ new_order_notification.dart | Migré | 8 Colors.* - Order notifications |
 
-#### Batch 6 - À venir
+#### Batch 6 - Screens & Widgets (4 fichiers) ✅
 | Fichier | Statut | Notes |
 |---------|--------|-------|
-| ⏳ pizza_roulette_wheel.dart | À faire | 4 Colors.* |
+| ✅ pizza_roulette_wheel.dart | Migré | 4 Colors.* - Roulette widget |
+| ✅ cart_screen.dart | Migré | 9 Colors.* - Shopping cart |
+| ✅ splash_screen.dart | Migré | 7 Colors.* - Splash screen |
+| ✅ product_detail_screen.dart | Migré | 5 Colors.* - Product details |
+
+#### Batch 7 - À venir
+| Fichier | Statut | Notes |
+|---------|--------|-------|
 | ⏳ Screens - home_screen.dart | À faire | ~30 Colors.* |
 | ⏳ Screens - menu_screen.dart | À faire | ~25 Colors.* |
-| ⏳ Screens - cart_screen.dart | À faire | ~20 Colors.* |
+| ⏳ Screens - profile_screen.dart | À faire | ~15 Colors.* |
+| ⏳ Profile widgets | À faire | ~40 Colors.* combinés |
 
-**Progression**: 18/250 fichiers (7.2%) - **Batch 5 COMPLETE**
+**Progression**: 22/250 fichiers (8.8%) - **Batch 6 COMPLETE**
 
 ### Violations Identifiées
 | Type | Occurrences | Impact |
