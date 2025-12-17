@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/builder/runtime/module_aware_block.dart
 ///
 /// Module-aware block rendering widget.

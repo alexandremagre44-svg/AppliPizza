@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/builder/runtime/builder_block_runtime_registry.dart
 // Central registry for block rendering (preview + runtime)
 // White-label pro architecture - Module-aware

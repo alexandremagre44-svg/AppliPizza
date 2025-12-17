@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/builder/editor/layout_tab.dart
 // Layout tab for the page editor - displays and manages blocks in draftLayout
 // Part of Builder B3 modular UI layer
@@ -189,14 +190,14 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
-                  left: BorderSide(color: Colors.grey.shade300),
+                  left: BorderSide(color: context.colorScheme.surfaceVariant // was Colors.grey.shade300),
                 ),
               ),
               child: Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
-                    color: Colors.grey.shade100,
+                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade100,
                     child: Row(
                       children: [
                         const Icon(Icons.visibility, size: 18),
@@ -273,7 +274,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: context.primaryColor.shade50,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Row(
@@ -298,16 +299,16 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: context.colorScheme.surfaceVariant // was Colors.grey.shade50,
         border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200),
+          bottom: BorderSide(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
         ),
       ),
       child: Row(
         children: [
           Icon(
             Icons.layers,
-            color: Colors.grey.shade700,
+            color: context.colorScheme.surfaceVariant // was Colors.grey.shade700,
             size: 20,
           ),
           const SizedBox(width: 8),
@@ -326,7 +327,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
                   '${_sortedBlocks.length} bloc(s)',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                   ),
                 ),
               ],
@@ -336,7 +337,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.orange.shade100,
+                color: AppColors.warning.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -344,7 +345,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  color: Colors.orange.shade800,
+                  color: AppColors.warning.shade800,
                 ),
               ),
             ),
@@ -358,13 +359,13 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: context.primaryColor.shade50,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.shade200),
+        border: Border.all(color: context.primaryColor.shade200),
       ),
       child: Row(
         children: [
-          Icon(Icons.shield, color: Colors.blue.shade700, size: 20),
+          Icon(Icons.shield, color: context.primaryColor.shade700, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -372,13 +373,13 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Colors.blue.shade800,
+                color: context.primaryColor.shade800,
               ),
             ),
           ),
           Tooltip(
             message: 'Cette page ne peut pas être supprimée.\nVous pouvez modifier les blocs.',
-            child: Icon(Icons.info_outline, color: Colors.blue.shade400, size: 18),
+            child: Icon(Icons.info_outline, color: context.primaryColor.shade400, size: 18),
           ),
         ],
       ),

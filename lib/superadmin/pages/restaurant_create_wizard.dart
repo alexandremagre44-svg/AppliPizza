@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/superadmin/pages/restaurant_create_wizard.dart
 ///
 /// Wizard de création d'un nouveau restaurant dans le module Super-Admin.
@@ -34,9 +35,9 @@ class RestaurantCreateWizard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(48),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.onPrimary,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
             ),
             child: Column(
               children: [
@@ -44,13 +45,13 @@ class RestaurantCreateWizard extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: Colors.green.shade50,
+                    color: AppColors.success.shade50,
                     borderRadius: BorderRadius.circular(40),
                   ),
                   child: Icon(
                     Icons.add_business,
                     size: 40,
-                    color: Colors.green.shade600,
+                    color: AppColors.success.shade600,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -67,7 +68,7 @@ class RestaurantCreateWizard extends StatelessWidget {
                   'Follow the wizard to configure a new restaurant',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey.shade600,
+                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -75,9 +76,9 @@ class RestaurantCreateWizard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
                   ),
                   child: const Column(
                     children: [

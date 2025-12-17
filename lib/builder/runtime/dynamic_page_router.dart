@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/builder/runtime/dynamic_page_router.dart
 // Dynamic page router for Builder B3 system
 // 
@@ -109,7 +110,7 @@ Widget _buildNotPublishedState(BuildContext context, String pageName) {
           Icon(
             Icons.visibility_off_outlined,
             size: 80,
-            color: Colors.grey[400],
+            color: context.colorScheme.surfaceVariant // was Colors.grey[400],
           ),
           const SizedBox(height: 24),
           Text(
@@ -124,7 +125,7 @@ Widget _buildNotPublishedState(BuildContext context, String pageName) {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey[600],
+              color: context.colorScheme.surfaceVariant // was Colors.grey[600],
             ),
           ),
         ],

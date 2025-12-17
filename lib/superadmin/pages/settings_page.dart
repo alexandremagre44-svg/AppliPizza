@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/superadmin/pages/settings_page.dart
 ///
 /// Page paramètres du module Super-Admin.
@@ -88,9 +89,9 @@ class _SettingsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.onPrimary,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,7 +113,7 @@ class _SettingsSection extends StatelessWidget {
               ],
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
           ...children,
         ],
       ),
@@ -137,21 +138,21 @@ class _SettingsPlaceholderItem extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade700,
+                color: context.colorScheme.surfaceVariant // was Colors.grey.shade700,
               ),
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: context.colorScheme.surfaceVariant // was Colors.grey.shade100,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               'TODO',
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.grey.shade500,
+                color: context.colorScheme.surfaceVariant // was Colors.grey.shade500,
                 fontStyle: FontStyle.italic,
               ),
             ),

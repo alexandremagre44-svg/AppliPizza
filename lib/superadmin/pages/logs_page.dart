@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/superadmin/pages/logs_page.dart
 ///
 /// Page des logs d'activité du module Super-Admin.
@@ -76,7 +77,7 @@ class LogsPage extends StatelessWidget {
                     'Showing ${mockLogs.length} recent activities',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade600,
+                      color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                     ),
                   ),
                 ],
@@ -90,19 +91,19 @@ class LogsPage extends StatelessWidget {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.onPrimary,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
+                      border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade300),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.filter_list, size: 18, color: Colors.grey.shade600),
+                        Icon(Icons.filter_list, size: 18, color: context.colorScheme.surfaceVariant // was Colors.grey.shade600),
                         const SizedBox(width: 8),
                         Text(
                           'Filter',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey.shade600,
+                            color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                           ),
                         ),
                       ],
@@ -127,15 +128,15 @@ class LogsPage extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.onPrimary,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
               ),
               child: ListView.separated(
                 padding: const EdgeInsets.all(0),
                 itemCount: mockLogs.length,
                 separatorBuilder: (context, index) =>
-                    Divider(height: 1, color: Colors.grey.shade200),
+                    Divider(height: 1, color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
                 itemBuilder: (context, index) {
                   final log = mockLogs[index];
                   return _LogListItem(log: log);
@@ -149,20 +150,20 @@ class LogsPage extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: context.primaryColor.shade50,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.blue.shade200),
+              border: Border.all(color: context.primaryColor.shade200),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, size: 20, color: Colors.blue.shade600),
+                Icon(Icons.info_outline, size: 20, color: context.primaryColor.shade600),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'TODO: Implement real-time log streaming and advanced filtering',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.blue.shade700,
+                      color: context.primaryColor.shade700,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -202,11 +203,11 @@ class _LogListItem extends StatelessWidget {
   Color _getLevelColor(String level) {
     switch (level) {
       case 'error':
-        return Colors.red;
+        return AppColors.error;
       case 'warning':
-        return Colors.orange;
+        return AppColors.warning;
       case 'info':
-        return Colors.blue;
+        return context.primaryColor;
       default:
         return Colors.grey;
     }
@@ -262,7 +263,7 @@ class _LogListItem extends StatelessWidget {
                       '• ${log.user}',
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -272,7 +273,7 @@ class _LogListItem extends StatelessWidget {
                   log.details,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade700,
+                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade700,
                   ),
                 ),
               ],
@@ -283,7 +284,7 @@ class _LogListItem extends StatelessWidget {
             _formatTimestamp(log.timestamp),
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade500,
+              color: context.colorScheme.surfaceVariant // was Colors.grey.shade500,
             ),
           ),
         ],

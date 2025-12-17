@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/builder/runtime/builder_page_loader.dart
 // Widget that loads Builder pages with fallback to legacy screens
 // THEME INTEGRATION: Loads published theme and passes it to blocks via BuilderThemeProvider

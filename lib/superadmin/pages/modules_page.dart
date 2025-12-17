@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/superadmin/pages/modules_page.dart
 ///
 /// Page gestion des modules du module Super-Admin.
@@ -29,15 +30,15 @@ class ModulesPage extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             margin: const EdgeInsets.only(bottom: 24),
             decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              border: Border.all(color: Colors.orange.shade300, width: 2),
+              color: AppColors.warning.shade50,
+              border: Border.all(color: AppColors.warning.shade300, width: 2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.warning_amber_rounded,
-                  color: Colors.orange.shade700,
+                  color: AppColors.warning.shade700,
                   size: 32,
                 ),
                 const SizedBox(width: 16),
@@ -50,7 +51,7 @@ class ModulesPage extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.orange.shade900,
+                          color: AppColors.warning.shade900,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -58,7 +59,7 @@ class ModulesPage extends ConsumerWidget {
                         'This page is not connected to the real WhiteLabel system. Use the Restaurant Modules page for actual module configuration.',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.orange.shade800,
+                          color: AppColors.warning.shade800,
                         ),
                       ),
                     ],
@@ -87,7 +88,7 @@ class ModulesPage extends ConsumerWidget {
                     '${modules.where((m) => m.enabled).length} of ${modules.length} modules enabled',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade600,
+                      color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                     ),
                   ),
                 ],
@@ -149,11 +150,11 @@ class _ModuleCard extends StatelessWidget {
   Color _getCategoryColor(ModuleCategory category) {
     switch (category) {
       case ModuleCategory.core:
-        return Colors.blue;
+        return context.primaryColor;
       case ModuleCategory.marketing:
         return Colors.purple;
       case ModuleCategory.operations:
-        return Colors.orange;
+        return AppColors.warning;
       case ModuleCategory.integration:
         return Colors.teal;
       case ModuleCategory.advanced:
@@ -168,10 +169,10 @@ class _ModuleCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isAvailable ? Colors.white : Colors.grey.shade50,
+        color: isAvailable ? context.onPrimary : context.colorScheme.surfaceVariant // was Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: module.enabled ? Colors.green.shade200 : Colors.grey.shade200,
+          color: module.enabled ? AppColors.success.shade200 : context.colorScheme.surfaceVariant // was Colors.grey.shade200,
         ),
         boxShadow: [
           BoxShadow(
@@ -191,16 +192,16 @@ class _ModuleCard extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: module.enabled
-                      ? Colors.green.shade50
-                      : Colors.grey.shade100,
+                      ? AppColors.success.shade50
+                      : context.colorScheme.surfaceVariant // was Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   _getModuleIcon(module.name),
                   size: 24,
                   color: module.enabled
-                      ? Colors.green.shade600
-                      : Colors.grey.shade600,
+                      ? AppColors.success.shade600
+                      : context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                 ),
               ),
               Switch(
@@ -211,7 +212,7 @@ class _ModuleCard extends StatelessWidget {
                         debugPrint('TODO: Toggle module ${module.name} to $value');
                       }
                     : null,
-                activeColor: Colors.green,
+                activeColor: AppColors.success,
               ),
             ],
           ),
@@ -226,7 +227,7 @@ class _ModuleCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: isAvailable
                         ? const Color(0xFF1A1A2E)
-                        : Colors.grey.shade500,
+                        : context.colorScheme.surfaceVariant // was Colors.grey.shade500,
                   ),
                 ),
               ),
@@ -254,8 +255,8 @@ class _ModuleCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               color: module.enabled 
-                  ? Colors.green 
-                  : (isAvailable ? Colors.grey : Colors.grey.shade400),
+                  ? AppColors.success 
+                  : (isAvailable ? Colors.grey : context.colorScheme.surfaceVariant // was Colors.grey.shade400),
             ),
           ),
         ],

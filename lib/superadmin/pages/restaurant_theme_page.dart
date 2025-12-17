@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/superadmin/pages/restaurant_theme_page.dart
 ///
 /// PHASE 3 - Éditeur de Thème White-Label pour SuperAdmin
@@ -184,7 +185,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✅ Thème sauvegardé avec succès'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -197,7 +198,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Erreur: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -260,7 +261,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✅ Thème réinitialisé aux valeurs par défaut'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -273,7 +274,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Erreur: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -298,7 +299,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const Icon(Icons.error_outline, size: 48, color: AppColors.error),
               const SizedBox(height: 16),
               Text('Erreur: $error'),
               const SizedBox(height: 16),
@@ -614,7 +615,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
                                         child: const Text(
                                           'Bouton',
                                           style: TextStyle(
-                                            color: Colors.white,
+                                            color: context.onPrimary,
                                             fontSize: 12,
                                           ),
                                         ),
@@ -714,7 +715,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade300),
           ),
         ),
         const SizedBox(width: 12),

@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/builder/editor/new_page_dialog.dart
 // Dialog for creating new Builder pages
 
@@ -199,7 +200,7 @@ class _NewPageDialogState extends State<NewPageDialog> {
     return AlertDialog(
       title: const Row(
         children: [
-          Icon(Icons.add_circle, color: Colors.blue),
+          Icon(Icons.add_circle, color: context.primaryColor),
           SizedBox(width: 12),
           Text('Créer une nouvelle page'),
         ],
@@ -323,16 +324,16 @@ class _NewPageDialogState extends State<NewPageDialog> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: isSelected ? Colors.blue.shade100 : Colors.grey.shade100,
+                            color: isSelected ? context.primaryColor.shade100 : context.colorScheme.surfaceVariant // was Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isSelected ? Colors.blue : Colors.grey.shade300,
+                              color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant // was Colors.grey.shade300,
                               width: isSelected ? 2 : 1,
                             ),
                           ),
                           child: Icon(
                             iconData['icon'] as IconData,
-                            color: isSelected ? Colors.blue : Colors.grey.shade700,
+                            color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant // was Colors.grey.shade700,
                           ),
                         ),
                       ),

@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/superadmin/pages/dashboard_page.dart
 ///
 /// Page Dashboard du module Super-Admin.
@@ -31,19 +32,19 @@ class DashboardPage extends ConsumerWidget {
                 title: 'Total Restaurants',
                 value: stats.totalRestaurants.toString(),
                 icon: Icons.restaurant,
-                color: Colors.blue,
+                color: context.primaryColor,
               ),
               _StatCard(
                 title: 'Active Restaurants',
                 value: stats.activeRestaurants.toString(),
                 icon: Icons.check_circle,
-                color: Colors.green,
+                color: AppColors.success,
               ),
               _StatCard(
                 title: 'Total Users',
                 value: stats.totalUsers.toString(),
                 icon: Icons.people,
-                color: Colors.orange,
+                color: AppColors.warning,
               ),
               _StatCard(
                 title: 'Today Orders',
@@ -71,9 +72,9 @@ class DashboardPage extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.onPrimary,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
             ),
             child: const Column(
               children: [
@@ -116,7 +117,7 @@ class _StatCard extends StatelessWidget {
       width: 180,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.onPrimary,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -151,7 +152,7 @@ class _StatCard extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade600,
+              color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
             ),
           ),
         ],

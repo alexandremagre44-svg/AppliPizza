@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/superadmin/pages/migration_page.dart
 ///
 /// Page SuperAdmin pour lancer les migrations Firestore.
@@ -82,7 +83,7 @@ class _MigrationPageState extends State<MigrationPage> {
         Text(
           'Correction des incohérences de la base de données',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[600],
+                color: context.colorScheme.surfaceVariant // was Colors.grey[600],
               ),
         ),
       ],
@@ -139,7 +140,7 @@ class _MigrationPageState extends State<MigrationPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle_outline, size: 20, color: Colors.green),
+          const Icon(Icons.check_circle_outline, size: 20, color: AppColors.success),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -151,7 +152,7 @@ class _MigrationPageState extends State<MigrationPage> {
                 ),
                 Text(
                   description,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  style: TextStyle(color: context.colorScheme.surfaceVariant // was Colors.grey[600], fontSize: 13),
                 ),
               ],
             ),
@@ -163,7 +164,7 @@ class _MigrationPageState extends State<MigrationPage> {
 
   Widget _buildOptions() {
     return Card(
-      color: Colors.blue[50],
+      color: context.primaryColor[50],
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -207,14 +208,14 @@ class _MigrationPageState extends State<MigrationPage> {
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: context.onPrimary,
                   ),
                 )
               : const Icon(Icons.play_arrow),
           label: Text(_isRunning ? 'Migration en cours...' : 'Lancer la migration'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: _isDryRun ? Colors.orange : Colors.red,
-            foregroundColor: Colors.white,
+            backgroundColor: _isDryRun ? AppColors.warning : AppColors.error,
+            foregroundColor: context.onPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           ),
         ),
@@ -237,7 +238,7 @@ class _MigrationPageState extends State<MigrationPage> {
     if (_report == null) return const SizedBox.shrink();
 
     return Card(
-      color: _report!.isSuccess ? Colors.green[50] : Colors.red[50],
+      color: _report!.isSuccess ? AppColors.success[50] : AppColors.error[50],
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -247,7 +248,7 @@ class _MigrationPageState extends State<MigrationPage> {
               children: [
                 Icon(
                   _report!.isSuccess ? Icons.check_circle : Icons.error,
-                  color: _report!.isSuccess ? Colors.green : Colors.red,
+                  color: _report!.isSuccess ? AppColors.success : AppColors.error,
                   size: 32,
                 ),
                 const SizedBox(width: 12),
@@ -257,7 +258,7 @@ class _MigrationPageState extends State<MigrationPage> {
                       : 'Migration avec erreurs ✗',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: _report!.isSuccess ? Colors.green[800] : Colors.red[800],
+                        color: _report!.isSuccess ? AppColors.success[800] : AppColors.error[800],
                       ),
                 ),
               ],
@@ -282,7 +283,7 @@ class _MigrationPageState extends State<MigrationPage> {
                 'Erreurs (${_report!.errors.length})',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.red,
+                  color: AppColors.error,
                 ),
               ),
               const SizedBox(height: 8),
@@ -290,7 +291,7 @@ class _MigrationPageState extends State<MigrationPage> {
                     padding: const EdgeInsets.only(bottom: 4.0),
                     child: Text(
                       '• $error',
-                      style: TextStyle(color: Colors.red[700]),
+                      style: TextStyle(color: AppColors.error[700]),
                     ),
                   )),
             ],
@@ -341,7 +342,7 @@ class _MigrationPageState extends State<MigrationPage> {
             Container(
               height: 300,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: context.colorScheme.surfaceVariant // was Colors.grey[100],
                 borderRadius: BorderRadius.circular(8),
               ),
               child: SingleChildScrollView(
@@ -402,7 +403,7 @@ class _MigrationPageState extends State<MigrationPage> {
                   ? 'Migration terminée avec succès'
                   : 'Migration terminée avec ${report.errors.length} erreur(s)',
             ),
-            backgroundColor: report.isSuccess ? Colors.green : Colors.red,
+            backgroundColor: report.isSuccess ? AppColors.success : AppColors.error,
           ),
         );
       }
@@ -416,7 +417,7 @@ class _MigrationPageState extends State<MigrationPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la migration: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
