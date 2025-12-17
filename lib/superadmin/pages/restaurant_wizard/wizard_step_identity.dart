@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'wizard_state.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Étape 1: Configuration de l'identité du restaurant.
 class WizardStepIdentity extends ConsumerStatefulWidget {
@@ -81,7 +82,7 @@ class _WizardStepIdentityState extends ConsumerState<WizardStepIdentity> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A2E),
+                  color: context.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -89,7 +90,7 @@ class _WizardStepIdentityState extends ConsumerState<WizardStepIdentity> {
                 'Ces informations définissent l\'identité de votre restaurant.',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: context.textSecondary.shade600,
                 ),
               ),
               const SizedBox(height: 32),
@@ -163,7 +164,7 @@ class _WizardStepIdentityState extends ConsumerState<WizardStepIdentity> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1A1A2E),
+            color: context.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -175,18 +176,18 @@ class _WizardStepIdentityState extends ConsumerState<WizardStepIdentity> {
             helperText: helperText,
             helperMaxLines: 2,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.surfaceColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: context.colorScheme.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: context.colorScheme.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF1A1A2E), width: 2),
+              borderSide: const BorderSide(color: context.onSurface, width: 2),
             ),
           ),
         ),

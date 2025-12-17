@@ -13,6 +13,7 @@ import '../../../white_label/core/module_registry.dart';
 import '../../models/restaurant_blueprint.dart';
 import 'wizard_state.dart';
 import 'wizard_step_template.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Étape 5: Aperçu final avant création.
 class WizardStepPreview extends ConsumerWidget {
@@ -50,7 +51,7 @@ class WizardStepPreview extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A2E),
+                  color: context.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -58,7 +59,7 @@ class WizardStepPreview extends ConsumerWidget {
                 'Vérifiez les informations avant de créer votre restaurant.',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: context.textSecondary.shade600,
                 ),
               ),
               const SizedBox(height: 32),
@@ -305,9 +306,9 @@ class _PreviewSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.colorScheme.surfaceVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,10 +318,10 @@ class _PreviewSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: context.colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 20, color: Colors.grey.shade700),
+                child: Icon(icon, size: 20, color: context.textSecondary.shade700),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -329,7 +330,7 @@ class _PreviewSection extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1A2E),
+                    color: context.onSurface,
                   ),
                 ),
               ),
@@ -376,7 +377,7 @@ class _PreviewRow extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey.shade600,
+                color: context.textSecondary.shade600,
               ),
             ),
           ),
@@ -386,7 +387,7 @@ class _PreviewRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isOptional ? FontWeight.normal : FontWeight.w500,
-                color: isOptional ? Colors.grey.shade500 : const Color(0xFF1A1A2E),
+                color: isOptional ? context.textSecondary.shade500 : const context.onSurface,
                 fontStyle: isOptional ? FontStyle.italic : FontStyle.normal,
               ),
             ),
@@ -414,7 +415,7 @@ class _PreviewColorRow extends StatelessWidget {
         return Color(int.parse('FF$hex', radix: 16));
       }
     } catch (_) {}
-    return Colors.grey;
+    return context.textSecondary;
   }
 
   @override
@@ -429,7 +430,7 @@ class _PreviewColorRow extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey.shade600,
+                color: context.textSecondary.shade600,
               ),
             ),
           ),
@@ -442,7 +443,7 @@ class _PreviewColorRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: _parseColor(color),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: context.colorScheme.outlineVariant),
                 ),
               );
             }).toList(),
@@ -491,7 +492,7 @@ class _PreviewModulesRow extends StatelessWidget {
         'Aucun module activé',
         style: TextStyle(
           fontSize: 13,
-          color: Colors.grey.shade500,
+          color: context.textSecondary.shade500,
           fontStyle: FontStyle.italic,
         ),
       );
@@ -541,7 +542,7 @@ class _PreviewModulesRowNew extends StatelessWidget {
         'Aucun module activé',
         style: TextStyle(
           fontSize: 13,
-          color: Colors.grey.shade500,
+          color: context.textSecondary.shade500,
           fontStyle: FontStyle.italic,
         ),
       );
@@ -592,7 +593,7 @@ class _AppPreview extends StatelessWidget {
         return Color(int.parse('FF$hex', radix: 16));
       }
     } catch (_) {}
-    return Colors.grey;
+    return context.textSecondary;
   }
 
   @override
@@ -608,14 +609,14 @@ class _AppPreview extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1A1A2E),
+            color: context.onSurface,
           ),
         ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: context.colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
@@ -623,11 +624,11 @@ class _AppPreview extends StatelessWidget {
               width: 280,
               height: 500,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.surfaceColor,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
+                    color: context.colorScheme.shadow.withOpacity(0.15),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -673,7 +674,7 @@ class _AppPreview extends StatelessWidget {
                     // Content placeholder
                     Expanded(
                       child: Container(
-                        color: Colors.grey.shade50,
+                        color: context.textSecondary.shade50,
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -681,14 +682,14 @@ class _AppPreview extends StatelessWidget {
                             Container(
                               height: 100,
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
+                                color: context.colorScheme.surfaceVariant,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Center(
                                 child: Icon(
                                   Icons.image,
                                   size: 40,
-                                  color: Colors.grey.shade400,
+                                  color: context.textSecondary.shade400,
                                 ),
                               ),
                             ),
@@ -697,7 +698,7 @@ class _AppPreview extends StatelessWidget {
                               height: 20,
                               width: 150,
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
+                                color: context.colorScheme.surfaceVariant,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -706,7 +707,7 @@ class _AppPreview extends StatelessWidget {
                               height: 14,
                               width: 200,
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
+                                color: context.colorScheme.surfaceVariant,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -718,10 +719,10 @@ class _AppPreview extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.surfaceColor,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
+                            color: context.colorScheme.shadow.withOpacity(0.05),
                             blurRadius: 10,
                             offset: const Offset(0, -2),
                           ),
@@ -731,9 +732,9 @@ class _AppPreview extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Icon(Icons.home, color: primary),
-                          Icon(Icons.restaurant_menu, color: Colors.grey.shade400),
-                          Icon(Icons.shopping_cart, color: Colors.grey.shade400),
-                          Icon(Icons.person, color: Colors.grey.shade400),
+                          Icon(Icons.restaurant_menu, color: context.textSecondary.shade400),
+                          Icon(Icons.shopping_cart, color: context.textSecondary.shade400),
+                          Icon(Icons.person, color: context.textSecondary.shade400),
                         ],
                       ),
                     ),

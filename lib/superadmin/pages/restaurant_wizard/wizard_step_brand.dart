@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'wizard_state.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Étape 2: Configuration de la marque.
 class WizardStepBrand extends ConsumerStatefulWidget {
@@ -58,7 +59,7 @@ class _WizardStepBrandState extends ConsumerState<WizardStepBrand> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A2E),
+                  color: context.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -66,7 +67,7 @@ class _WizardStepBrandState extends ConsumerState<WizardStepBrand> {
                 'Personnalisez l\'apparence de votre application.',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: context.textSecondary.shade600,
                 ),
               ),
               const SizedBox(height: 32),
@@ -91,7 +92,7 @@ class _WizardStepBrandState extends ConsumerState<WizardStepBrand> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1A1A2E),
+                  color: context.onSurface,
                 ),
               ),
               const SizedBox(height: 16),
@@ -142,7 +143,7 @@ class _WizardStepBrandState extends ConsumerState<WizardStepBrand> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1A1A2E),
+                  color: context.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -155,7 +156,7 @@ class _WizardStepBrandState extends ConsumerState<WizardStepBrand> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1A1A2E),
+                  color: context.onSurface,
                 ),
               ),
               const SizedBox(height: 16),
@@ -205,7 +206,7 @@ class _WizardStepBrandState extends ConsumerState<WizardStepBrand> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1A1A2E),
+            color: context.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -216,18 +217,18 @@ class _WizardStepBrandState extends ConsumerState<WizardStepBrand> {
             hintText: hint,
             helperText: helperText,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.surfaceColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: context.colorScheme.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: context.colorScheme.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF1A1A2E), width: 2),
+              borderSide: const BorderSide(color: context.onSurface, width: 2),
             ),
           ),
         ),
@@ -282,7 +283,7 @@ class _ColorPickerState extends State<_ColorPicker> {
         return Color(int.parse('FF$hex', radix: 16));
       }
     } catch (_) {}
-    return Colors.grey;
+    return context.textSecondary;
   }
 
   // Palette de couleurs prédéfinies
@@ -309,16 +310,16 @@ class _ColorPickerState extends State<_ColorPicker> {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF1A1A2E),
+            color: context.onSurface,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: context.colorScheme.outlineVariant),
           ),
           child: Column(
             children: [
@@ -331,7 +332,7 @@ class _ColorPickerState extends State<_ColorPicker> {
                     decoration: BoxDecoration(
                       color: _parseColor(widget.color),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
+                      border: Border.all(color: context.colorScheme.outlineVariant),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -348,7 +349,7 @@ class _ColorPickerState extends State<_ColorPicker> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(4),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: context.colorScheme.outlineVariant),
                         ),
                       ),
                     ),
@@ -376,8 +377,8 @@ class _ColorPickerState extends State<_ColorPicker> {
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(
                           color: isSelected
-                              ? const Color(0xFF1A1A2E)
-                              : Colors.grey.shade300,
+                              ? const context.onSurface
+                              : context.colorScheme.outlineVariant,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -406,7 +407,7 @@ class _ColorPreview extends StatelessWidget {
         return Color(int.parse('FF$hex', radix: 16));
       }
     } catch (_) {}
-    return Colors.grey;
+    return context.textSecondary;
   }
 
   @override
@@ -418,9 +419,9 @@ class _ColorPreview extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.colorScheme.surfaceVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -13,6 +13,7 @@ import '../../../white_label/core/module_category.dart';
 import '../../../white_label/core/module_definition.dart' as core;
 import '../../../white_label/core/module_registry.dart';
 import 'wizard_state.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Retourne une icône pour un module ID.
 IconData _getModuleIcon(String moduleId) {
@@ -128,7 +129,7 @@ class WizardStepModules extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A2E),
+                  color: context.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -137,7 +138,7 @@ class WizardStepModules extends ConsumerWidget {
                 '${visibleModules.length} modules disponibles.',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: context.textSecondary.shade600,
                 ),
               ),
               const SizedBox(height: 16),
@@ -215,10 +216,10 @@ class _ModulesSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: enabledCount > 0 ? Colors.green.shade50 : Colors.grey.shade100,
+        color: enabledCount > 0 ? Colors.green.shade50 : context.colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: enabledCount > 0 ? Colors.green.shade200 : Colors.grey.shade300,
+          color: enabledCount > 0 ? Colors.green.shade200 : context.colorScheme.outlineVariant,
         ),
       ),
       child: Row(
@@ -226,13 +227,13 @@ class _ModulesSummary extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: enabledCount > 0 ? Colors.green.shade100 : Colors.grey.shade200,
+              color: enabledCount > 0 ? Colors.green.shade100 : context.colorScheme.surfaceVariant,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.extension,
               size: 24,
-              color: enabledCount > 0 ? Colors.green.shade700 : Colors.grey.shade600,
+              color: enabledCount > 0 ? Colors.green.shade700 : context.textSecondary.shade600,
             ),
           ),
           const SizedBox(width: 16),
@@ -247,7 +248,7 @@ class _ModulesSummary extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: enabledCount > 0
                         ? Colors.green.shade800
-                        : Colors.grey.shade700,
+                        : context.textSecondary.shade700,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -270,7 +271,7 @@ class _ModulesSummary extends StatelessWidget {
                     'Aucun module activé',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      color: context.textSecondary.shade600,
                     ),
                   ),
               ],
@@ -368,7 +369,7 @@ class _ModuleCategorySection extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A2E),
+                color: context.onSurface,
               ),
             ),
             const SizedBox(width: 8),
@@ -376,7 +377,7 @@ class _ModuleCategorySection extends StatelessWidget {
               '(${modules.length})',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade500,
+                color: context.textSecondary.shade500,
               ),
             ),
           ],
@@ -386,7 +387,7 @@ class _ModuleCategorySection extends StatelessWidget {
           category.description,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey.shade600,
+            color: context.textSecondary.shade600,
           ),
         ),
         const SizedBox(height: 12),
@@ -429,10 +430,10 @@ class _ModuleToggleCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isEnabled ? Colors.green.shade300 : Colors.grey.shade200,
+          color: isEnabled ? Colors.green.shade300 : context.colorScheme.surfaceVariant,
         ),
       ),
       child: Row(
@@ -441,13 +442,13 @@ class _ModuleToggleCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: isEnabled ? Colors.green.shade50 : Colors.grey.shade100,
+              color: isEnabled ? Colors.green.shade50 : context.colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               _getModuleIcon(module.id),
               size: 24,
-              color: isEnabled ? Colors.green.shade600 : Colors.grey.shade600,
+              color: isEnabled ? Colors.green.shade600 : context.textSecondary.shade600,
             ),
           ),
           const SizedBox(width: 16),
@@ -464,7 +465,7 @@ class _ModuleToggleCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1A1A2E),
+                          color: context.onSurface,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -497,7 +498,7 @@ class _ModuleToggleCard extends StatelessWidget {
                   module.description,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: context.textSecondary.shade600,
                   ),
                 ),
                 if (hasDeps) ...[
@@ -507,7 +508,7 @@ class _ModuleToggleCard extends StatelessWidget {
                       Icon(
                         Icons.link,
                         size: 12,
-                        color: Colors.grey.shade500,
+                        color: context.textSecondary.shade500,
                       ),
                       const SizedBox(width: 4),
                       Flexible(
@@ -516,7 +517,7 @@ class _ModuleToggleCard extends StatelessWidget {
                               ModuleRegistry.of(d)?.name ?? d).join(', ')}',
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey.shade500,
+                            color: context.textSecondary.shade500,
                             fontStyle: FontStyle.italic,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -558,7 +559,7 @@ class _QuickActions extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: context.colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -569,7 +570,7 @@ class _QuickActions extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1A1A2E),
+              color: context.onSurface,
             ),
           ),
           const SizedBox(height: 12),

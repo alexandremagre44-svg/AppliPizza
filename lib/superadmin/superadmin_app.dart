@@ -21,6 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../src/providers/auth_provider.dart';
 import 'superadmin_router.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Widget principal du module Super-Admin.
 /// 
@@ -79,11 +80,11 @@ class SuperAdminApp extends ConsumerWidget {
             padding: const EdgeInsets.all(48),
             constraints: const BoxConstraints(maxWidth: 400),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.surfaceColor,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
+                  color: context.colorScheme.shadow.withOpacity(0.1),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -110,7 +111,7 @@ class SuperAdminApp extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1A2E),
+                    color: context.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -119,7 +120,7 @@ class SuperAdminApp extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey.shade600,
+                    color: context.textSecondary.shade600,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -131,8 +132,8 @@ class SuperAdminApp extends ConsumerWidget {
                       // For now, just show a snackbar
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1A1A2E),
-                      foregroundColor: Colors.white,
+                      backgroundColor: const context.onSurface,
+                      foregroundColor: context.surfaceColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: const Text('Retour à l\'application'),
@@ -151,21 +152,21 @@ class SuperAdminApp extends ConsumerWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF1A1A2E),
+        seedColor: const context.onSurface,
         brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: const Color(0xFFF5F5F7),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
-        foregroundColor: Color(0xFF1A1A2E),
+        backgroundColor: context.surfaceColor,
+        foregroundColor: context.onSurface,
         elevation: 0,
       ),
       cardTheme: CardTheme(
-        color: Colors.white,
+        color: context.surfaceColor,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.grey.shade200),
+          side: BorderSide(color: context.colorScheme.surfaceVariant),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -187,18 +188,18 @@ class SuperAdminApp extends ConsumerWidget {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: context.surfaceColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: context.colorScheme.outlineVariant),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: context.colorScheme.outlineVariant),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF1A1A2E), width: 2),
+          borderSide: const BorderSide(color: context.onSurface, width: 2),
         ),
       ),
     );

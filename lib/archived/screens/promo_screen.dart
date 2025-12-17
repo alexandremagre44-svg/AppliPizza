@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../builder/models/models.dart';
 import '../../../builder/utils/utils.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 class PromoScreen extends StatelessWidget {
   static const String appId = 'pizza_delizza';
@@ -43,14 +44,14 @@ class PromoScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.local_offer, size: 64, color: Colors.white),
+                  Icon(Icons.local_offer, size: 64, color: context.surfaceColor),
                   SizedBox(height: 16),
                   Text(
                     'Nos Promotions',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: context.surfaceColor,
                     ),
                   ),
                   SizedBox(height: 8),
@@ -58,7 +59,7 @@ class PromoScreen extends StatelessWidget {
                     'Profitez de nos offres spéciales',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white,
+                      color: context.surfaceColor,
                     ),
                   ),
                 ],
@@ -94,7 +95,7 @@ class PromoScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: context.textSecondary,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -137,7 +138,7 @@ class PromoScreen extends StatelessWidget {
                     description,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: context.textSecondary[600],
                     ),
                   ),
                 ],
@@ -152,7 +153,7 @@ class PromoScreen extends StatelessWidget {
               child: Text(
                 discount,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: context.surfaceColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                 ),

@@ -35,6 +35,7 @@ import '../../../src/providers/restaurant_plan_provider.dart';
 import '../../../white_label/restaurant/restaurant_plan_unified.dart';
 import '../../../white_label/core/module_id.dart';
 import '../../../white_label/core/module_category.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Dialog for selecting and adding a new block
 /// 
@@ -149,7 +150,7 @@ class BlockAddDialog extends StatelessWidget {
               _buildSectionHeader(
                 'Blocs de contenu',
                 Icons.widgets,
-                Colors.grey,
+                context.textSecondary,
               ),
               const SizedBox(height: 8),
               _buildBlockGrid(context, regularBlocks),
@@ -211,9 +212,9 @@ class BlockAddDialog extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: context.colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: context.colorScheme.outlineVariant),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -335,7 +336,7 @@ class BlockAddDialog extends StatelessWidget {
         title: Text(module.label),
         subtitle: Text(
           module.description,
-          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          style: TextStyle(fontSize: 12, color: context.textSecondary.shade600),
         ),
         trailing: const Icon(Icons.add_circle_outline),
         onTap: () => _addSystemBlock(context, module.id),

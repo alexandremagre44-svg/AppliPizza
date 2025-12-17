@@ -14,6 +14,7 @@ import '../../utils/action_helper.dart';
 import '../../utils/icon_helper.dart';
 import '../panels/theme_properties_panel.dart';
 import 'icon_picker_dialog.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Maximum characters for truncated page name in bottom nav preview
 const int kMaxPageNameLength = 6;
@@ -247,7 +248,7 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
                       'Modifié',
                       style: TextStyle(
                         fontSize: 10,
-                        color: Colors.white,
+                        color: context.surfaceColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -533,7 +534,7 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
               children: [
                 Icon(
                   page.isActive ? Icons.visibility : Icons.visibility_off,
-                  color: page.isActive ? Colors.green : Colors.grey,
+                  color: page.isActive ? Colors.green : context.textSecondary,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -944,7 +945,7 @@ class _BuilderPropertiesPanelState extends State<BuilderPropertiesPanel>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: context.colorScheme.shadow.withOpacity(0.05),
                     blurRadius: 4,
                     offset: const Offset(0, -1),
                   ),

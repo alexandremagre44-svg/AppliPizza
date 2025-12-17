@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../white_label/restaurant/cashier_profile.dart';
 import 'wizard_state.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Étape 4: Choix du profil métier caisse (conditionnelle).
 /// N'est affichée que si le Template Vide est sélectionné.
@@ -36,7 +37,7 @@ class WizardStepCashierProfile extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A2E),
+                  color: context.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -45,7 +46,7 @@ class WizardStepCashierProfile extends ConsumerWidget {
                 'Vous pourrez toujours activer ou désactiver les modules à l\'étape suivante.',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: context.textSecondary.shade600,
                 ),
               ),
               const SizedBox(height: 32),
@@ -126,16 +127,16 @@ class _CashierProfileCard extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF1A1A2E) : Colors.white,
+            color: isSelected ? const context.onSurface : context.surfaceColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? const Color(0xFF1A1A2E) : Colors.grey.shade300,
+              color: isSelected ? const context.onSurface : context.colorScheme.outlineVariant,
               width: isSelected ? 2 : 1,
             ),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: const Color(0xFF1A1A2E).withValues(alpha: 0.2),
+                      color: const context.onSurface.withValues(alpha: 0.2),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -153,14 +154,14 @@ class _CashierProfileCard extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : Colors.grey.shade100,
+                          ? context.surfaceColor.withValues(alpha: 0.1)
+                          : context.colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       _getIcon(),
                       size: 28,
-                      color: isSelected ? Colors.white : Colors.grey.shade700,
+                      color: isSelected ? context.surfaceColor : context.textSecondary.shade700,
                     ),
                   ),
                   if (isSelected)
@@ -173,7 +174,7 @@ class _CashierProfileCard extends StatelessWidget {
                       child: const Icon(
                         Icons.check,
                         size: 16,
-                        color: Colors.white,
+                        color: context.surfaceColor,
                       ),
                     ),
                 ],
@@ -185,7 +186,7 @@ class _CashierProfileCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : const Color(0xFF1A1A2E),
+                  color: isSelected ? context.surfaceColor : const context.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -195,7 +196,7 @@ class _CashierProfileCard extends StatelessWidget {
                   profile.description,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isSelected ? Colors.white70 : Colors.grey.shade600,
+                    color: isSelected ? context.surfaceColor70 : context.textSecondary.shade600,
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,

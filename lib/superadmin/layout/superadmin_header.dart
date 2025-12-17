@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/superadmin_mock_providers.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Widget Header pour le layout Super-Admin.
 /// Affiche une barre horizontale avec le titre dynamique de la page.
@@ -22,10 +23,10 @@ class SuperAdminHeader extends ConsumerWidget {
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: context.colorScheme.shadow.withOpacity(0.05),
             offset: const Offset(0, 2),
             blurRadius: 4,
           ),
@@ -39,7 +40,7 @@ class SuperAdminHeader extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A2E),
+              color: context.onSurface,
             ),
           ),
           const Spacer(),
@@ -47,20 +48,20 @@ class SuperAdminHeader extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: context.colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: context.colorScheme.outlineVariant),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.analytics_outlined, size: 18, color: Colors.grey),
+                Icon(Icons.analytics_outlined, size: 18, color: context.textSecondary),
                 SizedBox(width: 8),
                 Text(
                   'TODO: Metrics Dashboard',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: context.textSecondary,
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -71,8 +72,8 @@ class SuperAdminHeader extends ConsumerWidget {
           // Avatar placeholder
           CircleAvatar(
             radius: 18,
-            backgroundColor: Colors.grey.shade300,
-            child: const Icon(Icons.person, size: 20, color: Colors.white),
+            backgroundColor: context.colorScheme.outlineVariant,
+            child: const Icon(Icons.person, size: 20, color: context.surfaceColor),
           ),
         ],
       ),

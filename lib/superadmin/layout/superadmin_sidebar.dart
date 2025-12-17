@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/superadmin_mock_providers.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Item de navigation dans la sidebar.
 class _SidebarItem {
@@ -91,7 +92,7 @@ class SuperAdminSidebar extends ConsumerWidget {
     return Container(
       width: 250,
       decoration: const BoxDecoration(
-        color: Color(0xFF1A1A2E),
+        color: context.onSurface,
         boxShadow: [
           BoxShadow(
             color: Colors.black26,
@@ -108,7 +109,7 @@ class SuperAdminSidebar extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: const Row(
               children: [
-                Icon(Icons.admin_panel_settings, size: 32, color: Colors.white),
+                Icon(Icons.admin_panel_settings, size: 32, color: context.surfaceColor),
                 SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -120,14 +121,14 @@ class SuperAdminSidebar extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: context.surfaceColor,
                         ),
                       ),
                       Text(
                         'Control Panel',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.white54,
+                          color: context.surfaceColor54,
                         ),
                       ),
                     ],
@@ -136,7 +137,7 @@ class SuperAdminSidebar extends ConsumerWidget {
               ],
             ),
           ),
-          const Divider(color: Colors.white24, height: 1),
+          const Divider(color: context.surfaceColor24, height: 1),
           const SizedBox(height: 16),
           // Items de navigation
           Expanded(
@@ -162,12 +163,12 @@ class SuperAdminSidebar extends ConsumerWidget {
             ),
           ),
           // Footer
-          const Divider(color: Colors.white24, height: 1),
+          const Divider(color: context.surfaceColor24, height: 1),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Icon(Icons.logout, size: 18, color: Colors.white54),
+                const Icon(Icons.logout, size: 18, color: context.surfaceColor54),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () {
@@ -178,7 +179,7 @@ class SuperAdminSidebar extends ConsumerWidget {
                     'Logout',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white54,
+                      color: context.surfaceColor54,
                     ),
                   ),
                 ),
@@ -209,7 +210,7 @@ class _SidebarItemWidget extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 4),
       child: Material(
         color: isSelected
-            ? Colors.white.withValues(alpha: 0.1)
+            ? context.surfaceColor.withValues(alpha: 0.1)
             : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
@@ -222,7 +223,7 @@ class _SidebarItemWidget extends StatelessWidget {
                 Icon(
                   item.icon,
                   size: 22,
-                  color: isSelected ? Colors.white : Colors.white70,
+                  color: isSelected ? context.surfaceColor : context.surfaceColor70,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -232,7 +233,7 @@ class _SidebarItemWidget extends StatelessWidget {
                       fontSize: 14,
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color: isSelected ? Colors.white : Colors.white70,
+                      color: isSelected ? context.surfaceColor : context.surfaceColor70,
                     ),
                   ),
                 ),
