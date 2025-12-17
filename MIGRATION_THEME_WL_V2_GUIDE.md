@@ -1,0 +1,496 @@
+# 🎨 Guide de Migration - Thème WL V2
+
+## 📋 Résumé Exécutif
+
+### Objectif
+Migrer l'intégralité du code Flutter pour utiliser exclusivement le thème WL V2 via `UnifiedThemeProvider`, éliminant tous les styles hardcodés.
+
+### État Actuel
+- ✅ **Infrastructure WL V2**: Complète et fonctionnelle
+- ✅ **UnifiedThemeProvider**: Opérationnel dans main.dart
+- ✅ **ThemeSettings**: Configuration Firestore active
+- ✅ **UnifiedThemeAdapter**: Génération ThemeData Material 3
+- ⚠️ **Code applicatif**: ~3,271 violations hardcodées identifiées
+
+### Violations Identifiées
+| Type | Occurrences | Impact |
+|------|------------|--------|
+| `Colors.*` | 2,544 | 🔴 CRITIQUE |
+| `Color(0xFF...)` | 204 | 🟠 IMPORTANT |
+| `BorderRadius.circular(N)` | 523 | 🟡 IMPORTANT |
+| **TOTAL** | **3,271** | |
+
+### Modules Impactés
+| Module | Violations | Priorité |
+|--------|-----------|----------|
+| Screens | 922 | 🔴 HAUTE |
+| Builder | 776 | 🔴 HAUTE |
+| SuperAdmin | 673 | 🟠 MOYENNE |
+| Design System | 540 | 🟡 BASSE (fallback) |
+| Widgets | 196 | 🔴 HAUTE |
+| White-Label | 164 | 🟠 MOYENNE |
+
+## 🎯 Stratégie de Migration
+
+### Principe de Base
+**NE PAS MODIFIER** les fichiers du design system (`lib/src/design_system/`). Ces fichiers contiennent les valeurs de fallback et les constantes utilisées par `UnifiedThemeAdapter`.
+
+**MODIFIER** tous les fichiers qui UTILISENT ces constantes pour qu'ils lisent depuis `Theme.of(context)` à la place.
+
+### Architecture (Déjà en Place)
+
+```
+RestaurantPlanUnified (Firestore)
+    ↓
+theme.settings (ThemeSettings)
+    ↓
+UnifiedThemeProvider.themeSettingsProvider
+    ↓
+UnifiedThemeAdapter.toThemeData()
+    ↓
+MaterialApp.theme (ThemeData)
+    ↓
+Widgets → Theme.of(context).colorScheme.primary
+```
+
+### Helpers Disponibles
+
+#### Extension ThemeContextExtension
+```dart
+import 'package:your_app/white_label/theme/theme_extensions.dart';
+
+// Couleurs
+context.primaryColor          // au lieu de Theme.of(context).colorScheme.primary
+context.secondaryColor        // au lieu de Theme.of(context).colorScheme.secondary
+context.surfaceColor          // au lieu de Theme.of(context).colorScheme.surface
+context.backgroundColor       // au lieu de Theme.of(context).colorScheme.background
+context.errorColor            // au lieu de Theme.of(context).colorScheme.error
+
+// Text Styles
+context.titleLarge            // au lieu de Theme.of(context).textTheme.titleLarge
+context.bodyMedium            // au lieu de Theme.of(context).textTheme.bodyMedium
+context.labelSmall            // au lieu de Theme.of(context).textTheme.labelSmall
+```
+
+#### Extension ThemeRefExtension (pour ConsumerWidget)
+```dart
+// Accès à ThemeSettings complet
+final radiusBase = ref.themeSettings.radiusBase;
+final spacingBase = ref.themeSettings.spacingBase;
+final primaryHex = ref.themeSettings.primaryColor;
+```
+
+## 📝 Patterns de Migration
+
+### 1. Couleurs (CRITIQUE)
+
+#### ❌ AVANT
+```dart
+Container(
+  color: Colors.red,
+  child: Text(
+    'Error',
+    style: TextStyle(color: Colors.white),
+  ),
+)
+
+// Ou
+Container(
+  color: AppColors.primary,
+  child: Text(
+    'Title',
+    style: TextStyle(color: AppColors.textPrimary),
+  ),
+)
+```
+
+#### ✅ APRÈS
+```dart
+Container(
+  color: Theme.of(context).colorScheme.error,
+  child: Text(
+    'Error',
+    style: TextStyle(color: Theme.of(context).colorScheme.onError),
+  ),
+)
+
+// Ou avec extension
+Container(
+  color: context.errorColor,
+  child: Text(
+    'Error',
+    style: TextStyle(color: context.onError),
+  ),
+)
+```
+
+### 2. Couleurs Personnalisées (Badges, Tags)
+
+#### ❌ AVANT
+```dart
+// Badge "Best-seller"
+Container(
+  color: Colors.orange.withOpacity(0.95),
+  child: Row(
+    children: [
+      Icon(Icons.trending_up, color: Colors.white),
+      Text('Best-seller', style: TextStyle(color: Colors.white)),
+    ],
+  ),
+)
+
+// Badge "Nouveau"
+Container(
+  color: Colors.green.withOpacity(0.95),
+  child: Row(
+    children: [
+      Icon(Icons.new_releases, color: Colors.white),
+      Text('Nouveau', style: TextStyle(color: Colors.white)),
+    ],
+  ),
+)
+```
+
+#### ✅ APRÈS (Solution 1: Utiliser les couleurs d'état du thème)
+```dart
+// Badge "Best-seller" - Utiliser warning (orange)
+Container(
+  color: Theme.of(context).colorScheme.tertiaryContainer,
+  child: Row(
+    children: [
+      Icon(Icons.trending_up, color: Theme.of(context).colorScheme.onTertiaryContainer),
+      Text(
+        'Best-seller',
+        style: TextStyle(color: Theme.of(context).colorScheme.onTertiaryContainer),
+      ),
+    ],
+  ),
+)
+
+// Badge "Nouveau" - Utiliser success container
+Container(
+  color: Theme.of(context).colorScheme.secondaryContainer,
+  child: Row(
+    children: [
+      Icon(Icons.new_releases, color: Theme.of(context).colorScheme.onSecondaryContainer),
+      Text(
+        'Nouveau',
+        style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer),
+      ),
+    ],
+  ),
+)
+```
+
+#### ✅ APRÈS (Solution 2: Garder AppColors pour les couleurs fixes non-thémées)
+```dart
+// Pour les couleurs sémantiques qui ne doivent PAS changer avec le thème
+// (ex: success=vert, warning=orange, toujours)
+Container(
+  color: AppColors.success.withOpacity(0.95),
+  child: Row(
+    children: [
+      Icon(Icons.new_releases, color: Colors.white),
+      Text('Nouveau', style: TextStyle(color: Colors.white)),
+    ],
+  ),
+)
+```
+
+**Note**: Certaines couleurs sont sémantiques (vert=succès, orange=warning) et ne doivent pas changer avec le thème. Dans ce cas, garder `AppColors.success`, `AppColors.warning` est acceptable.
+
+### 3. BorderRadius
+
+#### ❌ AVANT
+```dart
+Container(
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(12),
+    color: Colors.red,
+  ),
+)
+
+Card(
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(8),
+  ),
+)
+```
+
+#### ✅ APRÈS (ConsumerWidget avec WidgetRef)
+```dart
+class MyWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final radiusBase = ref.themeSettings.radiusBase;
+    
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radiusBase),
+        color: context.primaryColor,
+      ),
+    );
+  }
+}
+
+Card(
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(ref.themeSettings.radiusBase),
+  ),
+)
+```
+
+#### ✅ APRÈS (StatelessWidget sans WidgetRef - Utiliser CardTheme)
+```dart
+// Les Cards héritent automatiquement du radius du thème
+Card(
+  // shape: déjà défini dans Theme.of(context).cardTheme.shape
+  child: ...,
+)
+
+// Ou utiliser la valeur par défaut Material 3
+Container(
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(12), // Material 3 default
+    color: context.primaryColor,
+  ),
+)
+```
+
+### 4. TextStyle
+
+#### ❌ AVANT
+```dart
+Text(
+  'Title',
+  style: TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  ),
+)
+
+Text(
+  'Body',
+  style: TextStyle(
+    fontSize: 14,
+    color: Colors.black87,
+  ),
+)
+```
+
+#### ✅ APRÈS
+```dart
+Text(
+  'Title',
+  style: Theme.of(context).textTheme.titleLarge,
+  // ou
+  style: context.titleLarge,
+)
+
+Text(
+  'Body',
+  style: Theme.of(context).textTheme.bodyMedium,
+  // ou
+  style: context.bodyMedium,
+)
+
+// Si besoin de modifications
+Text(
+  'Custom',
+  style: context.titleMedium?.copyWith(
+    color: context.errorColor,
+    fontWeight: FontWeight.bold,
+  ),
+)
+```
+
+### 5. Boutons
+
+#### ❌ AVANT
+```dart
+ElevatedButton(
+  onPressed: () {},
+  style: ElevatedButton.styleFrom(
+    backgroundColor: AppColors.primary,
+    foregroundColor: Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+  ),
+  child: Text('Action'),
+)
+```
+
+#### ✅ APRÈS
+```dart
+// Le style est automatiquement hérité du thème
+ElevatedButton(
+  onPressed: () {},
+  // style: déjà défini dans elevatedButtonTheme
+  child: Text('Action'),
+)
+
+// Si vraiment besoin de override
+ElevatedButton(
+  onPressed: () {},
+  style: ElevatedButton.styleFrom(
+    backgroundColor: context.secondaryColor, // Utiliser theme color
+  ),
+  child: Text('Action'),
+)
+```
+
+## 🔄 Processus de Migration
+
+### Étape 1: Convertir le Widget en ConsumerWidget (si nécessaire)
+
+```dart
+// ❌ AVANT
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: AppColors.primary,
+      ),
+    );
+  }
+}
+
+// ✅ APRÈS
+class MyWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final radiusBase = ref.themeSettings.radiusBase;
+    
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radiusBase),
+        color: context.primaryColor,
+      ),
+    );
+  }
+}
+```
+
+### Étape 2: Remplacer les Couleurs
+
+1. Chercher tous les `Colors.*` dans le fichier
+2. Remplacer par `context.*` ou `Theme.of(context).colorScheme.*`
+3. Vérifier les couleurs sémantiques (success, warning, error)
+
+### Étape 3: Remplacer les BorderRadius
+
+1. Chercher tous les `BorderRadius.circular(N)`
+2. Si N est hardcodé et que le widget est un ConsumerWidget → utiliser `ref.themeSettings.radiusBase`
+3. Si N est hardcodé et pas de WidgetRef → garder une valeur Material 3 standard (12) OU hériter du thème
+
+### Étape 4: Remplacer les TextStyle
+
+1. Chercher tous les `TextStyle(`
+2. Remplacer par `context.titleLarge`, `context.bodyMedium`, etc.
+3. Utiliser `.copyWith()` pour les modifications nécessaires
+
+### Étape 5: Tester
+
+1. Build l'application
+2. Vérifier visuellement
+3. Tester le changement de thème depuis SuperAdmin
+
+## 🎯 Fichiers Prioritaires (Top 10)
+
+Commencer par ces fichiers pour le maximum d'impact:
+
+1. **lib/src/widgets/product_card.dart** - Widget très utilisé
+2. **lib/src/widgets/order_status_badge.dart** - Widget commun
+3. **lib/src/screens/home/home_screen.dart** - Page principale
+4. **lib/src/screens/menu/menu_screen.dart** - Page catalogue
+5. **lib/src/screens/cart/cart_screen.dart** - Page panier
+6. **lib/superadmin/pages/restaurant_theme_page.dart** - Page configuration thème
+7. **lib/builder/blocks/*.dart** - Blocks Builder (11 fichiers)
+8. **lib/src/staff_tablet/widgets/*.dart** - Widgets Staff Tablet
+9. **lib/src/screens/admin/pos/widgets/*.dart** - Widgets POS
+10. **lib/superadmin/layout/*.dart** - Layout SuperAdmin
+
+## ⚠️ Pièges à Éviter
+
+### 1. Ne PAS modifier les fichiers design_system
+```dart
+// ❌ NE PAS FAIRE
+// lib/src/design_system/colors.dart
+class AppColors {
+  static Color get primary => Theme.of(context).colorScheme.primary; // ERREUR!
+}
+```
+
+Ces fichiers sont des **constantes de fallback** utilisées par UnifiedThemeAdapter. Ils doivent rester statiques.
+
+### 2. Ne PAS casser les couleurs sémantiques
+```dart
+// ❌ NE PAS FAIRE - Le vert=succès doit rester vert
+Container(color: context.primaryColor) // Si primary devient bleu, le succès devient bleu!
+
+// ✅ FAIRE - Garder les couleurs sémantiques fixes
+Container(color: AppColors.success) // Toujours vert
+```
+
+### 3. Ne PAS oublier les imports
+```dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../white_label/theme/theme_extensions.dart';
+
+// ConsumerWidget nécessite flutter_riverpod
+class MyWidget extends ConsumerWidget { ... }
+```
+
+### 4. Ne PAS utiliser context dans initState()
+```dart
+// ❌ NE PAS FAIRE
+@override
+void initState() {
+  super.initState();
+  final color = context.primaryColor; // ERREUR: context not available
+}
+
+// ✅ FAIRE
+@override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  final color = context.primaryColor; // OK
+}
+```
+
+## 📦 Résumé
+
+### Ce qui est fait
+- ✅ Infrastructure WL V2 complète
+- ✅ UnifiedThemeProvider opérationnel
+- ✅ ThemeExtensions pour accès simplifié
+- ✅ Audit complet des violations (3,271)
+- ✅ Guide de migration détaillé
+
+### Ce qui reste à faire
+- [ ] Migrer ~250 fichiers applicatifs
+- [ ] Remplacer ~2,544 Colors.*
+- [ ] Remplacer ~204 Color(0xFF...)
+- [ ] Remplacer ~523 BorderRadius hardcodés
+- [ ] Tests visuels de validation
+- [ ] Documentation finale
+
+### Estimation
+- **Temps nécessaire**: 3-5 jours pour un développeur expérimenté
+- **Approche recommandée**: Migration par batches de 10-20 fichiers
+- **Validation**: Build + test visuel après chaque batch
+- **Priorité**: Widgets communs → Screens client → Admin → SuperAdmin → Builder
+
+### Commencer maintenant
+1. Ouvrir `lib/src/widgets/product_card.dart`
+2. Suivre le guide de migration ci-dessus
+3. Build et tester
+4. Continuer avec les autres widgets
+
+---
+
+**Note importante**: Cette migration est purement visuelle. Aucune fonctionnalité n'est modifiée. Le comportement reste identique, seule la source des couleurs/styles change (hardcodé → thème dynamique).

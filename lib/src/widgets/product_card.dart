@@ -1,9 +1,11 @@
 // lib/src/widgets/product_card.dart
 // Carte produit redesignée - Style Pizza Deli'Zza
+// MIGRATED to WL V2 Theme - Uses Theme.of(context) for all colors
 
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../theme/app_theme.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Carte produit avec le nouveau design Pizza Deli'Zza
 /// - Cartes arrondies avec photo, nom, description courte, prix
@@ -14,6 +16,8 @@ import '../theme/app_theme.dart';
 /// ANIMATION: ScaleTransition sur tap (150ms) - Feedback visuel subtil
 /// Fichier: lib/src/widgets/product_card.dart
 /// But: Améliorer l'expérience utilisateur en donnant un feedback visuel au tap
+/// 
+/// WL V2 MIGRATION: All colors now use Theme.of(context).colorScheme
 class ProductCard extends StatefulWidget {
   final Product product;
   final VoidCallback onAddToCart;
@@ -70,23 +74,19 @@ class _ProductCardState extends State<ProductCard>
   Widget build(BuildContext context) {
     return ScaleTransition(
       scale: _scaleAnimation,
-      // refactor card style → app_theme standard (8px radius)
+      // Card inherits style from Theme.cardTheme (UnifiedThemeAdapter)
       child: Card(
-        elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.1),
+        // elevation, shadowColor, shape inherited from cardTheme
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.card,
-        ),
         child: GestureDetector(
           onTapDown: _handleTapDown,
           onTapUp: _handleTapUp,
           onTapCancel: _handleTapCancel,
           onTap: widget.onAddToCart,
           child: Container(
-            decoration: const BoxDecoration(
-              color: AppColors.surfaceWhite,
+            decoration: BoxDecoration(
+              color: context.surfaceColor, // WL V2: Uses theme surface color
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -109,14 +109,14 @@ class _ProductCardState extends State<ProductCard>
                               loadingBuilder: (context, child, loadingProgress) {
                                 if (loadingProgress == null) return child;
                                 return Container(
-                                  color: AppColors.backgroundLight,
-                                  child: const Center(
+                                  color: context.backgroundColor, // WL V2: Theme background
+                                  child: Center(
                                     child: SizedBox(
                                       width: 24,
                                       height: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
-                                        color: AppColors.primaryRed,
+                                        color: context.primaryColor, // WL V2: Theme primary
                                       ),
                                     ),
                                   ),
@@ -124,30 +124,29 @@ class _ProductCardState extends State<ProductCard>
                               },
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
-                                  color: AppColors.backgroundLight,
-                                  child: const Center(
+                                  color: context.backgroundColor, // WL V2: Theme background
+                                  child: Center(
                                     child: Icon(
                                       Icons.local_pizza,
                                       size: 48,
-                                      color: AppColors.textLight,
+                                      color: context.textSecondary, // WL V2: Theme text secondary
                                     ),
                                   ),
                                 );
                               },
                             )
                           : Container(
-                              color: AppColors.backgroundLight,
-                              child: const Center(
+                              color: context.backgroundColor, // WL V2: Theme background
+                              child: Center(
                                 child: Icon(
                                   Icons.local_pizza,
                                   size: 48,
-                                  color: AppColors.textLight,
+                                  color: context.textSecondary, // WL V2: Theme text secondary
                                 ),
                               ),
                             ),
                     ),
-                    // Badge "Personnaliser" en overlay semi-transparent en bas à droite
-                    // refactor badge style → app_theme standard (8px radius, spacing)
+                    // Badge "Personnaliser" - WL V2: Uses theme primary color
                     if (widget.product.category == ProductCategory.pizza || widget.product.isMenu)
                       Positioned(
                         bottom: AppSpacing.sm,
@@ -158,22 +157,21 @@ class _ProductCardState extends State<ProductCard>
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryRed.withOpacity(0.9),
+                            color: context.primaryColor.withOpacity(0.9), // WL V2: Theme primary
                             borderRadius: AppRadius.badge,
                             boxShadow: AppShadows.soft,
                           ),
                           child: Text(
                             'Personnaliser',
-                            style: AppTextStyles.labelSmall.copyWith(
-                              color: AppColors.surfaceWhite,
+                            style: context.labelSmall?.copyWith( // WL V2: Theme text style
+                              color: context.onPrimary, // WL V2: Contrast color
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ),
-                    // Badge quantité si dans le panier
-                    // refactor badge style → app_theme standard
+                    // Badge quantité - WL V2: Uses theme primary color
                     if (widget.cartQuantity != null && widget.cartQuantity! > 0)
                       Positioned(
                         top: AppSpacing.sm,
@@ -184,14 +182,14 @@ class _ProductCardState extends State<ProductCard>
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryRedLight,
+                            color: context.primaryContainer, // WL V2: Theme primary container
                             borderRadius: AppRadius.badge,
                             boxShadow: AppShadows.soft,
                           ),
                           child: Text(
                             'x${widget.cartQuantity}',
-                            style: AppTextStyles.labelSmall.copyWith(
-                              color: AppColors.surfaceWhite,
+                            style: context.labelSmall?.copyWith( // WL V2: Theme text style
+                              color: context.onPrimaryContainer, // WL V2: Contrast color
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -204,6 +202,8 @@ class _ProductCardState extends State<ProductCard>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
+                          // WL V2 NOTE: Semantic colors (warning=orange, success=green)
+                          // are kept as AppColors for consistency across themes
                           if (widget.product.isBestSeller)
                             Container(
                               margin: EdgeInsets.only(bottom: AppSpacing.xs),
@@ -212,18 +212,18 @@ class _ProductCardState extends State<ProductCard>
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.95),
+                                color: AppColors.warning.withOpacity(0.95), // Semantic: orange
                                 borderRadius: AppRadius.badge,
                                 boxShadow: AppShadows.soft,
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.trending_up, size: 12, color: Colors.white),
-                                  SizedBox(width: 4),
+                                  const Icon(Icons.trending_up, size: 12, color: Colors.white),
+                                  const SizedBox(width: 4),
                                   Text(
                                     'Best-seller',
-                                    style: AppTextStyles.labelSmall.copyWith(
+                                    style: context.labelSmall?.copyWith( // WL V2: Theme text
                                       color: Colors.white,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
@@ -240,18 +240,18 @@ class _ProductCardState extends State<ProductCard>
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.95),
+                                color: AppColors.success.withOpacity(0.95), // Semantic: green
                                 borderRadius: AppRadius.badge,
                                 boxShadow: AppShadows.soft,
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.new_releases, size: 12, color: Colors.white),
-                                  SizedBox(width: 4),
+                                  const Icon(Icons.new_releases, size: 12, color: Colors.white),
+                                  const SizedBox(width: 4),
                                   Text(
                                     'Nouveau',
-                                    style: AppTextStyles.labelSmall.copyWith(
+                                    style: context.labelSmall?.copyWith( // WL V2: Theme text
                                       color: Colors.white,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
@@ -268,18 +268,18 @@ class _ProductCardState extends State<ProductCard>
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.amber.withOpacity(0.95),
+                                color: AppColors.accentGold.withOpacity(0.95), // Semantic: gold
                                 borderRadius: AppRadius.badge,
                                 boxShadow: AppShadows.soft,
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.star, size: 12, color: Colors.white),
-                                  SizedBox(width: 4),
+                                  const Icon(Icons.star, size: 12, color: Colors.white),
+                                  const SizedBox(width: 4),
                                   Text(
                                     'Spécial Chef',
-                                    style: AppTextStyles.labelSmall.copyWith(
+                                    style: context.labelSmall?.copyWith( // WL V2: Theme text
                                       color: Colors.white,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
@@ -295,19 +295,19 @@ class _ProductCardState extends State<ProductCard>
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.pink.withOpacity(0.95),
+                                color: context.secondaryColor.withOpacity(0.95), // WL V2: Theme secondary
                                 borderRadius: AppRadius.badge,
                                 boxShadow: AppShadows.soft,
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.child_care, size: 12, color: Colors.white),
-                                  SizedBox(width: 4),
+                                  Icon(Icons.child_care, size: 12, color: context.onSecondary),
+                                  const SizedBox(width: 4),
                                   Text(
                                     'Enfants',
-                                    style: AppTextStyles.labelSmall.copyWith(
-                                      color: Colors.white,
+                                    style: context.labelSmall?.copyWith( // WL V2: Theme text
+                                      color: context.onSecondary, // WL V2: Contrast color
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -360,18 +360,17 @@ class _ProductCardState extends State<ProductCard>
                             '${widget.product.price.toStringAsFixed(2)} €',
                             style: AppTextStyles.price,
                           ),
-                          // Icône panier
-                          // refactor icon button → app_theme standard
+                          // Icône panier - WL V2: Uses theme primary color
                           Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: AppColors.primaryRed,
+                              color: context.primaryColor, // WL V2: Theme primary
                               borderRadius: AppRadius.badge,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.add_shopping_cart,
                               size: 18,
-                              color: AppColors.surfaceWhite,
+                              color: context.onPrimary, // WL V2: Contrast color
                             ),
                           ),
                         ],
