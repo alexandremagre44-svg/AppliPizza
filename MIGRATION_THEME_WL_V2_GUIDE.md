@@ -10,7 +10,21 @@ Migrer l'intégralité du code Flutter pour utiliser exclusivement le thème WL 
 - ✅ **UnifiedThemeProvider**: Opérationnel dans main.dart
 - ✅ **ThemeSettings**: Configuration Firestore active
 - ✅ **UnifiedThemeAdapter**: Génération ThemeData Material 3
-- ⚠️ **Code applicatif**: ~3,271 violations hardcodées identifiées
+- 🔄 **Code applicatif**: Migration en cours - 4/250 fichiers migrés (1.6%)
+
+### 🔄 Progrès de Migration (Batch 1 - Widgets Communs)
+| Fichier | Statut | Commit |
+|---------|--------|--------|
+| ✅ product_card.dart | Migré | Batch 1 |
+| ✅ order_status_badge.dart | Migré | Batch 1 |
+| ✅ fixed_cart_bar.dart | Migré | Batch 1 |
+| ✅ scaffold_with_nav_bar.dart | Migré | Batch 1 |
+| ⏳ ingredient_selector.dart | À faire | Batch 2 |
+| ⏳ product_detail_modal.dart | À faire | Batch 2 |
+| ⏳ popup_dialog.dart | À faire | Batch 2 |
+| ⏳ newsletter_subscription_widget.dart | À faire | Batch 2 |
+
+**Prochain batch**: Continuer les widgets communs (4-8 fichiers supplémentaires)
 
 ### Violations Identifiées
 | Type | Occurrences | Impact |

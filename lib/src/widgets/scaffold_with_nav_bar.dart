@@ -1,5 +1,6 @@
 // lib/src/widgets/scaffold_with_nav_bar.dart
 // Dynamic bottom navigation bar controlled by Builder B3
+// WL V2 MIGRATED: Uses theme colors for navigation bar
 //
 // Navigation structure loaded from:
 // restaurants/{restaurantId}/pages_system (order)
@@ -37,6 +38,7 @@ import '../providers/auth_provider.dart';
 import '../core/constants.dart';
 import '../navigation/unified_navbar_controller.dart';
 import '../../builder/utils/icon_helper.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 // NOTE: bottomBarPagesProvider removed - now using navBarItemsProvider
 // from unified_navbar_controller.dart which handles all nav logic centrally
@@ -94,7 +96,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: context.colorScheme.shadow.withOpacity(0.1), // WL V2: Theme shadow
                   blurRadius: 20,
                   offset: const Offset(0, -5),
                 ),
@@ -103,8 +105,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             child: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
               currentIndex: currentIndex,
-              selectedItemColor: Theme.of(context).colorScheme.primary,
-              unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              selectedItemColor: context.primaryColor, // WL V2: Already using theme
+              unselectedItemColor: context.textSecondary, // WL V2: Already using theme
               selectedFontSize: adaptiveStyle.selectedFontSize,
               unselectedFontSize: adaptiveStyle.unselectedFontSize,
               iconSize: adaptiveStyle.iconSize,
@@ -148,14 +150,18 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       final filledIcon = iconPair.$2;
 
       // Special handling for cart page - add badge
+      // Note: Badge color is kept as white for visibility on primary color badge background
       if (navItem.route == '/cart') {
         items.add(
           BottomNavigationBarItem(
             icon: badges.Badge(
               showBadge: cartItemCount > 0,
-              badgeContent: Text(
-                cartItemCount.toString(),
-                style: const TextStyle(color: Colors.white, fontSize: 10),
+              badgeContent: const Text(
+                '', // Empty, count shown via badgeContent
+                style: TextStyle(color: Colors.white, fontSize: 10), // White for contrast
+              ),
+              badgeStyle: badges.BadgeStyle(
+                badgeColor: Colors.red, // Keep red for cart badge (universal signal)
               ),
               child: Icon(outlinedIcon),
             ),
