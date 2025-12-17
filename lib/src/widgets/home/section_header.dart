@@ -1,8 +1,10 @@
 // lib/src/widgets/home/section_header.dart
 // Section header widget for home page
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 /// Section header widget for home page sections
 /// Displays a title with consistent styling
@@ -48,8 +50,8 @@ class SectionHeader extends StatelessWidget {
               onPressed: onSeeAll,
               child: Text(
                 'Voir tout',
-                style: AppTextStyles.labelLarge.copyWith(
-                  color: AppColors.primaryRed,
+                style: context.labelLarge?.copyWith( // WL V2: Theme text
+                  color: context.primaryColor, // WL V2: Theme primary
                 ),
               ),
             ),

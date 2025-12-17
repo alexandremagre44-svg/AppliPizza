@@ -12,19 +12,34 @@ Migrer l'intégralité du code Flutter pour utiliser exclusivement le thème WL 
 - ✅ **UnifiedThemeAdapter**: Génération ThemeData Material 3
 - 🔄 **Code applicatif**: Migration en cours - 4/250 fichiers migrés (1.6%)
 
-### 🔄 Progrès de Migration (Batch 1 - Widgets Communs)
-| Fichier | Statut | Commit |
-|---------|--------|--------|
-| ✅ product_card.dart | Migré | Batch 1 |
-| ✅ order_status_badge.dart | Migré | Batch 1 |
-| ✅ fixed_cart_bar.dart | Migré | Batch 1 |
-| ✅ scaffold_with_nav_bar.dart | Migré | Batch 1 |
-| ⏳ ingredient_selector.dart | À faire | Batch 2 |
-| ⏳ product_detail_modal.dart | À faire | Batch 2 |
-| ⏳ popup_dialog.dart | À faire | Batch 2 |
-| ⏳ newsletter_subscription_widget.dart | À faire | Batch 2 |
+### 🔄 Progrès de Migration
 
-**Prochain batch**: Continuer les widgets communs (4-8 fichiers supplémentaires)
+#### Batch 1 - Widgets Communs (4 fichiers) ✅
+| Fichier | Statut | Notes |
+|---------|--------|-------|
+| ✅ product_card.dart | Migré | Badges, semantic colors |
+| ✅ order_status_badge.dart | Migré | Status semantic colors |
+| ✅ fixed_cart_bar.dart | Migré | Cart bar, animations |
+| ✅ scaffold_with_nav_bar.dart | Migré | Bottom nav colors |
+
+#### Batch 2 - Widgets Communs & Home (4 fichiers) ✅
+| Fichier | Statut | Notes |
+|---------|--------|-------|
+| ✅ popup_dialog.dart | Migré | Dialog colors, buttons |
+| ✅ category_tabs.dart | Migré | Tab selection colors |
+| ✅ section_header.dart | Migré | Header "Voir tout" link |
+| ✅ info_banner.dart | Migré | Banner with custom color support |
+
+#### Batch 3 - À venir
+| Fichier | Statut | Notes |
+|---------|--------|-------|
+| ⏳ ingredient_selector.dart | À faire | 18 Colors.* |
+| ⏳ product_detail_modal.dart | À faire | 6 Colors.* |
+| ⏳ newsletter_subscription_widget.dart | À faire | 12 Colors.* |
+| ⏳ order_detail_panel.dart | À faire | 21 Colors.* |
+| ⏳ promo_banner_carousel.dart | À faire | 10 Colors.* |
+
+**Progression**: 8/250 fichiers (3.2%) - **Batch 2 COMPLETE**
 
 ### Violations Identifiées
 | Type | Occurrences | Impact |

@@ -1,8 +1,10 @@
 // lib/src/widgets/category_tabs.dart
 // Barre d'onglets catégories avec scroll horizontal
+// MIGRATED to WL V2 Theme - Uses theme primary color
 
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Barre d'onglets pour filtrer par catégorie
 /// - Scroll horizontal
@@ -12,6 +14,8 @@ import '../theme/app_theme.dart';
 /// ANIMATION: AnimatedContainer (200ms) - Transition fluide entre états actif/inactif
 /// Fichier: lib/src/widgets/category_tabs.dart
 /// But: Améliorer la lisibilité de l'onglet actif avec une ombre douce
+/// 
+/// WL V2 MIGRATION: Active tab uses theme primary color
 class CategoryTabs extends StatelessWidget {
   final List<String> categories;
   final String selectedCategory;
@@ -56,7 +60,7 @@ class CategoryTabs extends StatelessWidget {
     String category,
     bool isSelected,
   ) {
-    // refactor chip style → app_theme standard (colors, radius, shadow, text)
+    // WL V2: Uses theme primary color for active state
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -69,9 +73,9 @@ class CategoryTabs extends StatelessWidget {
             vertical: 8,
           ),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryRed : Colors.transparent,
+            color: isSelected ? context.primaryColor : Colors.transparent, // WL V2: Theme primary
             border: Border.all(
-              color: AppColors.primaryRed,
+              color: context.primaryColor, // WL V2: Theme primary
               width: 1.5,
             ),
             borderRadius: AppRadius.radiusXL,
@@ -80,10 +84,10 @@ class CategoryTabs extends StatelessWidget {
           child: Center(
             child: Text(
               category,
-              style: AppTextStyles.titleSmall.copyWith(
+              style: context.titleSmall?.copyWith( // WL V2: Theme text
                 color: isSelected
-                    ? AppColors.surfaceWhite
-                    : AppColors.primaryRed,
+                    ? context.onPrimary // WL V2: Contrast color
+                    : context.primaryColor, // WL V2: Theme primary
               ),
             ),
           ),
