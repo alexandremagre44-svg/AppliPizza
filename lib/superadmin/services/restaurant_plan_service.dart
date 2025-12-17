@@ -5,6 +5,7 @@
 library;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../white_label/core/module_config.dart';
 import '../../white_label/core/module_registry.dart';
@@ -337,6 +338,21 @@ class RestaurantPlanService {
       updatedAt: DateTime.now(),
     );
     
+    if (kDebugMode) {
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      debugPrint('💾 [RestaurantPlanService] updateModule');
+      debugPrint('   Restaurant: $restaurantId');
+      debugPrint('   Module: $moduleId');
+      debugPrint('   Enabled: $enabled');
+      debugPrint('   Firestore path: restaurants/$restaurantId/plan/config');
+      if (moduleId == 'theme') {
+        debugPrint('   Theme top-level field: ${themeConfig != null ? "SYNCED" : "KEPT EXISTING"}');
+        debugPrint('   Theme enabled: ${updatedPlan.theme?.enabled ?? false}');
+        debugPrint('   Theme settings keys: ${updatedPlan.theme?.settings.keys.toList()}');
+      }
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    }
+    
     await docRef.set(updatedPlan.toJson());
   }
 
@@ -381,6 +397,21 @@ class RestaurantPlanService {
       theme: themeConfig ?? plan.theme, // Mettre à jour theme si nécessaire
       updatedAt: DateTime.now(),
     );
+    
+    if (kDebugMode) {
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      debugPrint('💾 [RestaurantPlanService] updateModuleSettings');
+      debugPrint('   Restaurant: $restaurantId');
+      debugPrint('   Module: $moduleId');
+      debugPrint('   Settings: $settings');
+      debugPrint('   Firestore path: restaurants/$restaurantId/plan/config');
+      if (moduleId == 'theme') {
+        debugPrint('   Theme top-level field: ${themeConfig != null ? "SYNCED" : "NOT SYNCED"}');
+        debugPrint('   Theme enabled: ${themeConfig?.enabled ?? false}');
+        debugPrint('   Theme settings keys: ${themeConfig?.settings.keys.toList()}');
+      }
+      debugPrint('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    }
     
     await docRef.set(updatedPlan.toJson());
   }
