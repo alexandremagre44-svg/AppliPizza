@@ -815,4 +815,148 @@ Builder(
 
 ---
 
+## 🎨 PHASE 3 — SUPERADMIN THEME EDITOR (IMPLÉMENTÉ)
+
+### Objectif
+
+Implémenter un écran SuperAdmin complet permettant de modifier, tester et sauvegarder le thème d'un restaurant (Theme WL V2), avec impact immédiat sur Admin, POS et App client.
+
+### Implémentation
+
+**Nouvel Écran:**
+- `lib/superadmin/pages/restaurant_theme_page.dart` - Éditeur de thème SuperAdmin
+
+**Route Ajoutée:**
+- `/superadmin/restaurants/:id/theme` - Accessible depuis la page détail du restaurant
+- Bouton "Éditer le thème" ajouté dans `restaurant_detail_page.dart`
+
+**Fonctionnalités Implémentées:**
+
+1. **Édition des Couleurs** (limitée Phase 3):
+   - `primaryColor` - Couleur primaire (hex)
+   - `secondaryColor` - Couleur secondaire (hex)
+   - `backgroundColor` - Couleur de fond (hex)
+   - `surfaceColor` - Couleur de surface (hex)
+   - Champs de texte avec preview en temps réel
+   - Validation du format hex (#RRGGBB)
+
+2. **Édition de la Forme**:
+   - `borderRadius` - Rayon des bordures (slider 4-32px)
+   - Preview visuel avec exemple de carte
+
+3. **Actions**:
+   - **💾 Enregistrer** - Sauvegarde dans Firestore via `RestaurantPlanService.updateModuleSettings()`
+   - **🔄 Réinitialiser** - Restaure les valeurs par défaut de `ThemeSettings.defaultConfig()`
+   - Confirmation requise pour la réinitialisation
+
+4. **Aperçu Live**:
+   - Preview des couleurs sélectionnées
+   - Exemple de carte avec borderRadius appliqué
+   - Feedback visuel immédiat
+
+**Architecture:**
+
+```
+SuperAdmin Theme Editor
+  ↓
+RestaurantPlanService.updateModuleSettings()
+  ↓
+Firestore: restaurants/{id}/plan/config
+  → modules.theme.settings: { ...ThemeSettings }
+  ↓
+unifiedThemeProviderV2 (écoute le stream Firestore)
+  ↓
+Admin + POS + Client (mise à jour automatique)
+```
+
+**Comportement:**
+
+✅ **Respecté:**
+- Lecture/écriture exclusivement via `ThemeSettings`
+- Utilisation de `RestaurantPlanService` existant
+- Validation des couleurs (format hex)
+- Fallback automatique si données invalides
+- Aucun thème local au widget
+- Aucun `ThemeData` custom inline
+- Aucune modification de `MaterialApp`
+- Aucun impact sur le Builder
+
+❌ **Non Exposé (Phase 3 - V1 limité):**
+- `textPrimary` / `textSecondary` - Fixés à #323232 / #5A5A5A
+- `spacingBase` - Fixé à 8.0
+- `typographyScale` - Fixé à normal
+- Couleurs critiques POS (success/error/warning) - Protégées
+- Thèmes multiples
+- Mode sombre
+
+**UX:**
+
+- Interface simple et claire (2 colonnes: édition + preview)
+- Cartes par section (Couleurs / Forme)
+- Champs de texte hex avec preview de couleur inline
+- Feedback visuel immédiat (preview dans l'éditeur)
+- Messages de succès/erreur via SnackBar
+- Validation en temps réel
+
+**Sécurité & Robustesse:**
+
+- Validation format hex avant sauvegarde
+- `ThemeSettings.validate()` appelé systématiquement
+- Gestion d'erreurs avec try/catch
+- Messages d'erreur clairs pour l'utilisateur
+- Valeurs bornées: borderRadius (4-32px)
+- Null safety totale
+- Aucune exception runtime possible
+
+**Tests de Vérification (Manuels):**
+
+À tester dans la PR:
+
+1. **Changement couleur primaire** → Admin change instantanément
+2. **POS change** sans redémarrage (conteneurs visuels teintés)
+3. **App client change** (via même provider)
+4. **Builder reste identique** (pas de consommation du theme WL dans Builder)
+5. **Reset** → retour au thème par défaut Pizza Deli'Zza (#D32F2F)
+6. **Validation** → couleurs invalides bloquées, message d'erreur clair
+
+**Fichiers Modifiés:**
+
+- `lib/superadmin/pages/restaurant_theme_page.dart` (nouveau)
+- `lib/superadmin/superadmin_router.dart` (route ajoutée)
+- `lib/superadmin/pages/restaurant_detail_page.dart` (bouton ajouté)
+- `THEME_WL_V2_ARCHITECTURE.md` (cette documentation)
+
+**Fichiers Non Modifiés (Respecté):**
+
+✅ Builder - Aucune modification
+✅ Wizard - Aucune modification
+✅ Génération APK - Hors scope
+✅ POS design system - Aucune modification
+✅ ModuleGate - Aucune modification
+✅ Structure Firestore existante - Réutilisée telle quelle
+
+**Workflow Complet:**
+
+1. SuperAdmin ouvre `/superadmin/restaurants/{id}`
+2. Clique sur "Éditer le thème"
+3. Modifie les couleurs (hex) et le borderRadius (slider)
+4. Clique sur "Enregistrer"
+5. → Firestore mis à jour instantanément
+6. → `unifiedThemeProviderV2` détecte le changement (stream)
+7. → Admin UI se met à jour en temps réel
+8. → POS containers visuels se mettent à jour
+9. → App client se met à jour
+10. → Builder reste strictement identique
+
+**Garanties:**
+
+- ✅ 0 breaking change
+- ✅ 0 impact Builder
+- ✅ 0 duplication de thème
+- ✅ 1 source unique de vérité: `ThemeSettings`
+- ✅ Réutilisation infrastructure existante
+- ✅ Hot reload Firestore automatique
+
+---
+
 **FIN DE LA DOCUMENTATION**
