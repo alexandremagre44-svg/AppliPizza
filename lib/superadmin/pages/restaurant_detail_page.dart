@@ -461,6 +461,25 @@ class RestaurantDetailPage extends ConsumerWidget {
                         ),
                       ),
                     ),
+                    // Theme button
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        context.go(
+                          '/superadmin/restaurants/${restaurant.id}/theme'
+                          '?name=${Uri.encodeComponent(restaurant.name)}',
+                        );
+                      },
+                      icon: const Icon(Icons.palette, size: 18),
+                      label: const Text('Éditer le thème'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
                     // Diagnostic WL button
                     ElevatedButton.icon(
                       onPressed: () {

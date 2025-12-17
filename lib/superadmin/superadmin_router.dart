@@ -21,6 +21,7 @@ import 'pages/settings_page.dart';
 import 'pages/logs_page.dart';
 import 'pages/migration_page.dart';
 import 'pages/wl_diagnostic_page.dart';
+import 'pages/restaurant_theme_page.dart';
 
 /// Routes du module Super-Admin.
 class SuperAdminRoutes {
@@ -45,6 +46,9 @@ class SuperAdminRoutes {
   /// Route de configuration du module livraison d'un restaurant.
   static const String restaurantDeliverySettings =
       '/superadmin/restaurants/:id/modules/delivery';
+
+  /// Route d'édition du thème d'un restaurant (avec paramètre :id).
+  static const String restaurantTheme = '/superadmin/restaurants/:id/theme';
 
   /// Route de diagnostic WL d'un restaurant (avec paramètre :id).
   static const String restaurantDiagnostic = '/superadmin/restaurants/:id/diagnostic';
@@ -129,6 +133,20 @@ final List<RouteBase> superAdminRoutes = [
           final restaurantName = state.uri.queryParameters['name'];
           return NoTransitionPage(
             child: DeliverySettingsPage(
+              restaurantId: restaurantId,
+              restaurantName: restaurantName,
+            ),
+          );
+        },
+      ),
+      // Restaurants - Theme Editor
+      GoRoute(
+        path: SuperAdminRoutes.restaurantTheme,
+        pageBuilder: (context, state) {
+          final restaurantId = state.pathParameters['id'] ?? '';
+          final restaurantName = state.uri.queryParameters['name'];
+          return NoTransitionPage(
+            child: RestaurantThemePage(
               restaurantId: restaurantId,
               restaurantName: restaurantName,
             ),
