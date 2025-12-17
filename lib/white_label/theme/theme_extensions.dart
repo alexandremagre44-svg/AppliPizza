@@ -163,22 +163,32 @@ extension ThemeRefExtension on WidgetRef {
 
 /// Helper pour créer des radius depuis ThemeSettings.
 ///
+/// ⚠️ **IMPORTANT**: Ces méthodes retournent des valeurs Material 3 par défaut
+/// car BuildContext seul ne peut pas accéder à ThemeSettings.
+///
+/// **Utilisation recommandée**:
+/// - Pour ConsumerWidget: Utiliser `ref.themeSettings.radiusBase` directement
+/// - Pour StatelessWidget sans WidgetRef: Utiliser ces helpers (valeur fixe M3)
+/// - Pour widgets stylés: Hériter du thème (ex: Card hérite de cardTheme.shape)
+///
 /// Usage:
 /// ```dart
+/// // ConsumerWidget (RECOMMANDÉ)
+/// BorderRadius.circular(ref.themeSettings.radiusBase)
+///
+/// // StatelessWidget (Fallback Material 3)
 /// BorderRadius.circular(ThemeRadius.base(context))
-/// BorderRadius.circular(ThemeRadius.small(context))
-/// BorderRadius.circular(ThemeRadius.large(context))
 /// ```
 class ThemeRadius {
   ThemeRadius._();
   
-  /// Rayon de base depuis le thème (valeur par défaut: 12.0).
+  /// Rayon de base Material 3 (12.0).
+  /// 
+  /// ⚠️ ATTENTION: Retourne une valeur fixe Material 3, pas la valeur du thème.
+  /// Pour obtenir la vraie valeur dynamique du thème, utiliser:
+  /// `ref.themeSettings.radiusBase` dans un ConsumerWidget.
   static double base(BuildContext context) {
-    // On ne peut pas accéder directement à ThemeSettings depuis context
-    // sans WidgetRef, donc on utilise une valeur par défaut Material 3
-    // Les composants qui ont besoin du rayon exact doivent utiliser
-    // WidgetRef.themeSettings.radiusBase
-    return 12.0;
+    return 12.0; // Material 3 default
   }
   
   /// Rayon petit (67% du rayon de base).
@@ -199,18 +209,31 @@ class ThemeRadius {
 
 /// Helper pour créer des espacements depuis ThemeSettings.
 ///
+/// ⚠️ **IMPORTANT**: Ces méthodes retournent des valeurs Material 3 par défaut
+/// car BuildContext seul ne peut pas accéder à ThemeSettings.
+///
+/// **Utilisation recommandée**:
+/// - Pour ConsumerWidget: Utiliser `ref.themeSettings.spacingBase` directement
+/// - Pour StatelessWidget sans WidgetRef: Utiliser ces helpers (valeur fixe M3)
+///
 /// Usage:
 /// ```dart
+/// // ConsumerWidget (RECOMMANDÉ)
+/// padding: EdgeInsets.all(ref.themeSettings.spacingBase * 2)
+///
+/// // StatelessWidget (Fallback Material 3)
 /// padding: EdgeInsets.all(ThemeSpacing.md(context))
-/// SizedBox(height: ThemeSpacing.lg(context))
 /// ```
 class ThemeSpacing {
   ThemeSpacing._();
   
-  /// Espacement de base depuis le thème (valeur par défaut: 8.0).
+  /// Espacement de base Material 3 (8.0).
+  /// 
+  /// ⚠️ ATTENTION: Retourne une valeur fixe Material 3, pas la valeur du thème.
+  /// Pour obtenir la vraie valeur dynamique du thème, utiliser:
+  /// `ref.themeSettings.spacingBase` dans un ConsumerWidget.
   static double base(BuildContext context) {
-    // Valeur par défaut Material 3
-    return 8.0;
+    return 8.0; // Material 3 default
   }
   
   /// Espacement extra small (50% de la base = 4px).
