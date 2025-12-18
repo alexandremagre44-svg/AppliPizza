@@ -473,7 +473,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: context.colorScheme.surfaceVariant ,
+                              color: context.colorScheme.surfaceVariant,
                             ),
                           ),
                           if (widget.restaurantName != null)
@@ -481,7 +481,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                               widget.restaurantName!,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: context.colorScheme.surfaceVariant ,
+                                color: context.colorScheme.surfaceVariant,
                               ),
                             ),
                         ],
@@ -587,14 +587,14 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                       Text(
                         category.description,
                         style: TextStyle(
                           fontSize: 12,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                     ],
@@ -639,7 +639,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                       ),
                     ),
                     if (module.isPremium) ...[
@@ -691,7 +691,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                   module.description,
                   style: TextStyle(
                     fontSize: 12,
-                    color: context.colorScheme.surfaceVariant ,
+                    color: context.colorScheme.surfaceVariant,
                   ),
                 ),
                 if (hasDependencies) ...[
@@ -701,7 +701,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                       Icon(
                         Icons.link,
                         size: 12,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -709,7 +709,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                     ],

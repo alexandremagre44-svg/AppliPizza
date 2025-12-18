@@ -39,7 +39,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
     final cart = ref.watch(staffTabletCartProvider);
 
     return Scaffold(
-      backgroundColor: context.colorScheme.surfaceVariant ,
+      backgroundColor: context.colorScheme.surfaceVariant,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         title: const Text(
@@ -197,7 +197,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
               color: isSelected ? null : context.onPrimary,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                 width: isSelected ? 2 : 1.5,
               ),
               boxShadow: isSelected
@@ -230,7 +230,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant ,
+                    color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant,
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -314,7 +314,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return Container(
-                                color: context.colorScheme.surfaceVariant ,
+                                color: context.colorScheme.surfaceVariant,
                                 child: Center(
                                   child: CircularProgressIndicator(
                                     value: loadingProgress.expectedTotalBytes != null
@@ -330,7 +330,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                               );
                             },
                             errorBuilder: (context, error, stackTrace) => Container(
-                              color: context.colorScheme.surfaceVariant ,
+                              color: context.colorScheme.surfaceVariant,
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -341,7 +341,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                                     'Image non disponible',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: context.colorScheme.surfaceVariant ,
+                                      color: context.colorScheme.surfaceVariant,
                                     ),
                                   ),
                                 ],
@@ -349,7 +349,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                             ),
                           )
                         : Container(
-                            color: context.colorScheme.surfaceVariant ,
+                            color: context.colorScheme.surfaceVariant,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -360,7 +360,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                                   'Pas d\'image',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: context.colorScheme.surfaceVariant ,
+                                    color: context.colorScheme.surfaceVariant,
                                   ),
                                 ),
                               ],
@@ -408,7 +408,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                         height: 1.2,
                       ),
                       maxLines: 2,

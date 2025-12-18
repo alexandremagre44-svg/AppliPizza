@@ -121,7 +121,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                           Icon(
                             Icons.visibility_off_outlined,
                             size: 80,
-                            color: context.colorScheme.surfaceVariant ,
+                            color: context.colorScheme.surfaceVariant,
                           ),
                           const SizedBox(height: 24),
                           Text(
@@ -136,7 +136,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 16,
-                              color: context.colorScheme.surfaceVariant ,
+                              color: context.colorScheme.surfaceVariant,
                             ),
                           ),
                         ],
@@ -163,7 +163,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                   Icon(
                     Icons.article_outlined,
                     size: 80,
-                    color: context.colorScheme.surfaceVariant ,
+                    color: context.colorScheme.surfaceVariant,
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -178,7 +178,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
-                      color: context.colorScheme.surfaceVariant ,
+                      color: context.colorScheme.surfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 32),

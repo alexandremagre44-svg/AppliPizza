@@ -196,7 +196,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                       style: TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -205,7 +205,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                       'Entrez votre code PIN',
                       style: TextStyle(
                         fontSize: 17,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -319,13 +319,13 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                       onPressed: () => context.go('/menu'),
                       icon: Icon(
                         Icons.arrow_back_rounded,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                         size: 20,
                       ),
                       label: Text(
                         'Retour à l\'accueil',
                         style: TextStyle(
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -355,10 +355,10 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
-            color: context.colorScheme.surfaceVariant ,
+            color: context.colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: context.colorScheme.surfaceVariant ,
+              color: context.colorScheme.surfaceVariant,
               width: 1.5,
             ),
             boxShadow: [
@@ -375,7 +375,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.w600,
-                color: context.colorScheme.surfaceVariant ,
+                color: context.colorScheme.surfaceVariant,
               ),
             ),
           ),

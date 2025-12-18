@@ -134,7 +134,7 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: context.colorScheme.surfaceVariant ,
+                color: context.colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -329,7 +329,7 @@ class _QuickAmountButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceVariant ,
+          color: context.colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: context.colorScheme.surfaceVariant ),
         ),

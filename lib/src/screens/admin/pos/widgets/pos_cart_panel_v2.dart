@@ -101,13 +101,13 @@ class PosCartPanelV2 extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.shopping_cart_outlined,
                           size: 72,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -116,7 +116,7 @@ class PosCartPanelV2 extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -125,7 +125,7 @@ class PosCartPanelV2 extends ConsumerWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                           height: 1.4,
                         ),
                       ),
@@ -203,7 +203,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: context.colorScheme.surfaceVariant ,
+        color: context.colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: context.colorScheme.surfaceVariant ),
       ),
@@ -235,7 +235,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                           errorBuilder: (context, error, stackTrace) => Container(
                             width: 70,
                             height: 70,
-                            color: context.colorScheme.surfaceVariant ,
+                            color: context.colorScheme.surfaceVariant,
                             child: Icon(Icons.image_not_supported_rounded,
                                 color: context.colorScheme.surfaceVariant ),
                           ),
@@ -243,7 +243,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                       : Container(
                           width: 70,
                           height: 70,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                           child: Icon(Icons.fastfood_rounded,
                               color: context.colorScheme.surfaceVariant ),
                         ),
@@ -261,7 +261,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                         height: 1.2,
                       ),
                       maxLines: 2,
@@ -278,7 +278,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                           item.displayDescription!,
                           style: TextStyle(
                             fontSize: 12,
-                            color: context.colorScheme.surfaceVariant ,
+                            color: context.colorScheme.surfaceVariant,
                             fontStyle: FontStyle.italic,
                           ),
                           maxLines: 2,
@@ -333,7 +333,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                       decoration: BoxDecoration(
                         border: Border.symmetric(
                           vertical: BorderSide(
-                            color: context.colorScheme.surfaceVariant ,
+                            color: context.colorScheme.surfaceVariant,
                             width: 1,
                           ),
                         ),
@@ -343,7 +343,7 @@ class _PosCartItemTileV2 extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                     ),

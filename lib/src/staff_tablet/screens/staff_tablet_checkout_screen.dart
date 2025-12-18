@@ -109,7 +109,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: context.colorScheme.surfaceVariant ,
+                    color: context.colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
@@ -220,7 +220,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
     final cart = ref.watch(staffTabletCartProvider);
 
     return Scaffold(
-      backgroundColor: context.colorScheme.surfaceVariant ,
+      backgroundColor: context.colorScheme.surfaceVariant,
       appBar: AppBar(
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -524,7 +524,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: context.colorScheme.surfaceVariant ,
+                    color: context.colorScheme.surfaceVariant,
                   ),
                 ),
               ],
@@ -578,7 +578,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: context.colorScheme.surfaceVariant ,
+                              color: context.colorScheme.surfaceVariant,
                             ),
                           ),
                         ),
@@ -590,7 +590,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
-                      color: context.colorScheme.surfaceVariant ,
+                      color: context.colorScheme.surfaceVariant,
                     ),
                   ),
                 ],
@@ -628,7 +628,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                     ],
@@ -687,7 +687,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
-                      color: context.colorScheme.surfaceVariant ,
+                      color: context.colorScheme.surfaceVariant,
                     ),
                   ),
                 ),

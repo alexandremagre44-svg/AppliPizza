@@ -311,10 +311,10 @@ class _ProductTile extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant ,
+              color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -331,14 +331,14 @@ class _ProductTile extends StatelessWidget {
                           errorBuilder: (_, __, ___) => Container(
                             width: 60,
                             height: 60,
-                            color: context.colorScheme.surfaceVariant ,
+                            color: context.colorScheme.surfaceVariant,
                             child: Icon(Icons.fastfood, color: context.colorScheme.surfaceVariant ),
                           ),
                         )
                       : Container(
                           width: 60,
                           height: 60,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                           child: Icon(Icons.fastfood, color: context.colorScheme.surfaceVariant ),
                         ),
                 ),
@@ -349,7 +349,7 @@ class _ProductTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+                      color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                     ),
                   ),
                 ),

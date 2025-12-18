@@ -375,20 +375,20 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           Icon(
             Icons.search_off,
             size: 80,
-            color: context.colorScheme.surfaceVariant ,
+            color: context.colorScheme.surfaceVariant,
           ),
           const SizedBox(height: 16),
           Text(
             'Aucun résultat trouvé',
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: context.colorScheme.surfaceVariant ,
+                  color: context.colorScheme.surfaceVariant,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'Essayez de modifier votre recherche',
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: context.colorScheme.surfaceVariant ,
+                  color: context.colorScheme.surfaceVariant,
                 ),
           ),
         ],

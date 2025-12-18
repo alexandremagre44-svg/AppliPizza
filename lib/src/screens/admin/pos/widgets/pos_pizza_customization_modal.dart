@@ -420,10 +420,10 @@ class _SizeChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant ,
+            color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+              color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -433,7 +433,7 @@ class _SizeChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
               ),
             ),
           ),

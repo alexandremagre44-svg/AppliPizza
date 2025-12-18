@@ -29,7 +29,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
     final orderCount = ref.watch(staffTabletTodayOrdersCountProvider);
 
     return Scaffold(
-      backgroundColor: context.colorScheme.surfaceVariant ,
+      backgroundColor: context.colorScheme.surfaceVariant,
       appBar: AppBar(
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -150,7 +150,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: context.colorScheme.surfaceVariant ,
+                            color: context.colorScheme.surfaceVariant,
                           ),
                         ),
                       ],
@@ -203,7 +203,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: context.colorScheme.surfaceVariant ,
+              color: context.colorScheme.surfaceVariant,
               letterSpacing: 0.3,
             ),
           ),
@@ -526,7 +526,7 @@ class _OrderCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
-                            color: context.colorScheme.surfaceVariant ,
+                            color: context.colorScheme.surfaceVariant,
                           ),
                         ),
                       ],

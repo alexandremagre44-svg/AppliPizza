@@ -74,7 +74,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
-                    color: context.colorScheme.surfaceVariant ,
+                    color: context.colorScheme.surfaceVariant,
                   ),
                 ),
               ),
@@ -125,13 +125,13 @@ class RestaurantDetailPage extends ConsumerWidget {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.restaurant,
                         size: 32,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                       ),
                     ),
                     const SizedBox(width: 20),
@@ -178,7 +178,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                             restaurant.brandName,
                             style: TextStyle(
                               fontSize: 14,
-                              color: context.colorScheme.surfaceVariant ,
+                              color: context.colorScheme.surfaceVariant,
                             ),
                           ),
                         ],
@@ -282,7 +282,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                         'No modules enabled',
                         style: TextStyle(
                           fontSize: 14,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                           fontStyle: FontStyle.italic,
                         ),
                       )
@@ -382,7 +382,7 @@ class RestaurantDetailPage extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: context.colorScheme.surfaceVariant ,
+              color: context.colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: context.colorScheme.surfaceVariant),
             ),
@@ -557,7 +557,7 @@ class _DetailRow extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: context.colorScheme.surfaceVariant ,
+                color: context.colorScheme.surfaceVariant,
               ),
             ),
           ),
@@ -622,7 +622,7 @@ class _ColorDetailRow extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: context.colorScheme.surfaceVariant ,
+                color: context.colorScheme.surfaceVariant,
               ),
             ),
           ),

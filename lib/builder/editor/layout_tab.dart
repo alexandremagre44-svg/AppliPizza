@@ -199,7 +199,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
-                    color: context.colorScheme.surfaceVariant ,
+                    color: context.colorScheme.surfaceVariant,
                     child: Row(
                       children: [
                         const Icon(Icons.visibility, size: 18),
@@ -301,7 +301,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.colorScheme.surfaceVariant ,
+        color: context.colorScheme.surfaceVariant,
         border: Border(
           bottom: BorderSide(color: context.colorScheme.surfaceVariant ),
         ),
@@ -310,7 +310,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
         children: [
           Icon(
             Icons.layers,
-            color: context.colorScheme.surfaceVariant ,
+            color: context.colorScheme.surfaceVariant,
             size: 20,
           ),
           const SizedBox(width: 8),
@@ -329,7 +329,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
                   '${_sortedBlocks.length} bloc(s)',
                   style: TextStyle(
                     fontSize: 12,
-                    color: context.colorScheme.surfaceVariant ,
+                    color: context.colorScheme.surfaceVariant,
                   ),
                 ),
               ],

@@ -148,7 +148,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
         color: isSelected ? AppColors.primaryLight.withOpacity(0.1) : context.onPrimary,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+          color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
           width: isSelected ? 2.5 : 1.5,
         ),
         boxShadow: [
@@ -178,7 +178,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       if (isSelected)
@@ -191,7 +191,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                   ),
                   child: Icon(
                     isSelected ? Icons.check_circle : Icons.add_circle_outline,
-                    color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant ,
+                    color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant,
                     size: 24,
                   ),
                 ),
@@ -205,7 +205,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -214,7 +214,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+                          color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                         ),
                       ),
                     ],
@@ -223,7 +223,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 18,
-                  color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+                  color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                 ),
               ],
             ),
@@ -505,7 +505,7 @@ class _StaffMenuCustomizationModalState extends ConsumerState<StaffMenuCustomiza
             ),
             child: Container(
               decoration: BoxDecoration(
-                color: _isSelectionComplete ? AppColors.primary : context.colorScheme.surfaceVariant ,
+                color: _isSelectionComplete ? AppColors.primary : context.colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: _isSelectionComplete
                     ? [
@@ -712,7 +712,7 @@ class _SelectionOptionsModal extends StatelessWidget {
                                       return Container(
                                         width: 60,
                                         height: 60,
-                                        color: context.colorScheme.surfaceVariant ,
+                                        color: context.colorScheme.surfaceVariant,
                                         child: Icon(Icons.image_not_supported, color: context.colorScheme.surfaceVariant ),
                                       );
                                     },
@@ -729,7 +729,7 @@ class _SelectionOptionsModal extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w900,
-                                      color: context.colorScheme.surfaceVariant ,
+                                      color: context.colorScheme.surfaceVariant,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -740,7 +740,7 @@ class _SelectionOptionsModal extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
-                                      color: context.colorScheme.surfaceVariant ,
+                                      color: context.colorScheme.surfaceVariant,
                                     ),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,

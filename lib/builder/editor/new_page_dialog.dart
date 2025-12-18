@@ -334,7 +334,7 @@ class _NewPageDialogState extends State<NewPageDialog> {
                           ),
                           child: Icon(
                             iconData['icon'] as IconData,
-                            color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant ,
+                            color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant,
                           ),
                         ),
                       ),

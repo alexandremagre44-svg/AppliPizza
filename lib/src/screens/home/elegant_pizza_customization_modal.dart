@@ -907,7 +907,7 @@ class _ElegantPizzaCustomizationModalState
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant ,
+                    color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: isSelected
                         ? [
@@ -1065,7 +1065,7 @@ class _ElegantPizzaCustomizationModalState
         color: context.onPrimary,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: context.colorScheme.surfaceVariant ,
+          color: context.colorScheme.surfaceVariant,
           width: 2,
         ),
         boxShadow: [
@@ -1102,7 +1102,7 @@ class _ElegantPizzaCustomizationModalState
             ),
           ),
           filled: true,
-          fillColor: context.colorScheme.surfaceVariant ,
+          fillColor: context.colorScheme.surfaceVariant,
           contentPadding: const EdgeInsets.all(18),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),

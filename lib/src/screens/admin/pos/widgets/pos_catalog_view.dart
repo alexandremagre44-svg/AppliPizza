@@ -242,7 +242,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                             ),
                           )
                         : Container(
-                            color: context.colorScheme.surfaceVariant ,
+                            color: context.colorScheme.surfaceVariant,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -253,7 +253,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                                   'Pas d\'image',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: context.colorScheme.surfaceVariant ,
+                                    color: context.colorScheme.surfaceVariant,
                                   ),
                                 ),
                               ],
@@ -301,7 +301,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                         height: 1.2,
                       ),
                       maxLines: 2,

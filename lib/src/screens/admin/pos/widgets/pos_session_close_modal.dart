@@ -102,7 +102,7 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: context.colorScheme.surfaceVariant ,
+                  color: context.colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -113,7 +113,7 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -334,7 +334,7 @@ class _SummaryRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: context.colorScheme.surfaceVariant ,
+              color: context.colorScheme.surfaceVariant,
             ),
           ),
           Text(
@@ -342,7 +342,7 @@ class _SummaryRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-              color: context.colorScheme.surfaceVariant ,
+              color: context.colorScheme.surfaceVariant,
             ),
           ),
         ],

@@ -205,7 +205,7 @@ class _StaffPizzaCustomizationModalState
           width: 50,
           height: 5,
           decoration: BoxDecoration(
-            color: context.colorScheme.surfaceVariant ,
+            color: context.colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(3),
           ),
         ),
@@ -340,7 +340,7 @@ class _StaffPizzaCustomizationModalState
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     decoration: BoxDecoration(
-                      color: context.colorScheme.surfaceVariant ,
+                      color: context.colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(
@@ -374,7 +374,7 @@ class _StaffPizzaCustomizationModalState
             widget.pizza.description,
             style: TextStyle(
               fontSize: 14,
-              color: context.colorScheme.surfaceVariant ,
+              color: context.colorScheme.surfaceVariant,
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -459,7 +459,7 @@ class _StaffPizzaCustomizationModalState
                           subtitle,
                           style: TextStyle(
                             fontSize: 13,
-                            color: context.colorScheme.surfaceVariant ,
+                            color: context.colorScheme.surfaceVariant,
                             height: 1.3,
                           ),
                         ),
@@ -498,7 +498,7 @@ class _StaffPizzaCustomizationModalState
                   color: isSelected ? primaryColor.withOpacity(0.15) : context.onPrimary,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isSelected ? primaryColor : context.colorScheme.surfaceVariant ,
+                    color: isSelected ? primaryColor : context.colorScheme.surfaceVariant,
                     width: isSelected ? 2.5 : 1.5,
                   ),
                 ),
@@ -507,7 +507,7 @@ class _StaffPizzaCustomizationModalState
                     Icon(
                       Icons.local_pizza,
                       size: size['name'] == 'Grande' ? 40 : 32,
-                      color: isSelected ? primaryColor : context.colorScheme.surfaceVariant ,
+                      color: isSelected ? primaryColor : context.colorScheme.surfaceVariant,
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -523,7 +523,7 @@ class _StaffPizzaCustomizationModalState
                       size['size'] as String,
                       style: TextStyle(
                         fontSize: 13,
-                        color: context.colorScheme.surfaceVariant ,
+                        color: context.colorScheme.surfaceVariant,
                       ),
                     ),
                     if ((size['price'] as double) > 0) ...[
@@ -531,7 +531,7 @@ class _StaffPizzaCustomizationModalState
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: isSelected ? primaryColor : context.colorScheme.surfaceVariant ,
+                          color: isSelected ? primaryColor : context.colorScheme.surfaceVariant,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -539,7 +539,7 @@ class _StaffPizzaCustomizationModalState
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant ,
+                            color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant,
                           ),
                         ),
                       ),
@@ -589,7 +589,7 @@ class _StaffPizzaCustomizationModalState
                   color: isSelected ? primaryColor.withOpacity(0.15) : context.onPrimary,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected ? primaryColor : context.colorScheme.surfaceVariant ,
+                    color: isSelected ? primaryColor : context.colorScheme.surfaceVariant,
                     width: isSelected ? 2 : 1.5,
                   ),
                 ),
@@ -599,7 +599,7 @@ class _StaffPizzaCustomizationModalState
                     Icon(
                       isSelected ? Icons.check_circle : Icons.cancel,
                       size: 18,
-                      color: isSelected ? primaryColor : context.colorScheme.surfaceVariant ,
+                      color: isSelected ? primaryColor : context.colorScheme.surfaceVariant,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -635,7 +635,7 @@ class _StaffPizzaCustomizationModalState
             color: isSelected ? primaryColor.withOpacity(0.08) : context.onPrimary,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? primaryColor : context.colorScheme.surfaceVariant ,
+              color: isSelected ? primaryColor : context.colorScheme.surfaceVariant,
               width: isSelected ? 2 : 1.5,
             ),
           ),
@@ -654,12 +654,12 @@ class _StaffPizzaCustomizationModalState
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: isSelected ? primaryColor : context.colorScheme.surfaceVariant ,
+                color: isSelected ? primaryColor : context.colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 isSelected ? Icons.check : Icons.add,
-                color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant ,
+                color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant,
                 size: 24,
               ),
             ),
@@ -674,7 +674,7 @@ class _StaffPizzaCustomizationModalState
             trailing: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: isSelected ? primaryColor : context.colorScheme.surfaceVariant ,
+                color: isSelected ? primaryColor : context.colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -682,7 +682,7 @@ class _StaffPizzaCustomizationModalState
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
-                  color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant ,
+                  color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant,
                 ),
               ),
             ),
@@ -712,7 +712,7 @@ class _StaffPizzaCustomizationModalState
           borderSide: BorderSide(color: primaryColor, width: 2),
         ),
         filled: true,
-        fillColor: context.colorScheme.surfaceVariant ,
+        fillColor: context.colorScheme.surfaceVariant,
         contentPadding: const EdgeInsets.all(16),
       ),
     );
@@ -758,7 +758,7 @@ class _StaffPizzaCustomizationModalState
                       Text(
                         'Prix total',
                         style: TextStyle(
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),

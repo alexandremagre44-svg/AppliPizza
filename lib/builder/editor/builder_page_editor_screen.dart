@@ -2840,7 +2840,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: context.colorScheme.surfaceVariant ,
+                    color: context.colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -3052,7 +3052,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                         'Type: $moduleType',
                         style: TextStyle(
                           fontSize: 12,
-                          color: context.colorScheme.surfaceVariant ,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                     ],
@@ -3093,7 +3093,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: context.colorScheme.surfaceVariant ,
+                color: context.colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -3150,7 +3150,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceVariant ,
+          color: context.colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -3161,7 +3161,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: context.colorScheme.surfaceVariant ,
+                color: context.colorScheme.surfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
@@ -3193,7 +3193,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
           text,
           style: TextStyle(
             fontSize: 11,
-            color: context.colorScheme.surfaceVariant ,
+            color: context.colorScheme.surfaceVariant,
           ),
         ),
       ],
@@ -3757,7 +3757,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                     color: colorValue,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant ,
+                      color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant,
                       width: isSelected ? 3 : 1,
                     ),
                   ),
@@ -3774,7 +3774,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               'Sélectionné: ${colors[value] ?? value}',
               style: TextStyle(
                 fontSize: 11,
-                color: context.colorScheme.surfaceVariant ,
+                color: context.colorScheme.surfaceVariant,
               ),
             ),
           ],

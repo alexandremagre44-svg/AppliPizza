@@ -64,7 +64,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: context.colorScheme.surfaceVariant ,
+              color: context.colorScheme.surfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
@@ -182,7 +182,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: context.colorScheme.surfaceVariant ,
+            color: context.colorScheme.surfaceVariant,
           ),
         ),
         const SizedBox(height: 8),
@@ -198,10 +198,10 @@ class PosActionsPanelV2 extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant ,
+                  color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -210,7 +210,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
+                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                   ),
                 ),
               ),
@@ -270,8 +270,8 @@ class PosActionsPanelV2 extends ConsumerWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: hasItems ? Colors.transparent : null,
           foregroundColor: context.onPrimary,
-          disabledBackgroundColor: context.colorScheme.surfaceVariant ,
-          disabledForegroundColor: context.colorScheme.surfaceVariant ,
+          disabledBackgroundColor: context.colorScheme.surfaceVariant,
+          disabledForegroundColor: context.colorScheme.surfaceVariant,
           minimumSize: const Size(double.infinity, 70),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -328,9 +328,9 @@ class PosActionsPanelV2 extends ConsumerWidget {
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
       style: OutlinedButton.styleFrom(
-        foregroundColor: hasItems ? AppColors.error[600] : context.colorScheme.surfaceVariant ,
+        foregroundColor: hasItems ? AppColors.error[600] : context.colorScheme.surfaceVariant,
         side: BorderSide(
-          color: hasItems ? AppColors.error[300]! : context.colorScheme.surfaceVariant ,
+          color: hasItems ? AppColors.error[300]! : context.colorScheme.surfaceVariant,
           width: 1.5,
         ),
         minimumSize: const Size(double.infinity, 56),

@@ -111,7 +111,7 @@ Widget _buildNotPublishedState(BuildContext context, String pageName) {
           Icon(
             Icons.visibility_off_outlined,
             size: 80,
-            color: context.colorScheme.surfaceVariant ,
+            color: context.colorScheme.surfaceVariant,
           ),
           const SizedBox(height: 24),
           Text(
@@ -126,7 +126,7 @@ Widget _buildNotPublishedState(BuildContext context, String pageName) {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
-              color: context.colorScheme.surfaceVariant ,
+              color: context.colorScheme.surfaceVariant,
             ),
           ),
         ],
