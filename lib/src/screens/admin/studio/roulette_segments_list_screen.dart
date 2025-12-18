@@ -4,6 +4,8 @@
 
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/roulette_config.dart';
 import '../../../services/roulette_segment_service.dart';
@@ -175,7 +177,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
                 child: Text(
                   '⚠ La somme devrait être 100%',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.warning.shade700,
+                    color: AppColors.warning,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

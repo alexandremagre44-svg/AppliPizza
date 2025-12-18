@@ -268,8 +268,8 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
                     avatar: const Icon(Icons.check, size: 16),
                     label: Text(moduleId?.label ?? '⚠️ $module (unknown)'),
                     backgroundColor: moduleId != null
-                        ? AppColors.success.shade100
-                        : AppColors.warning.shade100,
+                        ? AppColors.success
+                        : AppColors.warning,
                   );
                 }).toList(),
               ),

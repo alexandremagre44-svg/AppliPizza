@@ -11,6 +11,7 @@
 // draftLayout is NEVER used for client runtime - only for editor preview.
 
 import 'package:flutter/material.dart';
+import '../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../models/theme_config.dart';
@@ -120,7 +121,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                           Icon(
                             Icons.visibility_off_outlined,
                             size: 80,
-                            color: context.colorScheme.surfaceVariant // was Colors.grey[400],
+                            color: context.colorScheme.surfaceVariant ,
                           ),
                           const SizedBox(height: 24),
                           Text(
@@ -135,7 +136,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 16,
-                              color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                              color: context.colorScheme.surfaceVariant ,
                             ),
                           ),
                         ],
@@ -162,7 +163,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                   Icon(
                     Icons.article_outlined,
                     size: 80,
-                    color: context.colorScheme.surfaceVariant // was Colors.grey[400],
+                    color: context.colorScheme.surfaceVariant ,
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -177,7 +178,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
-                      color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                      color: context.colorScheme.surfaceVariant ,
                     ),
                   ),
                   const SizedBox(height: 32),

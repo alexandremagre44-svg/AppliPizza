@@ -2,6 +2,8 @@
 // lib/src/screens/menu/menu_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
@@ -172,7 +174,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Rechercher une pizza, boisson...',
-                  hintStyle: TextStyle(color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
+                  hintStyle: TextStyle(color: context.colorScheme.surfaceVariant ),
                   prefixIcon: Icon(
                     Icons.search,
                     color: Theme.of(context).colorScheme.primary,
@@ -229,7 +231,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                       border: Border.all(
                         color: isSelected
                             ? Colors.transparent
-                            : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
+                            : context.textSecondary,
                         width: 1.5,
                       ),
                       boxShadow: isSelected
@@ -373,20 +375,20 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           Icon(
             Icons.search_off,
             size: 80,
-            color: context.colorScheme.surfaceVariant // was Colors.grey[400],
+            color: context.colorScheme.surfaceVariant ,
           ),
           const SizedBox(height: 16),
           Text(
             'Aucun résultat trouvé',
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                  color: context.colorScheme.surfaceVariant ,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'Essayez de modifier votre recherche',
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: context.colorScheme.surfaceVariant // was Colors.grey[500],
+                  color: context.colorScheme.surfaceVariant ,
                 ),
           ),
         ],

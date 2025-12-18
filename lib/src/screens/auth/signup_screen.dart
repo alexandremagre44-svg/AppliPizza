@@ -2,6 +2,8 @@
 // lib/src/screens/auth/signup_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
@@ -175,18 +177,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               margin: const EdgeInsets.only(bottom: 16),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppColors.error.shade50,
+                                color: AppColors.error,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.error.shade200),
+                                border: Border.all(color: AppColors.error),
                               ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.error_outline, color: AppColors.error.shade700),
+                                  Icon(Icons.error_outline, color: AppColors.error),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       _errorMessage!,
-                                      style: TextStyle(color: AppColors.error.shade700),
+                                      style: TextStyle(color: AppColors.error),
                                     ),
                                   ),
                                 ],

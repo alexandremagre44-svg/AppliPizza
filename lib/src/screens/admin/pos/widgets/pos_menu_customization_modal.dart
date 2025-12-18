@@ -2,6 +2,8 @@
 // lib/src/screens/admin/pos/widgets/pos_menu_customization_modal.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -309,10 +311,10 @@ class _ProductTile extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant // was Colors.grey[50],
+              color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant ,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
+                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -329,15 +331,15 @@ class _ProductTile extends StatelessWidget {
                           errorBuilder: (_, __, ___) => Container(
                             width: 60,
                             height: 60,
-                            color: context.colorScheme.surfaceVariant // was Colors.grey[200],
-                            child: Icon(Icons.fastfood, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
+                            color: context.colorScheme.surfaceVariant ,
+                            child: Icon(Icons.fastfood, color: context.colorScheme.surfaceVariant ),
                           ),
                         )
                       : Container(
                           width: 60,
                           height: 60,
-                          color: context.colorScheme.surfaceVariant // was Colors.grey[200],
-                          child: Icon(Icons.fastfood, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
+                          color: context.colorScheme.surfaceVariant ,
+                          child: Icon(Icons.fastfood, color: context.colorScheme.surfaceVariant ),
                         ),
                 ),
                 const SizedBox(width: 14),
@@ -347,7 +349,7 @@ class _ProductTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[800],
+                      color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
                     ),
                   ),
                 ),

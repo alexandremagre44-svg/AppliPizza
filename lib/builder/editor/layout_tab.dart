@@ -4,6 +4,8 @@
 // Part of Builder B3 modular UI layer
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../services/services.dart';
@@ -190,14 +192,14 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
-                  left: BorderSide(color: context.colorScheme.surfaceVariant // was Colors.grey.shade300),
+                  left: BorderSide(color: context.colorScheme.surfaceVariant ),
                 ),
               ),
               child: Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
-                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade100,
+                    color: context.colorScheme.surfaceVariant ,
                     child: Row(
                       children: [
                         const Icon(Icons.visibility, size: 18),
@@ -299,16 +301,16 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.colorScheme.surfaceVariant // was Colors.grey.shade50,
+        color: context.colorScheme.surfaceVariant ,
         border: Border(
-          bottom: BorderSide(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+          bottom: BorderSide(color: context.colorScheme.surfaceVariant ),
         ),
       ),
       child: Row(
         children: [
           Icon(
             Icons.layers,
-            color: context.colorScheme.surfaceVariant // was Colors.grey.shade700,
+            color: context.colorScheme.surfaceVariant ,
             size: 20,
           ),
           const SizedBox(width: 8),
@@ -327,7 +329,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
                   '${_sortedBlocks.length} bloc(s)',
                   style: TextStyle(
                     fontSize: 12,
-                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                    color: context.colorScheme.surfaceVariant ,
                   ),
                 ),
               ],
@@ -337,7 +339,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.warning.shade100,
+                color: AppColors.warning,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -345,7 +347,7 @@ class _LayoutTabState extends ConsumerState<LayoutTab> {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.warning.shade800,
+                  color: AppColors.warning,
                 ),
               ),
             ),

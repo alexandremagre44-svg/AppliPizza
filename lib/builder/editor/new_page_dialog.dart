@@ -3,6 +3,7 @@
 // Dialog for creating new Builder pages
 
 import 'package:flutter/material.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import '../models/models.dart';
 import '../services/services.dart';
 
@@ -324,16 +325,16 @@ class _NewPageDialogState extends State<NewPageDialog> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: isSelected ? context.primaryColor.shade100 : context.colorScheme.surfaceVariant // was Colors.grey.shade100,
+                            color: isSelected ? context.primaryColor.shade100 : context.colorScheme.surfaceVariant ,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant // was Colors.grey.shade300,
+                              color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant ,
                               width: isSelected ? 2 : 1,
                             ),
                           ),
                           child: Icon(
                             iconData['icon'] as IconData,
-                            color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant // was Colors.grey.shade700,
+                            color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant ,
                           ),
                         ),
                       ),

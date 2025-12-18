@@ -2,6 +2,8 @@
 // lib/src/screens/admin/pos/widgets/pos_pizza_customization_modal.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -283,7 +285,7 @@ class _PosPizzaCustomizationModalState
                       const SizedBox(height: 12),
                       Text(
                         'Tapez pour retirer un ingrédient',
-                        style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant // was Colors.grey[600]),
+                        style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant ),
                       ),
                       const SizedBox(height: 12),
                       Wrap(
@@ -336,7 +338,7 @@ class _PosPizzaCustomizationModalState
                       children: [
                         Text(
                           'Prix total',
-                          style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant // was Colors.grey[600]),
+                          style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant ),
                         ),
                         Text(
                           '${totalPrice.toStringAsFixed(2)} €',
@@ -418,10 +420,10 @@ class _SizeChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant // was Colors.grey[100],
+            color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant ,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
+              color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -431,7 +433,7 @@ class _SizeChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[700],
+                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant ,
               ),
             ),
           ),
