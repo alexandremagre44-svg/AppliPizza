@@ -8,6 +8,9 @@ library;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
+
 /// Page wizard de création de restaurant du Super-Admin.
 class RestaurantCreateWizard extends StatelessWidget {
   const RestaurantCreateWizard({super.key});
@@ -37,7 +40,7 @@ class RestaurantCreateWizard extends StatelessWidget {
             decoration: BoxDecoration(
               color: context.onPrimary,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+              border: Border.all(color: context.outlineVariant),
             ),
             child: Column(
               children: [
@@ -45,13 +48,13 @@ class RestaurantCreateWizard extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppColors.success.shade50,
+                    color: AppColors.successLight,
                     borderRadius: BorderRadius.circular(40),
                   ),
                   child: Icon(
                     Icons.add_business,
                     size: 40,
-                    color: AppColors.success.shade600,
+                    color: AppColors.success,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -68,7 +71,7 @@ class RestaurantCreateWizard extends StatelessWidget {
                   'Follow the wizard to configure a new restaurant',
                   style: TextStyle(
                     fontSize: 14,
-                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                    color: context.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -76,9 +79,9 @@ class RestaurantCreateWizard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade50,
+                    color: AppColors.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+                    border: Border.all(color: context.outlineVariant),
                   ),
                   child: const Column(
                     children: [

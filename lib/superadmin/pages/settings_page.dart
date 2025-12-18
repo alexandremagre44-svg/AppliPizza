@@ -7,6 +7,9 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
+
 /// Page paramètres du Super-Admin.
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -91,7 +94,7 @@ class _SettingsSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.onPrimary,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+        border: Border.all(color: context.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,7 +116,7 @@ class _SettingsSection extends StatelessWidget {
               ],
             ),
           ),
-          Divider(height: 1, color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+          Divider(height: 1, color: context.outlineVariant),
           ...children,
         ],
       ),
@@ -138,21 +141,21 @@ class _SettingsPlaceholderItem extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: context.colorScheme.surfaceVariant // was Colors.grey.shade700,
+                color: AppColors.neutral700,
               ),
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: context.colorScheme.surfaceVariant // was Colors.grey.shade100,
+              color: AppColors.surfaceContainerLow,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               'TODO',
               style: TextStyle(
                 fontSize: 11,
-                color: context.colorScheme.surfaceVariant // was Colors.grey.shade500,
+                color: AppColors.neutral500,
                 fontStyle: FontStyle.italic,
               ),
             ),
