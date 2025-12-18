@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/delivery_module_admin_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Admin widget for delivery_module - shown in Builder UI
 // 
 // Full Material 3 implementation for Delivery module admin view

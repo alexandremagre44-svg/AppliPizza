@@ -1,4 +1,5 @@
 // lib/builder/preview/preview.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Barrel file for Builder B3 preview components
 // Export all preview classes for easy importing
 

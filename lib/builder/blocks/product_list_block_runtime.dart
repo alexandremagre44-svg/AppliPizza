@@ -1,4 +1,5 @@
 // lib/builder/blocks/product_list_block_runtime.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime version of ProductListBlock - Phase 6F enhanced
 // ThemeConfig Integration: Uses theme cardRadius and primaryColor
 

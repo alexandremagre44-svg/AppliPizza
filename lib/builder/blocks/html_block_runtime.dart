@@ -1,4 +1,5 @@
 // lib/builder/blocks/html_block_runtime.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime version of HTMLBlock - Phase 5 enhanced with security
 // ThemeConfig Integration: Uses theme textBodySize and spacing
 

@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/click_collect_module_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime widget for click_collect_module
 // 
 // Placeholder for click & collect module integration

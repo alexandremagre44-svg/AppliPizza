@@ -1,4 +1,5 @@
 // lib/builder/blocks/spacer_block_runtime.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime version of SpacerBlock - Phase 5 enhanced
 // ThemeConfig Integration: Uses theme spacing as default
 

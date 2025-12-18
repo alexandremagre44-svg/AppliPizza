@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/staff_module_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime widget for staff_module
 // 
 // Staff tablet module for POS interface

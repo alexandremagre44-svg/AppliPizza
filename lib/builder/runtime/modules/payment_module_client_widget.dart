@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/payment_module_client_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Client widget for payment_module - checkout and payment functionality
 
 import 'package:flutter/material.dart';

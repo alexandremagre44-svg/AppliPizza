@@ -1,4 +1,5 @@
 // lib/builder/blocks/hero_block_runtime.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime version of HeroBlock - Phase 5 enhanced with modern visual design
 // ThemeConfig Integration: Uses theme primaryColor, textHeadingSize, textBodySize, buttonRadius
 

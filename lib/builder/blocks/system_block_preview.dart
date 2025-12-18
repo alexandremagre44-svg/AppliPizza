@@ -1,4 +1,5 @@
 // lib/builder/blocks/system_block_preview.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Preview version of SystemBlock for the editor
 // Phase 5: Pure StatelessWidget, no business logic, preview only
 

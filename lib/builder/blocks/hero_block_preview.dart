@@ -1,4 +1,5 @@
 // lib/builder/blocks/hero_block_preview.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Hero block preview widget - Phase 5 enhanced with modern visual design
 
 import 'package:flutter/material.dart';

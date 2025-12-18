@@ -1,4 +1,5 @@
 // lib/builder/blocks/button_block_preview.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Button block preview widget
 
 import 'package:flutter/material.dart';

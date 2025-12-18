@@ -1,4 +1,5 @@
 // lib/builder/blocks/image_block_runtime.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime version of ImageBlock - Phase 5 enhanced
 // ThemeConfig Integration: Uses theme cardRadius and spacing
 

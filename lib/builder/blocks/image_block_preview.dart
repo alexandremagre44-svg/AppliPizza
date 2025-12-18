@@ -1,4 +1,5 @@
 // lib/builder/blocks/image_block_preview.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Image block preview widget
 
 import 'package:flutter/material.dart';

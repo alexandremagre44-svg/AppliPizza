@@ -1,4 +1,5 @@
 // lib/builder/blocks/product_list_block_preview.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Product list block preview widget - Phase 6F enhanced
 
 import 'package:flutter/material.dart';

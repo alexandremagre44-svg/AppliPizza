@@ -1,4 +1,5 @@
 // lib/builder/blocks/system_block_runtime.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime version of SystemBlock - renders existing application modules
 // Phase 5: Pure StatelessWidget, no ConsumerWidget, layout logic only
 // ThemeConfig Integration: Uses theme cardRadius, primaryColor, and spacing

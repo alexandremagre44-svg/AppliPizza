@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/newsletter_module_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime widget for newsletter_module
 // 
 // Newsletter subscription module

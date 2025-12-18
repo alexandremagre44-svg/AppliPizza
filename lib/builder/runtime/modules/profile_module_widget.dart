@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/profile_module_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime widget for profile_module
 // 
 // Wraps the existing ProfileScreen for use in Builder system

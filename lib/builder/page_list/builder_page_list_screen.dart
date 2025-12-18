@@ -1,4 +1,5 @@
 // lib/builder/page_list/builder_page_list_screen.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Page list screen for Builder B3 system
 // Shows pages in Active/Inactive sections with badges and actions
 

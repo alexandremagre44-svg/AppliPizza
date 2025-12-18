@@ -1,4 +1,5 @@
 // lib/builder/blocks/text_block_runtime.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime version of TextBlock - Phase 5 enhanced
 // ThemeConfig Integration: Uses theme textBodySize and textHeadingSize
 

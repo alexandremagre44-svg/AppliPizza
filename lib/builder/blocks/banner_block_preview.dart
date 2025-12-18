@@ -1,4 +1,5 @@
 // lib/builder/blocks/banner_block_preview.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Banner block preview widget - Phase 5 enhanced
 
 import 'package:flutter/material.dart';

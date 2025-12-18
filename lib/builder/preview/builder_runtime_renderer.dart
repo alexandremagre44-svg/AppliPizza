@@ -1,4 +1,5 @@
 // lib/builder/preview/builder_runtime_renderer.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Renders builder blocks using runtime widgets (with real providers and data)
 // Phase 5: Layout logic centralized, all styling via BlockConfigHelper
 // ThemeConfig Integration: Uses theme spacing and background color
