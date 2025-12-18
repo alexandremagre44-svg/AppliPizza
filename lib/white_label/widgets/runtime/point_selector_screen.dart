@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Model for a pickup point
