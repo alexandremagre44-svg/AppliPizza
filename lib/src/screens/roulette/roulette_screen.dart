@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/roulette/roulette_screen.dart
 // Client-side roulette wheel screen using custom PizzaRouletteWheel widget
 //
@@ -67,6 +68,7 @@ import '../../widgets/pizza_roulette_wheel.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../design_system/app_theme.dart';
+import '../../../../white_label/theme/theme_extensions.dart';
 import '../../core/constants.dart';
 import '../../utils/roulette_reward_mapper.dart';
 
@@ -354,7 +356,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: context.onPrimary,
               ),
               child: const Text('Voir mes récompenses'),
             ),
@@ -365,7 +367,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: context.onPrimary,
               ),
               child: const Text('Super !'),
             ),
@@ -441,7 +443,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         appBar: AppBar(
           title: const Text('Roue de la Chance'),
           backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: context.onPrimary,
         ),
         body: const Center(
           child: CircularProgressIndicator(),
@@ -458,7 +460,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
         appBar: AppBar(
           title: const Text('Roue de la Chance'),
           backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: context.onPrimary,
         ),
         body: Center(
           child: Padding(
@@ -500,7 +502,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
       appBar: AppBar(
         title: const Text('Roue de la Chance'),
         backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: context.onPrimary,
       ),
       body: Column(
         children: [
@@ -660,7 +662,7 @@ class _RouletteScreenState extends ConsumerState<RouletteScreen> {
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: context.onPrimary,
                         disabledBackgroundColor: AppColors.neutral300,
                         disabledForegroundColor: AppColors.neutral600,
                         padding: const EdgeInsets.symmetric(

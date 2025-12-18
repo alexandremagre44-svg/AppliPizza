@@ -1,4 +1,5 @@
 // lib/builder/page_list/new_page_dialog_v2.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Enhanced dialog for creating new Builder pages
 // Supports both template and blank page creation
 

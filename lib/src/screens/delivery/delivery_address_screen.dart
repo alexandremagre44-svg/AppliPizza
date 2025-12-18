@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/src/screens/delivery/delivery_address_screen.dart
 ///
 /// Écran de saisie de l'adresse de livraison.

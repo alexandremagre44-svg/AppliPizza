@@ -1,10 +1,12 @@
 // lib/src/screens/product_detail/product_detail_screen.dart
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/ingredient_provider.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   final Product product;
@@ -95,7 +97,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                         final ingredientName = ingredientNames[ingId] ?? ingId;
                                         return Chip(
                                           label: Text(ingredientName),
-                                          backgroundColor: Colors.grey[200],
+                                          backgroundColor: context.colorScheme.surfaceVariant,
                                           labelStyle: const TextStyle(fontSize: 14),
                                         );
                                       })
@@ -108,7 +110,7 @@ class ProductDetailScreen extends ConsumerWidget {
                               ),
                               error: (error, stack) => Text(
                                 'Erreur lors du chargement des ingrédients',
-                                style: TextStyle(color: Colors.red, fontSize: 12),
+                                style: TextStyle(color: AppColors.error, fontSize: 12),
                               ),
                             );
                           },
@@ -128,10 +130,10 @@ class ProductDetailScreen extends ConsumerWidget {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.surfaceColor,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: context.colorScheme.shadow.withOpacity(0.1),
               blurRadius: 10,
               spreadRadius: 2,
               offset: const Offset(0, -2),
@@ -141,7 +143,7 @@ class ProductDetailScreen extends ConsumerWidget {
         child: SafeArea( // Utiliser SafeArea pour ne pas interférer avec la barre d'accueil
           minimum: const EdgeInsets.only(bottom: 0),
           child: ElevatedButton.icon(
-            icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
+            icon: const Icon(Icons.add_shopping_cart, color: context.surfaceColor),
             label: Text('Ajouter au panier (${product.price.toStringAsFixed(2)} €)'),
             onPressed: () {
               // Ajout de l'article au panier

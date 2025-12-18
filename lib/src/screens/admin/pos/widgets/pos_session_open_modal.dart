@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/pos/widgets/pos_session_open_modal.dart
 /// 
 /// Modal for opening a cashier session
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/app_theme.dart';
+import '../../../../../white_label/theme/theme_extensions.dart';
 
 /// Session opening modal
 class PosSessionOpenModal extends ConsumerStatefulWidget {
@@ -56,12 +58,12 @@ class _PosSessionOpenModalState extends ConsumerState<PosSessionOpenModal> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.green[50],
+                    color: AppColors.success[50],
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.store,
-                    color: Colors.green[700],
+                    color: AppColors.success[700],
                     size: 32,
                   ),
                 ),
@@ -87,13 +89,13 @@ class _PosSessionOpenModalState extends ConsumerState<PosSessionOpenModal> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: context.primaryColor[50],
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue[200]!),
+                border: Border.all(color: context.primaryColor[200]!),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue[700]),
+                  Icon(Icons.info_outline, color: context.primaryColor[700]),
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text(
@@ -175,7 +177,7 @@ class _PosSessionOpenModalState extends ConsumerState<PosSessionOpenModal> {
                       Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[600],
+                      backgroundColor: AppColors.success[600],
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -186,7 +188,7 @@ class _PosSessionOpenModalState extends ConsumerState<PosSessionOpenModal> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: context.onPrimary,
                       ),
                     ),
                   ),

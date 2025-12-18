@@ -1,10 +1,12 @@
 // lib/src/widgets/popup_dialog.dart
 // Animated popup dialog widget
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/popup_config.dart';
 import '../design_system/app_theme.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 class PopupDialog extends StatefulWidget {
   final PopupConfig popup;
@@ -106,7 +108,7 @@ class _PopupDialogState extends State<PopupDialog>
                     IconButton(
                       icon: Icon(
                         Icons.close,
-                        color: AppColors.textMedium,
+                        color: context.textSecondary, // WL V2: Theme text
                         size: 20,
                       ),
                       onPressed: _close,
@@ -131,11 +133,11 @@ class _PopupDialogState extends State<PopupDialog>
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           height: 200,
-                          color: AppColors.backgroundLight,
+                          color: context.backgroundColor, // WL V2: Theme background
                           child: Center(
                             child: Icon(
                               Icons.image_not_supported,
-                              color: AppColors.textLight,
+                              color: context.textSecondary, // WL V2: Theme text
                               size: 48,
                             ),
                           ),
@@ -160,13 +162,11 @@ class _PopupDialogState extends State<PopupDialog>
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _handleButtonTap,
+                      // WL V2: Button inherits style from theme elevatedButtonTheme
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryRed,
-                        foregroundColor: Colors.white,
+                        backgroundColor: context.primaryColor, // WL V2: Theme primary
+                        foregroundColor: context.onPrimary, // WL V2: Contrast color
                         padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: AppRadius.button,
-                        ),
                       ),
                       child: Text(widget.popup.buttonText!),
                     ),
@@ -180,8 +180,8 @@ class _PopupDialogState extends State<PopupDialog>
                     onPressed: _handleDismiss,
                     child: Text(
                       'Ne plus afficher',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textMedium,
+                      style: context.bodySmall?.copyWith( // WL V2: Theme text
+                        color: context.textSecondary, // WL V2: Theme text color
                       ),
                     ),
                   ),

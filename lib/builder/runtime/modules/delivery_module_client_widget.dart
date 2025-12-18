@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/delivery_module_client_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Client widget for delivery_module - user-facing delivery functionality
 
 import 'package:flutter/material.dart';

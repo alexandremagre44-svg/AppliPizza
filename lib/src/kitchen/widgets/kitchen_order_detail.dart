@@ -6,6 +6,7 @@ import '../../models/order.dart';
 import '../kitchen_constants.dart';
 import '../services/kitchen_print_stub.dart';
 import 'kitchen_status_badge.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Modal plein écran pour afficher les détails complets d'une commande
 class KitchenOrderDetail extends StatelessWidget {
@@ -192,7 +193,7 @@ class KitchenOrderDetail extends StatelessWidget {
                 color: KitchenConstants.kitchenSurface,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: context.colorScheme.shadow.withOpacity(0.3),
                     blurRadius: 8,
                     offset: const Offset(0, -2),
                   ),
@@ -268,7 +269,7 @@ class KitchenOrderDetail extends StatelessWidget {
         color: KitchenConstants.kitchenSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: context.surfaceColor.withOpacity(0.1),
           width: 1,
         ),
       ),
@@ -330,7 +331,7 @@ class KitchenOrderDetail extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: context.surfaceColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -348,7 +349,7 @@ class KitchenOrderDetail extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: context.surfaceColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -563,7 +564,7 @@ class KitchenOrderDetail extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        foregroundColor: Colors.white,
+        foregroundColor: context.surfaceColor,
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),

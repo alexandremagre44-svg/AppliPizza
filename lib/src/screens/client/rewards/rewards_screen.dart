@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/client/rewards/rewards_screen.dart
 // Page Récompenses - Affichage des tickets de récompenses
 // NOUVEAU DESIGN - Basé sur RewardTicket system
@@ -7,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../design_system/app_theme.dart';
+import '../../../../white_label/theme/theme_extensions.dart';
 import '../../../core/constants.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/app_texts_provider.dart';
@@ -41,7 +43,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
       appBar: AppBar(
         title: const Text('Mes Récompenses'),
         backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        foregroundColor: context.onPrimary,
       ),
       body: appTextsAsync.when(
         data: (appTexts) {
@@ -312,7 +314,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                 onPressed: () => _useTicket(context, ticket),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: context.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: AppRadius.button,
@@ -478,7 +480,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.white),
+            Icon(Icons.check_circle, color: context.onPrimary),
             SizedBox(width: AppSpacing.sm),
             Expanded(child: Text(message)),
           ],
@@ -495,7 +497,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.error_outline, color: Colors.white),
+            Icon(Icons.error_outline, color: context.onPrimary),
             SizedBox(width: AppSpacing.sm),
             Expanded(child: Text(message)),
           ],

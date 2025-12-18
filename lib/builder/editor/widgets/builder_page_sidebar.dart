@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../models/models.dart';
 import '../../services/services.dart';
 import '../../utils/icon_helper.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Sidebar widget displaying the list of pages
 /// 

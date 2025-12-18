@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/products_admin_screen.dart
 // Écran d'administration pour gérer le catalogue produits (Pizzas, Menus, Boissons, Desserts)
 
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../models/product.dart';
 import '../../providers/product_provider.dart';
 import '../../services/firestore_product_service.dart';

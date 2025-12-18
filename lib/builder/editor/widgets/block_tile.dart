@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import '../../models/models.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// A card-style tile representing a single block in the editor
 /// 
@@ -96,7 +97,7 @@ class BlockTile extends StatelessWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: context.colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
@@ -125,7 +126,7 @@ class BlockTile extends StatelessWidget {
             tooltip: 'Supprimer',
           ),
         if (showDragHandle)
-          const Icon(Icons.drag_handle, color: Colors.grey),
+          const Icon(Icons.drag_handle, color: context.textSecondary),
       ],
     );
   }
@@ -188,10 +189,10 @@ class BlockTileCompact extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        color: isSelected ? Colors.blue.shade50 : Colors.white,
+        color: isSelected ? Colors.blue.shade50 : context.surfaceColor,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isSelected ? Colors.blue : Colors.grey.shade300,
+          color: isSelected ? Colors.blue : context.colorScheme.outlineVariant,
           width: isSelected ? 2 : 1,
         ),
       ),
@@ -216,7 +217,7 @@ class BlockTileCompact extends StatelessWidget {
                 onPressed: onDelete,
               ),
             const SizedBox(width: 8),
-            const Icon(Icons.drag_handle, size: 18, color: Colors.grey),
+            const Icon(Icons.drag_handle, size: 18, color: context.textSecondary),
           ],
         ),
         onTap: onTap,

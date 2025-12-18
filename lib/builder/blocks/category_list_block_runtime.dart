@@ -1,4 +1,5 @@
 // lib/builder/blocks/category_list_block_runtime.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime version of CategoryListBlock - Phase 5 enhanced
 // ThemeConfig Integration: Uses theme primaryColor, cardRadius, and spacing
 

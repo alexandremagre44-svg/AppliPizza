@@ -1,4 +1,5 @@
 // lib/builder/blocks/info_block_runtime.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime version of InfoBlock - Phase 5 enhanced
 // ThemeConfig Integration: Uses theme primaryColor, spacing, and font sizes
 

@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/product_form_screen.dart
 // Formulaire de création/modification de produit
 
@@ -6,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../models/product.dart';
 import '../../services/firestore_product_service.dart';
 import '../../providers/ingredient_provider.dart';

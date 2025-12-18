@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/pos/pos_screen.dart
 // Main POS (Point of Sale) screen
 

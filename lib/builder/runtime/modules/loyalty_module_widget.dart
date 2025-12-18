@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/loyalty_module_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime widget for loyalty_module
 // 
 // Displays loyalty program information with points, level, and progress

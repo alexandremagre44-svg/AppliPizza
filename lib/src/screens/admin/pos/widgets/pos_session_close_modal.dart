@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/pos/widgets/pos_session_close_modal.dart
 /// 
 /// Modal for closing a cashier session with variance report
@@ -8,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../models/cashier_session.dart';
 import '../../../../design_system/app_theme.dart';
+import '../../../../../white_label/theme/theme_extensions.dart';
 
 /// Session closing modal
 class PosSessionCloseModal extends ConsumerStatefulWidget {
@@ -67,12 +69,12 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.orange[50],
+                      color: AppColors.warning[50],
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.store_mall_directory,
-                      color: Colors.orange[700],
+                      color: AppColors.warning[700],
                       size: 32,
                     ),
                   ),
@@ -98,7 +100,7 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: context.colorScheme.surfaceVariant // was Colors.grey[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -109,7 +111,7 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        color: context.colorScheme.surfaceVariant // was Colors.grey[800],
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -170,13 +172,13 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: _variance!.abs() < 0.01
-                        ? Colors.green[50]
-                        : Colors.orange[50],
+                        ? AppColors.success[50]
+                        : AppColors.warning[50],
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _variance!.abs() < 0.01
-                          ? Colors.green
-                          : Colors.orange,
+                          ? AppColors.success
+                          : AppColors.warning,
                       width: 2,
                     ),
                   ),
@@ -187,8 +189,8 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                             ? Icons.check_circle
                             : Icons.warning,
                         color: _variance!.abs() < 0.01
-                            ? Colors.green[700]
-                            : Colors.orange[700],
+                            ? AppColors.success[700]
+                            : AppColors.warning[700],
                         size: 28,
                       ),
                       const SizedBox(width: 12),
@@ -204,8 +206,8 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: _variance!.abs() < 0.01
-                                    ? Colors.green[900]
-                                    : Colors.orange[900],
+                                    ? AppColors.success[900]
+                                    : AppColors.warning[900],
                               ),
                             ),
                             if (_variance!.abs() >= 0.01)
@@ -215,7 +217,7 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                                     : 'Manque: ${_variance!.abs().toStringAsFixed(2)} €',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.orange[800],
+                                  color: AppColors.warning[800],
                                 ),
                               ),
                           ],
@@ -274,7 +276,7 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange[600],
+                        backgroundColor: AppColors.warning[600],
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -285,7 +287,7 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: context.onPrimary,
                         ),
                       ),
                     ),
@@ -330,7 +332,7 @@ class _SummaryRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: Colors.grey[700],
+              color: context.colorScheme.surfaceVariant // was Colors.grey[700],
             ),
           ),
           Text(
@@ -338,7 +340,7 @@ class _SummaryRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-              color: Colors.grey[900],
+              color: context.colorScheme.surfaceVariant // was Colors.grey[900],
             ),
           ),
         ],

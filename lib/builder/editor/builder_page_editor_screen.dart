@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/builder/editor/builder_page_editor_screen.dart
 // Page editor screen for Builder B3 system
 // RESPONSIVE LAYOUT: Desktop (>=1024px) 3-column, Tablet (768-1024px) 2-column, Mobile (<768px) stacked
@@ -985,12 +986,12 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.orange,
+                color: AppColors.warning,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
                 'Modifs',
-                style: TextStyle(fontSize: 10, color: Colors.white),
+                style: TextStyle(fontSize: 10, color: context.onPrimary),
               ),
             ),
           ],
@@ -1049,7 +1050,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                   width: 8,
                   height: 8,
                   decoration: const BoxDecoration(
-                    color: Colors.orange,
+                    color: AppColors.warning,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -1345,7 +1346,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                     width: 8,
                     height: 8,
                     decoration: const BoxDecoration(
-                      color: Colors.orange,
+                      color: AppColors.warning,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -1616,7 +1617,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.2),
+                        color: AppColors.success.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Text(
@@ -1624,7 +1625,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
-                          color: Colors.green,
+                          color: AppColors.success,
                         ),
                       ),
                     ),
@@ -1832,13 +1833,13 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: context.primaryColor.shade50,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.shade200),
+        border: Border.all(color: context.primaryColor.shade200),
       ),
       child: Row(
         children: [
-          Icon(Icons.shield, color: Colors.blue.shade700, size: 18),
+          Icon(Icons.shield, color: context.primaryColor.shade700, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -1846,13 +1847,13 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Colors.blue.shade800,
+                color: context.primaryColor.shade800,
               ),
             ),
           ),
           Tooltip(
             message: 'Cette page ne peut pas être supprimée',
-            child: Icon(Icons.info_outline, color: Colors.blue.shade400, size: 16),
+            child: Icon(Icons.info_outline, color: context.primaryColor.shade400, size: 16),
           ),
         ],
       ),
@@ -1865,13 +1866,13 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
+        color: AppColors.success.shade50,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.green.shade200),
+        border: Border.all(color: AppColors.success.shade200),
       ),
       child: Row(
         children: [
-          Icon(Icons.navigation, color: Colors.green.shade700, size: 18),
+          Icon(Icons.navigation, color: AppColors.success.shade700, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -1879,7 +1880,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Colors.green.shade800,
+                color: AppColors.success.shade800,
               ),
             ),
           ),
@@ -1887,7 +1888,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
           Switch(
             value: _page!.isActive,
             onChanged: (value) => _updateNavigationParams(isActive: value),
-            activeColor: Colors.green.shade600,
+            activeColor: AppColors.success.shade600,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],
@@ -2109,7 +2110,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               children: [
                 Icon(
                   _page!.isActive ? Icons.visibility : Icons.visibility_off,
-                  color: _page!.isActive ? Colors.green : Colors.grey,
+                  color: _page!.isActive ? AppColors.success : Colors.grey,
                   size: 20,
                 ),
                 const SizedBox(width: 10),
@@ -2135,7 +2136,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                 Switch(
                   value: _page!.isActive,
                   onChanged: (value) => _updateNavigationParams(isActive: value),
-                  activeColor: Colors.green,
+                  activeColor: AppColors.success,
                 ),
               ],
             ),
@@ -2207,20 +2208,20 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
+                          color: AppColors.warning.shade50,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: Colors.orange.shade300),
+                          border: Border.all(color: AppColors.warning.shade300),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.warning, size: 14, color: Colors.orange.shade700),
+                            Icon(Icons.warning, size: 14, color: AppColors.warning.shade700),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
                                 _duplicateIndexWarning!,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: Colors.orange.shade800,
+                                  color: AppColors.warning.shade800,
                                 ),
                               ),
                             ),
@@ -2423,7 +2424,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: context.primaryColor.shade50,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
@@ -2484,7 +2485,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('❌ La position doit être entre 0 et 4 pour une page active'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -2549,7 +2550,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                 ? '✅ Page activée (position $finalBottomNavIndex)' 
                 : '✅ Page désactivée'
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -2568,7 +2569,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('⚠️ ${e.message}'),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warning,
             duration: const Duration(seconds: 4),
           ),
         );
@@ -2579,7 +2580,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('⚠️ ${e.message}'),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warning,
             duration: const Duration(seconds: 4),
           ),
         );
@@ -2602,7 +2603,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -2685,7 +2686,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('✅ Icône "$iconName" enregistrée'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -2697,7 +2698,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -2837,7 +2838,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -3006,15 +3007,15 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         break;
       case 'rewards':
         moduleIcon = Icons.stars;
-        iconColor = Colors.orange.shade600;
+        iconColor = AppColors.warning.shade600;
         break;
       case 'accountActivity':
         moduleIcon = Icons.history;
-        iconColor = Colors.blue.shade600;
+        iconColor = context.primaryColor.shade600;
         break;
       default:
         moduleIcon = Icons.help_outline;
-        iconColor = Colors.grey.shade600;
+        iconColor = context.colorScheme.surfaceVariant // was Colors.grey.shade600;
     }
     
     return [
@@ -3022,9 +3023,9 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.blue.shade50,
+          color: context.primaryColor.shade50,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.blue.shade200),
+          border: Border.all(color: context.primaryColor.shade200),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -3049,7 +3050,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                         'Type: $moduleType',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade600,
+                          color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                         ),
                       ),
                     ],
@@ -3090,12 +3091,12 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: context.colorScheme.surfaceVariant // was Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 20, color: Colors.grey.shade600),
+                  Icon(Icons.info_outline, size: 20, color: context.colorScheme.surfaceVariant // was Colors.grey.shade600),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
@@ -3116,20 +3117,20 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: AppColors.error.shade50,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.shade200),
+                  border: Border.all(color: AppColors.error.shade200),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.warning, size: 20, color: Colors.red.shade600),
+                    Icon(Icons.warning, size: 20, color: AppColors.error.shade600),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Module "$moduleType" inconnu. Ce bloc peut ne pas s\'afficher correctement.',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.red.shade700,
+                          color: AppColors.error.shade700,
                         ),
                       ),
                     ),
@@ -3147,7 +3148,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: context.colorScheme.surfaceVariant // was Colors.grey.shade50,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -3158,7 +3159,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade700,
+                color: context.colorScheme.surfaceVariant // was Colors.grey.shade700,
               ),
             ),
             const SizedBox(height: 8),
@@ -3183,14 +3184,14 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         Icon(
           icon,
           size: 14,
-          color: isAllowed ? Colors.green.shade600 : Colors.red.shade400,
+          color: isAllowed ? AppColors.success.shade600 : AppColors.error.shade400,
         ),
         const SizedBox(width: 6),
         Text(
           text,
           style: TextStyle(
             fontSize: 11,
-            color: Colors.grey.shade700,
+            color: context.colorScheme.surfaceVariant // was Colors.grey.shade700,
           ),
         ),
       ],
@@ -3734,13 +3735,13 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               Color colorValue;
               
               if (entry.key.isEmpty) {
-                colorValue = Colors.grey.shade300;
+                colorValue = context.colorScheme.surfaceVariant // was Colors.grey.shade300;
               } else {
                 try {
                   colorValue = Color(int.parse(entry.key.replaceAll('#', '0xFF')));
                 } catch (e) {
                   // Fallback to grey if color parsing fails
-                  colorValue = Colors.grey.shade300;
+                  colorValue = context.colorScheme.surfaceVariant // was Colors.grey.shade300;
                   debugPrint('Invalid color format: ${entry.key}');
                 }
               }
@@ -3754,7 +3755,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                     color: colorValue,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isSelected ? Colors.blue : Colors.grey.shade300,
+                      color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant // was Colors.grey.shade300,
                       width: isSelected ? 3 : 1,
                     ),
                   ),
@@ -3771,7 +3772,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               'Sélectionné: ${colors[value] ?? value}',
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.grey.shade600,
+                color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
               ),
             ),
           ],
@@ -3859,7 +3860,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          color: Colors.blue,
+          color: context.primaryColor,
         ),
       ),
       const SizedBox(height: 12),
@@ -3906,18 +3907,18 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: context.primaryColor.shade50,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.blue.shade200),
+              border: Border.all(color: context.primaryColor.shade200),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
+                Icon(Icons.info_outline, size: 16, color: context.primaryColor.shade700),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Ouvre la page système avec la version Builder si disponible.',
-                    style: TextStyle(fontSize: 11, color: Colors.blue.shade700),
+                    style: TextStyle(fontSize: 11, color: context.primaryColor.shade700),
                   ),
                 ),
               ],

@@ -1,4 +1,5 @@
 // lib/builder/preview/builder_page_preview.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Preview widget that renders a list of blocks visually
 // MOBILE RESPONSIVE: Fixed sizing and zoom issues on mobile
 // Enhanced with draftLayout support and module placeholders

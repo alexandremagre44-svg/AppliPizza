@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/auth/signup_screen.dart
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -65,7 +67,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             SnackBar(
               content: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Colors.white),
+                  const Icon(Icons.check_circle, color: context.onPrimary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -74,7 +76,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   ),
                 ],
               ),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.success,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -94,7 +96,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          color: AppColors.primaryRed,
+          color: context.primaryColor,
         ),
         child: SafeArea(
           child: Center(
@@ -111,11 +113,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       width: 120,
                       height: 120,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.onPrimary,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: context.colorScheme.shadow.withOpacity(0.3),
                             blurRadius: 30,
                             offset: const Offset(0, 15),
                           ),
@@ -135,12 +137,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     Text(
                       'Créer un compte',
                       style: Theme.of(context).textTheme.displaySmall!.copyWith(
-                            color: Colors.white,
+                            color: context.onPrimary,
                             fontWeight: FontWeight.w900,
                             fontSize: 32,
                             shadows: [
                               Shadow(
-                                color: Colors.black.withOpacity(0.3),
+                                color: context.colorScheme.shadow.withOpacity(0.3),
                                 offset: const Offset(0, 4),
                                 blurRadius: 8,
                               ),
@@ -154,11 +156,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.onPrimary,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: context.colorScheme.shadow.withOpacity(0.2),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -173,18 +175,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               margin: const EdgeInsets.only(bottom: 16),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.red.shade50,
+                                color: AppColors.error.shade50,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.red.shade200),
+                                border: Border.all(color: AppColors.error.shade200),
                               ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.error_outline, color: Colors.red.shade700),
+                                  Icon(Icons.error_outline, color: AppColors.error.shade700),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       _errorMessage!,
-                                      style: TextStyle(color: Colors.red.shade700),
+                                      style: TextStyle(color: AppColors.error.shade700),
                                     ),
                                   ),
                                 ],
@@ -298,7 +300,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                       width: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 3,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        valueColor: AlwaysStoppedAnimation<Color>(context.onPrimary),
                                       ),
                                     )
                                   : const Text('Créer le compte', style: TextStyle(fontSize: 18)),

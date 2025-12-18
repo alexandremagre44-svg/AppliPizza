@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/pos/widgets/pos_catalog_view.dart
 
 import 'package:flutter/material.dart';
@@ -239,18 +240,18 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                             ),
                           )
                         : Container(
-                            color: Colors.grey[100],
+                            color: context.colorScheme.surfaceVariant // was Colors.grey[100],
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.fastfood_rounded,
-                                    size: 56, color: Colors.grey[400]),
+                                    size: 56, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
                                 const SizedBox(height: 8),
                                 Text(
                                   'Pas d\'image',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey[500],
+                                    color: context.colorScheme.surfaceVariant // was Colors.grey[500],
                                   ),
                                 ),
                               ],
@@ -269,7 +270,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
                           colors: [
-                            Colors.black.withOpacity(0.3),
+                            context.colorScheme.shadow.withOpacity(0.3),
                             Colors.transparent,
                           ],
                         ),
@@ -286,7 +287,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.onPrimary,
                   borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
                 ),
                 child: Column(
@@ -298,7 +299,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.grey[900],
+                        color: context.colorScheme.surfaceVariant // was Colors.grey[900],
                         height: 1.2,
                       ),
                       maxLines: 2,
@@ -343,7 +344,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                           ),
                           child: Icon(
                             Icons.add_rounded,
-                            color: Colors.white,
+                            color: context.onPrimary,
                             size: 22,
                           ),
                         ),

@@ -1,9 +1,11 @@
 // lib/src/widgets/home/promo_card_compact.dart
 // Compact promo card for horizontal carousel
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import '../../models/product.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 /// Compact promo card for displaying promotional products
 /// Used in horizontal carousel on home page
@@ -25,7 +27,7 @@ class PromoCardCompact extends StatelessWidget {
         width: 200,
         margin: EdgeInsets.only(right: AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surfaceWhite,
+          color: context.surfaceColor,
           borderRadius: AppRadius.radiusLG,
           boxShadow: AppShadows.card,
         ),
@@ -48,14 +50,14 @@ class PromoCardCompact extends StatelessWidget {
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return Container(
-                                color: AppColors.backgroundLight,
+                                color: context.backgroundColor,
                                 child: Center(
                                   child: SizedBox(
                                     width: 24,
                                     height: 24,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2.5,
-                                      color: AppColors.primaryRed,
+                                      color: context.primaryColor,
                                       value: loadingProgress.expectedTotalBytes != null
                                           ? loadingProgress.cumulativeBytesLoaded /
                                               loadingProgress.expectedTotalBytes!
@@ -67,24 +69,24 @@ class PromoCardCompact extends StatelessWidget {
                             },
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
-                                color: AppColors.backgroundLight,
+                                color: context.backgroundColor,
                                 child: const Center(
                                   child: Icon(
                                     Icons.local_pizza,
                                     size: 40,
-                                    color: AppColors.textLight,
+                                    color: context.textSecondary,
                                   ),
                                 ),
                               );
                             },
                           )
                         : Container(
-                            color: AppColors.backgroundLight,
+                            color: context.backgroundColor,
                             child: const Center(
                               child: Icon(
                                 Icons.local_pizza,
                                 size: 40,
-                                color: AppColors.textLight,
+                                color: context.textSecondary,
                               ),
                             ),
                           ),
@@ -100,13 +102,13 @@ class PromoCardCompact extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.errorRed,
+                      color: AppColors.error,
                       borderRadius: AppRadius.badge,
                     ),
                     child: Text(
                       'PROMO',
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.surfaceWhite,
+                        color: context.surfaceColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 10,
                       ),
@@ -138,13 +140,13 @@ class PromoCardCompact extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryRed,
+                          color: context.primaryColor,
                           borderRadius: AppRadius.badge,
                         ),
                         child: const Icon(
                           Icons.arrow_forward,
                           size: 16,
-                          color: AppColors.surfaceWhite,
+                          color: context.surfaceColor,
                         ),
                       ),
                     ],

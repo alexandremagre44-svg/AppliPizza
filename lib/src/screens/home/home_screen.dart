@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/home/home_screen.dart
 // HomeScreen - Professional showcase page for Pizza Deli'Zza
 // PROMPT 3F - Uses centralized text system
@@ -23,6 +24,7 @@ import '../../widgets/home/home_shimmer_loading.dart';
 import '../menu/menu_customization_modal.dart';
 import 'pizza_customization_modal.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../core/constants.dart';
 import '../../services/roulette_rules_service.dart';
 import '../../../builder/models/models.dart';
@@ -87,7 +89,7 @@ class HomeScreen extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: AppColors.surfaceWhite,
+              color: context.surfaceColor,
               fontFamily: 'Poppins',
             ),
           ),
@@ -96,14 +98,14 @@ class HomeScreen extends ConsumerWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w400,
-              color: AppColors.surfaceWhite.withOpacity(0.8),
+              color: context.surfaceColor.withOpacity(0.8),
               fontFamily: 'Poppins',
             ),
           ),
         ],
       ),
       centerTitle: true,
-      backgroundColor: AppColors.primaryRed,
+      backgroundColor: context.primaryColor,
       elevation: 0,
       actions: [
         IconButton(
@@ -148,10 +150,10 @@ class HomeScreen extends ConsumerWidget {
                 ref.invalidate(productListProvider);
                 await ref.read(productListProvider.future);
               },
-              color: AppColors.primaryRed,
+              color: context.primaryColor,
               child: BuilderRuntimeRenderer(
                 blocks: builderPage.publishedLayout,
-                backgroundColor: Colors.white,
+                backgroundColor: context.onPrimary,
                 wrapInScrollView: true,
               ),
             ),
@@ -220,7 +222,7 @@ class HomeScreen extends ConsumerWidget {
         ref.invalidate(productListProvider);
         await ref.read(productListProvider.future);
       },
-      color: AppColors.primaryRed,
+      color: context.primaryColor,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -466,7 +468,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ],
           ),
-          backgroundColor: AppColors.primaryRed,
+          backgroundColor: context.primaryColor,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
           shape: RoundedRectangleBorder(
@@ -539,12 +541,12 @@ class HomeScreen extends ConsumerWidget {
                       width: 56,
                       height: 56,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: context.onPrimary.withOpacity(0.2),
                         borderRadius: AppRadius.cardSmall,
                       ),
                       child: const Icon(
                         Icons.casino,
-                        color: Colors.white,
+                        color: context.onPrimary,
                         size: 32,
                       ),
                     ),
@@ -557,7 +559,7 @@ class HomeScreen extends ConsumerWidget {
                           Text(
                             'Tentez votre chance !',
                             style: AppTextStyles.titleMedium.copyWith(
-                              color: Colors.white,
+                              color: context.onPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -565,7 +567,7 @@ class HomeScreen extends ConsumerWidget {
                           Text(
                             'Tournez la roue et gagnez des récompenses 🎁',
                             style: AppTextStyles.bodyMedium.copyWith(
-                              color: Colors.white.withOpacity(0.9),
+                              color: context.onPrimary.withOpacity(0.9),
                             ),
                           ),
                         ],
@@ -576,7 +578,7 @@ class HomeScreen extends ConsumerWidget {
                     ElevatedButton(
                       onPressed: () => context.push(AppRoutes.rewards),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
+                        backgroundColor: context.onPrimary,
                         foregroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,

@@ -1,4 +1,5 @@
 // lib/builder/blocks/button_block_runtime.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime version of ButtonBlock - Phase 5 enhanced
 // ThemeConfig Integration: Uses theme primaryColor and buttonRadius
 

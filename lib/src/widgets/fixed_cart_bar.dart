@@ -1,11 +1,13 @@
 // lib/src/widgets/fixed_cart_bar.dart
 // Barre panier fixe en bas avec animation pop
+// MIGRATED to WL V2 Theme - Uses theme primary color
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/cart_provider.dart';
 import '../theme/app_theme.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Barre panier fixe en bas de l'écran client
 /// - Fond rouge avec coins supérieurs arrondis
@@ -17,6 +19,8 @@ import '../theme/app_theme.dart';
 /// 2. ScaleTransition (300ms) - Pop sur l'icône panier à chaque ajout
 /// Fichier: lib/src/widgets/fixed_cart_bar.dart
 /// But: Donner un feedback visuel dynamique et attirer l'attention sur le panier
+/// 
+/// WL V2 MIGRATION: Uses Theme.of(context).colorScheme.primary for background
 class FixedCartBar extends ConsumerStatefulWidget {
   const FixedCartBar({super.key});
 
@@ -105,10 +109,10 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
       position: _slideAnimation,
       child: ScaleTransition(
         scale: _scaleAnimation,
-        // refactor container style → app_theme standard (colors, shadow)
+        // WL V2: Uses theme primary color for background
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.primaryRed,
+            color: context.primaryColor, // WL V2: Theme primary
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(AppRadius.xl),
               topRight: Radius.circular(AppRadius.xl),
@@ -137,13 +141,13 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                     // Icône panier avec badge de quantité
                     Row(
                       children: [
-                        // refactor icon and badge → app_theme standard
+                        // WL V2: Uses theme colors
                         Stack(
                           clipBehavior: Clip.none,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.shopping_bag,
-                              color: AppColors.surfaceWhite,
+                              color: context.onPrimary, // WL V2: Contrast color
                               size: 28,
                             ),
                             // Badge quantité
@@ -153,8 +157,8 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                                 top: -8,
                                 child: Container(
                                   padding: AppSpacing.paddingXS,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.surfaceWhite,
+                                  decoration: BoxDecoration(
+                                    color: context.surfaceColor, // WL V2: Theme surface
                                     shape: BoxShape.circle,
                                   ),
                                   constraints: const BoxConstraints(
@@ -163,8 +167,8 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                                   ),
                                   child: Text(
                                     itemCount.toString(),
-                                    style: AppTextStyles.labelSmall.copyWith(
-                                      color: AppColors.primaryRed,
+                                    style: context.labelSmall?.copyWith( // WL V2: Theme text
+                                      color: context.primaryColor, // WL V2: Theme primary
                                       fontWeight: FontWeight.bold,
                                     ),
                                     textAlign: TextAlign.center,
@@ -176,27 +180,26 @@ class _FixedCartBarState extends ConsumerState<FixedCartBar>
                         SizedBox(width: AppSpacing.lg),
                         Text(
                           'Voir le panier',
-                          style: AppTextStyles.titleLarge.copyWith(
-                            color: AppColors.surfaceWhite,
+                          style: context.titleLarge?.copyWith( // WL V2: Theme text
+                            color: context.onPrimary, // WL V2: Contrast color
                           ),
                         ),
                       ],
                     ),
-                    // Total avec animation
-                    // refactor total badge → app_theme standard
+                    // Total avec animation - WL V2: Uses theme colors
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: context.onPrimary.withOpacity(0.2), // WL V2: Contrast with opacity
                         borderRadius: AppRadius.radiusXL,
                       ),
                       child: Text(
                         '${total.toStringAsFixed(2)} €',
-                        style: AppTextStyles.titleLarge.copyWith(
-                          color: AppColors.surfaceWhite,
+                        style: context.titleLarge?.copyWith( // WL V2: Theme text
+                          color: context.onPrimary, // WL V2: Contrast color
                           fontWeight: FontWeight.bold,
                         ),
                       ),

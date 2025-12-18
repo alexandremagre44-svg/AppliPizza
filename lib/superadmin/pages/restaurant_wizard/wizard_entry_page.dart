@@ -15,6 +15,7 @@ import 'wizard_step_template.dart';
 import 'wizard_step_cashier_profile.dart';
 import 'wizard_step_modules.dart';
 import 'wizard_step_preview.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Page principale du wizard de création de restaurant.
 class WizardEntryPage extends ConsumerWidget {
@@ -148,10 +149,10 @@ class _WizardHeader extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: context.colorScheme.shadow.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -166,7 +167,7 @@ class _WizardHeader extends ConsumerWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A2E),
+              color: context.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -174,7 +175,7 @@ class _WizardHeader extends ConsumerWidget {
             currentStep.description,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade600,
+              color: context.textSecondary.shade600,
             ),
           ),
           const SizedBox(height: 24),
@@ -198,17 +199,17 @@ class _WizardHeader extends ConsumerWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: isCurrent
-                              ? const Color(0xFF1A1A2E)
+                              ? const context.onSurface
                               : isActive
                                   ? Colors.green
-                                  : Colors.grey.shade300,
+                                  : context.colorScheme.outlineVariant,
                         ),
                         child: Center(
                           child: isActive && !isCurrent
                               ? const Icon(
                                   Icons.check,
                                   size: 16,
-                                  color: Colors.white,
+                                  color: context.surfaceColor,
                                 )
                               : Text(
                                   '${displayIndex + 1}',
@@ -216,8 +217,8 @@ class _WizardHeader extends ConsumerWidget {
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     color: isCurrent || isActive
-                                        ? Colors.white
-                                        : Colors.grey.shade600,
+                                        ? context.surfaceColor
+                                        : context.textSecondary.shade600,
                                   ),
                                 ),
                         ),
@@ -235,8 +236,8 @@ class _WizardHeader extends ConsumerWidget {
                                 fontWeight:
                                     isCurrent ? FontWeight.bold : FontWeight.normal,
                                 color: isCurrent
-                                    ? const Color(0xFF1A1A2E)
-                                    : Colors.grey.shade600,
+                                    ? const context.onSurface
+                                    : context.textSecondary.shade600,
                               ),
                             ),
                           ],
@@ -250,7 +251,7 @@ class _WizardHeader extends ConsumerWidget {
                             margin: const EdgeInsets.symmetric(horizontal: 8),
                             color: step.index < currentStep.index
                                 ? Colors.green
-                                : Colors.grey.shade300,
+                                : context.colorScheme.outlineVariant,
                           ),
                         ),
                     ],
@@ -286,10 +287,10 @@ class _WizardFooter extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: context.colorScheme.shadow.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -327,7 +328,7 @@ class _WizardFooter extends StatelessWidget {
                       : onSubmit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
+                    foregroundColor: context.surfaceColor,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 12,
@@ -339,7 +340,7 @@ class _WizardFooter extends StatelessWidget {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                            valueColor: AlwaysStoppedAnimation(context.surfaceColor),
                           ),
                         )
                       : const Row(
@@ -355,8 +356,8 @@ class _WizardFooter extends StatelessWidget {
                 ElevatedButton(
                   onPressed: wizardState.isCurrentStepValid ? onNext : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1A1A2E),
-                    foregroundColor: Colors.white,
+                    backgroundColor: const context.onSurface,
+                    foregroundColor: context.surfaceColor,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 12,
@@ -398,11 +399,11 @@ class _WizardCompletedScreen extends StatelessWidget {
           padding: const EdgeInsets.all(48),
           constraints: const BoxConstraints(maxWidth: 500),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: context.colorScheme.shadow.withOpacity(0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -429,7 +430,7 @@ class _WizardCompletedScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A2E),
+                  color: context.onSurface,
                 ),
               ),
               const SizedBox(height: 12),
@@ -438,15 +439,15 @@ class _WizardCompletedScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey.shade600,
+                  color: context.textSecondary.shade600,
                 ),
               ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: onClose,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1A1A2E),
-                  foregroundColor: Colors.white,
+                  backgroundColor: const context.onSurface,
+                  foregroundColor: context.surfaceColor,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 16,

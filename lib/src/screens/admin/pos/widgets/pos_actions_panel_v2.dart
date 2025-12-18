@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/pos/widgets/pos_actions_panel_v2.dart
 /// 
 /// Complete POS Actions Panel with all functionality
@@ -8,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../design_system/app_theme.dart';
+import '../../../../../white_label/theme/theme_extensions.dart';
 import '../../../../models/order_type.dart';
 import '../../../../models/payment_method.dart';
 import '../../../../models/pos_order_status.dart';
@@ -42,7 +44,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(
-        child: Text('Erreur: $error', style: const TextStyle(color: Colors.red)),
+        child: Text('Erreur: $error', style: const TextStyle(color: AppColors.error)),
       ),
     );
   }
@@ -53,21 +55,21 @@ class PosActionsPanelV2 extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.store_mall_directory_outlined, size: 64, color: Colors.grey[400]),
+          Icon(Icons.store_mall_directory_outlined, size: 64, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'Aucune session active',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
+              color: context.colorScheme.surfaceVariant // was Colors.grey[700],
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Ouvrez une session pour commencer',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant // was Colors.grey[600]),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
@@ -75,8 +77,8 @@ class PosActionsPanelV2 extends ConsumerWidget {
             icon: const Icon(Icons.play_arrow),
             label: const Text('Ouvrir la caisse'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green[600],
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.success[600],
+              foregroundColor: context.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -134,13 +136,13 @@ class PosActionsPanelV2 extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.green[50],
+        color: AppColors.success[50],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.green[300]!),
+        border: Border.all(color: AppColors.success[300]!),
       ),
       child: Row(
         children: [
-          Icon(Icons.check_circle, color: Colors.green[700], size: 20),
+          Icon(Icons.check_circle, color: AppColors.success[700], size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -151,12 +153,12 @@ class PosActionsPanelV2 extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green[900],
+                    color: AppColors.success[900],
                   ),
                 ),
                 Text(
                   '${session.orderCount} commande(s)',
-                  style: TextStyle(fontSize: 11, color: Colors.green[700]),
+                  style: TextStyle(fontSize: 11, color: AppColors.success[700]),
                 ),
               ],
             ),
@@ -178,7 +180,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
+            color: context.colorScheme.surfaceVariant // was Colors.grey[800],
           ),
         ),
         const SizedBox(height: 8),
@@ -194,10 +196,10 @@ class PosActionsPanelV2 extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryLighter : Colors.grey[100],
+                  color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant // was Colors.grey[100],
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -206,7 +208,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? AppColors.primary : Colors.grey[700],
+                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[700],
                   ),
                 ),
               ),
@@ -236,14 +238,14 @@ class PosActionsPanelV2 extends ConsumerWidget {
       decoration: BoxDecoration(
         gradient: hasItems
             ? LinearGradient(
-                colors: [Colors.green[600]!, Colors.green[800]!],
+                colors: [AppColors.success[600]!, AppColors.success[800]!],
               )
             : null,
         borderRadius: BorderRadius.circular(16),
         boxShadow: hasItems
             ? [
                 BoxShadow(
-                  color: Colors.green.withOpacity(0.4),
+                  color: AppColors.success.withOpacity(0.4),
                   blurRadius: 16,
                   offset: const Offset(0, 6),
                 ),
@@ -265,9 +267,9 @@ class PosActionsPanelV2 extends ConsumerWidget {
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: hasItems ? Colors.transparent : null,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: Colors.grey[300],
-          disabledForegroundColor: Colors.grey[500],
+          foregroundColor: context.onPrimary,
+          disabledBackgroundColor: context.colorScheme.surfaceVariant // was Colors.grey[300],
+          disabledForegroundColor: context.colorScheme.surfaceVariant // was Colors.grey[500],
           minimumSize: const Size(double.infinity, 70),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -291,7 +293,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
                   ),
                   title: Row(
                     children: [
-                      Icon(Icons.delete_outline, color: Colors.red[700]),
+                      Icon(Icons.delete_outline, color: AppColors.error[700]),
                       const SizedBox(width: 12),
                       const Text('Annuler la commande'),
                     ],
@@ -308,8 +310,8 @@ class PosActionsPanelV2 extends ConsumerWidget {
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red[600],
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.error[600],
+                        foregroundColor: context.onPrimary,
                       ),
                       child: const Text('Vider'),
                     ),
@@ -324,9 +326,9 @@ class PosActionsPanelV2 extends ConsumerWidget {
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
       style: OutlinedButton.styleFrom(
-        foregroundColor: hasItems ? Colors.red[600] : Colors.grey[400],
+        foregroundColor: hasItems ? AppColors.error[600] : context.colorScheme.surfaceVariant // was Colors.grey[400],
         side: BorderSide(
-          color: hasItems ? Colors.red[300]! : Colors.grey[300]!,
+          color: hasItems ? AppColors.error[300]! : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
           width: 1.5,
         ),
         minimumSize: const Size(double.infinity, 56),
@@ -348,8 +350,8 @@ class PosActionsPanelV2 extends ConsumerWidget {
         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       ),
       style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.orange[700],
-        side: BorderSide(color: Colors.orange[300]!),
+        foregroundColor: AppColors.warning[700],
+        side: BorderSide(color: AppColors.warning[300]!),
         minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -384,7 +386,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
           } catch (e) {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+                SnackBar(content: Text('Erreur: $e'), backgroundColor: AppColors.error),
               );
             }
           }
@@ -415,7 +417,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
           } catch (e) {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+                SnackBar(content: Text('Erreur: $e'), backgroundColor: AppColors.error),
               );
             }
           }
@@ -528,7 +530,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Commande enregistrée avec succès'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -537,7 +539,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de l\'enregistrement: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }

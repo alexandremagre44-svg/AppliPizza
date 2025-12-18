@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../builder/models/models.dart';
 import '../../../builder/utils/utils.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 class ContactScreen extends StatelessWidget {
   static const String appId = 'pizza_delizza';
@@ -51,7 +52,7 @@ class ContactScreen extends StatelessWidget {
                   'Nous sommes là pour vous aider',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey,
+                    color: context.textSecondary,
                   ),
                 ),
               ],
@@ -123,7 +124,7 @@ class ContactScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: context.textSecondary,
               fontStyle: FontStyle.italic,
             ),
           ),

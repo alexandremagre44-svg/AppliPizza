@@ -1,9 +1,11 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/profile/widgets/loyalty_section_widget.dart
 // Compact loyalty section for profile screen (Material 3)
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../design_system/app_theme.dart';
+import '../../../../white_label/theme/theme_extensions.dart';
 import '../../../core/constants.dart';
 import '../../../models/app_texts_config.dart';
 

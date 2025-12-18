@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/studio/roulette_segments_list_screen.dart
 // List screen for managing roulette segments - Material 3 + Pizza Deli'Zza
 
@@ -7,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/roulette_config.dart';
 import '../../../services/roulette_segment_service.dart';
 import '../../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
+import '../../../../white_label/theme/theme_extensions.dart';
 import 'roulette_segment_editor_screen.dart';
 
 /// Screen to list and manage all roulette segments
@@ -167,13 +169,13 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
                   vertical: AppSpacing.xxs,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.2),
+                  color: AppColors.warning.withOpacity(0.2),
                   borderRadius: AppRadius.badge,
                 ),
                 child: Text(
                   '⚠ La somme devrait être 100%',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.orange.shade700,
+                    color: AppColors.warning.shade700,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -216,7 +218,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
                 child: segment.iconName != null
                     ? Icon(
                         _getIconData(segment.iconName!),
-                        color: Colors.white,
+                        color: context.onPrimary,
                         size: 20,
                       )
                     : null,
@@ -430,7 +432,7 @@ class _RouletteSegmentsListScreenState extends ConsumerState<RouletteSegmentsLis
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? colorScheme.error : Colors.green,
+        backgroundColor: isError ? colorScheme.error : AppColors.success,
         behavior: SnackBarBehavior.floating,
       ),
     );

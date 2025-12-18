@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/promotions_module_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime widget for promotions_module
 // 
 // Displays current promotions and special offers

@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/menu_catalog_runtime_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime widget for menu_catalog module
 // 
 // Displays products from Firestore in a grid/list layout

@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/superadmin/pages/restaurant_detail_page.dart
 ///
 /// Page détail d'un restaurant du module Super-Admin.
@@ -26,15 +27,15 @@ class RestaurantDetailPage extends ConsumerWidget {
   Color _getStatusColor(RestaurantStatus status) {
     switch (status) {
       case RestaurantStatus.active:
-        return Colors.green;
+        return AppColors.success;
       case RestaurantStatus.pending:
-        return Colors.orange;
+        return AppColors.warning;
       case RestaurantStatus.suspended:
-        return Colors.red;
+        return AppColors.error;
       case RestaurantStatus.archived:
         return Colors.grey;
       case RestaurantStatus.draft:
-        return Colors.blue;
+        return context.primaryColor;
     }
   }
 
@@ -56,7 +57,7 @@ class RestaurantDetailPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 16),
             Text(
               'Restaurant not found: $restaurantId',
@@ -71,7 +72,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                   ),
                 ),
               ),
@@ -109,9 +110,9 @@ class RestaurantDetailPage extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.onPrimary,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,13 +123,13 @@ class RestaurantDetailPage extends ConsumerWidget {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+                        color: context.colorScheme.surfaceVariant // was Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.restaurant,
                         size: 32,
-                        color: Colors.grey.shade600,
+                        color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                       ),
                     ),
                     const SizedBox(width: 20),
@@ -175,7 +176,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                             restaurant.brandName,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey.shade600,
+                              color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                             ),
                           ),
                         ],
@@ -213,15 +214,15 @@ class RestaurantDetailPage extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade50,
+                    color: AppColors.warning.shade50,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange.shade200),
+                    border: Border.all(color: AppColors.warning.shade200),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.warning_amber_rounded,
-                        color: Colors.orange.shade700,
+                        color: AppColors.warning.shade700,
                         size: 32,
                       ),
                       const SizedBox(width: 16),
@@ -234,7 +235,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.orange.shade900,
+                                color: AppColors.warning.shade900,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -242,7 +243,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                               'Ce restaurant utilise un plan legacy. Les modules et configurations détaillées ne sont pas disponibles.',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.orange.shade700,
+                                color: AppColors.warning.shade700,
                               ),
                             ),
                           ],
@@ -258,9 +259,9 @@ class RestaurantDetailPage extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.onPrimary,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +280,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                         'No modules enabled',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade600,
+                          color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                           fontStyle: FontStyle.italic,
                         ),
                       )
@@ -293,9 +294,9 @@ class RestaurantDetailPage extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.onPrimary,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
               ),
               child: const Center(
                 child: CircularProgressIndicator(),
@@ -305,15 +306,15 @@ class RestaurantDetailPage extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.red.shade50,
+                color: AppColors.error.shade50,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.red.shade200),
+                border: Border.all(color: AppColors.error.shade200),
               ),
               child: Text(
                 'Error loading plan: $error',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.red.shade700,
+                  color: AppColors.error.shade700,
                 ),
               ),
             ),
@@ -331,9 +332,9 @@ class RestaurantDetailPage extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.onPrimary,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,9 +380,9 @@ class RestaurantDetailPage extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: context.colorScheme.surfaceVariant // was Colors.grey.shade50,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,9 +423,9 @@ class RestaurantDetailPage extends ConsumerWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.onPrimary,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,8 +454,8 @@ class RestaurantDetailPage extends ConsumerWidget {
                       icon: const Icon(Icons.extension, size: 18),
                       label: const Text('Gérer les modules'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
+                        backgroundColor: context.primaryColor,
+                        foregroundColor: context.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
@@ -473,7 +474,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                       label: const Text('Éditer le thème'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
+                        foregroundColor: context.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
@@ -491,7 +492,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                       label: const Text('Diagnostic WL'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.purple,
-                        foregroundColor: Colors.white,
+                        foregroundColor: context.onPrimary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
@@ -554,7 +555,7 @@ class _DetailRow extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
               ),
             ),
           ),
@@ -604,7 +605,7 @@ class _ColorDetailRow extends StatelessWidget {
     } on FormatException catch (_) {
       // Couleur invalide
     }
-    return Colors.grey.shade400;
+    return context.colorScheme.surfaceVariant // was Colors.grey.shade400;
   }
 
   @override
@@ -619,7 +620,7 @@ class _ColorDetailRow extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
               ),
             ),
           ),
@@ -629,7 +630,7 @@ class _ColorDetailRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: _parseColor(colorHex),
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade300),
             ),
           ),
           const SizedBox(width: 8),
@@ -690,7 +691,7 @@ class _ModulesGrid extends StatelessWidget {
               Icon(
                 isActive ? Icons.check_circle : Icons.cancel,
                 size: 20,
-                color: isActive ? Colors.green : Colors.grey,
+                color: isActive ? AppColors.success : Colors.grey,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -701,7 +702,7 @@ class _ModulesGrid extends StatelessWidget {
                     fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
                     color: isActive
                         ? const Color(0xFF1A1A2E)
-                        : Colors.grey.shade500,
+                        : context.colorScheme.surfaceVariant // was Colors.grey.shade500,
                   ),
                 ),
               ),
@@ -709,8 +710,8 @@ class _ModulesGrid extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? Colors.green.shade50
-                      : Colors.grey.shade100,
+                      ? AppColors.success.shade50
+                      : context.colorScheme.surfaceVariant // was Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -719,8 +720,8 @@ class _ModulesGrid extends StatelessWidget {
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     color: isActive
-                        ? Colors.green.shade700
-                        : Colors.grey.shade600,
+                        ? AppColors.success.shade700
+                        : context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                   ),
                 ),
               ),

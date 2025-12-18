@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/builder/runtime/module_runtime_registry.dart
 // Registry dedicated to White-Label modules runtime rendering
 //

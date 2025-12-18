@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/kitchen_module_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime widget for kitchen_module
 // 
 // Kitchen tablet module for displaying orders

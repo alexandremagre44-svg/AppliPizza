@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../kitchen_constants.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Badge de statut pour le mode cuisine
 /// Affiche le statut avec la couleur appropriée et une animation légère
@@ -93,7 +94,7 @@ class _KitchenStatusBadgeState extends State<KitchenStatusBadge>
             child: Text(
               widget.status.toUpperCase(),
               style: const TextStyle(
-                color: Colors.white,
+                color: context.surfaceColor,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,

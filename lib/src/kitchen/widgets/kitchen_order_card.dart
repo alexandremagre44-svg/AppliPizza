@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../models/order.dart';
 import 'kitchen_colors.dart';
 import 'kitchen_status_badge.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Carte de commande pour le mode cuisine
 /// Affiche les infos essentielles avec zones tactiles gauche/droite pour changer le statut
@@ -312,7 +313,7 @@ class _KitchenOrderCardState extends State<KitchenOrderCard> {
                               child: Text(
                                 'Depuis ${minutes}min',
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: context.surfaceColor,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),

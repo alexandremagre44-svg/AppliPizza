@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../builder/models/models.dart';
 import '../../../builder/utils/utils.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 class AboutScreen extends StatelessWidget {
   static const String appId = 'pizza_delizza';
@@ -60,7 +61,7 @@ class AboutScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey,
+              color: context.textSecondary,
             ),
           ),
           const SizedBox(height: 32),
@@ -92,7 +93,7 @@ class AboutScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: context.textSecondary,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -131,7 +132,7 @@ class AboutScreen extends StatelessWidget {
               content,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[700],
+                color: context.textSecondary[700],
                 height: 1.5,
               ),
             ),

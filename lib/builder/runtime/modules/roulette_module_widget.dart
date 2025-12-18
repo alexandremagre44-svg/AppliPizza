@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/roulette_module_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime widget for roulette_module
 // 
 // Wraps the existing RouletteScreen for use in Builder system

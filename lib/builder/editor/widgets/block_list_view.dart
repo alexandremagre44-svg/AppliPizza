@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import '../../models/models.dart';
 import 'block_tile.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// A reorderable list view of blocks
 /// 
@@ -87,7 +88,7 @@ class BlockListView extends StatelessWidget {
             Icon(
               Icons.widgets_outlined,
               size: 64,
-              color: Colors.grey.shade400,
+              color: context.textSecondary.shade400,
             ),
             const SizedBox(height: 16),
             Text(
@@ -95,7 +96,7 @@ class BlockListView extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey.shade600,
+                color: context.textSecondary.shade600,
               ),
             ),
           ],
@@ -179,7 +180,7 @@ class SimpleBlockList extends StatelessWidget {
       return Center(
         child: Text(
           'Aucun bloc',
-          style: TextStyle(color: Colors.grey.shade600),
+          style: TextStyle(color: context.textSecondary.shade600),
         ),
       );
     }

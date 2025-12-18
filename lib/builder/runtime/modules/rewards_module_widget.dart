@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/rewards_module_widget.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Runtime widget for rewards_module
 // 
 // Displays available rewards for the user

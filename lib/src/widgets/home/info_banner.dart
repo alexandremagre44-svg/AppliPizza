@@ -1,8 +1,10 @@
 // lib/src/widgets/home/info_banner.dart
 // Info banner widget for displaying business hours
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 /// Info banner widget for displaying important information
 /// Used on home page to show opening hours and other details
@@ -24,14 +26,15 @@ class InfoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // WL V2: Uses theme colors with fallback to custom colors if provided
     return Container(
       margin: AppSpacing.paddingHorizontalLG,
       padding: AppSpacing.paddingLG,
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.backgroundLight,
+        color: backgroundColor ?? context.surfaceColor, // WL V2: Theme surface or custom
         borderRadius: AppRadius.radiusMD,
         border: Border.all(
-          color: AppColors.textLight.withOpacity(0.2),
+          color: context.outlineVariant, // WL V2: Theme outline
           width: 1,
         ),
       ),
@@ -41,15 +44,15 @@ class InfoBanner extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: iconColor ?? textColor ?? AppColors.textMedium,
+              color: iconColor ?? textColor ?? context.textSecondary, // WL V2: Theme text or custom
             ),
             SizedBox(width: AppSpacing.md),
           ],
           Expanded(
             child: Text(
               text,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: textColor ?? AppColors.textDark,
+              style: context.bodyMedium?.copyWith( // WL V2: Theme text
+                color: textColor ?? context.onSurface, // WL V2: Theme text or custom
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,

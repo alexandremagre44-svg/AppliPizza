@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/superadmin/pages/users_page.dart
 ///
 /// Page gestion des utilisateurs du module Super-Admin.
@@ -31,7 +32,7 @@ class UsersPage extends ConsumerWidget {
                 '${users.length} users',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                 ),
               ),
               ElevatedButton.icon(
@@ -43,7 +44,7 @@ class UsersPage extends ConsumerWidget {
                 label: const Text('Add User'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4CAF50),
-                  foregroundColor: Colors.white,
+                  foregroundColor: context.onPrimary,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 12,
@@ -57,15 +58,15 @@ class UsersPage extends ConsumerWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.onPrimary,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
               ),
               child: ListView.separated(
                 padding: const EdgeInsets.all(0),
                 itemCount: users.length,
                 separatorBuilder: (context, index) =>
-                    Divider(height: 1, color: Colors.grey.shade200),
+                    Divider(height: 1, color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
                 itemBuilder: (context, index) {
                   final user = users[index];
                   return _UserListItem(user: user);
@@ -90,9 +91,9 @@ class _UserListItem extends StatelessWidget {
       case AdminRole.superAdmin:
         return Colors.purple;
       case AdminRole.restaurantOwner:
-        return Colors.blue;
+        return context.primaryColor;
       case AdminRole.restaurantManager:
-        return Colors.orange;
+        return AppColors.warning;
       case AdminRole.restaurantStaff:
         return Colors.grey;
     }
@@ -101,11 +102,11 @@ class _UserListItem extends StatelessWidget {
   Color _getStatusColor(UserStatus status) {
     switch (status) {
       case UserStatus.active:
-        return Colors.green;
+        return AppColors.success;
       case UserStatus.pending:
-        return Colors.orange;
+        return AppColors.warning;
       case UserStatus.suspended:
-        return Colors.red;
+        return AppColors.error;
       case UserStatus.disabled:
         return Colors.grey;
     }
@@ -186,7 +187,7 @@ class _UserListItem extends StatelessWidget {
                   '${user.email} • ${user.attachedRestaurants.length} restaurant(s)',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -216,7 +217,7 @@ class _UserListItem extends StatelessWidget {
               // TODO: Implement user edit
               debugPrint('TODO: Edit user ${user.id}');
             },
-            icon: Icon(Icons.edit_outlined, color: Colors.grey.shade600),
+            icon: Icon(Icons.edit_outlined, color: context.colorScheme.surfaceVariant // was Colors.grey.shade600),
             tooltip: 'Edit user',
           ),
         ],

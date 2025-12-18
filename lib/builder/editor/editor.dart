@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/builder/editor/editor.dart
 // Barrel file for Builder B3 editor components
 // Export all editor classes for easy importing

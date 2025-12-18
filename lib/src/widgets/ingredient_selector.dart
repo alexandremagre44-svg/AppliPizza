@@ -2,8 +2,10 @@
 // Widget réutilisable pour la gestion dynamique des ingrédients
 // ⚠️ DÉPRÉCIÉ: Ce widget utilise une liste statique d'ingrédients
 // Utilisez plutôt les providers Firestore (ingredientStreamProvider) pour une gestion dynamique
+// MIGRATED to WL V2 Theme - Uses theme colors with fallback to primary
 
 import 'package:flutter/material.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Widget pour gérer dynamiquement les ingrédients d'une pizza
 /// 
@@ -111,7 +113,8 @@ class _IngredientSelectorState extends State<IngredientSelector> {
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.primaryColor ?? Colors.orange.shade600;
+    // WL V2: Use custom color if provided, otherwise theme primary
+    final color = widget.primaryColor ?? context.primaryColor;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -148,8 +151,8 @@ class _IngredientSelectorState extends State<IngredientSelector> {
                 ),
                 child: Text(
                   '${_currentIngredients.length}',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.onPrimary, // WL V2: Contrast color
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -168,7 +171,7 @@ class _IngredientSelectorState extends State<IngredientSelector> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
+                color: context.onSurface, // WL V2: Theme text
               ),
             ),
             const SizedBox(height: 8),
@@ -205,7 +208,7 @@ class _IngredientSelectorState extends State<IngredientSelector> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
+              color: context.onSurface, // WL V2: Theme text
             ),
           ),
           const SizedBox(height: 8),
@@ -224,12 +227,12 @@ class _IngredientSelectorState extends State<IngredientSelector> {
                   decoration: BoxDecoration(
                     color: isSelected 
                         ? color.withOpacity(0.2) 
-                        : Colors.grey.shade100,
+                        : context.surfaceColor, // WL V2: Theme surface
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isSelected 
                           ? color.withOpacity(0.5) 
-                          : Colors.grey.shade300,
+                          : context.outlineVariant, // WL V2: Theme outline
                       width: 1.5,
                     ),
                   ),
@@ -239,7 +242,7 @@ class _IngredientSelectorState extends State<IngredientSelector> {
                       Icon(
                         isSelected ? Icons.check_box : Icons.check_box_outline_blank,
                         size: 18,
-                        color: isSelected ? color : Colors.grey.shade600,
+                        color: isSelected ? color : context.textSecondary, // WL V2: Theme text
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -247,7 +250,7 @@ class _IngredientSelectorState extends State<IngredientSelector> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected ? color : Colors.grey.shade700,
+                          color: isSelected ? color : context.onSurface, // WL V2: Theme text
                         ),
                       ),
                     ],
@@ -267,7 +270,7 @@ class _IngredientSelectorState extends State<IngredientSelector> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
+              color: context.onSurface, // WL V2: Theme text
             ),
           ),
           const SizedBox(height: 8),
@@ -280,17 +283,17 @@ class _IngredientSelectorState extends State<IngredientSelector> {
                     hintText: 'Ex: Roquette, Gorgonzola...',
                     hintStyle: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey.shade400,
+                      color: context.textSecondary, // WL V2: Theme text
                     ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: context.surfaceColor, // WL V2: Theme surface
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: context.outlineVariant), // WL V2: Theme outline
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: context.outlineVariant), // WL V2: Theme outline
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -317,7 +320,7 @@ class _IngredientSelectorState extends State<IngredientSelector> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: color,
-                  foregroundColor: Colors.white,
+                  foregroundColor: context.onPrimary, // WL V2: Contrast color
                   padding: const EdgeInsets.all(16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -336,20 +339,20 @@ class _IngredientSelectorState extends State<IngredientSelector> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: context.secondaryContainer, // WL V2: Theme secondary container
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.blue.shade200),
+              border: Border.all(color: context.outlineVariant), // WL V2: Theme outline
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, color: Colors.blue.shade700, size: 18),
+                Icon(Icons.info_outline, color: context.onSecondaryContainer, size: 18), // WL V2: Theme color
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Les ingrédients sont propres à cette pizza et n\'affectent pas les autres produits.',
                     style: TextStyle(
                       fontSize: 11,
-                      color: Colors.blue.shade900,
+                      color: context.onSecondaryContainer, // WL V2: Theme color
                     ),
                   ),
                 ),

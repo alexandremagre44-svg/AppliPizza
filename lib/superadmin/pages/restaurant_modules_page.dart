@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/superadmin/pages/restaurant_modules_page.dart
 ///
 /// Page de gestion des modules d'un restaurant.
@@ -213,7 +214,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
             child: const Text('Annuler'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () {
               Navigator.of(context).pop();
               // Désactiver le module et tous ses dépendants
@@ -261,7 +262,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Configuration enregistrée avec succès'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.success,
             ),
           );
         }
@@ -271,7 +272,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Modifications enregistrées mais erreur lors du rechargement: $e'),
-              backgroundColor: Colors.orange,
+              backgroundColor: AppColors.warning,
             ),
           );
         }
@@ -288,7 +289,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de l\'enregistrement: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -308,17 +309,17 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
   Color _getCategoryColor(ModuleCategory category) {
     switch (category) {
       case ModuleCategory.system:
-        return Colors.red;
+        return AppColors.error;
       case ModuleCategory.business:
         return Colors.indigo;
       case ModuleCategory.visual:
         return Colors.purple;
       case ModuleCategory.core:
-        return Colors.blue;
+        return context.primaryColor;
       case ModuleCategory.payment:
-        return Colors.green;
+        return AppColors.success;
       case ModuleCategory.marketing:
-        return Colors.orange;
+        return AppColors.warning;
       case ModuleCategory.operations:
         return Colors.brown;
       case ModuleCategory.appearance:
@@ -366,9 +367,9 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 16),
-            Text(_error!, style: const TextStyle(color: Colors.red)),
+            Text(_error!, style: const TextStyle(color: AppColors.error)),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _loadPlan,
@@ -396,9 +397,9 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.onPrimary,
               border: Border(
-                bottom: BorderSide(color: Colors.grey.shade200),
+                bottom: BorderSide(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
               ),
             ),
             child: Column(
@@ -432,14 +433,14 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                                 height: 16,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: context.onPrimary,
                                 ),
                               )
                             : const Icon(Icons.save, size: 18),
                         label: Text(_isSaving ? 'Enregistrement...' : 'Enregistrer'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.success,
+                          foregroundColor: context.onPrimary,
                         ),
                       ),
                     ],
@@ -451,13 +452,13 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
+                        color: context.primaryColor.shade50,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.extension,
                         size: 32,
-                        color: Colors.blue.shade700,
+                        color: context.primaryColor.shade700,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -470,7 +471,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.grey.shade800,
+                              color: context.colorScheme.surfaceVariant // was Colors.grey.shade800,
                             ),
                           ),
                           if (widget.restaurantName != null)
@@ -478,7 +479,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                               widget.restaurantName!,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey.shade600,
+                                color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                               ),
                             ),
                         ],
@@ -491,9 +492,9 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
+                          color: AppColors.warning.shade50,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.orange.shade200),
+                          border: Border.all(color: AppColors.warning.shade200),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -501,7 +502,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                             Icon(
                               Icons.pending,
                               size: 16,
-                              color: Colors.orange.shade700,
+                              color: AppColors.warning.shade700,
                             ),
                             const SizedBox(width: 6),
                             Text(
@@ -509,7 +510,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.orange.shade700,
+                                color: AppColors.warning.shade700,
                               ),
                             ),
                           ],
@@ -547,9 +548,9 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.onPrimary,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -584,14 +585,14 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade800,
+                          color: context.colorScheme.surfaceVariant // was Colors.grey.shade800,
                         ),
                       ),
                       Text(
                         category.description,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade600,
+                          color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                         ),
                       ),
                     ],
@@ -618,7 +619,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: Colors.grey.shade200),
+          top: BorderSide(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
         ),
         color: hasChange ? Colors.yellow.shade50 : null,
       ),
@@ -636,7 +637,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
+                        color: context.colorScheme.surfaceVariant // was Colors.grey.shade800,
                       ),
                     ),
                     if (module.isPremium) ...[
@@ -668,7 +669,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.orange.shade100,
+                          color: AppColors.warning.shade100,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -676,7 +677,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color: Colors.orange.shade800,
+                            color: AppColors.warning.shade800,
                           ),
                         ),
                       ),
@@ -688,7 +689,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                   module.description,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
                   ),
                 ),
                 if (hasDependencies) ...[
@@ -698,7 +699,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                       Icon(
                         Icons.link,
                         size: 12,
-                        color: Colors.grey.shade500,
+                        color: context.colorScheme.surfaceVariant // was Colors.grey.shade500,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -706,7 +707,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,
-                          color: Colors.grey.shade500,
+                          color: context.colorScheme.surfaceVariant // was Colors.grey.shade500,
                         ),
                       ),
                     ],
@@ -742,7 +743,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
             child: const Text('Continuer à éditer'),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () {
               Navigator.of(context).pop();
               context.go('/superadmin/restaurants/${widget.restaurantId}');

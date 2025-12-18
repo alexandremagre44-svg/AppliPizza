@@ -1,4 +1,5 @@
 // lib/builder/runtime/modules/payment_module_wrapper.dart
+import '../../white_label/theme/theme_extensions.dart';
 // Wrapper for payment module that integrates with Riverpod providers
 
 import 'package:flutter/material.dart';

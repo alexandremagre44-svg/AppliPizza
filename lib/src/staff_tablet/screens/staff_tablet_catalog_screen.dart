@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/staff_tablet/screens/staff_tablet_catalog_screen.dart
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import '../../models/product.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../design_system/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 import '../providers/staff_tablet_cart_provider.dart';
 import '../providers/staff_tablet_auth_provider.dart';
 import '../widgets/staff_tablet_cart_summary.dart';
@@ -35,7 +37,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
     final cart = ref.watch(staffTabletCartProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: context.colorScheme.surfaceVariant // was Colors.grey[100],
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         title: const Text(
@@ -43,7 +45,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: context.onPrimary,
           ),
         ),
         actions: [
@@ -52,7 +54,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
             icon: const Icon(Icons.history, size: 28),
             onPressed: () => context.push('/staff-tablet/history'),
             tooltip: 'Historique',
-            color: Colors.white,
+            color: context.onPrimary,
           ),
           // Logout button
           IconButton(
@@ -64,7 +66,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
               }
             },
             tooltip: 'Déconnexion',
-            color: Colors.white,
+            color: context.onPrimary,
           ),
           const SizedBox(width: 8),
         ],
@@ -78,7 +80,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
               children: [
                 // Category tabs
                 Container(
-                  color: Colors.white,
+                  color: context.onPrimary,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.all(16),
@@ -110,11 +112,11 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[400]),
+                              Icon(Icons.inventory_2_outlined, size: 64, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
                               const SizedBox(height: 16),
                               Text(
                                 'Aucun produit dans cette catégorie',
-                                style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                                style: TextStyle(fontSize: 18, color: context.colorScheme.surfaceVariant // was Colors.grey[600]),
                               ),
                             ],
                           ),
@@ -138,7 +140,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                     },
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (error, stack) => Center(
-                      child: Text('Erreur: $error', style: const TextStyle(color: Colors.red)),
+                      child: Text('Erreur: $error', style: const TextStyle(color: AppColors.error)),
                     ),
                   ),
                 ),
@@ -150,10 +152,10 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
           Container(
             width: 380,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.onPrimary,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: context.colorScheme.shadow.withOpacity(0.1),
                   blurRadius: 8,
                   offset: const Offset(-2, 0),
                 ),
@@ -190,10 +192,10 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                       end: Alignment.bottomRight,
                     )
                   : null,
-              color: isSelected ? null : Colors.white,
+              color: isSelected ? null : context.onPrimary,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
                 width: isSelected ? 2 : 1.5,
               ),
               boxShadow: isSelected
@@ -206,7 +208,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                     ]
                   : [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: context.colorScheme.shadow.withOpacity(0.05),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -218,7 +220,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                 Icon(
                   icon,
                   size: 22,
-                  color: isSelected ? Colors.white : AppColors.primary,
+                  color: isSelected ? context.onPrimary : AppColors.primary,
                 ),
                 const SizedBox(width: 10),
                 Text(
@@ -226,7 +228,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: isSelected ? Colors.white : Colors.grey[800],
+                    color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant // was Colors.grey[800],
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -271,7 +273,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
               SnackBar(
                 content: Row(
                   children: [
-                    const Icon(Icons.check_circle, color: Colors.white),
+                    const Icon(Icons.check_circle, color: context.onPrimary),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -310,7 +312,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return Container(
-                                color: Colors.grey[100],
+                                color: context.colorScheme.surfaceVariant // was Colors.grey[100],
                                 child: Center(
                                   child: CircularProgressIndicator(
                                     value: loadingProgress.expectedTotalBytes != null
@@ -326,18 +328,18 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                               );
                             },
                             errorBuilder: (context, error, stackTrace) => Container(
-                              color: Colors.grey[100],
+                              color: context.colorScheme.surfaceVariant // was Colors.grey[100],
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.image_not_supported_rounded,
-                                      size: 48, color: Colors.grey[400]),
+                                      size: 48, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
                                   const SizedBox(height: 8),
                                   Text(
                                     'Image non disponible',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey[500],
+                                      color: context.colorScheme.surfaceVariant // was Colors.grey[500],
                                     ),
                                   ),
                                 ],
@@ -345,18 +347,18 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                             ),
                           )
                         : Container(
-                            color: Colors.grey[100],
+                            color: context.colorScheme.surfaceVariant // was Colors.grey[100],
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.fastfood_rounded,
-                                    size: 56, color: Colors.grey[400]),
+                                    size: 56, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
                                 const SizedBox(height: 8),
                                 Text(
                                   'Pas d\'image',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey[500],
+                                    color: context.colorScheme.surfaceVariant // was Colors.grey[500],
                                   ),
                                 ),
                               ],
@@ -375,7 +377,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
                           colors: [
-                            Colors.black.withOpacity(0.3),
+                            context.colorScheme.shadow.withOpacity(0.3),
                             Colors.transparent,
                           ],
                         ),
@@ -392,7 +394,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.onPrimary,
                   borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
                 ),
                 child: Column(
@@ -404,7 +406,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.grey[900],
+                        color: context.colorScheme.surfaceVariant // was Colors.grey[900],
                         height: 1.2,
                       ),
                       maxLines: 2,
@@ -449,7 +451,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                           ),
                           child: const Icon(
                             Icons.add_rounded,
-                            color: Colors.white,
+                            color: context.onPrimary,
                             size: 22,
                           ),
                         ),
@@ -474,8 +476,8 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.red[900]!,
-              Colors.red[700]!,
+              AppColors.error[900]!,
+              AppColors.error[700]!,
             ],
           ),
         ),
@@ -490,7 +492,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                   Icon(
                     Icons.lock,
                     size: 80,
-                    color: Colors.red,
+                    color: AppColors.error,
                   ),
                   SizedBox(height: AppSpacing.lg),
                   Text(

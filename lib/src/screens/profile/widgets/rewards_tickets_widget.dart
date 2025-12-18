@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/profile/widgets/rewards_tickets_widget.dart
 // Display active reward tickets in profile screen (Material 3)
 
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../design_system/app_theme.dart';
+import '../../../../white_label/theme/theme_extensions.dart';
 import '../../../core/constants.dart';
 import '../../../models/reward_ticket.dart';
 import '../../../models/app_texts_config.dart';

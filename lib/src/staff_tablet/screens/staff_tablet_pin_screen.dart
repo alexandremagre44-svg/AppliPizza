@@ -1,7 +1,9 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/staff_tablet/screens/staff_tablet_pin_screen.dart
 
 import 'package:flutter/material.dart';
 import '../../design_system/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/staff_tablet_auth_provider.dart';
@@ -71,8 +73,8 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.red[900]!,
-                Colors.red[700]!,
+                AppColors.error[900]!,
+                AppColors.error[700]!,
               ],
             ),
           ),
@@ -87,7 +89,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                     Icon(
                       Icons.lock,
                       size: 80,
-                      color: Colors.red,
+                      color: AppColors.error,
                     ),
                     SizedBox(height: AppSpacing.lg),
                     Text(
@@ -180,7 +182,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                             child: const Icon(
                               Icons.point_of_sale_rounded,
                               size: 64,
-                              color: Colors.white,
+                              color: context.onPrimary,
                             ),
                           ),
                         );
@@ -192,7 +194,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                       style: TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[900],
+                        color: context.colorScheme.surfaceVariant // was Colors.grey[900],
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -201,7 +203,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                       'Entrez votre code PIN',
                       style: TextStyle(
                         fontSize: 17,
-                        color: Colors.grey[600],
+                        color: context.colorScheme.surfaceVariant // was Colors.grey[600],
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -223,18 +225,18 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: isFilled
-                                  ? (_isError ? Colors.red[600] : AppColors.primary)
+                                  ? (_isError ? AppColors.error[600] : AppColors.primary)
                                   : Colors.transparent,
                               border: Border.all(
                                 color: _isError
-                                    ? Colors.red[600]!
-                                    : (isFilled ? AppColors.primary! : Colors.grey[400]!),
+                                    ? AppColors.error[600]!
+                                    : (isFilled ? AppColors.primary! : context.colorScheme.surfaceVariant // was Colors.grey[400]!),
                                 width: 2.5,
                               ),
                               boxShadow: isFilled
                                   ? [
                                       BoxShadow(
-                                        color: (_isError ? Colors.red : AppColors.primary)
+                                        color: (_isError ? AppColors.error : AppColors.primary)
                                             .withOpacity(0.3),
                                         blurRadius: 8,
                                         spreadRadius: 1,
@@ -259,10 +261,10 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                                   vertical: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.red[50],
+                                  color: AppColors.error[50],
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: Colors.red[200]!,
+                                    color: AppColors.error[200]!,
                                     width: 1,
                                   ),
                                 ),
@@ -271,14 +273,14 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                                   children: [
                                     Icon(
                                       Icons.error_outline,
-                                      color: Colors.red[700],
+                                      color: AppColors.error[700],
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
                                       'Code PIN incorrect',
                                       style: TextStyle(
-                                        color: Colors.red[700],
+                                        color: AppColors.error[700],
                                         fontSize: 15,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -315,13 +317,13 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                       onPressed: () => context.go('/menu'),
                       icon: Icon(
                         Icons.arrow_back_rounded,
-                        color: Colors.grey[600],
+                        color: context.colorScheme.surfaceVariant // was Colors.grey[600],
                         size: 20,
                       ),
                       label: Text(
                         'Retour à l\'accueil',
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: context.colorScheme.surfaceVariant // was Colors.grey[600],
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -351,15 +353,15 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            color: context.colorScheme.surfaceVariant // was Colors.grey[50],
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.grey[300]!,
+              color: context.colorScheme.surfaceVariant // was Colors.grey[300]!,
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: context.colorScheme.shadow.withOpacity(0.05),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -371,7 +373,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
+                color: context.colorScheme.surfaceVariant // was Colors.grey[800],
               ),
             ),
           ),

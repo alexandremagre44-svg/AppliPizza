@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/pos/widgets/pos_cash_payment_modal.dart
 /// 
 /// Cash payment modal with change calculation
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../design_system/app_theme.dart';
+import '../../../../../white_label/theme/theme_extensions.dart';
 
 /// Cash payment modal
 class PosCashPaymentModal extends ConsumerStatefulWidget {
@@ -130,7 +132,7 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: context.colorScheme.surfaceVariant // was Colors.grey[100],
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -213,10 +215,10 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _change! >= 0 ? Colors.green[50] : Colors.red[50],
+                  color: _change! >= 0 ? AppColors.success[50] : AppColors.error[50],
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _change! >= 0 ? Colors.green : Colors.red,
+                    color: _change! >= 0 ? AppColors.success : AppColors.error,
                     width: 2,
                   ),
                 ),
@@ -227,7 +229,7 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
                       children: [
                         Icon(
                           _change! >= 0 ? Icons.check_circle : Icons.error,
-                          color: _change! >= 0 ? Colors.green[700] : Colors.red[700],
+                          color: _change! >= 0 ? AppColors.success[700] : AppColors.error[700],
                           size: 28,
                         ),
                         const SizedBox(width: 12),
@@ -236,7 +238,7 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: _change! >= 0 ? Colors.green[900] : Colors.red[900],
+                            color: _change! >= 0 ? AppColors.success[900] : AppColors.error[900],
                           ),
                         ),
                       ],
@@ -247,7 +249,7 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green[700],
+                          color: AppColors.success[700],
                         ),
                       ),
                   ],
@@ -283,7 +285,7 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[600],
+                      backgroundColor: AppColors.success[600],
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -294,7 +296,7 @@ class _PosCashPaymentModalState extends ConsumerState<PosCashPaymentModal> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: context.onPrimary,
                       ),
                     ),
                   ),
@@ -325,9 +327,9 @@ class _QuickAmountButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: context.colorScheme.surfaceVariant // was Colors.grey[200],
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[400]!),
+          border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey[400]!),
         ),
         child: Text(
           label,

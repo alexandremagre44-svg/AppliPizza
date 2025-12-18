@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/menu/menu_screen.dart
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'menu_customization_modal.dart';
 import '../home/pizza_customization_modal.dart';
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../../builder/models/models.dart';
 import '../../../builder/providers/builder_providers.dart';
 import '../../../builder/preview/builder_runtime_renderer.dart';
@@ -88,10 +90,10 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                   // Continue even if one provider fails
                 }
               },
-              color: AppColors.primaryRed,
+              color: context.primaryColor,
               child: BuilderRuntimeRenderer(
                 blocks: builderPage.publishedLayout,
-                backgroundColor: Colors.white,
+                backgroundColor: context.onPrimary,
                 wrapInScrollView: true,
               ),
             ),
@@ -156,11 +158,11 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
             // refactor container style → app_theme standard
             child: Container(
               decoration: BoxDecoration(
-                color: AppColors.surfaceWhite,
+                color: context.surfaceColor,
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: context.colorScheme.shadow.withOpacity(0.15),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -170,7 +172,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Rechercher une pizza, boisson...',
-                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  hintStyle: TextStyle(color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
                   prefixIcon: Icon(
                     Icons.search,
                     color: Theme.of(context).colorScheme.primary,
@@ -222,12 +224,12 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                     decoration: BoxDecoration(
                       color: isSelected 
                           ? Theme.of(context).colorScheme.primary 
-                          : Colors.white,
+                          : context.onPrimary,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected
                             ? Colors.transparent
-                            : Colors.grey[300]!,
+                            : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
                         width: 1.5,
                       ),
                       boxShadow: isSelected
@@ -254,7 +256,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                           child: Text(
                             category,
                             style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black87,
+                              color: isSelected ? context.onPrimary : Colors.black87,
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
                             ),
@@ -321,7 +323,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                                   SnackBar(
                                     content: Row(
                                       children: [
-                                        const Icon(Icons.check_circle, color: Colors.white),
+                                        const Icon(Icons.check_circle, color: context.onPrimary),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Text('${product.name} ajouté au panier !'),
@@ -345,7 +347,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
+                    Icon(Icons.error_outline, size: 60, color: AppColors.error[300]),
                     const SizedBox(height: 16),
                     Text('Erreur de chargement: $error'),
                     const SizedBox(height: 16),
@@ -371,20 +373,20 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           Icon(
             Icons.search_off,
             size: 80,
-            color: Colors.grey[400],
+            color: context.colorScheme.surfaceVariant // was Colors.grey[400],
           ),
           const SizedBox(height: 16),
           Text(
             'Aucun résultat trouvé',
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Colors.grey[600],
+                  color: context.colorScheme.surfaceVariant // was Colors.grey[600],
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'Essayez de modifier votre recherche',
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: Colors.grey[500],
+                  color: context.colorScheme.surfaceVariant // was Colors.grey[500],
                 ),
           ),
         ],

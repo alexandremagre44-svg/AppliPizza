@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/ingredients_admin_screen.dart
 // Écran d'administration pour gérer les ingrédients universels
 
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../models/product.dart';
 import '../../providers/ingredient_provider.dart';
 import '../../services/firestore_ingredient_service.dart';

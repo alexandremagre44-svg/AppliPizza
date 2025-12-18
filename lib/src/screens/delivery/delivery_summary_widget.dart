@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 /// lib/src/screens/delivery/delivery_summary_widget.dart
 ///
 /// Widget récapitulatif de la livraison pour le checkout.

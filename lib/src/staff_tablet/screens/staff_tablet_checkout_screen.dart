@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/staff_tablet/screens/staff_tablet_checkout_screen.dart
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../design_system/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../models/order.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -88,7 +90,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
           builder: (context) => AlertDialog(
             title: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green[700], size: 32),
+                Icon(Icons.check_circle, color: AppColors.success[700], size: 32),
                 const SizedBox(width: 12),
                 const Text('Commande créée'),
               ],
@@ -105,7 +107,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: context.colorScheme.surfaceVariant // was Colors.grey[100],
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
@@ -164,7 +166,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: context.onPrimary,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 ),
                 child: const Text('Nouvelle commande', style: TextStyle(fontSize: 16)),
@@ -178,7 +180,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
-            backgroundColor: Colors.red[700],
+            backgroundColor: AppColors.error[700],
             duration: const Duration(seconds: 4),
           ),
         );
@@ -216,7 +218,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
     final cart = ref.watch(staffTabletCartProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: context.colorScheme.surfaceVariant // was Colors.grey[100],
       appBar: AppBar(
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -228,7 +230,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 26),
+          icon: const Icon(Icons.arrow_back_rounded, color: context.onPrimary, size: 26),
           onPressed: () => context.pop(),
         ),
         title: Row(
@@ -236,12 +238,12 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: context.onPrimary.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
                 Icons.receipt_long_rounded,
-                color: Colors.white,
+                color: context.onPrimary,
                 size: 24,
               ),
             ),
@@ -251,7 +253,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
-                color: Colors.white,
+                color: context.onPrimary,
                 letterSpacing: 0.3,
               ),
             ),
@@ -264,7 +266,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey[300]),
+                  Icon(Icons.shopping_cart_outlined, size: 80, color: context.colorScheme.surfaceVariant // was Colors.grey[300]),
                   const SizedBox(height: 16),
                   const Text(
                     'Le panier est vide',
@@ -275,7 +277,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                     onPressed: () => context.pop(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: context.onPrimary,
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     ),
                     child: const Text('Retour au catalogue', style: TextStyle(fontSize: 16)),
@@ -358,7 +360,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                                       },
                                       selectedColor: AppColors.primary,
                                       labelStyle: TextStyle(
-                                        color: _selectedTimeSlot == slot ? Colors.white : Colors.black,
+                                        color: _selectedTimeSlot == slot ? context.onPrimary : Colors.black,
                                       ),
                                     );
                                   }).toList(),
@@ -419,14 +421,14 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                             gradient: _isProcessing
                                 ? null
                                 : LinearGradient(
-                                    colors: [Colors.green[600]!, Colors.green[800]!],
+                                    colors: [AppColors.success[600]!, AppColors.success[800]!],
                                   ),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: _isProcessing
                                 ? null
                                 : [
                                     BoxShadow(
-                                      color: Colors.green.withOpacity(0.4),
+                                      color: AppColors.success.withOpacity(0.4),
                                       blurRadius: 16,
                                       offset: const Offset(0, 6),
                                     ),
@@ -440,7 +442,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                                     width: 26,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 3,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(context.onPrimary),
                                     ),
                                   )
                                 : const Icon(
@@ -457,8 +459,8 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
-                                  _isProcessing ? Colors.grey[400] : Colors.transparent,
-                              foregroundColor: Colors.white,
+                                  _isProcessing ? context.colorScheme.surfaceVariant // was Colors.grey[400] : Colors.transparent,
+                              foregroundColor: context.onPrimary,
                               minimumSize: const Size(double.infinity, 72),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
@@ -489,8 +491,8 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.white,
-              Colors.grey[50]!,
+              context.onPrimary,
+              context.colorScheme.surfaceVariant // was Colors.grey[50]!,
             ],
           ),
         ),
@@ -510,7 +512,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   ),
                   child: const Icon(
                     Icons.shopping_bag_rounded,
-                    color: Colors.white,
+                    color: context.onPrimary,
                     size: 26,
                   ),
                 ),
@@ -520,7 +522,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: Colors.grey[900],
+                    color: context.colorScheme.surfaceVariant // was Colors.grey[900],
                   ),
                 ),
               ],
@@ -539,9 +541,9 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.onPrimary,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey[200]!, width: 1),
+                border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey[200]!, width: 1),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -574,7 +576,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey[800],
+                              color: context.colorScheme.surfaceVariant // was Colors.grey[800],
                             ),
                           ),
                         ),
@@ -586,7 +588,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
-                      color: Colors.grey[900],
+                      color: context.colorScheme.surfaceVariant // was Colors.grey[900],
                     ),
                   ),
                 ],
@@ -624,7 +626,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: Colors.grey[900],
+                          color: context.colorScheme.surfaceVariant // was Colors.grey[900],
                         ),
                       ),
                     ],
@@ -659,7 +661,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
+          color: context.onPrimary,
         ),
         padding: const EdgeInsets.all(22),
         child: Column(
@@ -683,7 +685,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
-                      color: Colors.grey[900],
+                      color: context.colorScheme.surfaceVariant // was Colors.grey[900],
                     ),
                   ),
                 ),
@@ -715,8 +717,8 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.red[900]!,
-              Colors.red[700]!,
+              AppColors.error[900]!,
+              AppColors.error[700]!,
             ],
           ),
         ),
@@ -731,7 +733,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   Icon(
                     Icons.lock,
                     size: 80,
-                    color: Colors.red,
+                    color: AppColors.error,
                   ),
                   SizedBox(height: AppSpacing.lg),
                   Text(

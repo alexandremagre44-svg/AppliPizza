@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../src/providers/restaurant_provider.dart';

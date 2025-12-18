@@ -1,8 +1,10 @@
 // lib/src/widgets/home/hero_banner.dart
 // Hero banner for home page with image, title, subtitle and CTA button
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 /// Hero banner widget for the home page
 /// Displays a prominent banner with image, title, subtitle and CTA button
@@ -59,8 +61,8 @@ class HeroBanner extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.3),
-                    Colors.black.withOpacity(0.6),
+                    context.colorScheme.shadow.withOpacity(0.3),
+                    context.colorScheme.shadow.withOpacity(0.6),
                   ],
                 ),
               ),
@@ -76,22 +78,22 @@ class HeroBanner extends StatelessWidget {
                   Text(
                     title,
                     style: AppTextStyles.displayMedium.copyWith(
-                      color: AppColors.surfaceWhite,
+                      color: context.onPrimary,
                     ),
                   ),
                   SizedBox(height: AppSpacing.md),
                   Text(
                     subtitle,
                     style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.surfaceWhite.withOpacity(0.95),
+                      color: context.onPrimary.withOpacity(0.95),
                     ),
                   ),
                   SizedBox(height: AppSpacing.xxl),
                   ElevatedButton(
                     onPressed: onTap,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.surfaceWhite,
-                      foregroundColor: AppColors.primaryRed,
+                      backgroundColor: context.surfaceColor,
+                      foregroundColor: context.primaryColor,
                       padding: AppSpacing.buttonPadding,
                       elevation: 4,
                     ),
@@ -113,8 +115,8 @@ class HeroBanner extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryRed,
-            AppColors.primaryRedDark,
+            context.primaryColor,
+            context.primaryColor.withOpacity(0.8),
           ],
         ),
       ),

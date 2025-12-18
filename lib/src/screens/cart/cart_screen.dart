@@ -1,6 +1,7 @@
 // lib/src/screens/cart/cart_screen.dart
 // CartScreen redesigné - Style Pizza Deli'Zza
 // PROMPT 3F - Uses centralized text system
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,7 @@ import '../../theme/app_theme.dart';
 import '../../../white_label/core/module_id.dart';
 import '../delivery/delivery_summary_widget.dart';
 import '../delivery/delivery_not_available_widget.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 /// Écran du panier - Redesign Pizza Deli'Zza
 /// Style cohérent avec le reste de l'application
@@ -105,13 +107,13 @@ class CartScreen extends ConsumerWidget {
               width: 140,
               height: 140,
               decoration: const BoxDecoration(
-                color: AppColors.backgroundLight,
+                color: context.backgroundColor,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.shopping_bag_outlined,
                 size: 70,
-                color: AppColors.textLight,
+                color: context.textSecondary,
               ),
             ),
             SizedBox(height: AppSpacing.xxxl),
@@ -153,7 +155,7 @@ class CartScreen extends ConsumerWidget {
     return Card(
       margin: EdgeInsets.only(bottom: AppSpacing.md),
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: context.colorScheme.shadow.withOpacity(0.1),
       shape: RoundedRectangleBorder(borderRadius: AppRadius.button),
       child: Padding(
         padding: AppSpacing.paddingMD,
@@ -172,11 +174,11 @@ class CartScreen extends ConsumerWidget {
                   return Container(
                     width: 70,
                     height: 70,
-                    color: AppColors.backgroundLight,
+                    color: context.backgroundColor,
                     child: const Icon(
                       Icons.local_pizza,
                       size: 30,
-                      color: AppColors.textLight,
+                      color: context.textSecondary,
                     ),
                   );
                 },
@@ -439,7 +441,7 @@ class CartScreen extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: deliveryFee == 0 ? Colors.green : AppTheme.textDark,
+                      color: deliveryFee == 0 ? AppColors.success : context.onSurface,
                       fontFamily: 'Poppins',
                     ),
                   ),
@@ -483,7 +485,7 @@ class CartScreen extends ConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryRed,
                   foregroundColor: AppTheme.surfaceWhite,
-                  disabledBackgroundColor: Colors.grey.shade300,
+                  disabledBackgroundColor: context.colorScheme.surfaceVariant,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -598,7 +600,7 @@ class CartScreen extends ConsumerWidget {
           color: isSelected ? AppTheme.primaryRed.withOpacity(0.1) : AppTheme.backgroundLight,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? AppTheme.primaryRed : Colors.transparent,
+            color: isSelected ? context.primaryColor : Colors.transparent,
             width: 2,
           ),
         ),

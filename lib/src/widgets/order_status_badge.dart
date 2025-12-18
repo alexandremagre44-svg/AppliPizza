@@ -1,9 +1,11 @@
 // lib/src/widgets/order_status_badge.dart
 // Badge de statut pour afficher l'état d'une commande
+// MIGRATED to WL V2 Theme - Uses semantic colors from AppColors
 
 import 'package:flutter/material.dart';
 import '../models/order.dart';
 import '../theme/app_theme.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 class OrderStatusBadge extends StatelessWidget {
   final String status;
@@ -54,36 +56,38 @@ class OrderStatusBadge extends StatelessWidget {
   }
   
   _StatusConfig _getStatusConfig(String status) {
+    // WL V2: Semantic colors (warning/success/error) kept as AppColors
+    // for universal meaning. Text colors use theme.
     switch (status) {
       case OrderStatus.pending:
         return _StatusConfig(
           emoji: '🕓',
-          color: AppColors.warningOrange,
+          color: AppColors.warning, // Semantic: orange
         );
       case OrderStatus.preparing:
         return _StatusConfig(
           emoji: '🧑‍🍳',
-          color: AppColors.infoBlue,
+          color: AppColors.info, // Semantic: blue
         );
       case OrderStatus.ready:
         return _StatusConfig(
           emoji: '✅',
-          color: AppColors.successGreen,
+          color: AppColors.success, // Semantic: green
         );
       case OrderStatus.delivered:
         return _StatusConfig(
           emoji: '📦',
-          color: AppColors.textMedium,
+          color: AppColors.textSecondary, // Theme text secondary
         );
       case OrderStatus.cancelled:
         return _StatusConfig(
           emoji: '❌',
-          color: AppColors.errorRed,
+          color: AppColors.error, // Semantic: red
         );
       default:
         return _StatusConfig(
           emoji: '❓',
-          color: AppColors.textLight,
+          color: AppColors.textTertiary, // Theme text tertiary
         );
     }
   }

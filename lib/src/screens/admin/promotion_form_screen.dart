@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/promotion_form_screen.dart
 // Formulaire de création/modification de promotion
 
@@ -7,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
+import '../../../white_label/theme/theme_extensions.dart';
 import '../../models/promotion.dart';
 import '../../providers/promotion_provider.dart';
 

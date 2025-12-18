@@ -1,7 +1,9 @@
-﻿// lib/src/widgets/product_detail_modal.dart
+// lib/src/widgets/product_detail_modal.dart
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 class ProductDetailModal extends StatefulWidget {
   final Product product;
@@ -70,9 +72,9 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
       maxChildSize: 0.95,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: context.surfaceColor, // WL V2: Theme surface
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             children: [
@@ -110,7 +112,7 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                           Text(
                             widget.product.description,
                             style: TextStyle(
-                              color: Colors.grey[700],
+                              color: context.textSecondary, // WL V2: Theme text
                               fontSize: 16,
                             ),
                           ),
@@ -130,8 +132,8 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                               children: widget.product.baseIngredients
                                   .map((ing) => Chip(
                                         label: Text(ing),
-                                        backgroundColor: Colors.red.shade50,
-                                        labelStyle: const TextStyle(color: Color(0xFFB00020)),
+                                        backgroundColor: context.primaryContainer, // WL V2: Theme primary container
+                                        labelStyle: TextStyle(color: context.onPrimaryContainer), // WL V2: Contrast
                                       ))
                                   .toList(),
                             ),
@@ -182,10 +184,10 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.surfaceColor, // WL V2: Theme surface
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: context.colorScheme.shadow.withOpacity(0.1), // WL V2: Theme shadow
                       blurRadius: 10,
                       spreadRadius: 2,
                     ),
@@ -198,8 +200,8 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFB00020),
-                    foregroundColor: Colors.white,
+                    backgroundColor: context.primaryColor, // WL V2: Theme primary
+                    foregroundColor: context.onPrimary, // WL V2: Contrast color
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),

@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/studio/roulette_admin_settings_screen.dart
 // Unified admin screen for roulette settings and rules
 
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../design_system/app_theme.dart'; // Keep for AppSpacing, AppRadius, AppTextStyles
+import '../../../../white_label/theme/theme_extensions.dart';
 import '../../../services/roulette_rules_service.dart';
 import '../../../services/roulette_settings_service.dart';
 
@@ -132,7 +134,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Configuration sauvegardée avec succès'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -305,10 +307,10 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
             Container(
               padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: context.primaryColor.withOpacity(0.1),
                 borderRadius: AppRadius.card,
                 border: Border.all(
-                  color: Colors.blue.withOpacity(0.3),
+                  color: context.primaryColor.withOpacity(0.3),
                   width: 1,
                 ),
               ),
@@ -316,7 +318,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: Colors.blue,
+                    color: context.primaryColor,
                     size: 20,
                   ),
                   SizedBox(width: AppSpacing.sm),
@@ -583,10 +585,10 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
             Container(
               padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: context.primaryColor.withOpacity(0.1),
                 borderRadius: AppRadius.card,
                 border: Border.all(
-                  color: Colors.blue.withOpacity(0.3),
+                  color: context.primaryColor.withOpacity(0.3),
                   width: 1,
                 ),
               ),
@@ -594,7 +596,7 @@ class _RouletteAdminSettingsScreenState extends ConsumerState<RouletteAdminSetti
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: Colors.blue,
+                    color: context.primaryColor,
                     size: 20,
                   ),
                   SizedBox(width: AppSpacing.sm),

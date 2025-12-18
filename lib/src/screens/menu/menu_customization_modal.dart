@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/menu/menu_customization_modal.dart
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import '../../providers/cart_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../models/product.dart';
 import '../../design_system/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 const _uuid = Uuid();
 
@@ -231,7 +233,7 @@ class _MenuCustomizationModalState extends ConsumerState<MenuCustomizationModal>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
+                Icon(Icons.error_outline, size: 60, color: AppColors.error[300]),
                 const SizedBox(height: 16),
                 Text('Erreur: $error'),
               ],

@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/builder/runtime/dynamic_builder_page_screen.dart
 // Screen for displaying dynamic Builder pages via /page/:pageId route
 // THEME INTEGRATION: Loads published theme and passes it to blocks via BuilderThemeProvider
@@ -119,7 +120,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                           Icon(
                             Icons.visibility_off_outlined,
                             size: 80,
-                            color: Colors.grey[400],
+                            color: context.colorScheme.surfaceVariant // was Colors.grey[400],
                           ),
                           const SizedBox(height: 24),
                           Text(
@@ -134,7 +135,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.grey[600],
+                              color: context.colorScheme.surfaceVariant // was Colors.grey[600],
                             ),
                           ),
                         ],
@@ -161,7 +162,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                   Icon(
                     Icons.article_outlined,
                     size: 80,
-                    color: Colors.grey[400],
+                    color: context.colorScheme.surfaceVariant // was Colors.grey[400],
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -176,7 +177,7 @@ class DynamicBuilderPageScreen extends ConsumerWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey[600],
+                      color: context.colorScheme.surfaceVariant // was Colors.grey[600],
                     ),
                   ),
                   const SizedBox(height: 32),

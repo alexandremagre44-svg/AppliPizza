@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/src/screens/admin/pos/widgets/pos_menu_customization_modal.dart
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../models/product.dart';
 import '../../../../design_system/app_theme.dart';
+import '../../../../../white_label/theme/theme_extensions.dart';
 import '../providers/pos_cart_provider.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../../providers/product_provider.dart';
@@ -36,7 +38,7 @@ class _PosMenuCustomizationModalState
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez sélectionner une pizza'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -72,7 +74,7 @@ class _PosMenuCustomizationModalState
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.white),
+            const Icon(Icons.check_circle, color: context.onPrimary),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -110,7 +112,7 @@ class _PosMenuCustomizationModalState
         return Container(
           height: MediaQuery.of(context).size.height * 0.85,
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: context.onPrimary,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
@@ -138,14 +140,14 @@ class _PosMenuCustomizationModalState
                                 width: 70,
                                 height: 70,
                                 color: Colors.white24,
-                                child: const Icon(Icons.restaurant_menu, color: Colors.white, size: 35),
+                                child: const Icon(Icons.restaurant_menu, color: context.onPrimary, size: 35),
                               ),
                             )
                           : Container(
                               width: 70,
                               height: 70,
                               color: Colors.white24,
-                              child: const Icon(Icons.restaurant_menu, color: Colors.white, size: 35),
+                              child: const Icon(Icons.restaurant_menu, color: context.onPrimary, size: 35),
                             ),
                     ),
                     const SizedBox(width: 16),
@@ -158,7 +160,7 @@ class _PosMenuCustomizationModalState
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              color: Colors.white,
+                              color: context.onPrimary,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -166,7 +168,7 @@ class _PosMenuCustomizationModalState
                             '${widget.menu.price.toStringAsFixed(2)} €',
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.white.withOpacity(0.9),
+                              color: context.onPrimary.withOpacity(0.9),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -175,7 +177,7 @@ class _PosMenuCustomizationModalState
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                      icon: const Icon(Icons.close, color: context.onPrimary, size: 28),
                     ),
                   ],
                 ),
@@ -231,10 +233,10 @@ class _PosMenuCustomizationModalState
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.onPrimary,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: context.colorScheme.shadow.withOpacity(0.1),
                       blurRadius: 8,
                       offset: const Offset(0, -2),
                     ),
@@ -249,7 +251,7 @@ class _PosMenuCustomizationModalState
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.success,
-                    foregroundColor: Colors.white,
+                    foregroundColor: context.onPrimary,
                     minimumSize: const Size(double.infinity, 60),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -307,10 +309,10 @@ class _ProductTile extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.primaryLighter : Colors.grey[50],
+              color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant // was Colors.grey[50],
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -327,15 +329,15 @@ class _ProductTile extends StatelessWidget {
                           errorBuilder: (_, __, ___) => Container(
                             width: 60,
                             height: 60,
-                            color: Colors.grey[200],
-                            child: Icon(Icons.fastfood, color: Colors.grey[400]),
+                            color: context.colorScheme.surfaceVariant // was Colors.grey[200],
+                            child: Icon(Icons.fastfood, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
                           ),
                         )
                       : Container(
                           width: 60,
                           height: 60,
-                          color: Colors.grey[200],
-                          child: Icon(Icons.fastfood, color: Colors.grey[400]),
+                          color: context.colorScheme.surfaceVariant // was Colors.grey[200],
+                          child: Icon(Icons.fastfood, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
                         ),
                 ),
                 const SizedBox(width: 14),
@@ -345,7 +347,7 @@ class _ProductTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: isSelected ? AppColors.primary : Colors.grey[800],
+                      color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[800],
                     ),
                   ),
                 ),

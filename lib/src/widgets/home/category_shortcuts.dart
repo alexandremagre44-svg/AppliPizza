@@ -1,9 +1,11 @@
 // lib/src/widgets/home/category_shortcuts.dart
 // Category shortcuts grid for home page
+// MIGRATED to WL V2 Theme - Uses theme colors
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
+import '../../../white_label/theme/theme_extensions.dart';
 
 /// Category shortcut button data
 class CategoryShortcut {
@@ -71,10 +73,10 @@ class _CategoryButton extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
         child: Material(
-          color: AppColors.surfaceWhite,
+          color: context.surfaceColor,
           borderRadius: AppRadius.radiusLG,
           elevation: 2,
-          shadowColor: Colors.black.withOpacity(0.1),
+          shadowColor: context.colorScheme.shadow.withOpacity(0.1),
           child: InkWell(
             onTap: () => context.push(category.route),
             borderRadius: AppRadius.radiusLG,
@@ -86,13 +88,13 @@ class _CategoryButton extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryRed.withOpacity(0.1),
+                      color: context.primaryColor.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       category.icon,
                       size: 28,
-                      color: AppColors.primaryRed,
+                      color: context.primaryColor,
                     ),
                   ),
                   SizedBox(height: AppSpacing.sm),
@@ -100,7 +102,7 @@ class _CategoryButton extends StatelessWidget {
                     child: Text(
                       category.name,
                       style: AppTextStyles.labelMedium.copyWith(
-                        color: AppColors.textDark,
+                        color: context.onSurface,
                         fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,

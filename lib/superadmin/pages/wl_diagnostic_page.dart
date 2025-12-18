@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/superadmin/pages/wl_diagnostic_page.dart
 // Page SuperAdmin pour diagnostiquer un restaurant et modifier ses modules
 
@@ -122,7 +123,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✅ Plan mis à jour avec succès'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -133,7 +134,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('❌ Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -178,7 +179,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const Icon(Icons.error_outline, size: 64, color: AppColors.error),
               const SizedBox(height: 16),
               Text(
                 _error!,
@@ -232,7 +233,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
           children: [
             Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.green),
+                const Icon(Icons.check_circle, color: AppColors.success),
                 const SizedBox(width: 8),
                 Text(
                   'Modules actifs (${activeModules.length})',
@@ -246,7 +247,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
             if (activeModules.isEmpty)
               Text(
                 'Aucun module actif',
-                style: TextStyle(color: Colors.grey[600]),
+                style: TextStyle(color: context.colorScheme.surfaceVariant // was Colors.grey[600]),
               )
             else
               Wrap(
@@ -265,8 +266,8 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
                     avatar: const Icon(Icons.check, size: 16),
                     label: Text(moduleId?.label ?? '⚠️ $module (unknown)'),
                     backgroundColor: moduleId != null
-                        ? Colors.green.shade100
-                        : Colors.orange.shade100,
+                        ? AppColors.success.shade100
+                        : AppColors.warning.shade100,
                   );
                 }).toList(),
               ),
@@ -287,7 +288,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
           children: [
             Row(
               children: [
-                const Icon(Icons.toggle_on, color: Colors.blue),
+                const Icon(Icons.toggle_on, color: context.primaryColor),
                 const SizedBox(width: 8),
                 Text(
                   'Tous les modules (${allModules.length})',
@@ -362,9 +363,9 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: context.colorScheme.surfaceVariant // was Colors.grey[100],
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey[300]!),
               ),
               constraints: const BoxConstraints(maxHeight: 400),
               child: SingleChildScrollView(

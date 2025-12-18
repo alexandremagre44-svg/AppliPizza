@@ -1,3 +1,4 @@
+// MIGRATED to WL V2 Theme - Uses theme colors
 // lib/builder/runtime/builder_theme_resolver.dart
 // Theme resolver for Builder B3 runtime
 //
@@ -60,7 +61,7 @@ class BuilderThemeResolver {
   static ButtonStyle getButtonStyle(ThemeConfig theme, BuildContext context) {
     return ElevatedButton.styleFrom(
       backgroundColor: theme.primaryColor,
-      foregroundColor: Colors.white,
+      foregroundColor: context.onPrimary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(theme.buttonRadius),
       ),
@@ -83,7 +84,7 @@ class BuilderThemeResolver {
     final brightness = theme.getEffectiveBrightness(context);
     final defaultBgColor = brightness == Brightness.dark
         ? const Color(0xFF424242)
-        : Colors.white;
+        : context.onPrimary;
 
     return BoxDecoration(
       color: backgroundColor ?? defaultBgColor,
@@ -91,7 +92,7 @@ class BuilderThemeResolver {
       boxShadow: elevation != null && elevation > 0
           ? [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: context.colorScheme.shadow.withOpacity(0.1),
                 blurRadius: elevation * 2,
                 offset: Offset(0, elevation),
               ),
