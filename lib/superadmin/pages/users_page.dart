@@ -8,6 +8,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import '../providers/superadmin_mock_providers.dart';
 import '../models/user_admin_meta.dart';
 
@@ -32,7 +34,7 @@ class UsersPage extends ConsumerWidget {
                 '${users.length} users',
                 style: TextStyle(
                   fontSize: 14,
-                  color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                  color: context.textSecondary,
                 ),
               ),
               ElevatedButton.icon(
@@ -60,13 +62,13 @@ class UsersPage extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: context.onPrimary,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+                border: Border.all(color: context.outlineVariant),
               ),
               child: ListView.separated(
                 padding: const EdgeInsets.all(0),
                 itemCount: users.length,
                 separatorBuilder: (context, index) =>
-                    Divider(height: 1, color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+                    Divider(height: 1, color: context.outlineVariant),
                 itemBuilder: (context, index) {
                   final user = users[index];
                   return _UserListItem(user: user);
@@ -187,7 +189,7 @@ class _UserListItem extends StatelessWidget {
                   '${user.email} • ${user.attachedRestaurants.length} restaurant(s)',
                   style: TextStyle(
                     fontSize: 12,
-                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                    color: context.textSecondary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -217,7 +219,7 @@ class _UserListItem extends StatelessWidget {
               // TODO: Implement user edit
               debugPrint('TODO: Edit user ${user.id}');
             },
-            icon: Icon(Icons.edit_outlined, color: context.colorScheme.surfaceVariant // was Colors.grey.shade600),
+            icon: Icon(Icons.edit_outlined, color: context.textSecondary),
             tooltip: 'Edit user',
           ),
         ],
