@@ -114,7 +114,7 @@ class RestaurantDetailPage extends ConsumerWidget {
             decoration: BoxDecoration(
               color: context.onPrimary,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: context.colorScheme.surfaceVariant ),
+              border: Border.all(color: context.colorScheme.surfaceVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,7 +263,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: context.onPrimary,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.colorScheme.surfaceVariant ),
+                  border: Border.all(color: context.colorScheme.surfaceVariant),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,7 +298,7 @@ class RestaurantDetailPage extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: context.onPrimary,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: context.colorScheme.surfaceVariant ),
+                border: Border.all(color: context.colorScheme.surfaceVariant),
               ),
               child: const Center(
                 child: CircularProgressIndicator(),
@@ -336,7 +336,7 @@ class RestaurantDetailPage extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: context.onPrimary,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.colorScheme.surfaceVariant ),
+                  border: Border.all(color: context.colorScheme.surfaceVariant),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,7 +384,7 @@ class RestaurantDetailPage extends ConsumerWidget {
             decoration: BoxDecoration(
               color: context.colorScheme.surfaceVariant ,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: context.colorScheme.surfaceVariant ),
+              border: Border.all(color: context.colorScheme.surfaceVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,7 +427,7 @@ class RestaurantDetailPage extends ConsumerWidget {
             decoration: BoxDecoration(
               color: context.onPrimary,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: context.colorScheme.surfaceVariant ),
+              border: Border.all(color: context.colorScheme.surfaceVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -632,7 +632,7 @@ class _ColorDetailRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: _parseColor(colorHex),
               borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: context.colorScheme.surfaceVariant ),
+              border: Border.all(color: context.colorScheme.surfaceVariant),
             ),
           ),
           const SizedBox(width: 8),

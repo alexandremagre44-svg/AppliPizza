@@ -81,7 +81,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [context.onPrimary, context.textSecondary,
+                colors: [context.onPrimary, context.textSecondary],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
@@ -329,7 +329,7 @@ class _OrderCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [context.onPrimary, context.textSecondary,
+              colors: [context.onPrimary, context.textSecondary],
             ),
           ),
           padding: const EdgeInsets.all(18),

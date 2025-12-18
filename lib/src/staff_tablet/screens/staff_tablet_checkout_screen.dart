@@ -461,7 +461,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
-                                  _isProcessing ? context.colorScheme.surfaceVariant ,
+                                  _isProcessing ? context.colorScheme.surfaceVariant : AppColors.primary,
                               foregroundColor: context.onPrimary,
                               minimumSize: const Size(double.infinity, 72),
                               shape: RoundedRectangleBorder(

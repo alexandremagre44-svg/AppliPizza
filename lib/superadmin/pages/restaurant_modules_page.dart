@@ -401,7 +401,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
             decoration: BoxDecoration(
               color: context.onPrimary,
               border: Border(
-                bottom: BorderSide(color: context.colorScheme.surfaceVariant ),
+                bottom: BorderSide(color: context.colorScheme.surfaceVariant),
               ),
             ),
             child: Column(
