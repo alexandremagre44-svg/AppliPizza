@@ -285,7 +285,7 @@ class _PosPizzaCustomizationModalState
                       const SizedBox(height: 12),
                       Text(
                         'Tapez pour retirer un ingrédient',
-                        style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant ),
+                        style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant),
                       ),
                       const SizedBox(height: 12),
                       Wrap(
@@ -338,7 +338,7 @@ class _PosPizzaCustomizationModalState
                       children: [
                         Text(
                           'Prix total',
-                          style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant ),
+                          style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant),
                         ),
                         Text(
                           '${totalPrice.toStringAsFixed(2)} €',

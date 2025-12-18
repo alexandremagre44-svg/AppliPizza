@@ -401,7 +401,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
             decoration: BoxDecoration(
               color: context.onPrimary,
               border: Border(
-                bottom: BorderSide(color: context.colorScheme.surfaceVariant),
+                bottom: BorderSide(color: context.outlineVariant),
               ),
             ),
             child: Column(
@@ -552,7 +552,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
       decoration: BoxDecoration(
         color: context.onPrimary,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.colorScheme.surfaceVariant ),
+        border: Border.all(color: context.colorScheme.surfaceVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -621,7 +621,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: context.colorScheme.surfaceVariant ),
+          top: BorderSide(color: context.colorScheme.surfaceVariant),
         ),
         color: hasChange ? Colors.yellow.shade50 : null,
       ),
@@ -671,7 +671,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.warning,
+                          color: AppColors.warningLight,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -679,7 +679,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.warning,
+                            color: AppColors.warningDark,
                           ),
                         ),
                       ),

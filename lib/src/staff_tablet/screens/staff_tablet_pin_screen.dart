@@ -232,7 +232,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                               border: Border.all(
                                 color: _isError
                                     ? AppColors.error[600]!
-                                    : (isFilled ? AppColors.primary! : context.textSecondary),
+                                    : (isFilled ? AppColors.primary : context.textSecondary),
                                 width: 2.5,
                               ),
                               boxShadow: isFilled

@@ -325,10 +325,10 @@ class _NewPageDialogState extends State<NewPageDialog> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: isSelected ? context.primaryColor.shade100 : context.colorScheme.surfaceVariant ,
+                            color: isSelected ? AppColors.primaryContainer : context.colorScheme.surfaceVariant,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant ,
+                              color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant,
                               width: isSelected ? 2 : 1,
                             ),
                           ),

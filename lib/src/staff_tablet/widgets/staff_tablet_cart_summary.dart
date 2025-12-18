@@ -145,7 +145,7 @@ class StaffTabletCartSummary extends ConsumerWidget {
           decoration: BoxDecoration(
             color: context.onPrimary,
             border: Border(
-              top: BorderSide(color: context.colorScheme.surfaceVariant ),
+              top: BorderSide(color: context.colorScheme.surfaceVariant),
             ),
             boxShadow: [
               BoxShadow(
@@ -163,14 +163,14 @@ class StaffTabletCartSummary extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: context.colorScheme.surfaceVariant ,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.colorScheme.surfaceVariant ),
+                  border: Border.all(color: context.colorScheme.surfaceVariant),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.calculate_rounded, color: context.colorScheme.surfaceVariant ),
+                        Icon(Icons.calculate_rounded, color: context.colorScheme.surfaceVariant),
                         const SizedBox(width: 10),
                         Text(
                           'Total',
@@ -329,7 +329,7 @@ class _CartItemTile extends ConsumerWidget {
       decoration: BoxDecoration(
         color: context.colorScheme.surfaceVariant ,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.colorScheme.surfaceVariant ),
+        border: Border.all(color: context.colorScheme.surfaceVariant),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,7 +358,7 @@ class _CartItemTile extends ConsumerWidget {
                         height: 70,
                         color: context.colorScheme.surfaceVariant ,
                         child: Icon(Icons.image_not_supported_rounded,
-                            color: context.colorScheme.surfaceVariant ),
+                            color: context.colorScheme.surfaceVariant),
                       ),
                     )
                   : Container(
@@ -366,7 +366,7 @@ class _CartItemTile extends ConsumerWidget {
                       height: 70,
                       color: context.colorScheme.surfaceVariant ,
                       child: Icon(Icons.fastfood_rounded,
-                          color: context.colorScheme.surfaceVariant ),
+                          color: context.colorScheme.surfaceVariant),
                     ),
             ),
           ),
@@ -416,7 +416,7 @@ class _CartItemTile extends ConsumerWidget {
                     Container(
                       decoration: BoxDecoration(
                         color: context.onPrimary,
-                        border: Border.all(color: context.colorScheme.surfaceVariant ),
+                        border: Border.all(color: context.colorScheme.surfaceVariant),
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
