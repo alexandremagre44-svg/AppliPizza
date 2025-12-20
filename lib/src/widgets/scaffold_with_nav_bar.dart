@@ -26,6 +26,12 @@
 // - _applyModuleFiltering provides safety layer for route security
 // - Does NOT filter pages based on plan.hasModule()
 //
+// BOTTOM NAVIGATION BAR HANDLING:
+// ================================
+// - 0 items: Shows centered placeholder "Aucun module actif"
+// - 1 item: Shows single module directly (no bottom bar - Flutter requires >= 2 items)
+// - 2+ items: Shows bottom navigation bar as normal
+//
 // Result: Builder controls presentation, WL controls access rights
 
 import 'package:flutter/foundation.dart';
