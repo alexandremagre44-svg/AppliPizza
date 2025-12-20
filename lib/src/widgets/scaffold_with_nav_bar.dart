@@ -59,40 +59,72 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     // Read unified navigation items from the new provider
     final navItemsAsync = ref.watch(navBarItemsProvider);
 
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: navItemsAsync.when(
-        data: (navItems) {
-          debugPrint('📱 [BottomNav] Loaded ${navItems.length} unified nav items');
-          
-          // If no nav items, hide the bottom navigation bar entirely
-          if (navItems.isEmpty) {
-            debugPrint('⚠️ No navigation items available, hiding bottom bar');
-            return null;
-          }
-          
-          // Convert NavBarItem list to BottomNavigationBarItem list
-          final bottomNavItems = _convertToBottomNavItems(navItems, totalItems);
-          
-          // Add admin tab if user is admin
-          if (isAdmin) {
-            bottomNavItems.add(
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.admin_panel_settings),
-                label: 'Admin',
+    return navItemsAsync.when(
+      data: (navItems) {
+        debugPrint('📱 [BottomNav] Loaded ${navItems.length} unified nav items');
+        
+        // Convert NavBarItem list to BottomNavigationBarItem list
+        final bottomNavItems = _convertToBottomNavItems(navItems, totalItems);
+        
+        // Add admin tab if user is admin
+        if (isAdmin) {
+          bottomNavItems.add(
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.admin_panel_settings),
+              label: 'Admin',
+            ),
+          );
+        }
+        
+        // CASE 1: No navigation items (0 modules active)
+        // Display centered placeholder message
+        if (bottomNavItems.isEmpty) {
+          debugPrint('⚠️ No navigation items available, showing placeholder');
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 64,
+                    color: context.textSecondary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Aucun module actif',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: context.textSecondary,
+                    ),
+                  ),
+                ],
               ),
-            );
-          }
-          
-          // Calculate current index based on location
-          final currentIndex = _calculateSelectedIndex(context, navItems);
-          
-          // Get adaptive styling based on item count (supports up to 6 items)
-          final adaptiveStyle = _BottomNavAdaptiveStyle.forItemCount(bottomNavItems.length);
-          
-          debugPrint('[BottomNav] Rendered ${bottomNavItems.length} items (index: $currentIndex)');
+            ),
+          );
+        }
+        
+        // CASE 2: Only 1 navigation item (1 module active)
+        // Display the single module directly without BottomNavigationBar
+        // Flutter requires BottomNavigationBar.items.length >= 2
+        if (bottomNavItems.length == 1) {
+          debugPrint('📱 [BottomNav] Only 1 item available, hiding bottom bar and displaying module directly');
+          return Scaffold(
+            body: child,
+          );
+        }
+        
+        // CASE 3: 2+ navigation items
+        // Display normal BottomNavigationBar behavior
+        final currentIndex = _calculateSelectedIndex(context, navItems);
+        final adaptiveStyle = _BottomNavAdaptiveStyle.forItemCount(bottomNavItems.length);
+        
+        debugPrint('[BottomNav] Rendered ${bottomNavItems.length} items (index: $currentIndex)');
 
-          return Container(
+        return Scaffold(
+          body: child,
+          bottomNavigationBar: Container(
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
@@ -115,21 +147,21 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               onTap: (int index) => _onItemTapped(context, index, navItems, isAdmin),
               items: bottomNavItems,
             ),
-          );
-        },
-        loading: () {
-          // Hide navigation bar during loading
-          return null;
-        },
-        error: (error, stack) {
-          // On error, hide navigation bar
-          debugPrint('⚠️ Error loading navigation items: $error');
-          if (kDebugMode && stack != null) {
-            debugPrint('Stack trace: $stack');
-          }
-          return null;
-        },
-      ),
+          ),
+        );
+      },
+      loading: () {
+        // Hide navigation bar during loading
+        return Scaffold(body: child);
+      },
+      error: (error, stack) {
+        // On error, hide navigation bar and show the child
+        debugPrint('⚠️ Error loading navigation items: $error');
+        if (kDebugMode && stack != null) {
+          debugPrint('Stack trace: $stack');
+        }
+        return Scaffold(body: child);
+      },
     );
   }
 
