@@ -26,17 +26,24 @@ void main() {
   });
 
   group('ModuleExposure', () {
-    test('creates with default values', () {
-      const exposure = ModuleExposure();
+    test('creates with required values', () {
+      const exposure = ModuleExposure(
+        moduleId: 'test-module',
+        enabled: false,
+        surfaces: [],
+      );
+      expect(exposure.moduleId, 'test-module');
       expect(exposure.enabled, false);
       expect(exposure.surfaces, isEmpty);
     });
 
     test('creates with custom values', () {
       const exposure = ModuleExposure(
+        moduleId: 'custom-module',
         enabled: true,
         surfaces: [ModuleSurface.client, ModuleSurface.pos],
       );
+      expect(exposure.moduleId, 'custom-module');
       expect(exposure.enabled, true);
       expect(exposure.surfaces.length, 2);
       expect(exposure.surfaces[0], ModuleSurface.client);
@@ -45,20 +52,24 @@ void main() {
 
     test('toJson converts correctly', () {
       const exposure = ModuleExposure(
+        moduleId: 'test-module',
         enabled: true,
         surfaces: [ModuleSurface.client, ModuleSurface.admin],
       );
       final json = exposure.toJson();
+      expect(json['moduleId'], 'test-module');
       expect(json['enabled'], true);
       expect(json['surfaces'], ['client', 'admin']);
     });
 
     test('fromJson converts correctly', () {
       final json = {
+        'moduleId': 'json-module',
         'enabled': true,
         'surfaces': ['pos', 'kitchen'],
       };
       final exposure = ModuleExposure.fromJson(json);
+      expect(exposure.moduleId, 'json-module');
       expect(exposure.enabled, true);
       expect(exposure.surfaces.length, 2);
       expect(exposure.surfaces[0], ModuleSurface.pos);
@@ -68,30 +79,36 @@ void main() {
     test('fromJson handles missing values', () {
       final json = <String, dynamic>{};
       final exposure = ModuleExposure.fromJson(json);
+      expect(exposure.moduleId, '');
       expect(exposure.enabled, false);
       expect(exposure.surfaces, isEmpty);
     });
 
     test('copyWith creates modified copy', () {
       const original = ModuleExposure(
+        moduleId: 'original-module',
         enabled: false,
         surfaces: [ModuleSurface.client],
       );
       final modified = original.copyWith(enabled: true);
+      expect(modified.moduleId, 'original-module');
       expect(modified.enabled, true);
       expect(modified.surfaces, [ModuleSurface.client]);
     });
 
     test('equality works correctly', () {
       const exposure1 = ModuleExposure(
+        moduleId: 'test-module',
         enabled: true,
         surfaces: [ModuleSurface.client],
       );
       const exposure2 = ModuleExposure(
+        moduleId: 'test-module',
         enabled: true,
         surfaces: [ModuleSurface.client],
       );
       const exposure3 = ModuleExposure(
+        moduleId: 'test-module',
         enabled: false,
         surfaces: [ModuleSurface.client],
       );
