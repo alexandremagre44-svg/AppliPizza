@@ -18,6 +18,7 @@ class DomainImportExample extends StatelessWidget {
   Widget build(BuildContext context) {
     // Example usage of ModuleExposure
     const exposure = ModuleExposure(
+      moduleId: 'example-module',
       enabled: true,
       surfaces: [ModuleSurface.client, ModuleSurface.pos],
     );
@@ -37,12 +38,17 @@ class DomainImportExample extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Text('Module ID: ${exposure.moduleId}'),
             Text('Module enabled: ${exposure.enabled}'),
             Text('Surfaces: ${exposure.surfaces}'),
             const SizedBox(height: 20),
             Text('App ID: ${config.appId}'),
             Text('Pickup: ${config.pickupEnabled}'),
             Text('Delivery: ${config.deliveryEnabled}'),
+            Text('Dine-in: ${config.dineInEnabled}'),
+            Text('Prep time: ${config.preparationTimeMinutes} min'),
+            Text('Delivery fee: ${config.deliveryFeeInCents}¢'),
+            Text('Min order: ${config.minimumOrderInCents}¢'),
           ],
         ),
       ),
