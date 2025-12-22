@@ -54,6 +54,9 @@ extension ModuleSurfaceExtension on ModuleSurface {
 
 /// Configuration d'exposition d'un module sur différentes surfaces.
 class ModuleExposure {
+  /// Identifiant du module.
+  final String moduleId;
+  
   /// Indique si le module est activé.
   final bool enabled;
   
@@ -62,8 +65,9 @@ class ModuleExposure {
 
   /// Constructeur principal.
   const ModuleExposure({
-    this.enabled = false,
-    this.surfaces = const [],
+    required this.moduleId,
+    required this.enabled,
+    required this.surfaces,
   });
 
   /// Crée une instance depuis un Map JSON.
@@ -74,6 +78,7 @@ class ModuleExposure {
         .toList() ?? [];
     
     return ModuleExposure(
+      moduleId: json['moduleId'] as String? ?? '',
       enabled: json['enabled'] as bool? ?? false,
       surfaces: surfaces,
     );
@@ -82,6 +87,7 @@ class ModuleExposure {
   /// Convertit l'instance en Map JSON.
   Map<String, dynamic> toJson() {
     return {
+      'moduleId': moduleId,
       'enabled': enabled,
       'surfaces': surfaces.map((s) => s.value).toList(),
     };
@@ -89,10 +95,12 @@ class ModuleExposure {
 
   /// Crée une copie de l'objet avec des valeurs modifiées.
   ModuleExposure copyWith({
+    String? moduleId,
     bool? enabled,
     List<ModuleSurface>? surfaces,
   }) {
     return ModuleExposure(
+      moduleId: moduleId ?? this.moduleId,
       enabled: enabled ?? this.enabled,
       surfaces: surfaces ?? this.surfaces,
     );
@@ -100,17 +108,18 @@ class ModuleExposure {
 
   @override
   String toString() {
-    return 'ModuleExposure(enabled: $enabled, surfaces: $surfaces)';
+    return 'ModuleExposure(moduleId: $moduleId, enabled: $enabled, surfaces: $surfaces)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is ModuleExposure &&
+        other.moduleId == moduleId &&
         other.enabled == enabled &&
         listEquals(other.surfaces, surfaces);
   }
 
   @override
-  int get hashCode => Object.hash(enabled, Object.hashAll(surfaces));
+  int get hashCode => Object.hash(moduleId, enabled, Object.hashAll(surfaces));
 }

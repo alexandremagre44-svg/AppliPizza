@@ -17,6 +17,18 @@ class FulfillmentConfig {
   
   /// Indique si la consommation sur place est activée.
   final bool onSiteEnabled;
+  
+  /// Temps de préparation en minutes.
+  final int preparationTimeMinutes;
+  
+  /// Frais de livraison en centimes.
+  final int deliveryFeeInCents;
+  
+  /// Montant minimum de commande en centimes.
+  final int minimumOrderInCents;
+
+  /// Getter pour la compatibilité UI: dineInEnabled mappé sur onSiteEnabled.
+  bool get dineInEnabled => onSiteEnabled;
 
   /// Constructeur principal.
   const FulfillmentConfig({
@@ -24,6 +36,9 @@ class FulfillmentConfig {
     this.pickupEnabled = false,
     this.deliveryEnabled = false,
     this.onSiteEnabled = false,
+    this.preparationTimeMinutes = 30,
+    this.deliveryFeeInCents = 0,
+    this.minimumOrderInCents = 0,
   });
 
   /// Crée une configuration par défaut pour un appId donné.
@@ -33,6 +48,9 @@ class FulfillmentConfig {
       pickupEnabled: true,
       deliveryEnabled: false,
       onSiteEnabled: false,
+      preparationTimeMinutes: 30,
+      deliveryFeeInCents: 0,
+      minimumOrderInCents: 0,
     );
   }
 
@@ -43,6 +61,9 @@ class FulfillmentConfig {
       pickupEnabled: json['pickupEnabled'] as bool? ?? false,
       deliveryEnabled: json['deliveryEnabled'] as bool? ?? false,
       onSiteEnabled: json['onSiteEnabled'] as bool? ?? false,
+      preparationTimeMinutes: json['preparationTimeMinutes'] as int? ?? 30,
+      deliveryFeeInCents: json['deliveryFeeInCents'] as int? ?? 0,
+      minimumOrderInCents: json['minimumOrderInCents'] as int? ?? 0,
     );
   }
 
@@ -53,6 +74,9 @@ class FulfillmentConfig {
       'pickupEnabled': pickupEnabled,
       'deliveryEnabled': deliveryEnabled,
       'onSiteEnabled': onSiteEnabled,
+      'preparationTimeMinutes': preparationTimeMinutes,
+      'deliveryFeeInCents': deliveryFeeInCents,
+      'minimumOrderInCents': minimumOrderInCents,
     };
   }
 
@@ -62,19 +86,28 @@ class FulfillmentConfig {
     bool? pickupEnabled,
     bool? deliveryEnabled,
     bool? onSiteEnabled,
+    int? preparationTimeMinutes,
+    int? deliveryFeeInCents,
+    int? minimumOrderInCents,
   }) {
     return FulfillmentConfig(
       appId: appId ?? this.appId,
       pickupEnabled: pickupEnabled ?? this.pickupEnabled,
       deliveryEnabled: deliveryEnabled ?? this.deliveryEnabled,
       onSiteEnabled: onSiteEnabled ?? this.onSiteEnabled,
+      preparationTimeMinutes: preparationTimeMinutes ?? this.preparationTimeMinutes,
+      deliveryFeeInCents: deliveryFeeInCents ?? this.deliveryFeeInCents,
+      minimumOrderInCents: minimumOrderInCents ?? this.minimumOrderInCents,
     );
   }
 
   @override
   String toString() {
     return 'FulfillmentConfig(appId: $appId, pickup: $pickupEnabled, '
-        'delivery: $deliveryEnabled, onSite: $onSiteEnabled)';
+        'delivery: $deliveryEnabled, onSite: $onSiteEnabled, '
+        'prepTime: ${preparationTimeMinutes}min, '
+        'deliveryFee: ${deliveryFeeInCents}¢, '
+        'minOrder: ${minimumOrderInCents}¢)';
   }
 
   @override
@@ -84,7 +117,10 @@ class FulfillmentConfig {
         other.appId == appId &&
         other.pickupEnabled == pickupEnabled &&
         other.deliveryEnabled == deliveryEnabled &&
-        other.onSiteEnabled == onSiteEnabled;
+        other.onSiteEnabled == onSiteEnabled &&
+        other.preparationTimeMinutes == preparationTimeMinutes &&
+        other.deliveryFeeInCents == deliveryFeeInCents &&
+        other.minimumOrderInCents == minimumOrderInCents;
   }
 
   @override
@@ -93,5 +129,8 @@ class FulfillmentConfig {
         pickupEnabled,
         deliveryEnabled,
         onSiteEnabled,
+        preparationTimeMinutes,
+        deliveryFeeInCents,
+        minimumOrderInCents,
       );
 }
