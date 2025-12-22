@@ -4,6 +4,8 @@
 /// Ce fichier est un stub temporaire pour satisfaire la compilation.
 library;
 
+import 'package:flutter/foundation.dart';
+
 /// Surfaces d'exposition disponibles pour un module.
 enum ModuleSurface {
   /// Interface client (application mobile/web pour les clients).
@@ -106,19 +108,9 @@ class ModuleExposure {
     if (identical(this, other)) return true;
     return other is ModuleExposure &&
         other.enabled == enabled &&
-        _listEquals(other.surfaces, surfaces);
+        listEquals(other.surfaces, surfaces);
   }
 
   @override
-  int get hashCode => Object.hash(enabled, surfaces);
-
-  /// Helper pour comparer des listes.
-  bool _listEquals<T>(List<T>? a, List<T>? b) {
-    if (a == null) return b == null;
-    if (b == null || a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
+  int get hashCode => Object.hash(enabled, Object.hashAll(surfaces));
 }
