@@ -1,8 +1,13 @@
-// MIGRATED to WL V2 Theme - Uses theme colors
-// lib/src/screens/home/pizza_customization_modal.dart
-// TODO: Uses legacy version. Bridge to new module under construction.
-// Nouveau module: lib/modules/customization/presentation/widgets/pizza_customization_widget.dart
-// Ce fichier reste la source ACTIVE pour l'instant. Ne pas modifier sans coordination.
+// lib/modules/customization/presentation/widgets/pizza_customization_widget.dart
+// TODO: migration future — ce fichier est une copie, le code original reste la source active.
+// Source originale: lib/src/screens/home/pizza_customization_modal.dart
+// 
+// Ce widget gère la personnalisation d'une pizza avec :
+// - Sélection de la taille
+// - Retrait d'ingrédients de base
+// - Ajout d'ingrédients supplémentaires (fromages, viandes, légumes, sauces, herbes)
+// - Instructions spéciales
+// - Calcul du prix total
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +17,6 @@ import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/ingredient_provider.dart';
 import '../../design_system/app_theme.dart';
-import '../../../white_label/theme/theme_extensions.dart';
 
 const _uuid = Uuid();
 
@@ -546,7 +550,7 @@ class _PizzaCustomizationModalState
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Text(
         'Erreur lors du chargement des ingrédients',
-        style: TextStyle(color: AppColors.error),
+        style: TextStyle(color: Colors.red),
       ),
     );
   }

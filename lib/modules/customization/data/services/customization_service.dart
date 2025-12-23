@@ -1,18 +1,21 @@
-// lib/src/services/firestore_ingredient_service.dart
-// TODO: Uses legacy version. Bridge to new module under construction.
-// Nouveau module: lib/modules/customization/data/services/customization_service.dart
-// Ce fichier reste la source ACTIVE pour l'instant. Ne pas modifier sans coordination.
-// 
-// Service pour gérer les ingrédients dans Firestore
+// lib/modules/customization/data/services/customization_service.dart
+// TODO: migration future — ce fichier est une copie, le code original reste la source active.
+// Source originale: lib/src/services/firestore_ingredient_service.dart
 
 import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/product.dart';
-import '../providers/restaurant_provider.dart';
+import '../models/customization_option.dart';
 
-/// Interface abstraite pour le service des ingrédients
-abstract class FirestoreIngredientService {
+/// Interface abstraite pour le service des ingrédients/options de personnalisation
+abstract class CustomizationService {
+  /// Bridge pour créer le nouveau service depuis l'ancien
+  /// TODO: À implémenter lors de la Phase 3 de migration
+  /// @param legacy L'ancien service FirestoreIngredientService
+  static CustomizationService fromLegacy(dynamic legacyService) {
+    // TODO: Wrapping du service legacy pour compatibilité
+    // Permet de faire la transition progressive sans casser l'existant
+    throw UnimplementedError('Bridge non implémenté - Phase 3');
+  }
   /// Charger tous les ingrédients
   Future<List<Ingredient>> loadIngredients();
   
@@ -39,28 +42,29 @@ abstract class FirestoreIngredientService {
   
   /// Supprimer un ingrédient
   Future<bool> deleteIngredient(String ingredientId);
+  
+  /// Valider une customisation
+  bool validateCustomization(List<String> selectedOptions, int minRequired, int maxAllowed) {
+    return selectedOptions.length >= minRequired && selectedOptions.length <= maxAllowed;
+  }
+  
+  /// Calculer le prix total des suppléments
+  double calculatePrice(List<Ingredient> selectedIngredients) {
+    return selectedIngredients.fold(0.0, (sum, ing) => sum + ing.extraCost);
+  }
 }
 
 /// Implémentation réelle avec Firebase
-class RealFirestoreIngredientService implements FirestoreIngredientService {
+class RealCustomizationService implements CustomizationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String appId;
   static const String _collectionName = 'ingredients';
-
-  RealFirestoreIngredientService({required this.appId});
-
-  /// Helper: Get scoped collection reference
-  CollectionReference<Map<String, dynamic>> get _scopedCollection {
-    return _firestore
-        .collection('restaurants')
-        .doc(appId)
-        .collection(_collectionName);
-  }
 
   @override
   Future<List<Ingredient>> loadIngredients() async {
     try {
-      final snapshot = await _scopedCollection.get();
+      final snapshot = await _firestore
+          .collection(_collectionName)
+          .get();
 
       final ingredients = snapshot.docs
           .map((doc) => Ingredient.fromJson({...doc.data(), 'id': doc.id}))
@@ -83,7 +87,8 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
   @override
   Future<List<Ingredient>> loadActiveIngredients() async {
     try {
-      final snapshot = await _scopedCollection
+      final snapshot = await _firestore
+          .collection(_collectionName)
           .where('isActive', isEqualTo: true)
           .get();
 
@@ -108,7 +113,8 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
   @override
   Future<List<Ingredient>> loadIngredientsByCategory(IngredientCategory category) async {
     try {
-      final snapshot = await _scopedCollection
+      final snapshot = await _firestore
+          .collection(_collectionName)
           .where('category', isEqualTo: category.name)
           .where('isActive', isEqualTo: true)
           .get();
@@ -133,17 +139,14 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
 
   @override
   Stream<List<Ingredient>> watchIngredients() {
-    // Stream en temps réel des ingrédients
-    // Toute modification dans Firestore sera automatiquement reflétée
-    // dans tous les widgets qui écoutent ce stream
-    return _scopedCollection
+    return _firestore
+        .collection(_collectionName)
         .snapshots()
         .map((snapshot) {
           final ingredients = snapshot.docs
               .map((doc) => Ingredient.fromJson({...doc.data(), 'id': doc.id}))
               .toList();
           
-          // Sort in Dart to avoid composite index requirement
           ingredients.sort((a, b) {
             final orderCompare = a.order.compareTo(b.order);
             if (orderCompare != 0) return orderCompare;
@@ -167,14 +170,12 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
   Future<bool> saveIngredient(Ingredient ingredient) async {
     try {
       final data = ingredient.toJson();
-      data.remove('id'); // L'ID est géré par Firestore
+      data.remove('id');
 
       if (ingredient.id.isEmpty) {
-        // Création d'un nouvel ingrédient
-        await _scopedCollection.add(data);
+        await _firestore.collection(_collectionName).add(data);
       } else {
-        // Mise à jour d'un ingrédient existant
-        await _scopedCollection.doc(ingredient.id).set(data);
+        await _firestore.collection(_collectionName).doc(ingredient.id).set(data);
       }
       
       developer.log('Ingrédient sauvegardé: ${ingredient.name}');
@@ -188,7 +189,7 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
   @override
   Future<bool> deleteIngredient(String ingredientId) async {
     try {
-      await _scopedCollection.doc(ingredientId).delete();
+      await _firestore.collection(_collectionName).doc(ingredientId).delete();
       developer.log('Ingrédient supprimé: $ingredientId');
       return true;
     } catch (e) {
@@ -199,28 +200,28 @@ class RealFirestoreIngredientService implements FirestoreIngredientService {
 }
 
 /// Implémentation mock pour les tests ou quand Firebase n'est pas configuré
-class MockFirestoreIngredientService implements FirestoreIngredientService {
+class MockCustomizationService implements CustomizationService {
   @override
   Future<List<Ingredient>> loadIngredients() async {
-    developer.log('MockFirestoreIngredientService: Firebase non configuré');
+    developer.log('MockCustomizationService: Firebase non configuré');
     return [];
   }
 
   @override
   Future<List<Ingredient>> loadActiveIngredients() async {
-    developer.log('MockFirestoreIngredientService: Firebase non configuré');
+    developer.log('MockCustomizationService: Firebase non configuré');
     return [];
   }
 
   @override
   Future<List<Ingredient>> loadIngredientsByCategory(IngredientCategory category) async {
-    developer.log('MockFirestoreIngredientService: Firebase non configuré');
+    developer.log('MockCustomizationService: Firebase non configuré');
     return [];
   }
 
   @override
   Stream<List<Ingredient>> watchIngredients() {
-    developer.log('MockFirestoreIngredientService: Firebase non configuré');
+    developer.log('MockCustomizationService: Firebase non configuré');
     return Stream.value([]);
   }
 
@@ -235,33 +236,24 @@ class MockFirestoreIngredientService implements FirestoreIngredientService {
 
   @override
   Future<bool> saveIngredient(Ingredient ingredient) async {
-    developer.log('MockFirestoreIngredientService: Firebase non configuré');
+    developer.log('MockCustomizationService: Firebase non configuré');
     return false;
   }
 
   @override
   Future<bool> deleteIngredient(String ingredientId) async {
-    developer.log('MockFirestoreIngredientService: Firebase non configuré');
+    developer.log('MockCustomizationService: Firebase non configuré');
     return false;
   }
 }
 
 /// Factory pour créer le service approprié
-FirestoreIngredientService createFirestoreIngredientService({required String appId}) {
+CustomizationService createCustomizationService() {
   try {
     FirebaseFirestore.instance;
-    return RealFirestoreIngredientService(appId: appId);
+    return RealCustomizationService();
   } catch (e) {
     developer.log('Firebase non initialisé, utilisation du service mock');
-    return MockFirestoreIngredientService();
+    return MockCustomizationService();
   }
 }
-
-/// Provider for FirestoreIngredientService scoped to the current restaurant
-final firestoreIngredientServiceProvider = Provider<FirestoreIngredientService>(
-  (ref) {
-    final appId = ref.watch(currentRestaurantProvider).id;
-    return createFirestoreIngredientService(appId: appId);
-  },
-  dependencies: [currentRestaurantProvider],
-);
