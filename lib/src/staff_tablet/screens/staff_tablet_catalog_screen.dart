@@ -2,6 +2,8 @@
 // lib/src/staff_tablet/screens/staff_tablet_catalog_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/product.dart';
@@ -37,7 +39,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
     final cart = ref.watch(staffTabletCartProvider);
 
     return Scaffold(
-      backgroundColor: context.colorScheme.surfaceVariant // was Colors.grey[100],
+      backgroundColor: context.colorScheme.surfaceVariant,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         title: const Text(
@@ -112,11 +114,11 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.inventory_2_outlined, size: 64, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
+                              Icon(Icons.inventory_2_outlined, size: 64, color: context.colorScheme.surfaceVariant ),
                               const SizedBox(height: 16),
                               Text(
                                 'Aucun produit dans cette catégorie',
-                                style: TextStyle(fontSize: 18, color: context.colorScheme.surfaceVariant // was Colors.grey[600]),
+                                style: TextStyle(fontSize: 18, color: context.colorScheme.surfaceVariant ),
                               ),
                             ],
                           ),
@@ -195,7 +197,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
               color: isSelected ? null : context.onPrimary,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
+                color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                 width: isSelected ? 2 : 1.5,
               ),
               boxShadow: isSelected
@@ -228,7 +230,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant // was Colors.grey[800],
+                    color: isSelected ? context.onPrimary : context.colorScheme.surfaceVariant,
                     letterSpacing: 0.2,
                   ),
                 ),
@@ -312,7 +314,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
                               return Container(
-                                color: context.colorScheme.surfaceVariant // was Colors.grey[100],
+                                color: context.colorScheme.surfaceVariant,
                                 child: Center(
                                   child: CircularProgressIndicator(
                                     value: loadingProgress.expectedTotalBytes != null
@@ -328,18 +330,18 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                               );
                             },
                             errorBuilder: (context, error, stackTrace) => Container(
-                              color: context.colorScheme.surfaceVariant // was Colors.grey[100],
+                              color: context.colorScheme.surfaceVariant,
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.image_not_supported_rounded,
-                                      size: 48, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
+                                      size: 48, color: context.colorScheme.surfaceVariant ),
                                   const SizedBox(height: 8),
                                   Text(
                                     'Image non disponible',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: context.colorScheme.surfaceVariant // was Colors.grey[500],
+                                      color: context.colorScheme.surfaceVariant,
                                     ),
                                   ),
                                 ],
@@ -347,18 +349,18 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                             ),
                           )
                         : Container(
-                            color: context.colorScheme.surfaceVariant // was Colors.grey[100],
+                            color: context.colorScheme.surfaceVariant,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.fastfood_rounded,
-                                    size: 56, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
+                                    size: 56, color: context.colorScheme.surfaceVariant ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'Pas d\'image',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: context.colorScheme.surfaceVariant // was Colors.grey[500],
+                                    color: context.colorScheme.surfaceVariant,
                                   ),
                                 ),
                               ],
@@ -406,7 +408,7 @@ class _StaffTabletCatalogScreenState extends ConsumerState<StaffTabletCatalogScr
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey[900],
+                        color: context.colorScheme.surfaceVariant,
                         height: 1.2,
                       ),
                       maxLines: 2,

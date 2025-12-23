@@ -2,6 +2,8 @@
 // lib/src/screens/profile/profile_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/user_provider.dart';
@@ -615,7 +617,7 @@ class ProfileScreen extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(40),
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceVariant // was Colors.grey[100],
+          color: context.colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Center(
@@ -624,20 +626,20 @@ class ProfileScreen extends ConsumerWidget {
               Icon(
                 Icons.shopping_bag_outlined,
                 size: 60,
-                color: context.colorScheme.surfaceVariant // was Colors.grey[400],
+                color: context.colorScheme.surfaceVariant,
               ),
               const SizedBox(height: 16),
               Text(
                 'Aucune commande',
                 style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                      color: context.colorScheme.surfaceVariant,
                     ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Vos commandes apparaîtront ici',
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: context.colorScheme.surfaceVariant // was Colors.grey[500],
+                      color: context.colorScheme.surfaceVariant,
                     ),
               ),
             ],
@@ -719,7 +721,7 @@ class ProfileScreen extends ConsumerWidget {
                               Text(
                                 '${item.quantity} x ${item.price.toStringAsFixed(2)}€',
                                 style: TextStyle(
-                                  color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                                  color: context.colorScheme.surfaceVariant,
                                   fontSize: 13,
                                 ),
                               ),

@@ -2,6 +2,8 @@
 // lib/src/screens/admin/pos/widgets/pos_catalog_view.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../models/product.dart';
 import '../../../../providers/product_provider.dart';
@@ -240,18 +242,18 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                             ),
                           )
                         : Container(
-                            color: context.colorScheme.surfaceVariant // was Colors.grey[100],
+                            color: context.colorScheme.surfaceVariant,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.fastfood_rounded,
-                                    size: 56, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
+                                    size: 56, color: context.colorScheme.surfaceVariant ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'Pas d\'image',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: context.colorScheme.surfaceVariant // was Colors.grey[500],
+                                    color: context.colorScheme.surfaceVariant,
                                   ),
                                 ),
                               ],
@@ -299,7 +301,7 @@ class _PosCatalogViewState extends ConsumerState<PosCatalogView> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey[900],
+                        color: context.colorScheme.surfaceVariant,
                         height: 1.2,
                       ),
                       maxLines: 2,

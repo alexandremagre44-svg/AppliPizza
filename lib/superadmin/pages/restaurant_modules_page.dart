@@ -6,6 +6,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -399,7 +401,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
             decoration: BoxDecoration(
               color: context.onPrimary,
               border: Border(
-                bottom: BorderSide(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+                bottom: BorderSide(color: context.outlineVariant),
               ),
             ),
             child: Column(
@@ -471,7 +473,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: context.colorScheme.surfaceVariant // was Colors.grey.shade800,
+                              color: context.colorScheme.surfaceVariant,
                             ),
                           ),
                           if (widget.restaurantName != null)
@@ -479,7 +481,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                               widget.restaurantName!,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                                color: context.colorScheme.surfaceVariant,
                               ),
                             ),
                         ],
@@ -492,9 +494,9 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.warning.shade50,
+                          color: AppColors.warningLight,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.warning.shade200),
+                          border: Border.all(color: AppColors.warning),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -502,7 +504,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                             Icon(
                               Icons.pending,
                               size: 16,
-                              color: AppColors.warning.shade700,
+                              color: AppColors.warning,
                             ),
                             const SizedBox(width: 6),
                             Text(
@@ -510,7 +512,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.warning.shade700,
+                                color: AppColors.warning,
                               ),
                             ),
                           ],
@@ -550,7 +552,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
       decoration: BoxDecoration(
         color: context.onPrimary,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+        border: Border.all(color: context.colorScheme.surfaceVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -585,14 +587,14 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: context.colorScheme.surfaceVariant // was Colors.grey.shade800,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                       Text(
                         category.description,
                         style: TextStyle(
                           fontSize: 12,
-                          color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                     ],
@@ -619,7 +621,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+          top: BorderSide(color: context.colorScheme.surfaceVariant),
         ),
         color: hasChange ? Colors.yellow.shade50 : null,
       ),
@@ -637,7 +639,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey.shade800,
+                        color: context.colorScheme.surfaceVariant,
                       ),
                     ),
                     if (module.isPremium) ...[
@@ -669,7 +671,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.warning.shade100,
+                          color: AppColors.warningLight,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -677,7 +679,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.warning.shade800,
+                            color: AppColors.warningDark,
                           ),
                         ),
                       ),
@@ -689,7 +691,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                   module.description,
                   style: TextStyle(
                     fontSize: 12,
-                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                    color: context.colorScheme.surfaceVariant,
                   ),
                 ),
                 if (hasDependencies) ...[
@@ -699,7 +701,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                       Icon(
                         Icons.link,
                         size: 12,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey.shade500,
+                        color: context.colorScheme.surfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -707,7 +709,7 @@ class _RestaurantModulesPageState extends ConsumerState<RestaurantModulesPage> {
                         style: TextStyle(
                           fontSize: 11,
                           fontStyle: FontStyle.italic,
-                          color: context.colorScheme.surfaceVariant // was Colors.grey.shade500,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                     ],

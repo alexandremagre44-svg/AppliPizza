@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 
 import '../../migration/firestore_migration_service.dart';
 import '../../migration/migration_report.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Page SuperAdmin pour gérer les migrations Firestore.
 ///
@@ -83,7 +85,7 @@ class _MigrationPageState extends State<MigrationPage> {
         Text(
           'Correction des incohérences de la base de données',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                color: context.textSecondary,
               ),
         ),
       ],
@@ -152,7 +154,7 @@ class _MigrationPageState extends State<MigrationPage> {
                 ),
                 Text(
                   description,
-                  style: TextStyle(color: context.colorScheme.surfaceVariant // was Colors.grey[600], fontSize: 13),
+                  style: TextStyle(color: context.textSecondary, fontSize: 13),
                 ),
               ],
             ),
@@ -342,7 +344,7 @@ class _MigrationPageState extends State<MigrationPage> {
             Container(
               height: 300,
               decoration: BoxDecoration(
-                color: context.colorScheme.surfaceVariant // was Colors.grey[100],
+                color: AppColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: SingleChildScrollView(

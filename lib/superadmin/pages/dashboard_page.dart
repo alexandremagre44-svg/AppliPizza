@@ -8,6 +8,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import '../providers/superadmin_mock_providers.dart';
 
 /// Page Dashboard du Super-Admin.
@@ -74,7 +76,7 @@ class DashboardPage extends ConsumerWidget {
             decoration: BoxDecoration(
               color: context.onPrimary,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+              border: Border.all(color: context.outlineVariant),
             ),
             child: const Column(
               children: [
@@ -152,7 +154,7 @@ class _StatCard extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: 12,
-              color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+              color: context.textSecondary,
             ),
           ),
         ],

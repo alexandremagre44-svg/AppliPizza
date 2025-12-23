@@ -2,6 +2,8 @@
 // lib/src/staff_tablet/screens/staff_tablet_history_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +29,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
     final orderCount = ref.watch(staffTabletTodayOrdersCountProvider);
 
     return Scaffold(
-      backgroundColor: context.colorScheme.surfaceVariant // was Colors.grey[100],
+      backgroundColor: context.colorScheme.surfaceVariant,
       appBar: AppBar(
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -79,7 +81,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [context.onPrimary, context.colorScheme.surfaceVariant // was Colors.grey[50]!],
+                colors: [context.onPrimary, context.textSecondary],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
@@ -112,9 +114,9 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        context.colorScheme.surfaceVariant // was Colors.grey[200]!,
-                        context.colorScheme.surfaceVariant // was Colors.grey[400]!,
-                        context.colorScheme.surfaceVariant // was Colors.grey[200]!,
+                        context.textSecondary,
+                        context.textSecondary,
+                        context.textSecondary,
                       ],
                     ),
                   ),
@@ -141,14 +143,14 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.receipt_long_outlined, size: 80, color: context.colorScheme.surfaceVariant // was Colors.grey[300]),
+                        Icon(Icons.receipt_long_outlined, size: 80, color: context.colorScheme.surfaceVariant ),
                         const SizedBox(height: 16),
                         Text(
                           'Aucune commande aujourd\'hui',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                            color: context.colorScheme.surfaceVariant,
                           ),
                         ),
                       ],
@@ -201,7 +203,7 @@ class StaffTabletHistoryScreen extends ConsumerWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+              color: context.colorScheme.surfaceVariant,
               letterSpacing: 0.3,
             ),
           ),
@@ -295,11 +297,11 @@ class _OrderCard extends StatelessWidget {
       case OrderStatus.ready:
         return AppColors.success[700]!;
       case OrderStatus.delivered:
-        return context.colorScheme.surfaceVariant // was Colors.grey[600]!;
+        return context.textSecondary;
       case OrderStatus.cancelled:
         return AppColors.error[700]!;
       default:
-        return context.colorScheme.surfaceVariant // was Colors.grey[600]!;
+        return context.textSecondary;
     }
   }
 
@@ -327,7 +329,7 @@ class _OrderCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [context.onPrimary, context.colorScheme.surfaceVariant // was Colors.grey[50]!],
+              colors: [context.onPrimary, context.textSecondary],
             ),
           ),
           padding: const EdgeInsets.all(18),
@@ -524,7 +526,7 @@ class _OrderCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
-                            color: context.colorScheme.surfaceVariant // was Colors.grey[900],
+                            color: context.colorScheme.surfaceVariant,
                           ),
                         ),
                       ],

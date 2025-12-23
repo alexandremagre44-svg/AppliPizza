@@ -15,6 +15,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
 import '../models/theme_config.dart';
@@ -1866,13 +1868,13 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: AppColors.success.shade50,
+        color: AppColors.successLight,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.success.shade200),
+        border: Border.all(color: AppColors.success),
       ),
       child: Row(
         children: [
-          Icon(Icons.navigation, color: AppColors.success.shade700, size: 18),
+          Icon(Icons.navigation, color: AppColors.success, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -1880,7 +1882,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.success.shade800,
+                color: AppColors.success,
               ),
             ),
           ),
@@ -1888,7 +1890,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
           Switch(
             value: _page!.isActive,
             onChanged: (value) => _updateNavigationParams(isActive: value),
-            activeColor: AppColors.success.shade600,
+            activeColor: AppColors.success,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],
@@ -2208,20 +2210,20 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.warning.shade50,
+                          color: AppColors.warningLight,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.warning.shade300),
+                          border: Border.all(color: AppColors.warning),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.warning, size: 14, color: AppColors.warning.shade700),
+                            Icon(Icons.warning, size: 14, color: AppColors.warning),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
                                 _duplicateIndexWarning!,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: AppColors.warning.shade800,
+                                  color: AppColors.warning,
                                 ),
                               ),
                             ),
@@ -2838,7 +2840,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade300,
+                    color: context.colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -3007,7 +3009,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         break;
       case 'rewards':
         moduleIcon = Icons.stars;
-        iconColor = AppColors.warning.shade600;
+        iconColor = AppColors.warning;
         break;
       case 'accountActivity':
         moduleIcon = Icons.history;
@@ -3015,7 +3017,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         break;
       default:
         moduleIcon = Icons.help_outline;
-        iconColor = context.colorScheme.surfaceVariant // was Colors.grey.shade600;
+        iconColor = context.textSecondary;
     }
     
     return [
@@ -3050,7 +3052,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                         'Type: $moduleType',
                         style: TextStyle(
                           fontSize: 12,
-                          color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                     ],
@@ -3091,12 +3093,12 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: context.colorScheme.surfaceVariant // was Colors.grey.shade100,
+                color: context.colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 20, color: context.colorScheme.surfaceVariant // was Colors.grey.shade600),
+                  Icon(Icons.info_outline, size: 20, color: context.colorScheme.surfaceVariant ),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
@@ -3117,20 +3119,20 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.error.shade50,
+                  color: AppColors.error,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.error.shade200),
+                  border: Border.all(color: AppColors.error),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.warning, size: 20, color: AppColors.error.shade600),
+                    Icon(Icons.warning, size: 20, color: AppColors.error),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Module "$moduleType" inconnu. Ce bloc peut ne pas s\'afficher correctement.',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.error.shade700,
+                          color: AppColors.error,
                         ),
                       ),
                     ),
@@ -3148,7 +3150,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
       Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceVariant // was Colors.grey.shade50,
+          color: context.colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -3159,7 +3161,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: context.colorScheme.surfaceVariant // was Colors.grey.shade700,
+                color: context.colorScheme.surfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
@@ -3184,14 +3186,14 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
         Icon(
           icon,
           size: 14,
-          color: isAllowed ? AppColors.success.shade600 : AppColors.error.shade400,
+          color: isAllowed ? AppColors.success : AppColors.error,
         ),
         const SizedBox(width: 6),
         Text(
           text,
           style: TextStyle(
             fontSize: 11,
-            color: context.colorScheme.surfaceVariant // was Colors.grey.shade700,
+            color: context.colorScheme.surfaceVariant,
           ),
         ),
       ],
@@ -3735,13 +3737,13 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               Color colorValue;
               
               if (entry.key.isEmpty) {
-                colorValue = context.colorScheme.surfaceVariant // was Colors.grey.shade300;
+                colorValue = context.textSecondary;
               } else {
                 try {
                   colorValue = Color(int.parse(entry.key.replaceAll('#', '0xFF')));
                 } catch (e) {
                   // Fallback to grey if color parsing fails
-                  colorValue = context.colorScheme.surfaceVariant // was Colors.grey.shade300;
+                  colorValue = context.textSecondary;
                   debugPrint('Invalid color format: ${entry.key}');
                 }
               }
@@ -3755,7 +3757,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
                     color: colorValue,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant // was Colors.grey.shade300,
+                      color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant,
                       width: isSelected ? 3 : 1,
                     ),
                   ),
@@ -3772,7 +3774,7 @@ class _BuilderPageEditorScreenState extends ConsumerState<BuilderPageEditorScree
               'Sélectionné: ${colors[value] ?? value}',
               style: TextStyle(
                 fontSize: 11,
-                color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                color: context.colorScheme.surfaceVariant,
               ),
             ),
           ],

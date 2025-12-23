@@ -3,6 +3,8 @@
 // Ultra-professional pizza customization modal with modern design
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:ui';
@@ -760,7 +762,7 @@ class _ElegantPizzaCustomizationModalState
             border: Border.all(
               color: isSelected
                   ? AppTheme.primaryRed
-                  : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
+                  : context.textSecondary,
               width: 2.5,
             ),
             boxShadow: isSelected
@@ -821,7 +823,7 @@ class _ElegantPizzaCustomizationModalState
         border: Border.all(
           color: isSelected
               ? AppTheme.primaryRed
-              : context.colorScheme.surfaceVariant // was Colors.grey[200]!,
+              : context.textSecondary,
           width: 2.5,
         ),
         boxShadow: [
@@ -905,7 +907,7 @@ class _ElegantPizzaCustomizationModalState
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant // was Colors.grey[100],
+                    color: isSelected ? context.primaryColor : context.colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: isSelected
                         ? [
@@ -974,7 +976,7 @@ class _ElegantPizzaCustomizationModalState
                     border: Border.all(
                       color: isSelected
                           ? AppTheme.primaryRed
-                          : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
+                          : context.textSecondary,
                       width: 2.5,
                     ),
                     boxShadow: isSelected
@@ -1063,7 +1065,7 @@ class _ElegantPizzaCustomizationModalState
         color: context.onPrimary,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: context.colorScheme.surfaceVariant // was Colors.grey[200]!,
+          color: context.colorScheme.surfaceVariant,
           width: 2,
         ),
         boxShadow: [
@@ -1100,7 +1102,7 @@ class _ElegantPizzaCustomizationModalState
             ),
           ),
           filled: true,
-          fillColor: context.colorScheme.surfaceVariant // was Colors.grey.shade50,
+          fillColor: context.colorScheme.surfaceVariant,
           contentPadding: const EdgeInsets.all(18),
           prefixIcon: Padding(
             padding: const EdgeInsets.all(12),

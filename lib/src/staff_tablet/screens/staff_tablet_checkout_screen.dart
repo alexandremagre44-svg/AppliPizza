@@ -2,6 +2,8 @@
 // lib/src/staff_tablet/screens/staff_tablet_checkout_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -107,7 +109,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: context.colorScheme.surfaceVariant // was Colors.grey[100],
+                    color: context.colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
@@ -218,7 +220,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
     final cart = ref.watch(staffTabletCartProvider);
 
     return Scaffold(
-      backgroundColor: context.colorScheme.surfaceVariant // was Colors.grey[100],
+      backgroundColor: context.colorScheme.surfaceVariant,
       appBar: AppBar(
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -266,7 +268,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart_outlined, size: 80, color: context.colorScheme.surfaceVariant // was Colors.grey[300]),
+                  Icon(Icons.shopping_cart_outlined, size: 80, color: context.colorScheme.surfaceVariant ),
                   const SizedBox(height: 16),
                   const Text(
                     'Le panier est vide',
@@ -459,7 +461,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
-                                  _isProcessing ? context.colorScheme.surfaceVariant // was Colors.grey[400] : Colors.transparent,
+                                  _isProcessing ? AppColors.neutral400 : AppColors.primary,
                               foregroundColor: context.onPrimary,
                               minimumSize: const Size(double.infinity, 72),
                               shape: RoundedRectangleBorder(
@@ -492,7 +494,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
             end: Alignment.bottomRight,
             colors: [
               context.onPrimary,
-              context.colorScheme.surfaceVariant // was Colors.grey[50]!,
+              context.textSecondary,
             ],
           ),
         ),
@@ -522,7 +524,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: context.colorScheme.surfaceVariant // was Colors.grey[900],
+                    color: context.colorScheme.surfaceVariant,
                   ),
                 ),
               ],
@@ -543,7 +545,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
               decoration: BoxDecoration(
                 color: context.onPrimary,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey[200]!, width: 1),
+                border: Border.all(color: context.colorScheme.surfaceVariant ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -576,7 +578,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: context.colorScheme.surfaceVariant // was Colors.grey[800],
+                              color: context.colorScheme.surfaceVariant,
                             ),
                           ),
                         ),
@@ -588,7 +590,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
-                      color: context.colorScheme.surfaceVariant // was Colors.grey[900],
+                      color: context.colorScheme.surfaceVariant,
                     ),
                   ),
                 ],
@@ -626,7 +628,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
-                          color: context.colorScheme.surfaceVariant // was Colors.grey[900],
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                     ],
@@ -685,7 +687,7 @@ class _StaffTabletCheckoutScreenState extends ConsumerState<StaffTabletCheckoutS
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
-                      color: context.colorScheme.surfaceVariant // was Colors.grey[900],
+                      color: context.colorScheme.surfaceVariant,
                     ),
                   ),
                 ),

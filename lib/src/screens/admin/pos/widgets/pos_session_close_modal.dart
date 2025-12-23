@@ -5,6 +5,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../models/cashier_session.dart';
@@ -100,7 +102,7 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: context.colorScheme.surfaceVariant // was Colors.grey[100],
+                  color: context.colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -111,7 +113,7 @@ class _PosSessionCloseModalState extends ConsumerState<PosSessionCloseModal> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey[800],
+                        color: context.colorScheme.surfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -332,7 +334,7 @@ class _SummaryRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: context.colorScheme.surfaceVariant // was Colors.grey[700],
+              color: context.colorScheme.surfaceVariant,
             ),
           ),
           Text(
@@ -340,7 +342,7 @@ class _SummaryRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-              color: context.colorScheme.surfaceVariant // was Colors.grey[900],
+              color: context.colorScheme.surfaceVariant,
             ),
           ),
         ],

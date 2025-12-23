@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../white_label/theme/theme_extensions.dart';
 import '../../white_label/theme/theme_settings.dart';
 import '../../white_label/theme/unified_theme_provider.dart';
 import '../services/restaurant_plan_service.dart';
@@ -715,7 +716,7 @@ class _RestaurantThemePageState extends ConsumerState<RestaurantThemePage> {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade300),
+            border: Border.all(color: context.outlineColor),
           ),
         ),
         const SizedBox(width: 12),

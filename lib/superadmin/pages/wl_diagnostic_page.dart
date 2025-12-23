@@ -7,8 +7,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../src/design_system/colors.dart';
 import '../../white_label/core/module_id.dart';
 import '../../white_label/restaurant/restaurant_plan_unified.dart';
+import '../../white_label/theme/theme_extensions.dart';
 
 /// Page de diagnostic White-Label pour SuperAdmin
 class WLDiagnosticPage extends ConsumerStatefulWidget {
@@ -247,7 +249,7 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
             if (activeModules.isEmpty)
               Text(
                 'Aucun module actif',
-                style: TextStyle(color: context.colorScheme.surfaceVariant // was Colors.grey[600]),
+                style: TextStyle(color: context.textSecondary),
               )
             else
               Wrap(
@@ -266,8 +268,8 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
                     avatar: const Icon(Icons.check, size: 16),
                     label: Text(moduleId?.label ?? '⚠️ $module (unknown)'),
                     backgroundColor: moduleId != null
-                        ? AppColors.success.shade100
-                        : AppColors.warning.shade100,
+                        ? AppColors.success
+                        : AppColors.warning,
                   );
                 }).toList(),
               ),
@@ -363,9 +365,9 @@ class _WLDiagnosticPageState extends ConsumerState<WLDiagnosticPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: context.colorScheme.surfaceVariant // was Colors.grey[100],
+                color: AppColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey[300]!),
+                border: Border.all(color: context.outlineColor),
               ),
               constraints: const BoxConstraints(maxHeight: 400),
               child: SingleChildScrollView(

@@ -5,6 +5,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
@@ -55,21 +57,21 @@ class PosActionsPanelV2 extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.store_mall_directory_outlined, size: 64, color: context.colorScheme.surfaceVariant // was Colors.grey[400]),
+          Icon(Icons.store_mall_directory_outlined, size: 64, color: context.colorScheme.surfaceVariant ),
           const SizedBox(height: 16),
           Text(
             'Aucune session active',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: context.colorScheme.surfaceVariant // was Colors.grey[700],
+              color: context.colorScheme.surfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Ouvrez une session pour commencer',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant // was Colors.grey[600]),
+            style: TextStyle(fontSize: 14, color: context.colorScheme.surfaceVariant ),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
@@ -180,7 +182,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: context.colorScheme.surfaceVariant // was Colors.grey[800],
+            color: context.colorScheme.surfaceVariant,
           ),
         ),
         const SizedBox(height: 8),
@@ -196,10 +198,10 @@ class PosActionsPanelV2 extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant // was Colors.grey[100],
+                  color: isSelected ? AppColors.primaryLighter : context.colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
+                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -208,7 +210,7 @@ class PosActionsPanelV2 extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant // was Colors.grey[700],
+                    color: isSelected ? AppColors.primary : context.colorScheme.surfaceVariant,
                   ),
                 ),
               ),
@@ -268,8 +270,8 @@ class PosActionsPanelV2 extends ConsumerWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: hasItems ? Colors.transparent : null,
           foregroundColor: context.onPrimary,
-          disabledBackgroundColor: context.colorScheme.surfaceVariant // was Colors.grey[300],
-          disabledForegroundColor: context.colorScheme.surfaceVariant // was Colors.grey[500],
+          disabledBackgroundColor: context.colorScheme.surfaceVariant,
+          disabledForegroundColor: context.colorScheme.surfaceVariant,
           minimumSize: const Size(double.infinity, 70),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -326,9 +328,9 @@ class PosActionsPanelV2 extends ConsumerWidget {
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
       style: OutlinedButton.styleFrom(
-        foregroundColor: hasItems ? AppColors.error[600] : context.colorScheme.surfaceVariant // was Colors.grey[400],
+        foregroundColor: hasItems ? AppColors.error[600] : context.colorScheme.surfaceVariant,
         side: BorderSide(
-          color: hasItems ? AppColors.error[300]! : context.colorScheme.surfaceVariant // was Colors.grey[300]!,
+          color: hasItems ? AppColors.error[300]! : context.colorScheme.surfaceVariant,
           width: 1.5,
         ),
         minimumSize: const Size(double.infinity, 56),

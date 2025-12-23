@@ -2,6 +2,8 @@
 // lib/src/staff_tablet/widgets/staff_tablet_cart_summary.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import '../../design_system/app_theme.dart';
 import '../../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -91,13 +93,13 @@ class StaffTabletCartSummary extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: context.colorScheme.surfaceVariant // was Colors.grey[100],
+                          color: context.colorScheme.surfaceVariant,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.shopping_cart_outlined,
                           size: 72,
-                          color: context.colorScheme.surfaceVariant // was Colors.grey[400],
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -106,7 +108,7 @@ class StaffTabletCartSummary extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: context.colorScheme.surfaceVariant // was Colors.grey[700],
+                          color: context.colorScheme.surfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -115,7 +117,7 @@ class StaffTabletCartSummary extends ConsumerWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
-                          color: context.colorScheme.surfaceVariant // was Colors.grey[500],
+                          color: context.colorScheme.surfaceVariant,
                           height: 1.4,
                         ),
                       ),
@@ -143,7 +145,7 @@ class StaffTabletCartSummary extends ConsumerWidget {
           decoration: BoxDecoration(
             color: context.onPrimary,
             border: Border(
-              top: BorderSide(color: context.colorScheme.surfaceVariant // was Colors.grey[200]!, width: 2),
+              top: BorderSide(color: context.colorScheme.surfaceVariant),
             ),
             boxShadow: [
               BoxShadow(
@@ -159,23 +161,23 @@ class StaffTabletCartSummary extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: context.colorScheme.surfaceVariant // was Colors.grey[50],
+                  color: context.colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey[200]!, width: 1.5),
+                  border: Border.all(color: context.colorScheme.surfaceVariant),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.calculate_rounded, color: context.colorScheme.surfaceVariant // was Colors.grey[700], size: 24),
+                        Icon(Icons.calculate_rounded, color: context.colorScheme.surfaceVariant),
                         const SizedBox(width: 10),
                         Text(
                           'Total',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: context.colorScheme.surfaceVariant // was Colors.grey[800],
+                            color: context.colorScheme.surfaceVariant,
                           ),
                         ),
                       ],
@@ -221,7 +223,7 @@ class StaffTabletCartSummary extends ConsumerWidget {
                             child: Text(
                               'Annuler',
                               style: TextStyle(
-                                color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                                color: context.colorScheme.surfaceVariant,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -296,8 +298,8 @@ class StaffTabletCartSummary extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: cart.items.isEmpty ? null : Colors.transparent,
                     foregroundColor: context.onPrimary,
-                    disabledBackgroundColor: context.colorScheme.surfaceVariant // was Colors.grey[300],
-                    disabledForegroundColor: context.colorScheme.surfaceVariant // was Colors.grey[500],
+                    disabledBackgroundColor: context.colorScheme.surfaceVariant,
+                    disabledForegroundColor: context.colorScheme.surfaceVariant,
                     minimumSize: const Size(double.infinity, 64),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -325,9 +327,9 @@ class _CartItemTile extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: context.colorScheme.surfaceVariant // was Colors.grey[50],
+        color: context.colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey[200]!, width: 1),
+        border: Border.all(color: context.colorScheme.surfaceVariant),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,17 +356,17 @@ class _CartItemTile extends ConsumerWidget {
                       errorBuilder: (context, error, stackTrace) => Container(
                         width: 70,
                         height: 70,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey[200],
+                        color: context.colorScheme.surfaceVariant,
                         child: Icon(Icons.image_not_supported_rounded,
-                            color: context.colorScheme.surfaceVariant // was Colors.grey[400], size: 30),
+                            color: context.colorScheme.surfaceVariant),
                       ),
                     )
                   : Container(
                       width: 70,
                       height: 70,
-                      color: context.colorScheme.surfaceVariant // was Colors.grey[200],
+                      color: context.colorScheme.surfaceVariant,
                       child: Icon(Icons.fastfood_rounded,
-                          color: context.colorScheme.surfaceVariant // was Colors.grey[400], size: 32),
+                          color: context.colorScheme.surfaceVariant),
                     ),
             ),
           ),
@@ -381,7 +383,7 @@ class _CartItemTile extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: context.colorScheme.surfaceVariant // was Colors.grey[900],
+                    color: context.colorScheme.surfaceVariant,
                     height: 1.2,
                   ),
                   maxLines: 2,
@@ -397,7 +399,7 @@ class _CartItemTile extends ConsumerWidget {
                       item.customDescription!,
                       style: TextStyle(
                         fontSize: 12,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                        color: context.colorScheme.surfaceVariant,
                         fontStyle: FontStyle.italic,
                       ),
                       maxLines: 2,
@@ -414,7 +416,7 @@ class _CartItemTile extends ConsumerWidget {
                     Container(
                       decoration: BoxDecoration(
                         color: context.onPrimary,
-                        border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey[300]!, width: 1.5),
+                        border: Border.all(color: context.colorScheme.surfaceVariant),
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
@@ -447,7 +449,7 @@ class _CartItemTile extends ConsumerWidget {
                             decoration: BoxDecoration(
                               border: Border.symmetric(
                                 vertical: BorderSide(
-                                  color: context.colorScheme.surfaceVariant // was Colors.grey[300]!,
+                                  color: context.colorScheme.surfaceVariant,
                                   width: 1,
                                 ),
                               ),
@@ -457,7 +459,7 @@ class _CartItemTile extends ConsumerWidget {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
-                                color: context.colorScheme.surfaceVariant // was Colors.grey[800],
+                                color: context.colorScheme.surfaceVariant,
                               ),
                             ),
                           ),

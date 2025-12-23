@@ -7,6 +7,9 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
+
 /// Page des logs d'activité du Super-Admin.
 class LogsPage extends StatelessWidget {
   const LogsPage({super.key});
@@ -77,7 +80,7 @@ class LogsPage extends StatelessWidget {
                     'Showing ${mockLogs.length} recent activities',
                     style: TextStyle(
                       fontSize: 14,
-                      color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                      color: context.textSecondary,
                     ),
                   ),
                 ],
@@ -93,17 +96,17 @@ class LogsPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: context.onPrimary,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade300),
+                      border: Border.all(color: context.outlineColor),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.filter_list, size: 18, color: context.colorScheme.surfaceVariant // was Colors.grey.shade600),
+                        Icon(Icons.filter_list, size: 18, color: context.textSecondary),
                         const SizedBox(width: 8),
                         Text(
                           'Filter',
                           style: TextStyle(
                             fontSize: 14,
-                            color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                            color: context.textSecondary,
                           ),
                         ),
                       ],
@@ -130,13 +133,13 @@ class LogsPage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: context.onPrimary,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+                border: Border.all(color: context.outlineVariant),
               ),
               child: ListView.separated(
                 padding: const EdgeInsets.all(0),
                 itemCount: mockLogs.length,
                 separatorBuilder: (context, index) =>
-                    Divider(height: 1, color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+                    Divider(height: 1, color: context.outlineVariant),
                 itemBuilder: (context, index) {
                   final log = mockLogs[index];
                   return _LogListItem(log: log);
@@ -263,7 +266,7 @@ class _LogListItem extends StatelessWidget {
                       '• ${log.user}',
                       style: TextStyle(
                         fontSize: 13,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                        color: context.textSecondary,
                       ),
                     ),
                   ],
@@ -273,7 +276,7 @@ class _LogListItem extends StatelessWidget {
                   log.details,
                   style: TextStyle(
                     fontSize: 13,
-                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade700,
+                    color: AppColors.neutral700,
                   ),
                 ),
               ],
@@ -284,7 +287,7 @@ class _LogListItem extends StatelessWidget {
             _formatTimestamp(log.timestamp),
             style: TextStyle(
               fontSize: 12,
-              color: context.colorScheme.surfaceVariant // was Colors.grey.shade500,
+              color: AppColors.neutral500,
             ),
           ),
         ],

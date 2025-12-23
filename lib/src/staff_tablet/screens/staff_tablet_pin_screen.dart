@@ -2,6 +2,8 @@
 // lib/src/staff_tablet/screens/staff_tablet_pin_screen.dart
 
 import 'package:flutter/material.dart';
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import '../../design_system/app_theme.dart';
 import '../../../white_label/theme/theme_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -194,7 +196,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                       style: TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey[900],
+                        color: context.colorScheme.surfaceVariant,
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -203,7 +205,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                       'Entrez votre code PIN',
                       style: TextStyle(
                         fontSize: 17,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                        color: context.colorScheme.surfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -230,7 +232,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                               border: Border.all(
                                 color: _isError
                                     ? AppColors.error[600]!
-                                    : (isFilled ? AppColors.primary! : context.colorScheme.surfaceVariant // was Colors.grey[400]!),
+                                    : (isFilled ? AppColors.primary : context.textSecondary),
                                 width: 2.5,
                               ),
                               boxShadow: isFilled
@@ -317,13 +319,13 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
                       onPressed: () => context.go('/menu'),
                       icon: Icon(
                         Icons.arrow_back_rounded,
-                        color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                        color: context.colorScheme.surfaceVariant,
                         size: 20,
                       ),
                       label: Text(
                         'Retour à l\'accueil',
                         style: TextStyle(
-                          color: context.colorScheme.surfaceVariant // was Colors.grey[600],
+                          color: context.colorScheme.surfaceVariant,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -353,10 +355,10 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
-            color: context.colorScheme.surfaceVariant // was Colors.grey[50],
+            color: context.colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: context.colorScheme.surfaceVariant // was Colors.grey[300]!,
+              color: context.colorScheme.surfaceVariant,
               width: 1.5,
             ),
             boxShadow: [
@@ -373,7 +375,7 @@ class _StaffTabletPinScreenState extends ConsumerState<StaffTabletPinScreen> {
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.w600,
-                color: context.colorScheme.surfaceVariant // was Colors.grey[800],
+                color: context.colorScheme.surfaceVariant,
               ),
             ),
           ),

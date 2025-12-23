@@ -8,6 +8,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import '../providers/superadmin_mock_providers.dart';
 import '../models/module_meta.dart';
 
@@ -30,15 +32,15 @@ class ModulesPage extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             margin: const EdgeInsets.only(bottom: 24),
             decoration: BoxDecoration(
-              color: AppColors.warning.shade50,
-              border: Border.all(color: AppColors.warning.shade300, width: 2),
+              color: AppColors.warningLight,
+              border: Border.all(color: AppColors.warning, width: 2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.warning_amber_rounded,
-                  color: AppColors.warning.shade700,
+                  color: AppColors.warningDark,
                   size: 32,
                 ),
                 const SizedBox(width: 16),
@@ -51,7 +53,7 @@ class ModulesPage extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.warning.shade900,
+                          color: AppColors.warningDark,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -59,7 +61,7 @@ class ModulesPage extends ConsumerWidget {
                         'This page is not connected to the real WhiteLabel system. Use the Restaurant Modules page for actual module configuration.',
                         style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.warning.shade800,
+                          color: AppColors.warningDark,
                         ),
                       ),
                     ],
@@ -88,7 +90,7 @@ class ModulesPage extends ConsumerWidget {
                     '${modules.where((m) => m.enabled).length} of ${modules.length} modules enabled',
                     style: TextStyle(
                       fontSize: 14,
-                      color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                      color: context.textSecondary,
                     ),
                   ),
                 ],
@@ -169,10 +171,10 @@ class _ModuleCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isAvailable ? context.onPrimary : context.colorScheme.surfaceVariant // was Colors.grey.shade50,
+        color: isAvailable ? context.onPrimary : AppColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: module.enabled ? AppColors.success.shade200 : context.colorScheme.surfaceVariant // was Colors.grey.shade200,
+          color: module.enabled ? AppColors.successLight : context.outlineVariant,
         ),
         boxShadow: [
           BoxShadow(
@@ -192,16 +194,16 @@ class _ModuleCard extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: module.enabled
-                      ? AppColors.success.shade50
-                      : context.colorScheme.surfaceVariant // was Colors.grey.shade100,
+                      ? AppColors.successLight
+                      : AppColors.surfaceContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   _getModuleIcon(module.name),
                   size: 24,
                   color: module.enabled
-                      ? AppColors.success.shade600
-                      : context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                      ? AppColors.success
+                      : AppColors.neutral600,
                 ),
               ),
               Switch(
@@ -227,7 +229,7 @@ class _ModuleCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     color: isAvailable
                         ? const Color(0xFF1A1A2E)
-                        : context.colorScheme.surfaceVariant // was Colors.grey.shade500,
+                        : AppColors.neutral500,
                   ),
                 ),
               ),
@@ -256,7 +258,7 @@ class _ModuleCard extends StatelessWidget {
               fontSize: 12,
               color: module.enabled 
                   ? AppColors.success 
-                  : (isAvailable ? Colors.grey : context.colorScheme.surfaceVariant // was Colors.grey.shade400),
+                  : (isAvailable ? Colors.grey : AppColors.neutral400),
             ),
           ),
         ],

@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../src/design_system/colors.dart';
+import '../../white_label/theme/theme_extensions.dart';
 import '../providers/superadmin_restaurants_provider.dart';
 import '../models/restaurant_meta.dart';
 
@@ -34,21 +36,21 @@ class RestaurantsListPage extends ConsumerWidget {
                   '${restaurants.length} restaurants',
                   style: TextStyle(
                     fontSize: 14,
-                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                    color: context.textSecondary,
                   ),
                 ),
                 loading: () => Text(
                   'Loading...',
                   style: TextStyle(
                     fontSize: 14,
-                    color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                    color: context.textSecondary,
                   ),
                 ),
                 error: (_, __) => Text(
                   'Error loading count',
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.error.shade600,
+                    color: AppColors.error,
                   ),
                 ),
               ),
@@ -76,7 +78,7 @@ class RestaurantsListPage extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: context.onPrimary,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+                border: Border.all(color: context.outlineVariant),
               ),
               child: restaurantsAsync.when(
                 data: (restaurants) {
@@ -88,14 +90,14 @@ class RestaurantsListPage extends ConsumerWidget {
                           Icon(
                             Icons.restaurant_outlined,
                             size: 64,
-                            color: context.colorScheme.surfaceVariant // was Colors.grey.shade400,
+                            color: AppColors.neutral400,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'Aucun restaurant configuré',
                             style: TextStyle(
                               fontSize: 16,
-                              color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                              color: context.textSecondary,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -103,7 +105,7 @@ class RestaurantsListPage extends ConsumerWidget {
                             'Créez votre premier restaurant',
                             style: TextStyle(
                               fontSize: 14,
-                              color: context.colorScheme.surfaceVariant // was Colors.grey.shade500,
+                              color: AppColors.neutral500,
                             ),
                           ),
                         ],
@@ -115,7 +117,7 @@ class RestaurantsListPage extends ConsumerWidget {
                     padding: const EdgeInsets.all(0),
                     itemCount: restaurants.length,
                     separatorBuilder: (context, index) =>
-                        Divider(height: 1, color: context.colorScheme.surfaceVariant // was Colors.grey.shade200),
+                        Divider(height: 1, color: context.outlineVariant),
                     itemBuilder: (context, index) {
                       final restaurant = restaurants[index];
                       return _RestaurantListItem(restaurant: restaurant);
@@ -137,7 +139,7 @@ class RestaurantsListPage extends ConsumerWidget {
                         Icon(
                           Icons.error_outline,
                           size: 64,
-                          color: AppColors.error.shade400,
+                          color: AppColors.error,
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -145,7 +147,7 @@ class RestaurantsListPage extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.error.shade700,
+                            color: AppColors.error,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -156,7 +158,7 @@ class RestaurantsListPage extends ConsumerWidget {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
-                              color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                              color: context.textSecondary,
                             ),
                           ),
                         ),
@@ -198,7 +200,7 @@ class _RestaurantListItem extends StatelessWidget {
       case RestaurantStatus.archived:
         return Colors.grey;
       case RestaurantStatus.draft:
-        return context.primaryColor;
+        return AppColors.primary;
     }
   }
 
@@ -217,13 +219,13 @@ class _RestaurantListItem extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: context.colorScheme.surfaceVariant // was Colors.grey.shade100,
+                color: AppColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.restaurant,
                 size: 24,
-                color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                color: AppColors.neutral600,
               ),
             ),
             const SizedBox(width: 16),
@@ -247,7 +249,7 @@ class _RestaurantListItem extends StatelessWidget {
                         : 'Aucun slug',
                     style: TextStyle(
                       fontSize: 12,
-                      color: context.colorScheme.surfaceVariant // was Colors.grey.shade600,
+                      color: context.textSecondary,
                     ),
                   ),
                 ],
@@ -290,7 +292,7 @@ class _RestaurantListItem extends StatelessWidget {
             // Arrow
             Icon(
               Icons.chevron_right,
-              color: context.colorScheme.surfaceVariant // was Colors.grey.shade400,
+              color: AppColors.neutral400,
             ),
           ],
         ),
